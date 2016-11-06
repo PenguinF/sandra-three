@@ -27,8 +27,7 @@ namespace Sandra.UI.WF
     /// Windows <see cref="Form"/> with extra <see cref="OnMoving(ref RECT)"/> and <see cref="OnResizing(ref RECT, ResizeMode)"/> methods,
     /// which can be overridden to restrict the window rectangle while the user is moving and resizing the form.
     /// </summary>
-    public class ConstrainedMoveResizeForm
-        : Form
+    public class ConstrainedMoveResizeForm : Form
     {
         /// <summary>
         /// Expected displacement of the RECT parameter in WndProc(), resulting from continuous RECT updates while moving.

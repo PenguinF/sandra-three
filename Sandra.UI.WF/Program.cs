@@ -41,18 +41,13 @@ namespace Sandra.UI.WF
             Random rnd = new Random();
             for (int i = 3; i >= 0; --i)
             {
-                SnappingMdiChildForm mdiChild = new SnappingMdiChildForm()
+                PlayingBoardForm mdiChild = new PlayingBoardForm()
                 {
                     MdiParent = mdiParent,
                     ClientSize = new System.Drawing.Size(400, 400),
                     Visible = true,
                 };
-                PlayingBoard playingBoard = new PlayingBoard();
-                playingBoard.BoardSize = rnd.Next(5) + 4;
-                playingBoard.SquareSize = rnd.Next(20) + 32;
-                playingBoard.Dock = DockStyle.Fill;
-                playingBoard.Visible = true;
-                mdiChild.Controls.Add(playingBoard);
+                mdiChild.PlayingBoard.BoardSize = rnd.Next(5) + 4;
             }
 
             Application.Run(mdiParent);

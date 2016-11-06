@@ -27,8 +27,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Windows <see cref="Form"/> which, if it's an MDI child, snaps to other MDI children and the edges of its parent MDI client area.
     /// </summary>
-    public class SnappingMdiChildForm
-        : ConstrainedMoveResizeForm
+    public class SnappingMdiChildForm : ConstrainedMoveResizeForm
     {
         //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

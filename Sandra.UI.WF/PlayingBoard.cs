@@ -78,6 +78,7 @@ namespace Sandra.UI.WF
                 if (value != BoardSize)
                 {
                     propertyStore[nameof(BoardSize)] = value;
+                    if (SizeToFit) performSizeToFit();
                     Invalidate();
                 }
             }
@@ -177,6 +178,11 @@ namespace Sandra.UI.WF
                 {
                     throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 1 or higher.");
                 }
+                // No effect if SizeToFit.
+                if (SizeToFit)
+                {
+                    return;
+                }
                 if (value != SquareSize)
                 {
                     propertyStore[nameof(SquareSize)] = value;
@@ -249,7 +255,9 @@ namespace Sandra.UI.WF
             // Do this by adjusting the square size.
             int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
             int newSquareSize = squareSizeFromClientSize(minSize);
-            SquareSize = Math.Max(1, newSquareSize);
+            // Store directly in the property store, to bypass SizeToFit check.
+            propertyStore[nameof(SquareSize)] = Math.Max(1, newSquareSize);
+            Invalidate();
         }
 
         protected override void OnLayout(LayoutEventArgs args)
@@ -258,6 +266,16 @@ namespace Sandra.UI.WF
 
             // Choose client size.
             if (SizeToFit) performSizeToFit();
+        }
+
+        /// <summary>
+        /// Returns the size closest to the given size which will allow the board to fit exactly.
+        /// </summary>
+        public int GetClosestAutoFitSize(int clientSize)
+        {
+            int squareSize = squareSizeFromClientSize(clientSize);
+            // Go back to a client size by inverting squareSizeFromClientSize().
+            return squareSize * BoardSize;
         }
 
 
