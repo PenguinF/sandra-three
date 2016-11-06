@@ -47,10 +47,11 @@ namespace Sandra.UI.WF
 
         private readonly Dictionary<string, object> propertyStore = new Dictionary<string, object>
         {
-            {  nameof(BoardSize), DefaultBoardSize },
-            {  nameof(DarkSquareColor), DefaultDarkSquareColor },
-            {  nameof(LightSquareColor), DefaultLightSquareColor },
-            {  nameof(SquareSize), DefaultSquareSize },
+            { nameof(BoardSize), DefaultBoardSize },
+            { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(LightSquareColor), DefaultLightSquareColor },
+            { nameof(SizeToFit), DefaultSizeToFit },
+            { nameof(SquareSize), DefaultSquareSize },
         };
 
 
@@ -60,7 +61,8 @@ namespace Sandra.UI.WF
         public const int DefaultBoardSize = 8;
 
         /// <summary>
-        /// Gets or sets the size of either side of a single square on the board. The default value is <see cref="DefaultBoardSize"/> (8).
+        /// Gets or sets the number of squares in a row and file.
+        /// The default value is <see cref="DefaultBoardSize"/> (8).
         /// </summary>
         [DefaultValue(DefaultBoardSize)]
         public int BoardSize
@@ -68,6 +70,7 @@ namespace Sandra.UI.WF
             get { return (int)propertyStore[nameof(BoardSize)]; }
             set
             {
+                // A board size of 0 will cause a division by zero error if SizeToFit is true.
                 if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardSize), value, "Board size must be 1 or higher.");
@@ -87,7 +90,8 @@ namespace Sandra.UI.WF
         public static Color DefaultDarkSquareColor { get { return Color.Brown; } }
 
         /// <summary>
-        /// Gets or sets the color of dark squares. The default value is <see cref="Color.Brown"/>.
+        /// Gets or sets the color of dark squares.
+        /// The default value is <see cref="Color.Brown"/>.
         /// </summary>
         public Color DarkSquareColor
         {
@@ -110,7 +114,8 @@ namespace Sandra.UI.WF
         public static Color DefaultLightSquareColor { get { return Color.SandyBrown; } }
 
         /// <summary>
-        /// Gets or sets the color of light squares. The default value is <see cref="Color.SandyBrown"/>.
+        /// Gets or sets the color of light squares.
+        /// The default value is <see cref="Color.SandyBrown"/>.
         /// </summary>
         public Color LightSquareColor
         {
@@ -128,12 +133,38 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Gets the default value for the <see cref="SizeToFit"/> property.
+        /// </summary>
+        public const bool DefaultSizeToFit = true;
+
+        /// <summary>
+        /// Gets or sets if <see cref="SquareSize"/> is automatically adjusted to fit the control's client area for as much as possible.
+        /// The default value is <see cref="DefaultSizeToFit"/> (true).
+        /// </summary>
+        [DefaultValue(DefaultSizeToFit)]
+        public bool SizeToFit
+        {
+            get { return (bool)propertyStore[nameof(SizeToFit)]; }
+            set
+            {
+                if (value != SizeToFit)
+                {
+                    propertyStore[nameof(SizeToFit)] = value;
+                    if (value) performSizeToFit();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Gets the default value for the <see cref="SquareSize"/> property.
         /// </summary>
         public const int DefaultSquareSize = 44;
 
         /// <summary>
-        /// Gets or sets the size of either side of a single square on the board. The default value is <see cref="DefaultSquareSize"/> (44).
+        /// Gets or sets the size of either side of a single square on the board.
+        /// The default value is <see cref="DefaultSquareSize"/> (44).
         /// </summary>
         [DefaultValue(DefaultSquareSize)]
         public int SquareSize
@@ -203,6 +234,29 @@ namespace Sandra.UI.WF
         {
             if (lightSquareBrush != null) lightSquareBrush.Dispose();
             lightSquareBrush = new SolidBrush(LightSquareColor);
+        }
+
+
+        private int squareSizeFromClientSize(int clientSize)
+        {
+            return clientSize / BoardSize;
+        }
+
+        private void performSizeToFit()
+        {
+            // Resize the board so that it is as large as possible while still fitting on the window.
+            // Do this by adjusting the square size.
+            int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
+            int newSquareSize = squareSizeFromClientSize(minSize);
+            SquareSize = Math.Max(1, newSquareSize);
+        }
+
+        protected override void OnLayout(LayoutEventArgs args)
+        {
+            base.OnLayout(args);
+
+            // Choose client size.
+            if (SizeToFit) performSizeToFit();
         }
 
 
