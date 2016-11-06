@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF", "Sandra.UI.WF\Sandra.UI.WF.csproj", "{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{7862F666-B6D7-4485-BA63-3C9E53D65C22}"
+	ProjectSection(SolutionItems) = preProject
+		Images\bb.png = Images\bb.png
+		Images\bk.png = Images\bk.png
+		Images\bn.png = Images\bn.png
+		Images\bp.png = Images\bp.png
+		Images\bq.png = Images\bq.png
+		Images\br.png = Images\br.png
+		Images\Sandra.ico = Images\Sandra.ico
+		Images\wb.png = Images\wb.png
+		Images\wk.png = Images\wk.png
+		Images\wn.png = Images\wn.png
+		Images\wp.png = Images\wp.png
+		Images\wq.png = Images\wq.png
+		Images\wr.png = Images\wr.png
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
