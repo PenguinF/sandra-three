@@ -206,6 +206,7 @@ namespace Sandra.UI.WF
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
             int boardSize = BoardSize;
+            int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
             int totalBoardSize = squareSize * boardSize;
             Rectangle clipRectangle = pe.ClipRectangle;
@@ -223,11 +224,11 @@ namespace Sandra.UI.WF
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = squareSize * 2;
                 int y = 0;
-                for (int yIndex = boardSize - 1; yIndex >= 0; --yIndex)
+                for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
                     int x = (yIndex & 1) * squareSize;
-                    for (int xIndex = (boardSize - 1) / 2; xIndex >= 0; --xIndex)
+                    for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                         x += doubleDelta;
