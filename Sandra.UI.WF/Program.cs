@@ -38,6 +38,7 @@ namespace Sandra.UI.WF
                 IsMdiContainer = true,
             };
 
+            Random rnd = new Random();
             for (int i = 3; i >= 0; --i)
             {
                 SnappingMdiChildForm mdiChild = new SnappingMdiChildForm()
@@ -47,6 +48,8 @@ namespace Sandra.UI.WF
                     Visible = true,
                 };
                 PlayingBoard playingBoard = new PlayingBoard();
+                playingBoard.BoardSize = rnd.Next(5) + 4;
+                playingBoard.SquareSize = rnd.Next(20) + 32;
                 playingBoard.Dock = DockStyle.Fill;
                 playingBoard.Visible = true;
                 mdiChild.Controls.Add(playingBoard);

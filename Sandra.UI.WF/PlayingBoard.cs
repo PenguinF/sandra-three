@@ -41,17 +41,47 @@ namespace Sandra.UI.WF
                 | ControlStyles.Opaque, true);
 
             updateBackgroundBrush();
-            updateLightSquareBrush();
             updateDarkSquareBrush();
+            updateLightSquareBrush();
         }
 
         private readonly Dictionary<string, object> propertyStore = new Dictionary<string, object>
         {
-            {  nameof(SquareSize), DefaultSquareSize },
-            {  nameof(LightSquareColor), DefaultLightSquareColor },
+            {  nameof(BoardSize), DefaultBoardSize },
             {  nameof(DarkSquareColor), DefaultDarkSquareColor },
+            {  nameof(LightSquareColor), DefaultLightSquareColor },
+            {  nameof(SquareSize), DefaultSquareSize },
         };
 
+
+        /// <summary>
+        /// Gets the default value for the <see cref="BoardSize"/> property.
+        /// </summary>
+        public const int DefaultBoardSize = 8;
+
+        /// <summary>
+        /// Gets or sets the size of either side of a single square on the board. The default value is <see cref="DefaultBoardSize"/> (8).
+        /// </summary>
+        [DefaultValue(DefaultBoardSize)]
+        public int BoardSize
+        {
+            get { return (int)propertyStore[nameof(BoardSize)]; }
+            set
+            {
+                // Never allow zero board sizes - will cause division by zero errors.
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(BoardSize), value, "Board size must be 1 or higher.");
+                }
+                propertyStore[nameof(BoardSize)] = value;
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="DarkSquareColor"/> property.
+        /// </summary>
+        public static Color DefaultDarkSquareColor { get { return Color.Brown; } }
 
         /// <summary>
         /// Gets or sets the color of dark squares. The default value is <see cref="Color.Brown"/>.
@@ -69,11 +99,11 @@ namespace Sandra.UI.WF
             }
         }
 
-        /// <summary>
-        /// Gets the default value for the <see cref="DarkSquareColor"/> property.
-        /// </summary>
-        public static Color DefaultDarkSquareColor { get { return Color.Brown; } }
 
+        /// <summary>
+        /// Gets the default value for the <see cref="LightSquareColor"/> property.
+        /// </summary>
+        public static Color DefaultLightSquareColor { get { return Color.SandyBrown; } }
 
         /// <summary>
         /// Gets or sets the color of light squares. The default value is <see cref="Color.SandyBrown"/>.
@@ -91,14 +121,14 @@ namespace Sandra.UI.WF
             }
         }
 
+
         /// <summary>
-        /// Gets the default value for the <see cref="LightSquareColor"/> property.
+        /// Gets the default value for the <see cref="SquareSize"/> property.
         /// </summary>
-        public static Color DefaultLightSquareColor { get { return Color.SandyBrown; } }
-
+        public const int DefaultSquareSize = 44;
 
         /// <summary>
-        /// Gets or sets the size of either side of a single square on the board. The default value is <see cref="DefaultSquareSize"/> (4).
+        /// Gets or sets the size of either side of a single square on the board. The default value is <see cref="DefaultSquareSize"/> (44).
         /// </summary>
         [DefaultValue(DefaultSquareSize)]
         public int SquareSize
@@ -114,11 +144,6 @@ namespace Sandra.UI.WF
                 propertyStore[nameof(SquareSize)] = value;
             }
         }
-
-        /// <summary>
-        /// Gets the default value for the <see cref="SquareSize"/> property.
-        /// </summary>
-        public const int DefaultSquareSize = 44;
 
 
         private Brush backgroundBrush;
@@ -142,21 +167,6 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush lightSquareBrush;
-
-        private void resetLightSquareBrush()
-        {
-            if (lightSquareBrush != null) lightSquareBrush.Dispose();
-            lightSquareBrush = null;
-        }
-
-        private void updateLightSquareBrush()
-        {
-            if (lightSquareBrush != null) lightSquareBrush.Dispose();
-            lightSquareBrush = new SolidBrush(LightSquareColor);
-        }
-
-
         private Brush darkSquareBrush;
 
         private void resetDarkSquareBrush()
@@ -172,6 +182,21 @@ namespace Sandra.UI.WF
         }
 
 
+        private Brush lightSquareBrush;
+
+        private void resetLightSquareBrush()
+        {
+            if (lightSquareBrush != null) lightSquareBrush.Dispose();
+            lightSquareBrush = null;
+        }
+
+        private void updateLightSquareBrush()
+        {
+            if (lightSquareBrush != null) lightSquareBrush.Dispose();
+            lightSquareBrush = new SolidBrush(LightSquareColor);
+        }
+
+
         protected override void OnPaint(PaintEventArgs pe)
         {
             base.OnPaint(pe);
@@ -180,7 +205,7 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            const int boardSize = 8;
+            int boardSize = BoardSize;
             int squareSize = SquareSize;
             int totalBoardSize = squareSize * boardSize;
             Rectangle clipRectangle = pe.ClipRectangle;
