@@ -35,6 +35,9 @@
   <PropertyGroup>
     <ApplicationIcon>$(SolutionDir)Images\Sandra.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Sandra.UI.WF.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
