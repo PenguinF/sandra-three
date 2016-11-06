@@ -31,7 +31,28 @@ namespace Sandra.UI.WF
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form());
+
+            Form mdiParent = new Form()
+            {
+                WindowState = FormWindowState.Maximized,
+                IsMdiContainer = true,
+            };
+
+            for (int i = 3; i >= 0; --i)
+            {
+                SnappingMdiChildForm mdiChild = new SnappingMdiChildForm()
+                {
+                    MdiParent = mdiParent,
+                    ClientSize = new System.Drawing.Size(400, 400),
+                    Visible = true,
+                };
+                PlayingBoard playingBoard = new PlayingBoard();
+                playingBoard.Dock = DockStyle.Fill;
+                playingBoard.Visible = true;
+                mdiChild.Controls.Add(playingBoard);
+            }
+
+            Application.Run(mdiParent);
         }
     }
 }
