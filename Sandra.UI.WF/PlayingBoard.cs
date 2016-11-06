@@ -68,12 +68,15 @@ namespace Sandra.UI.WF
             get { return (int)propertyStore[nameof(BoardSize)]; }
             set
             {
-                // Never allow zero board sizes - will cause division by zero errors.
                 if (value < 1)
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardSize), value, "Board size must be 1 or higher.");
                 }
-                propertyStore[nameof(BoardSize)] = value;
+                if (value != BoardSize)
+                {
+                    propertyStore[nameof(BoardSize)] = value;
+                    Invalidate();
+                }
             }
         }
 
@@ -95,6 +98,7 @@ namespace Sandra.UI.WF
                 {
                     propertyStore[nameof(DarkSquareColor)] = value;
                     updateDarkSquareBrush();
+                    Invalidate();
                 }
             }
         }
@@ -117,6 +121,7 @@ namespace Sandra.UI.WF
                 {
                     propertyStore[nameof(LightSquareColor)] = value;
                     updateLightSquareBrush();
+                    Invalidate();
                 }
             }
         }
@@ -141,7 +146,11 @@ namespace Sandra.UI.WF
                 {
                     throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 1 or higher.");
                 }
-                propertyStore[nameof(SquareSize)] = value;
+                if (value != SquareSize)
+                {
+                    propertyStore[nameof(SquareSize)] = value;
+                    Invalidate();
+                }
             }
         }
 
