@@ -204,6 +204,7 @@ namespace Sandra.UI.WF
         {
             base.OnBackColorChanged(e);
             updateBackgroundBrush();
+            Invalidate();
         }
 
 
