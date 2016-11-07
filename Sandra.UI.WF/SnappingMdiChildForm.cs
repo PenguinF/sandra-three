@@ -100,12 +100,21 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the default value for the <see cref="MaxSnapDistance"/> property.
+        /// </summary>
+        public const int DefaultMaxSnapDistance = 4;
+
+        /// <summary>
         /// Gets or sets the maximum distance between form edges within which they will be sensitive to snapping together. The default value is <see cref="DefaultMaxSnapDistance"/> (4).
         /// </summary>
         [DefaultValue(DefaultMaxSnapDistance)]
         public int MaxSnapDistance { get { return m_maxSnapDistance; } set { m_maxSnapDistance = value; } }
         int m_maxSnapDistance = DefaultMaxSnapDistance;
-        public const int DefaultMaxSnapDistance = 4;
+
+        /// <summary>
+        /// Gets the default value for the <see cref="InsensitiveBorderEndLength"/> property.
+        /// </summary>
+        public const int DefaultInsensitiveBorderEndLength = 16;
 
         /// <summary>
         /// Gets or sets the length of the ends of the borders of this form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
@@ -113,7 +122,6 @@ namespace Sandra.UI.WF
         [DefaultValue(DefaultInsensitiveBorderEndLength)]
         public int InsensitiveBorderEndLength { get { return m_insensitiveBorderEndLength; } set { m_insensitiveBorderEndLength = value; } }
         int m_insensitiveBorderEndLength = DefaultInsensitiveBorderEndLength;
-        public const int DefaultInsensitiveBorderEndLength = 16;
 
         // Size/move precalculated information.
         bool m_canSnap;                                // Guard boolean, which is only true if the window is sizing/moving and has an MDI parent.
@@ -125,7 +133,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Calculates an array of visible vertical or horizontal segments, given a list of possibly overlapping rectangles.
         /// </summary>
-        private LineSegment[] calculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
+        LineSegment[] calculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
         {
             // Create snap line segments for each MDI child, and add extra segments for the MDI client rectangle.
             List<LineSegment> segments = isVertical
