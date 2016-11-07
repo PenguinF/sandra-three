@@ -39,7 +39,7 @@ namespace Sandra.UI.WF
             };
 
             Random rnd = new Random();
-            for (int i = 3; i >= 0; --i)
+            for (int i = 9; i >= 0; --i)
             {
                 PlayingBoardForm mdiChild = new PlayingBoardForm()
                 {
@@ -47,6 +47,8 @@ namespace Sandra.UI.WF
                     ClientSize = new System.Drawing.Size(400, 400),
                     Visible = true,
                 };
+                mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
+                mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
                 mdiChild.PlayingBoard.BoardSize = rnd.Next(5) + 4;
             }
 

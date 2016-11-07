@@ -40,6 +40,7 @@ namespace Sandra.UI.WF
                 | ControlStyles.Opaque, true);
 
             updateBackgroundBrush();
+            updateBorderBrush();
             updateDarkSquareBrush();
             updateLightSquareBrush();
         }
@@ -47,12 +48,16 @@ namespace Sandra.UI.WF
         private readonly PropertyStore propertyStore = new PropertyStore
         {
             { nameof(BoardSize), DefaultBoardSize },
+            { nameof(BorderColor), DefaultBorderColor },
+            { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
             { nameof(backgroundBrush), null },
+            { nameof(borderBrush), null },
             { nameof(darkSquareBrush), null },
             { nameof(lightSquareBrush), null },
         };
@@ -88,6 +93,57 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Gets the default value for the <see cref="BorderColor"/> property.
+        /// </summary>
+        public static Color DefaultBorderColor { get { return Color.Black; } }
+
+        /// <summary>
+        /// Gets or sets the color of dark squares.
+        /// The default value is <see cref="Color.Black"/>.
+        /// </summary>
+        public Color BorderColor
+        {
+            get { return propertyStore.Get<Color>(nameof(BorderColor)); }
+            set
+            {
+                if (propertyStore.Set(nameof(BorderColor), value))
+                {
+                    updateBorderBrush();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="BorderWidth"/> property.
+        /// </summary>
+        public const int DefaultBorderWidth = 0;
+
+        /// <summary>
+        /// Gets or sets the width of the border around the playing board.
+        /// The default value is <see cref="DefaultBorderWidth"/> (0).
+        /// </summary>
+        [DefaultValue(DefaultBorderWidth)]
+        public int BorderWidth
+        {
+            get { return propertyStore.Get<int>(nameof(BorderWidth)); }
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(BorderWidth), value, "Border width must be 0 or higher.");
+                }
+                if (propertyStore.Set(nameof(BorderWidth), value))
+                {
+                    if (SizeToFit) performSizeToFit();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Gets the default value for the <see cref="DarkSquareColor"/> property.
         /// </summary>
         public static Color DefaultDarkSquareColor { get { return Color.Brown; } }
@@ -104,6 +160,34 @@ namespace Sandra.UI.WF
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
                 {
                     updateDarkSquareBrush();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="InnerSpacing"/> property.
+        /// </summary>
+        public const int DefaultInnerSpacing = 0;
+
+        /// <summary>
+        /// Gets or sets the amount of spacing between squares inside the playing board.
+        /// The default value is <see cref="DefaultInnerSpacing"/> (0).
+        /// </summary>
+        [DefaultValue(DefaultInnerSpacing)]
+        public int InnerSpacing
+        {
+            get { return propertyStore.Get<int>(nameof(InnerSpacing)); }
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(InnerSpacing), value, "Inner spacing must be 0 or higher.");
+                }
+                if (propertyStore.Set(nameof(InnerSpacing), value))
+                {
+                    if (SizeToFit) performSizeToFit();
                     Invalidate();
                 }
             }
@@ -209,6 +293,18 @@ namespace Sandra.UI.WF
         }
 
 
+        private Brush borderBrush
+        {
+            get { return propertyStore.Get<Brush>(nameof(borderBrush)); }
+            set { propertyStore.Set(nameof(borderBrush), value); }
+        }
+
+        private void updateBorderBrush()
+        {
+            borderBrush = new SolidBrush(BorderColor);
+        }
+
+
         private Brush darkSquareBrush
         {
             get { return propertyStore.Get<Brush>(nameof(darkSquareBrush)); }
@@ -235,7 +331,8 @@ namespace Sandra.UI.WF
 
         private int squareSizeFromClientSize(int clientSize)
         {
-            return clientSize / BoardSize;
+            int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
+            return Math.Max(result, 1);
         }
 
         private void performSizeToFit()
@@ -245,7 +342,7 @@ namespace Sandra.UI.WF
             int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
             int newSquareSize = squareSizeFromClientSize(minSize);
             // Store directly in the property store, to bypass SizeToFit check.
-            if (propertyStore.Set(nameof(SquareSize), Math.Max(1, newSquareSize)))
+            if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
                 Invalidate();
             }
@@ -266,7 +363,7 @@ namespace Sandra.UI.WF
         {
             int squareSize = squareSizeFromClientSize(clientSize);
             // Go back to a client size by inverting squareSizeFromClientSize().
-            return squareSize * BoardSize;
+            return squareSize * BoardSize + InnerSpacing * (BoardSize - 1) + BorderWidth * 2;
         }
 
 
@@ -281,34 +378,70 @@ namespace Sandra.UI.WF
             int boardSize = BoardSize;
             int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
-            int totalBoardSize = squareSize * boardSize;
+            int innerBorderWidth = InnerSpacing;
+            int delta = squareSize + innerBorderWidth;
+            int borderWidth = BorderWidth;
+            int totalBoardSize = delta * boardSizeMinusOne + squareSize;
+            int totalSize = borderWidth * 2 + totalBoardSize;
             Rectangle clipRectangle = pe.ClipRectangle;
-            Rectangle boardRectangle = new Rectangle(0, 0, totalBoardSize, totalBoardSize);
+            Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardSize, totalBoardSize);
+            Rectangle boardWithBorderRectangle = new Rectangle(0, 0, totalSize, totalSize);
 
-            g.ExcludeClip(boardRectangle);
+            // Draw the background area not covered by the playing board.
+            g.ExcludeClip(boardWithBorderRectangle);
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
 
+            // Draw the background light and dark squares.
             if (clipRectangle.IntersectsWith(boardRectangle))
             {
                 // Draw dark squares over the entire board.
                 g.FillRectangle(darkSquareBrush, boardRectangle);
 
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
-                int doubleDelta = squareSize * 2;
-                int y = 0;
+                int doubleDelta = delta * 2;
+                int y = borderWidth;
                 for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    int x = (yIndex & 1) * squareSize;
+                    int x = borderWidth + (yIndex & 1) * delta;
                     for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                         x += doubleDelta;
                     }
-                    y += squareSize;
+                    y += delta;
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
+                g.ResetClip();
+            }
+
+            // Draw borders.
+            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            {
+                // Clip to borders.
+                if (innerBorderWidth == 0)
+                {
+                    g.ExcludeClip(boardRectangle);
+                }
+                else
+                {
+                    // Exclude all squares one by one.
+                    int y = borderWidth;
+                    for (int j = boardSizeMinusOne; j >= 0; --j)
+                    {
+                        int x = borderWidth;
+                        for (int k = boardSizeMinusOne; k >= 0; --k)
+                        {
+                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
+                            x += delta;
+                        }
+                        y += delta;
+                    }
+                }
+
+                // And draw.
+                g.FillRectangle(borderBrush, boardWithBorderRectangle);
                 g.ResetClip();
             }
         }
