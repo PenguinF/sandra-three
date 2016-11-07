@@ -99,7 +99,7 @@ namespace Sandra.UI.WF
         public static Color DefaultBorderColor { get { return Color.Black; } }
 
         /// <summary>
-        /// Gets or sets the color of dark squares.
+        /// Gets or sets the color of the border area.
         /// The default value is <see cref="Color.Black"/>.
         /// </summary>
         public Color BorderColor
@@ -224,7 +224,7 @@ namespace Sandra.UI.WF
         public const bool DefaultSizeToFit = true;
 
         /// <summary>
-        /// Gets or sets if <see cref="SquareSize"/> is automatically adjusted to fit the control's client area for as much as possible.
+        /// Gets or sets if <see cref="SquareSize"/> is automatically adjusted to fit the control's client area.
         /// The default value is <see cref="DefaultSizeToFit"/> (true).
         /// </summary>
         [DefaultValue(DefaultSizeToFit)]
@@ -358,6 +358,12 @@ namespace Sandra.UI.WF
             return foregroundImages[index];
         }
 
+        /// <summary>
+        /// Sets the <see cref="Image"/> on position (x, y).
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
         public void SetForegroundImage(int x, int y, Image value)
         {
             int index = getIndex(x, y);
@@ -512,13 +518,12 @@ namespace Sandra.UI.WF
                     Image currentImg = foregroundImages[index];
                     if (currentImg != null)
                     {
-                        // Copy image to graphics, with a custom highlight.
+                        // Copy image to the graphics.
                         g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
                     }
                     x += delta;
                     ++index;
                 }
-
                 y += delta;
             }
         }
