@@ -65,8 +65,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool SnapSensitive(ref int threshold, LineSegment segment)
         {
+            if (Far < segment.Near || segment.Far < Near) return false;
             int distance = Math.Abs(Position - segment.Position);
-            if (distance >= threshold || Far < segment.Near || segment.Far < Near) return false;
+            if (distance >= threshold) return false;
             threshold = distance;
             return true;
         }
