@@ -17,6 +17,11 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -38,21 +43,63 @@ namespace Sandra.UI.WF
                 IsMdiContainer = true,
             };
 
+            List<Image> pieceImages = new List<Image>
+            {
+                loadImage("bp"),
+                loadImage("bn"),
+                loadImage("bb"),
+                loadImage("br"),
+                loadImage("bq"),
+                loadImage("bk"),
+                loadImage("wp"),
+                loadImage("wn"),
+                loadImage("wb"),
+                loadImage("wr"),
+                loadImage("wq"),
+                loadImage("wk"),
+            };
+
             Random rnd = new Random();
             for (int i = 9; i >= 0; --i)
             {
                 PlayingBoardForm mdiChild = new PlayingBoardForm()
                 {
                     MdiParent = mdiParent,
-                    ClientSize = new System.Drawing.Size(400, 400),
+                    ClientSize = new Size(400, 400),
                     Visible = true,
                 };
                 mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
                 mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
-                mdiChild.PlayingBoard.BoardSize = rnd.Next(5) + 4;
+
+                int boardSize = rnd.Next(5) + 4;
+                mdiChild.PlayingBoard.BoardSize = boardSize;
+                for (int x = 0; x < boardSize; ++x)
+                {
+                    for (int y = 0; y < boardSize; ++y)
+                    {
+                        if (rnd.Next(2) == 0)
+                        {
+                            mdiChild.PlayingBoard.SetForegroundImage(x, y, pieceImages[rnd.Next(pieceImages.Count)]);
+                        }
+                    }
+                }
             }
 
             Application.Run(mdiParent);
+        }
+
+        static Image loadImage(string imageFileKey)
+        {
+            try
+            {
+                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
+            }
+            catch (Exception exc)
+            {
+                Debug.Write(exc.Message);
+                return null;
+            }
         }
     }
 }

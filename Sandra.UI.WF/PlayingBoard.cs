@@ -24,8 +24,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
-    public class PlayingBoard
-        : Control
+    public class PlayingBoard : Control
     {
         public PlayingBoard()
         {
@@ -43,6 +42,7 @@ namespace Sandra.UI.WF
             updateBorderBrush();
             updateDarkSquareBrush();
             updateLightSquareBrush();
+            updateForegroundImages();
         }
 
         private readonly PropertyStore propertyStore = new PropertyStore
@@ -85,6 +85,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BoardSize), value))
                 {
+                    updateForegroundImages();
                     if (SizeToFit) performSizeToFit();
                     Invalidate();
                 }
@@ -329,6 +330,52 @@ namespace Sandra.UI.WF
         }
 
 
+        private Image[] foregroundImages;
+
+        private void updateForegroundImages()
+        {
+            int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
+                newArrayLength = BoardSize * BoardSize;
+
+            Image[] newForegroundImages = new Image[newArrayLength];
+            int min = Math.Min(newArrayLength, oldArrayLength);
+            if (min > 0)
+            {
+                Array.Copy(foregroundImages, newForegroundImages, min);
+            }
+            foregroundImages = newForegroundImages;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Image"/> on position (x, y).
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public Image GetForegroundImage(int x, int y)
+        {
+            int index = getIndex(x, y);
+            return foregroundImages[index];
+        }
+
+        public void SetForegroundImage(int x, int y, Image value)
+        {
+            int index = getIndex(x, y);
+            if (foregroundImages[index] != value)
+            {
+                foregroundImages[index] = value;
+                Invalidate();
+            }
+        }
+
+        private int getIndex(int x, int y)
+        {
+            int boardSize = BoardSize;
+            if (x < 0 || x >= boardSize) throw new IndexOutOfRangeException(nameof(x));
+            if (y < 0 || y >= boardSize) throw new IndexOutOfRangeException(nameof(y));
+            return y * boardSize + x;
+        }
+
         private int squareSizeFromClientSize(int clientSize)
         {
             int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
@@ -375,6 +422,7 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
+            int x, y;
             int boardSize = BoardSize;
             int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
@@ -400,11 +448,11 @@ namespace Sandra.UI.WF
 
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
-                int y = borderWidth;
+                y = borderWidth;
                 for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    int x = borderWidth + (yIndex & 1) * delta;
+                    x = borderWidth + (yIndex & 1) * delta;
                     for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
@@ -427,10 +475,10 @@ namespace Sandra.UI.WF
                 else
                 {
                     // Exclude all squares one by one.
-                    int y = borderWidth;
+                    y = borderWidth;
                     for (int j = boardSizeMinusOne; j >= 0; --j)
                     {
-                        int x = borderWidth;
+                        x = borderWidth;
                         for (int k = boardSizeMinusOne; k >= 0; --k)
                         {
                             g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
@@ -443,6 +491,35 @@ namespace Sandra.UI.WF
                 // And draw.
                 g.FillRectangle(borderBrush, boardWithBorderRectangle);
                 g.ResetClip();
+            }
+
+            // Draw foreground images.
+            // Use this.Padding to determine the amount of space around a foreground image within a square.
+            int hOffset = borderWidth + Padding.Left,
+                vOffset = borderWidth + Padding.Top;
+            int sizeH = squareSize - Padding.Horizontal,
+                sizeV = squareSize - Padding.Vertical;
+
+            // Loop over foreground images and draw them.
+            y = vOffset;
+            int index = 0;
+            for (int j = boardSizeMinusOne; j >= 0; --j)
+            {
+                x = hOffset;
+                for (int k = boardSizeMinusOne; k >= 0; --k)
+                {
+                    // Select picture.
+                    Image currentImg = foregroundImages[index];
+                    if (currentImg != null)
+                    {
+                        // Copy image to graphics, with a custom highlight.
+                        g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                    }
+                    x += delta;
+                    ++index;
+                }
+
+                y += delta;
             }
         }
 
