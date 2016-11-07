@@ -239,7 +239,7 @@ namespace Sandra.UI.WF
 
         private void updateLightSquareBrush()
         {
-            if (lightSquareBrush != null) lightSquareBrush.Dispose();
+            resetLightSquareBrush();
             lightSquareBrush = new SolidBrush(LightSquareColor);
         }
 
