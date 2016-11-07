@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>$(SolutionDir)Images\Sandra.ico</ApplicationIcon>
+    <ApplicationIcon>Sandra.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Sandra.UI.WF.Program</StartupObject>
@@ -68,7 +68,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(SolutionDir)Images\Sandra.ico" />
+    <Content Include="Sandra.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
