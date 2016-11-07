@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -52,6 +51,10 @@ namespace Sandra.UI.WF
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
+
+            { nameof(backgroundBrush), null },
+            { nameof(darkSquareBrush), null },
+            { nameof(lightSquareBrush), null },
         };
 
 
@@ -187,17 +190,14 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush backgroundBrush;
-
-        private void resetBackgroundBrush()
+        private Brush backgroundBrush
         {
-            if (backgroundBrush != null) backgroundBrush.Dispose();
-            backgroundBrush = null;
+            get { return propertyStore.Get<Brush>(nameof(backgroundBrush)); }
+            set { propertyStore.Set(nameof(backgroundBrush), value); }
         }
 
         private void updateBackgroundBrush()
         {
-            resetBackgroundBrush();
             backgroundBrush = new SolidBrush(BackColor);
         }
 
@@ -209,32 +209,26 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush darkSquareBrush;
-
-        private void resetDarkSquareBrush()
+        private Brush darkSquareBrush
         {
-            if (darkSquareBrush != null) darkSquareBrush.Dispose();
-            darkSquareBrush = null;
+            get { return propertyStore.Get<Brush>(nameof(darkSquareBrush)); }
+            set { propertyStore.Set(nameof(darkSquareBrush), value); }
         }
 
         private void updateDarkSquareBrush()
         {
-            resetDarkSquareBrush();
             darkSquareBrush = new SolidBrush(DarkSquareColor);
         }
 
 
-        private Brush lightSquareBrush;
-
-        private void resetLightSquareBrush()
+        private Brush lightSquareBrush
         {
-            if (lightSquareBrush != null) lightSquareBrush.Dispose();
-            lightSquareBrush = null;
+            get { return propertyStore.Get<Brush>(nameof(lightSquareBrush)); }
+            set { propertyStore.Set(nameof(lightSquareBrush), value); }
         }
 
         private void updateLightSquareBrush()
         {
-            resetLightSquareBrush();
             lightSquareBrush = new SolidBrush(LightSquareColor);
         }
 
@@ -323,9 +317,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                resetBackgroundBrush();
-                resetLightSquareBrush();
-                resetDarkSquareBrush();
+                // To dispose of stored disposable values such as brushes.
+                propertyStore.Dispose();
             }
             base.Dispose(disposing);
         }

@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
 
 namespace Sandra.UI.WF
@@ -23,7 +24,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Helper class which stores values for a fixed set of properties.
     /// </summary>
-    public class PropertyStore : Dictionary<string, object>
+    public class PropertyStore : Dictionary<string, object>, IDisposable
     {
         /// <summary>
         /// Gets a value from the store.
@@ -59,10 +60,41 @@ namespace Sandra.UI.WF
             T oldValue = Get<T>(propertyKey);
             if (!EqualityComparer<T>.Default.Equals(oldValue, value))
             {
+                // Assume that PropertyStore owns the stored values, i.e. old values go out of scope here.
+                if (oldValue is IDisposable)
+                {
+                    ((IDisposable)oldValue).Dispose();
+                }
                 base[propertyKey] = value;
                 return true;
             }
             return false;
+        }
+
+
+        public bool IsDisposed { get; private set; }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                foreach (var value in Values)
+                {
+                    if (value is IDisposable)
+                    {
+                        ((IDisposable)value).Dispose();
+                    }
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (!IsDisposed)
+            {
+                Dispose(true);
+                IsDisposed = true;
+            }
         }
     }
 }
