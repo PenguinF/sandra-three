@@ -45,7 +45,7 @@ namespace Sandra.UI.WF
             updateLightSquareBrush();
         }
 
-        private readonly Dictionary<string, object> propertyStore = new Dictionary<string, object>
+        private readonly PropertyStore propertyStore = new PropertyStore
         {
             { nameof(BoardSize), DefaultBoardSize },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
@@ -67,7 +67,7 @@ namespace Sandra.UI.WF
         [DefaultValue(DefaultBoardSize)]
         public int BoardSize
         {
-            get { return (int)propertyStore[nameof(BoardSize)]; }
+            get { return propertyStore.Get<int>(nameof(BoardSize)); }
             set
             {
                 // A board size of 0 will cause a division by zero error if SizeToFit is true.
@@ -75,9 +75,8 @@ namespace Sandra.UI.WF
                 {
                     throw new ArgumentOutOfRangeException(nameof(BoardSize), value, "Board size must be 1 or higher.");
                 }
-                if (value != BoardSize)
+                if (propertyStore.Set(nameof(BoardSize), value))
                 {
-                    propertyStore[nameof(BoardSize)] = value;
                     if (SizeToFit) performSizeToFit();
                     Invalidate();
                 }
@@ -96,12 +95,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public Color DarkSquareColor
         {
-            get { return (Color)propertyStore[nameof(DarkSquareColor)]; }
+            get { return propertyStore.Get<Color>(nameof(DarkSquareColor)); }
             set
             {
-                if (DarkSquareColor != value)
+                if (propertyStore.Set(nameof(DarkSquareColor), value))
                 {
-                    propertyStore[nameof(DarkSquareColor)] = value;
                     updateDarkSquareBrush();
                     Invalidate();
                 }
@@ -120,12 +118,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public Color LightSquareColor
         {
-            get { return (Color)propertyStore[nameof(LightSquareColor)]; }
+            get { return propertyStore.Get<Color>(nameof(LightSquareColor)); }
             set
             {
-                if (LightSquareColor != value)
+                if (propertyStore.Set(nameof(LightSquareColor), value))
                 {
-                    propertyStore[nameof(LightSquareColor)] = value;
                     updateLightSquareBrush();
                     Invalidate();
                 }
@@ -145,12 +142,11 @@ namespace Sandra.UI.WF
         [DefaultValue(DefaultSizeToFit)]
         public bool SizeToFit
         {
-            get { return (bool)propertyStore[nameof(SizeToFit)]; }
+            get { return propertyStore.Get<bool>(nameof(SizeToFit)); }
             set
             {
-                if (value != SizeToFit)
+                if (propertyStore.Set(nameof(SizeToFit), value))
                 {
-                    propertyStore[nameof(SizeToFit)] = value;
                     if (value) performSizeToFit();
                     Invalidate();
                 }
@@ -170,7 +166,7 @@ namespace Sandra.UI.WF
         [DefaultValue(DefaultSquareSize)]
         public int SquareSize
         {
-            get { return (int)propertyStore[nameof(SquareSize)]; }
+            get { return propertyStore.Get<int>(nameof(SquareSize)); }
             set
             {
                 // Never allow zero square sizes - will cause division by zero errors.
@@ -183,9 +179,8 @@ namespace Sandra.UI.WF
                 {
                     return;
                 }
-                if (value != SquareSize)
+                if (propertyStore.Set(nameof(SquareSize), value))
                 {
-                    propertyStore[nameof(SquareSize)] = value;
                     Invalidate();
                 }
             }
@@ -256,8 +251,10 @@ namespace Sandra.UI.WF
             int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
             int newSquareSize = squareSizeFromClientSize(minSize);
             // Store directly in the property store, to bypass SizeToFit check.
-            propertyStore[nameof(SquareSize)] = Math.Max(1, newSquareSize);
-            Invalidate();
+            if (propertyStore.Set(nameof(SquareSize), Math.Max(1, newSquareSize)))
+            {
+                Invalidate();
+            }
         }
 
         protected override void OnLayout(LayoutEventArgs args)
