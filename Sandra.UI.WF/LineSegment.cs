@@ -44,7 +44,7 @@ namespace Sandra.UI.WF
         /// Constructs a new instance of a <see cref="LineSegment"/>.
         /// </summary>
         /// <param name="position">
-        /// The initial fixed coordinate of the line segment.
+        /// The fixed coordinate of the line segment.
         /// </param>
         /// <param name="near">
         /// The initial coordinate of the near endpoint of the line segment.
