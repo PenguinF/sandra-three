@@ -54,14 +54,14 @@ namespace Sandra.UI.WF
 
                 if (m.Msg == WM_MOVING)
                 {
-                    // Add displacement resulting from continuous moving and snapping.
+                    // Add displacement resulting from continuous updates by OnMoving().
                     rc.Left += m_displacement.X;
                     rc.Top += m_displacement.Y;
                     rc.Right += m_displacement.X;
                     rc.Bottom += m_displacement.Y;
                 }
 
-                // Store result rectangle in a different variable, to be able to calculate the moving/snapping displacement later.
+                // Store result rectangle in a different variable, to be able to calculate the displacement later.
                 RECT newRC = rc;
 
                 if (m.Msg == WM_MOVING)
