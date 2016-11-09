@@ -508,6 +508,92 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Occurs when the image is being dragged and dropped onto another square.
+        /// </summary>
+        public event EventHandler<DragSquareEventArgs> DragImageDrop;
+
+        /// <summary>
+        /// Raises the <see cref="DragImageDrop"/> event. 
+        /// </summary>
+        protected virtual void OnDragImageDrop(DragSquareEventArgs e)
+        {
+            DragImageDrop?.Invoke(this, e);
+        }
+
+        protected void RaiseDragImageDrop(int sourceSquareIndex, int squareIndex)
+        {
+            OnDragImageDrop(new DragSquareEventArgs(
+                getX(sourceSquareIndex),
+                getY(sourceSquareIndex),
+                getX(squareIndex),
+                getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when the image is being dragged over another square.
+        /// </summary>
+        public event EventHandler<DragSquareEventArgs> DragImageOver;
+
+        /// <summary>
+        /// Raises the <see cref="DragImageOver"/> event. 
+        /// </summary>
+        protected virtual void OnDragImageOver(DragSquareEventArgs e)
+        {
+            DragImageOver?.Invoke(this, e);
+        }
+
+        protected void RaiseDragImageOver(int sourceSquareIndex, int squareIndex)
+        {
+            OnDragImageOver(new DragSquareEventArgs(
+                getX(sourceSquareIndex),
+                getY(sourceSquareIndex),
+                getX(squareIndex),
+                getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when the image stops being dragged, and is not dropped onto another square.
+        /// </summary>
+        public event EventHandler<SquareEventArgs> DragImageCancel;
+
+        /// <summary>
+        /// Raises the <see cref="DragImageCancel"/> event. 
+        /// </summary>
+        protected virtual void OnDragImageCancel(SquareEventArgs e)
+        {
+            DragImageCancel?.Invoke(this, e);
+        }
+
+        protected void RaiseDragImageCancel(int squareIndex)
+        {
+            OnDragImageCancel(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+        
+        /// <summary>
+        /// Occurs when the image occupying a square starts being dragged.
+        /// </summary>
+        public event EventHandler<CancellableSquareEventArgs> DragImageStart;
+
+        /// <summary>
+        /// Raises the <see cref="DragImageStart"/> event. 
+        /// </summary>
+        protected virtual void OnDragImageStart(CancellableSquareEventArgs e)
+        {
+            DragImageStart?.Invoke(this, e);
+        }
+
+        protected bool RaiseDragImageStart(int squareIndex)
+        {
+            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            OnDragImageStart(e);
+            return !e.Cancel;
+        }
+
+
+        /// <summary>
         /// Occurs when the mouse pointer enters a square.
         /// </summary>
         public event EventHandler<SquareEventArgs> MouseEnterSquare;
@@ -542,27 +628,6 @@ namespace Sandra.UI.WF
         protected void RaiseMouseLeaveSquare(int squareIndex)
         {
             OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
-        }
-
-
-        /// <summary>
-        /// Occurs when the image occupying a square starts being dragged.
-        /// </summary>
-        public event EventHandler<CancellableSquareEventArgs> DragImageStart;
-
-        /// <summary>
-        /// Raises the <see cref="DragImageStart"/> event. 
-        /// </summary>
-        protected virtual void OnDragImageStart(CancellableSquareEventArgs e)
-        {
-            DragImageStart?.Invoke(this, e);
-        }
-
-        protected bool RaiseDragImageStart(int squareIndex)
-        {
-            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
-            OnDragImageStart(e);
-            return !e.Cancel;
         }
 
 
@@ -764,12 +829,18 @@ namespace Sandra.UI.WF
             base.OnMouseMove(e);
 
             // Do a hit test, which updates hover information.
-            hitTest(e.Location);
+            int hit = hitTest(e.Location);
 
             // Update dragging information.
             if (dragging)
             {
                 dragCurrentPosition = e.Location;
+
+                if (hit >= 0)
+                {
+                    RaiseDragImageOver(hit, dragStartSquareIndex);
+                }
+
                 Invalidate();
             }
 
@@ -785,6 +856,16 @@ namespace Sandra.UI.WF
             {
                 // End drag mode.
                 dragging = false;
+
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseDragImageDrop(hoveringSquareIndex, dragStartSquareIndex);
+                }
+                else
+                {
+                    RaiseDragImageCancel(dragStartSquareIndex);
+                }
+
                 Invalidate();
             }
         }
@@ -968,7 +1049,8 @@ namespace Sandra.UI.WF
 
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
-    /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
+    /// or <see cref="PlayingBoard.MouseLeaveSquare"/>
+    /// or <see cref="PlayingBoard.DragImageCancel"/> event.
     /// </summary>
     [DebuggerDisplay("(x, y) = ({X}, {Y})")]
     public class SquareEventArgs : EventArgs
@@ -984,7 +1066,7 @@ namespace Sandra.UI.WF
         public int Y { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SquareEventArgs"/>  class.
+        /// Initializes a new instance of the <see cref="SquareEventArgs"/> class.
         /// </summary>
         /// <param name="x">
         /// The X-coordinate of the square.
@@ -998,6 +1080,9 @@ namespace Sandra.UI.WF
         }
     }
 
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.DragImageStart"/> event.
+    /// </summary>
     public class CancellableSquareEventArgs : SquareEventArgs
     {
         /// <summary>
@@ -1005,7 +1090,52 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool Cancel { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancellableSquareEventArgs"/> class.
+        /// </summary>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
         public CancellableSquareEventArgs(int x, int y) : base(x, y)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.DragImageOver"/>
+    /// or <see cref="PlayingBoard.DragImageDrop"/> event.
+    /// </summary>
+    public class DragSquareEventArgs : SquareEventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square where dragging started.
+        /// </summary>
+        public int StartX { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square where dragging started.
+        /// </summary>
+        public int StartY { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DragSquareEventArgs"/> class.
+        /// </summary>
+        /// <param name="startX">
+        /// The X-coordinate of the square where dragging started.
+        /// </param>
+        /// <param name="startY">
+        /// The Y-coordinate of the square where dragging started.
+        /// </param>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
+        public DragSquareEventArgs(int startX, int startY, int x, int y) : base(x, y)
         {
         }
     }
