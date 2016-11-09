@@ -493,7 +493,7 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private void hitTest(Point clientLocation)
+        private int hitTest(Point clientLocation)
         {
             int squareSize = SquareSize;
 
@@ -501,7 +501,7 @@ namespace Sandra.UI.WF
             {
                 // No square can contain the point.
                 // Short-circuit exit here to prevent division by zeroes.
-                return;
+                return -1;
             }
 
             int boardSize = BoardSize;
@@ -533,6 +533,8 @@ namespace Sandra.UI.WF
                 hoveringSquareIndex = hit;
                 Invalidate();
             }
+
+            return hit;
         }
 
         private void endHover()
