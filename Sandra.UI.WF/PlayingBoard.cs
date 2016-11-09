@@ -48,7 +48,7 @@ namespace Sandra.UI.WF
             updateBorderBrush();
             updateDarkSquareBrush();
             updateLightSquareBrush();
-            updateForegroundImages();
+            updateSquareArrays();
 
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
@@ -114,7 +114,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BoardSize), value))
                 {
-                    updateForegroundImages();
+                    updateSquareArrays();
                     verifySizeToFit();
                     Invalidate();
                 }
@@ -416,20 +416,6 @@ namespace Sandra.UI.WF
 
         private Image[] foregroundImages;
 
-        private void updateForegroundImages()
-        {
-            int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
-                newArrayLength = BoardSize * BoardSize;
-
-            Image[] newForegroundImages = new Image[newArrayLength];
-            int min = Math.Min(newArrayLength, oldArrayLength);
-            if (min > 0)
-            {
-                Array.Copy(foregroundImages, newForegroundImages, min);
-            }
-            foregroundImages = newForegroundImages;
-        }
-
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
         /// </summary>
@@ -456,6 +442,20 @@ namespace Sandra.UI.WF
                 foregroundImages[index] = value;
                 Invalidate();
             }
+        }
+
+        private void updateSquareArrays()
+        {
+            int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
+                newArrayLength = BoardSize * BoardSize;
+
+            Image[] newForegroundImages = new Image[newArrayLength];
+            int min = Math.Min(newArrayLength, oldArrayLength);
+            if (min > 0)
+            {
+                Array.Copy(foregroundImages, newForegroundImages, min);
+            }
+            foregroundImages = newForegroundImages;
         }
 
 
