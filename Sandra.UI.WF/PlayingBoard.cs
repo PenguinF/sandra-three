@@ -389,8 +389,7 @@ namespace Sandra.UI.WF
 
         private void performSizeToFit()
         {
-            // Resize the board so that it is as large as possible while still fitting on the window.
-            // Do this by adjusting the square size.
+            // Resize the squares so that it is as large as possible while still fitting in the client area.
             int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
             int newSquareSize = squareSizeFromClientSize(minSize);
             // Store directly in the property store, to bypass SizeToFit check.
@@ -409,8 +408,6 @@ namespace Sandra.UI.WF
         protected override void OnLayout(LayoutEventArgs args)
         {
             base.OnLayout(args);
-
-            // Choose client size.
             verifySizeToFit();
         }
 
