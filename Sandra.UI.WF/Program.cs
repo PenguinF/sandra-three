@@ -112,12 +112,20 @@ namespace Sandra.UI.WF
 
         private static void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            ((PlayingBoard)sender).SetIsImageHighLighted(e.X, e.Y, true);
+            PlayingBoard playingBoard = (PlayingBoard)sender;
+            if (!playingBoard.IsDraggingImage)
+            {
+                playingBoard.SetIsImageHighLighted(e.X, e.Y, true);
+            }
         }
 
         private static void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
-            ((PlayingBoard)sender).SetIsImageHighLighted(e.X, e.Y, false);
+            PlayingBoard playingBoard = (PlayingBoard)sender;
+            if (!playingBoard.IsDraggingImage)
+            {
+                playingBoard.SetIsImageHighLighted(e.X, e.Y, false);
+            }
         }
 
         static Image loadImage(string imageFileKey)
