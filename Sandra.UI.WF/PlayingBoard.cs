@@ -444,18 +444,53 @@ namespace Sandra.UI.WF
             }
         }
 
+
+        private bool[] isImageHighlighted;
+
+        /// <summary>
+        /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public bool GetIsImageHighLighted(int x, int y)
+        {
+            int index = getIndex(x, y);
+            return isImageHighlighted[index];
+        }
+
+        /// <summary>
+        /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public void SetIsImageHighLighted(int x, int y, bool value)
+        {
+            int index = getIndex(x, y);
+            if (isImageHighlighted[index] != value)
+            {
+                isImageHighlighted[index] = value;
+                Invalidate();
+            }
+        }
+
+
         private void updateSquareArrays()
         {
             int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
                 newArrayLength = BoardSize * BoardSize;
 
             Image[] newForegroundImages = new Image[newArrayLength];
+            bool[] newIsImageHighlighted = new bool[newArrayLength];
             int min = Math.Min(newArrayLength, oldArrayLength);
             if (min > 0)
             {
                 Array.Copy(foregroundImages, newForegroundImages, min);
+                Array.Copy(isImageHighlighted, newIsImageHighlighted, min);
             }
             foregroundImages = newForegroundImages;
+            isImageHighlighted = newIsImageHighlighted;
         }
 
 
