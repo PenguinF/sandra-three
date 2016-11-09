@@ -508,6 +508,10 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
+        private bool dragging;
+        private Point dragStartPosition;
+        private Point dragCurrentPosition;
+
         private int hitTest(Point clientLocation)
         {
             int squareSize = SquareSize;
@@ -570,6 +574,26 @@ namespace Sandra.UI.WF
             }
         }
 
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            int hit = hitTest(e.Location);
+
+            // Start dragging?
+            if (e.Button == MouseButtons.Left && !dragging)
+            {
+                // Only start when a square is hit.
+                if (hit >= 0 && foregroundImages[hit] != null)
+                {
+                    dragging = true;
+                    dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
+                    dragCurrentPosition = e.Location;
+                    Invalidate();
+                }
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -577,8 +601,27 @@ namespace Sandra.UI.WF
             // Do a hit test, which updates highlighting information.
             hitTest(e.Location);
 
+            // Update dragging information.
+            if (dragging)
+            {
+                dragCurrentPosition = e.Location;
+                Invalidate();
+            }
+
             // Remember position for mouse-enters without mouse-leaves.
             lastKnownMouseMovePoint = e.Location;
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            if (dragging)
+            {
+                // End drag mode.
+                dragging = false;
+                Invalidate();
+            }
         }
 
         protected override void OnMouseLeave(EventArgs e)
