@@ -86,7 +86,7 @@ namespace Sandra.UI.WF
                 if (propertyStore.Set(nameof(BoardSize), value))
                 {
                     updateForegroundImages();
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -137,7 +137,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BorderWidth), value))
                 {
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -188,7 +188,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(InnerSpacing), value))
                 {
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -235,7 +235,7 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(SizeToFit), value))
                 {
-                    if (value) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -400,12 +400,18 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void verifySizeToFit()
+        {
+            // Only conditionally perform size-to-fit.
+            if (SizeToFit) performSizeToFit();
+        }
+
         protected override void OnLayout(LayoutEventArgs args)
         {
             base.OnLayout(args);
 
             // Choose client size.
-            if (SizeToFit) performSizeToFit();
+            verifySizeToFit();
         }
 
         /// <summary>
