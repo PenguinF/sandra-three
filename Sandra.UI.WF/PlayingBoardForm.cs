@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -39,6 +40,30 @@ namespace Sandra.UI.WF
             Controls.Add(PlayingBoard);
         }
 
+        /// <summary>
+        /// Manually updates the size of the form to a value which it would have snapped to had it been resized by WM_SIZING messages.
+        /// </summary>
+        public void PerformAutoFit()
+        {
+            startResize();
+
+            // Simulate OnResizing event.
+            // No need to create a RECT with coordinates relative to the screen, since only the size may be affected.
+            RECT windowRect = new RECT()
+            {
+                Left = Left,
+                Right = Right,
+                Top = Top,
+                Bottom = Bottom,
+            };
+
+            OnResizing(ref windowRect, ResizeMode.BottomRight);
+
+            SetBoundsCore(windowRect.Left, windowRect.Top,
+                          windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
+                          BoundsSpecified.Size);
+        }
+
         int widthDifference;
         int heightDifference;
 
@@ -46,6 +71,11 @@ namespace Sandra.UI.WF
         {
             base.OnResizeBegin(e);
 
+            startResize();
+        }
+
+        private void startResize()
+        {
             // Cache difference in size between the window and the client rectangle.
             widthDifference = Bounds.Width - ClientRectangle.Width;
             heightDifference = Bounds.Height - ClientRectangle.Height;

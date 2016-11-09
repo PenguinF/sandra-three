@@ -83,6 +83,8 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
+
+                mdiChild.PerformAutoFit();
             }
 
             Application.Run(mdiParent);
