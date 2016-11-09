@@ -47,35 +47,35 @@ namespace Sandra.UI.WF
             const int WM_SIZING = 0x214;
             const int WM_MOVING = 0x216;
 
-            if (m.Msg == WM_SIZING || m.Msg == WM_MOVING)
+            if (m.Msg == WM_SIZING)
             {
                 // Marshal the size/move rectangle from the message.
                 RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
 
-                if (m.Msg == WM_MOVING)
-                {
-                    // Add displacement resulting from continuous moving and snapping.
-                    rc.Left += m_displacement.X;
-                    rc.Top += m_displacement.Y;
-                    rc.Right += m_displacement.X;
-                    rc.Bottom += m_displacement.Y;
-                }
+                OnResizing(ref rc, (ResizeMode)m.WParam.ToInt32());
 
-                // Store result rectangle in a different variable, to be able to calculate the moving/snapping displacement later.
+                // Marshal back the result.
+                Marshal.StructureToPtr(rc, m.LParam, true);
+            }
+            else if (m.Msg == WM_MOVING)
+            {
+                // Marshal the size/move rectangle from the message.
+                RECT rc = (RECT)Marshal.PtrToStructure(m.LParam, typeof(RECT));
+
+                // Add displacement resulting from continuous updates by OnMoving().
+                rc.Left += m_displacement.X;
+                rc.Top += m_displacement.Y;
+                rc.Right += m_displacement.X;
+                rc.Bottom += m_displacement.Y;
+
+                // Store result rectangle in a different variable, to be able to calculate the displacement later.
                 RECT newRC = rc;
 
-                if (m.Msg == WM_MOVING)
-                {
-                    OnMoving(ref newRC);
+                OnMoving(ref newRC);
 
-                    // Calculate new displacement for the next WndProc() iteration.
-                    m_displacement.X = rc.Left - newRC.Left;
-                    m_displacement.Y = rc.Top - newRC.Top;
-                }
-                else
-                {
-                    OnResizing(ref newRC, (ResizeMode)m.WParam.ToInt32());
-                }
+                // Calculate new displacement for the next WndProc() iteration.
+                m_displacement.X = rc.Left - newRC.Left;
+                m_displacement.Y = rc.Top - newRC.Top;
 
                 // Marshal back the result.
                 Marshal.StructureToPtr(newRC, m.LParam, true);

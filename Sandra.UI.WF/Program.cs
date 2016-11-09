@@ -60,7 +60,7 @@ namespace Sandra.UI.WF
             };
 
             Random rnd = new Random();
-            for (int i = 9; i >= 0; --i)
+            for (int i = 29; i >= 0; --i)
             {
                 PlayingBoardForm mdiChild = new PlayingBoardForm()
                 {
@@ -68,6 +68,23 @@ namespace Sandra.UI.WF
                     ClientSize = new Size(400, 400),
                     Visible = true,
                 };
+
+                if (rnd.Next(4) == 0)
+                {
+                    mdiChild.PlayingBoard.SizeToFit = false;
+                    int sign = rnd.Next(2) - 1; // allowing zero is desirable in this case
+                    if (sign == 0)
+                    {
+                        mdiChild.PlayingBoard.SquareSize = 24;
+                    }
+                    else
+                    {
+                        int delta = Math.Min(24, (int)Math.Floor(Math.Sqrt(rnd.NextDouble()) * 25));
+                        mdiChild.PlayingBoard.SquareSize = 24 + sign * delta;
+                    }
+                }
+
+                mdiChild.PlayingBoard.ForegroundImageRelativeSize = Math.Sqrt(rnd.NextDouble()); // sqrt gets it closer to 1.
                 mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
                 mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
 
@@ -83,6 +100,8 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
+
+                mdiChild.PerformAutoFit();
             }
 
             Application.Run(mdiParent);

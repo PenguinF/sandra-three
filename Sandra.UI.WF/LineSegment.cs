@@ -44,7 +44,7 @@ namespace Sandra.UI.WF
         /// Constructs a new instance of a <see cref="LineSegment"/>.
         /// </summary>
         /// <param name="position">
-        /// The initial fixed coordinate of the line segment.
+        /// The fixed coordinate of the line segment.
         /// </param>
         /// <param name="near">
         /// The initial coordinate of the near endpoint of the line segment.
@@ -65,8 +65,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool SnapSensitive(ref int threshold, LineSegment segment)
         {
+            if (Far < segment.Near || segment.Far < Near) return false;
             int distance = Math.Abs(Position - segment.Position);
-            if (distance >= threshold || Far < segment.Near || segment.Far < Near) return false;
+            if (distance >= threshold) return false;
             threshold = distance;
             return true;
         }

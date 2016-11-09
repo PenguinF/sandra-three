@@ -51,6 +51,8 @@ namespace Sandra.UI.WF
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
+            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -69,7 +71,7 @@ namespace Sandra.UI.WF
         public const int DefaultBoardSize = 8;
 
         /// <summary>
-        /// Gets or sets the number of squares in a row and file.
+        /// Gets or sets the number of squares in a row or file. The minimum value is 1.
         /// The default value is <see cref="DefaultBoardSize"/> (8).
         /// </summary>
         [DefaultValue(DefaultBoardSize)]
@@ -86,7 +88,7 @@ namespace Sandra.UI.WF
                 if (propertyStore.Set(nameof(BoardSize), value))
                 {
                     updateForegroundImages();
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -100,7 +102,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of the border area.
-        /// The default value is <see cref="Color.Black"/>.
+        /// The default value is <see cref="DefaultBorderColor"/> (<see cref="Color.Black"/>).
         /// </summary>
         public Color BorderColor
         {
@@ -137,7 +139,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BorderWidth), value))
                 {
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -151,7 +153,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of dark squares.
-        /// The default value is <see cref="Color.Brown"/>.
+        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Brown"/>).
         /// </summary>
         public Color DarkSquareColor
         {
@@ -167,6 +169,62 @@ namespace Sandra.UI.WF
         }
 
 
+        /// <summary>
+        /// Gets the default value for the <see cref="ForegroundImagePadding"/> property.
+        /// </summary>
+        public static Padding DefaultForegroundImagePadding { get { return new Padding(0); } }
+
+        /// <summary>
+        /// Gets or sets the absolute padding between a foreground image and the edge of the square in which it is shown.
+        /// The default value is <see cref="DefaultForegroundImagePadding"/>, which is zero padding.
+        /// </summary>
+        public Padding ForegroundImagePadding
+        {
+            get { return propertyStore.Get<Padding>(nameof(ForegroundImagePadding)); }
+            set
+            {
+                if (value.Left < 0 || value.Right < 0 || value.Top < 0 || value.Bottom < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(ForegroundImagePadding), value, "The foreground image padding must contain values that are 0 or higher.");
+                }
+                if (propertyStore.Set(nameof(ForegroundImagePadding), value))
+                {
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="ForegroundImageRelativeSize"/> property.
+        /// </summary>
+        public const double DefaultForegroundImageRelativeSize = 1;
+
+        /// <summary>
+        /// Gets or sets the size of a foreground image as a factor of the size of the square in which it is shown.
+        /// The default value is <see cref="DefaultForegroundImageRelativeSize"/> (1.0).
+        /// </summary>
+        [DefaultValue(DefaultForegroundImageRelativeSize)]
+        public double ForegroundImageRelativeSize
+        {
+            get { return propertyStore.Get<double>(nameof(ForegroundImageRelativeSize)); }
+            set
+            {
+                // Do not allow cases where negative relative size and padding create a positive image size.
+                // This has the weird effect of foreground images growing as the square size shrinks,
+                // and appearing in the top left corner of the square in the negative padding area.
+                if (value < 0.0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(ForegroundImageRelativeSize), value, "Relative size must be 0.0 or higher.");
+                }
+                if (propertyStore.Set(nameof(ForegroundImageRelativeSize), value))
+                {
+                    Invalidate();
+                }
+            }
+        }
+
+        
         /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
@@ -188,7 +246,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(InnerSpacing), value))
                 {
-                    if (SizeToFit) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -202,7 +260,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of light squares.
-        /// The default value is <see cref="Color.SandyBrown"/>.
+        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.SandyBrown"/>).
         /// </summary>
         public Color LightSquareColor
         {
@@ -235,7 +293,7 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(SizeToFit), value))
                 {
-                    if (value) performSizeToFit();
+                    verifySizeToFit();
                     Invalidate();
                 }
             }
@@ -248,7 +306,7 @@ namespace Sandra.UI.WF
         public const int DefaultSquareSize = 44;
 
         /// <summary>
-        /// Gets or sets the size of either side of a single square on the board.
+        /// Gets or sets the size of a single square on the board in pixels.
         /// The default value is <see cref="DefaultSquareSize"/> (44).
         /// </summary>
         [DefaultValue(DefaultSquareSize)]
@@ -257,10 +315,9 @@ namespace Sandra.UI.WF
             get { return propertyStore.Get<int>(nameof(SquareSize)); }
             set
             {
-                // Never allow zero square sizes - will cause division by zero errors.
-                if (value < 1)
+                if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 1 or higher.");
+                    throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 0 or higher.");
                 }
                 // No effect if SizeToFit.
                 if (SizeToFit)
@@ -385,13 +442,12 @@ namespace Sandra.UI.WF
         private int squareSizeFromClientSize(int clientSize)
         {
             int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
-            return Math.Max(result, 1);
+            return Math.Max(result, 0);
         }
 
         private void performSizeToFit()
         {
-            // Resize the board so that it is as large as possible while still fitting on the window.
-            // Do this by adjusting the square size.
+            // Resize the squares so that it is as large as possible while still fitting in the client area.
             int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
             int newSquareSize = squareSizeFromClientSize(minSize);
             // Store directly in the property store, to bypass SizeToFit check.
@@ -401,12 +457,16 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void verifySizeToFit()
+        {
+            // Only conditionally perform size-to-fit.
+            if (SizeToFit) performSizeToFit();
+        }
+
         protected override void OnLayout(LayoutEventArgs args)
         {
             base.OnLayout(args);
-
-            // Choose client size.
-            if (SizeToFit) performSizeToFit();
+            verifySizeToFit();
         }
 
         /// <summary>
@@ -428,7 +488,6 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            int x, y;
             int boardSize = BoardSize;
             int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
@@ -446,19 +505,25 @@ namespace Sandra.UI.WF
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
 
+            // Draw borders.
+            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            {
+                g.FillRectangle(borderBrush, boardWithBorderRectangle);
+            }
+
             // Draw the background light and dark squares.
-            if (clipRectangle.IntersectsWith(boardRectangle))
+            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
             {
                 // Draw dark squares over the entire board.
                 g.FillRectangle(darkSquareBrush, boardRectangle);
 
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
-                y = borderWidth;
+                int y = borderWidth;
                 for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    x = borderWidth + (yIndex & 1) * delta;
+                    int x = borderWidth + (yIndex & 1) * delta;
                     for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
@@ -468,63 +533,41 @@ namespace Sandra.UI.WF
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
-            }
 
-            // Draw borders.
-            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-            {
-                // Clip to borders.
-                if (innerBorderWidth == 0)
+                // Draw foreground images.
+                // Determine the image size and the amount of space around a foreground image within a square.
+                int foregroundImageSize = (int)Math.Floor(squareSize * ForegroundImageRelativeSize);
+                var padding = ForegroundImagePadding;
+                int sizeH = foregroundImageSize - padding.Horizontal,
+                    sizeV = foregroundImageSize - padding.Vertical;
+
+                if (sizeH > 0 && sizeV > 0)
                 {
-                    g.ExcludeClip(boardRectangle);
-                }
-                else
-                {
-                    // Exclude all squares one by one.
-                    y = borderWidth;
+                    int imageOffset = borderWidth + (squareSize - foregroundImageSize) / 2;
+                    int hOffset = imageOffset + padding.Left,
+                        vOffset = imageOffset + padding.Top;
+
+                    // Loop over foreground images and draw them.
+                    y = vOffset;
+                    int index = 0;
                     for (int j = boardSizeMinusOne; j >= 0; --j)
                     {
-                        x = borderWidth;
+                        int x = hOffset;
                         for (int k = boardSizeMinusOne; k >= 0; --k)
                         {
-                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
+                            // Select picture.
+                            Image currentImg = foregroundImages[index];
+                            if (currentImg != null)
+                            {
+                                // Copy image to the graphics.
+                                g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                            }
                             x += delta;
+                            ++index;
                         }
                         y += delta;
                     }
                 }
-
-                // And draw.
-                g.FillRectangle(borderBrush, boardWithBorderRectangle);
-                g.ResetClip();
-            }
-
-            // Draw foreground images.
-            // Use this.Padding to determine the amount of space around a foreground image within a square.
-            int hOffset = borderWidth + Padding.Left,
-                vOffset = borderWidth + Padding.Top;
-            int sizeH = squareSize - Padding.Horizontal,
-                sizeV = squareSize - Padding.Vertical;
-
-            // Loop over foreground images and draw them.
-            y = vOffset;
-            int index = 0;
-            for (int j = boardSizeMinusOne; j >= 0; --j)
-            {
-                x = hOffset;
-                for (int k = boardSizeMinusOne; k >= 0; --k)
-                {
-                    // Select picture.
-                    Image currentImg = foregroundImages[index];
-                    if (currentImg != null)
-                    {
-                        // Copy image to the graphics.
-                        g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
-                    }
-                    x += delta;
-                    ++index;
-                }
-                y += delta;
             }
         }
 
