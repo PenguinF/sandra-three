@@ -101,10 +101,23 @@ namespace Sandra.UI.WF
                     }
                 }
 
+                mdiChild.PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
+                mdiChild.PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
+
                 mdiChild.PerformAutoFit();
             }
 
             Application.Run(mdiParent);
+        }
+
+        private static void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
+        {
+            ((PlayingBoard)sender).SetIsImageHighLighted(e.X, e.Y, true);
+        }
+
+        private static void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
+        {
+            ((PlayingBoard)sender).SetIsImageHighLighted(e.X, e.Y, false);
         }
 
         static Image loadImage(string imageFileKey)

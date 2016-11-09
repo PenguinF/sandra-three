@@ -494,6 +494,47 @@ namespace Sandra.UI.WF
         }
 
 
+        /// <summary>
+        /// Occurs when the mouse pointer enters a square.
+        /// </summary>
+        public event EventHandler<SquareEventArgs> MouseEnterSquare;
+
+        /// <summary>
+        /// Raises the <see cref="MouseEnterSquare"/> event. 
+        /// </summary>
+        protected virtual void OnMouseEnterSquare(SquareEventArgs e)
+        {
+            MouseEnterSquare?.Invoke(this, e);
+        }
+
+        protected void RaiseMouseEnterSquare(int squareIndex)
+        {
+            OnMouseEnterSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when the mouse pointer leaves a square.
+        /// </summary>
+        public event EventHandler<SquareEventArgs> MouseLeaveSquare;
+
+        /// <summary>
+        /// Raises the <see cref="MouseLeaveSquare"/> event. 
+        /// </summary>
+        protected virtual void OnMouseLeaveSquare(SquareEventArgs e)
+        {
+            MouseLeaveSquare?.Invoke(this, e);
+        }
+
+        protected void RaiseMouseLeaveSquare(int squareIndex)
+        {
+            OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        private int getX(int index) { return index % BoardSize; }
+        private int getY(int index) { return index / BoardSize; }
+
         private int getIndex(int x, int y)
         {
             if (x < 0 || x >= BoardSize) throw new IndexOutOfRangeException(nameof(x));
@@ -508,8 +549,8 @@ namespace Sandra.UI.WF
                 return Point.Empty;
             }
 
-            int x = index % BoardSize,
-                y = index / BoardSize,
+            int x = getX(index),
+                y = getY(index),
                 delta = SquareSize + InnerSpacing;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
@@ -625,8 +666,15 @@ namespace Sandra.UI.WF
             // Update hovering information.
             if (hoveringSquareIndex != hit)
             {
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseMouseLeaveSquare(hoveringSquareIndex);
+                }
                 hoveringSquareIndex = hit;
-                Invalidate();
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseMouseEnterSquare(hoveringSquareIndex);
+                }
             }
 
             return hit;
@@ -636,8 +684,8 @@ namespace Sandra.UI.WF
         {
             if (hoveringSquareIndex >= 0)
             {
+                RaiseMouseLeaveSquare(hoveringSquareIndex);
                 hoveringSquareIndex = -1;
-                Invalidate();
             }
         }
 
@@ -678,7 +726,7 @@ namespace Sandra.UI.WF
         {
             base.OnMouseMove(e);
 
-            // Do a hit test, which updates highlighting information.
+            // Do a hit test, which updates hover information.
             hitTest(e.Location);
 
             // Update dragging information.
@@ -826,7 +874,7 @@ namespace Sandra.UI.WF
                                                 GraphicsUnit.Pixel,
                                                 dragSrcImgAttributes);
                                 }
-                                else if (!dragging && index == hoveringSquareIndex)
+                                else if (!dragging && isImageHighlighted[index])
                                 {
                                     // Highlight piece.
                                     g.DrawImage(currentImg,
