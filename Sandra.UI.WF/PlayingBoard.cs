@@ -281,6 +281,19 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Gets if an image is currently being dragged.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsDraggingImage
+        {
+            get
+            {
+                return dragging;
+            }
+        }
+
+
+        /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
         public static Color DefaultLightSquareColor { get { return Color.SandyBrown; } }
