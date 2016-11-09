@@ -25,6 +25,10 @@ using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Represents a playing board of squares occupied by pieces represented by foreground images.
+    /// Square coordinate (0, 0) is the top left square.
+    /// </summary>
     public class PlayingBoard : Control
     {
         public PlayingBoard()
