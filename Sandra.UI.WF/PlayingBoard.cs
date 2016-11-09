@@ -511,6 +511,7 @@ namespace Sandra.UI.WF
         private bool dragging;
         private Point dragStartPosition;
         private Point dragCurrentPosition;
+        private int draggedSquareIndex;
 
         private int hitTest(Point clientLocation)
         {
@@ -589,6 +590,7 @@ namespace Sandra.UI.WF
                     dragging = true;
                     dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
                     dragCurrentPosition = e.Location;
+                    draggedSquareIndex = hit;
                     Invalidate();
                 }
             }
@@ -756,6 +758,22 @@ namespace Sandra.UI.WF
                             ++index;
                         }
                         y += delta;
+                    }
+
+                    if (dragging)
+                    {
+                        // Draw dragged image on top of the rest.
+                        // Copy image to graphics, and apply highlight.
+                        Image currentImg = foregroundImages[draggedSquareIndex];
+                        if (currentImg != null)
+                        {
+                            Point location = dragCurrentPosition;
+                            g.DrawImage(currentImg,
+                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                        0, 0, currentImg.Width, currentImg.Height,
+                                        GraphicsUnit.Pixel,
+                                        highlightImgAttributes);
+                        }
                     }
                 }
             }
