@@ -248,7 +248,7 @@ namespace Sandra.UI.WF
         public const int DefaultSquareSize = 44;
 
         /// <summary>
-        /// Gets or sets the size of either side of a single square on the board.
+        /// Gets or sets the size of a single square on the board in pixels.
         /// The default value is <see cref="DefaultSquareSize"/> (44).
         /// </summary>
         [DefaultValue(DefaultSquareSize)]
