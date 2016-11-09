@@ -20,6 +20,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -43,7 +44,14 @@ namespace Sandra.UI.WF
             updateDarkSquareBrush();
             updateLightSquareBrush();
             updateForegroundImages();
+
+            // Highlight by setting a gamma smaller than 1.
+            var highlight = new ImageAttributes();
+            highlight.SetGamma(0.6f);
+            highlightImgAttributes = highlight;
         }
+
+        private readonly ImageAttributes highlightImgAttributes;
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -224,7 +232,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        
+
         /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
@@ -431,6 +439,7 @@ namespace Sandra.UI.WF
             }
         }
 
+
         private int getIndex(int x, int y)
         {
             int boardSize = BoardSize;
@@ -480,6 +489,89 @@ namespace Sandra.UI.WF
         }
 
 
+        private Point lastKnownMouseMovePoint = new Point(-1, -1);
+
+        private int hoveringSquareIndex = -1;
+
+        private void hitTest(Point clientLocation)
+        {
+            int squareSize = SquareSize;
+
+            if (squareSize == 0)
+            {
+                // No square can contain the point.
+                // Short-circuit exit here to prevent division by zeroes.
+                return;
+            }
+
+            int boardSize = BoardSize;
+            int borderWidth = BorderWidth;
+
+            int px = clientLocation.X - borderWidth,
+                py = clientLocation.Y - borderWidth,
+                delta = squareSize + InnerSpacing;
+            int x = px / delta,
+                y = py / delta;
+            int remainderX = px - x * delta,
+                remainderY = py - y * delta;
+
+            int hit;
+            if (x < 0 || x >= boardSize || y < 0 || y >= boardSize || remainderX >= squareSize || remainderY >= squareSize)
+            {
+                // Either outside of the actual board, or hitting a border.
+                hit = -1;
+            }
+            else
+            {
+                // The location is inside a square.
+                hit = y * boardSize + x;
+            }
+
+            // Update hovering information.
+            if (hoveringSquareIndex != hit)
+            {
+                hoveringSquareIndex = hit;
+                Invalidate();
+            }
+        }
+
+        private void endHover()
+        {
+            if (hoveringSquareIndex >= 0)
+            {
+                hoveringSquareIndex = -1;
+                Invalidate();
+            }
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            if (lastKnownMouseMovePoint.X >= 0 && lastKnownMouseMovePoint.Y >= 0)
+            {
+                hitTest(lastKnownMouseMovePoint);
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            // Do a hit test, which updates highlighting information.
+            hitTest(e.Location);
+
+            // Remember position for mouse-enters without mouse-leaves.
+            lastKnownMouseMovePoint = e.Location;
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+            lastKnownMouseMovePoint = new Point(-1, -1);
+            endHover();
+        }
+
+
         protected override void OnPaint(PaintEventArgs pe)
         {
             base.OnPaint(pe);
@@ -505,12 +597,6 @@ namespace Sandra.UI.WF
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
 
-            // Draw borders.
-            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-            {
-                g.FillRectangle(borderBrush, boardWithBorderRectangle);
-            }
-
             // Draw the background light and dark squares.
             if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
             {
@@ -533,7 +619,39 @@ namespace Sandra.UI.WF
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
+            }
 
+            // Draw borders.
+            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            {
+                // Clip to borders.
+                if (innerBorderWidth == 0)
+                {
+                    g.ExcludeClip(boardRectangle);
+                }
+                else
+                {
+                    // Exclude all squares one by one.
+                    int y = borderWidth;
+                    for (int j = boardSizeMinusOne; j >= 0; --j)
+                    {
+                        int x = borderWidth;
+                        for (int k = boardSizeMinusOne; k >= 0; --k)
+                        {
+                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
+                            x += delta;
+                        }
+                        y += delta;
+                    }
+                }
+
+                // And draw.
+                g.FillRectangle(borderBrush, boardWithBorderRectangle);
+                g.ResetClip();
+            }
+
+            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
+            {
                 // Draw foreground images.
                 // Determine the image size and the amount of space around a foreground image within a square.
                 int foregroundImageSize = (int)Math.Floor(squareSize * ForegroundImageRelativeSize);
@@ -548,7 +666,7 @@ namespace Sandra.UI.WF
                         vOffset = imageOffset + padding.Top;
 
                     // Loop over foreground images and draw them.
-                    y = vOffset;
+                    int y = vOffset;
                     int index = 0;
                     for (int j = boardSizeMinusOne; j >= 0; --j)
                     {
@@ -559,8 +677,20 @@ namespace Sandra.UI.WF
                             Image currentImg = foregroundImages[index];
                             if (currentImg != null)
                             {
-                                // Copy image to the graphics.
-                                g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                if (index == hoveringSquareIndex)
+                                {
+                                    // Highlight piece.
+                                    g.DrawImage(currentImg,
+                                                new Rectangle(x, y, sizeH, sizeV),
+                                                0, 0, currentImg.Width, currentImg.Height,
+                                                GraphicsUnit.Pixel,
+                                                highlightImgAttributes);
+                                }
+                                else
+                                {
+                                    // Default case.
+                                    g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                }
                             }
                             x += delta;
                             ++index;
@@ -575,6 +705,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
+                highlightImgAttributes.Dispose();
+
                 // To dispose of stored disposable values such as brushes.
                 propertyStore.Dispose();
             }
