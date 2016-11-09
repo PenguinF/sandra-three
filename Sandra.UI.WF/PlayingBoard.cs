@@ -51,6 +51,7 @@ namespace Sandra.UI.WF
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -161,6 +162,28 @@ namespace Sandra.UI.WF
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
                 {
                     updateDarkSquareBrush();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="ForegroundImagePadding"/> property.
+        /// </summary>
+        public static Padding DefaultForegroundImagePadding { get { return new Padding(0); } }
+
+        /// <summary>
+        /// Gets or sets the absolute padding between a foreground image and the edge of the square in which it is shown.
+        /// The default value is <see cref="DefaultForegroundImagePadding"/>, which is zero padding.
+        /// </summary>
+        public Padding ForegroundImagePadding
+        {
+            get { return propertyStore.Get<Padding>(nameof(ForegroundImagePadding)); }
+            set
+            {
+                if (propertyStore.Set(nameof(ForegroundImagePadding), value))
+                {
                     Invalidate();
                 }
             }
@@ -430,7 +453,6 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            int x, y;
             int boardSize = BoardSize;
             int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
@@ -462,11 +484,11 @@ namespace Sandra.UI.WF
 
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
-                y = borderWidth;
+                int y = borderWidth;
                 for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    x = borderWidth + (yIndex & 1) * delta;
+                    int x = borderWidth + (yIndex & 1) * delta;
                     for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
@@ -479,31 +501,36 @@ namespace Sandra.UI.WF
             }
 
             // Draw foreground images.
-            // Use this.Padding to determine the amount of space around a foreground image within a square.
-            int hOffset = borderWidth + Padding.Left,
-                vOffset = borderWidth + Padding.Top;
-            int sizeH = squareSize - Padding.Horizontal,
-                sizeV = squareSize - Padding.Vertical;
+            // Use ForegroundImagePadding to determine the amount of space around a foreground image within a square.
+            var padding = ForegroundImagePadding;
+            int sizeH = squareSize - padding.Horizontal,
+                sizeV = squareSize - padding.Vertical;
 
-            // Loop over foreground images and draw them.
-            y = vOffset;
-            int index = 0;
-            for (int j = boardSizeMinusOne; j >= 0; --j)
+            if (sizeH > 0 && sizeV > 0)
             {
-                x = hOffset;
-                for (int k = boardSizeMinusOne; k >= 0; --k)
+                int hOffset = borderWidth + padding.Left,
+                    vOffset = borderWidth + padding.Top;
+
+                // Loop over foreground images and draw them.
+                int y = vOffset;
+                int index = 0;
+                for (int j = boardSizeMinusOne; j >= 0; --j)
                 {
-                    // Select picture.
-                    Image currentImg = foregroundImages[index];
-                    if (currentImg != null)
+                    int x = hOffset;
+                    for (int k = boardSizeMinusOne; k >= 0; --k)
                     {
-                        // Copy image to the graphics.
-                        g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                        // Select picture.
+                        Image currentImg = foregroundImages[index];
+                        if (currentImg != null)
+                        {
+                            // Copy image to the graphics.
+                            g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                        }
+                        x += delta;
+                        ++index;
                     }
-                    x += delta;
-                    ++index;
+                    y += delta;
                 }
-                y += delta;
             }
         }
 
