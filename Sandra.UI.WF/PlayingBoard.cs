@@ -472,9 +472,9 @@ namespace Sandra.UI.WF
             if (SizeToFit) performSizeToFit();
         }
 
-        protected override void OnLayout(LayoutEventArgs args)
+        protected override void OnLayout(LayoutEventArgs levent)
         {
-            base.OnLayout(args);
+            base.OnLayout(levent);
             verifySizeToFit();
         }
 
