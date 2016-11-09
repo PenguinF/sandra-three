@@ -87,13 +87,11 @@ namespace Sandra.UI.WF
             // Left/right.
             switch (resizeMode)
             {
-                case ResizeMode.Left:
                 case ResizeMode.TopLeft:
                 case ResizeMode.BottomLeft:
                     // Adjust left edge.
                     resizeRect.Left = resizeRect.Right - targetSize - widthDifference;
                     break;
-                case ResizeMode.Right:
                 case ResizeMode.TopRight:
                 case ResizeMode.BottomRight:
                     // Adjust right edge.
@@ -104,13 +102,11 @@ namespace Sandra.UI.WF
             // Top/bottom.
             switch (resizeMode)
             {
-                case ResizeMode.Top:
                 case ResizeMode.TopLeft:
                 case ResizeMode.TopRight:
                     // Adjust top edge.
                     resizeRect.Top = resizeRect.Bottom - targetSize - heightDifference;
                     break;
-                case ResizeMode.Bottom:
                 case ResizeMode.BottomLeft:
                 case ResizeMode.BottomRight:
                     // Adjust bottom edge.
