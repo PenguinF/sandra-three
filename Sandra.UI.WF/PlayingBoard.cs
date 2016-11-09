@@ -929,6 +929,10 @@ namespace Sandra.UI.WF
         }
     }
 
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
+    /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
+    /// </summary>
     [DebuggerDisplay("(x, y) = ({X}, {Y})")]
     public class SquareEventArgs : EventArgs
     {
