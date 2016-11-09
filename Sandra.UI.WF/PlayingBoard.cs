@@ -498,38 +498,38 @@ namespace Sandra.UI.WF
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
-            }
 
-            // Draw foreground images.
-            // Use ForegroundImagePadding to determine the amount of space around a foreground image within a square.
-            var padding = ForegroundImagePadding;
-            int sizeH = squareSize - padding.Horizontal,
-                sizeV = squareSize - padding.Vertical;
+                // Draw foreground images.
+                // Use ForegroundImagePadding to determine the amount of space around a foreground image within a square.
+                var padding = ForegroundImagePadding;
+                int sizeH = squareSize - padding.Horizontal,
+                    sizeV = squareSize - padding.Vertical;
 
-            if (sizeH > 0 && sizeV > 0)
-            {
-                int hOffset = borderWidth + padding.Left,
-                    vOffset = borderWidth + padding.Top;
-
-                // Loop over foreground images and draw them.
-                int y = vOffset;
-                int index = 0;
-                for (int j = boardSizeMinusOne; j >= 0; --j)
+                if (sizeH > 0 && sizeV > 0)
                 {
-                    int x = hOffset;
-                    for (int k = boardSizeMinusOne; k >= 0; --k)
+                    int hOffset = borderWidth + padding.Left,
+                        vOffset = borderWidth + padding.Top;
+
+                    // Loop over foreground images and draw them.
+                    y = vOffset;
+                    int index = 0;
+                    for (int j = boardSizeMinusOne; j >= 0; --j)
                     {
-                        // Select picture.
-                        Image currentImg = foregroundImages[index];
-                        if (currentImg != null)
+                        int x = hOffset;
+                        for (int k = boardSizeMinusOne; k >= 0; --k)
                         {
-                            // Copy image to the graphics.
-                            g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                            // Select picture.
+                            Image currentImg = foregroundImages[index];
+                            if (currentImg != null)
+                            {
+                                // Copy image to the graphics.
+                                g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                            }
+                            x += delta;
+                            ++index;
                         }
-                        x += delta;
-                        ++index;
+                        y += delta;
                     }
-                    y += delta;
                 }
             }
         }
