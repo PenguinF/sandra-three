@@ -1,0 +1,37 @@
+
+Sandra 3 was inspired by ideas from various sources. They all deserve bountiful credit for their work.
+
+Disclaimer:
+I did not copy any code from either of these sources. Feel free to copy mine though, as long as you keep in mind that I attached the Apache License to it, to ensure that:
+
+1) Even though I wrote the code, using it properly remains your responsibility.
+2) You cannot claim the code as your intellectual property, denying me the right to use my own code.
+
+
+Here then are the credits:
+
+Thief, my favorite chess client:
+    http://thief.sourceforge.net/
+
+World Chess Network, for their beautiful piece set:
+    https://en.wikipedia.org/wiki/World_Chess_Network
+
+Snap sensitivity calculation - Jevgenij Pankov, 2004:
+    http://www.codeproject.com/Articles/6338/SnapFormExtender-a-magnet-for-your-MDI-child-forms
+
+Enumerating MDI children in z-order, in particular Alan N's post:
+    http://www.codeproject.com/Messages/4486351/Mdi-Child-Window-Z-Order.aspx
+
+Overriding WndProc() to preserve the aspect ratio of a form:
+    http://www.vcskicks.com/maintain-aspect-ratio.php
+
+
+There is also no way I could have done this without proper tools and documentation:
+
+    https://chessprogramming.wikispaces.com/Home
+    http://referencesource.microsoft.com/
+    http://www.pinvoke.net/
+    http://ilspy.net/
+
+
+Many, many thanks to all of the above!

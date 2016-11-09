@@ -29,23 +29,6 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SnappingMdiChildForm : ConstrainedMoveResizeForm
     {
-        //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        //
-        //  Code inspired on various sources:
-        //
-        //  Snap sensitivity calculation:
-        //  http://www.codeproject.com/Articles/6338/SnapFormExtender-a-magnet-for-your-MDI-child-forms  (Eugene Pankov, 2004)
-        //
-        //  Enumerating MDI children in z-order:
-        //  http://www.codeproject.com/Messages/4486351/Mdi-Child-Window-Z-Order.aspx
-        //
-        //  Overriding WndProc() to preserve the aspect ratio of a form:
-        //  http://www.vcskicks.com/maintain-aspect-ratio.php
-        //
-        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
         LineSegment createIfNonEmpty(int position, int min, int max)
         {
             if (min < max) return new LineSegment(position, min, max);
