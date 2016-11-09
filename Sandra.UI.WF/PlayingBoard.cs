@@ -448,8 +448,14 @@ namespace Sandra.UI.WF
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
 
+            // Draw borders.
+            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            {
+                g.FillRectangle(borderBrush, boardWithBorderRectangle);
+            }
+
             // Draw the background light and dark squares.
-            if (clipRectangle.IntersectsWith(boardRectangle))
+            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
             {
                 // Draw dark squares over the entire board.
                 g.FillRectangle(darkSquareBrush, boardRectangle);
@@ -469,35 +475,6 @@ namespace Sandra.UI.WF
                     y += delta;
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
-                g.ResetClip();
-            }
-
-            // Draw borders.
-            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-            {
-                // Clip to borders.
-                if (innerBorderWidth == 0)
-                {
-                    g.ExcludeClip(boardRectangle);
-                }
-                else
-                {
-                    // Exclude all squares one by one.
-                    y = borderWidth;
-                    for (int j = boardSizeMinusOne; j >= 0; --j)
-                    {
-                        x = borderWidth;
-                        for (int k = boardSizeMinusOne; k >= 0; --k)
-                        {
-                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                            x += delta;
-                        }
-                        y += delta;
-                    }
-                }
-
-                // And draw.
-                g.FillRectangle(borderBrush, boardWithBorderRectangle);
                 g.ResetClip();
             }
 
