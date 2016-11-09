@@ -610,6 +610,9 @@ namespace Sandra.UI.WF
                 {
                     dragging = true;
                     dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
+                    dragStartPosition.Offset(getLocationFromIndex(hit));
+                    Rectangle imageRect = getRelativeForegroundImageRectangle();
+                    dragStartPosition.Offset(imageRect.Location);
                     dragCurrentPosition = e.Location;
                     draggedSquareIndex = hit;
                     Invalidate();
@@ -787,6 +790,7 @@ namespace Sandra.UI.WF
                         if (currentImg != null)
                         {
                             Point location = dragCurrentPosition;
+                            location.Offset(dragStartPosition);
                             g.DrawImage(currentImg,
                                         new Rectangle(location.X, location.Y, sizeH, sizeV),
                                         0, 0, currentImg.Width, currentImg.Height,
