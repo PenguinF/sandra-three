@@ -52,6 +52,7 @@ namespace Sandra.UI.WF
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
+            { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -182,6 +183,10 @@ namespace Sandra.UI.WF
             get { return propertyStore.Get<Padding>(nameof(ForegroundImagePadding)); }
             set
             {
+                if (value.Left < 0 || value.Right < 0 || value.Top < 0 || value.Bottom < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(ForegroundImagePadding), value, "The foreground image padding must contain values that are 0 or higher.");
+                }
                 if (propertyStore.Set(nameof(ForegroundImagePadding), value))
                 {
                     Invalidate();
@@ -190,6 +195,36 @@ namespace Sandra.UI.WF
         }
 
 
+        /// <summary>
+        /// Gets the default value for the <see cref="ForegroundImageRelativeSize"/> property.
+        /// </summary>
+        public const double DefaultForegroundImageRelativeSize = 1;
+
+        /// <summary>
+        /// Gets or sets the size of a foreground image as a factor of the size of the square in which it is shown.
+        /// The default value is <see cref="DefaultForegroundImageRelativeSize"/> (1.0).
+        /// </summary>
+        [DefaultValue(DefaultForegroundImageRelativeSize)]
+        public double ForegroundImageRelativeSize
+        {
+            get { return propertyStore.Get<double>(nameof(ForegroundImageRelativeSize)); }
+            set
+            {
+                // Do not allow cases where negative relative size and padding create a positive image size.
+                // This has the weird effect of foreground images growing as the square size shrinks,
+                // and appearing in the top left corner of the square in the negative padding area.
+                if (value < 0.0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(ForegroundImageRelativeSize), value, "Relative size must be 0.0 or higher.");
+                }
+                if (propertyStore.Set(nameof(ForegroundImageRelativeSize), value))
+                {
+                    Invalidate();
+                }
+            }
+        }
+
+        
         /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
@@ -500,15 +535,17 @@ namespace Sandra.UI.WF
                 g.ResetClip();
 
                 // Draw foreground images.
-                // Use ForegroundImagePadding to determine the amount of space around a foreground image within a square.
+                // Determine the image size and the amount of space around a foreground image within a square.
+                int foregroundImageSize = (int)Math.Floor(squareSize * ForegroundImageRelativeSize);
                 var padding = ForegroundImagePadding;
-                int sizeH = squareSize - padding.Horizontal,
-                    sizeV = squareSize - padding.Vertical;
+                int sizeH = foregroundImageSize - padding.Horizontal,
+                    sizeV = foregroundImageSize - padding.Vertical;
 
                 if (sizeH > 0 && sizeV > 0)
                 {
-                    int hOffset = borderWidth + padding.Left,
-                        vOffset = borderWidth + padding.Top;
+                    int imageOffset = borderWidth + (squareSize - foregroundImageSize) / 2;
+                    int hOffset = imageOffset + padding.Left,
+                        vOffset = imageOffset + padding.Top;
 
                     // Loop over foreground images and draw them.
                     y = vOffset;

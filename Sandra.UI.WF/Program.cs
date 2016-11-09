@@ -84,6 +84,7 @@ namespace Sandra.UI.WF
                     }
                 }
 
+                mdiChild.PlayingBoard.ForegroundImageRelativeSize = Math.Sqrt(rnd.NextDouble()); // sqrt gets it closer to 1.
                 mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
                 mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
 
