@@ -69,7 +69,7 @@ namespace Sandra.UI.WF
         public const int DefaultBoardSize = 8;
 
         /// <summary>
-        /// Gets or sets the number of squares in a row and file.
+        /// Gets or sets the number of squares in a row or file. The minimum value is 1.
         /// The default value is <see cref="DefaultBoardSize"/> (8).
         /// </summary>
         [DefaultValue(DefaultBoardSize)]
@@ -100,7 +100,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of the border area.
-        /// The default value is <see cref="Color.Black"/>.
+        /// The default value is <see cref="DefaultBorderColor"/> (<see cref="Color.Black"/>).
         /// </summary>
         public Color BorderColor
         {
@@ -151,7 +151,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of dark squares.
-        /// The default value is <see cref="Color.Brown"/>.
+        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Brown"/>).
         /// </summary>
         public Color DarkSquareColor
         {
@@ -202,7 +202,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Gets or sets the color of light squares.
-        /// The default value is <see cref="Color.SandyBrown"/>.
+        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.SandyBrown"/>).
         /// </summary>
         public Color LightSquareColor
         {
@@ -257,10 +257,9 @@ namespace Sandra.UI.WF
             get { return propertyStore.Get<int>(nameof(SquareSize)); }
             set
             {
-                // Never allow zero square sizes - will cause division by zero errors.
-                if (value < 1)
+                if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 1 or higher.");
+                    throw new ArgumentOutOfRangeException(nameof(SquareSize), value, "Square size must be 0 or higher.");
                 }
                 // No effect if SizeToFit.
                 if (SizeToFit)
