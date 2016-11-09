@@ -49,9 +49,23 @@ namespace Sandra.UI.WF
             var highlight = new ImageAttributes();
             highlight.SetGamma(0.6f);
             highlightImgAttributes = highlight;
+
+            // Half-transparent foreground image at the source square, when dragging.
+            var halfTransparent = new ImageAttributes();
+            ColorMatrix halfTransparentMatrix = new ColorMatrix(new float[][]
+            {
+                new float[] {1, 0, 0, 0, 0},
+                new float[] {0, 1, 0, 0, 0},
+                new float[] {0, 0, 1, 0, 0},
+                new float[] {0, 0, 0, 0.4f, 0},
+                new float[] {0, 0, 0, 0, 0}
+            });
+            halfTransparent.SetColorMatrix(halfTransparentMatrix);
+            dragSrcImgAttributes = halfTransparent;
         }
 
         private readonly ImageAttributes highlightImgAttributes;
+        private readonly ImageAttributes dragSrcImgAttributes;
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -761,7 +775,18 @@ namespace Sandra.UI.WF
                             Image currentImg = foregroundImages[index];
                             if (currentImg != null)
                             {
-                                if (index == hoveringSquareIndex)
+                                // Draw current image - but use a color transformation if the current square was
+                                // used to start dragging from, or if the mouse is hovering above it.
+                                if (dragging && index == draggedSquareIndex)
+                                {
+                                    // Half-transparent.
+                                    g.DrawImage(currentImg,
+                                                new Rectangle(x, y, sizeH, sizeV),
+                                                0, 0, currentImg.Width, currentImg.Height,
+                                                GraphicsUnit.Pixel,
+                                                dragSrcImgAttributes);
+                                }
+                                else if (!dragging && index == hoveringSquareIndex)
                                 {
                                     // Highlight piece.
                                     g.DrawImage(currentImg,
@@ -807,6 +832,7 @@ namespace Sandra.UI.WF
             if (disposing)
             {
                 highlightImgAttributes.Dispose();
+                dragSrcImgAttributes.Dispose();
 
                 // To dispose of stored disposable values such as brushes.
                 propertyStore.Dispose();
