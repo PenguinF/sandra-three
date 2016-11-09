@@ -643,13 +643,13 @@ namespace Sandra.UI.WF
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
             int boardSize = BoardSize;
-            int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
-            int innerBorderWidth = InnerSpacing;
-            int delta = squareSize + innerBorderWidth;
+            int innerSpacing = InnerSpacing;
+            int delta = squareSize + innerSpacing;
             int borderWidth = BorderWidth;
-            int totalBoardSize = delta * boardSizeMinusOne + squareSize;
+            int totalBoardSize = delta * boardSize - innerSpacing;
             int totalSize = borderWidth * 2 + totalBoardSize;
+
             Rectangle clipRectangle = pe.ClipRectangle;
             Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardSize, totalBoardSize);
             Rectangle boardWithBorderRectangle = new Rectangle(0, 0, totalSize, totalSize);
@@ -668,11 +668,11 @@ namespace Sandra.UI.WF
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
                 int y = borderWidth;
-                for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
+                for (int yIndex = boardSize - 1; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
                     int x = borderWidth + (yIndex & 1) * delta;
-                    for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
+                    for (int xIndex = (boardSize - 1) / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                         x += doubleDelta;
@@ -684,10 +684,10 @@ namespace Sandra.UI.WF
             }
 
             // Draw borders.
-            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
             {
                 // Clip to borders.
-                if (innerBorderWidth == 0)
+                if (innerSpacing == 0)
                 {
                     g.ExcludeClip(boardRectangle);
                 }
@@ -695,10 +695,10 @@ namespace Sandra.UI.WF
                 {
                     // Exclude all squares one by one.
                     int y = borderWidth;
-                    for (int j = boardSizeMinusOne; j >= 0; --j)
+                    for (int j = 0; j < boardSize; ++j)
                     {
                         int x = borderWidth;
-                        for (int k = boardSizeMinusOne; k >= 0; --k)
+                        for (int k = 0; k < boardSize; ++k)
                         {
                             g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                             x += delta;
@@ -730,10 +730,10 @@ namespace Sandra.UI.WF
                     // Loop over foreground images and draw them.
                     int y = vOffset;
                     int index = 0;
-                    for (int j = boardSizeMinusOne; j >= 0; --j)
+                    for (int j = 0; j < boardSize; ++j)
                     {
                         int x = hOffset;
-                        for (int k = boardSizeMinusOne; k >= 0; --k)
+                        for (int k = 0; k < boardSize; ++k)
                         {
                             // Select picture.
                             Image currentImg = foregroundImages[index];
