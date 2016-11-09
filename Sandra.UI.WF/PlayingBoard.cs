@@ -463,6 +463,27 @@ namespace Sandra.UI.WF
             return new Point(px, py);
         }
 
+        private Rectangle getRelativeForegroundImageRectangle()
+        {
+            // Returns the rectangle of a foreground image relative to its containing square.
+            if (SquareSize > 0)
+            {
+                int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
+                var padding = ForegroundImagePadding;
+                int imageOffset = (SquareSize - foregroundImageSize) / 2;
+                int left = imageOffset + padding.Left;
+                int top = imageOffset + padding.Top;
+                int width = foregroundImageSize - padding.Horizontal;
+                int height = foregroundImageSize - padding.Vertical;
+                if (width > 0 && height > 0)
+                {
+                    return new Rectangle(left, top, width, height);
+                }
+            }
+            // Default empty rectangle.
+            return new Rectangle();
+        }
+
         private int squareSizeFromClientSize(int clientSize)
         {
             int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
@@ -716,16 +737,14 @@ namespace Sandra.UI.WF
             {
                 // Draw foreground images.
                 // Determine the image size and the amount of space around a foreground image within a square.
-                int foregroundImageSize = (int)Math.Floor(squareSize * ForegroundImageRelativeSize);
-                var padding = ForegroundImagePadding;
-                int sizeH = foregroundImageSize - padding.Horizontal,
-                    sizeV = foregroundImageSize - padding.Vertical;
+                Rectangle imgRect = getRelativeForegroundImageRectangle();
+                int sizeH = imgRect.Width,
+                    sizeV = imgRect.Height;
 
                 if (sizeH > 0 && sizeV > 0)
                 {
-                    int imageOffset = borderWidth + (squareSize - foregroundImageSize) / 2;
-                    int hOffset = imageOffset + padding.Left,
-                        vOffset = imageOffset + padding.Top;
+                    int hOffset = borderWidth + imgRect.Left,
+                        vOffset = borderWidth + imgRect.Top;
 
                     // Loop over foreground images and draw them.
                     int y = vOffset;
