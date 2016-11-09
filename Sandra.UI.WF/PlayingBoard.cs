@@ -992,7 +992,7 @@ namespace Sandra.UI.WF
                                                 GraphicsUnit.Pixel,
                                                 dragSrcImgAttributes);
                                 }
-                                else if (!dragging && isImageHighlighted[index])
+                                else if (isImageHighlighted[index])
                                 {
                                     // Highlight piece.
                                     g.DrawImage(currentImg,
@@ -1022,11 +1022,22 @@ namespace Sandra.UI.WF
                         {
                             Point location = dragCurrentPosition;
                             location.Offset(dragStartPosition);
-                            g.DrawImage(currentImg,
-                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
-                                        0, 0, currentImg.Width, currentImg.Height,
-                                        GraphicsUnit.Pixel,
-                                        highlightImgAttributes);
+
+                            // Make sure the piece looks exactly the same as when it was still on its source square.
+                            if (isImageHighlighted[dragStartSquareIndex])
+                            {
+                                // Highlight piece.
+                                g.DrawImage(currentImg,
+                                            new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                            0, 0, currentImg.Width, currentImg.Height,
+                                            GraphicsUnit.Pixel,
+                                            highlightImgAttributes);
+                            }
+                            else
+                            {
+                                // Default case.
+                                g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
+                            }
                         }
                     }
                 }
