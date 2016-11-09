@@ -532,6 +532,27 @@ namespace Sandra.UI.WF
         }
 
 
+        /// <summary>
+        /// Occurs when the image occupying a square starts being dragged.
+        /// </summary>
+        public event EventHandler<CancellableSquareEventArgs> DragImageStart;
+
+        /// <summary>
+        /// Raises the <see cref="DragImageStart"/> event. 
+        /// </summary>
+        protected virtual void OnDragImageStart(CancellableSquareEventArgs e)
+        {
+            DragImageStart?.Invoke(this, e);
+        }
+
+        protected bool RaiseDragImageStart(int squareIndex)
+        {
+            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            OnDragImageStart(e);
+            return !e.Cancel;
+        }
+
+
         private int getX(int index) { return index % BoardSize; }
         private int getY(int index) { return index / BoardSize; }
 
@@ -710,14 +731,17 @@ namespace Sandra.UI.WF
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
-                    dragging = true;
-                    dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
-                    dragStartPosition.Offset(getLocationFromIndex(hit));
-                    Rectangle imageRect = getRelativeForegroundImageRectangle();
-                    dragStartPosition.Offset(imageRect.Location);
-                    dragCurrentPosition = e.Location;
-                    dragStartSquareIndex = hit;
-                    Invalidate();
+                    if (RaiseDragImageStart(hit))
+                    {
+                        dragging = true;
+                        dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
+                        dragStartPosition.Offset(getLocationFromIndex(hit));
+                        Rectangle imageRect = getRelativeForegroundImageRectangle();
+                        dragStartPosition.Offset(imageRect.Location);
+                        dragCurrentPosition = e.Location;
+                        dragStartSquareIndex = hit;
+                        Invalidate();
+                    }
                 }
             }
         }
@@ -958,6 +982,18 @@ namespace Sandra.UI.WF
         public SquareEventArgs(int x, int y)
         {
             X = x; Y = y;
+        }
+    }
+
+    public class CancellableSquareEventArgs : SquareEventArgs
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the event should be canceled.
+        /// </summary>
+        public bool Cancel { get; set; }
+
+        public CancellableSquareEventArgs(int x, int y) : base(x, y)
+        {
         }
     }
 }
