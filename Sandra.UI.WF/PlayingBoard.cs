@@ -384,7 +384,7 @@ namespace Sandra.UI.WF
         private int squareSizeFromClientSize(int clientSize)
         {
             int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
-            return Math.Max(result, 1);
+            return Math.Max(result, 0);
         }
 
         private void performSizeToFit()
