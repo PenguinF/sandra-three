@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -842,6 +843,34 @@ namespace Sandra.UI.WF
                 propertyStore.Dispose();
             }
             base.Dispose(disposing);
+        }
+    }
+
+    [DebuggerDisplay("(x, y) = ({X}, {Y})")]
+    public class SquareEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square.
+        /// </summary>
+        public int X { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square.
+        /// </summary>
+        public int Y { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SquareEventArgs"/>  class.
+        /// </summary>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
+        public SquareEventArgs(int x, int y)
+        {
+            X = x; Y = y;
         }
     }
 }
