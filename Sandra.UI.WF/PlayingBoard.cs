@@ -442,10 +442,25 @@ namespace Sandra.UI.WF
 
         private int getIndex(int x, int y)
         {
-            int boardSize = BoardSize;
-            if (x < 0 || x >= boardSize) throw new IndexOutOfRangeException(nameof(x));
-            if (y < 0 || y >= boardSize) throw new IndexOutOfRangeException(nameof(y));
-            return y * boardSize + x;
+            if (x < 0 || x >= BoardSize) throw new IndexOutOfRangeException(nameof(x));
+            if (y < 0 || y >= BoardSize) throw new IndexOutOfRangeException(nameof(y));
+            return y * BoardSize + x;
+        }
+
+        private Point getLocationFromIndex(int index)
+        {
+            if (index < 0 || index >= BoardSize * BoardSize)
+            {
+                return Point.Empty;
+            }
+
+            int x = index % BoardSize,
+                y = index / BoardSize,
+                delta = SquareSize + InnerSpacing;
+            int px = BorderWidth + x * delta,
+                py = BorderWidth + y * delta;
+
+            return new Point(px, py);
         }
 
         private int squareSizeFromClientSize(int clientSize)
