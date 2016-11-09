@@ -627,7 +627,7 @@ namespace Sandra.UI.WF
         private bool dragging;
         private Point dragStartPosition;
         private Point dragCurrentPosition;
-        private int draggedSquareIndex;
+        private int dragStartSquareIndex;
 
         private int hitTest(Point clientLocation)
         {
@@ -716,7 +716,7 @@ namespace Sandra.UI.WF
                     Rectangle imageRect = getRelativeForegroundImageRectangle();
                     dragStartPosition.Offset(imageRect.Location);
                     dragCurrentPosition = e.Location;
-                    draggedSquareIndex = hit;
+                    dragStartSquareIndex = hit;
                     Invalidate();
                 }
             }
@@ -865,7 +865,7 @@ namespace Sandra.UI.WF
                             {
                                 // Draw current image - but use a color transformation if the current square was
                                 // used to start dragging from, or if the mouse is hovering above it.
-                                if (dragging && index == draggedSquareIndex)
+                                if (dragging && index == dragStartSquareIndex)
                                 {
                                     // Half-transparent.
                                     g.DrawImage(currentImg,
@@ -899,7 +899,7 @@ namespace Sandra.UI.WF
                     {
                         // Draw dragged image on top of the rest.
                         // Copy image to graphics, and apply highlight.
-                        Image currentImg = foregroundImages[draggedSquareIndex];
+                        Image currentImg = foregroundImages[dragStartSquareIndex];
                         if (currentImg != null)
                         {
                             Point location = dragCurrentPosition;
