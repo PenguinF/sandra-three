@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -48,30 +47,11 @@ namespace Sandra.UI.WF
                         Visible = true,
                     };
 
-                    if (rnd.Next(4) == 0)
-                    {
-                        mdiChild.PlayingBoard.SizeToFit = false;
-                        int sign = rnd.Next(2) - 1; // allowing zero is desirable in this case
-                        if (sign == 0)
-                        {
-                            mdiChild.PlayingBoard.SquareSize = 24;
-                        }
-                        else
-                        {
-                            int delta = Math.Min(24, (int)Math.Floor(Math.Sqrt(rnd.NextDouble()) * 25));
-                            mdiChild.PlayingBoard.SquareSize = 24 + sign * delta;
-                        }
-                    }
+                    mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
 
-                    mdiChild.PlayingBoard.ForegroundImageRelativeSize = Math.Sqrt(rnd.NextDouble()); // sqrt gets it closer to 1.
-                    mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
-                    mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
-
-                    int boardSize = rnd.Next(5) + 4;
-                    mdiChild.PlayingBoard.BoardSize = boardSize;
-                    for (int x = 0; x < boardSize; ++x)
+                    for (int x = 0; x < mdiChild.PlayingBoard.BoardSize; ++x)
                     {
-                        for (int y = 0; y < boardSize; ++y)
+                        for (int y = 0; y < mdiChild.PlayingBoard.BoardSize; ++y)
                         {
                             if (rnd.Next(2) == 0)
                             {
