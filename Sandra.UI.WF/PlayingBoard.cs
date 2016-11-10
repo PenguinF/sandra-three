@@ -779,15 +779,6 @@ namespace Sandra.UI.WF
             return hit;
         }
 
-        private void endHover()
-        {
-            if (hoveringSquareIndex >= 0)
-            {
-                RaiseMouseLeaveSquare(hoveringSquareIndex);
-                hoveringSquareIndex = -1;
-            }
-        }
-
         protected override void OnMouseEnter(EventArgs e)
         {
             base.OnMouseEnter(e);
@@ -873,8 +864,10 @@ namespace Sandra.UI.WF
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
+
+            // Hit test a position outside of the control to reset the hover square index and raise proper events.
             lastKnownMouseMovePoint = new Point(-1, -1);
-            endHover();
+            hitTest(lastKnownMouseMovePoint);
         }
 
 
