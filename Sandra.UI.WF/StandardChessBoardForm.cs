@@ -28,10 +28,15 @@ namespace Sandra.UI.WF
         {
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
+            PlayingBoard.DragImageCancel += playingBoard_DragImageCancel;
+            PlayingBoard.DragImageDrop += playingBoard_DragImageDrop;
         }
+
+        private SquareEventArgs hoverSquare;
 
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
+            hoverSquare = e;
             PlayingBoard playingBoard = (PlayingBoard)sender;
             if (!playingBoard.IsDraggingImage)
             {
@@ -41,11 +46,30 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
+            hoverSquare = null;
             PlayingBoard playingBoard = (PlayingBoard)sender;
             if (!playingBoard.IsDraggingImage)
             {
                 playingBoard.SetIsImageHighLighted(e.X, e.Y, false);
             }
+        }
+
+        private void resetDragStartSquareHighlight(DragSquareEventArgs e)
+        {
+            if (hoverSquare == null || hoverSquare.X != e.StartX || hoverSquare.Y != e.StartY)
+            {
+                PlayingBoard.SetIsImageHighLighted(e.StartX, e.StartY, false);
+            }
+        }
+
+        private void playingBoard_DragImageDrop(object sender, DragOverSquareEventArgs e)
+        {
+            resetDragStartSquareHighlight(e);
+        }
+
+        private void playingBoard_DragImageCancel(object sender, DragSquareEventArgs e)
+        {
+            resetDragStartSquareHighlight(e);
         }
     }
 }
