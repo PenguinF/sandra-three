@@ -26,6 +26,9 @@ namespace Sandra.UI.WF
     {
         public StandardChessBoardForm()
         {
+            ShowIcon = false;
+            MaximizeBox = false;
+
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
             PlayingBoard.DragImageCancel += playingBoard_DragImageCancel;
