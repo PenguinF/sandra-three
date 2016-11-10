@@ -277,7 +277,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        
+
         /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
@@ -560,22 +560,10 @@ namespace Sandra.UI.WF
 
         private void updateSquareArrays()
         {
-            int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
-                newArrayLength = BoardSize * BoardSize;
-
-            Image[] newForegroundImages = new Image[newArrayLength];
-            bool[] newIsImageHighlighted = new bool[newArrayLength];
-            bool[] newIsSquareHighlighted = new bool[newArrayLength];
-            int min = Math.Min(newArrayLength, oldArrayLength);
-            if (min > 0)
-            {
-                Array.Copy(foregroundImages, newForegroundImages, min);
-                Array.Copy(isImageHighlighted, newIsImageHighlighted, min);
-                Array.Copy(isSquareHighlighted, newIsSquareHighlighted, min);
-            }
-            foregroundImages = newForegroundImages;
-            isImageHighlighted = newIsImageHighlighted;
-            isSquareHighlighted = newIsSquareHighlighted;
+            int newArrayLength = BoardSize * BoardSize;
+            foregroundImages = new Image[newArrayLength];
+            isImageHighlighted = new bool[newArrayLength];
+            isSquareHighlighted = new bool[newArrayLength];
         }
 
 
