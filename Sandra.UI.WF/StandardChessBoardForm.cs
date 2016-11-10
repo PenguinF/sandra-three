@@ -74,8 +74,11 @@ namespace Sandra.UI.WF
             resetDragStartSquareHighlight(e);
 
             // Move piece from source to destination.
-            PlayingBoard.SetForegroundImage(e.DragX, e.DragY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
-            PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
+            if (e.StartX != e.DragX || e.StartY != e.DragY)
+            {
+                PlayingBoard.SetForegroundImage(e.DragX, e.DragY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
+                PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
+            }
         }
 
         private void playingBoard_DragImageCancel(object sender, DragSquareEventArgs e)
