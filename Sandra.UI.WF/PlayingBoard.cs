@@ -385,9 +385,9 @@ namespace Sandra.UI.WF
 
         protected override void OnBackColorChanged(EventArgs e)
         {
-            base.OnBackColorChanged(e);
             updateBackgroundBrush();
             Invalidate();
+            base.OnBackColorChanged(e);
         }
 
 
@@ -704,8 +704,8 @@ namespace Sandra.UI.WF
 
         protected override void OnLayout(LayoutEventArgs levent)
         {
-            base.OnLayout(levent);
             verifySizeToFit();
+            base.OnLayout(levent);
         }
 
         /// <summary>
@@ -781,17 +781,15 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseEnter(EventArgs e)
         {
-            base.OnMouseEnter(e);
             if (lastKnownMouseMovePoint.X >= 0 && lastKnownMouseMovePoint.Y >= 0)
             {
                 hitTest(lastKnownMouseMovePoint);
             }
+            base.OnMouseEnter(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            base.OnMouseDown(e);
-
             int hit = hitTest(e.Location);
 
             // Start dragging?
@@ -813,12 +811,12 @@ namespace Sandra.UI.WF
                     }
                 }
             }
+
+            base.OnMouseDown(e);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            base.OnMouseMove(e);
-
             // Do a hit test, which updates hover information.
             int hit = hitTest(e.Location);
 
@@ -837,12 +835,12 @@ namespace Sandra.UI.WF
 
             // Remember position for mouse-enters without mouse-leaves.
             lastKnownMouseMovePoint = e.Location;
+
+            base.OnMouseMove(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            base.OnMouseUp(e);
-
             if (dragging)
             {
                 // End drag mode.
@@ -859,22 +857,22 @@ namespace Sandra.UI.WF
 
                 Invalidate();
             }
+
+            base.OnMouseUp(e);
         }
 
         protected override void OnMouseLeave(EventArgs e)
         {
-            base.OnMouseLeave(e);
-
             // Hit test a position outside of the control to reset the hover square index and raise proper events.
             lastKnownMouseMovePoint = new Point(-1, -1);
             hitTest(lastKnownMouseMovePoint);
+
+            base.OnMouseLeave(e);
         }
 
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            base.OnPaint(pe);
-
             Graphics g = pe.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -1035,6 +1033,8 @@ namespace Sandra.UI.WF
                     }
                 }
             }
+
+            base.OnPaint(pe);
         }
 
         protected override void Dispose(bool disposing)
