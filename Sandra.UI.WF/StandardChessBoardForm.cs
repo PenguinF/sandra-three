@@ -40,20 +40,26 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
             hoverSquare = e;
-            PlayingBoard playingBoard = (PlayingBoard)sender;
-            if (!playingBoard.IsDraggingImage)
+            if (PlayingBoard.IsDraggingImage)
             {
-                playingBoard.SetIsImageHighLighted(e.X, e.Y, true);
+                PlayingBoard.SetIsSquareHighLighted(e.X, e.Y, false);
+            }
+            else
+            {
+                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, true);
             }
         }
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             hoverSquare = null;
-            PlayingBoard playingBoard = (PlayingBoard)sender;
-            if (!playingBoard.IsDraggingImage)
+            if (PlayingBoard.IsDraggingImage)
             {
-                playingBoard.SetIsImageHighLighted(e.X, e.Y, false);
+                PlayingBoard.SetIsSquareHighLighted(e.X, e.Y, true);
+            }
+            else
+            {
+                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, false);
             }
         }
 
@@ -66,6 +72,13 @@ namespace Sandra.UI.WF
             if (hoverSquare != null)
             {
                 PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
+            }
+            for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+            {
+                for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+                {
+                    PlayingBoard.SetIsSquareHighLighted(x, y, false);
+                }
             }
         }
 

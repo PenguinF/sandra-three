@@ -47,6 +47,7 @@ namespace Sandra.UI.WF
             updateBackgroundBrush();
             updateBorderBrush();
             updateDarkSquareBrush();
+            updateHighlightSquareBrush();
             updateLightSquareBrush();
             updateSquareArrays();
 
@@ -80,6 +81,7 @@ namespace Sandra.UI.WF
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
+            { nameof(HighlightSquareColor), DefaultHighlightSquareColor },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -88,6 +90,7 @@ namespace Sandra.UI.WF
             { nameof(backgroundBrush), null },
             { nameof(borderBrush), null },
             { nameof(darkSquareBrush), null },
+            { nameof(highlightSquareBrush), null },
             { nameof(lightSquareBrush), null },
         };
 
@@ -253,6 +256,29 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Gets the default value for the <see cref="HighlightSquareColor"/> property.
+        /// </summary>
+        public static Color DefaultHighlightSquareColor { get { return Color.FromArgb(30, 255, 255, 0); } }
+
+        /// <summary>
+        /// Gets or sets the color of squares that are highlighted.
+        /// The default value is <see cref="DefaultHighlightSquareColor"/> (A=30, R=255, G=255, B=0).
+        /// </summary>
+        public Color HighlightSquareColor
+        {
+            get { return propertyStore.Get<Color>(nameof(HighlightSquareColor)); }
+            set
+            {
+                if (propertyStore.Set(nameof(HighlightSquareColor), value))
+                {
+                    updateHighlightSquareBrush();
+                    Invalidate();
+                }
+            }
+        }
+
+        
+        /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
         public const int DefaultInnerSpacing = 0;
@@ -415,6 +441,18 @@ namespace Sandra.UI.WF
         }
 
 
+        private Brush highlightSquareBrush
+        {
+            get { return propertyStore.Get<Brush>(nameof(highlightSquareBrush)); }
+            set { propertyStore.Set(nameof(highlightSquareBrush), value); }
+        }
+
+        private void updateHighlightSquareBrush()
+        {
+            highlightSquareBrush = new SolidBrush(HighlightSquareColor);
+        }
+
+
         private Brush lightSquareBrush
         {
             get { return propertyStore.Get<Brush>(nameof(lightSquareBrush)); }
@@ -489,6 +527,37 @@ namespace Sandra.UI.WF
         }
 
 
+        private bool[] isSquareHighlighted;
+
+        /// <summary>
+        /// Gets if the square on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public bool GetIsSquareHighLighted(int x, int y)
+        {
+            int index = getIndex(x, y);
+            return isSquareHighlighted[index];
+        }
+
+        /// <summary>
+        /// Sets if the square on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public void SetIsSquareHighLighted(int x, int y, bool value)
+        {
+            int index = getIndex(x, y);
+            if (isSquareHighlighted[index] != value)
+            {
+                isSquareHighlighted[index] = value;
+                Invalidate();
+            }
+        }
+
+
         private void updateSquareArrays()
         {
             int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
@@ -496,14 +565,17 @@ namespace Sandra.UI.WF
 
             Image[] newForegroundImages = new Image[newArrayLength];
             bool[] newIsImageHighlighted = new bool[newArrayLength];
+            bool[] newIsSquareHighlighted = new bool[newArrayLength];
             int min = Math.Min(newArrayLength, oldArrayLength);
             if (min > 0)
             {
                 Array.Copy(foregroundImages, newForegroundImages, min);
                 Array.Copy(isImageHighlighted, newIsImageHighlighted, min);
+                Array.Copy(isSquareHighlighted, newIsSquareHighlighted, min);
             }
             foregroundImages = newForegroundImages;
             isImageHighlighted = newIsImageHighlighted;
+            isSquareHighlighted = newIsSquareHighlighted;
         }
 
 
@@ -1003,32 +1075,43 @@ namespace Sandra.UI.WF
                         }
                         y += delta;
                     }
+                }
 
-                    if (dragging)
+                // Apply square highlights.
+                for (int index = 0; index < boardSize * boardSize; ++index)
+                {
+                    if (isSquareHighlighted[index])
                     {
-                        // Draw dragged image on top of the rest.
-                        // Copy image to graphics, and apply highlight.
-                        Image currentImg = foregroundImages[dragStartSquareIndex];
-                        if (currentImg != null)
-                        {
-                            Point location = dragCurrentPosition;
-                            location.Offset(dragStartPosition);
+                        Point offset = getLocationFromIndex(index);
+                        // Highlight the square, including the already drawn foreground image.
+                        g.FillRectangle(highlightSquareBrush, offset.X, offset.Y, squareSize, squareSize);
+                    }
+                }
 
-                            // Make sure the piece looks exactly the same as when it was still on its source square.
-                            if (isImageHighlighted[dragStartSquareIndex])
-                            {
-                                // Highlight piece.
-                                g.DrawImage(currentImg,
-                                            new Rectangle(location.X, location.Y, sizeH, sizeV),
-                                            0, 0, currentImg.Width, currentImg.Height,
-                                            GraphicsUnit.Pixel,
-                                            highlightImgAttributes);
-                            }
-                            else
-                            {
-                                // Default case.
-                                g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
-                            }
+                if (sizeH > 0 && sizeV > 0 && dragging)
+                {
+                    // Draw dragged image on top of the rest.
+                    // Copy image to graphics, and apply highlight.
+                    Image currentImg = foregroundImages[dragStartSquareIndex];
+                    if (currentImg != null)
+                    {
+                        Point location = dragCurrentPosition;
+                        location.Offset(dragStartPosition);
+
+                        // Make sure the piece looks exactly the same as when it was still on its source square.
+                        if (isImageHighlighted[dragStartSquareIndex])
+                        {
+                            // Highlight piece.
+                            g.DrawImage(currentImg,
+                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                        0, 0, currentImg.Width, currentImg.Height,
+                                        GraphicsUnit.Pixel,
+                                        highlightImgAttributes);
+                        }
+                        else
+                        {
+                            // Default case.
+                            g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
                         }
                     }
                 }
