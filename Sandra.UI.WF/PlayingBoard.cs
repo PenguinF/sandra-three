@@ -510,19 +510,19 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the image is being dragged and dropped onto another square.
         /// </summary>
-        public event EventHandler<DragSquareEventArgs> DragImageDrop;
+        public event EventHandler<DragOverSquareEventArgs> DragImageDrop;
 
         /// <summary>
         /// Raises the <see cref="DragImageDrop"/> event. 
         /// </summary>
-        protected virtual void OnDragImageDrop(DragSquareEventArgs e)
+        protected virtual void OnDragImageDrop(DragOverSquareEventArgs e)
         {
             DragImageDrop?.Invoke(this, e);
         }
 
         protected void RaiseDragImageDrop(int sourceSquareIndex, int squareIndex)
         {
-            OnDragImageDrop(new DragSquareEventArgs(
+            OnDragImageDrop(new DragOverSquareEventArgs(
                 getX(sourceSquareIndex),
                 getY(sourceSquareIndex),
                 getX(squareIndex),
@@ -533,19 +533,19 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the image is being dragged over another square.
         /// </summary>
-        public event EventHandler<DragSquareEventArgs> DragImageOver;
+        public event EventHandler<DragOverSquareEventArgs> DragImageOver;
 
         /// <summary>
         /// Raises the <see cref="DragImageOver"/> event. 
         /// </summary>
-        protected virtual void OnDragImageOver(DragSquareEventArgs e)
+        protected virtual void OnDragImageOver(DragOverSquareEventArgs e)
         {
             DragImageOver?.Invoke(this, e);
         }
 
         protected void RaiseDragImageOver(int sourceSquareIndex, int squareIndex)
         {
-            OnDragImageOver(new DragSquareEventArgs(
+            OnDragImageOver(new DragOverSquareEventArgs(
                 getX(sourceSquareIndex),
                 getY(sourceSquareIndex),
                 getX(squareIndex),
@@ -556,22 +556,22 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the image stops being dragged, and is not dropped onto another square.
         /// </summary>
-        public event EventHandler<SquareEventArgs> DragImageCancel;
+        public event EventHandler<DragSquareEventArgs> DragImageCancel;
 
         /// <summary>
         /// Raises the <see cref="DragImageCancel"/> event. 
         /// </summary>
-        protected virtual void OnDragImageCancel(SquareEventArgs e)
+        protected virtual void OnDragImageCancel(DragSquareEventArgs e)
         {
             DragImageCancel?.Invoke(this, e);
         }
 
         protected void RaiseDragImageCancel(int squareIndex)
         {
-            OnDragImageCancel(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnDragImageCancel(new DragSquareEventArgs(getX(squareIndex), getY(squareIndex)));
         }
 
-        
+
         /// <summary>
         /// Occurs when the image occupying a square starts being dragged.
         /// </summary>
@@ -838,7 +838,7 @@ namespace Sandra.UI.WF
 
                 if (hit >= 0)
                 {
-                    RaiseDragImageOver(hit, dragStartSquareIndex);
+                    RaiseDragImageOver(dragStartSquareIndex, hit);
                 }
 
                 Invalidate();
@@ -859,7 +859,7 @@ namespace Sandra.UI.WF
 
                 if (hoveringSquareIndex >= 0)
                 {
-                    RaiseDragImageDrop(hoveringSquareIndex, dragStartSquareIndex);
+                    RaiseDragImageDrop(dragStartSquareIndex, hoveringSquareIndex);
                 }
                 else
                 {
@@ -1060,10 +1060,9 @@ namespace Sandra.UI.WF
 
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
-    /// or <see cref="PlayingBoard.MouseLeaveSquare"/>
-    /// or <see cref="PlayingBoard.DragImageCancel"/> event.
+    /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
     /// </summary>
-    [DebuggerDisplay("(x, y) = ({X}, {Y})")]
+    [DebuggerDisplay("(x = {X}, y = {Y})")]
     public class SquareEventArgs : EventArgs
     {
         /// <summary>
@@ -1116,10 +1115,10 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.DragImageOver"/>
-    /// or <see cref="PlayingBoard.DragImageDrop"/> event.
+    /// Provides data for the <see cref="PlayingBoard.DragImageCancel"/> event.
     /// </summary>
-    public class DragSquareEventArgs : SquareEventArgs
+    [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
+    public class DragSquareEventArgs : EventArgs
     {
         /// <summary>
         /// Gets the X-coordinate of the square where dragging started.
@@ -1140,14 +1139,47 @@ namespace Sandra.UI.WF
         /// <param name="startY">
         /// The Y-coordinate of the square where dragging started.
         /// </param>
-        /// <param name="x">
-        /// The X-coordinate of the square.
-        /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public DragSquareEventArgs(int startX, int startY, int x, int y) : base(x, y)
+        public DragSquareEventArgs(int startX, int startY)
         {
+            StartX = startX; StartY = startY;
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.DragImageOver"/>
+    /// or <see cref="PlayingBoard.DragImageDrop"/> event.
+    /// </summary>
+    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {DragX}, y = {DragY})")]
+    public class DragOverSquareEventArgs : DragSquareEventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square where the mouse cursor currently is.
+        /// </summary>
+        public int DragX { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square where the mouse cursor currently is.
+        /// </summary>
+        public int DragY { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DragOverSquareEventArgs"/> class.
+        /// </summary>
+        /// <param name="startX">
+        /// The X-coordinate of the square where dragging started.
+        /// </param>
+        /// <param name="startY">
+        /// The Y-coordinate of the square where dragging started.
+        /// </param>
+        /// <param name="dragX">
+        /// The X-coordinate of the square where the mouse cursor currently is.
+        /// </param>
+        /// <param name="dragY">
+        /// The Y-coordinate of the square where the mouse cursor currently is.
+        /// </param>
+        public DragOverSquareEventArgs(int startX, int startY, int dragX, int dragY) : base(startX, startY)
+        {
+            DragX = dragX; DragY = dragY;
         }
     }
 }
