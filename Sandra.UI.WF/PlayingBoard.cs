@@ -47,7 +47,6 @@ namespace Sandra.UI.WF
             updateBackgroundBrush();
             updateBorderBrush();
             updateDarkSquareBrush();
-            updateHighlightSquareBrush();
             updateLightSquareBrush();
             updateSquareArrays();
 
@@ -81,7 +80,6 @@ namespace Sandra.UI.WF
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
-            { nameof(HighlightSquareColor), DefaultHighlightSquareColor },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(SizeToFit), DefaultSizeToFit },
@@ -90,7 +88,6 @@ namespace Sandra.UI.WF
             { nameof(backgroundBrush), null },
             { nameof(borderBrush), null },
             { nameof(darkSquareBrush), null },
-            { nameof(highlightSquareBrush), null },
             { nameof(lightSquareBrush), null },
         };
 
@@ -249,29 +246,6 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(ForegroundImageRelativeSize), value))
                 {
-                    Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets the default value for the <see cref="HighlightSquareColor"/> property.
-        /// </summary>
-        public static Color DefaultHighlightSquareColor { get { return Color.FromArgb(48, 255, 190, 0); } }
-
-        /// <summary>
-        /// Gets or sets the color of squares that are highlighted.
-        /// The default value is <see cref="DefaultHighlightSquareColor"/> (A=30, R=255, G=255, B=0).
-        /// </summary>
-        public Color HighlightSquareColor
-        {
-            get { return propertyStore.Get<Color>(nameof(HighlightSquareColor)); }
-            set
-            {
-                if (propertyStore.Set(nameof(HighlightSquareColor), value))
-                {
-                    updateHighlightSquareBrush();
                     Invalidate();
                 }
             }
@@ -441,18 +415,6 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush highlightSquareBrush
-        {
-            get { return propertyStore.Get<Brush>(nameof(highlightSquareBrush)); }
-            set { propertyStore.Set(nameof(highlightSquareBrush), value); }
-        }
-
-        private void updateHighlightSquareBrush()
-        {
-            highlightSquareBrush = new SolidBrush(HighlightSquareColor);
-        }
-
-
         private Brush lightSquareBrush
         {
             get { return propertyStore.Get<Brush>(nameof(lightSquareBrush)); }
@@ -527,32 +489,32 @@ namespace Sandra.UI.WF
         }
 
 
-        private bool[] isSquareHighlighted;
+        private Color[] squareOverlayColors;
 
         /// <summary>
-        /// Gets if the square on position (x, y) is highlighted or not.
+        /// Gets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
         /// </exception>
-        public bool GetIsSquareHighLighted(int x, int y)
+        public Color GetSquareOverlayColor(int x, int y)
         {
             int index = getIndex(x, y);
-            return isSquareHighlighted[index];
+            return squareOverlayColors[index];
         }
 
         /// <summary>
-        /// Sets if the square on position (x, y) is highlighted or not.
+        /// Sets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
         /// </exception>
-        public void SetIsSquareHighLighted(int x, int y, bool value)
+        public void SetSquareOverlayColor(int x, int y, Color value)
         {
             int index = getIndex(x, y);
-            if (isSquareHighlighted[index] != value)
+            if (squareOverlayColors[index] != value)
             {
-                isSquareHighlighted[index] = value;
+                squareOverlayColors[index] = value;
                 Invalidate();
             }
         }
@@ -563,7 +525,7 @@ namespace Sandra.UI.WF
             int newArrayLength = BoardSize * BoardSize;
             foregroundImages = new Image[newArrayLength];
             isImageHighlighted = new bool[newArrayLength];
-            isSquareHighlighted = new bool[newArrayLength];
+            squareOverlayColors = new Color[newArrayLength];
         }
 
 
@@ -1068,11 +1030,14 @@ namespace Sandra.UI.WF
                 // Apply square highlights.
                 for (int index = 0; index < boardSize * boardSize; ++index)
                 {
-                    if (isSquareHighlighted[index])
+                    if (!squareOverlayColors[index].IsEmpty)
                     {
                         Point offset = getLocationFromIndex(index);
-                        // Highlight the square, including the already drawn foreground image.
-                        g.FillRectangle(highlightSquareBrush, offset.X, offset.Y, squareSize, squareSize);
+                        // Draw overlay color on the square, with the already drawn foreground image.
+                        using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                        {
+                            g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                        }
                     }
                 }
 

@@ -17,6 +17,8 @@
  * 
  *********************************************************************************/
 
+using System.Drawing;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -42,7 +44,7 @@ namespace Sandra.UI.WF
             hoverSquare = e;
             if (PlayingBoard.IsDraggingImage)
             {
-                PlayingBoard.SetIsSquareHighLighted(e.X, e.Y, false);
+                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(80, 255, 255, 255));
             }
             else
             {
@@ -55,7 +57,7 @@ namespace Sandra.UI.WF
             hoverSquare = null;
             if (PlayingBoard.IsDraggingImage)
             {
-                PlayingBoard.SetIsSquareHighLighted(e.X, e.Y, true);
+                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(48, 255, 190, 0));
             }
             else
             {
@@ -77,7 +79,7 @@ namespace Sandra.UI.WF
             {
                 for (int y = 0; y < PlayingBoard.BoardSize; ++y)
                 {
-                    PlayingBoard.SetIsSquareHighLighted(x, y, false);
+                    PlayingBoard.SetSquareOverlayColor(x, y, new Color());
                 }
             }
         }
