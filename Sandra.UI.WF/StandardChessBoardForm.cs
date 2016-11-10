@@ -60,11 +60,19 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(e.StartX, e.StartY, false);
             }
+            if (hoverSquare != null)
+            {
+                PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
+            }
         }
 
         private void playingBoard_DragImageDrop(object sender, DragOverSquareEventArgs e)
         {
             resetDragStartSquareHighlight(e);
+
+            // Move piece from source to destination.
+            PlayingBoard.SetForegroundImage(e.DragX, e.DragY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
+            PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
         }
 
         private void playingBoard_DragImageCancel(object sender, DragSquareEventArgs e)
