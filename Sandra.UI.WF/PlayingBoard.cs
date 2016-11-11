@@ -55,7 +55,7 @@ namespace Sandra.UI.WF
             highlight.SetGamma(0.6f);
             highlightImgAttributes = highlight;
 
-            // Half-transparent foreground image at the source square, when dragging.
+            // Half-transparent foreground image at the source square, when moving.
             var halfTransparent = new ImageAttributes();
             ColorMatrix halfTransparentMatrix = new ColorMatrix(new float[][]
             {
@@ -66,11 +66,11 @@ namespace Sandra.UI.WF
                 new float[] {0, 0, 0, 0, 0}
             });
             halfTransparent.SetColorMatrix(halfTransparentMatrix);
-            dragSrcImgAttributes = halfTransparent;
+            moveSourceImageAttributes = halfTransparent;
         }
 
         private readonly ImageAttributes highlightImgAttributes;
-        private readonly ImageAttributes dragSrcImgAttributes;
+        private readonly ImageAttributes moveSourceImageAttributes;
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -281,14 +281,14 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Gets if an image is currently being dragged.
+        /// Gets if an image is currently being moved.
         /// </summary>
         [Browsable(false)]
-        public bool IsDraggingImage
+        public bool IsMoving
         {
             get
             {
-                return dragging;
+                return isMoving;
             }
         }
 
@@ -530,21 +530,21 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when the image is being dragged and dropped onto another square.
+        /// Occurs when an image is being moved and dropped onto another square.
         /// </summary>
-        public event EventHandler<DragOverSquareEventArgs> DragImageDrop;
+        public event EventHandler<MoveTargetEventArgs> MoveDrop;
 
         /// <summary>
-        /// Raises the <see cref="DragImageDrop"/> event. 
+        /// Raises the <see cref="MoveDrop"/> event. 
         /// </summary>
-        protected virtual void OnDragImageDrop(DragOverSquareEventArgs e)
+        protected virtual void OnMoveDrop(MoveTargetEventArgs e)
         {
-            DragImageDrop?.Invoke(this, e);
+            MoveDrop?.Invoke(this, e);
         }
 
-        protected void RaiseDragImageDrop(int sourceSquareIndex, int squareIndex)
+        protected void RaiseMoveDrop(int sourceSquareIndex, int squareIndex)
         {
-            OnDragImageDrop(new DragOverSquareEventArgs(
+            OnMoveDrop(new MoveTargetEventArgs(
                 getX(sourceSquareIndex),
                 getY(sourceSquareIndex),
                 getX(squareIndex),
@@ -553,21 +553,21 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when the image is being dragged over another square.
+        /// Occurs when an image is being moved over another square.
         /// </summary>
-        public event EventHandler<DragOverSquareEventArgs> DragImageOver;
+        public event EventHandler<MoveTargetEventArgs> MoveOver;
 
         /// <summary>
-        /// Raises the <see cref="DragImageOver"/> event. 
+        /// Raises the <see cref="MoveOver"/> event. 
         /// </summary>
-        protected virtual void OnDragImageOver(DragOverSquareEventArgs e)
+        protected virtual void OnMoveOver(MoveTargetEventArgs e)
         {
-            DragImageOver?.Invoke(this, e);
+            MoveOver?.Invoke(this, e);
         }
 
-        protected void RaiseDragImageOver(int sourceSquareIndex, int squareIndex)
+        protected void RaiseMoveOver(int sourceSquareIndex, int squareIndex)
         {
-            OnDragImageOver(new DragOverSquareEventArgs(
+            OnMoveOver(new MoveTargetEventArgs(
                 getX(sourceSquareIndex),
                 getY(sourceSquareIndex),
                 getX(squareIndex),
@@ -576,41 +576,41 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when the image stops being dragged, and is not dropped onto another square.
+        /// Occurs when an image stops being moved, and is not dropped onto another square.
         /// </summary>
-        public event EventHandler<DragSquareEventArgs> DragImageCancel;
+        public event EventHandler<MoveEventArgs> MoveCancel;
 
         /// <summary>
-        /// Raises the <see cref="DragImageCancel"/> event. 
+        /// Raises the <see cref="MoveCancel"/> event. 
         /// </summary>
-        protected virtual void OnDragImageCancel(DragSquareEventArgs e)
+        protected virtual void OnMoveCancel(MoveEventArgs e)
         {
-            DragImageCancel?.Invoke(this, e);
+            MoveCancel?.Invoke(this, e);
         }
 
-        protected void RaiseDragImageCancel(int squareIndex)
+        protected void RaiseMoveCancel(int squareIndex)
         {
-            OnDragImageCancel(new DragSquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
         }
 
 
         /// <summary>
-        /// Occurs when the image occupying a square starts being dragged.
+        /// Occurs when an image occupying a square starts being moved.
         /// </summary>
-        public event EventHandler<CancellableSquareEventArgs> DragImageStart;
+        public event EventHandler<CancellableSquareEventArgs> MoveStart;
 
         /// <summary>
-        /// Raises the <see cref="DragImageStart"/> event. 
+        /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected virtual void OnDragImageStart(CancellableSquareEventArgs e)
+        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
         {
-            DragImageStart?.Invoke(this, e);
+            MoveStart?.Invoke(this, e);
         }
 
-        protected bool RaiseDragImageStart(int squareIndex)
+        protected bool RaiseMoveStart(int squareIndex)
         {
             var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
-            OnDragImageStart(e);
+            OnMoveStart(e);
             return !e.Cancel;
         }
 
@@ -745,10 +745,10 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private bool dragging;
-        private Point dragStartPosition;
-        private Point dragCurrentPosition;
-        private int dragStartSquareIndex;
+        private bool isMoving;
+        private Point moveStartPosition;
+        private Point moveCurrentPosition;
+        private int moveStartSquareIndex;
 
         private int hitTest(Point clientLocation)
         {
@@ -814,21 +814,21 @@ namespace Sandra.UI.WF
         {
             int hit = hitTest(e.Location);
 
-            // Start dragging?
-            if (e.Button == MouseButtons.Left && !dragging)
+            // Start moving?
+            if (e.Button == MouseButtons.Left && !isMoving)
             {
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
-                    if (RaiseDragImageStart(hit))
+                    if (RaiseMoveStart(hit))
                     {
-                        dragging = true;
-                        dragStartPosition = new Point(-e.Location.X, -e.Location.Y);
-                        dragStartPosition.Offset(getLocationFromIndex(hit));
+                        isMoving = true;
+                        moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
+                        moveStartPosition.Offset(getLocationFromIndex(hit));
                         Rectangle imageRect = getRelativeForegroundImageRectangle();
-                        dragStartPosition.Offset(imageRect.Location);
-                        dragCurrentPosition = e.Location;
-                        dragStartSquareIndex = hit;
+                        moveStartPosition.Offset(imageRect.Location);
+                        moveCurrentPosition = e.Location;
+                        moveStartSquareIndex = hit;
                         Invalidate();
                     }
                 }
@@ -842,14 +842,14 @@ namespace Sandra.UI.WF
             // Do a hit test, which updates hover information.
             int hit = hitTest(e.Location);
 
-            // Update dragging information.
-            if (dragging)
+            // Update moving information.
+            if (isMoving)
             {
-                dragCurrentPosition = e.Location;
+                moveCurrentPosition = e.Location;
 
                 if (hit >= 0)
                 {
-                    RaiseDragImageOver(dragStartSquareIndex, hit);
+                    RaiseMoveOver(moveStartSquareIndex, hit);
                 }
 
                 Invalidate();
@@ -863,18 +863,18 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (dragging)
+            if (isMoving)
             {
-                // End drag mode.
-                dragging = false;
+                // End of move.
+                isMoving = false;
 
                 if (hoveringSquareIndex >= 0)
                 {
-                    RaiseDragImageDrop(dragStartSquareIndex, hoveringSquareIndex);
+                    RaiseMoveDrop(moveStartSquareIndex, hoveringSquareIndex);
                 }
                 else
                 {
-                    RaiseDragImageCancel(dragStartSquareIndex);
+                    RaiseMoveCancel(moveStartSquareIndex);
                 }
 
                 Invalidate();
@@ -995,15 +995,15 @@ namespace Sandra.UI.WF
                             if (currentImg != null)
                             {
                                 // Draw current image - but use a color transformation if the current square was
-                                // used to start dragging from, or if the mouse is hovering above it.
-                                if (dragging && index == dragStartSquareIndex)
+                                // used to start moving from, or if the image must be highlighted.
+                                if (isMoving && index == moveStartSquareIndex)
                                 {
                                     // Half-transparent.
                                     g.DrawImage(currentImg,
                                                 new Rectangle(x, y, sizeH, sizeV),
                                                 0, 0, currentImg.Width, currentImg.Height,
                                                 GraphicsUnit.Pixel,
-                                                dragSrcImgAttributes);
+                                                moveSourceImageAttributes);
                                 }
                                 else if (isImageHighlighted[index])
                                 {
@@ -1041,18 +1041,17 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                if (sizeH > 0 && sizeV > 0 && dragging)
+                if (sizeH > 0 && sizeV > 0 && isMoving)
                 {
-                    // Draw dragged image on top of the rest.
-                    // Copy image to graphics, and apply highlight.
-                    Image currentImg = foregroundImages[dragStartSquareIndex];
+                    // Draw moving image on top of the rest.
+                    Image currentImg = foregroundImages[moveStartSquareIndex];
                     if (currentImg != null)
                     {
-                        Point location = dragCurrentPosition;
-                        location.Offset(dragStartPosition);
+                        Point location = moveCurrentPosition;
+                        location.Offset(moveStartPosition);
 
                         // Make sure the piece looks exactly the same as when it was still on its source square.
-                        if (isImageHighlighted[dragStartSquareIndex])
+                        if (isImageHighlighted[moveStartSquareIndex])
                         {
                             // Highlight piece.
                             g.DrawImage(currentImg,
@@ -1078,7 +1077,7 @@ namespace Sandra.UI.WF
             if (disposing)
             {
                 highlightImgAttributes.Dispose();
-                dragSrcImgAttributes.Dispose();
+                moveSourceImageAttributes.Dispose();
 
                 // To dispose of stored disposable values such as brushes.
                 propertyStore.Dispose();
@@ -1120,7 +1119,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.DragImageStart"/> event.
+    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
     /// </summary>
     public class CancellableSquareEventArgs : SquareEventArgs
     {
@@ -1144,71 +1143,71 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.DragImageCancel"/> event.
+    /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
     /// </summary>
     [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
-    public class DragSquareEventArgs : EventArgs
+    public class MoveEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the X-coordinate of the square where dragging started.
+        /// Gets the X-coordinate of the square where moving started.
         /// </summary>
         public int StartX { get; }
 
         /// <summary>
-        /// Gets the Y-coordinate of the square where dragging started.
+        /// Gets the Y-coordinate of the square where moving started.
         /// </summary>
         public int StartY { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DragSquareEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
         /// </summary>
         /// <param name="startX">
-        /// The X-coordinate of the square where dragging started.
+        /// The X-coordinate of the square where moving started.
         /// </param>
         /// <param name="startY">
-        /// The Y-coordinate of the square where dragging started.
+        /// The Y-coordinate of the square where moving started.
         /// </param>
-        public DragSquareEventArgs(int startX, int startY)
+        public MoveEventArgs(int startX, int startY)
         {
             StartX = startX; StartY = startY;
         }
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.DragImageOver"/>
-    /// or <see cref="PlayingBoard.DragImageDrop"/> event.
+    /// Provides data for the <see cref="PlayingBoard.MoveOver"/>
+    /// or <see cref="PlayingBoard.MoveDrop"/> event.
     /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {DragX}, y = {DragY})")]
-    public class DragOverSquareEventArgs : DragSquareEventArgs
+    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
+    public class MoveTargetEventArgs : MoveEventArgs
     {
         /// <summary>
         /// Gets the X-coordinate of the square where the mouse cursor currently is.
         /// </summary>
-        public int DragX { get; }
+        public int TargetX { get; }
 
         /// <summary>
         /// Gets the Y-coordinate of the square where the mouse cursor currently is.
         /// </summary>
-        public int DragY { get; }
+        public int TargetY { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DragOverSquareEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="MoveTargetEventArgs"/> class.
         /// </summary>
         /// <param name="startX">
-        /// The X-coordinate of the square where dragging started.
+        /// The X-coordinate of the square where moving started.
         /// </param>
         /// <param name="startY">
-        /// The Y-coordinate of the square where dragging started.
+        /// The Y-coordinate of the square where moving started.
         /// </param>
-        /// <param name="dragX">
+        /// <param name="targetX">
         /// The X-coordinate of the square where the mouse cursor currently is.
         /// </param>
-        /// <param name="dragY">
+        /// <param name="targetY">
         /// The Y-coordinate of the square where the mouse cursor currently is.
         /// </param>
-        public DragOverSquareEventArgs(int startX, int startY, int dragX, int dragY) : base(startX, startY)
+        public MoveTargetEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
         {
-            DragX = dragX; DragY = dragY;
+            TargetX = targetX; TargetY = targetY;
         }
     }
 }

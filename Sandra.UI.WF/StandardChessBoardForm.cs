@@ -33,8 +33,8 @@ namespace Sandra.UI.WF
 
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
-            PlayingBoard.DragImageCancel += playingBoard_DragImageCancel;
-            PlayingBoard.DragImageDrop += playingBoard_DragImageDrop;
+            PlayingBoard.MoveCancel += playingBoard_MoveCancel;
+            PlayingBoard.MoveDrop += playingBoard_MoveDrop;
         }
 
         private SquareEventArgs hoverSquare;
@@ -42,7 +42,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
             hoverSquare = e;
-            if (PlayingBoard.IsDraggingImage)
+            if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(80, 255, 255, 255));
             }
@@ -55,7 +55,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             hoverSquare = null;
-            if (PlayingBoard.IsDraggingImage)
+            if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(48, 255, 190, 0));
             }
@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void resetDragStartSquareHighlight(DragSquareEventArgs e)
+        private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
             if (hoverSquare == null || hoverSquare.X != e.StartX || hoverSquare.Y != e.StartY)
             {
@@ -84,21 +84,21 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_DragImageDrop(object sender, DragOverSquareEventArgs e)
+        private void playingBoard_MoveDrop(object sender, MoveTargetEventArgs e)
         {
-            resetDragStartSquareHighlight(e);
+            resetMoveStartSquareHighlight(e);
 
             // Move piece from source to destination.
-            if (e.StartX != e.DragX || e.StartY != e.DragY)
+            if (e.StartX != e.TargetX || e.StartY != e.TargetY)
             {
-                PlayingBoard.SetForegroundImage(e.DragX, e.DragY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
+                PlayingBoard.SetForegroundImage(e.TargetX, e.TargetY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
                 PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
             }
         }
 
-        private void playingBoard_DragImageCancel(object sender, DragSquareEventArgs e)
+        private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
         {
-            resetDragStartSquareHighlight(e);
+            resetMoveStartSquareHighlight(e);
         }
     }
 }
