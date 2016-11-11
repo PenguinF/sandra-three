@@ -743,8 +743,10 @@ namespace Sandra.UI.WF
             int px = clientLocation.X - borderWidth,
                 py = clientLocation.Y - borderWidth,
                 delta = squareSize + InnerSpacing;
-            int x = px / delta,
-                y = py / delta,
+
+            // Need to use a conditional expression because e.g. -1/2 == 0.
+            int x = px < 0 ? -1 : px / delta,
+                y = py < 0 ? -1 : py / delta,
                 remainderX = px % delta,
                 remainderY = py % delta;
 
@@ -816,7 +818,7 @@ namespace Sandra.UI.WF
         protected override void OnMouseMove(MouseEventArgs e)
         {
             // Do a hit test, which updates hover information.
-            int hit = hitTest(e.Location);
+            hitTest(e.Location);
 
             // Update moving information.
             if (isMoving)
