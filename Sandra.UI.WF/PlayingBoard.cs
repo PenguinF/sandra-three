@@ -744,9 +744,9 @@ namespace Sandra.UI.WF
                 py = clientLocation.Y - borderWidth,
                 delta = squareSize + InnerSpacing;
             int x = px / delta,
-                y = py / delta;
-            int remainderX = px - x * delta,
-                remainderY = py - y * delta;
+                y = py / delta,
+                remainderX = px % delta,
+                remainderY = py % delta;
 
             int hit;
             if (x < 0 || x >= boardSize || y < 0 || y >= boardSize || remainderX >= squareSize || remainderY >= squareSize)
