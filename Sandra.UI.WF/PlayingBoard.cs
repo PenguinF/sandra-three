@@ -553,29 +553,6 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image is being moved over another square.
-        /// </summary>
-        public event EventHandler<MoveTargetEventArgs> MoveOver;
-
-        /// <summary>
-        /// Raises the <see cref="MoveOver"/> event. 
-        /// </summary>
-        protected virtual void OnMoveOver(MoveTargetEventArgs e)
-        {
-            MoveOver?.Invoke(this, e);
-        }
-
-        protected void RaiseMoveOver(int sourceSquareIndex, int squareIndex)
-        {
-            OnMoveOver(new MoveTargetEventArgs(
-                getX(sourceSquareIndex),
-                getY(sourceSquareIndex),
-                getX(squareIndex),
-                getY(squareIndex)));
-        }
-
-
-        /// <summary>
         /// Occurs when an image stops being moved, and is not dropped onto another square.
         /// </summary>
         public event EventHandler<MoveEventArgs> MoveCancel;
@@ -846,12 +823,6 @@ namespace Sandra.UI.WF
             if (isMoving)
             {
                 moveCurrentPosition = e.Location;
-
-                if (hit >= 0)
-                {
-                    RaiseMoveOver(moveStartSquareIndex, hit);
-                }
-
                 Invalidate();
             }
 
@@ -1174,8 +1145,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveOver"/>
-    /// or <see cref="PlayingBoard.MoveDrop"/> event.
+    /// Provides data for the <see cref="PlayingBoard.MoveDrop"/> event.
     /// </summary>
     [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
     public class MoveTargetEventArgs : MoveEventArgs
