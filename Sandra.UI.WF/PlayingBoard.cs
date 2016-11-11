@@ -18,12 +18,18 @@
  *********************************************************************************/
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Represents a playing board of squares occupied by pieces represented by foreground images.
+    /// Square coordinate (0, 0) is the top left square.
+    /// </summary>
     public class PlayingBoard : Control
     {
         public PlayingBoard()
@@ -42,8 +48,29 @@ namespace Sandra.UI.WF
             updateBorderBrush();
             updateDarkSquareBrush();
             updateLightSquareBrush();
-            updateForegroundImages();
+            updateSquareArrays();
+
+            // Highlight by setting a gamma smaller than 1.
+            var highlight = new ImageAttributes();
+            highlight.SetGamma(0.6f);
+            highlightImgAttributes = highlight;
+
+            // Half-transparent foreground image at the source square, when moving.
+            var halfTransparent = new ImageAttributes();
+            ColorMatrix halfTransparentMatrix = new ColorMatrix(new float[][]
+            {
+                new float[] {1, 0, 0, 0, 0},
+                new float[] {0, 1, 0, 0, 0},
+                new float[] {0, 0, 1, 0, 0},
+                new float[] {0, 0, 0, 0.4f, 0},
+                new float[] {0, 0, 0, 0, 0}
+            });
+            halfTransparent.SetColorMatrix(halfTransparentMatrix);
+            moveSourceImageAttributes = halfTransparent;
         }
+
+        private readonly ImageAttributes highlightImgAttributes;
+        private readonly ImageAttributes moveSourceImageAttributes;
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -87,7 +114,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BoardSize), value))
                 {
-                    updateForegroundImages();
+                    updateSquareArrays();
                     verifySizeToFit();
                     Invalidate();
                 }
@@ -149,11 +176,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="DarkSquareColor"/> property.
         /// </summary>
-        public static Color DefaultDarkSquareColor { get { return Color.Brown; } }
+        public static Color DefaultDarkSquareColor { get { return Color.Azure; } }
 
         /// <summary>
         /// Gets or sets the color of dark squares.
-        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Brown"/>).
+        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Azure"/>).
         /// </summary>
         public Color DarkSquareColor
         {
@@ -224,7 +251,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        
+
         /// <summary>
         /// Gets the default value for the <see cref="InnerSpacing"/> property.
         /// </summary>
@@ -254,13 +281,26 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Gets if an image is currently being moved.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsMoving
+        {
+            get
+            {
+                return isMoving;
+            }
+        }
+
+
+        /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
-        public static Color DefaultLightSquareColor { get { return Color.SandyBrown; } }
+        public static Color DefaultLightSquareColor { get { return Color.LightBlue; } }
 
         /// <summary>
         /// Gets or sets the color of light squares.
-        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.SandyBrown"/>).
+        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.LightBlue"/>).
         /// </summary>
         public Color LightSquareColor
         {
@@ -345,9 +385,9 @@ namespace Sandra.UI.WF
 
         protected override void OnBackColorChanged(EventArgs e)
         {
-            base.OnBackColorChanged(e);
             updateBackgroundBrush();
             Invalidate();
+            base.OnBackColorChanged(e);
         }
 
 
@@ -389,20 +429,6 @@ namespace Sandra.UI.WF
 
         private Image[] foregroundImages;
 
-        private void updateForegroundImages()
-        {
-            int oldArrayLength = foregroundImages == null ? 0 : foregroundImages.Length,
-                newArrayLength = BoardSize * BoardSize;
-
-            Image[] newForegroundImages = new Image[newArrayLength];
-            int min = Math.Min(newArrayLength, oldArrayLength);
-            if (min > 0)
-            {
-                Array.Copy(foregroundImages, newForegroundImages, min);
-            }
-            foregroundImages = newForegroundImages;
-        }
-
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
         /// </summary>
@@ -431,12 +457,223 @@ namespace Sandra.UI.WF
             }
         }
 
+
+        private bool[] isImageHighlighted;
+
+        /// <summary>
+        /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public bool GetIsImageHighLighted(int x, int y)
+        {
+            int index = getIndex(x, y);
+            return isImageHighlighted[index];
+        }
+
+        /// <summary>
+        /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public void SetIsImageHighLighted(int x, int y, bool value)
+        {
+            int index = getIndex(x, y);
+            if (isImageHighlighted[index] != value)
+            {
+                isImageHighlighted[index] = value;
+                Invalidate();
+            }
+        }
+
+
+        private Color[] squareOverlayColors;
+
+        /// <summary>
+        /// Gets an overlay color for the square on position (x, y).
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public Color GetSquareOverlayColor(int x, int y)
+        {
+            int index = getIndex(x, y);
+            return squareOverlayColors[index];
+        }
+
+        /// <summary>
+        /// Sets an overlay color for the square on position (x, y).
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// </exception>
+        public void SetSquareOverlayColor(int x, int y, Color value)
+        {
+            int index = getIndex(x, y);
+            if (squareOverlayColors[index] != value)
+            {
+                squareOverlayColors[index] = value;
+                Invalidate();
+            }
+        }
+
+
+        private void updateSquareArrays()
+        {
+            int newArrayLength = BoardSize * BoardSize;
+            foregroundImages = new Image[newArrayLength];
+            isImageHighlighted = new bool[newArrayLength];
+            squareOverlayColors = new Color[newArrayLength];
+        }
+
+
+        /// <summary>
+        /// Occurs when the mouse pointer enters a square.
+        /// </summary>
+        public event EventHandler<SquareEventArgs> MouseEnterSquare;
+
+        /// <summary>
+        /// Raises the <see cref="MouseEnterSquare"/> event. 
+        /// </summary>
+        protected virtual void OnMouseEnterSquare(SquareEventArgs e)
+        {
+            MouseEnterSquare?.Invoke(this, e);
+        }
+
+        protected void RaiseMouseEnterSquare(int squareIndex)
+        {
+            OnMouseEnterSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when the mouse pointer leaves a square.
+        /// </summary>
+        public event EventHandler<SquareEventArgs> MouseLeaveSquare;
+
+        /// <summary>
+        /// Raises the <see cref="MouseLeaveSquare"/> event. 
+        /// </summary>
+        protected virtual void OnMouseLeaveSquare(SquareEventArgs e)
+        {
+            MouseLeaveSquare?.Invoke(this, e);
+        }
+
+        protected void RaiseMouseLeaveSquare(int squareIndex)
+        {
+            OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image stops being moved, and is not dropped onto another square.
+        /// </summary>
+        public event EventHandler<MoveEventArgs> MoveCancel;
+
+        /// <summary>
+        /// Raises the <see cref="MoveCancel"/> event. 
+        /// </summary>
+        protected virtual void OnMoveCancel(MoveEventArgs e)
+        {
+            MoveCancel?.Invoke(this, e);
+        }
+
+        protected void RaiseMoveCancel(int squareIndex)
+        {
+            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image is being moved and dropped onto another square.
+        /// </summary>
+        public event EventHandler<MoveCommitEventArgs> MoveCommit;
+
+        /// <summary>
+        /// Raises the <see cref="MoveCommit"/> event. 
+        /// </summary>
+        protected virtual void OnMoveCommit(MoveCommitEventArgs e)
+        {
+            MoveCommit?.Invoke(this, e);
+        }
+
+        protected void RaiseMoveCommit(int sourceSquareIndex, int targetSquareIndex)
+        {
+            OnMoveCommit(new MoveCommitEventArgs(getX(sourceSquareIndex),
+                                                 getY(sourceSquareIndex),
+                                                 getX(targetSquareIndex),
+                                                 getY(targetSquareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image occupying a square starts being moved.
+        /// </summary>
+        public event EventHandler<CancellableSquareEventArgs> MoveStart;
+
+        /// <summary>
+        /// Raises the <see cref="MoveStart"/> event. 
+        /// </summary>
+        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
+        {
+            MoveStart?.Invoke(this, e);
+        }
+
+        protected bool RaiseMoveStart(int squareIndex)
+        {
+            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            OnMoveStart(e);
+            return !e.Cancel;
+        }
+
+
+        private int getX(int index) { return index % BoardSize; }
+        private int getY(int index) { return index / BoardSize; }
+
         private int getIndex(int x, int y)
         {
-            int boardSize = BoardSize;
-            if (x < 0 || x >= boardSize) throw new IndexOutOfRangeException(nameof(x));
-            if (y < 0 || y >= boardSize) throw new IndexOutOfRangeException(nameof(y));
-            return y * boardSize + x;
+            if (x < 0 || x >= BoardSize) throw new IndexOutOfRangeException(nameof(x));
+            if (y < 0 || y >= BoardSize) throw new IndexOutOfRangeException(nameof(y));
+            return y * BoardSize + x;
+        }
+
+        private Point getLocationFromIndex(int index)
+        {
+            if (index < 0 || index >= BoardSize * BoardSize)
+            {
+                return Point.Empty;
+            }
+
+            int x = getX(index),
+                y = getY(index),
+                delta = SquareSize + InnerSpacing;
+            int px = BorderWidth + x * delta,
+                py = BorderWidth + y * delta;
+
+            return new Point(px, py);
+        }
+
+        private Rectangle getRelativeForegroundImageRectangle()
+        {
+            // Returns the rectangle of a foreground image relative to its containing square.
+            if (SquareSize > 0)
+            {
+                int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
+                var padding = ForegroundImagePadding;
+                int imageOffset = (SquareSize - foregroundImageSize) / 2;
+                int left = imageOffset + padding.Left;
+                int top = imageOffset + padding.Top;
+                int width = foregroundImageSize - padding.Horizontal;
+                int height = foregroundImageSize - padding.Vertical;
+                if (width > 0 && height > 0)
+                {
+                    return new Rectangle(left, top, width, height);
+                }
+            }
+            // Default empty rectangle.
+            return new Rectangle();
         }
 
         private int squareSizeFromClientSize(int clientSize)
@@ -463,10 +700,10 @@ namespace Sandra.UI.WF
             if (SizeToFit) performSizeToFit();
         }
 
-        protected override void OnLayout(LayoutEventArgs args)
+        protected override void OnLayout(LayoutEventArgs levent)
         {
-            base.OnLayout(args);
             verifySizeToFit();
+            base.OnLayout(levent);
         }
 
         /// <summary>
@@ -480,22 +717,168 @@ namespace Sandra.UI.WF
         }
 
 
+        private Point lastKnownMouseMovePoint = new Point(-1, -1);
+
+        private int hoveringSquareIndex = -1;
+
+        private bool isMoving;
+        private Point moveStartPosition;
+        private Point moveCurrentPosition;
+        private int moveStartSquareIndex;
+
+        private int hitTest(Point clientLocation)
+        {
+            int squareSize = SquareSize;
+
+            if (squareSize == 0)
+            {
+                // No square can contain the point.
+                // Short-circuit exit here to prevent division by zeroes.
+                return -1;
+            }
+
+            int boardSize = BoardSize;
+            int borderWidth = BorderWidth;
+
+            int px = clientLocation.X - borderWidth,
+                py = clientLocation.Y - borderWidth,
+                delta = squareSize + InnerSpacing;
+
+            // Need to use a conditional expression because e.g. -1/2 == 0.
+            int x = px < 0 ? -1 : px / delta,
+                y = py < 0 ? -1 : py / delta,
+                remainderX = px % delta,
+                remainderY = py % delta;
+
+            int hit;
+            if (x < 0 || x >= boardSize || y < 0 || y >= boardSize || remainderX >= squareSize || remainderY >= squareSize)
+            {
+                // Either outside of the actual board, or hitting a border.
+                hit = -1;
+            }
+            else
+            {
+                // The location is inside a square.
+                hit = y * boardSize + x;
+            }
+
+            // Update hovering information.
+            if (hoveringSquareIndex != hit)
+            {
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseMouseLeaveSquare(hoveringSquareIndex);
+                }
+                hoveringSquareIndex = hit;
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseMouseEnterSquare(hoveringSquareIndex);
+                }
+            }
+
+            return hit;
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            if (lastKnownMouseMovePoint.X >= 0 && lastKnownMouseMovePoint.Y >= 0)
+            {
+                hitTest(lastKnownMouseMovePoint);
+            }
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            int hit = hitTest(e.Location);
+
+            // Start moving?
+            if (e.Button == MouseButtons.Left && !isMoving)
+            {
+                // Only start when a square is hit.
+                if (hit >= 0 && foregroundImages[hit] != null)
+                {
+                    if (RaiseMoveStart(hit))
+                    {
+                        isMoving = true;
+                        moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
+                        moveStartPosition.Offset(getLocationFromIndex(hit));
+                        Rectangle imageRect = getRelativeForegroundImageRectangle();
+                        moveStartPosition.Offset(imageRect.Location);
+                        moveCurrentPosition = e.Location;
+                        moveStartSquareIndex = hit;
+                        Invalidate();
+                    }
+                }
+            }
+
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            // Do a hit test, which updates hover information.
+            hitTest(e.Location);
+
+            // Update moving information.
+            if (isMoving)
+            {
+                moveCurrentPosition = e.Location;
+                Invalidate();
+            }
+
+            // Remember position for mouse-enters without mouse-leaves.
+            lastKnownMouseMovePoint = e.Location;
+
+            base.OnMouseMove(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            if (isMoving)
+            {
+                // End of move.
+                isMoving = false;
+
+                if (hoveringSquareIndex >= 0)
+                {
+                    RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
+                }
+                else
+                {
+                    RaiseMoveCancel(moveStartSquareIndex);
+                }
+
+                Invalidate();
+            }
+
+            base.OnMouseUp(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            // Hit test a position outside of the control to reset the hover square index and raise proper events.
+            lastKnownMouseMovePoint = new Point(-1, -1);
+            hitTest(lastKnownMouseMovePoint);
+
+            base.OnMouseLeave(e);
+        }
+
+
         protected override void OnPaint(PaintEventArgs pe)
         {
-            base.OnPaint(pe);
-
             Graphics g = pe.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
             int boardSize = BoardSize;
-            int boardSizeMinusOne = boardSize - 1;
             int squareSize = SquareSize;
-            int innerBorderWidth = InnerSpacing;
-            int delta = squareSize + innerBorderWidth;
+            int innerSpacing = InnerSpacing;
+            int delta = squareSize + innerSpacing;
             int borderWidth = BorderWidth;
-            int totalBoardSize = delta * boardSizeMinusOne + squareSize;
+            int totalBoardSize = delta * boardSize - innerSpacing;
             int totalSize = borderWidth * 2 + totalBoardSize;
+
             Rectangle clipRectangle = pe.ClipRectangle;
             Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardSize, totalBoardSize);
             Rectangle boardWithBorderRectangle = new Rectangle(0, 0, totalSize, totalSize);
@@ -504,12 +887,6 @@ namespace Sandra.UI.WF
             g.ExcludeClip(boardWithBorderRectangle);
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
-
-            // Draw borders.
-            if ((borderWidth > 0 || innerBorderWidth > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-            {
-                g.FillRectangle(borderBrush, boardWithBorderRectangle);
-            }
 
             // Draw the background light and dark squares.
             if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
@@ -520,11 +897,11 @@ namespace Sandra.UI.WF
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
                 int y = borderWidth;
-                for (int yIndex = boardSizeMinusOne; yIndex >= 0; --yIndex)
+                for (int yIndex = boardSize - 1; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
                     int x = borderWidth + (yIndex & 1) * delta;
-                    for (int xIndex = boardSizeMinusOne / 2; xIndex >= 0; --xIndex)
+                    for (int xIndex = (boardSize - 1) / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                         x += doubleDelta;
@@ -533,34 +910,87 @@ namespace Sandra.UI.WF
                 }
                 g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
+            }
 
+            // Draw borders.
+            if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
+            {
+                // Clip to borders.
+                if (innerSpacing == 0)
+                {
+                    g.ExcludeClip(boardRectangle);
+                }
+                else
+                {
+                    // Exclude all squares one by one.
+                    int y = borderWidth;
+                    for (int j = 0; j < boardSize; ++j)
+                    {
+                        int x = borderWidth;
+                        for (int k = 0; k < boardSize; ++k)
+                        {
+                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
+                            x += delta;
+                        }
+                        y += delta;
+                    }
+                }
+
+                // And draw.
+                g.FillRectangle(borderBrush, boardWithBorderRectangle);
+                g.ResetClip();
+            }
+
+            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
+            {
                 // Draw foreground images.
                 // Determine the image size and the amount of space around a foreground image within a square.
-                int foregroundImageSize = (int)Math.Floor(squareSize * ForegroundImageRelativeSize);
-                var padding = ForegroundImagePadding;
-                int sizeH = foregroundImageSize - padding.Horizontal,
-                    sizeV = foregroundImageSize - padding.Vertical;
+                Rectangle imgRect = getRelativeForegroundImageRectangle();
+                int sizeH = imgRect.Width,
+                    sizeV = imgRect.Height;
 
                 if (sizeH > 0 && sizeV > 0)
                 {
-                    int imageOffset = borderWidth + (squareSize - foregroundImageSize) / 2;
-                    int hOffset = imageOffset + padding.Left,
-                        vOffset = imageOffset + padding.Top;
+                    int hOffset = borderWidth + imgRect.Left,
+                        vOffset = borderWidth + imgRect.Top;
 
                     // Loop over foreground images and draw them.
-                    y = vOffset;
+                    int y = vOffset;
                     int index = 0;
-                    for (int j = boardSizeMinusOne; j >= 0; --j)
+                    for (int j = 0; j < boardSize; ++j)
                     {
                         int x = hOffset;
-                        for (int k = boardSizeMinusOne; k >= 0; --k)
+                        for (int k = 0; k < boardSize; ++k)
                         {
                             // Select picture.
                             Image currentImg = foregroundImages[index];
                             if (currentImg != null)
                             {
-                                // Copy image to the graphics.
-                                g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                // Draw current image - but use a color transformation if the current square was
+                                // used to start moving from, or if the image must be highlighted.
+                                if (isMoving && index == moveStartSquareIndex)
+                                {
+                                    // Half-transparent.
+                                    g.DrawImage(currentImg,
+                                                new Rectangle(x, y, sizeH, sizeV),
+                                                0, 0, currentImg.Width, currentImg.Height,
+                                                GraphicsUnit.Pixel,
+                                                moveSourceImageAttributes);
+                                }
+                                else if (isImageHighlighted[index])
+                                {
+                                    // Highlight piece.
+                                    g.DrawImage(currentImg,
+                                                new Rectangle(x, y, sizeH, sizeV),
+                                                0, 0, currentImg.Width, currentImg.Height,
+                                                GraphicsUnit.Pixel,
+                                                highlightImgAttributes);
+                                }
+                                else
+                                {
+                                    // Default case.
+                                    g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                }
                             }
                             x += delta;
                             ++index;
@@ -568,17 +998,187 @@ namespace Sandra.UI.WF
                         y += delta;
                     }
                 }
+
+                // Apply square highlights.
+                for (int index = 0; index < boardSize * boardSize; ++index)
+                {
+                    if (!squareOverlayColors[index].IsEmpty)
+                    {
+                        Point offset = getLocationFromIndex(index);
+                        // Draw overlay color on the square, with the already drawn foreground image.
+                        using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                        {
+                            g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                        }
+                    }
+                }
+
+                if (sizeH > 0 && sizeV > 0 && isMoving)
+                {
+                    // Draw moving image on top of the rest.
+                    Image currentImg = foregroundImages[moveStartSquareIndex];
+                    if (currentImg != null)
+                    {
+                        Point location = moveCurrentPosition;
+                        location.Offset(moveStartPosition);
+
+                        // Make sure the piece looks exactly the same as when it was still on its source square.
+                        if (isImageHighlighted[moveStartSquareIndex])
+                        {
+                            // Highlight piece.
+                            g.DrawImage(currentImg,
+                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                        0, 0, currentImg.Width, currentImg.Height,
+                                        GraphicsUnit.Pixel,
+                                        highlightImgAttributes);
+                        }
+                        else
+                        {
+                            // Default case.
+                            g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
+                        }
+                    }
+                }
             }
+
+            base.OnPaint(pe);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                highlightImgAttributes.Dispose();
+                moveSourceImageAttributes.Dispose();
+
                 // To dispose of stored disposable values such as brushes.
                 propertyStore.Dispose();
             }
             base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
+    /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
+    /// </summary>
+    [DebuggerDisplay("(x = {X}, y = {Y})")]
+    public class SquareEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square.
+        /// </summary>
+        public int X { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square.
+        /// </summary>
+        public int Y { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SquareEventArgs"/> class.
+        /// </summary>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
+        public SquareEventArgs(int x, int y)
+        {
+            X = x; Y = y;
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
+    /// </summary>
+    public class CancellableSquareEventArgs : SquareEventArgs
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the event should be canceled.
+        /// </summary>
+        public bool Cancel { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancellableSquareEventArgs"/> class.
+        /// </summary>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
+        public CancellableSquareEventArgs(int x, int y) : base(x, y)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
+    /// </summary>
+    [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
+    public class MoveEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square where moving started.
+        /// </summary>
+        public int StartX { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square where moving started.
+        /// </summary>
+        public int StartY { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
+        /// </summary>
+        /// <param name="startX">
+        /// The X-coordinate of the square where moving started.
+        /// </param>
+        /// <param name="startY">
+        /// The Y-coordinate of the square where moving started.
+        /// </param>
+        public MoveEventArgs(int startX, int startY)
+        {
+            StartX = startX; StartY = startY;
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
+    /// </summary>
+    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
+    public class MoveCommitEventArgs : MoveEventArgs
+    {
+        /// <summary>
+        /// Gets the X-coordinate of the square where the mouse cursor currently is.
+        /// </summary>
+        public int TargetX { get; }
+
+        /// <summary>
+        /// Gets the Y-coordinate of the square where the mouse cursor currently is.
+        /// </summary>
+        public int TargetY { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
+        /// </summary>
+        /// <param name="startX">
+        /// The X-coordinate of the square where moving started.
+        /// </param>
+        /// <param name="startY">
+        /// The Y-coordinate of the square where moving started.
+        /// </param>
+        /// <param name="targetX">
+        /// The X-coordinate of the square where the mouse cursor currently is.
+        /// </param>
+        /// <param name="targetY">
+        /// The Y-coordinate of the square where the mouse cursor currently is.
+        /// </param>
+        public MoveCommitEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
+        {
+            TargetX = targetX; TargetY = targetY;
         }
     }
 }

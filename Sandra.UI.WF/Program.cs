@@ -17,11 +17,7 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -37,88 +33,38 @@ namespace Sandra.UI.WF
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Form mdiParent = new Form()
+            MdiContainerForm mdiParent = new MdiContainerForm();
+
+            mdiParent.Shown += (_, __) =>
             {
-                WindowState = FormWindowState.Maximized,
-                IsMdiContainer = true,
-            };
-
-            List<Image> pieceImages = new List<Image>
-            {
-                loadImage("bp"),
-                loadImage("bn"),
-                loadImage("bb"),
-                loadImage("br"),
-                loadImage("bq"),
-                loadImage("bk"),
-                loadImage("wp"),
-                loadImage("wn"),
-                loadImage("wb"),
-                loadImage("wr"),
-                loadImage("wq"),
-                loadImage("wk"),
-            };
-
-            Random rnd = new Random();
-            for (int i = 29; i >= 0; --i)
-            {
-                PlayingBoardForm mdiChild = new PlayingBoardForm()
+                Random rnd = new Random();
+                for (int i = 29; i >= 0; --i)
                 {
-                    MdiParent = mdiParent,
-                    ClientSize = new Size(400, 400),
-                    Visible = true,
-                };
-
-                if (rnd.Next(4) == 0)
-                {
-                    mdiChild.PlayingBoard.SizeToFit = false;
-                    int sign = rnd.Next(2) - 1; // allowing zero is desirable in this case
-                    if (sign == 0)
+                    StandardChessBoardForm mdiChild = new StandardChessBoardForm()
                     {
-                        mdiChild.PlayingBoard.SquareSize = 24;
-                    }
-                    else
-                    {
-                        int delta = Math.Min(24, (int)Math.Floor(Math.Sqrt(rnd.NextDouble()) * 25));
-                        mdiChild.PlayingBoard.SquareSize = 24 + sign * delta;
-                    }
-                }
+                        MdiParent = mdiParent,
+                        ClientSize = new Size(400, 400),
+                        Visible = true,
+                    };
 
-                mdiChild.PlayingBoard.ForegroundImageRelativeSize = Math.Sqrt(rnd.NextDouble()); // sqrt gets it closer to 1.
-                mdiChild.PlayingBoard.BorderWidth = rnd.Next(4);
-                mdiChild.PlayingBoard.InnerSpacing = rnd.Next(3);
+                    mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
 
-                int boardSize = rnd.Next(5) + 4;
-                mdiChild.PlayingBoard.BoardSize = boardSize;
-                for (int x = 0; x < boardSize; ++x)
-                {
-                    for (int y = 0; y < boardSize; ++y)
+                    for (int x = 0; x < mdiChild.PlayingBoard.BoardSize; ++x)
                     {
-                        if (rnd.Next(2) == 0)
+                        for (int y = 0; y < mdiChild.PlayingBoard.BoardSize; ++y)
                         {
-                            mdiChild.PlayingBoard.SetForegroundImage(x, y, pieceImages[rnd.Next(pieceImages.Count)]);
+                            if (rnd.Next(2) == 0)
+                            {
+                                mdiChild.PlayingBoard.SetForegroundImage(x, y, mdiParent.PieceImages[rnd.Next(mdiParent.PieceImages.Count)]);
+                            }
                         }
                     }
-                }
 
-                mdiChild.PerformAutoFit();
-            }
+                    mdiChild.PerformAutoFit();
+                }
+            };
 
             Application.Run(mdiParent);
-        }
-
-        static Image loadImage(string imageFileKey)
-        {
-            try
-            {
-                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
-            }
-            catch (Exception exc)
-            {
-                Debug.Write(exc.Message);
-                return null;
-            }
         }
     }
 }
