@@ -530,69 +530,6 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image is being moved and dropped onto another square.
-        /// </summary>
-        public event EventHandler<MoveTargetEventArgs> MoveDrop;
-
-        /// <summary>
-        /// Raises the <see cref="MoveDrop"/> event. 
-        /// </summary>
-        protected virtual void OnMoveDrop(MoveTargetEventArgs e)
-        {
-            MoveDrop?.Invoke(this, e);
-        }
-
-        protected void RaiseMoveDrop(int sourceSquareIndex, int squareIndex)
-        {
-            OnMoveDrop(new MoveTargetEventArgs(
-                getX(sourceSquareIndex),
-                getY(sourceSquareIndex),
-                getX(squareIndex),
-                getY(squareIndex)));
-        }
-
-
-        /// <summary>
-        /// Occurs when an image stops being moved, and is not dropped onto another square.
-        /// </summary>
-        public event EventHandler<MoveEventArgs> MoveCancel;
-
-        /// <summary>
-        /// Raises the <see cref="MoveCancel"/> event. 
-        /// </summary>
-        protected virtual void OnMoveCancel(MoveEventArgs e)
-        {
-            MoveCancel?.Invoke(this, e);
-        }
-
-        protected void RaiseMoveCancel(int squareIndex)
-        {
-            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
-        }
-
-
-        /// <summary>
-        /// Occurs when an image occupying a square starts being moved.
-        /// </summary>
-        public event EventHandler<CancellableSquareEventArgs> MoveStart;
-
-        /// <summary>
-        /// Raises the <see cref="MoveStart"/> event. 
-        /// </summary>
-        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
-        {
-            MoveStart?.Invoke(this, e);
-        }
-
-        protected bool RaiseMoveStart(int squareIndex)
-        {
-            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
-            OnMoveStart(e);
-            return !e.Cancel;
-        }
-
-
-        /// <summary>
         /// Occurs when the mouse pointer enters a square.
         /// </summary>
         public event EventHandler<SquareEventArgs> MouseEnterSquare;
@@ -627,6 +564,68 @@ namespace Sandra.UI.WF
         protected void RaiseMouseLeaveSquare(int squareIndex)
         {
             OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image stops being moved, and is not dropped onto another square.
+        /// </summary>
+        public event EventHandler<MoveEventArgs> MoveCancel;
+
+        /// <summary>
+        /// Raises the <see cref="MoveCancel"/> event. 
+        /// </summary>
+        protected virtual void OnMoveCancel(MoveEventArgs e)
+        {
+            MoveCancel?.Invoke(this, e);
+        }
+
+        protected void RaiseMoveCancel(int squareIndex)
+        {
+            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image is being moved and dropped onto another square.
+        /// </summary>
+        public event EventHandler<MoveCommitEventArgs> MoveCommit;
+
+        /// <summary>
+        /// Raises the <see cref="MoveCommit"/> event. 
+        /// </summary>
+        protected virtual void OnMoveCommit(MoveCommitEventArgs e)
+        {
+            MoveCommit?.Invoke(this, e);
+        }
+
+        protected void RaiseMoveCommit(int sourceSquareIndex, int targetSquareIndex)
+        {
+            OnMoveCommit(new MoveCommitEventArgs(getX(sourceSquareIndex),
+                                                 getY(sourceSquareIndex),
+                                                 getX(targetSquareIndex),
+                                                 getY(targetSquareIndex)));
+        }
+
+
+        /// <summary>
+        /// Occurs when an image occupying a square starts being moved.
+        /// </summary>
+        public event EventHandler<CancellableSquareEventArgs> MoveStart;
+
+        /// <summary>
+        /// Raises the <see cref="MoveStart"/> event. 
+        /// </summary>
+        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
+        {
+            MoveStart?.Invoke(this, e);
+        }
+
+        protected bool RaiseMoveStart(int squareIndex)
+        {
+            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            OnMoveStart(e);
+            return !e.Cancel;
         }
 
 
@@ -841,7 +840,7 @@ namespace Sandra.UI.WF
 
                 if (hoveringSquareIndex >= 0)
                 {
-                    RaiseMoveDrop(moveStartSquareIndex, hoveringSquareIndex);
+                    RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
                 }
                 else
                 {
@@ -1145,10 +1144,10 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveDrop"/> event.
+    /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
     /// </summary>
     [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
-    public class MoveTargetEventArgs : MoveEventArgs
+    public class MoveCommitEventArgs : MoveEventArgs
     {
         /// <summary>
         /// Gets the X-coordinate of the square where the mouse cursor currently is.
@@ -1161,7 +1160,7 @@ namespace Sandra.UI.WF
         public int TargetY { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MoveTargetEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
         /// </summary>
         /// <param name="startX">
         /// The X-coordinate of the square where moving started.
@@ -1175,7 +1174,7 @@ namespace Sandra.UI.WF
         /// <param name="targetY">
         /// The Y-coordinate of the square where the mouse cursor currently is.
         /// </param>
-        public MoveTargetEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
+        public MoveCommitEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
         {
             TargetX = targetX; TargetY = targetY;
         }

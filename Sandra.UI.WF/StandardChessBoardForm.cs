@@ -34,7 +34,7 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
-            PlayingBoard.MoveDrop += playingBoard_MoveDrop;
+            PlayingBoard.MoveCommit += playingBoard_MoveCommit;
         }
 
         private SquareEventArgs hoverSquare;
@@ -84,7 +84,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_MoveDrop(object sender, MoveTargetEventArgs e)
+        private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
         {
             resetMoveStartSquareHighlight(e);
 
