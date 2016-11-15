@@ -324,8 +324,8 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets or sets the color of light squares.
         /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.LightBlue"/>).
+        /// If an image is specified for <see cref="LightSquareImage"/>, this property is ignored.
         /// </summary>
-        /// If an image is specified for <see cref="LightSquareImage"/>, this property is unused.
         public Color LightSquareColor
         {
             get { return propertyStore.Get<Color>(nameof(LightSquareColor)); }
