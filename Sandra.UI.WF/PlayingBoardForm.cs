@@ -56,7 +56,7 @@ namespace Sandra.UI.WF
                 Bottom = Bottom,
             };
 
-            OnResizing(ref windowRect, ResizeMode.BottomRight);
+            performAutoFit(ref windowRect, ResizeMode.BottomRight);
 
             SetBoundsCore(windowRect.Left, windowRect.Top,
                           windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
