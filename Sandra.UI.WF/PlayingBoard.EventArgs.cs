@@ -25,31 +25,24 @@ namespace Sandra.UI.WF
     /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
     /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
     /// </summary>
-    [DebuggerDisplay("(x = {X}, y = {Y})")]
+    [DebuggerDisplay("(x = {Location.X}, y = {Location.Y})")]
     public class SquareEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the X-coordinate of the square.
+        /// Gets the location of the square.
         /// </summary>
-        public int X { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the square.
-        /// </summary>
-        public int Y { get; }
+        public SquareLocation Location { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SquareEventArgs"/> class.
         /// </summary>
-        /// <param name="x">
-        /// The X-coordinate of the square.
+        /// <param name="location">
+        /// The location of the square.
         /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public SquareEventArgs(int x, int y)
+        public SquareEventArgs(SquareLocation location)
         {
-            X = x; Y = y;
+            if (location == null) throw new ArgumentNullException(nameof(location));
+            Location = location;
         }
     }
 

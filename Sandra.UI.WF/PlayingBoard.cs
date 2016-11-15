@@ -543,7 +543,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMouseEnterSquare(int squareIndex)
         {
-            OnMouseEnterSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMouseEnterSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -562,7 +562,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMouseLeaveSquare(int squareIndex)
         {
-            OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMouseLeaveSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -630,6 +630,12 @@ namespace Sandra.UI.WF
 
         private int getX(int index) { return index % BoardSize; }
         private int getY(int index) { return index / BoardSize; }
+
+        private SquareLocation getSquareLocation(int index)
+        {
+            if (index < 0) return null;
+            return new SquareLocation(getX(index), getY(index));
+        }
 
         private int getIndex(int x, int y)
         {

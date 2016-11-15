@@ -44,11 +44,11 @@ namespace Sandra.UI.WF
             hoverSquare = e;
             if (PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(80, 255, 255, 255));
+                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
             }
             else
             {
-                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, true);
+                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
             }
         }
 
@@ -57,23 +57,23 @@ namespace Sandra.UI.WF
             hoverSquare = null;
             if (PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(48, 255, 190, 0));
+                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
             }
             else
             {
-                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, false);
+                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
             }
         }
 
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
-            if (hoverSquare == null || hoverSquare.X != e.StartX || hoverSquare.Y != e.StartY)
+            if (hoverSquare == null || hoverSquare.Location.X != e.StartX || hoverSquare.Location.Y != e.StartY)
             {
                 PlayingBoard.SetIsImageHighLighted(e.StartX, e.StartY, false);
             }
             if (hoverSquare != null)
             {
-                PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
+                PlayingBoard.SetIsImageHighLighted(hoverSquare.Location.X, hoverSquare.Location.Y, true);
             }
             for (int x = 0; x < PlayingBoard.BoardSize; ++x)
             {
