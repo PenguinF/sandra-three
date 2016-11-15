@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -34,15 +33,7 @@ namespace Sandra.UI.WF
             Application.SetCompatibleTextRenderingDefault(false);
 
             MdiContainerForm mdiParent = new MdiContainerForm();
-
-            StandardChessBoardForm mdiChild = new StandardChessBoardForm()
-            {
-                MdiParent = mdiParent,
-                ClientSize = new Size(400, 400),
-                Visible = true,
-            };
-            mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-            mdiChild.PerformAutoFit();
+            mdiParent.NewPlayingBoard();
 
             Application.Run(mdiParent);
         }
