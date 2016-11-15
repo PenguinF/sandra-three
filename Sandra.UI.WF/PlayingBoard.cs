@@ -709,8 +709,9 @@ namespace Sandra.UI.WF
 
         private int maxSquareSize(Size clientSize)
         {
-            int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - BorderWidth * 2) / BoardWidth;
-            int squareSizeVrt = (clientSize.Height - InnerSpacing * (BoardHeight - 1) - BorderWidth * 2) / BoardHeight;
+            int totalBorderWidth = BorderWidth * 2;
+            int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - totalBorderWidth) / BoardWidth;
+            int squareSizeVrt = (clientSize.Height - InnerSpacing * (BoardHeight - 1) - totalBorderWidth) / BoardHeight;
             return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
