@@ -374,8 +374,8 @@ namespace Sandra.UI.WF
 
         private Brush backgroundBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(backgroundBrush)); }
-            set { propertyStore.Set(nameof(backgroundBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(backgroundBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(backgroundBrush), value); }
         }
 
         private void updateBackgroundBrush()
@@ -393,8 +393,8 @@ namespace Sandra.UI.WF
 
         private Brush borderBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(borderBrush)); }
-            set { propertyStore.Set(nameof(borderBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(borderBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(borderBrush), value); }
         }
 
         private void updateBorderBrush()
@@ -405,8 +405,8 @@ namespace Sandra.UI.WF
 
         private Brush darkSquareBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(darkSquareBrush)); }
-            set { propertyStore.Set(nameof(darkSquareBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(darkSquareBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(darkSquareBrush), value); }
         }
 
         private void updateDarkSquareBrush()
@@ -417,8 +417,8 @@ namespace Sandra.UI.WF
 
         private Brush lightSquareBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(lightSquareBrush)); }
-            set { propertyStore.Set(nameof(lightSquareBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(lightSquareBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(lightSquareBrush), value); }
         }
 
         private void updateLightSquareBrush()
