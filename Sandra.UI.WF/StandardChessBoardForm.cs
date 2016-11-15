@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-
 using System.Drawing;
 
 namespace Sandra.UI.WF
@@ -75,9 +74,9 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
             }
-            for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+            for (int x = 0; x < PlayingBoard.BoardWidth; ++x)
             {
-                for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+                for (int y = 0; y < PlayingBoard.BoardHeight; ++y)
                 {
                     PlayingBoard.SetSquareOverlayColor(x, y, new Color());
                 }
