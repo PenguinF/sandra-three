@@ -643,7 +643,7 @@ namespace Sandra.UI.WF
         {
             get
             {
-                return isMoving;
+                return moveStartSquareIndex >= 0;
             }
         }
 
@@ -849,7 +849,6 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private bool isMoving;
         private Point moveStartPosition;
         private Point moveCurrentPosition;
         private int moveStartSquareIndex;
@@ -921,14 +920,13 @@ namespace Sandra.UI.WF
             int hit = hitTest(e.Location);
 
             // Start moving?
-            if (e.Button == MouseButtons.Left && !isMoving)
+            if (e.Button == MouseButtons.Left && !IsMoving)
             {
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
                     if (RaiseMoveStart(hit))
                     {
-                        isMoving = true;
                         moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
                         moveStartPosition.Offset(getLocationFromIndex(hit));
                         Rectangle imageRect = getRelativeForegroundImageRectangle();
@@ -949,7 +947,7 @@ namespace Sandra.UI.WF
             hitTest(e.Location);
 
             // Update moving information.
-            if (isMoving)
+            if (IsMoving)
             {
                 moveCurrentPosition = e.Location;
                 Invalidate();
@@ -963,11 +961,8 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (isMoving)
+            if (moveStartSquareIndex >= 0)
             {
-                // End of move.
-                isMoving = false;
-
                 if (hoveringSquareIndex >= 0)
                 {
                     RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
@@ -976,6 +971,9 @@ namespace Sandra.UI.WF
                 {
                     RaiseMoveCancel(moveStartSquareIndex);
                 }
+
+                // End of move.
+                moveStartSquareIndex = -1;
 
                 Invalidate();
             }
@@ -1096,7 +1094,7 @@ namespace Sandra.UI.WF
                             {
                                 // Draw current image - but use a color transformation if the current square was
                                 // used to start moving from, or if the image must be highlighted.
-                                if (isMoving && index == moveStartSquareIndex)
+                                if (index == moveStartSquareIndex)
                                 {
                                     // Half-transparent.
                                     g.DrawImage(currentImg,
@@ -1141,7 +1139,7 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                if (sizeH > 0 && sizeV > 0 && isMoving)
+                if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
                 {
                     // Draw moving image on top of the rest.
                     Image currentImg = foregroundImages[moveStartSquareIndex];
