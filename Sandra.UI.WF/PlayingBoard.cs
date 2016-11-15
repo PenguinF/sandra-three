@@ -610,19 +610,19 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when an image occupying a square starts being moved.
         /// </summary>
-        public event EventHandler<CancellableSquareEventArgs> MoveStart;
+        public event EventHandler<CancellableMoveEventArgs> MoveStart;
 
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
+        protected virtual void OnMoveStart(CancellableMoveEventArgs e)
         {
             MoveStart?.Invoke(this, e);
         }
 
         protected bool RaiseMoveStart(int squareIndex)
         {
-            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            var e = new CancellableMoveEventArgs(getX(squareIndex), getY(squareIndex));
             OnMoveStart(e);
             return !e.Cancel;
         }

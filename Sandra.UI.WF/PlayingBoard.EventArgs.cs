@@ -54,30 +54,6 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
-    /// </summary>
-    public class CancellableSquareEventArgs : SquareEventArgs
-    {
-        /// <summary>
-        /// Gets or sets a value indicating whether the event should be canceled.
-        /// </summary>
-        public bool Cancel { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CancellableSquareEventArgs"/> class.
-        /// </summary>
-        /// <param name="x">
-        /// The X-coordinate of the square.
-        /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public CancellableSquareEventArgs(int x, int y) : base(x, y)
-        {
-        }
-    }
-
-    /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
     /// </summary>
     [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
@@ -105,6 +81,30 @@ namespace Sandra.UI.WF
         public MoveEventArgs(int startX, int startY)
         {
             StartX = startX; StartY = startY;
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
+    /// </summary>
+    public class CancellableMoveEventArgs : MoveEventArgs
+    {
+        /// <summary>
+        /// Gets or sets a value indicating whether the event should be canceled.
+        /// </summary>
+        public bool Cancel { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CancellableMoveEventArgs"/> class.
+        /// </summary>
+        /// <param name="x">
+        /// The X-coordinate of the square.
+        /// </param>
+        /// <param name="y">
+        /// The Y-coordinate of the square.
+        /// </param>
+        public CancellableMoveEventArgs(int x, int y) : base(x, y)
+        {
         }
     }
 
