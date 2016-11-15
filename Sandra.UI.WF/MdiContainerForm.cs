@@ -36,6 +36,32 @@ namespace Sandra.UI.WF
         public MdiContainerForm()
         {
             IsMdiContainer = true;
+            MainMenuStrip = new MenuStrip();
+            MainMenuStrip.Items.Add("New playing board (Ctrl+B)", null, (_, __) => { NewPlayingBoard(); });
+            MainMenuStrip.Visible = true;
+            Controls.Add(MainMenuStrip);
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.B))
+            {
+                NewPlayingBoard();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        public void NewPlayingBoard()
+        {
+            StandardChessBoardForm mdiChild = new StandardChessBoardForm()
+            {
+                MdiParent = this,
+                ClientSize = new Size(400, 400),
+                Visible = true,
+            };
+            mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+            mdiChild.PerformAutoFit();
         }
 
         protected override void OnLoad(EventArgs e)
