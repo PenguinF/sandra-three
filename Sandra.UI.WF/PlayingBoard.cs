@@ -280,19 +280,6 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Gets if an image is currently being moved.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsMoving
-        {
-            get
-            {
-                return isMoving;
-            }
-        }
-
-
-        /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
         public static Color DefaultLightSquareColor { get { return Color.LightBlue; } }
@@ -525,6 +512,31 @@ namespace Sandra.UI.WF
             foregroundImages = new Image[newArrayLength];
             isImageHighlighted = new bool[newArrayLength];
             squareOverlayColors = new Color[newArrayLength];
+        }
+
+
+        /// <summary>
+        /// Gets the location of the square the mouse pointer is located,
+        /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
+        /// </summary>
+        public SquareLocation HoverSquare
+        {
+            get
+            {
+                return getSquareLocation(hoveringSquareIndex);
+            }
+        }
+
+        /// <summary>
+        /// Gets if an image is currently being moved.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsMoving
+        {
+            get
+            {
+                return isMoving;
+            }
         }
 
 
