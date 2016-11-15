@@ -1056,4 +1056,28 @@ namespace Sandra.UI.WF
             base.Dispose(disposing);
         }
     }
+
+    /// <summary>
+    /// Represents the location of a square on a <see cref="PlayingBoard"/>. 
+    /// </summary>
+    public class SquareLocation
+    {
+        /// <summary>
+        /// Gets the x-coordinate of the square.
+        /// </summary>
+        public int X { get; }
+
+        /// <summary>
+        /// Gets the y-coordinate of the square.
+        /// </summary>
+        public int Y { get; }
+
+        /// <summary>
+        /// Initializes a new instance of a square location.
+        /// </summary>
+        public SquareLocation(int x, int y)
+        {
+            X = x; Y = y;
+        }
+    }
 }
