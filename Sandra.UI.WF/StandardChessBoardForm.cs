@@ -37,11 +37,8 @@ namespace Sandra.UI.WF
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
         }
 
-        private SquareEventArgs hoverSquare;
-
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            hoverSquare = e;
             if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
@@ -54,7 +51,6 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
-            hoverSquare = null;
             if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
@@ -67,13 +63,14 @@ namespace Sandra.UI.WF
 
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
-            if (hoverSquare == null || hoverSquare.Location.X != e.Start.X || hoverSquare.Location.Y != e.Start.Y)
+            var hoverSquare = PlayingBoard.HoverSquare;
+            if (hoverSquare == null || hoverSquare.X != e.Start.X || hoverSquare.Y != e.Start.Y)
             {
                 PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, false);
             }
             if (hoverSquare != null)
             {
-                PlayingBoard.SetIsImageHighLighted(hoverSquare.Location.X, hoverSquare.Location.Y, true);
+                PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
             }
             for (int x = 0; x < PlayingBoard.BoardSize; ++x)
             {
