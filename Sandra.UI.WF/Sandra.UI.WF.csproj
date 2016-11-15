@@ -76,6 +76,12 @@
   <ItemGroup>
     <Content Include="Sandra.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
+      <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
+      <Name>Sandra.Chess</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
