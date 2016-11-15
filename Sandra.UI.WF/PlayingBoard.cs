@@ -682,11 +682,17 @@ namespace Sandra.UI.WF
             return Math.Max(result, 0);
         }
 
+        private int maxSquareSize(Size clientSize)
+        {
+            int squareSizeHrz = squareSizeFromClientSize(clientSize.Width);
+            int squareSizeVrt = squareSizeFromClientSize(clientSize.Height);
+            return Math.Min(squareSizeHrz, squareSizeVrt);
+        }
+
         private void performSizeToFit()
         {
             // Resize the squares so that it is as large as possible while still fitting in the client area.
-            int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
-            int newSquareSize = squareSizeFromClientSize(minSize);
+            int newSquareSize = maxSquareSize(ClientSize);
             // Store directly in the property store, to bypass SizeToFit check.
             if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
@@ -709,11 +715,13 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Returns the size closest to the given size which will allow the board to fit exactly.
         /// </summary>
-        public int GetClosestAutoFitSize(int clientSize)
+        public Size GetClosestAutoFitSize(Size maxBounds)
         {
-            int squareSize = squareSizeFromClientSize(clientSize);
+            int squareSize = maxSquareSize(maxBounds);
+
             // Go back to a client size by inverting squareSizeFromClientSize().
-            return squareSize * BoardSize + InnerSpacing * (BoardSize - 1) + BorderWidth * 2;
+            int targetSize = squareSize * BoardSize + InnerSpacing * (BoardSize - 1) + BorderWidth * 2;
+            return new Size(targetSize, targetSize);
         }
 
 
@@ -1043,6 +1051,7 @@ namespace Sandra.UI.WF
 
             base.OnPaint(pe);
         }
+
 
         protected override void Dispose(bool disposing)
         {
