@@ -78,10 +78,12 @@ namespace Sandra.UI.WF
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(DarkSquareImage), null },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
+            { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
@@ -181,6 +183,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets or sets the color of dark squares.
         /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Azure"/>).
+        /// If an image is specified for <see cref="DarkSquareImage"/>, this property is ignored.
         /// </summary>
         public Color DarkSquareColor
         {
@@ -188,6 +191,26 @@ namespace Sandra.UI.WF
             set
             {
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
+                {
+                    if (DarkSquareImage == null)
+                    {
+                        updateDarkSquareBrush();
+                        Invalidate();
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the image background for dark squares.
+        /// </summary>
+        public Image DarkSquareImage
+        {
+            get { return propertyStore.Get<Image>(nameof(DarkSquareImage)); }
+            set
+            {
+                if (propertyStore.Set(nameof(DarkSquareImage), value))
                 {
                     updateDarkSquareBrush();
                     Invalidate();
@@ -302,12 +325,33 @@ namespace Sandra.UI.WF
         /// Gets or sets the color of light squares.
         /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.LightBlue"/>).
         /// </summary>
+        /// If an image is specified for <see cref="LightSquareImage"/>, this property is unused.
         public Color LightSquareColor
         {
             get { return propertyStore.Get<Color>(nameof(LightSquareColor)); }
             set
             {
                 if (propertyStore.Set(nameof(LightSquareColor), value))
+                {
+                    if (LightSquareImage == null)
+                    {
+                        updateLightSquareBrush();
+                        Invalidate();
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the image background for light squares.
+        /// </summary>
+        public Image LightSquareImage
+        {
+            get { return propertyStore.Get<Image>(nameof(LightSquareImage)); }
+            set
+            {
+                if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
                     updateLightSquareBrush();
                     Invalidate();
@@ -411,7 +455,14 @@ namespace Sandra.UI.WF
 
         private void updateDarkSquareBrush()
         {
-            darkSquareBrush = new SolidBrush(DarkSquareColor);
+            if (DarkSquareImage != null)
+            {
+                darkSquareBrush = new TextureBrush(DarkSquareImage, WrapMode.Tile);
+            }
+            else
+            {
+                darkSquareBrush = new SolidBrush(DarkSquareColor);
+            }
         }
 
 
@@ -423,7 +474,14 @@ namespace Sandra.UI.WF
 
         private void updateLightSquareBrush()
         {
-            lightSquareBrush = new SolidBrush(LightSquareColor);
+            if (LightSquareImage != null)
+            {
+                lightSquareBrush = new TextureBrush(LightSquareImage, WrapMode.Tile);
+            }
+            else
+            {
+                lightSquareBrush = new SolidBrush(LightSquareColor);
+            }
         }
 
 
