@@ -49,31 +49,24 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
     /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
+    [DebuggerDisplay("From (x = {Start.X}, y = {Start.Y})")]
     public class MoveEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the X-coordinate of the square where moving started.
+        /// Gets the location of the square where moving started.
         /// </summary>
-        public int StartX { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the square where moving started.
-        /// </summary>
-        public int StartY { get; }
+        public SquareLocation Start { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
         /// </summary>
-        /// <param name="startX">
-        /// The X-coordinate of the square where moving started.
+        /// <param name="start">
+        /// The location of the square where moving started.
         /// </param>
-        /// <param name="startY">
-        /// The Y-coordinate of the square where moving started.
-        /// </param>
-        public MoveEventArgs(int startX, int startY)
+        public MoveEventArgs(SquareLocation start)
         {
-            StartX = startX; StartY = startY;
+            if (start == null) throw new ArgumentNullException(nameof(start));
+            Start = start;
         }
     }
 
@@ -90,13 +83,10 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes a new instance of the <see cref="CancellableMoveEventArgs"/> class.
         /// </summary>
-        /// <param name="x">
-        /// The X-coordinate of the square.
+        /// <param name="start">
+        /// The location of the square where moving started.
         /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public CancellableMoveEventArgs(int x, int y) : base(x, y)
+        public CancellableMoveEventArgs(SquareLocation start) : base(start)
         {
         }
     }
@@ -108,33 +98,23 @@ namespace Sandra.UI.WF
     public class MoveCommitEventArgs : MoveEventArgs
     {
         /// <summary>
-        /// Gets the X-coordinate of the square where the mouse cursor currently is.
+        /// Gets the location of the square where the mouse cursor currently is.
         /// </summary>
-        public int TargetX { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the square where the mouse cursor currently is.
-        /// </summary>
-        public int TargetY { get; }
+        public SquareLocation Target { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
         /// </summary>
-        /// <param name="startX">
-        /// The X-coordinate of the square where moving started.
+        /// <param name="start">
+        /// The location of the square where moving started.
         /// </param>
-        /// <param name="startY">
-        /// The Y-coordinate of the square where moving started.
+        /// <param name="target">
+        /// The location of the square where the mouse cursor currently is.
         /// </param>
-        /// <param name="targetX">
-        /// The X-coordinate of the square where the mouse cursor currently is.
-        /// </param>
-        /// <param name="targetY">
-        /// The Y-coordinate of the square where the mouse cursor currently is.
-        /// </param>
-        public MoveCommitEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
+        public MoveCommitEventArgs(SquareLocation start, SquareLocation target) : base(start)
         {
-            TargetX = targetX; TargetY = targetY;
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            Target = target;
         }
     }
 }

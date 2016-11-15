@@ -67,9 +67,9 @@ namespace Sandra.UI.WF
 
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
-            if (hoverSquare == null || hoverSquare.Location.X != e.StartX || hoverSquare.Location.Y != e.StartY)
+            if (hoverSquare == null || hoverSquare.Location.X != e.Start.X || hoverSquare.Location.Y != e.Start.Y)
             {
-                PlayingBoard.SetIsImageHighLighted(e.StartX, e.StartY, false);
+                PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, false);
             }
             if (hoverSquare != null)
             {
@@ -89,10 +89,10 @@ namespace Sandra.UI.WF
             resetMoveStartSquareHighlight(e);
 
             // Move piece from source to destination.
-            if (e.StartX != e.TargetX || e.StartY != e.TargetY)
+            if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
             {
-                PlayingBoard.SetForegroundImage(e.TargetX, e.TargetY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
-                PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
+                PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
+                PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
             }
         }
 

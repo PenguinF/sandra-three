@@ -581,7 +581,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMoveCancel(int squareIndex)
         {
-            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -600,10 +600,8 @@ namespace Sandra.UI.WF
 
         protected void RaiseMoveCommit(int sourceSquareIndex, int targetSquareIndex)
         {
-            OnMoveCommit(new MoveCommitEventArgs(getX(sourceSquareIndex),
-                                                 getY(sourceSquareIndex),
-                                                 getX(targetSquareIndex),
-                                                 getY(targetSquareIndex)));
+            OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
+                                                 getSquareLocation(targetSquareIndex)));
         }
 
 
@@ -622,7 +620,7 @@ namespace Sandra.UI.WF
 
         protected bool RaiseMoveStart(int squareIndex)
         {
-            var e = new CancellableMoveEventArgs(getX(squareIndex), getY(squareIndex));
+            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex));
             OnMoveStart(e);
             return !e.Cancel;
         }
