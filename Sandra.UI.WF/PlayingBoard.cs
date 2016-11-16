@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -84,6 +85,7 @@ namespace Sandra.UI.WF
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(LightSquareImage), null },
+            { nameof(MovingImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
@@ -372,6 +374,23 @@ namespace Sandra.UI.WF
                 {
                     updateLightSquareBrush();
                     Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the image to display under the mouse pointer when moving.
+        /// A null value (Nothing in Visual Basic) means that the image of the move's start square is used.
+        /// </summary>
+        public Image MovingImage
+        {
+            get { return propertyStore.Get<Image>(nameof(MovingImage)); }
+            set
+            {
+                if (propertyStore.Set(nameof(MovingImage), value))
+                {
+                    if (IsMoving) Invalidate();
                 }
             }
         }
@@ -713,6 +732,23 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
+        /// Enumerates all available <see cref="SquareLocation"/>s on the board.
+        /// </summary>
+        public IEnumerable<SquareLocation> AllSquareLocations
+        {
+            get
+            {
+                for (int x = 0; x < BoardWidth; ++x)
+                {
+                    for (int y = 0; y < BoardHeight; ++y)
+                    {
+                        yield return new SquareLocation(x, y);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the location of the square the mouse pointer is located,
         /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
         /// </summary>
@@ -734,6 +770,39 @@ namespace Sandra.UI.WF
             {
                 return moveStartSquareIndex >= 0;
             }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Rectangle GetSquareRectangle(int x, int y)
+        {
+            throwIfOutOfRange(x, y);
+            int delta = SquareSize + InnerSpacing;
+            int px = BorderWidth + x * delta,
+                py = BorderWidth + y * delta;
+            return new Rectangle(px, py, px + SquareSize, py + SquareSize);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Rectangle GetSquareRectangle(SquareLocation squareLocation)
+        {
+            throwIfNull(squareLocation);
+            return GetSquareRectangle(squareLocation.X, squareLocation.Y);
         }
 
 
@@ -849,10 +918,15 @@ namespace Sandra.UI.WF
             if (squareLocation == null) throw new ArgumentNullException(nameof(squareLocation));
         }
 
-        private int getIndex(int x, int y)
+        private void throwIfOutOfRange(int x, int y)
         {
             if (x < 0 || x >= BoardWidth) throw new IndexOutOfRangeException(nameof(x));
             if (y < 0 || y >= BoardHeight) throw new IndexOutOfRangeException(nameof(y));
+        }
+
+        private int getIndex(int x, int y)
+        {
+            throwIfOutOfRange(x, y);
             return y * BoardWidth + x;
         }
 
@@ -1196,19 +1270,11 @@ namespace Sandra.UI.WF
                                                 GraphicsUnit.Pixel,
                                                 moveSourceImageAttributes);
                                 }
-                                else if (isImageHighlighted[index])
-                                {
-                                    // Highlight piece.
-                                    g.DrawImage(currentImg,
-                                                new Rectangle(x, y, sizeH, sizeV),
-                                                0, 0, currentImg.Width, currentImg.Height,
-                                                GraphicsUnit.Pixel,
-                                                highlightImgAttributes);
-                                }
                                 else
                                 {
-                                    // Default case.
-                                    g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                    drawForegroundImage(g, currentImg,
+                                                        new Rectangle(x, y, sizeH, sizeV),
+                                                        isImageHighlighted[index]);
                                 }
                             }
                             x += delta;
@@ -1232,35 +1298,46 @@ namespace Sandra.UI.WF
                     }
                 }
 
+                base.OnPaint(pe);
+
                 if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
                 {
                     // Draw moving image on top of the rest.
-                    Image currentImg = foregroundImages[moveStartSquareIndex];
+                    Image currentImg = MovingImage ?? foregroundImages[moveStartSquareIndex];
                     if (currentImg != null)
                     {
                         Point location = moveCurrentPosition;
                         location.Offset(moveStartPosition);
 
                         // Make sure the piece looks exactly the same as when it was still on its source square.
-                        if (isImageHighlighted[moveStartSquareIndex])
-                        {
-                            // Highlight piece.
-                            g.DrawImage(currentImg,
-                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
-                                        0, 0, currentImg.Width, currentImg.Height,
-                                        GraphicsUnit.Pixel,
-                                        highlightImgAttributes);
-                        }
-                        else
-                        {
-                            // Default case.
-                            g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
-                        }
+                        drawForegroundImage(g, currentImg,
+                                            new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                            isImageHighlighted[moveStartSquareIndex]);
                     }
                 }
             }
+            else
+            {
+                base.OnPaint(pe);
+            }
+        }
 
-            base.OnPaint(pe);
+        private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, bool highlight)
+        {
+            if (highlight)
+            {
+                // Highlight piece.
+                g.DrawImage(image,
+                            destinationRectangle,
+                            0, 0, image.Width, image.Height,
+                            GraphicsUnit.Pixel,
+                            highlightImgAttributes);
+            }
+            else
+            {
+                // Default case.
+                g.DrawImage(image, destinationRectangle);
+            }
         }
 
 
