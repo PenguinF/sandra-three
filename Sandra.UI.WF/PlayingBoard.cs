@@ -734,6 +734,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Enumerates all available <see cref="SquareLocation"/>s on the board.
         /// </summary>
+        [Browsable(false)]
         public IEnumerable<SquareLocation> AllSquareLocations
         {
             get
@@ -752,6 +753,7 @@ namespace Sandra.UI.WF
         /// Gets the location of the square the mouse pointer is located,
         /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
         /// </summary>
+        [Browsable(false)]
         public SquareLocation HoverSquare
         {
             get
