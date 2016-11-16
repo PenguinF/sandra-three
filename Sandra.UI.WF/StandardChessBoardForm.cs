@@ -25,10 +25,19 @@ namespace Sandra.UI.WF
     /// </summary>
     public class StandardChessBoardForm : PlayingBoardForm
     {
+        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
+
+        public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
+        {
+            PieceImages = pieceImages;
+        }
+
         public StandardChessBoardForm()
         {
             ShowIcon = false;
             MaximizeBox = false;
+
+            PlayingBoard.BoardSize = Chess.Constants.SquareCount;
 
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
@@ -98,6 +107,45 @@ namespace Sandra.UI.WF
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
         {
             resetMoveStartSquareHighlight(e);
+        }
+
+        private void clearBoard()
+        {
+            for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+            {
+                for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+                {
+                    PlayingBoard.SetForegroundImage(x, y, null);
+                }
+            }
+        }
+
+        public void InitializeStartPosition()
+        {
+            clearBoard();
+
+            var startPosition = EnumIndexedArray<Chess.NonEmptyColoredPiece, ulong>.New();
+
+            startPosition[Chess.NonEmptyColoredPiece.WhitePawn] = Chess.Constants.WhiteInStartPosition & Chess.Constants.PawnsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.WhiteKnight] = Chess.Constants.WhiteInStartPosition & Chess.Constants.KnightsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.WhiteBishop] = Chess.Constants.WhiteInStartPosition & Chess.Constants.BishopsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.WhiteRook] = Chess.Constants.WhiteInStartPosition & Chess.Constants.RooksInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.WhiteQueen] = Chess.Constants.WhiteInStartPosition & Chess.Constants.QueensInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.WhiteKing] = Chess.Constants.WhiteInStartPosition & Chess.Constants.KingsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackPawn] = Chess.Constants.BlackInStartPosition & Chess.Constants.PawnsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackKnight] = Chess.Constants.BlackInStartPosition & Chess.Constants.KnightsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackBishop] = Chess.Constants.BlackInStartPosition & Chess.Constants.BishopsInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackRook] = Chess.Constants.BlackInStartPosition & Chess.Constants.RooksInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackQueen] = Chess.Constants.BlackInStartPosition & Chess.Constants.QueensInStartPosition;
+            startPosition[Chess.NonEmptyColoredPiece.BlackKing] = Chess.Constants.BlackInStartPosition & Chess.Constants.KingsInStartPosition;
+
+            foreach (Chess.NonEmptyColoredPiece chessPieceImage in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
+            {
+                foreach (var square in startPosition[chessPieceImage].AllSquares())
+                {
+                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[chessPieceImage]);
+                }
+            }
         }
     }
 }

@@ -79,10 +79,12 @@ namespace Sandra.UI.WF
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
+            { nameof(DarkSquareImage), null },
             { nameof(ForegroundImagePadding), DefaultForegroundImagePadding },
             { nameof(ForegroundImageRelativeSize), DefaultForegroundImageRelativeSize },
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
+            { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
@@ -212,6 +214,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets or sets the color of dark squares.
         /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Azure"/>).
+        /// If an image is specified for <see cref="DarkSquareImage"/>, this property is ignored.
         /// </summary>
         public Color DarkSquareColor
         {
@@ -219,6 +222,26 @@ namespace Sandra.UI.WF
             set
             {
                 if (propertyStore.Set(nameof(DarkSquareColor), value))
+                {
+                    if (DarkSquareImage == null)
+                    {
+                        updateDarkSquareBrush();
+                        Invalidate();
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the image background for dark squares.
+        /// </summary>
+        public Image DarkSquareImage
+        {
+            get { return propertyStore.Get<Image>(nameof(DarkSquareImage)); }
+            set
+            {
+                if (propertyStore.Set(nameof(DarkSquareImage), value))
                 {
                     updateDarkSquareBrush();
                     Invalidate();
@@ -332,6 +355,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets or sets the color of light squares.
         /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.LightBlue"/>).
+        /// If an image is specified for <see cref="LightSquareImage"/>, this property is ignored.
         /// </summary>
         public Color LightSquareColor
         {
@@ -339,6 +363,26 @@ namespace Sandra.UI.WF
             set
             {
                 if (propertyStore.Set(nameof(LightSquareColor), value))
+                {
+                    if (LightSquareImage == null)
+                    {
+                        updateLightSquareBrush();
+                        Invalidate();
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets or sets the image background for light squares.
+        /// </summary>
+        public Image LightSquareImage
+        {
+            get { return propertyStore.Get<Image>(nameof(LightSquareImage)); }
+            set
+            {
+                if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
                     updateLightSquareBrush();
                     Invalidate();
@@ -405,8 +449,8 @@ namespace Sandra.UI.WF
 
         private Brush backgroundBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(backgroundBrush)); }
-            set { propertyStore.Set(nameof(backgroundBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(backgroundBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(backgroundBrush), value); }
         }
 
         private void updateBackgroundBrush()
@@ -424,8 +468,8 @@ namespace Sandra.UI.WF
 
         private Brush borderBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(borderBrush)); }
-            set { propertyStore.Set(nameof(borderBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(borderBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(borderBrush), value); }
         }
 
         private void updateBorderBrush()
@@ -436,25 +480,39 @@ namespace Sandra.UI.WF
 
         private Brush darkSquareBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(darkSquareBrush)); }
-            set { propertyStore.Set(nameof(darkSquareBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(darkSquareBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(darkSquareBrush), value); }
         }
 
         private void updateDarkSquareBrush()
         {
-            darkSquareBrush = new SolidBrush(DarkSquareColor);
+            if (DarkSquareImage != null)
+            {
+                darkSquareBrush = new TextureBrush(DarkSquareImage, WrapMode.Tile);
+            }
+            else
+            {
+                darkSquareBrush = new SolidBrush(DarkSquareColor);
+            }
         }
 
 
         private Brush lightSquareBrush
         {
-            get { return propertyStore.Get<Brush>(nameof(lightSquareBrush)); }
-            set { propertyStore.Set(nameof(lightSquareBrush), value); }
+            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(lightSquareBrush)); }
+            set { propertyStore.SetOwnedDisposable(nameof(lightSquareBrush), value); }
         }
 
         private void updateLightSquareBrush()
         {
-            lightSquareBrush = new SolidBrush(LightSquareColor);
+            if (LightSquareImage != null)
+            {
+                lightSquareBrush = new TextureBrush(LightSquareImage, WrapMode.Tile);
+            }
+            else
+            {
+                lightSquareBrush = new SolidBrush(LightSquareColor);
+            }
         }
 
 
