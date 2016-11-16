@@ -867,10 +867,15 @@ namespace Sandra.UI.WF
             if (squareLocation == null) throw new ArgumentNullException(nameof(squareLocation));
         }
 
-        private int getIndex(int x, int y)
+        private void throwIfOutOfRange(int x, int y)
         {
             if (x < 0 || x >= BoardWidth) throw new IndexOutOfRangeException(nameof(x));
             if (y < 0 || y >= BoardHeight) throw new IndexOutOfRangeException(nameof(y));
+        }
+
+        private int getIndex(int x, int y)
+        {
+            throwIfOutOfRange(x, y);
             return y * BoardWidth + x;
         }
 
