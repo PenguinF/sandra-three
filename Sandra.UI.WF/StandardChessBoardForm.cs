@@ -26,6 +26,13 @@ namespace Sandra.UI.WF
     /// </summary>
     public class StandardChessBoardForm : PlayingBoardForm
     {
+        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
+
+        public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
+        {
+            PieceImages = pieceImages;
+        }
+
         public StandardChessBoardForm()
         {
             ShowIcon = false;
