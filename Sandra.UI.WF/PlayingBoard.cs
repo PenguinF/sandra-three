@@ -74,7 +74,8 @@ namespace Sandra.UI.WF
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
-            { nameof(BoardSize), DefaultBoardSize },
+            { nameof(BoardHeight), DefaultBoardHeight },
+            { nameof(BoardWidth), DefaultBoardWidth },
             { nameof(BorderColor), DefaultBorderColor },
             { nameof(BorderWidth), DefaultBorderWidth },
             { nameof(DarkSquareColor), DefaultDarkSquareColor },
@@ -95,26 +96,56 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Gets the default value for the <see cref="BoardSize"/> property.
+        /// Gets the default value for the <see cref="BoardHeight"/> property.
         /// </summary>
-        public const int DefaultBoardSize = 8;
+        public const int DefaultBoardHeight = 8;
 
         /// <summary>
-        /// Gets or sets the number of squares in a row or file. The minimum value is 1.
-        /// The default value is <see cref="DefaultBoardSize"/> (8).
+        /// Gets or sets the number of squares in a file. The minimum value is 1.
+        /// The default value is <see cref="DefaultBoardHeight"/> (8).
         /// </summary>
-        [DefaultValue(DefaultBoardSize)]
-        public int BoardSize
+        [DefaultValue(DefaultBoardHeight)]
+        public int BoardHeight
         {
-            get { return propertyStore.Get<int>(nameof(BoardSize)); }
+            get { return propertyStore.Get<int>(nameof(BoardHeight)); }
             set
             {
-                // A board size of 0 will cause a division by zero error if SizeToFit is true.
+                // A board height of 0 will cause a division by zero error if SizeToFit is true.
                 if (value < 1)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(BoardSize), value, "Board size must be 1 or higher.");
+                    throw new ArgumentOutOfRangeException(nameof(BoardHeight), value, "Board height must be 1 or higher.");
                 }
-                if (propertyStore.Set(nameof(BoardSize), value))
+                if (propertyStore.Set(nameof(BoardHeight), value))
+                {
+                    updateSquareArrays();
+                    verifySizeToFit();
+                    Invalidate();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the default value for the <see cref="BoardWidth"/> property.
+        /// </summary>
+        public const int DefaultBoardWidth = 8;
+
+        /// <summary>
+        /// Gets or sets the number of squares in a rank. The minimum value is 1.
+        /// The default value is <see cref="DefaultBoardWidth"/> (8).
+        /// </summary>
+        [DefaultValue(DefaultBoardWidth)]
+        public int BoardWidth
+        {
+            get { return propertyStore.Get<int>(nameof(BoardWidth)); }
+            set
+            {
+                // A board width of 0 will cause a division by zero error if SizeToFit is true.
+                if (value < 1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(BoardWidth), value, "Board width must be 1 or higher.");
+                }
+                if (propertyStore.Set(nameof(BoardWidth), value))
                 {
                     updateSquareArrays();
                     verifySizeToFit();
@@ -491,7 +522,7 @@ namespace Sandra.UI.WF
         /// Gets the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public Image GetForegroundImage(int x, int y)
         {
@@ -503,7 +534,7 @@ namespace Sandra.UI.WF
         /// Sets the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetForegroundImage(int x, int y, Image value)
         {
@@ -522,7 +553,7 @@ namespace Sandra.UI.WF
         /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public bool GetIsImageHighLighted(int x, int y)
         {
@@ -534,7 +565,7 @@ namespace Sandra.UI.WF
         /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetIsImageHighLighted(int x, int y, bool value)
         {
@@ -553,7 +584,7 @@ namespace Sandra.UI.WF
         /// Gets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public Color GetSquareOverlayColor(int x, int y)
         {
@@ -565,7 +596,7 @@ namespace Sandra.UI.WF
         /// Sets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetSquareOverlayColor(int x, int y, Color value)
         {
@@ -580,7 +611,7 @@ namespace Sandra.UI.WF
 
         private void updateSquareArrays()
         {
-            int newArrayLength = BoardSize * BoardSize;
+            int newArrayLength = BoardWidth * BoardHeight;
             foregroundImages = new Image[newArrayLength];
             isImageHighlighted = new bool[newArrayLength];
             squareOverlayColors = new Color[newArrayLength];
@@ -687,19 +718,19 @@ namespace Sandra.UI.WF
         }
 
 
-        private int getX(int index) { return index % BoardSize; }
-        private int getY(int index) { return index / BoardSize; }
+        private int getX(int index) { return index % BoardWidth; }
+        private int getY(int index) { return index / BoardWidth; }
 
         private int getIndex(int x, int y)
         {
-            if (x < 0 || x >= BoardSize) throw new IndexOutOfRangeException(nameof(x));
-            if (y < 0 || y >= BoardSize) throw new IndexOutOfRangeException(nameof(y));
-            return y * BoardSize + x;
+            if (x < 0 || x >= BoardWidth) throw new IndexOutOfRangeException(nameof(x));
+            if (y < 0 || y >= BoardHeight) throw new IndexOutOfRangeException(nameof(y));
+            return y * BoardWidth + x;
         }
 
         private Point getLocationFromIndex(int index)
         {
-            if (index < 0 || index >= BoardSize * BoardSize)
+            if (index < 0 || index >= BoardWidth * BoardHeight)
             {
                 return Point.Empty;
             }
@@ -734,17 +765,18 @@ namespace Sandra.UI.WF
             return new Rectangle();
         }
 
-        private int squareSizeFromClientSize(int clientSize)
+        private int maxSquareSize(Size clientSize)
         {
-            int result = (clientSize - InnerSpacing * (BoardSize - 1) - BorderWidth * 2) / BoardSize;
-            return Math.Max(result, 0);
+            int totalBorderWidth = BorderWidth * 2;
+            int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - totalBorderWidth) / BoardWidth;
+            int squareSizeVrt = (clientSize.Height - InnerSpacing * (BoardHeight - 1) - totalBorderWidth) / BoardHeight;
+            return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
         private void performSizeToFit()
         {
             // Resize the squares so that it is as large as possible while still fitting in the client area.
-            int minSize = Math.Min(ClientSize.Height, ClientSize.Width);
-            int newSquareSize = squareSizeFromClientSize(minSize);
+            int newSquareSize = maxSquareSize(ClientSize);
             // Store directly in the property store, to bypass SizeToFit check.
             if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
@@ -767,11 +799,14 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Returns the size closest to the given size which will allow the board to fit exactly.
         /// </summary>
-        public int GetClosestAutoFitSize(int clientSize)
+        public Size GetClosestAutoFitSize(Size maxBounds)
         {
-            int squareSize = squareSizeFromClientSize(clientSize);
+            int squareSize = maxSquareSize(maxBounds);
+
             // Go back to a client size by inverting squareSizeFromClientSize().
-            return squareSize * BoardSize + InnerSpacing * (BoardSize - 1) + BorderWidth * 2;
+            int targetWidth = squareSize * BoardWidth + InnerSpacing * (BoardWidth - 1) + BorderWidth * 2;
+            int targetHeight = squareSize * BoardHeight + InnerSpacing * (BoardHeight - 1) + BorderWidth * 2;
+            return new Size(targetWidth, targetHeight);
         }
 
 
@@ -795,7 +830,6 @@ namespace Sandra.UI.WF
                 return -1;
             }
 
-            int boardSize = BoardSize;
             int borderWidth = BorderWidth;
 
             int px = clientLocation.X - borderWidth,
@@ -809,7 +843,7 @@ namespace Sandra.UI.WF
                 remainderY = py % delta;
 
             int hit;
-            if (x < 0 || x >= boardSize || y < 0 || y >= boardSize || remainderX >= squareSize || remainderY >= squareSize)
+            if (x < 0 || x >= BoardWidth || y < 0 || y >= BoardHeight || remainderX >= squareSize || remainderY >= squareSize)
             {
                 // Either outside of the actual board, or hitting a border.
                 hit = -1;
@@ -817,7 +851,7 @@ namespace Sandra.UI.WF
             else
             {
                 // The location is inside a square.
-                hit = y * boardSize + x;
+                hit = y * BoardWidth + x;
             }
 
             // Update hovering information.
@@ -929,17 +963,18 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // First cache some property values needed for painting so they don't get typecast repeatedly out of the property store.
-            int boardSize = BoardSize;
+            int boardWidth = BoardWidth;
+            int boardHeight = BoardHeight;
             int squareSize = SquareSize;
             int innerSpacing = InnerSpacing;
             int delta = squareSize + innerSpacing;
             int borderWidth = BorderWidth;
-            int totalBoardSize = delta * boardSize - innerSpacing;
-            int totalSize = borderWidth * 2 + totalBoardSize;
+            int totalBoardWidth = delta * boardWidth - innerSpacing;
+            int totalBoardHeight = delta * boardHeight - innerSpacing;
 
             Rectangle clipRectangle = pe.ClipRectangle;
-            Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardSize, totalBoardSize);
-            Rectangle boardWithBorderRectangle = new Rectangle(0, 0, totalSize, totalSize);
+            Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
+            Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
 
             // Draw the background area not covered by the playing board.
             g.ExcludeClip(boardWithBorderRectangle);
@@ -955,11 +990,11 @@ namespace Sandra.UI.WF
                 // Draw light squares by excluding the dark squares, and then filling up what's left.
                 int doubleDelta = delta * 2;
                 int y = borderWidth;
-                for (int yIndex = boardSize - 1; yIndex >= 0; --yIndex)
+                for (int yIndex = boardHeight - 1; yIndex >= 0; --yIndex)
                 {
                     // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
                     int x = borderWidth + (yIndex & 1) * delta;
-                    for (int xIndex = (boardSize - 1) / 2; xIndex >= 0; --xIndex)
+                    for (int xIndex = (boardWidth - 1) / 2; xIndex >= 0; --xIndex)
                     {
                         g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                         x += doubleDelta;
@@ -982,10 +1017,10 @@ namespace Sandra.UI.WF
                 {
                     // Exclude all squares one by one.
                     int y = borderWidth;
-                    for (int j = 0; j < boardSize; ++j)
+                    for (int j = 0; j < boardHeight; ++j)
                     {
                         int x = borderWidth;
-                        for (int k = 0; k < boardSize; ++k)
+                        for (int k = 0; k < boardWidth; ++k)
                         {
                             g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
                             x += delta;
@@ -1015,10 +1050,10 @@ namespace Sandra.UI.WF
                     // Loop over foreground images and draw them.
                     int y = vOffset;
                     int index = 0;
-                    for (int j = 0; j < boardSize; ++j)
+                    for (int j = 0; j < boardHeight; ++j)
                     {
                         int x = hOffset;
-                        for (int k = 0; k < boardSize; ++k)
+                        for (int k = 0; k < boardWidth; ++k)
                         {
                             // Select picture.
                             Image currentImg = foregroundImages[index];
@@ -1058,7 +1093,7 @@ namespace Sandra.UI.WF
                 }
 
                 // Apply square highlights.
-                for (int index = 0; index < boardSize * boardSize; ++index)
+                for (int index = 0; index < boardWidth * boardHeight; ++index)
                 {
                     if (!squareOverlayColors[index].IsEmpty)
                     {
@@ -1101,6 +1136,7 @@ namespace Sandra.UI.WF
 
             base.OnPaint(pe);
         }
+
 
         protected override void Dispose(bool disposing)
         {

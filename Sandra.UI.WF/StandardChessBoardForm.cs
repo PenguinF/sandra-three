@@ -37,7 +37,8 @@ namespace Sandra.UI.WF
             ShowIcon = false;
             MaximizeBox = false;
 
-            PlayingBoard.BoardSize = Chess.Constants.SquareCount;
+            PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
+            PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
 
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
@@ -83,9 +84,9 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
             }
-            for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+            for (int x = 0; x < PlayingBoard.BoardWidth; ++x)
             {
-                for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+                for (int y = 0; y < PlayingBoard.BoardHeight; ++y)
                 {
                     PlayingBoard.SetSquareOverlayColor(x, y, new Color());
                 }
@@ -111,9 +112,9 @@ namespace Sandra.UI.WF
 
         private void clearBoard()
         {
-            for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+            for (int y = 0; y < PlayingBoard.BoardHeight; ++y)
             {
-                for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+                for (int x = 0; x < PlayingBoard.BoardWidth; ++x)
                 {
                     PlayingBoard.SetForegroundImage(x, y, null);
                 }

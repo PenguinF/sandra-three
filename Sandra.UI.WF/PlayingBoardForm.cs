@@ -35,6 +35,7 @@ namespace Sandra.UI.WF
         public PlayingBoardForm()
         {
             PlayingBoard = new PlayingBoard();
+            PlayingBoard.Location = new Point(0, 0);
             PlayingBoard.Dock = DockStyle.Fill;
             PlayingBoard.Visible = true;
             Controls.Add(PlayingBoard);
@@ -57,11 +58,13 @@ namespace Sandra.UI.WF
                 Bottom = Bottom,
             };
 
-            OnResizing(ref windowRect, ResizeMode.BottomRight);
+            performAutoFit(ref windowRect, ResizeMode.BottomRight);
 
             SetBoundsCore(windowRect.Left, windowRect.Top,
                           windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
                           BoundsSpecified.Size);
+
+            PlayingBoard.Size = PlayingBoard.GetClosestAutoFitSize(ClientSize);
         }
 
         int widthDifference;
@@ -81,70 +84,69 @@ namespace Sandra.UI.WF
             heightDifference = Bounds.Height - ClientRectangle.Height;
         }
 
+        private void performAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
+        {
+            Size maxBounds;
+            switch (resizeMode)
+            {
+                case ResizeMode.Left:
+                case ResizeMode.Right:
+                    // Unrestricted vertical growth.
+                    maxBounds = new Size(resizeRect.Right - resizeRect.Left - widthDifference,
+                                         int.MaxValue);
+                    break;
+                case ResizeMode.Top:
+                case ResizeMode.Bottom:
+                    // Unrestricted horizontal growth.
+                    maxBounds = new Size(int.MaxValue,
+                                         resizeRect.Bottom - resizeRect.Top - heightDifference);
+                    break;
+                default:
+                    maxBounds = new Size(resizeRect.Right - resizeRect.Left - widthDifference,
+                                         resizeRect.Bottom - resizeRect.Top - heightDifference);
+                    break;
+            }
+
+            // Calculate closest auto fit size given the client height and width that would result from performing the given resize.
+            Size targetSize = PlayingBoard.GetClosestAutoFitSize(maxBounds);
+
+            // Left/right.
+            switch (resizeMode)
+            {
+                case ResizeMode.Left:
+                case ResizeMode.TopLeft:
+                case ResizeMode.BottomLeft:
+                    // Adjust left edge.
+                    resizeRect.Left = resizeRect.Right - targetSize.Width - widthDifference;
+                    break;
+                default:
+                    // Adjust right edge.
+                    resizeRect.Right = resizeRect.Left + targetSize.Width + widthDifference;
+                    break;
+            }
+
+            // Top/bottom.
+            switch (resizeMode)
+            {
+                case ResizeMode.Top:
+                case ResizeMode.TopLeft:
+                case ResizeMode.TopRight:
+                    // Adjust top edge.
+                    resizeRect.Top = resizeRect.Bottom - targetSize.Height - heightDifference;
+                    break;
+                default:
+                    // Adjust bottom edge.
+                    resizeRect.Bottom = resizeRect.Top + targetSize.Height + heightDifference;
+                    break;
+            }
+        }
+
         protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
         {
             if (PlayingBoard.SizeToFit)
             {
                 // Snap to auto-fit, instead of to other MDI children.
-
-                // Calculate closest auto fit size given the client height and width that would result from performing the given resize.
-                int targetWidth = PlayingBoard.GetClosestAutoFitSize(resizeRect.Right - resizeRect.Left - widthDifference);
-                int targetHeight = PlayingBoard.GetClosestAutoFitSize(resizeRect.Bottom - resizeRect.Top - heightDifference);
-
-                // Select target size and extra direction in which to grow/shrink for straight directions.
-                int targetSize;
-                switch (resizeMode)
-                {
-                    case ResizeMode.Top:
-                        resizeMode = ResizeMode.TopRight;
-                        targetSize = targetHeight;
-                        break;
-                    case ResizeMode.Bottom:
-                        resizeMode = ResizeMode.BottomRight;
-                        targetSize = targetHeight;
-                        break;
-                    case ResizeMode.Left:
-                        resizeMode = ResizeMode.BottomLeft;
-                        targetSize = targetWidth;
-                        break;
-                    case ResizeMode.Right:
-                        resizeMode = ResizeMode.BottomRight;
-                        targetSize = targetWidth;
-                        break;
-                    default:
-                        targetSize = Math.Min(targetHeight, targetWidth);
-                        break;
-                }
-
-                // Left/right.
-                switch (resizeMode)
-                {
-                    case ResizeMode.TopLeft:
-                    case ResizeMode.BottomLeft:
-                        // Adjust left edge.
-                        resizeRect.Left = resizeRect.Right - targetSize - widthDifference;
-                        break;
-                    case ResizeMode.TopRight:
-                    case ResizeMode.BottomRight:
-                        // Adjust right edge.
-                        resizeRect.Right = resizeRect.Left + targetSize + widthDifference;
-                        break;
-                }
-
-                // Top/bottom.
-                switch (resizeMode)
-                {
-                    case ResizeMode.TopLeft:
-                    case ResizeMode.TopRight:
-                        // Adjust top edge.
-                        resizeRect.Top = resizeRect.Bottom - targetSize - heightDifference;
-                        break;
-                    case ResizeMode.BottomLeft:
-                    case ResizeMode.BottomRight:
-                        // Adjust bottom edge.
-                        resizeRect.Bottom = resizeRect.Top + targetSize + heightDifference;
-                        break;
-                }
+                performAutoFit(ref resizeRect, resizeMode);
             }
             else
             {
