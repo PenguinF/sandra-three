@@ -1242,6 +1242,8 @@ namespace Sandra.UI.WF
                     }
                 }
 
+                base.OnPaint(pe);
+
                 if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
                 {
                     // Draw moving image on top of the rest.
@@ -1258,8 +1260,10 @@ namespace Sandra.UI.WF
                     }
                 }
             }
-
-            base.OnPaint(pe);
+            else
+            {
+                base.OnPaint(pe);
+            }
         }
 
         private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, bool highlight)
