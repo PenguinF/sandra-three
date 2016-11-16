@@ -66,26 +66,45 @@ namespace Sandra.UI.WF
             BottomRight,
         }
 
-        private Chess.NonEmptyColoredPiece getPromoteToPiece(SquareQuadrant quadrant)
+        private Chess.NonEmptyColoredPiece getPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
         {
-            switch (quadrant)
+            switch (promoteColor)
             {
-                case SquareQuadrant.TopLeft:
-                    return Chess.NonEmptyColoredPiece.WhiteRook;
-                case SquareQuadrant.TopRight:
-                    return Chess.NonEmptyColoredPiece.WhiteBishop;
-                case SquareQuadrant.BottomRight:
-                    return Chess.NonEmptyColoredPiece.WhiteKnight;
-                case SquareQuadrant.BottomLeft:
-                case SquareQuadrant.Indeterminate:
+                case Chess.Color.White:
+                    switch (quadrant)
+                    {
+                        case SquareQuadrant.TopLeft:
+                            return Chess.NonEmptyColoredPiece.WhiteRook;
+                        case SquareQuadrant.TopRight:
+                            return Chess.NonEmptyColoredPiece.WhiteBishop;
+                        case SquareQuadrant.BottomRight:
+                            return Chess.NonEmptyColoredPiece.WhiteKnight;
+                        case SquareQuadrant.BottomLeft:
+                        case SquareQuadrant.Indeterminate:
+                        default:
+                            return Chess.NonEmptyColoredPiece.WhiteQueen;
+                    }
+                case Chess.Color.Black:
                 default:
-                    return Chess.NonEmptyColoredPiece.WhiteQueen;
+                    switch (quadrant)
+                    {
+                        case SquareQuadrant.BottomLeft:
+                            return Chess.NonEmptyColoredPiece.BlackRook;
+                        case SquareQuadrant.BottomRight:
+                            return Chess.NonEmptyColoredPiece.BlackBishop;
+                        case SquareQuadrant.TopRight:
+                            return Chess.NonEmptyColoredPiece.BlackKnight;
+                        case SquareQuadrant.TopLeft:
+                        case SquareQuadrant.Indeterminate:
+                        default:
+                            return Chess.NonEmptyColoredPiece.BlackQueen;
+                    }
             }
         }
 
         private SquareQuadrant hoverQuadrant;
 
-        private void updateHoverQuadrant(SquareQuadrant value)
+        private void updateHoverQuadrant(SquareQuadrant value, Chess.Color promoteColor)
         {
             if (hoverQuadrant != value)
             {
@@ -96,30 +115,34 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    PlayingBoard.MovingImage = PieceImages[getPromoteToPiece(value)];
+                    PlayingBoard.MovingImage = PieceImages[getPromoteToPiece(value, promoteColor)];
                 }
             }
         }
 
-        private bool isPromoting(SquareLocation location)
+        private bool isPromoting(SquareLocation location, out Chess.Color promoteColor)
         {
             if (PlayingBoard.IsMoving && location != null && PlayingBoard.MoveStartSquare != location)
             {
                 if (location.Y == 0)
                 {
+                    promoteColor = Chess.Color.White;
                     return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
                 }
                 else if (location.Y == 7)
                 {
+                    promoteColor = Chess.Color.Black;
                     return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.BlackPawn];
                 }
             }
+            promoteColor = default(Chess.Color);
             return false;
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isPromoting(PlayingBoard.HoverSquare))
+            Chess.Color promoteColor;
+            if (isPromoting(PlayingBoard.HoverSquare, out promoteColor))
             {
                 Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
                 SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
@@ -143,7 +166,7 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-                updateHoverQuadrant(hitQuadrant);
+                updateHoverQuadrant(hitQuadrant, promoteColor);
             }
         }
 
@@ -161,7 +184,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
-            updateHoverQuadrant(SquareQuadrant.Indeterminate);
+            updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
             if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
@@ -196,9 +219,10 @@ namespace Sandra.UI.WF
             // Move piece from source to destination.
             if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
             {
-                if (isPromoting(e.Target))
+                Chess.Color promoteColor;
+                if (isPromoting(e.Target, out promoteColor))
                 {
-                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PieceImages[getPromoteToPiece(hoverQuadrant)]);
+                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PieceImages[getPromoteToPiece(hoverQuadrant, promoteColor)]);
                 }
                 else
                 {
@@ -217,7 +241,8 @@ namespace Sandra.UI.WF
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            if (isPromoting(hoverSquare))
+            Chess.Color promoteColor;
+            if (isPromoting(hoverSquare, out promoteColor))
             {
                 int squareSize = PlayingBoard.SquareSize;
                 if (squareSize >= 2)
@@ -226,13 +251,13 @@ namespace Sandra.UI.WF
                     int halfSquareSize = (squareSize + 1) / 2;
                     int otherHalfSquareSize = squareSize - halfSquareSize;
 
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft)],
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft, promoteColor)],
                                          rect.X, rect.Y, halfSquareSize, halfSquareSize);
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight)],
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight, promoteColor)],
                                          rect.X + halfSquareSize, rect.Y, otherHalfSquareSize, halfSquareSize);
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomLeft)],
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomLeft, promoteColor)],
                                          rect.X, rect.Y + halfSquareSize, halfSquareSize, otherHalfSquareSize);
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight)],
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
                                          rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
                 }
             }
