@@ -754,6 +754,39 @@ namespace Sandra.UI.WF
             }
         }
 
+        /// <summary>
+        /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
+        /// </summary>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Rectangle GetSquareRectangle(int x, int y)
+        {
+            throwIfOutOfRange(x, y);
+            int delta = SquareSize + InnerSpacing;
+            int px = BorderWidth + x * delta,
+                py = BorderWidth + y * delta;
+            return new Rectangle(px, py, px + SquareSize, py + SquareSize);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Rectangle GetSquareRectangle(SquareLocation squareLocation)
+        {
+            throwIfNull(squareLocation);
+            return GetSquareRectangle(squareLocation.X, squareLocation.Y);
+        }
+
 
         /// <summary>
         /// Occurs when the mouse pointer enters a square.
