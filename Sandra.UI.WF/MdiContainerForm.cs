@@ -62,6 +62,7 @@ namespace Sandra.UI.WF
             };
             mdiChild.UpdatePieceImages(PieceImages);
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+            mdiChild.InitializeStartPosition();
             mdiChild.PerformAutoFit();
         }
 
@@ -81,6 +82,8 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
+
+            NewPlayingBoard();
         }
 
         EnumIndexedArray<NonEmptyColoredPiece, Image> loadChessPieceImages()

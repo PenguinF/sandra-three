@@ -31,11 +31,7 @@ namespace Sandra.UI.WF
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            MdiContainerForm mdiParent = new MdiContainerForm();
-            mdiParent.NewPlayingBoard();
-
-            Application.Run(mdiParent);
+            Application.Run(new MdiContainerForm());
         }
     }
 }
