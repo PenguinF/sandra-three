@@ -16,8 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Sandra.Chess;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public class MdiContainerForm : Form
     {
-        public List<Image> PieceImages { get; private set; }
+        public EnumIndexedArray<NonEmptyColoredPiece, Image> PieceImages { get; private set; }
 
         public MdiContainerForm()
         {
@@ -60,7 +60,9 @@ namespace Sandra.UI.WF
                 ClientSize = new Size(400, 400),
                 Visible = true,
             };
+            mdiChild.UpdatePieceImages(PieceImages);
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+            mdiChild.InitializeStartPosition();
             mdiChild.PerformAutoFit();
         }
 
@@ -80,25 +82,26 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
+
+            NewPlayingBoard();
         }
 
-        List<Image> loadChessPieceImages()
+        EnumIndexedArray<NonEmptyColoredPiece, Image> loadChessPieceImages()
         {
-            return new List<Image>
-            {
-                loadImage("bp"),
-                loadImage("bn"),
-                loadImage("bb"),
-                loadImage("br"),
-                loadImage("bq"),
-                loadImage("bk"),
-                loadImage("wp"),
-                loadImage("wn"),
-                loadImage("wb"),
-                loadImage("wr"),
-                loadImage("wq"),
-                loadImage("wk"),
-            };
+            var array = EnumIndexedArray<NonEmptyColoredPiece, Image>.New();
+            array[NonEmptyColoredPiece.BlackPawn] = loadImage("bp");
+            array[NonEmptyColoredPiece.BlackKnight] = loadImage("bn");
+            array[NonEmptyColoredPiece.BlackBishop] = loadImage("bb");
+            array[NonEmptyColoredPiece.BlackRook] = loadImage("br");
+            array[NonEmptyColoredPiece.BlackQueen] = loadImage("bq");
+            array[NonEmptyColoredPiece.BlackKing] = loadImage("bk");
+            array[NonEmptyColoredPiece.WhitePawn] = loadImage("wp");
+            array[NonEmptyColoredPiece.WhiteKnight] = loadImage("wn");
+            array[NonEmptyColoredPiece.WhiteBishop] = loadImage("wb");
+            array[NonEmptyColoredPiece.WhiteRook] = loadImage("wr");
+            array[NonEmptyColoredPiece.WhiteQueen] = loadImage("wq");
+            array[NonEmptyColoredPiece.WhiteKing] = loadImage("wk");
+            return array;
         }
 
         static Image loadImage(string imageFileKey)
