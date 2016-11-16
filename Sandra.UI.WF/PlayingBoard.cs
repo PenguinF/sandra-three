@@ -526,7 +526,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public Image GetForegroundImage(SquareLocation squareLocation)
         {
@@ -560,7 +560,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetForegroundImage(SquareLocation squareLocation, Image value)
         {
@@ -593,7 +593,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public bool GetIsImageHighLighted(SquareLocation squareLocation)
         {
@@ -627,7 +627,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetIsImageHighLighted(SquareLocation squareLocation, bool value)
         {
@@ -660,7 +660,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public Color GetSquareOverlayColor(SquareLocation squareLocation)
         {
@@ -694,7 +694,7 @@ namespace Sandra.UI.WF
         /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardSize"/>.
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
         public void SetSquareOverlayColor(SquareLocation squareLocation, Color value)
         {
