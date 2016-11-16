@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -40,10 +41,92 @@ namespace Sandra.UI.WF
             PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
             PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
 
+            PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
+        }
+
+        /// <summary>
+        /// Identifies a quadrant of a square.
+        /// </summary>
+        private enum SquareQuadrant
+        {
+            /// <summary>
+            /// Either there is no active quadrant, or the square size is too small to subdivide into non-empty quadrants.
+            /// </summary>
+            Indeterminate,
+
+            TopLeft,
+            TopRight,
+            BottomLeft,
+            BottomRight,
+        }
+
+        private Chess.NonEmptyColoredPiece getPromoteToPiece(SquareQuadrant quadrant)
+        {
+            switch (quadrant)
+            {
+                case SquareQuadrant.TopLeft:
+                    return Chess.NonEmptyColoredPiece.WhiteRook;
+                case SquareQuadrant.TopRight:
+                    return Chess.NonEmptyColoredPiece.WhiteBishop;
+                case SquareQuadrant.BottomRight:
+                    return Chess.NonEmptyColoredPiece.WhiteKnight;
+                case SquareQuadrant.BottomLeft:
+                case SquareQuadrant.Indeterminate:
+                default:
+                    return Chess.NonEmptyColoredPiece.WhiteQueen;
+            }
+        }
+
+        private SquareQuadrant hoverQuadrant;
+
+        private void updateHoverQuadrant(SquareQuadrant value)
+        {
+            if (hoverQuadrant != value)
+            {
+                hoverQuadrant = value;
+                if (value == SquareQuadrant.Indeterminate)
+                {
+                    PlayingBoard.MovingImage = null;
+                }
+                else
+                {
+                    PlayingBoard.MovingImage = PieceImages[getPromoteToPiece(value)];
+                }
+            }
+        }
+
+        private void playingBoard_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (PlayingBoard.IsMoving && PlayingBoard.HoverSquare != null && PlayingBoard.HoverSquare.Y == 0)
+            {
+                Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
+                SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
+                if (hoverSquareRectangle.Contains(e.X, e.Y))
+                {
+                    int squareSize = PlayingBoard.SquareSize;
+                    if (squareSize >= 2)
+                    {
+                        int halfSquareSize = (squareSize + 1) / 2;
+                        if (e.X - hoverSquareRectangle.Left < halfSquareSize)
+                        {
+                            hitQuadrant = e.Y - hoverSquareRectangle.Top < halfSquareSize
+                                        ? SquareQuadrant.TopLeft
+                                        : SquareQuadrant.BottomLeft;
+                        }
+                        else
+                        {
+                            hitQuadrant = e.Y - hoverSquareRectangle.Top < halfSquareSize
+                                        ? SquareQuadrant.TopRight
+                                        : SquareQuadrant.BottomRight;
+                        }
+                    }
+                }
+                updateHoverQuadrant(hitQuadrant);
+            }
         }
 
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
@@ -60,6 +143,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
+            updateHoverQuadrant(SquareQuadrant.Indeterminate);
             if (PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
