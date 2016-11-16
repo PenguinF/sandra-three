@@ -35,6 +35,7 @@ namespace Sandra.UI.WF
         public PlayingBoardForm()
         {
             PlayingBoard = new PlayingBoard();
+            PlayingBoard.Location = new Point(0, 0);
             PlayingBoard.Dock = DockStyle.Fill;
             PlayingBoard.Visible = true;
             Controls.Add(PlayingBoard);
@@ -62,6 +63,8 @@ namespace Sandra.UI.WF
             SetBoundsCore(windowRect.Left, windowRect.Top,
                           windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
                           BoundsSpecified.Size);
+
+            PlayingBoard.Size = PlayingBoard.GetClosestAutoFitSize(ClientSize);
         }
 
         int widthDifference;
