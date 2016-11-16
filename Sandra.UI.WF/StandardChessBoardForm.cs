@@ -103,7 +103,7 @@ namespace Sandra.UI.WF
 
         private bool isPromoting(SquareLocation location)
         {
-            return PlayingBoard.IsMoving && location != null && location.Y == 0;
+            return PlayingBoard.IsMoving && location != null && location.Y == 0 && PlayingBoard.MoveStartSquare != location;
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)

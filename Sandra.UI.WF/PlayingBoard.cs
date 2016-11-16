@@ -807,6 +807,19 @@ namespace Sandra.UI.WF
             return GetSquareRectangle(squareLocation.X, squareLocation.Y);
         }
 
+        /// <summary>
+        /// Gets the location of the square where the current move started if <see cref="IsMoving"/> is true,
+        /// or null (Nothing in Visual Basic) if no move is currently being performed.
+        /// </summary>
+        [Browsable(false)]
+        public SquareLocation MoveStartSquare
+        {
+            get
+            {
+                return getSquareLocation(moveStartSquareIndex);
+            }
+        }
+
 
         /// <summary>
         /// Occurs when the mouse pointer enters a square.
@@ -1360,7 +1373,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the location of a square on a <see cref="PlayingBoard"/>. 
     /// </summary>
-    public class SquareLocation
+    public sealed class SquareLocation
     {
         /// <summary>
         /// Gets the x-coordinate of the square.
@@ -1378,6 +1391,35 @@ namespace Sandra.UI.WF
         public SquareLocation(int x, int y)
         {
             X = x; Y = y;
+        }
+
+        private bool equals(SquareLocation other)
+        {
+            if (other == null) return false;
+            return X == other.X && Y == other.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return equals(obj as SquareLocation);
+        }
+
+        public override int GetHashCode()
+        {
+            // Rely on hash code generation of the built-in .NET library.
+            return new Tuple<int, int>(X, Y).GetHashCode();
+        }
+
+        public static bool operator ==(SquareLocation left, SquareLocation right)
+        {
+            if (ReferenceEquals(left, null)) return ReferenceEquals(right, null);
+            return left.equals(right);
+        }
+
+        public static bool operator !=(SquareLocation left, SquareLocation right)
+        {
+            if (ReferenceEquals(left, null)) return !ReferenceEquals(right, null);
+            return !left.equals(right);
         }
     }
 }
