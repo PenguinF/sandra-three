@@ -851,7 +851,7 @@ namespace Sandra.UI.WF
 
         private Point moveStartPosition;
         private Point moveCurrentPosition;
-        private int moveStartSquareIndex;
+        private int moveStartSquareIndex = -1;
 
         private int hitTest(Point clientLocation)
         {
