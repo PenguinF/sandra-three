@@ -46,39 +46,36 @@ namespace Sandra.UI.WF
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
         }
 
-        private SquareEventArgs hoverSquare;
-
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            hoverSquare = e;
             if (PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(80, 255, 255, 255));
+                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
             }
             else
             {
-                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, true);
+                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
             }
         }
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
-            hoverSquare = null;
             if (PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetSquareOverlayColor(e.X, e.Y, Color.FromArgb(48, 255, 190, 0));
+                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
             }
             else
             {
-                PlayingBoard.SetIsImageHighLighted(e.X, e.Y, false);
+                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
             }
         }
 
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
-            if (hoverSquare == null || hoverSquare.X != e.StartX || hoverSquare.Y != e.StartY)
+            var hoverSquare = PlayingBoard.HoverSquare;
+            if (hoverSquare == null || hoverSquare.X != e.Start.X || hoverSquare.Y != e.Start.Y)
             {
-                PlayingBoard.SetIsImageHighLighted(e.StartX, e.StartY, false);
+                PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, false);
             }
             if (hoverSquare != null)
             {
@@ -98,10 +95,10 @@ namespace Sandra.UI.WF
             resetMoveStartSquareHighlight(e);
 
             // Move piece from source to destination.
-            if (e.StartX != e.TargetX || e.StartY != e.TargetY)
+            if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
             {
-                PlayingBoard.SetForegroundImage(e.TargetX, e.TargetY, PlayingBoard.GetForegroundImage(e.StartX, e.StartY));
-                PlayingBoard.SetForegroundImage(e.StartX, e.StartY, null);
+                PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
+                PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
             }
         }
 

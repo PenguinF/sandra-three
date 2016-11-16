@@ -18,7 +18,6 @@
  *********************************************************************************/
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -335,19 +334,6 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Gets if an image is currently being moved.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsMoving
-        {
-            get
-            {
-                return isMoving;
-            }
-        }
-
-
-        /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
         public static Color DefaultLightSquareColor { get { return Color.LightBlue; } }
@@ -531,6 +517,24 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the <see cref="Image"/> on position (x, y).
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Image GetForegroundImage(SquareLocation squareLocation)
+        {
+            throwIfNull(squareLocation);
+            return GetForegroundImage(squareLocation.X, squareLocation.Y);
+        }
+
+        /// <summary>
         /// Sets the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
@@ -544,6 +548,24 @@ namespace Sandra.UI.WF
                 foregroundImages[index] = value;
                 Invalidate();
             }
+        }
+
+        /// <summary>
+        /// Sets the <see cref="Image"/> on position (x, y).
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public void SetForegroundImage(SquareLocation squareLocation, Image value)
+        {
+            throwIfNull(squareLocation);
+            SetForegroundImage(squareLocation.X, squareLocation.Y, value);
         }
 
 
@@ -562,6 +584,24 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public bool GetIsImageHighLighted(SquareLocation squareLocation)
+        {
+            throwIfNull(squareLocation);
+            return GetIsImageHighLighted(squareLocation.X, squareLocation.Y);
+        }
+
+        /// <summary>
         /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
@@ -575,6 +615,24 @@ namespace Sandra.UI.WF
                 isImageHighlighted[index] = value;
                 Invalidate();
             }
+        }
+
+        /// <summary>
+        /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public void SetIsImageHighLighted(SquareLocation squareLocation, bool value)
+        {
+            throwIfNull(squareLocation);
+            SetIsImageHighLighted(squareLocation.X, squareLocation.Y, value);
         }
 
 
@@ -593,6 +651,24 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets an overlay color for the square on position (x, y).
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public Color GetSquareOverlayColor(SquareLocation squareLocation)
+        {
+            throwIfNull(squareLocation);
+            return GetSquareOverlayColor(squareLocation.X, squareLocation.Y);
+        }
+
+        /// <summary>
         /// Sets an overlay color for the square on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
@@ -608,6 +684,24 @@ namespace Sandra.UI.WF
             }
         }
 
+        /// <summary>
+        /// Sets an overlay color for the square on position (x, y).
+        /// </summary>
+        /// <param name="squareLocation">
+        /// The location (x, y) of the square.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="squareLocation"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
+        /// </exception>
+        public void SetSquareOverlayColor(SquareLocation squareLocation, Color value)
+        {
+            throwIfNull(squareLocation);
+            SetSquareOverlayColor(squareLocation.X, squareLocation.Y, value);
+        }
+
 
         private void updateSquareArrays()
         {
@@ -615,6 +709,31 @@ namespace Sandra.UI.WF
             foregroundImages = new Image[newArrayLength];
             isImageHighlighted = new bool[newArrayLength];
             squareOverlayColors = new Color[newArrayLength];
+        }
+
+
+        /// <summary>
+        /// Gets the location of the square the mouse pointer is located,
+        /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
+        /// </summary>
+        public SquareLocation HoverSquare
+        {
+            get
+            {
+                return getSquareLocation(hoveringSquareIndex);
+            }
+        }
+
+        /// <summary>
+        /// Gets if an image is currently being moved.
+        /// </summary>
+        [Browsable(false)]
+        public bool IsMoving
+        {
+            get
+            {
+                return moveStartSquareIndex >= 0;
+            }
         }
 
 
@@ -633,7 +752,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMouseEnterSquare(int squareIndex)
         {
-            OnMouseEnterSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMouseEnterSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -652,7 +771,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMouseLeaveSquare(int squareIndex)
         {
-            OnMouseLeaveSquare(new SquareEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMouseLeaveSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -671,7 +790,7 @@ namespace Sandra.UI.WF
 
         protected void RaiseMoveCancel(int squareIndex)
         {
-            OnMoveCancel(new MoveEventArgs(getX(squareIndex), getY(squareIndex)));
+            OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
         }
 
 
@@ -690,29 +809,27 @@ namespace Sandra.UI.WF
 
         protected void RaiseMoveCommit(int sourceSquareIndex, int targetSquareIndex)
         {
-            OnMoveCommit(new MoveCommitEventArgs(getX(sourceSquareIndex),
-                                                 getY(sourceSquareIndex),
-                                                 getX(targetSquareIndex),
-                                                 getY(targetSquareIndex)));
+            OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
+                                                 getSquareLocation(targetSquareIndex)));
         }
 
 
         /// <summary>
         /// Occurs when an image occupying a square starts being moved.
         /// </summary>
-        public event EventHandler<CancellableSquareEventArgs> MoveStart;
+        public event EventHandler<CancellableMoveEventArgs> MoveStart;
 
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected virtual void OnMoveStart(CancellableSquareEventArgs e)
+        protected virtual void OnMoveStart(CancellableMoveEventArgs e)
         {
             MoveStart?.Invoke(this, e);
         }
 
         protected bool RaiseMoveStart(int squareIndex)
         {
-            var e = new CancellableSquareEventArgs(getX(squareIndex), getY(squareIndex));
+            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex));
             OnMoveStart(e);
             return !e.Cancel;
         }
@@ -720,6 +837,17 @@ namespace Sandra.UI.WF
 
         private int getX(int index) { return index % BoardWidth; }
         private int getY(int index) { return index / BoardWidth; }
+
+        private SquareLocation getSquareLocation(int index)
+        {
+            if (index < 0) return null;
+            return new SquareLocation(getX(index), getY(index));
+        }
+
+        private void throwIfNull(SquareLocation squareLocation)
+        {
+            if (squareLocation == null) throw new ArgumentNullException(nameof(squareLocation));
+        }
 
         private int getIndex(int x, int y)
         {
@@ -814,10 +942,9 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private bool isMoving;
         private Point moveStartPosition;
         private Point moveCurrentPosition;
-        private int moveStartSquareIndex;
+        private int moveStartSquareIndex = -1;
 
         private int hitTest(Point clientLocation)
         {
@@ -885,14 +1012,13 @@ namespace Sandra.UI.WF
             int hit = hitTest(e.Location);
 
             // Start moving?
-            if (e.Button == MouseButtons.Left && !isMoving)
+            if (e.Button == MouseButtons.Left && !IsMoving)
             {
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
                     if (RaiseMoveStart(hit))
                     {
-                        isMoving = true;
                         moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
                         moveStartPosition.Offset(getLocationFromIndex(hit));
                         Rectangle imageRect = getRelativeForegroundImageRectangle();
@@ -913,7 +1039,7 @@ namespace Sandra.UI.WF
             hitTest(e.Location);
 
             // Update moving information.
-            if (isMoving)
+            if (IsMoving)
             {
                 moveCurrentPosition = e.Location;
                 Invalidate();
@@ -927,11 +1053,8 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (isMoving)
+            if (moveStartSquareIndex >= 0)
             {
-                // End of move.
-                isMoving = false;
-
                 if (hoveringSquareIndex >= 0)
                 {
                     RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
@@ -940,6 +1063,9 @@ namespace Sandra.UI.WF
                 {
                     RaiseMoveCancel(moveStartSquareIndex);
                 }
+
+                // End of move.
+                moveStartSquareIndex = -1;
 
                 Invalidate();
             }
@@ -1061,7 +1187,7 @@ namespace Sandra.UI.WF
                             {
                                 // Draw current image - but use a color transformation if the current square was
                                 // used to start moving from, or if the image must be highlighted.
-                                if (isMoving && index == moveStartSquareIndex)
+                                if (index == moveStartSquareIndex)
                                 {
                                     // Half-transparent.
                                     g.DrawImage(currentImg,
@@ -1106,7 +1232,7 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                if (sizeH > 0 && sizeV > 0 && isMoving)
+                if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
                 {
                     // Draw moving image on top of the rest.
                     Image currentImg = foregroundImages[moveStartSquareIndex];
@@ -1153,126 +1279,26 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>
-    /// or <see cref="PlayingBoard.MouseLeaveSquare"/> event.
+    /// Represents the location of a square on a <see cref="PlayingBoard"/>. 
     /// </summary>
-    [DebuggerDisplay("(x = {X}, y = {Y})")]
-    public class SquareEventArgs : EventArgs
+    public class SquareLocation
     {
         /// <summary>
-        /// Gets the X-coordinate of the square.
+        /// Gets the x-coordinate of the square.
         /// </summary>
         public int X { get; }
 
         /// <summary>
-        /// Gets the Y-coordinate of the square.
+        /// Gets the y-coordinate of the square.
         /// </summary>
         public int Y { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SquareEventArgs"/> class.
+        /// Initializes a new instance of a square location.
         /// </summary>
-        /// <param name="x">
-        /// The X-coordinate of the square.
-        /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public SquareEventArgs(int x, int y)
+        public SquareLocation(int x, int y)
         {
             X = x; Y = y;
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
-    /// </summary>
-    public class CancellableSquareEventArgs : SquareEventArgs
-    {
-        /// <summary>
-        /// Gets or sets a value indicating whether the event should be canceled.
-        /// </summary>
-        public bool Cancel { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CancellableSquareEventArgs"/> class.
-        /// </summary>
-        /// <param name="x">
-        /// The X-coordinate of the square.
-        /// </param>
-        /// <param name="y">
-        /// The Y-coordinate of the square.
-        /// </param>
-        public CancellableSquareEventArgs(int x, int y) : base(x, y)
-        {
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
-    /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY})")]
-    public class MoveEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the X-coordinate of the square where moving started.
-        /// </summary>
-        public int StartX { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the square where moving started.
-        /// </summary>
-        public int StartY { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
-        /// </summary>
-        /// <param name="startX">
-        /// The X-coordinate of the square where moving started.
-        /// </param>
-        /// <param name="startY">
-        /// The Y-coordinate of the square where moving started.
-        /// </param>
-        public MoveEventArgs(int startX, int startY)
-        {
-            StartX = startX; StartY = startY;
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
-    /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
-    public class MoveCommitEventArgs : MoveEventArgs
-    {
-        /// <summary>
-        /// Gets the X-coordinate of the square where the mouse cursor currently is.
-        /// </summary>
-        public int TargetX { get; }
-
-        /// <summary>
-        /// Gets the Y-coordinate of the square where the mouse cursor currently is.
-        /// </summary>
-        public int TargetY { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
-        /// </summary>
-        /// <param name="startX">
-        /// The X-coordinate of the square where moving started.
-        /// </param>
-        /// <param name="startY">
-        /// The Y-coordinate of the square where moving started.
-        /// </param>
-        /// <param name="targetX">
-        /// The X-coordinate of the square where the mouse cursor currently is.
-        /// </param>
-        /// <param name="targetY">
-        /// The Y-coordinate of the square where the mouse cursor currently is.
-        /// </param>
-        public MoveCommitEventArgs(int startX, int startY, int targetX, int targetY) : base(startX, startY)
-        {
-            TargetX = targetX; TargetY = targetY;
         }
     }
 }
