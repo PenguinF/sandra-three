@@ -103,7 +103,11 @@ namespace Sandra.UI.WF
 
         private bool isPromoting(SquareLocation location)
         {
-            return PlayingBoard.IsMoving && location != null && location.Y == 0 && PlayingBoard.MoveStartSquare != location;
+            return PlayingBoard.IsMoving
+                && location != null
+                && location.Y == 0
+                && PlayingBoard.MoveStartSquare != location
+                && PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
