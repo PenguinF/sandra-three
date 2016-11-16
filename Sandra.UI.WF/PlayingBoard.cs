@@ -1214,19 +1214,11 @@ namespace Sandra.UI.WF
                                                 GraphicsUnit.Pixel,
                                                 moveSourceImageAttributes);
                                 }
-                                else if (isImageHighlighted[index])
-                                {
-                                    // Highlight piece.
-                                    g.DrawImage(currentImg,
-                                                new Rectangle(x, y, sizeH, sizeV),
-                                                0, 0, currentImg.Width, currentImg.Height,
-                                                GraphicsUnit.Pixel,
-                                                highlightImgAttributes);
-                                }
                                 else
                                 {
-                                    // Default case.
-                                    g.DrawImage(currentImg, new Rectangle(x, y, sizeH, sizeV));
+                                    drawForegroundImage(g, currentImg,
+                                                        new Rectangle(x, y, sizeH, sizeV),
+                                                        isImageHighlighted[index]);
                                 }
                             }
                             x += delta;
@@ -1260,25 +1252,32 @@ namespace Sandra.UI.WF
                         location.Offset(moveStartPosition);
 
                         // Make sure the piece looks exactly the same as when it was still on its source square.
-                        if (isImageHighlighted[moveStartSquareIndex])
-                        {
-                            // Highlight piece.
-                            g.DrawImage(currentImg,
-                                        new Rectangle(location.X, location.Y, sizeH, sizeV),
-                                        0, 0, currentImg.Width, currentImg.Height,
-                                        GraphicsUnit.Pixel,
-                                        highlightImgAttributes);
-                        }
-                        else
-                        {
-                            // Default case.
-                            g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
-                        }
+                        drawForegroundImage(g, currentImg,
+                                            new Rectangle(location.X, location.Y, sizeH, sizeV),
+                                            isImageHighlighted[moveStartSquareIndex]);
                     }
                 }
             }
 
             base.OnPaint(pe);
+        }
+
+        private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, bool highlight)
+        {
+            if (highlight)
+            {
+                // Highlight piece.
+                g.DrawImage(image,
+                            destinationRectangle,
+                            0, 0, image.Width, image.Height,
+                            GraphicsUnit.Pixel,
+                            highlightImgAttributes);
+            }
+            else
+            {
+                // Default case.
+                g.DrawImage(image, destinationRectangle);
+            }
         }
 
 
