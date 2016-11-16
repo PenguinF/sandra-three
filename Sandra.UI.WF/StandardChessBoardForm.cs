@@ -46,6 +46,8 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
+
+            PlayingBoard.Paint += playingBoard_Paint;
         }
 
         /// <summary>
@@ -99,9 +101,14 @@ namespace Sandra.UI.WF
             }
         }
 
+        private bool isPromoting(SquareLocation location)
+        {
+            return PlayingBoard.IsMoving && location != null && location.Y == 0;
+        }
+
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            if (PlayingBoard.IsMoving && PlayingBoard.HoverSquare != null && PlayingBoard.HoverSquare.Y == 0)
+            if (isPromoting(PlayingBoard.HoverSquare))
             {
                 Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
                 SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
@@ -186,6 +193,31 @@ namespace Sandra.UI.WF
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
         {
             resetMoveStartSquareHighlight(e);
+        }
+
+        private void playingBoard_Paint(object sender, PaintEventArgs e)
+        {
+            var hoverSquare = PlayingBoard.HoverSquare;
+
+            if (isPromoting(hoverSquare))
+            {
+                int squareSize = PlayingBoard.SquareSize;
+                if (squareSize >= 2)
+                {
+                    Rectangle rect = PlayingBoard.GetSquareRectangle(hoverSquare.X, hoverSquare.Y);
+                    int halfSquareSize = (squareSize + 1) / 2;
+                    int otherHalfSquareSize = squareSize - halfSquareSize;
+
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft)],
+                                         rect.X, rect.Y, halfSquareSize, halfSquareSize);
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight)],
+                                         rect.X + halfSquareSize, rect.Y, otherHalfSquareSize, halfSquareSize);
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomLeft)],
+                                         rect.X, rect.Y + halfSquareSize, halfSquareSize, otherHalfSquareSize);
+                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight)],
+                                         rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
+                }
+            }
         }
 
         private void clearBoard()
