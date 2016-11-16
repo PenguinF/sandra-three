@@ -185,7 +185,14 @@ namespace Sandra.UI.WF
             // Move piece from source to destination.
             if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
             {
-                PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
+                if (isPromoting(e.Target))
+                {
+                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PieceImages[getPromoteToPiece(hoverQuadrant)]);
+                }
+                else
+                {
+                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
+                }
                 PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
             }
         }
