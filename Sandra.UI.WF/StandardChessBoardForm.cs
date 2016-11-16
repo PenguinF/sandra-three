@@ -81,12 +81,9 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
             }
-            for (int x = 0; x < PlayingBoard.BoardWidth; ++x)
+            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
-                for (int y = 0; y < PlayingBoard.BoardHeight; ++y)
-                {
-                    PlayingBoard.SetSquareOverlayColor(x, y, new Color());
-                }
+                PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
             }
         }
 
@@ -109,12 +106,9 @@ namespace Sandra.UI.WF
 
         private void clearBoard()
         {
-            for (int y = 0; y < PlayingBoard.BoardHeight; ++y)
+            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
-                for (int x = 0; x < PlayingBoard.BoardWidth; ++x)
-                {
-                    PlayingBoard.SetForegroundImage(x, y, null);
-                }
+                PlayingBoard.SetForegroundImage(squareLocation, null);
             }
         }
 

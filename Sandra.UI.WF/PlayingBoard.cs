@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -729,6 +730,23 @@ namespace Sandra.UI.WF
             squareOverlayColors = new Color[newArrayLength];
         }
 
+
+        /// <summary>
+        /// Enumerates all available <see cref="SquareLocation"/>s on the board.
+        /// </summary>
+        public IEnumerable<SquareLocation> AllSquareLocations
+        {
+            get
+            {
+                for (int x = 0; x < BoardWidth; ++x)
+                {
+                    for (int y = 0; y < BoardHeight; ++y)
+                    {
+                        yield return new SquareLocation(x, y);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the location of the square the mouse pointer is located,
