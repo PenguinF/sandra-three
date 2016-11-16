@@ -36,6 +36,16 @@ namespace Sandra.Chess
     }
 
     /// <summary>
+    /// Specifies all twelve distinct types of chess pieces.
+    /// <see cref="NonEmptyColoredPiece"/> is a combination of the <see cref="Piece"/> and <see cref="Color"/> enumerations.
+    /// </summary>
+    public enum NonEmptyColoredPiece
+    {
+        WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing,
+        BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing,
+    }
+
+    /// <summary>
     /// Specifies all thirteen possible states of a square.
     /// <see cref="ColoredPiece"/> is a combination of the <see cref="Piece"/> and <see cref="Color"/> enumerations, with an extra <see cref="Empty"/> value.
     /// </summary>
