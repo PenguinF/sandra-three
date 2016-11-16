@@ -1247,7 +1247,7 @@ namespace Sandra.UI.WF
                 if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
                 {
                     // Draw moving image on top of the rest.
-                    Image currentImg = foregroundImages[moveStartSquareIndex];
+                    Image currentImg = MovingImage ?? foregroundImages[moveStartSquareIndex];
                     if (currentImg != null)
                     {
                         Point location = moveCurrentPosition;
