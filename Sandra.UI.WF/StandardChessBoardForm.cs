@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-
 using System.Drawing;
 
 namespace Sandra.UI.WF
@@ -110,8 +109,21 @@ namespace Sandra.UI.WF
             resetMoveStartSquareHighlight(e);
         }
 
+        private void clearBoard()
+        {
+            for (int y = 0; y < PlayingBoard.BoardSize; ++y)
+            {
+                for (int x = 0; x < PlayingBoard.BoardSize; ++x)
+                {
+                    PlayingBoard.SetForegroundImage(x, y, null);
+                }
+            }
+        }
+
         public void InitializeStartPosition()
         {
+            clearBoard();
+
             var startPosition = EnumIndexedArray<Chess.NonEmptyColoredPiece, ulong>.New();
 
             startPosition[Chess.NonEmptyColoredPiece.WhitePawn] = Chess.Constants.WhiteInStartPosition & Chess.Constants.PawnsInStartPosition;
