@@ -103,11 +103,18 @@ namespace Sandra.UI.WF
 
         private bool isPromoting(SquareLocation location)
         {
-            return PlayingBoard.IsMoving
-                && location != null
-                && location.Y == 0
-                && PlayingBoard.MoveStartSquare != location
-                && PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
+            if (PlayingBoard.IsMoving && location != null && PlayingBoard.MoveStartSquare != location)
+            {
+                if (location.Y == 0)
+                {
+                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
+                }
+                else if (location.Y == 7)
+                {
+                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.BlackPawn];
+                }
+            }
+            return false;
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
