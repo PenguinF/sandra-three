@@ -127,9 +127,18 @@ namespace Sandra.Chess
             if (move == null) throw new ArgumentNullException(nameof(move));
             move.ThrowWhenOutOfRange();
 
-            if (move.SourceSquare == move.TargetSquare)
+            ulong sourceDelta = move.SourceSquare.ToVector();
+            ulong targetDelta = move.TargetSquare.ToVector();
+
+            if (sourceDelta == targetDelta)
             {
                 // Can never move to the same square.
+                return false;
+            }
+
+            if ((colorVectors[sideToMove] & sourceDelta) == 0)
+            {
+                // Allow only SideToMove to make a move.
                 return false;
             }
 
@@ -147,9 +156,6 @@ namespace Sandra.Chess
 
             if (make)
             {
-                ulong sourceDelta = move.SourceSquare.ToVector();
-                ulong targetDelta = move.TargetSquare.ToVector();
-
                 // Remove whatever was captured.
                 foreach (Color color in EnumHelper<Color>.AllValues) colorVectors[color] &= ~targetDelta;
                 foreach (Piece piece in EnumHelper<Piece>.AllValues) pieceVectors[piece] &= ~targetDelta;
