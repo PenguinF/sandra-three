@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.Chess
 {
     /// <summary>
@@ -113,8 +115,18 @@ namespace Sandra.Chess
         /// <returns>
         /// True if the move was legal, otherwise false.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="move"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
+        /// </exception>
         public bool TryMakeMove(Move move, bool make)
         {
+            // Null and range checks.
+            if (move == null) throw new ArgumentNullException(nameof(move));
+            move.ThrowWhenOutOfRange();
+
             if (move.SourceSquare == move.TargetSquare)
             {
                 // Can never move to the same square.
@@ -137,14 +149,24 @@ namespace Sandra.Chess
                     {
                         colorVectors[color] |= targetDelta;
                         colorVectors[color] &= ~sourceDelta;
+                        break;
                     }
                 }
                 foreach (Piece piece in EnumHelper<Piece>.AllValues)
                 {
                     if ((pieceVectors[piece] & sourceDelta) != 0)
                     {
-                        pieceVectors[piece] |= targetDelta;
+                        if (move.MoveType == MoveType.Default)
+                        {
+                            pieceVectors[piece] |= targetDelta;
+                        }
+                        else
+                        {
+                            // Change type of piece.
+                            pieceVectors[move.PromoteTo] |= targetDelta;
+                        }
                         pieceVectors[piece] &= ~sourceDelta;
+                        break;
                     }
                 }
 

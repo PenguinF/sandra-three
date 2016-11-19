@@ -276,6 +276,13 @@ namespace Sandra.UI.WF
                 TargetSquare = toSquare(e.Target),
             };
 
+            Chess.Color promoteColor;
+            if (isPromoting(e.Target, out promoteColor))
+            {
+                move.MoveType = Chess.MoveType.Promotion;
+                move.PromoteTo = getPromoteToPiece(hoverQuadrant, promoteColor).GetPiece();
+            }
+
             if (currentPosition.TryMakeMove(move, true))
             {
                 copyPositionToBoard();

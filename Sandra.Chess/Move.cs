@@ -16,11 +16,41 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.Chess
 {
+    public enum MoveType
+    {
+        Default,
+        Promotion,
+    }
+
     public class Move
     {
+        public MoveType MoveType;
         public Square SourceSquare;
         public Square TargetSquare;
+        public Piece PromoteTo;
+
+        public void ThrowWhenOutOfRange()
+        {
+            if (MoveType < 0 || MoveType > MoveType.Promotion)
+            {
+                throw new ArgumentOutOfRangeException(nameof(MoveType));
+            }
+            if (SourceSquare < 0 || SourceSquare > Square.H8)
+            {
+                throw new ArgumentOutOfRangeException(nameof(SourceSquare));
+            }
+            if (TargetSquare < 0 || TargetSquare > Square.H8)
+            {
+                throw new ArgumentOutOfRangeException(nameof(TargetSquare));
+            }
+            if (PromoteTo < 0 || PromoteTo > Piece.King)
+            {
+                throw new ArgumentOutOfRangeException(nameof(PromoteTo));
+            }
+        }
     }
 }
