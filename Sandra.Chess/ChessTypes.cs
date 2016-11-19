@@ -119,6 +119,22 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Returns the <see cref="Piece"/> part of a given coloured piece.
+        /// </summary>
+        public static Piece GetPiece(this NonEmptyColoredPiece coloredPiece)
+        {
+            return (Piece)((int)coloredPiece % Constants.PieceCount);
+        }
+
+        /// <summary>
+        /// Returns the colored piece combination of a piece and a color.
+        /// </summary>
+        public static NonEmptyColoredPiece Combine(this Piece piece, Color color)
+        {
+            return (NonEmptyColoredPiece)((int)color * Constants.PieceCount + piece);
+        }
+
+        /// <summary>
         /// Returns the square at the position specified by the file and rank.
         /// </summary>
         public static Square Combine(this File file, Rank rank)

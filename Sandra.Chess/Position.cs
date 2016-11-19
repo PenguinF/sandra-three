@@ -25,10 +25,58 @@ namespace Sandra.Chess
     {
         private Color sideToMove;
 
+        private EnumIndexedArray<Color, ulong> colorVectors;
+        private EnumIndexedArray<Piece, ulong> pieceVectors;
+
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
         public Color SideToMove { get { return sideToMove; } }
+
+        /// <summary>
+        /// Gets a bitfield which is true for all squares that contain the given color.
+        /// </summary>
+        public ulong GetColorVector(Color color)
+        {
+            return colorVectors[color];
+        }
+
+        /// <summary>
+        /// Gets a bitfield which is true for all squares that contain the given piece.
+        /// </summary>
+        public ulong GetPieceVector(Piece piece)
+        {
+            return pieceVectors[piece];
+        }
+
+
+        private Position()
+        {
+            colorVectors = EnumIndexedArray<Color, ulong>.New();
+            pieceVectors = EnumIndexedArray<Piece, ulong>.New();
+        }
+
+        /// <summary>
+        /// Returns the standard initial position.
+        /// </summary>
+        public static Position GetInitialPosition()
+        {
+            var initialPosition = new Position();
+
+            initialPosition.sideToMove = Color.White;
+
+            initialPosition.colorVectors[Color.White] = Constants.WhiteInStartPosition;
+            initialPosition.colorVectors[Color.Black] = Constants.BlackInStartPosition;
+
+            initialPosition.pieceVectors[Piece.Pawn] = Constants.PawnsInStartPosition;
+            initialPosition.pieceVectors[Piece.Knight] = Constants.KnightsInStartPosition;
+            initialPosition.pieceVectors[Piece.Bishop] = Constants.BishopsInStartPosition;
+            initialPosition.pieceVectors[Piece.Rook] = Constants.RooksInStartPosition;
+            initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
+            initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
+
+            return initialPosition;
+        }
 
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
@@ -55,21 +103,6 @@ namespace Sandra.Chess
                 sideToMove = sideToMove.Opposite();
             }
             return true;
-        }
-
-        private Position()
-        {
-        }
-
-        /// <summary>
-        /// Returns the standard initial position.
-        /// </summary>
-        public static Position GetInitialPosition()
-        {
-            return new Position()
-            {
-                sideToMove = Color.White,
-            };
         }
     }
 }
