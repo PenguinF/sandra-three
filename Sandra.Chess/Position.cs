@@ -133,6 +133,18 @@ namespace Sandra.Chess
                 return false;
             }
 
+            if (move.MoveType == MoveType.Promotion)
+            {
+                // Allow only 4 promote-to pieces.
+                Piece promoteTo = move.PromoteTo;
+                switch (promoteTo)
+                {
+                    case Piece.Pawn:
+                    case Piece.King:
+                        return false;
+                }
+            }
+
             if (make)
             {
                 ulong sourceDelta = 1UL << (int)move.SourceSquare;
