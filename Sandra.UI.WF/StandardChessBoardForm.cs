@@ -28,6 +28,8 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
 
+        private Chess.Position currentPosition;
+
         public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
         {
             PieceImages = pieceImages;
@@ -270,6 +272,8 @@ namespace Sandra.UI.WF
 
         public void InitializeStartPosition()
         {
+            currentPosition = Chess.Position.GetInitialPosition();
+
             clearBoard();
 
             var startPosition = EnumIndexedArray<Chess.NonEmptyColoredPiece, ulong>.New();

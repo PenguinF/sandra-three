@@ -50,5 +50,20 @@ namespace Sandra.Chess
             }
             return true;
         }
+
+        private Position()
+        {
+        }
+
+        /// <summary>
+        /// Returns the standard initial position.
+        /// </summary>
+        public static Position GetInitialPosition()
+        {
+            return new Position()
+            {
+                sideToMove = Color.White,
+            };
+        }
     }
 }
