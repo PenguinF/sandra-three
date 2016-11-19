@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="ChessConstants.cs" />
     <Compile Include="ChessTypes.cs" />
+    <Compile Include="Move.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpecialzedArrays.cs" />
