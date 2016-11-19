@@ -31,6 +31,12 @@ namespace Sandra.UI.WF
 
         private Chess.Position currentPosition;
 
+        private Chess.Square toSquare(SquareLocation squareLocation)
+        {
+            // Reverse y-index, because square A1 is at y == 7.
+            return ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
+        }
+
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
             // For now, check the color of the image which is moved.
@@ -186,12 +192,17 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void setMoveStartHighlight(SquareLocation squareLocation)
+        {
+            if (!PlayingBoard.IsMoving && canPieceBeMoved(squareLocation))
+            {
+                PlayingBoard.SetIsImageHighLighted(squareLocation.X, squareLocation.Y, true);
+            }
+        }
+
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            if (!PlayingBoard.IsMoving && canPieceBeMoved(e.Location))
-            {
-                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
-            }
+            setMoveStartHighlight(e.Location);
         }
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
@@ -220,16 +231,21 @@ namespace Sandra.UI.WF
             }
             if (hoverSquare != null)
             {
-                PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
+                // Possibly turn highlight on again for the hoverSquare.
+                setMoveStartHighlight(hoverSquare);
             }
         }
 
         private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
         {
-            resetMoveStartSquareHighlight(e);
-
             // Move piece from source to destination.
-            if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
+            Chess.Move move = new Chess.Move()
+            {
+                SourceSquare = toSquare(e.Start),
+                TargetSquare = toSquare(e.Target),
+            };
+
+            if (currentPosition.TryMakeMove(move, true))
             {
                 Chess.Color promoteColor;
                 if (isPromoting(e.Target, out promoteColor))
@@ -242,6 +258,8 @@ namespace Sandra.UI.WF
                 }
                 PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
             }
+
+            resetMoveStartSquareHighlight(e);
         }
 
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)

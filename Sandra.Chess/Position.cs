@@ -44,6 +44,12 @@ namespace Sandra.Chess
         /// </returns>
         public bool TryMakeMove(Move move, bool make)
         {
+            if (move.SourceSquare == move.TargetSquare)
+            {
+                // Can never move to the same square.
+                return false;
+            }
+
             if (make)
             {
                 sideToMove = sideToMove.Opposite();

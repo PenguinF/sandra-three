@@ -59,6 +59,25 @@ namespace Sandra.Chess
     }
 
     /// <summary>
+    /// Specifies a rank on a standard 8x8 chess board.
+    /// </summary>
+    /// <remarks>
+    /// Be aware that when casting to integer, the 'value' decreases with one, for example (int)Rank._3 yields 2.
+    /// </remarks>
+    public enum Rank
+    {
+        _1, _2, _3, _4, _5, _6, _7, _8,
+    }
+
+    /// <summary>
+    /// Specifies a file on a standard 8x8 chess board.
+    /// </summary>
+    public enum File
+    {
+        A, B, C, D, E, F, G, H,
+    }
+
+    /// <summary>
     /// Specifies a square on a standard 8x8 chess board.
     /// </summary>
     public enum Square
@@ -97,6 +116,14 @@ namespace Sandra
         public static Color GetColor(this NonEmptyColoredPiece coloredPiece)
         {
             return (Color)((int)coloredPiece / Constants.PieceCount);
+        }
+
+        /// <summary>
+        /// Returns the square at the position specified by the file and rank.
+        /// </summary>
+        public static Square Combine(this File file, Rank rank)
+        {
+            return (Square)((int)rank * Constants.SquareCount + file);
         }
 
         /// <summary>
