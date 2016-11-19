@@ -278,15 +278,7 @@ namespace Sandra.UI.WF
 
             if (currentPosition.TryMakeMove(move, true))
             {
-                Chess.Color promoteColor;
-                if (isPromoting(e.Target, out promoteColor))
-                {
-                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PieceImages[getPromoteToPiece(hoverQuadrant, promoteColor)]);
-                }
-                else
-                {
-                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
-                }
+                PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
                 PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
             }
 
