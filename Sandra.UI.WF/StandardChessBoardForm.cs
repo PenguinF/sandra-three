@@ -27,7 +27,23 @@ namespace Sandra.UI.WF
     /// </summary>
     public class StandardChessBoardForm : PlayingBoardForm
     {
-        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
+        private EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages;
+
+        /// <summary>
+        /// Gets or sets the image set to use for the playing board.
+        /// </summary>
+        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages
+        {
+            get
+            {
+                return pieceImages;
+            }
+            set
+            {
+                pieceImages = value;
+                copyPositionToBoard();
+            }
+        }
 
         private Chess.Position currentPosition;
 
@@ -51,13 +67,10 @@ namespace Sandra.UI.WF
             return false;
         }
 
-        public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
-        {
-            PieceImages = pieceImages;
-        }
-
         public StandardChessBoardForm()
         {
+            currentPosition = Chess.Position.GetInitialPosition();
+
             PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
             PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
 
@@ -315,12 +328,6 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
             }
-        }
-
-        public void InitializeStartPosition()
-        {
-            currentPosition = Chess.Position.GetInitialPosition();
-            copyPositionToBoard();
         }
     }
 }
