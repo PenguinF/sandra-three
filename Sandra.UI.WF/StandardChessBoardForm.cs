@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -73,16 +72,9 @@ namespace Sandra.UI.WF
 
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
-            // For now, check the color of the image which is moved.
-            Image piece = PlayingBoard.GetForegroundImage(squareLocation);
-
-            Chess.NonEmptyColoredPiece chessPieceImage;
-            if (EnumHelper<Chess.NonEmptyColoredPiece>.AllValues.Any(x => PieceImages[x] == piece, out chessPieceImage))
-            {
-                return chessPieceImage.GetColor() == currentPosition.SideToMove;
-            }
-
-            return false;
+            // Check if location is a member of all squares where a piece sits of the current colour.
+            ulong allowed = currentPosition.GetVector(currentPosition.SideToMove);
+            return (allowed & toSquare(squareLocation).ToVector()) != 0;
         }
 
         public StandardChessBoardForm()

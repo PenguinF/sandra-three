@@ -147,8 +147,8 @@ namespace Sandra.Chess
 
             if (make)
             {
-                ulong sourceDelta = 1UL << (int)move.SourceSquare;
-                ulong targetDelta = 1UL << (int)move.TargetSquare;
+                ulong sourceDelta = move.SourceSquare.ToVector();
+                ulong targetDelta = move.TargetSquare.ToVector();
 
                 // Remove whatever was captured.
                 foreach (Color color in EnumHelper<Color>.AllValues) colorVectors[color] &= ~targetDelta;

@@ -159,6 +159,14 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Returns a bitfield which is true only at the given square.
+        /// </summary>
+        public static ulong ToVector(this Square square)
+        {
+            return 1UL << (int)square;
+        }
+
+        /// <summary>
         /// Gets the index of the single bit of the bitfield, or an undefined value if the number of set bits in the bitfield is not equal to one.
         /// </summary>
         public static int GetSingleBitIndex(this ulong oneBit)
