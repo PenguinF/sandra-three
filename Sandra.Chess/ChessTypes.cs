@@ -79,7 +79,7 @@ namespace Sandra.Chess
 namespace Sandra
 {
     /// <summary>
-    /// Contains extension methods for chess enumeration types and bit vectors (<see cref="uint"/>).
+    /// Contains extension methods for chess enumeration types and bit vectors (<see cref="ulong"/>).
     /// </summary>
     public static class ChessExtensions
     {
