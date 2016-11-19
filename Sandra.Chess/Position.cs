@@ -142,6 +142,12 @@ namespace Sandra.Chess
                 return false;
             }
 
+            if ((colorVectors[sideToMove] & targetDelta) != 0)
+            {
+                // Do not allow capture of ones own pieces.
+                return false;
+            }
+
             if (move.MoveType == MoveType.Promotion)
             {
                 // Allow only 4 promote-to pieces.
