@@ -123,6 +123,31 @@ namespace Sandra.Chess
 
             if (make)
             {
+                ulong sourceDelta = 1UL << (int)move.SourceSquare;
+                ulong targetDelta = 1UL << (int)move.TargetSquare;
+
+                // Remove whatever was captured.
+                foreach (Color color in EnumHelper<Color>.AllValues) colorVectors[color] &= ~targetDelta;
+                foreach (Piece piece in EnumHelper<Piece>.AllValues) pieceVectors[piece] &= ~targetDelta;
+
+                // Move from source to target.
+                foreach (Color color in EnumHelper<Color>.AllValues)
+                {
+                    if ((colorVectors[color] & sourceDelta) != 0)
+                    {
+                        colorVectors[color] |= targetDelta;
+                        colorVectors[color] &= ~sourceDelta;
+                    }
+                }
+                foreach (Piece piece in EnumHelper<Piece>.AllValues)
+                {
+                    if ((pieceVectors[piece] & sourceDelta) != 0)
+                    {
+                        pieceVectors[piece] |= targetDelta;
+                        pieceVectors[piece] &= ~sourceDelta;
+                    }
+                }
+
                 sideToMove = sideToMove.Opposite();
             }
             return true;

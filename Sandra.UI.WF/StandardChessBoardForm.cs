@@ -278,8 +278,7 @@ namespace Sandra.UI.WF
 
             if (currentPosition.TryMakeMove(move, true))
             {
-                PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
-                PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
+                copyPositionToBoard();
             }
 
             resetMoveStartSquareHighlight(e);
