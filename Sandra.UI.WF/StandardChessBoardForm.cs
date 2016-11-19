@@ -35,9 +35,6 @@ namespace Sandra.UI.WF
 
         public StandardChessBoardForm()
         {
-            ShowIcon = false;
-            MaximizeBox = false;
-
             PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
             PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
 
