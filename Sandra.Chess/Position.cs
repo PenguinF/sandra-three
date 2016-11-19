@@ -161,15 +161,8 @@ namespace Sandra.Chess
                 foreach (Piece piece in EnumHelper<Piece>.AllValues) pieceVectors[piece] &= ~targetDelta;
 
                 // Move from source to target.
-                foreach (Color color in EnumHelper<Color>.AllValues)
-                {
-                    if ((colorVectors[color] & sourceDelta) != 0)
-                    {
-                        colorVectors[color] |= targetDelta;
-                        colorVectors[color] &= ~sourceDelta;
-                        break;
-                    }
-                }
+                colorVectors[sideToMove] |= targetDelta;
+                colorVectors[sideToMove] &= ~sourceDelta;
                 foreach (Piece piece in EnumHelper<Piece>.AllValues)
                 {
                     if ((pieceVectors[piece] & sourceDelta) != 0)
