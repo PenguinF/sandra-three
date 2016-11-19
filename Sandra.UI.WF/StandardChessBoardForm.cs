@@ -188,11 +188,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            if (PlayingBoard.IsMoving)
-            {
-                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
-            }
-            else if (canPieceBeMoved(e.Location))
+            if (!PlayingBoard.IsMoving && canPieceBeMoved(e.Location))
             {
                 PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
             }
@@ -201,11 +197,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
-            if (PlayingBoard.IsMoving)
-            {
-                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
-            }
-            else
+            if (!PlayingBoard.IsMoving)
             {
                 PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
             }
@@ -229,10 +221,6 @@ namespace Sandra.UI.WF
             if (hoverSquare != null)
             {
                 PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
-            }
-            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
-            {
-                PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
             }
         }
 
