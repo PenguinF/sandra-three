@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -29,6 +30,20 @@ namespace Sandra.UI.WF
         public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
 
         private Chess.Position currentPosition;
+
+        private bool canPieceBeMoved(SquareLocation squareLocation)
+        {
+            // For now, check the color of the image which is moved.
+            Image piece = PlayingBoard.GetForegroundImage(squareLocation);
+
+            Chess.NonEmptyColoredPiece chessPieceImage;
+            if (EnumHelper<Chess.NonEmptyColoredPiece>.AllValues.Any(x => PieceImages[x] == piece, out chessPieceImage))
+            {
+                return chessPieceImage.GetColor() == currentPosition.SideToMove;
+            }
+
+            return false;
+        }
 
         public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
         {
@@ -43,6 +58,8 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
+
+            PlayingBoard.MoveStart += playingBoard_MoveStart;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
 
@@ -175,7 +192,7 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
             }
-            else
+            else if (canPieceBeMoved(e.Location))
             {
                 PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
             }
@@ -191,6 +208,14 @@ namespace Sandra.UI.WF
             else
             {
                 PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
+            }
+        }
+
+        private void playingBoard_MoveStart(object sender, CancellableMoveEventArgs e)
+        {
+            if (!canPieceBeMoved(e.Start))
+            {
+                e.Cancel = true;
             }
         }
 

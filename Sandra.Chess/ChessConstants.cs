@@ -24,6 +24,11 @@ namespace Sandra.Chess
     public sealed class Constants
     {
         /// <summary>
+        /// Gets the number of different pieces in the chess game.
+        /// </summary>
+        public const int PieceCount = 6;
+
+        /// <summary>
         /// Gets the number of squares in a file or rank on a standard chessboard.
         /// </summary>
         public const int SquareCount = 8;

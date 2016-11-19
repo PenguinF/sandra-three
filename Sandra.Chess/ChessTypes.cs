@@ -92,6 +92,14 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Returns the <see cref="Color"/> of a given piece.
+        /// </summary>
+        public static Color GetColor(this NonEmptyColoredPiece coloredPiece)
+        {
+            return (Color)((int)coloredPiece / Constants.PieceCount);
+        }
+
+        /// <summary>
         /// Returns the X-coordinate of a non-empty square.
         /// </summary>
         public static int X(this Square square)
