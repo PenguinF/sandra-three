@@ -53,6 +53,24 @@ namespace Sandra.UI.WF
             return ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
         }
 
+        private void copyPositionToBoard()
+        {
+            // Copy all pieces.
+            foreach (Chess.NonEmptyColoredPiece coloredPiece in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
+            {
+                foreach (var square in currentPosition.GetVector(coloredPiece).AllSquares())
+                {
+                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[coloredPiece]);
+                }
+            }
+
+            // Clear all squares that are empty.
+            foreach (var square in currentPosition.GetVector(Chess.ColoredPiece.Empty).AllSquares())
+            {
+                PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
+            }
+        }
+
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
             // For now, check the color of the image which is moved.
@@ -303,30 +321,6 @@ namespace Sandra.UI.WF
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
                                          rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
                 }
-            }
-        }
-
-        private void copyPositionToBoard()
-        {
-            var whiteVector = currentPosition.GetColorVector(Chess.Color.White);
-            var blackVector = currentPosition.GetColorVector(Chess.Color.Black);
-
-            // Copy all pieces.
-            foreach (Chess.NonEmptyColoredPiece coloredPiece in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
-            {
-                var colorVector = coloredPiece.GetColor() == Chess.Color.White ? whiteVector : blackVector;
-                var pieceVector = currentPosition.GetPieceVector(coloredPiece.GetPiece());
-                foreach (var square in (colorVector & pieceVector).AllSquares())
-                {
-                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[coloredPiece]);
-                }
-            }
-
-            // Clear all squares that are empty.
-            var emptyVector = ulong.MaxValue ^ whiteVector ^ blackVector;
-            foreach (var square in emptyVector.AllSquares())
-            {
-                PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
             }
         }
     }
