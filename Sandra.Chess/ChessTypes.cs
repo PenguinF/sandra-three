@@ -84,6 +84,14 @@ namespace Sandra
     public static class ChessExtensions
     {
         /// <summary>
+        /// Returns the opposite of a given <see cref="Color"/>.
+        /// </summary>
+        public static Color Opposite(this Color color)
+        {
+            return 1 - color;
+        }
+
+        /// <summary>
         /// Returns the X-coordinate of a non-empty square.
         /// </summary>
         public static int X(this Square square)
