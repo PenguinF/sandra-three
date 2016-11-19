@@ -163,7 +163,7 @@ namespace Sandra.Chess
             if (make)
             {
                 // Remove whatever was captured.
-                foreach (Color color in EnumHelper<Color>.AllValues) colorVectors[color] &= ~targetDelta;
+                colorVectors[sideToMove.Opposite()] &= ~targetDelta;
                 foreach (Piece piece in EnumHelper<Piece>.AllValues) pieceVectors[piece] &= ~targetDelta;
 
                 // Move from source to target.
