@@ -38,7 +38,24 @@ namespace Sandra.Chess.Tests
         }
 
 
-        enum IllegalEnum
+        private void testIllegalEnum<T>() where T : struct
+        {
+            // The beauty of this is that the static constructor is only run when already inside the closure.
+            Exception exception = ExpectException(() => EnumIndexedArray<T, int>.New());
+            Assert.IsInstanceOfType(exception, typeof(TypeInitializationException));
+        }
+
+        enum IllegalEnum1
+        {
+        }
+
+        [TestMethod]
+        public void TestIllegalEnum1()
+        {
+            testIllegalEnum<IllegalEnum1>();
+        }
+
+        enum IllegalEnum2
         {
             MinusOne = -1,
             Zero = 0,
@@ -46,11 +63,23 @@ namespace Sandra.Chess.Tests
         }
 
         [TestMethod]
-        public void TestIllegalEnum()
+        public void TestIllegalEnum2()
         {
-            // The beauty of this is that the static constructor is only run when already inside the closure.
-            Exception exception = ExpectException(() => EnumIndexedArray<IllegalEnum, int>.New());
-            Assert.IsInstanceOfType(exception, typeof(TypeInitializationException));
+            testIllegalEnum<IllegalEnum2>();
+        }
+
+        enum IllegalEnum3
+        {
+            MinusOne = -1,
+            Zero = 0,
+            // To test the specific edge case where the highest value is the number of elements minus one.
+            Two = 2,
+        }
+
+        [TestMethod]
+        public void TestIllegalEnum3()
+        {
+            testIllegalEnum<IllegalEnum3>();
         }
 
         enum EnumWithDuplicates
