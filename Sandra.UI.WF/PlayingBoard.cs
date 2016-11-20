@@ -786,7 +786,7 @@ namespace Sandra.UI.WF
             int delta = SquareSize + InnerSpacing;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
-            return new Rectangle(px, py, px + SquareSize, py + SquareSize);
+            return new Rectangle(px, py, SquareSize, SquareSize);
         }
 
         /// <summary>
