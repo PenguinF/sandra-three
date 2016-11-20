@@ -37,7 +37,7 @@ namespace Sandra.Chess.Tests
             {
                 ulong vector = 0;
                 ulong indexVector = 1;
-                for (int sq = 0; sq < 64; ++sq)
+                for (int sq = 0; sq < Constants.TotalSquareCount; ++sq)
                 {
                     if (piecePerSquare[sq] != ColoredPiece.Empty)
                     {
@@ -53,7 +53,7 @@ namespace Sandra.Chess.Tests
             {
                 ulong vector = 0;
                 ulong indexVector = 1;
-                for (int sq = 0; sq < 64; ++sq)
+                for (int sq = 0; sq < Constants.TotalSquareCount; ++sq)
                 {
                     if (piecePerSquare[sq] != ColoredPiece.Empty)
                     {
@@ -67,7 +67,7 @@ namespace Sandra.Chess.Tests
 
             private ShadowPosition()
             {
-                piecePerSquare = new ColoredPiece[64];
+                piecePerSquare = new ColoredPiece[Constants.TotalSquareCount];
                 piecePerSquare.Fill(ColoredPiece.Empty);
             }
 

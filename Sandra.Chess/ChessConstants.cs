@@ -33,6 +33,11 @@ namespace Sandra.Chess
         /// </summary>
         public const int SquareCount = 8;
 
+        /// <summary>
+        /// Gets the total number of squares on a standard chessboard.
+        /// </summary>
+        public const int TotalSquareCount = SquareCount * SquareCount;
+
         public const ulong A1 = 0x1;
         public const ulong B1 = 0x2;
         public const ulong C1 = 0x4;
