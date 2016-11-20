@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Linq;
 
 namespace Sandra.Chess
 {
@@ -148,6 +149,9 @@ namespace Sandra.Chess
                 return false;
             }
 
+            // Obtain moving piece. It exists because otherwise the colorVectors[sideToMove] would have returned 0 already.
+            Piece movingPiece = EnumHelper<Piece>.AllValues.First(x => (pieceVectors[x] & sourceDelta) != 0);
+
             if (move.MoveType == MoveType.Promotion)
             {
                 // Allow only 4 promote-to pieces.
@@ -169,23 +173,16 @@ namespace Sandra.Chess
                 // Move from source to target.
                 colorVectors[sideToMove] |= targetDelta;
                 colorVectors[sideToMove] &= ~sourceDelta;
-                foreach (Piece piece in EnumHelper<Piece>.AllValues)
+                if (move.MoveType == MoveType.Default)
                 {
-                    if ((pieceVectors[piece] & sourceDelta) != 0)
-                    {
-                        if (move.MoveType == MoveType.Default)
-                        {
-                            pieceVectors[piece] |= targetDelta;
-                        }
-                        else
-                        {
-                            // Change type of piece.
-                            pieceVectors[move.PromoteTo] |= targetDelta;
-                        }
-                        pieceVectors[piece] &= ~sourceDelta;
-                        break;
-                    }
+                    pieceVectors[movingPiece] |= targetDelta;
                 }
+                else
+                {
+                    // Change type of piece.
+                    pieceVectors[move.PromoteTo] |= targetDelta;
+                }
+                pieceVectors[movingPiece] &= ~sourceDelta;
 
                 sideToMove = sideToMove.Opposite();
             }
