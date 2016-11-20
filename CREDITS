@@ -25,6 +25,9 @@ Enumerating MDI children in z-order, in particular Alan N's post:
 Overriding WndProc() to preserve the aspect ratio of a form:
     http://www.vcskicks.com/maintain-aspect-ratio.php
 
+How to generate sliding moves using magic multipliers (dead link unfortunately):
+    http://www.sluijten.com/winglet/11movegen03.htm
+
 
 There is also no way I could have done this without proper tools and documentation:
 

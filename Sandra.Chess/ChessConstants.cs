@@ -174,6 +174,13 @@ namespace Sandra.Chess
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
+        // Occupancy tables.
+        private const int totalOccupancies = 1 << 6;
+        private static readonly ulong[,] fileOccupancy;
+        private static readonly ulong[,] rankOccupancy;
+        private static readonly EnumIndexedArray<Square, ulong> fileMultipliers;
+        private static readonly EnumIndexedArray<Square, int> rankShifts;
+
         static Constants()
         {
             FileMasks = EnumIndexedArray<Square, ulong>.New();
@@ -185,9 +192,25 @@ namespace Sandra.Chess
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
 
+            Constants.fileMultipliers = EnumIndexedArray<Square, ulong>.New();
+            rankShifts = EnumIndexedArray<Square, int>.New();
+            fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+            rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+
             ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
             ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
-            ulong nonEdgeSquares = ~(FileA | FileH | Rank1 | Rank8);
+
+            ulong[] fileMultipliers = new ulong[]
+            {
+                0x8040201008040200, //A
+                0x4020100804020100, //B
+                0x2010080402010080, //C
+                0x1008040201008040, //D
+                0x0804020100804020, //E
+                0x0402010080402010, //F
+                0x0201008040201008, //G
+                0x0100804020100804  //H
+            };
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {
@@ -195,10 +218,18 @@ namespace Sandra.Chess
                 int x = sq.X();
                 int y = sq.Y();
 
+                for (int i = totalOccupancies - 1; i >= 0; --i)
+                {
+                    fileOccupancy[(int)sq, i] = allFiles[x];
+                    rankOccupancy[(int)sq, i] = allRanks[y];
+                }
+
                 FileMasks[sq] = allFiles[x];
-                InnerFileMasks[sq] = FileMasks[sq] & nonEdgeSquares;
+                InnerFileMasks[sq] = FileMasks[sq] & ~Rank1 & ~Rank8;
                 RankMasks[sq] = allRanks[y];
-                InnerRankMasks[sq] = RankMasks[sq] & nonEdgeSquares;
+                InnerRankMasks[sq] = RankMasks[sq] & ~FileA & ~FileH;
+                Constants.fileMultipliers[sq] = fileMultipliers[x];
+                rankShifts[sq] = y * 8 + 1;
 
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
                                            | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
@@ -218,7 +249,52 @@ namespace Sandra.Chess
                                 | (sqVector & ~Rank1 & ~Rank2 & ~FileA) >> 17  // SSW
                                 | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
                                 | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
+
             }
+        }
+
+
+        // Occupancy calculation is done in a few stages.
+        // Given are a bitfield of occupied squares, a source square for which to calculate sliding moves,
+        // and a direction, N-S, W-E, NW-SE or SW-NE.
+        // Example: take a bitfield in which a white queen is on E1, a black king on C3, and a white king on G8.
+        // We'd like to calculate whether or not the black king is in check, so:
+        // source square = E1, direction = NW-SE.
+        //
+        // A) Zero out everything that's not on the file/rank/diagonal to consider.
+        //    In the example, only E1, D2, C3, B4, A5 are relevant, so square G8 is zeroed out.
+        // B) Also ignore the two edge squares, because no further squares can be blocked.
+        //    In the example, this means that square E1 is zeroed out as well.
+        //    Only six bits of information remain.
+        // C) Multiply by a 'magic' value to map and rotate the value onto the seventh rank.
+        // D) Shift right by 57 positions to move the value to the first rank instead.
+        //    In the example, the result binary is: 000010
+        //    Had B4 been occupied as well, the result would have been: 000110
+        //    And had D2 been occupied as well, the result would have been: 000111
+        // E) Given the source square and the 6-bit occupancy index, convert into a bitfield of reachable squares.
+        //    The end result of the example then is a bitfield in which bits are set for C3 and D2.
+        //
+        // Note that the color of the piece occupying a square can be safely ignored,
+        // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
+
+
+        private static int calculateOccupancyIndex_File(Square square, ulong occupied)
+        {
+            return (int)(((InnerFileMasks[square] & occupied) * fileMultipliers[square]) >> 57);
+        }
+
+        private static int calculateOccupancyIndex_Rank(Square square, ulong occupied)
+        {
+            // rankMultiplier[square], if it existed, would map the rank to the seventh rank by a simple shift left,
+            // after which a '>> 57' would be correct here too.
+            // Both operations can be combined into a single shift.
+            return (int)((InnerRankMasks[square] & occupied) >> rankShifts[square]);
+        }
+
+        public static ulong CalculateReachableSquaresStraight(Square square, ulong occupied)
+        {
+            return fileOccupancy[(int)square, calculateOccupancyIndex_File(square, occupied)]
+                 | rankOccupancy[(int)square, calculateOccupancyIndex_Rank(square, occupied)];
         }
 
         /// <summary>

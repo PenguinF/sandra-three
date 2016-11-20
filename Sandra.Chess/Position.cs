@@ -206,6 +206,13 @@ namespace Sandra.Chess
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
+                case Piece.Rook:
+                    ulong occupied = colorVectors[Color.White] | colorVectors[Color.Black];
+                    if (!Constants.CalculateReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
+                    {
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                    }
+                    break;
             }
 
             if (moveCheckResult == MoveCheckResult.OK && make)
