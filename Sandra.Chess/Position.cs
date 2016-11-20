@@ -144,7 +144,7 @@ namespace Sandra.Chess
 
             if ((colorVectors[sideToMove] & targetDelta) != 0)
             {
-                // Do not allow capture of ones own pieces.
+                // Do not allow capture of one's own pieces.
                 return false;
             }
 
