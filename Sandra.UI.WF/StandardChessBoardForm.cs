@@ -195,7 +195,6 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            Chess.Color promoteColor = currentPosition.SideToMove;
             if (isPromoting(PlayingBoard.HoverSquare))
             {
                 Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
@@ -220,7 +219,7 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-                updateHoverQuadrant(hitQuadrant, promoteColor);
+                updateHoverQuadrant(hitQuadrant, currentPosition.SideToMove);
             }
         }
 
@@ -277,11 +276,10 @@ namespace Sandra.UI.WF
                 TargetSquare = toSquare(e.Target),
             };
 
-            Chess.Color promoteColor = currentPosition.SideToMove;
             if (isPromoting(e.Target))
             {
                 move.MoveType = Chess.MoveType.Promotion;
-                move.PromoteTo = getPromoteToPiece(hoverQuadrant, promoteColor).GetPiece();
+                move.PromoteTo = getPromoteToPiece(hoverQuadrant, currentPosition.SideToMove).GetPiece();
             }
 
             if (currentPosition.TryMakeMove(move, true) == Chess.MoveCheckResult.OK)
@@ -301,7 +299,6 @@ namespace Sandra.UI.WF
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            Chess.Color promoteColor = currentPosition.SideToMove;
             if (isPromoting(hoverSquare))
             {
                 int squareSize = PlayingBoard.SquareSize;
@@ -311,6 +308,7 @@ namespace Sandra.UI.WF
                     int halfSquareSize = (squareSize + 1) / 2;
                     int otherHalfSquareSize = squareSize - halfSquareSize;
 
+                    Chess.Color promoteColor = currentPosition.SideToMove;
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft, promoteColor)],
                                          rect.X, rect.Y, halfSquareSize, halfSquareSize);
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight, promoteColor)],
