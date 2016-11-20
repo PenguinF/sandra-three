@@ -23,6 +23,23 @@ using System.Linq;
 namespace Sandra
 {
     /// <summary>
+    /// Contains utility extension methods.
+    /// </summary>
+    public static class UtilityExtensions
+    {
+        /// <summary>
+        /// Sets a single value at each index of the array.
+        /// </summary>
+        public static void Fill<T>(this T[] array, T value)
+        {
+            for (int i = array.Length - 1; i >= 0; --i)
+            {
+                array[i] = value;
+            }
+        }
+    }
+
+    /// <summary>
     /// Contains general helper methods for enumerations.
     /// </summary>
     /// <remarks>
