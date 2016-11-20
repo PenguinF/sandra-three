@@ -165,29 +165,38 @@ namespace Sandra.UI.WF
             }
         }
 
-        private bool isPromoting(SquareLocation location, out Chess.Color promoteColor)
+        private bool isPromoting(SquareLocation location)
         {
-            if (PlayingBoard.IsMoving && location != null && PlayingBoard.MoveStartSquare != location)
+            if (PlayingBoard.IsMoving && location != null)
             {
-                if (location.Y == 0)
+                // Create fake illegal promotion move to check what TryMakeMove() returns.
+                Chess.Move move = new Chess.Move()
                 {
-                    promoteColor = Chess.Color.White;
-                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
-                }
-                else if (location.Y == 7)
+                    SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
+                    TargetSquare = toSquare(location),
+                    MoveType = Chess.MoveType.Promotion,
+                    PromoteTo = Chess.Piece.Pawn,
+                };
+
+                if (currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.IllegalPromotion))
                 {
-                    promoteColor = Chess.Color.Black;
-                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.BlackPawn];
+                    if (move.TargetSquare.Y() == 0)
+                    {
+                        return currentPosition.SideToMove == Chess.Color.Black;
+                    }
+                    else if (move.TargetSquare.Y() == 7)
+                    {
+                        return currentPosition.SideToMove == Chess.Color.White;
+                    }
                 }
             }
-            promoteColor = default(Chess.Color);
             return false;
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            Chess.Color promoteColor;
-            if (isPromoting(PlayingBoard.HoverSquare, out promoteColor))
+            Chess.Color promoteColor = currentPosition.SideToMove;
+            if (isPromoting(PlayingBoard.HoverSquare))
             {
                 Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
                 SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
@@ -268,8 +277,8 @@ namespace Sandra.UI.WF
                 TargetSquare = toSquare(e.Target),
             };
 
-            Chess.Color promoteColor;
-            if (isPromoting(e.Target, out promoteColor))
+            Chess.Color promoteColor = currentPosition.SideToMove;
+            if (isPromoting(e.Target))
             {
                 move.MoveType = Chess.MoveType.Promotion;
                 move.PromoteTo = getPromoteToPiece(hoverQuadrant, promoteColor).GetPiece();
@@ -292,8 +301,8 @@ namespace Sandra.UI.WF
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            Chess.Color promoteColor;
-            if (isPromoting(hoverSquare, out promoteColor))
+            Chess.Color promoteColor = currentPosition.SideToMove;
+            if (isPromoting(hoverSquare))
             {
                 int squareSize = PlayingBoard.SquareSize;
                 if (squareSize >= 2)
