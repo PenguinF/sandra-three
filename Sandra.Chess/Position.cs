@@ -173,35 +173,19 @@ namespace Sandra.Chess
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    bool legalPawnTargetSquare;
-                    if (colorVectors[sideToMove.Opposite()].Test(targetDelta))
-                    {
-                        legalPawnTargetSquare = Constants.PawnCaptures[sideToMove, move.SourceSquare].Test(targetDelta);
-                    }
-                    else
-                    {
-                        legalPawnTargetSquare = Constants.PawnMoves[sideToMove, move.SourceSquare].Test(targetDelta);
-                    }
+                    ulong oppositeColorSquares = colorVectors[sideToMove.Opposite()];
+                    ulong legalCaptureSquares = oppositeColorSquares & Constants.PawnCaptures[sideToMove, move.SourceSquare];
+                    ulong legalMoveToSquares = ~oppositeColorSquares & Constants.PawnMoves[sideToMove, move.SourceSquare];
 
-                    if (legalPawnTargetSquare)
+                    if ((legalCaptureSquares | legalMoveToSquares).Test(targetDelta))
                     {
                         if (Constants.PromotionSquares.Test(targetDelta))
                         {
-                            if (move.MoveType == MoveType.Promotion)
+                            if (move.MoveType != MoveType.Promotion
+                                || move.PromoteTo == Piece.Pawn
+                                || move.PromoteTo == Piece.King)
                             {
-                                // Allow only 4 promote-to pieces.
-                                Piece promoteTo = move.PromoteTo;
-                                switch (promoteTo)
-                                {
-                                    case Piece.Pawn:
-                                    case Piece.King:
-                                        moveCheckResult |= MoveCheckResult.IllegalPromotion;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                // Must specify the correct MoveType.
+                                // Must specify the correct MoveType, and allow only 4 promote-to pieces.
                                 moveCheckResult |= MoveCheckResult.IllegalPromotion;
                             }
                         }
