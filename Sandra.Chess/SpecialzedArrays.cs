@@ -98,3 +98,61 @@ namespace Sandra
         }
     }
 }
+
+namespace Sandra.Chess
+{
+    /// <summary>
+    /// Contains an array which is indexed by a <see cref="Color"/> and a <see cref="Square"/>.
+    /// Always initialize such an array with the <see cref="New"/> method, e.g.:
+    /// <code>
+    /// var array = ColorSquareIndexedArray&lt;ulong&gt;.New();
+    /// </code>
+    /// </summary>
+    public struct ColorSquareIndexedArray<TValue>
+    {
+        private TValue[,] arr;
+
+        private void init()
+        {
+            if (arr == null) arr = new TValue[EnumHelper<Color>.EnumCount, EnumHelper<Square>.EnumCount];
+        }
+
+        /// <summary>
+        /// Initializes an empty array with default values.
+        /// </summary>
+        public static ColorSquareIndexedArray<TValue> New()
+        {
+            ColorSquareIndexedArray<TValue> wrapped = default(ColorSquareIndexedArray<TValue>);
+            wrapped.init();
+            return wrapped;
+        }
+
+        public TValue this[Color color, Square square]
+        {
+            get
+            {
+                try
+                {
+                    return arr[(int)color, (int)square];
+                }
+                catch (NullReferenceException)
+                {
+                    init();
+                    return arr[(int)color, (int)square];
+                }
+            }
+            set
+            {
+                try
+                {
+                    arr[(int)color, (int)square] = value;
+                }
+                catch (NullReferenceException)
+                {
+                    init();
+                    arr[(int)color, (int)square] = value;
+                }
+            }
+        }
+    }
+}
