@@ -139,20 +139,66 @@ namespace Sandra.Chess
 
         public const ulong PromotionSquares = Rank1 | Rank8;
 
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same file as a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> FileMasks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same file as a given square, except the two outermost squares.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> InnerFileMasks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same rank as a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> RankMasks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same rank as a given square, except the two outermost squares.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> InnerRankMasks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square where a pawn of a given color on a given square can move to.
+        /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnMoves;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square where a pawn of a given color on a given square can capture a piece of the opposite color.
+        /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnCaptures;
 
+        /// <summary>
+        /// Contains a bitfield which is true for each target square where a knight can jump to from a given square.
+        /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
         static Constants()
         {
+            FileMasks = EnumIndexedArray<Square, ulong>.New();
+            InnerFileMasks = EnumIndexedArray<Square, ulong>.New();
+            RankMasks = EnumIndexedArray<Square, ulong>.New();
+            InnerRankMasks = EnumIndexedArray<Square, ulong>.New();
+
             PawnMoves = ColorSquareIndexedArray<ulong>.New();
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
 
+            ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
+            ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
+            ulong nonEdgeSquares = ~(FileA | FileH | Rank1 | Rank8);
+
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {
                 ulong sqVector = sq.ToVector();
+                int x = sq.X();
+                int y = sq.Y();
+
+                FileMasks[sq] = allFiles[x];
+                InnerFileMasks[sq] = FileMasks[sq] & nonEdgeSquares;
+                RankMasks[sq] = allRanks[y];
+                InnerRankMasks[sq] = RankMasks[sq] & nonEdgeSquares;
 
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
                                            | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
