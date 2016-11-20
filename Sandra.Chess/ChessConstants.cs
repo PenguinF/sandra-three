@@ -147,15 +147,14 @@ namespace Sandra.Chess
             {
                 ulong sqVector = sq.ToVector();
 
-                KnightMoves[sq]
-                    = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
-                    | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE
-                    | (sqVector & ~Rank8 & ~FileG & ~FileH) << 10  // ENE
-                    | (sqVector & ~Rank1 & ~FileG & ~FileH) >> 6   // ESE
-                    | (sqVector & ~Rank1 & ~Rank2 & ~FileH) >> 15  // SSE
-                    | (sqVector & ~Rank1 & ~Rank2 & ~FileA) >> 17  // SSW
-                    | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
-                    | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
+                KnightMoves[sq] = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
+                                | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE
+                                | (sqVector & ~Rank8 & ~FileG & ~FileH) << 10  // ENE
+                                | (sqVector & ~Rank1 & ~FileG & ~FileH) >> 6   // ESE
+                                | (sqVector & ~Rank1 & ~Rank2 & ~FileH) >> 15  // SSE
+                                | (sqVector & ~Rank1 & ~Rank2 & ~FileA) >> 17  // SSW
+                                | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
+                                | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
             }
         }
 
