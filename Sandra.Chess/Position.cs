@@ -158,6 +158,7 @@ namespace Sandra.Chess
                 return false;
             }
 
+            // Check legal target squares and specific rules depending on the moving piece.
             switch (movingPiece)
             {
                 case Piece.Pawn:
@@ -176,7 +177,6 @@ namespace Sandra.Chess
                 case Piece.Knight:
                     if ((Constants.KnightMoves[move.SourceSquare] & targetDelta) == 0)
                     {
-                        // Knight can only move to certain squares.
                         return false;
                     }
                     break;
