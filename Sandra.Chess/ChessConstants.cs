@@ -137,15 +137,30 @@ namespace Sandra.Chess
         public const ulong WhiteInStartPosition = Rank1 | Rank2;
         public const ulong BlackInStartPosition = Rank7 | Rank8;
 
+        public static readonly ColorSquareIndexedArray<ulong> PawnMoves;
+        public static readonly ColorSquareIndexedArray<ulong> PawnCaptures;
+
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
         static Constants()
         {
+            PawnMoves = ColorSquareIndexedArray<ulong>.New();
+            PawnCaptures = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {
                 ulong sqVector = sq.ToVector();
+
+                PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
+                                           | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
+                PawnMoves[Color.Black, sq] = (sqVector & ~Rank1) >> 8
+                                           | (sqVector & Rank7) >> 16;
+
+                PawnCaptures[Color.White, sq] = (sqVector & ~Rank8 & ~FileA) << 7
+                                              | (sqVector & ~Rank8 & ~FileH) << 9;
+                PawnCaptures[Color.Black, sq] = (sqVector & ~Rank1 & ~FileA) >> 9
+                                              | (sqVector & ~Rank1 & ~FileH) >> 7;
 
                 KnightMoves[sq] = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
                                 | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE

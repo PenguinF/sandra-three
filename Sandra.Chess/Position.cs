@@ -173,17 +173,34 @@ namespace Sandra.Chess
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    if (move.MoveType == MoveType.Promotion)
+                    bool legalPawnTargetSquare;
+                    if (colorVectors[sideToMove.Opposite()].Test(targetDelta))
                     {
-                        // Allow only 4 promote-to pieces.
-                        Piece promoteTo = move.PromoteTo;
-                        switch (promoteTo)
+                        legalPawnTargetSquare = Constants.PawnCaptures[sideToMove, move.SourceSquare].Test(targetDelta);
+                    }
+                    else
+                    {
+                        legalPawnTargetSquare = Constants.PawnMoves[sideToMove, move.SourceSquare].Test(targetDelta);
+                    }
+
+                    if (legalPawnTargetSquare)
+                    {
+                        if (move.MoveType == MoveType.Promotion)
                         {
-                            case Piece.Pawn:
-                            case Piece.King:
-                                moveCheckResult |= MoveCheckResult.IllegalPromotion;
-                                break;
+                            // Allow only 4 promote-to pieces.
+                            Piece promoteTo = move.PromoteTo;
+                            switch (promoteTo)
+                            {
+                                case Piece.Pawn:
+                                case Piece.King:
+                                    moveCheckResult |= MoveCheckResult.IllegalPromotion;
+                                    break;
+                            }
                         }
+                    }
+                    else
+                    {
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Knight:
