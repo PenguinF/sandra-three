@@ -191,14 +191,14 @@ namespace Sandra.Chess
                 // Move from source to target.
                 colorVectors[sideToMove] |= targetDelta;
                 colorVectors[sideToMove] &= ~sourceDelta;
-                if (move.MoveType == MoveType.Default)
-                {
-                    pieceVectors[movingPiece] |= targetDelta;
-                }
-                else
+                if (move.MoveType == MoveType.Promotion)
                 {
                     // Change type of piece.
                     pieceVectors[move.PromoteTo] |= targetDelta;
+                }
+                else
+                {
+                    pieceVectors[movingPiece] |= targetDelta;
                 }
                 pieceVectors[movingPiece] &= ~sourceDelta;
 
