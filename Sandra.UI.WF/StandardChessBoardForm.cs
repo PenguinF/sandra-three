@@ -247,7 +247,25 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MoveStart(object sender, CancellableMoveEventArgs e)
         {
-            if (!canPieceBeMoved(e.Start))
+            if (canPieceBeMoved(e.Start))
+            {
+                // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
+                Chess.Move move = new Chess.Move()
+                {
+                    SourceSquare = toSquare(e.Start),
+                };
+
+                foreach (var square in EnumHelper<Chess.Square>.AllValues)
+                {
+                    move.TargetSquare = square;
+                    if (currentPosition.TryMakeMove(move, false) == Chess.MoveCheckResult.OK)
+                    {
+                        // Highlight each found square.
+                        PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(76, 255, 240, 0));
+                    }
+                }
+            }
+            else
             {
                 e.Cancel = true;
             }
@@ -260,10 +278,9 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, false);
             }
-            if (hoverSquare != null)
+            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
-                // Possibly turn highlight on again for the hoverSquare.
-                setMoveStartHighlight(hoverSquare);
+                PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
             }
         }
 
