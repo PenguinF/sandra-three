@@ -316,6 +316,16 @@ namespace Sandra.UI.WF
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
+            // Draw subtle corners just inside the edges of a legal target square.
+            if (hoverSquare != null && PlayingBoard.IsMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
+            {
+                Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
+                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
+                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
+                e.Graphics.DrawRectangle(Pens.Gray, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+                e.Graphics.ResetClip();
+            }
+
             if (isPromoting(hoverSquare))
             {
                 int squareSize = PlayingBoard.SquareSize;
