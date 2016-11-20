@@ -153,5 +153,12 @@ namespace Sandra.Chess
                     | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
             }
         }
+
+        /// <summary>
+        /// Forces runtime precalculation lookup tables.
+        /// </summary>
+        public static void ForceInitialize()
+        {
+        }
     }
 }
