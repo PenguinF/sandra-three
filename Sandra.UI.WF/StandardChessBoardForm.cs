@@ -275,7 +275,7 @@ namespace Sandra.UI.WF
                 move.PromoteTo = getPromoteToPiece(hoverQuadrant, promoteColor).GetPiece();
             }
 
-            if (currentPosition.TryMakeMove(move, true))
+            if (currentPosition.TryMakeMove(move, true) == Chess.MoveCheckResult.OK)
             {
                 copyPositionToBoard();
             }

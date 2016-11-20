@@ -114,7 +114,8 @@ namespace Sandra.Chess
         /// True if the move must actually be made, false if only validated.
         /// </param>
         /// <returns>
-        /// True if the move was legal, otherwise false.
+        /// <see cref="MoveCheckResult.OK"/> if the move was legal, otherwise one of the other <see cref="MoveCheckResult"/> values.
+        /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="move"/> is null (Nothing in Visual Basic).
@@ -122,7 +123,7 @@ namespace Sandra.Chess
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public bool TryMakeMove(Move move, bool make)
+        public MoveCheckResult TryMakeMove(Move move, bool make)
         {
             // Null and range checks.
             if (move == null) throw new ArgumentNullException(nameof(move));
@@ -131,31 +132,41 @@ namespace Sandra.Chess
             ulong sourceDelta = move.SourceSquare.ToVector();
             ulong targetDelta = move.TargetSquare.ToVector();
 
+            MoveCheckResult moveCheckResult = MoveCheckResult.OK;
             if (sourceDelta == targetDelta)
             {
                 // Can never move to the same square.
-                return false;
+                moveCheckResult |= MoveCheckResult.SourceSquareIsTargetSquare;
             }
 
-            if ((colorVectors[sideToMove] & sourceDelta) == 0)
+            // Obtain moving piece.
+            Piece movingPiece;
+            if (!EnumHelper<Piece>.AllValues.Any(x => (pieceVectors[x] & sourceDelta) != 0, out movingPiece))
+            {
+                moveCheckResult |= MoveCheckResult.SourceSquareIsEmpty;
+            }
+            else if ((colorVectors[sideToMove] & sourceDelta) == 0)
             {
                 // Allow only SideToMove to make a move.
-                return false;
+                moveCheckResult |= MoveCheckResult.NotSideToMove;
+            }
+
+            // Can only check the rest if the basics are right.
+            if (moveCheckResult != 0)
+            {
+                return moveCheckResult;
             }
 
             if ((colorVectors[sideToMove] & targetDelta) != 0)
             {
                 // Do not allow capture of one's own pieces.
-                return false;
+                moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
             }
-
-            // Obtain moving piece. It exists because otherwise colorVectors[sideToMove] would have returned 0 already.
-            Piece movingPiece = EnumHelper<Piece>.AllValues.First(x => (pieceVectors[x] & sourceDelta) != 0);
 
             if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
             {
                 // Cannot promote a non-pawn.
-                return false;
+                moveCheckResult |= MoveCheckResult.NotPromotion;
             }
 
             // Check legal target squares and specific rules depending on the moving piece.
@@ -170,19 +181,20 @@ namespace Sandra.Chess
                         {
                             case Piece.Pawn:
                             case Piece.King:
-                                return false;
+                                moveCheckResult |= MoveCheckResult.IllegalPromotion;
+                                break;
                         }
                     }
                     break;
                 case Piece.Knight:
                     if ((Constants.KnightMoves[move.SourceSquare] & targetDelta) == 0)
                     {
-                        return false;
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
             }
 
-            if (make)
+            if (moveCheckResult == MoveCheckResult.OK && make)
             {
                 // Remove whatever was captured.
                 colorVectors[sideToMove.Opposite()] &= ~targetDelta;
@@ -204,7 +216,48 @@ namespace Sandra.Chess
 
                 sideToMove = sideToMove.Opposite();
             }
-            return true;
+
+            return moveCheckResult;
         }
+    }
+
+    /// <summary>
+    /// Enumerates all possible results of <see cref="Position.TryMakeMove(Move, bool)"/>.
+    /// </summary>
+    [Flags]
+    public enum MoveCheckResult
+    {
+        /// <summary>
+        /// The move is a valid move in the given position.
+        /// </summary>
+        OK,
+        /// <summary>
+        /// The given source and target squares are the same.
+        /// </summary>
+        SourceSquareIsTargetSquare = 1,
+        /// <summary>
+        /// There is no piece on the source square.
+        /// </summary>
+        SourceSquareIsEmpty = 2,
+        /// <summary>
+        /// The piece on the source square does not belong to the color which turn it is.
+        /// </summary>
+        NotSideToMove = 4,
+        /// <summary>
+        /// The move would result in capturing a piece of the same color.
+        /// </summary>
+        CannotCaptureOwnPiece = 8,
+        /// <summary>
+        /// The target square is not a legal destination for the moving piece in the current position.
+        /// </summary>
+        IllegalTargetSquare = 16,
+        /// <summary>
+        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or knight.
+        /// </summary>
+        IllegalPromotion = 32,
+        /// <summary>
+        /// <see cref="MoveType.Promotion"/> was specified for a move which does not promote a pawn.
+        /// </summary>
+        NotPromotion = 64,
     }
 }
