@@ -216,5 +216,13 @@ namespace Sandra
                 yield return ((Square)index);
             }
         }
+
+        /// <summary>
+        /// Tests if another bitfield has any bits in common with this one.
+        /// </summary>
+        public static bool Test(this ulong bitVector64, ulong otherVector)
+        {
+            return (bitVector64 & otherVector) != 0;
+        }
     }
 }

@@ -141,11 +141,11 @@ namespace Sandra.Chess
 
             // Obtain moving piece.
             Piece movingPiece;
-            if (!EnumHelper<Piece>.AllValues.Any(x => (pieceVectors[x] & sourceDelta) != 0, out movingPiece))
+            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceDelta), out movingPiece))
             {
                 moveCheckResult |= MoveCheckResult.SourceSquareIsEmpty;
             }
-            else if ((colorVectors[sideToMove] & sourceDelta) == 0)
+            else if (!colorVectors[sideToMove].Test(sourceDelta))
             {
                 // Allow only SideToMove to make a move.
                 moveCheckResult |= MoveCheckResult.NotSideToMove;
@@ -157,7 +157,7 @@ namespace Sandra.Chess
                 return moveCheckResult;
             }
 
-            if ((colorVectors[sideToMove] & targetDelta) != 0)
+            if (colorVectors[sideToMove].Test(targetDelta))
             {
                 // Do not allow capture of one's own pieces.
                 moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
@@ -187,7 +187,7 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.Knight:
-                    if ((Constants.KnightMoves[move.SourceSquare] & targetDelta) == 0)
+                    if (!Constants.KnightMoves[move.SourceSquare].Test(targetDelta))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
