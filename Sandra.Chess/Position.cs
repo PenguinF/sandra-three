@@ -152,6 +152,12 @@ namespace Sandra.Chess
             // Obtain moving piece. It exists because otherwise the colorVectors[sideToMove] would have returned 0 already.
             Piece movingPiece = EnumHelper<Piece>.AllValues.First(x => (pieceVectors[x] & sourceDelta) != 0);
 
+            if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
+            {
+                // Cannot promote a non-pawn.
+                return false;
+            }
+
             if (move.MoveType == MoveType.Promotion)
             {
                 // Allow only 4 promote-to pieces.
