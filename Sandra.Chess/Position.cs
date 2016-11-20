@@ -149,7 +149,7 @@ namespace Sandra.Chess
                 return false;
             }
 
-            // Obtain moving piece. It exists because otherwise the colorVectors[sideToMove] would have returned 0 already.
+            // Obtain moving piece. It exists because otherwise colorVectors[sideToMove] would have returned 0 already.
             Piece movingPiece = EnumHelper<Piece>.AllValues.First(x => (pieceVectors[x] & sourceDelta) != 0);
 
             if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
@@ -160,6 +160,19 @@ namespace Sandra.Chess
 
             switch (movingPiece)
             {
+                case Piece.Pawn:
+                    if (move.MoveType == MoveType.Promotion)
+                    {
+                        // Allow only 4 promote-to pieces.
+                        Piece promoteTo = move.PromoteTo;
+                        switch (promoteTo)
+                        {
+                            case Piece.Pawn:
+                            case Piece.King:
+                                return false;
+                        }
+                    }
+                    break;
                 case Piece.Knight:
                     if ((Constants.KnightMoves[move.SourceSquare] & targetDelta) == 0)
                     {
@@ -167,18 +180,6 @@ namespace Sandra.Chess
                         return false;
                     }
                     break;
-            }
-
-            if (move.MoveType == MoveType.Promotion)
-            {
-                // Allow only 4 promote-to pieces.
-                Piece promoteTo = move.PromoteTo;
-                switch (promoteTo)
-                {
-                    case Piece.Pawn:
-                    case Piece.King:
-                        return false;
-                }
             }
 
             if (make)
