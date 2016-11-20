@@ -158,6 +158,17 @@ namespace Sandra.Chess
                 return false;
             }
 
+            switch (movingPiece)
+            {
+                case Piece.Knight:
+                    if ((Constants.KnightMoves[move.SourceSquare] & targetDelta) == 0)
+                    {
+                        // Knight can only move to certain squares.
+                        return false;
+                    }
+                    break;
+            }
+
             if (move.MoveType == MoveType.Promotion)
             {
                 // Allow only 4 promote-to pieces.

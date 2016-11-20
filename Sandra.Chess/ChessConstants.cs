@@ -21,7 +21,7 @@ namespace Sandra.Chess
     /// <summary>
     /// Declares several pre-defined bitfield chess constants for all 64 squares. 
     /// </summary>
-    public sealed class Constants
+    public static class Constants
     {
         /// <summary>
         /// Gets the number of different pieces in the chess game.
@@ -131,5 +131,27 @@ namespace Sandra.Chess
         public const ulong PawnsInStartPosition = Rank2 | Rank7;
         public const ulong WhiteInStartPosition = Rank1 | Rank2;
         public const ulong BlackInStartPosition = Rank7 | Rank8;
+
+        public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
+
+        static Constants()
+        {
+            KnightMoves = EnumIndexedArray<Square, ulong>.New();
+
+            for (Square sq = Square.H8; sq >= Square.A1; --sq)
+            {
+                ulong sqVector = sq.ToVector();
+
+                KnightMoves[sq]
+                    = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
+                    | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE
+                    | (sqVector & ~Rank8 & ~FileG & ~FileH) << 10  // ENE
+                    | (sqVector & ~Rank1 & ~FileG & ~FileH) >> 6   // ESE
+                    | (sqVector & ~Rank1 & ~Rank2 & ~FileH) >> 15  // SSE
+                    | (sqVector & ~Rank1 & ~Rank2 & ~FileA) >> 17  // SSW
+                    | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
+                    | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
+            }
+        }
     }
 }
