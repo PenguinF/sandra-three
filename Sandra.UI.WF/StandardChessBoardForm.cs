@@ -174,21 +174,8 @@ namespace Sandra.UI.WF
                 {
                     SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
                     TargetSquare = toSquare(location),
-                    MoveType = Chess.MoveType.Promotion,
-                    PromoteTo = Chess.Piece.Pawn,
                 };
-
-                if (currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.IllegalPromotion))
-                {
-                    if (move.TargetSquare.Y() == 0)
-                    {
-                        return currentPosition.SideToMove == Chess.Color.Black;
-                    }
-                    else if (move.TargetSquare.Y() == 7)
-                    {
-                        return currentPosition.SideToMove == Chess.Color.White;
-                    }
-                }
+                return currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.IllegalPromotion);
             }
             return false;
         }
@@ -258,7 +245,8 @@ namespace Sandra.UI.WF
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
                 {
                     move.TargetSquare = square;
-                    if (currentPosition.TryMakeMove(move, false) == Chess.MoveCheckResult.OK)
+                    var moveCheckResult = currentPosition.TryMakeMove(move, false);
+                    if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.IllegalPromotion)
                     {
                         // Highlight each found square.
                         PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(76, 255, 240, 0));

@@ -137,6 +137,8 @@ namespace Sandra.Chess
         public const ulong WhiteInStartPosition = Rank1 | Rank2;
         public const ulong BlackInStartPosition = Rank7 | Rank8;
 
+        public const ulong PromotionSquares = Rank1 | Rank8;
+
         public static readonly ColorSquareIndexedArray<ulong> PawnMoves;
         public static readonly ColorSquareIndexedArray<ulong> PawnCaptures;
 

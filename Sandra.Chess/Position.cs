@@ -185,17 +185,30 @@ namespace Sandra.Chess
 
                     if (legalPawnTargetSquare)
                     {
-                        if (move.MoveType == MoveType.Promotion)
+                        if (Constants.PromotionSquares.Test(targetDelta))
                         {
-                            // Allow only 4 promote-to pieces.
-                            Piece promoteTo = move.PromoteTo;
-                            switch (promoteTo)
+                            if (move.MoveType == MoveType.Promotion)
                             {
-                                case Piece.Pawn:
-                                case Piece.King:
-                                    moveCheckResult |= MoveCheckResult.IllegalPromotion;
-                                    break;
+                                // Allow only 4 promote-to pieces.
+                                Piece promoteTo = move.PromoteTo;
+                                switch (promoteTo)
+                                {
+                                    case Piece.Pawn:
+                                    case Piece.King:
+                                        moveCheckResult |= MoveCheckResult.IllegalPromotion;
+                                        break;
+                                }
                             }
+                            else
+                            {
+                                // Must specify the correct MoveType.
+                                moveCheckResult |= MoveCheckResult.IllegalPromotion;
+                            }
+                        }
+                        else if (move.MoveType == MoveType.Promotion)
+                        {
+                            // Cannot promote to a non-promotion square.
+                            moveCheckResult |= MoveCheckResult.NotPromotion;
                         }
                     }
                     else
