@@ -192,7 +192,7 @@ namespace Sandra.Chess
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
 
-            Constants.fileMultipliers = EnumIndexedArray<Square, ulong>.New();
+            fileMultipliers = EnumIndexedArray<Square, ulong>.New();
             rankShifts = EnumIndexedArray<Square, int>.New();
             fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
             rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
@@ -200,7 +200,7 @@ namespace Sandra.Chess
             ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
             ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
 
-            ulong[] fileMultipliers = new ulong[]
+            ulong[] fileMultipliers8 = new ulong[]
             {
                 0x8040201008040200, //A
                 0x4020100804020100, //B
@@ -228,7 +228,7 @@ namespace Sandra.Chess
                 InnerFileMasks[sq] = FileMasks[sq] & ~Rank1 & ~Rank8;
                 RankMasks[sq] = allRanks[y];
                 InnerRankMasks[sq] = RankMasks[sq] & ~FileA & ~FileH;
-                Constants.fileMultipliers[sq] = fileMultipliers[x];
+                fileMultipliers[sq] = fileMultipliers8[x];
                 rankShifts[sq] = y * 8 + 1;
 
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
@@ -278,12 +278,12 @@ namespace Sandra.Chess
         // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
 
 
-        private static int calculateOccupancyIndex_File(Square square, ulong occupied)
+        private static int occupancyIndex_File(Square square, ulong occupied)
         {
             return (int)(((InnerFileMasks[square] & occupied) * fileMultipliers[square]) >> 57);
         }
 
-        private static int calculateOccupancyIndex_Rank(Square square, ulong occupied)
+        private static int occupancyIndex_Rank(Square square, ulong occupied)
         {
             // rankMultiplier[square], if it existed, would map the rank to the seventh rank by a simple shift left,
             // after which a '>> 57' would be correct here too.
@@ -291,10 +291,10 @@ namespace Sandra.Chess
             return (int)((InnerRankMasks[square] & occupied) >> rankShifts[square]);
         }
 
-        public static ulong CalculateReachableSquaresStraight(Square square, ulong occupied)
+        public static ulong ReachableSquaresStraight(Square square, ulong occupied)
         {
-            return fileOccupancy[(int)square, calculateOccupancyIndex_File(square, occupied)]
-                 | rankOccupancy[(int)square, calculateOccupancyIndex_Rank(square, occupied)];
+            return fileOccupancy[(int)square, occupancyIndex_File(square, occupied)]
+                 | rankOccupancy[(int)square, occupancyIndex_Rank(square, occupied)];
         }
 
         /// <summary>

@@ -181,7 +181,7 @@ namespace Sandra.Chess
                                               & Constants.PawnCaptures[sideToMove, move.SourceSquare];
                     ulong legalMoveToSquares = ~occupied
                                              & Constants.PawnMoves[sideToMove, move.SourceSquare]
-                                             & Constants.CalculateReachableSquaresStraight(move.SourceSquare, occupied);
+                                             & Constants.ReachableSquaresStraight(move.SourceSquare, occupied);
 
                     if ((legalCaptureSquares | legalMoveToSquares).Test(targetDelta))
                     {
@@ -213,7 +213,7 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.Rook:
-                    if (!Constants.CalculateReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
+                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
