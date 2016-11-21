@@ -210,11 +210,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="DarkSquareColor"/> property.
         /// </summary>
-        public static Color DefaultDarkSquareColor { get { return Color.Azure; } }
+        public static Color DefaultDarkSquareColor { get { return Color.LightBlue; } }
 
         /// <summary>
         /// Gets or sets the color of dark squares.
-        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.Azure"/>).
+        /// The default value is <see cref="DefaultDarkSquareColor"/> (<see cref="Color.LightBlue"/>).
         /// If an image is specified for <see cref="DarkSquareImage"/>, this property is ignored.
         /// </summary>
         public Color DarkSquareColor
@@ -338,11 +338,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
-        public static Color DefaultLightSquareColor { get { return Color.LightBlue; } }
+        public static Color DefaultLightSquareColor { get { return Color.Azure; } }
 
         /// <summary>
         /// Gets or sets the color of light squares.
-        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.LightBlue"/>).
+        /// The default value is <see cref="DefaultLightSquareColor"/> (<see cref="Color.Azure"/>).
         /// If an image is specified for <see cref="LightSquareImage"/>, this property is ignored.
         /// </summary>
         public Color LightSquareColor
