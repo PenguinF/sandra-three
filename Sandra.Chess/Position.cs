@@ -177,8 +177,11 @@ namespace Sandra.Chess
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    ulong legalCaptureSquares = oppositeColorVector & Constants.PawnCaptures[sideToMove, move.SourceSquare];
-                    ulong legalMoveToSquares = ~oppositeColorVector & Constants.PawnMoves[sideToMove, move.SourceSquare];
+                    ulong legalCaptureSquares = oppositeColorVector
+                                              & Constants.PawnCaptures[sideToMove, move.SourceSquare];
+                    ulong legalMoveToSquares = ~occupied
+                                             & Constants.PawnMoves[sideToMove, move.SourceSquare]
+                                             & Constants.CalculateReachableSquaresStraight(move.SourceSquare, occupied);
 
                     if ((legalCaptureSquares | legalMoveToSquares).Test(targetDelta))
                     {
