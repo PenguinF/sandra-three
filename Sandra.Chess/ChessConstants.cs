@@ -379,10 +379,36 @@ namespace Sandra.Chess
             // Note that the color of the piece occupying a square can be safely ignored,
             // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
 
+            // Order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.
+            // This in turn is determined by the multipliers which are used in step C.
+            Square[] baseFile = new Square[] { Square.A8, Square.A7, Square.A6, Square.A5, Square.A4, Square.A3, Square.A2, Square.A1 };
+            ulong[,] baseFileOccupancy = calculateRayOccupancyTable(baseFile);
             fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+
+            Square[] baseRank = new Square[] { Square.A1, Square.B1, Square.C1, Square.D1, Square.E1, Square.F1, Square.G1, Square.H1 };
+            ulong[,] baseRankOccupancy = calculateRayOccupancyTable(baseRank);
             rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+
+            Square[] baseA1H8 = new Square[] { Square.A1, Square.B2, Square.C3, Square.D4, Square.E5, Square.F6, Square.G7, Square.H8 };
+            ulong[,] baseA1H8Occupancy = calculateRayOccupancyTable(baseA1H8);
             a1h8Occupancy = new ulong[TotalSquareCount, totalOccupancies];
+
+            Square[] baseA8H1 = new Square[] { Square.A8, Square.B7, Square.C6, Square.D5, Square.E4, Square.F3, Square.G2, Square.H1 };
+            ulong[,] baseA8H1Occupancy = calculateRayOccupancyTable(baseA8H1);
             a8h1Occupancy = new ulong[TotalSquareCount, totalOccupancies];
+
+            // To zero out part of a diagonal before shifting it to another shorter diagonal.
+            ulong[] partialDiagMasks = new ulong[]
+            {
+                ulong.MaxValue,
+                ulong.MaxValue & ~FileH,
+                ulong.MaxValue & ~FileG & ~FileH,
+                ulong.MaxValue & ~FileF & ~FileG & ~FileH,
+                ulong.MaxValue & ~FileE & ~FileF & ~FileG & ~FileH,
+                ulong.MaxValue & ~FileD & ~FileE & ~FileF & ~FileG & ~FileH,
+                ulong.MaxValue & ~FileC & ~FileD & ~FileE & ~FileF & ~FileG & ~FileH,
+                ulong.MaxValue & ~FileB & ~FileC & ~FileD & ~FileE & ~FileF & ~FileG & ~FileH,
+            };
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {
@@ -391,12 +417,97 @@ namespace Sandra.Chess
 
                 for (int o = totalOccupancies - 1; o >= 0; --o)
                 {
-                    fileOccupancy[(int)sq, o] = allFiles[x];
-                    rankOccupancy[(int)sq, o] = allRanks[y];
-                    a1h8Occupancy[(int)sq, o] = A1H8Masks[sq];
-                    a8h1Occupancy[(int)sq, o] = A8H1Masks[sq];
+                    // Copy from the base occupancy table, and shift the result to the current rank/file/diagonal.
+                    fileOccupancy[(int)sq, o] = baseFileOccupancy[7 - y, o] << x;
+                    rankOccupancy[(int)sq, o] = baseRankOccupancy[x, o] << (y * 8);
+
+                    if (x == y)
+                    {
+                        a1h8Occupancy[(int)sq, o] = baseA1H8Occupancy[x, o];
+                    }
+                    else if (x < y)
+                    {
+                        ulong a1h8Diag = baseA1H8Occupancy[x, o] & partialDiagMasks[y - x];
+                        a1h8Occupancy[(int)sq, o] = a1h8Diag << ((y - x) * 8);
+                    }
+                    else
+                    {
+                        ulong a1h8Diag = baseA1H8Occupancy[y, o] & partialDiagMasks[x - y];
+                        a1h8Occupancy[(int)sq, o] = a1h8Diag << (x - y);
+                    }
+
+                    if (x + y == 7)
+                    {
+                        a8h1Occupancy[(int)sq, o] = baseA8H1Occupancy[x, o];
+                    }
+                    else if (x + y < 7)
+                    {
+                        ulong a8h1Diag = baseA8H1Occupancy[x, o] & partialDiagMasks[7 - x - y];
+                        a8h1Occupancy[(int)sq, o] = a8h1Diag >> ((7 - x - y) * 8);
+                    }
+                    else
+                    {
+                        ulong a8h1Diag = baseA8H1Occupancy[7 - y, o] & partialDiagMasks[x + y - 7];
+                        a8h1Occupancy[(int)sq, o] = a8h1Diag << (x + y - 7);
+                    }
                 }
             }
+        }
+
+        private static ulong[,] calculateRayOccupancyTable(Square[] ray)
+        {
+            // Construct a bitfield which is true for all squares in the ray.
+            ulong rayVector = 0;
+            for (int sqIndex = 0; sqIndex < ray.Length; ++sqIndex)
+            {
+                rayVector |= ray[sqIndex].ToVector();
+            }
+
+            // Initialize all occupancy entries to rayVector to indicate that all squares in the ray are reachable.
+            ulong[,] occupancy = new ulong[ray.Length, totalOccupancies];
+            for (int sqIndex = 0; sqIndex < ray.Length; ++sqIndex)
+            {
+                for (int o = totalOccupancies - 1; o >= 0; --o)
+                {
+                    occupancy[sqIndex, o] = rayVector;
+                }
+            }
+
+            // Bitfield of reachable squares.
+            ulong reachableNear = ray[0].ToVector();
+            // Create a block mask which is 1 for the corresponding bit in the occupancy index.
+            int blockMask = 1;
+            for (int blockingSqIndex = 1; blockingSqIndex < ray.Length - 1; ++blockingSqIndex)
+            {
+                // Update reachable squares from both ends of the ray.
+                ulong reachableFar = ~reachableNear & rayVector;
+                reachableNear |= ray[blockingSqIndex].ToVector();
+
+                // Can skip 0 because (o & blockMask) != 0 is always false.
+                for (int o = totalOccupancies - 1; o > 0; --o)
+                {
+                    // Only update occupancy for indexes where the corresponding bit is blocked.
+                    if ((o & blockMask) != 0)
+                    {
+                        for (int sqIndex = 0; sqIndex < ray.Length; ++sqIndex)
+                        {
+                            // Zero out unreachable squares.
+                            if (sqIndex < blockingSqIndex)
+                            {
+                                occupancy[sqIndex, o] &= reachableNear;
+                            }
+                            else if (sqIndex > blockingSqIndex)
+                            {
+                                occupancy[sqIndex, o] &= reachableFar;
+                            }
+                        }
+                    }
+                }
+
+                blockMask <<= 1;
+            }
+
+            return occupancy;
         }
 
         private static int occupancyIndex_File(Square square, ulong occupied)
