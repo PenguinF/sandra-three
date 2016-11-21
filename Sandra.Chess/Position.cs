@@ -245,23 +245,22 @@ namespace Sandra.Chess
                 Piece capturedPiece;
                 if (EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(targetDelta), out capturedPiece))
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] & ~targetDelta;
-                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] & ~targetDelta;
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetDelta;
+                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetDelta;
                 }
 
                 // Move from source to target.
-                colorVectors[sideToMove] = colorVectors[sideToMove] | targetDelta;
-                colorVectors[sideToMove] = colorVectors[sideToMove] & ~sourceDelta;
+                colorVectors[sideToMove] = colorVectors[sideToMove] ^ targetDelta;
+                colorVectors[sideToMove] = colorVectors[sideToMove] ^ sourceDelta;
+                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetDelta;
+                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ sourceDelta;
+
                 if (move.MoveType == MoveType.Promotion)
                 {
                     // Change type of piece.
-                    pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] | targetDelta;
+                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetDelta;
+                    pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetDelta;
                 }
-                else
-                {
-                    pieceVectors[movingPiece] = pieceVectors[movingPiece] | targetDelta;
-                }
-                pieceVectors[movingPiece] = pieceVectors[movingPiece] & ~sourceDelta;
 
                 sideToMove = sideToMove.Opposite();
             }
