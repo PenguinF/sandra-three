@@ -239,7 +239,7 @@ namespace Sandra.Chess
                     break;
             }
 
-            if (moveCheckResult == MoveCheckResult.OK && make)
+            if (moveCheckResult == MoveCheckResult.OK)
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
@@ -255,14 +255,27 @@ namespace Sandra.Chess
                 colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
                 pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
 
-                if (move.MoveType == MoveType.Promotion)
+                if (make)
                 {
-                    // Change type of piece.
-                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
-                    pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                    if (move.MoveType == MoveType.Promotion)
+                    {
+                        // Change type of piece.
+                        pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
+                        pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                    }
+                    sideToMove = sideToMove.Opposite();
                 }
-
-                sideToMove = sideToMove.Opposite();
+                else
+                {
+                    // Reverse move.
+                    colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
+                    if (isCapture)
+                    {
+                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
+                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
+                    }
+                }
             }
 
             return moveCheckResult;
