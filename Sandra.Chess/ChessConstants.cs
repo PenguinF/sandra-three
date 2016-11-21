@@ -192,6 +192,26 @@ namespace Sandra.Chess
         public static readonly EnumIndexedArray<Square, ulong> InnerRankMasks;
 
         /// <summary>
+        /// Contains a bitfield which is true for each square in the same SW-NE diagonal as a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> A1H8Masks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same SW-NE diagonal as a given square, except the two outermost squares.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> InnerA1H8Masks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same NW-SE diagonal as a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> A8H1Masks;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square in the same NW-SE diagonal as a given square, except the two outermost squares.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> InnerA8H1Masks;
+
+        /// <summary>
         /// Contains a bitfield which is true for each square where a pawn of a given color on a given square can move to.
         /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnMoves;
@@ -206,12 +226,18 @@ namespace Sandra.Chess
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
-        // Occupancy tables.
+        // Occupancy tables and multipliers.
         private const int totalOccupancies = 1 << 6;
-        private static readonly ulong[,] fileOccupancy;
-        private static readonly ulong[,] rankOccupancy;
+
         private static readonly EnumIndexedArray<Square, ulong> fileMultipliers;
         private static readonly EnumIndexedArray<Square, int> rankShifts;
+        private static readonly EnumIndexedArray<Square, ulong> a1h8Multipliers;
+        private static readonly EnumIndexedArray<Square, ulong> a8h1Multipliers;
+
+        private static readonly ulong[,] fileOccupancy;
+        private static readonly ulong[,] rankOccupancy;
+        private static readonly ulong[,] a1h8Occupancy;
+        private static readonly ulong[,] a8h1Occupancy;
 
         static Constants()
         {
@@ -219,6 +245,10 @@ namespace Sandra.Chess
             InnerFileMasks = EnumIndexedArray<Square, ulong>.New();
             RankMasks = EnumIndexedArray<Square, ulong>.New();
             InnerRankMasks = EnumIndexedArray<Square, ulong>.New();
+            A1H8Masks = EnumIndexedArray<Square, ulong>.New();
+            InnerA1H8Masks = EnumIndexedArray<Square, ulong>.New();
+            A8H1Masks = EnumIndexedArray<Square, ulong>.New();
+            InnerA8H1Masks = EnumIndexedArray<Square, ulong>.New();
 
             PawnMoves = ColorSquareIndexedArray<ulong>.New();
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
@@ -226,9 +256,13 @@ namespace Sandra.Chess
 
             fileMultipliers = EnumIndexedArray<Square, ulong>.New();
             rankShifts = EnumIndexedArray<Square, int>.New();
+            a1h8Multipliers = EnumIndexedArray<Square, ulong>.New();
+            a8h1Multipliers = EnumIndexedArray<Square, ulong>.New();
 
             ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
             ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
+            ulong[] allDiagsA1H8 = new ulong[] { DiagA8, DiagA7B8, DiagA6C8, DiagA5D8, DiagA4E8, DiagA3F8, DiagA2G8, DiagA1H8, DiagB1H7, DiagC1H6, DiagD1H5, DiagE1H4, DiagF1H3, DiagG1H2, DiagH1 };
+            ulong[] allDiagsA8H1 = new ulong[] { DiagA1, DiagA2B1, DiagA3C1, DiagA4D1, DiagA5E1, DiagA6F1, DiagA7G1, DiagA8H1, DiagB8H2, DiagC8H3, DiagD8H4, DiagE8H5, DiagF8H6, DiagG8H7, DiagH8 };
 
             ulong[] fileMultipliers8 = new ulong[]
             {
@@ -290,8 +324,15 @@ namespace Sandra.Chess
                 InnerFileMasks[sq] = FileMasks[sq] & ~Rank1 & ~Rank8;
                 RankMasks[sq] = allRanks[y];
                 InnerRankMasks[sq] = RankMasks[sq] & ~FileA & ~FileH;
+                A1H8Masks[sq] = allDiagsA1H8[7 + x - y];
+                InnerA1H8Masks[sq] = A1H8Masks[sq] & ~FileA & ~FileH & ~Rank1 & ~Rank8;
+                A8H1Masks[sq] = allDiagsA8H1[x + y];
+                InnerA8H1Masks[sq] = A8H1Masks[sq] & ~FileA & ~FileH & ~Rank1 & ~Rank8;
+
                 fileMultipliers[sq] = fileMultipliers8[x];
                 rankShifts[sq] = y * 8 + 1;
+                a1h8Multipliers[sq] = a1h8Multipliers8[7 + x - y];
+                a8h1Multipliers[sq] = a8h1Multipliers8[x + y];
 
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
                                            | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
@@ -340,6 +381,8 @@ namespace Sandra.Chess
 
             fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
             rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+            a1h8Occupancy = new ulong[TotalSquareCount, totalOccupancies];
+            a8h1Occupancy = new ulong[TotalSquareCount, totalOccupancies];
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {
@@ -350,6 +393,8 @@ namespace Sandra.Chess
                 {
                     fileOccupancy[(int)sq, o] = allFiles[x];
                     rankOccupancy[(int)sq, o] = allRanks[y];
+                    a1h8Occupancy[(int)sq, o] = A1H8Masks[sq];
+                    a8h1Occupancy[(int)sq, o] = A8H1Masks[sq];
                 }
             }
         }
