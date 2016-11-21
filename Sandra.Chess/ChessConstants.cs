@@ -110,6 +110,15 @@ namespace Sandra.Chess
         public const ulong G8 = 0x4000000000000000;
         public const ulong H8 = 0x8000000000000000;
 
+        public const ulong FileA = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8;
+        public const ulong FileB = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
+        public const ulong FileC = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8;
+        public const ulong FileD = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8;
+        public const ulong FileE = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8;
+        public const ulong FileF = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
+        public const ulong FileG = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
+        public const ulong FileH = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8;
+
         public const ulong Rank1 = A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1;
         public const ulong Rank2 = A2 | B2 | C2 | D2 | E2 | F2 | G2 | H2;
         public const ulong Rank3 = A3 | B3 | C3 | D3 | E3 | F3 | G3 | H3;
@@ -119,14 +128,37 @@ namespace Sandra.Chess
         public const ulong Rank7 = A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7;
         public const ulong Rank8 = A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8;
 
-        public const ulong FileA = A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8;
-        public const ulong FileB = B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8;
-        public const ulong FileC = C1 | C2 | C3 | C4 | C5 | C6 | C7 | C8;
-        public const ulong FileD = D1 | D2 | D3 | D4 | D5 | D6 | D7 | D8;
-        public const ulong FileE = E1 | E2 | E3 | E4 | E5 | E6 | E7 | E8;
-        public const ulong FileF = F1 | F2 | F3 | F4 | F5 | F6 | F7 | F8;
-        public const ulong FileG = G1 | G2 | G3 | G4 | G5 | G6 | G7 | G8;
-        public const ulong FileH = H1 | H2 | H3 | H4 | H5 | H6 | H7 | H8;
+        public const ulong DiagA8 = A8;
+        public const ulong DiagA7B8 = A7 | B8;
+        public const ulong DiagA6C8 = A6 | B7 | C8;
+        public const ulong DiagA5D8 = A5 | B6 | C7 | D8;
+        public const ulong DiagA4E8 = A4 | B5 | C6 | D7 | E8;
+        public const ulong DiagA3F8 = A3 | B4 | C5 | D6 | E7 | F8;
+        public const ulong DiagA2G8 = A2 | B3 | C4 | D5 | E6 | F7 | G8;
+        public const ulong DiagA1H8 = A1 | B2 | C3 | D4 | E5 | F6 | G7 | H8;
+        public const ulong DiagB1H7 = B1 | C2 | D3 | E4 | F5 | G6 | H7;
+        public const ulong DiagC1H6 = C1 | D2 | E3 | F4 | G5 | H6;
+        public const ulong DiagD1H5 = D1 | E2 | F3 | G4 | H5;
+        public const ulong DiagE1H4 = E1 | F2 | G3 | H4;
+        public const ulong DiagF1H3 = F1 | G2 | H3;
+        public const ulong DiagG1H2 = G1 | H2;
+        public const ulong DiagH1 = H1;
+
+        public const ulong DiagA1 = A1;
+        public const ulong DiagA2B1 = A2 | B1;
+        public const ulong DiagA3C1 = A3 | B2 | C1;
+        public const ulong DiagA4D1 = A4 | B3 | C2 | D1;
+        public const ulong DiagA5E1 = A5 | B4 | C3 | D2 | E1;
+        public const ulong DiagA6F1 = A6 | B5 | C4 | D3 | E2 | F1;
+        public const ulong DiagA7G1 = A7 | B6 | C5 | D4 | E3 | F2 | G1;
+        public const ulong DiagA8H1 = A8 | B7 | C6 | D5 | E4 | F3 | G2 | H1;
+        public const ulong DiagB8H2 = B8 | C7 | D6 | E5 | F4 | G3 | H2;
+        public const ulong DiagC8H3 = C8 | D7 | E6 | F5 | G4 | H3;
+        public const ulong DiagD8H4 = D8 | E7 | F6 | G5 | H4;
+        public const ulong DiagE8H5 = E8 | F7 | G6 | H5;
+        public const ulong DiagF8H6 = F8 | G7 | H6;
+        public const ulong DiagG8H7 = G8 | H7;
+        public const ulong DiagH8 = H8;
 
         public const ulong KingsInStartPosition = E1 | E8;
         public const ulong QueensInStartPosition = D1 | D8;
@@ -208,6 +240,44 @@ namespace Sandra.Chess
                 0x0402010080402010, //F
                 0x0201008040201008, //G
                 0x0100804020100804  //H
+            };
+
+            ulong[] a1h8Multipliers8 = new ulong[]
+            {
+                0,                  //A8
+                0,                  //A7-B8
+                0x0101010101010100, //A6-C8
+                0x0101010101010100, //A5-D8
+                0x0101010101010100, //A4-E8
+                0x0101010101010100, //A3-F8
+                0x0101010101010100, //A2-G8
+                0x0101010101010100, //A1-H8
+                0x8080808080808000, //B1-H7
+                0x4040404040400000, //C1-H6
+                0x2020202020000000, //D1-H5
+                0x1010101000000000, //E1-H4
+                0x0808080000000000, //F1-H3
+                0,                  //G1-H2
+                0                   //H1
+            };
+
+            ulong[] a8h1Multipliers8 = new ulong[]
+            {
+                0,                  //A1
+                0,                  //A2-B1
+                0x0101010101010100, //A3-C1
+                0x0101010101010100, //A4-D1
+                0x0101010101010100, //A5-E1
+                0x0101010101010100, //A6-F1
+                0x0101010101010100, //A7-G1
+                0x0101010101010100, //A8-H1
+                0x0080808080808080, //B8-H2
+                0x0040404040404040, //C8-H3
+                0x0020202020202020, //D8-H4
+                0x0010101010101010, //E8-H5
+                0x0008080808080808, //F8-H6
+                0,                  //G8-H7
+                0                   //H8
             };
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
