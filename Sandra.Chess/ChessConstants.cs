@@ -194,8 +194,6 @@ namespace Sandra.Chess
 
             fileMultipliers = EnumIndexedArray<Square, ulong>.New();
             rankShifts = EnumIndexedArray<Square, int>.New();
-            fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
-            rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
 
             ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
             ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
@@ -217,12 +215,6 @@ namespace Sandra.Chess
                 ulong sqVector = sq.ToVector();
                 int x = sq.X();
                 int y = sq.Y();
-
-                for (int i = totalOccupancies - 1; i >= 0; --i)
-                {
-                    fileOccupancy[(int)sq, i] = allFiles[x];
-                    rankOccupancy[(int)sq, i] = allRanks[y];
-                }
 
                 FileMasks[sq] = allFiles[x];
                 InnerFileMasks[sq] = FileMasks[sq] & ~Rank1 & ~Rank8;
@@ -251,32 +243,46 @@ namespace Sandra.Chess
                                 | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
 
             }
+
+            // Occupancy calculation is done in a few stages.
+            // Given are a bitfield of occupied squares, a source square for which to calculate sliding moves,
+            // and a direction, N-S, W-E, NW-SE or SW-NE.
+            // Example: take a bitfield in which a white queen is on E1, a black king on C3, and a white king on G8.
+            // We'd like to calculate whether or not the black king is in check, so:
+            // source square = E1, direction = NW-SE.
+            //
+            // A) Zero out everything that's not on the file/rank/diagonal to consider.
+            //    In the example, only E1, D2, C3, B4, A5 are relevant, so square G8 is zeroed out.
+            // B) Also ignore the two edge squares, because no further squares can be blocked.
+            //    In the example, this means that square E1 is zeroed out as well.
+            //    Only six bits of information remain.
+            // C) Multiply by a 'magic' value to map and rotate the value onto the eighth rank.
+            //    This will generate garbage on the other seven ranks.
+            // D) Shift right by 57 positions to move the value to the first rank instead. This also removes the garbage.
+            //    In the example, the result binary is: 000010
+            //    Had B4 been occupied as well, the result would have been: 000110
+            //    And had D2 been occupied as well, the result would have been: 000111
+            // E) Given the source square and the 6-bit occupancy index, convert into a bitfield of reachable squares.
+            //    The end result of the example then is a bitfield in which bits are set for C3 and D2.
+            //
+            // Note that the color of the piece occupying a square can be safely ignored,
+            // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
+
+            fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+            rankOccupancy = new ulong[TotalSquareCount, totalOccupancies];
+
+            for (Square sq = Square.H8; sq >= Square.A1; --sq)
+            {
+                int x = sq.X();
+                int y = sq.Y();
+
+                for (int o = totalOccupancies - 1; o >= 0; --o)
+                {
+                    fileOccupancy[(int)sq, o] = allFiles[x];
+                    rankOccupancy[(int)sq, o] = allRanks[y];
+                }
+            }
         }
-
-
-        // Occupancy calculation is done in a few stages.
-        // Given are a bitfield of occupied squares, a source square for which to calculate sliding moves,
-        // and a direction, N-S, W-E, NW-SE or SW-NE.
-        // Example: take a bitfield in which a white queen is on E1, a black king on C3, and a white king on G8.
-        // We'd like to calculate whether or not the black king is in check, so:
-        // source square = E1, direction = NW-SE.
-        //
-        // A) Zero out everything that's not on the file/rank/diagonal to consider.
-        //    In the example, only E1, D2, C3, B4, A5 are relevant, so square G8 is zeroed out.
-        // B) Also ignore the two edge squares, because no further squares can be blocked.
-        //    In the example, this means that square E1 is zeroed out as well.
-        //    Only six bits of information remain.
-        // C) Multiply by a 'magic' value to map and rotate the value onto the seventh rank.
-        // D) Shift right by 57 positions to move the value to the first rank instead.
-        //    In the example, the result binary is: 000010
-        //    Had B4 been occupied as well, the result would have been: 000110
-        //    And had D2 been occupied as well, the result would have been: 000111
-        // E) Given the source square and the 6-bit occupancy index, convert into a bitfield of reachable squares.
-        //    The end result of the example then is a bitfield in which bits are set for C3 and D2.
-        //
-        // Note that the color of the piece occupying a square can be safely ignored,
-        // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
-
 
         private static int occupancyIndex_File(Square square, ulong occupied)
         {
