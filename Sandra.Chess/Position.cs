@@ -132,6 +132,10 @@ namespace Sandra.Chess
             ulong sourceDelta = move.SourceSquare.ToVector();
             ulong targetDelta = move.TargetSquare.ToVector();
 
+            ulong sideToMoveVector = colorVectors[sideToMove];
+            ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
+            ulong occupied = sideToMoveVector | oppositeColorVector;
+
             MoveCheckResult moveCheckResult = MoveCheckResult.OK;
             if (sourceDelta == targetDelta)
             {
@@ -145,7 +149,7 @@ namespace Sandra.Chess
             {
                 moveCheckResult |= MoveCheckResult.SourceSquareIsEmpty;
             }
-            else if (!colorVectors[sideToMove].Test(sourceDelta))
+            else if (!sideToMoveVector.Test(sourceDelta))
             {
                 // Allow only SideToMove to make a move.
                 moveCheckResult |= MoveCheckResult.NotSideToMove;
@@ -157,7 +161,7 @@ namespace Sandra.Chess
                 return moveCheckResult;
             }
 
-            if (colorVectors[sideToMove].Test(targetDelta))
+            if (sideToMoveVector.Test(targetDelta))
             {
                 // Do not allow capture of one's own pieces.
                 moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
@@ -173,9 +177,8 @@ namespace Sandra.Chess
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    ulong oppositeColorSquares = colorVectors[sideToMove.Opposite()];
-                    ulong legalCaptureSquares = oppositeColorSquares & Constants.PawnCaptures[sideToMove, move.SourceSquare];
-                    ulong legalMoveToSquares = ~oppositeColorSquares & Constants.PawnMoves[sideToMove, move.SourceSquare];
+                    ulong legalCaptureSquares = oppositeColorVector & Constants.PawnCaptures[sideToMove, move.SourceSquare];
+                    ulong legalMoveToSquares = ~oppositeColorVector & Constants.PawnMoves[sideToMove, move.SourceSquare];
 
                     if ((legalCaptureSquares | legalMoveToSquares).Test(targetDelta))
                     {
@@ -207,7 +210,6 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.Rook:
-                    ulong occupied = colorVectors[Color.White] | colorVectors[Color.Black];
                     if (!Constants.CalculateReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
