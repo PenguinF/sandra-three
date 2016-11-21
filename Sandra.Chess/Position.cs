@@ -212,8 +212,21 @@ namespace Sandra.Chess
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
+                case Piece.Bishop:
+                    if (!Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetDelta))
+                    {
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                    }
+                    break;
                 case Piece.Rook:
                     if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
+                    {
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                    }
+                    break;
+                case Piece.Queen:
+                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta)
+                        && !Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetDelta))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
