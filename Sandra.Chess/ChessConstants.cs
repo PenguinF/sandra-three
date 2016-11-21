@@ -226,6 +226,11 @@ namespace Sandra.Chess
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
+        /// <summary>
+        /// Contains a bitfield which is true for each target square where a king can move to from a given square.
+        /// </summary>
+        public static readonly EnumIndexedArray<Square, ulong> Neighbours;
+
         // Occupancy tables and multipliers.
         private const int totalOccupancies = 1 << 6;
 
@@ -253,6 +258,7 @@ namespace Sandra.Chess
             PawnMoves = ColorSquareIndexedArray<ulong>.New();
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
+            Neighbours = EnumIndexedArray<Square, ulong>.New();
 
             fileMultipliers = EnumIndexedArray<Square, ulong>.New();
             rankShifts = EnumIndexedArray<Square, int>.New();
@@ -353,6 +359,14 @@ namespace Sandra.Chess
                                 | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
                                 | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
 
+                Neighbours[sq] = (sqVector & ~Rank8 & ~FileH) << 9  // NE
+                               | (sqVector & ~Rank8) << 8           // N
+                               | (sqVector & ~Rank8 & ~FileA) << 7  // NW
+                               | (sqVector & ~FileH) << 1           // E
+                               | (sqVector & ~FileA) >> 1           // W
+                               | (sqVector & ~Rank1 & ~FileH) >> 7  // SE
+                               | (sqVector & ~Rank1) >> 8           // S
+                               | (sqVector & ~Rank1 & ~FileA) >> 9; // SW
             }
 
             // Occupancy calculation is done in a few stages.

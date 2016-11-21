@@ -231,6 +231,12 @@ namespace Sandra.Chess
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
+                case Piece.King:
+                    if (!Constants.Neighbours[move.SourceSquare].Test(targetDelta))
+                    {
+                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                    }
+                    break;
             }
 
             if (moveCheckResult == MoveCheckResult.OK && make)
