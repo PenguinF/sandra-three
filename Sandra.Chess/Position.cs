@@ -129,15 +129,15 @@ namespace Sandra.Chess
             if (move == null) throw new ArgumentNullException(nameof(move));
             move.ThrowWhenOutOfRange();
 
-            ulong sourceDelta = move.SourceSquare.ToVector();
-            ulong targetDelta = move.TargetSquare.ToVector();
+            ulong sourceVector = move.SourceSquare.ToVector();
+            ulong targetVector = move.TargetSquare.ToVector();
 
             ulong sideToMoveVector = colorVectors[sideToMove];
             ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
 
             MoveCheckResult moveCheckResult = MoveCheckResult.OK;
-            if (sourceDelta == targetDelta)
+            if (sourceVector == targetVector)
             {
                 // Can never move to the same square.
                 moveCheckResult |= MoveCheckResult.SourceSquareIsTargetSquare;
@@ -145,11 +145,11 @@ namespace Sandra.Chess
 
             // Obtain moving piece.
             Piece movingPiece;
-            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceDelta), out movingPiece))
+            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out movingPiece))
             {
                 moveCheckResult |= MoveCheckResult.SourceSquareIsEmpty;
             }
-            else if (!sideToMoveVector.Test(sourceDelta))
+            else if (!sideToMoveVector.Test(sourceVector))
             {
                 // Allow only SideToMove to make a move.
                 moveCheckResult |= MoveCheckResult.NotSideToMove;
@@ -161,7 +161,7 @@ namespace Sandra.Chess
                 return moveCheckResult;
             }
 
-            if (sideToMoveVector.Test(targetDelta))
+            if (sideToMoveVector.Test(targetVector))
             {
                 // Do not allow capture of one's own pieces.
                 moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
@@ -183,9 +183,9 @@ namespace Sandra.Chess
                                              & Constants.PawnMoves[sideToMove, move.SourceSquare]
                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied);
 
-                    if ((legalCaptureSquares | legalMoveToSquares).Test(targetDelta))
+                    if ((legalCaptureSquares | legalMoveToSquares).Test(targetVector))
                     {
-                        if (Constants.PromotionSquares.Test(targetDelta))
+                        if (Constants.PromotionSquares.Test(targetVector))
                         {
                             if (move.MoveType != MoveType.Promotion
                                 || move.PromoteTo == Piece.Pawn
@@ -207,32 +207,32 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.Knight:
-                    if (!Constants.KnightMoves[move.SourceSquare].Test(targetDelta))
+                    if (!Constants.KnightMoves[move.SourceSquare].Test(targetVector))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Bishop:
-                    if (!Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetDelta))
+                    if (!Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Rook:
-                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta))
+                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Queen:
-                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetDelta)
-                        && !Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetDelta))
+                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector)
+                        && !Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.King:
-                    if (!Constants.Neighbours[move.SourceSquare].Test(targetDelta))
+                    if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
                     }
@@ -243,23 +243,23 @@ namespace Sandra.Chess
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
-                if (EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(targetDelta), out capturedPiece))
+                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(targetVector), out capturedPiece);
+                if (isCapture)
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetDelta;
-                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetDelta;
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
+                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
                 }
 
                 // Move from source to target.
-                colorVectors[sideToMove] = colorVectors[sideToMove] ^ targetDelta;
-                colorVectors[sideToMove] = colorVectors[sideToMove] ^ sourceDelta;
-                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetDelta;
-                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ sourceDelta;
+                ulong moveDelta = sourceVector | targetVector;
+                colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
 
                 if (move.MoveType == MoveType.Promotion)
                 {
                     // Change type of piece.
-                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetDelta;
-                    pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetDelta;
+                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
+                    pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
                 }
 
                 sideToMove = sideToMove.Opposite();
