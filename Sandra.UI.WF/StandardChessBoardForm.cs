@@ -249,7 +249,7 @@ namespace Sandra.UI.WF
                     if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.IllegalPromotion)
                     {
                         // Highlight each found square.
-                        PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(76, 255, 240, 0));
+                        PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));
                     }
                 }
             }
