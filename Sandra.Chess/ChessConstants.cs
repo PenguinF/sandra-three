@@ -523,10 +523,32 @@ namespace Sandra.Chess
             return (int)((InnerRankMasks[square] & occupied) >> rankShifts[square]);
         }
 
-        public static ulong ReachableSquaresStraight(Square square, ulong occupied)
+        private static int occupancyIndex_DiagA1H8(Square square, ulong occupied)
         {
-            return fileOccupancy[(int)square, occupancyIndex_File(square, occupied)]
-                 | rankOccupancy[(int)square, occupancyIndex_Rank(square, occupied)];
+            return (int)(((InnerA1H8Masks[square] & occupied) * a1h8Multipliers[square]) >> 57);
+        }
+
+        private static int occupancyIndex_DiagA8H1(Square square, ulong occupied)
+        {
+            return (int)(((InnerA8H1Masks[square] & occupied) * a8h1Multipliers[square]) >> 57);
+        }
+
+        /// <summary>
+        /// Given a bitfield of occupied squares, returns a bitfield with all squares which are reachable from a source square with a rook.
+        /// </summary>
+        public static ulong ReachableSquaresStraight(Square sourceSquare, ulong occupied)
+        {
+            return fileOccupancy[(int)sourceSquare, occupancyIndex_File(sourceSquare, occupied)]
+                 | rankOccupancy[(int)sourceSquare, occupancyIndex_Rank(sourceSquare, occupied)];
+        }
+
+        /// <summary>
+        /// Given a bitfield of occupied squares, returns a bitfield with all squares which are reachable from a source square with a bishop.
+        /// </summary>
+        public static ulong ReachableSquaresDiagonal(Square sourceSquare, ulong occupied)
+        {
+            return a1h8Occupancy[(int)sourceSquare, occupancyIndex_DiagA1H8(sourceSquare, occupied)]
+                 | a8h1Occupancy[(int)sourceSquare, occupancyIndex_DiagA8H1(sourceSquare, occupied)];
         }
 
         /// <summary>
