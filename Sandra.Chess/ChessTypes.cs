@@ -207,6 +207,14 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Gets the single square for which this bitfield is set, or an undefined value if the number of squares in the bitfield is not equal to one.
+        /// </summary>
+        public static Square GetSingleSquare(this ulong oneBit)
+        {
+            return (Square)GetSingleBitIndex(oneBit);
+        }
+
+        /// <summary>
         /// Enumerates all squares for which this bitfield is set.
         /// </summary>
         public static IEnumerable<Square> AllSquares(this ulong bitVector64)

@@ -442,11 +442,11 @@ namespace Sandra.Chess
                     fileOccupancy[(int)sq, o] = baseFileOccupancy[7 - y, o] << x;
                     rankOccupancy[(int)sq, o] = baseRankOccupancy[x, o] << (y * 8);
 
-                    if (x == y)
+                    if (a1h8Index == 0)
                     {
                         a1h8Occupancy[(int)sq, o] = baseA1H8Occupancy[x, o];
                     }
-                    else if (x < y)
+                    else if (a1h8Index < 0)
                     {
                         ulong a1h8Diag = baseA1H8Occupancy[x, o] & partialDiagMasks[-a1h8Index];
                         a1h8Occupancy[(int)sq, o] = a1h8Diag << (-a1h8Index * 8);

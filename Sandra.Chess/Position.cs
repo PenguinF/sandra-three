@@ -170,7 +170,7 @@ namespace Sandra.Chess
             if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
             {
                 // Cannot promote a non-pawn.
-                moveCheckResult |= MoveCheckResult.NotPromotion;
+                moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
             }
 
             // Check legal target squares and specific rules depending on the moving piece.
@@ -192,13 +192,13 @@ namespace Sandra.Chess
                                 || move.PromoteTo == Piece.King)
                             {
                                 // Must specify the correct MoveType, and allow only 4 promote-to pieces.
-                                moveCheckResult |= MoveCheckResult.IllegalPromotion;
+                                moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
                             }
                         }
                         else if (move.MoveType == MoveType.Promotion)
                         {
                             // Cannot promote to a non-promotion square.
-                            moveCheckResult |= MoveCheckResult.NotPromotion;
+                            moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
                         }
                     }
                     else
@@ -239,7 +239,7 @@ namespace Sandra.Chess
                     break;
             }
 
-            if (moveCheckResult == MoveCheckResult.OK || moveCheckResult == MoveCheckResult.IllegalPromotion)
+            if (moveCheckResult == MoveCheckResult.OK || moveCheckResult == MoveCheckResult.MissingPromotionInformation)
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
@@ -256,16 +256,23 @@ namespace Sandra.Chess
                 pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
 
                 // Find the king in the resulting position.
-                Square friendlyKing = (Square)(colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleBitIndex();
+                Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
+
                 // Evaluate colorVectors[sideToMove.Opposite()] again because it may have changed because of a capture.
                 ulong candidateAttackers = colorVectors[sideToMove.Opposite()];
                 ulong resultOccupied = colorVectors[sideToMove] | candidateAttackers;
+
                 // See if the friendly king is now under attack.
-                if (Constants.PawnCaptures[sideToMove, friendlyKing].Test(candidateAttackers & pieceVectors[Piece.Pawn])
-                    || Constants.KnightMoves[friendlyKing].Test(candidateAttackers & pieceVectors[Piece.Knight])
-                    || Constants.ReachableSquaresStraight(friendlyKing, resultOccupied).Test(candidateAttackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
-                    || Constants.ReachableSquaresDiagonal(friendlyKing, resultOccupied).Test(candidateAttackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
-                    || Constants.Neighbours[friendlyKing].Test(candidateAttackers & pieceVectors[Piece.King]))
+                if (Constants.PawnCaptures[sideToMove, friendlyKing]
+                                .Test(candidateAttackers & pieceVectors[Piece.Pawn])
+                    || Constants.KnightMoves[friendlyKing]
+                                .Test(candidateAttackers & pieceVectors[Piece.Knight])
+                    || Constants.ReachableSquaresStraight(friendlyKing, resultOccupied)
+                                .Test(candidateAttackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
+                    || Constants.ReachableSquaresDiagonal(friendlyKing, resultOccupied)
+                                .Test(candidateAttackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
+                    || Constants.Neighbours[friendlyKing]
+                                .Test(candidateAttackers & pieceVectors[Piece.King]))
                 {
                     moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
                 }
@@ -328,16 +335,16 @@ namespace Sandra.Chess
         /// </summary>
         IllegalTargetSquare = 16,
         /// <summary>
-        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
-        /// </summary>
-        IllegalPromotion = 32,
-        /// <summary>
         /// <see cref="MoveType.Promotion"/> was specified for a move which does not promote a pawn.
         /// </summary>
-        NotPromotion = 64,
+        IllegalMoveTypePromotion = 32,
         /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
-        FriendlyKingInCheck = 128,
+        FriendlyKingInCheck = 64,
+        /// <summary>
+        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
+        /// </summary>
+        MissingPromotionInformation = 128,
     }
 }

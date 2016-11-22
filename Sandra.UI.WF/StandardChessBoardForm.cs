@@ -175,7 +175,7 @@ namespace Sandra.UI.WF
                     SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
                     TargetSquare = toSquare(location),
                 };
-                return currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.IllegalPromotion);
+                return currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.MissingPromotionInformation);
             }
             return false;
         }
@@ -246,7 +246,7 @@ namespace Sandra.UI.WF
                 {
                     move.TargetSquare = square;
                     var moveCheckResult = currentPosition.TryMakeMove(move, false);
-                    if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.IllegalPromotion)
+                    if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
                     {
                         // Highlight each found square.
                         PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));
