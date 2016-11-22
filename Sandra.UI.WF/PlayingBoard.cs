@@ -1323,11 +1323,7 @@ namespace Sandra.UI.WF
                     {
                         Point location = moveCurrentPosition;
                         location.Offset(moveStartPosition);
-
-                        // Make sure the piece looks exactly the same as when it was still on its source square.
-                        drawForegroundImage(g, currentImg,
-                                            new Rectangle(location.X, location.Y, sizeH, sizeV),
-                                            isImageHighlighted[moveStartSquareIndex]);
+                        g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
                     }
                 }
             }
