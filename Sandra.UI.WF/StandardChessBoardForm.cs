@@ -74,7 +74,7 @@ namespace Sandra.UI.WF
         {
             // Check if location is a member of all squares where a piece sits of the current colour.
             ulong allowed = currentPosition.GetVector(currentPosition.SideToMove);
-            return (allowed & toSquare(squareLocation).ToVector()) != 0;
+            return allowed.Test(toSquare(squareLocation).ToVector());
         }
 
         public StandardChessBoardForm()
