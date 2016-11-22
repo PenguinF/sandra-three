@@ -265,7 +265,7 @@ namespace Sandra.Chess
                     || Constants.KnightMoves[friendlyKing].Test(candidateAttackers & pieceVectors[Piece.Knight])
                     || Constants.ReachableSquaresStraight(friendlyKing, resultOccupied).Test(candidateAttackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
                     || Constants.ReachableSquaresDiagonal(friendlyKing, resultOccupied).Test(candidateAttackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
-                    || Constants.KnightMoves[friendlyKing].Test(candidateAttackers & pieceVectors[Piece.King]))
+                    || Constants.Neighbours[friendlyKing].Test(candidateAttackers & pieceVectors[Piece.King]))
                 {
                     moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
                 }
