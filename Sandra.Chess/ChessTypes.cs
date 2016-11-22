@@ -232,5 +232,14 @@ namespace Sandra
         {
             return (bitVector64 & otherVector) != 0;
         }
+
+        /// <summary>
+        /// Returns if the given <see cref="MoveCheckResult"/> represents a legal move, even if that move is incomplete.
+        /// </summary>
+        public static bool IsLegalMove(this MoveCheckResult moveCheckResult)
+        {
+            return moveCheckResult == MoveCheckResult.OK
+                || moveCheckResult == MoveCheckResult.MissingPromotionInformation;
+        }
     }
 }
