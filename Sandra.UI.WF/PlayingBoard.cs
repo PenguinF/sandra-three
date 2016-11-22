@@ -1276,21 +1276,11 @@ namespace Sandra.UI.WF
                             {
                                 // Draw current image - but use a color transformation if the current square was
                                 // used to start moving from, or if the image must be highlighted.
-                                if (index == moveStartSquareIndex)
-                                {
-                                    // Half-transparent.
-                                    g.DrawImage(currentImg,
-                                                new Rectangle(x, y, sizeH, sizeV),
-                                                0, 0, currentImg.Width, currentImg.Height,
-                                                GraphicsUnit.Pixel,
-                                                moveSourceImageAttributes);
-                                }
-                                else
-                                {
-                                    drawForegroundImage(g, currentImg,
-                                                        new Rectangle(x, y, sizeH, sizeV),
-                                                        foregroundImageAttributes[index]);
-                                }
+                                var imgAttribute = foregroundImageAttributes[index];
+                                if (index == moveStartSquareIndex) imgAttribute = ForegroundImageAttribute.HalfTransparent;
+                                drawForegroundImage(g, currentImg,
+                                                    new Rectangle(x, y, sizeH, sizeV),
+                                                    imgAttribute);
                             }
                             x += delta;
                             ++index;
@@ -1333,9 +1323,18 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute highlight)
+        private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
         {
-            if (highlight == ForegroundImageAttribute.Highlight)
+            if (imgAttribute == ForegroundImageAttribute.HalfTransparent)
+            {
+                // Half-transparent.
+                g.DrawImage(image,
+                            destinationRectangle,
+                            0, 0, image.Width, image.Height,
+                            GraphicsUnit.Pixel,
+                            moveSourceImageAttributes);
+            }
+            else if (imgAttribute == ForegroundImageAttribute.Highlight)
             {
                 // Highlight piece.
                 g.DrawImage(image,
@@ -1379,6 +1378,10 @@ namespace Sandra.UI.WF
         /// The foreground image is drawn with a highlight.
         /// </summary>
         Highlight,
+        /// <summary>
+        /// The foreground image is drawn half transparently.
+        /// </summary>
+        HalfTransparent,
     }
 
     /// <summary>
