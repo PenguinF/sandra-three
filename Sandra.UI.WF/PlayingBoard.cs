@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
             highlight.SetGamma(0.6f);
-            highlightImgAttributes = highlight;
+            highlightImageAttributes = highlight;
 
             // Half-transparent foreground image at the source square, when moving.
             var halfTransparent = new ImageAttributes();
@@ -66,11 +66,11 @@ namespace Sandra.UI.WF
                 new float[] {0, 0, 0, 0, 0}
             });
             halfTransparent.SetColorMatrix(halfTransparentMatrix);
-            moveSourceImageAttributes = halfTransparent;
+            halfTransparentImageAttributes = halfTransparent;
         }
 
-        private readonly ImageAttributes highlightImgAttributes;
-        private readonly ImageAttributes moveSourceImageAttributes;
+        private readonly ImageAttributes highlightImageAttributes;
+        private readonly ImageAttributes halfTransparentImageAttributes;
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -1328,7 +1328,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            moveSourceImageAttributes);
+                            halfTransparentImageAttributes);
             }
             else if (imgAttribute == ForegroundImageAttribute.Highlight)
             {
@@ -1337,7 +1337,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            highlightImgAttributes);
+                            highlightImageAttributes);
             }
             else
             {
@@ -1351,8 +1351,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                highlightImgAttributes.Dispose();
-                moveSourceImageAttributes.Dispose();
+                highlightImageAttributes.Dispose();
+                halfTransparentImageAttributes.Dispose();
 
                 // To dispose of stored disposable values such as brushes.
                 propertyStore.Dispose();
