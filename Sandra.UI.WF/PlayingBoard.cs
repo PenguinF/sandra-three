@@ -588,22 +588,22 @@ namespace Sandra.UI.WF
         }
 
 
-        private ForegroundImageAttribute[] isImageHighlighted;
+        private ForegroundImageAttribute[] foregroundImageAttributes;
 
         /// <summary>
-        /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetIsImageHighLighted(int x, int y)
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y)
         {
             int index = getIndex(x, y);
-            return isImageHighlighted[index];
+            return foregroundImageAttributes[index];
         }
 
         /// <summary>
-        /// Gets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <param name="squareLocation">
         /// The location (x, y) of the square.
@@ -614,30 +614,30 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetIsImageHighLighted(SquareLocation squareLocation)
+        public ForegroundImageAttribute GetForegroundImageAttribute(SquareLocation squareLocation)
         {
             throwIfNull(squareLocation);
-            return GetIsImageHighLighted(squareLocation.X, squareLocation.Y);
+            return GetForegroundImageAttribute(squareLocation.X, squareLocation.Y);
         }
 
         /// <summary>
-        /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// Sets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public void SetIsImageHighLighted(int x, int y, ForegroundImageAttribute value)
+        public void SetForegroundImageAttribute(int x, int y, ForegroundImageAttribute value)
         {
             int index = getIndex(x, y);
-            if (isImageHighlighted[index] != value)
+            if (foregroundImageAttributes[index] != value)
             {
-                isImageHighlighted[index] = value;
+                foregroundImageAttributes[index] = value;
                 Invalidate();
             }
         }
 
         /// <summary>
-        /// Sets if the <see cref="Image"/> on position (x, y) is highlighted or not.
+        /// Sets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
         /// </summary>
         /// <param name="squareLocation">
         /// The location (x, y) of the square.
@@ -648,10 +648,10 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="squareLocation.X"/> or <paramref name="squareLocation.Y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public void SetIsImageHighLighted(SquareLocation squareLocation, ForegroundImageAttribute value)
+        public void SetForegroundImageAttribute(SquareLocation squareLocation, ForegroundImageAttribute value)
         {
             throwIfNull(squareLocation);
-            SetIsImageHighLighted(squareLocation.X, squareLocation.Y, value);
+            SetForegroundImageAttribute(squareLocation.X, squareLocation.Y, value);
         }
 
 
@@ -726,7 +726,7 @@ namespace Sandra.UI.WF
         {
             int newArrayLength = BoardWidth * BoardHeight;
             foregroundImages = new Image[newArrayLength];
-            isImageHighlighted = new ForegroundImageAttribute[newArrayLength];
+            foregroundImageAttributes = new ForegroundImageAttribute[newArrayLength];
             squareOverlayColors = new Color[newArrayLength];
         }
 
@@ -1289,7 +1289,7 @@ namespace Sandra.UI.WF
                                 {
                                     drawForegroundImage(g, currentImg,
                                                         new Rectangle(x, y, sizeH, sizeV),
-                                                        isImageHighlighted[index]);
+                                                        foregroundImageAttributes[index]);
                                 }
                             }
                             x += delta;
@@ -1335,7 +1335,7 @@ namespace Sandra.UI.WF
 
         private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute highlight)
         {
-            if (highlight == ForegroundImageAttribute.True)
+            if (highlight == ForegroundImageAttribute.Highlight)
             {
                 // Highlight piece.
                 g.DrawImage(image,
@@ -1366,10 +1366,19 @@ namespace Sandra.UI.WF
         }
     }
 
+    /// <summary>
+    /// Enumerates options in which to draw a foreground image on the playing board.
+    /// </summary>
     public enum ForegroundImageAttribute
     {
-        False,
-        True,
+        /// <summary>
+        /// The foreground image is drawn as is.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// The foreground image is drawn with a highlight.
+        /// </summary>
+        Highlight,
     }
 
     /// <summary>

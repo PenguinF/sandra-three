@@ -214,7 +214,7 @@ namespace Sandra.UI.WF
         {
             if (!PlayingBoard.IsMoving && canPieceBeMoved(squareLocation))
             {
-                PlayingBoard.SetIsImageHighLighted(squareLocation.X, squareLocation.Y, ForegroundImageAttribute.True);
+                PlayingBoard.SetForegroundImageAttribute(squareLocation.X, squareLocation.Y, ForegroundImageAttribute.Highlight);
             }
         }
 
@@ -228,7 +228,7 @@ namespace Sandra.UI.WF
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
             if (!PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, ForegroundImageAttribute.False);
+                PlayingBoard.SetForegroundImageAttribute(e.Location.X, e.Location.Y, ForegroundImageAttribute.Default);
             }
         }
 
@@ -264,7 +264,7 @@ namespace Sandra.UI.WF
             var hoverSquare = PlayingBoard.HoverSquare;
             if (hoverSquare == null || hoverSquare.X != e.Start.X || hoverSquare.Y != e.Start.Y)
             {
-                PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, ForegroundImageAttribute.False);
+                PlayingBoard.SetForegroundImageAttribute(e.Start.X, e.Start.Y, ForegroundImageAttribute.Default);
             }
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
