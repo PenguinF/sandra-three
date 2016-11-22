@@ -231,7 +231,7 @@ namespace Sandra.UI.WF
                 };
 
                 var moveCheckResult = currentPosition.TryMakeMove(move, false);
-                if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
+                if (moveCheckResult.IsLegalMove())
                 {
                     PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
                 }
@@ -265,7 +265,7 @@ namespace Sandra.UI.WF
                 {
                     move.TargetSquare = square;
                     var moveCheckResult = currentPosition.TryMakeMove(move, false);
-                    if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
+                    if (moveCheckResult.IsLegalMove())
                     {
                         // Highlight each found square.
                         PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));

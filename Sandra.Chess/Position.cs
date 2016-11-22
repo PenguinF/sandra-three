@@ -239,7 +239,7 @@ namespace Sandra.Chess
                     break;
             }
 
-            if (moveCheckResult == MoveCheckResult.OK || moveCheckResult == MoveCheckResult.MissingPromotionInformation)
+            if (moveCheckResult.IsLegalMove())
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
