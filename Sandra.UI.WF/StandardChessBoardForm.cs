@@ -210,17 +210,12 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void setMoveStartHighlight(SquareLocation squareLocation)
-        {
-            if (!PlayingBoard.IsMoving && canPieceBeMoved(squareLocation))
-            {
-                PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Highlight);
-            }
-        }
-
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            setMoveStartHighlight(e.Location);
+            if (!PlayingBoard.IsMoving && canPieceBeMoved(e.Location))
+            {
+                PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Highlight);
+            }
         }
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
