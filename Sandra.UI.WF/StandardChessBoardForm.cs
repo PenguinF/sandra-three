@@ -210,11 +210,20 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void highlightHoverSquare()
+        {
+            var hoverSquare = PlayingBoard.HoverSquare;
+            if (hoverSquare != null && canPieceBeMoved(hoverSquare))
+            {
+                PlayingBoard.SetForegroundImageAttribute(hoverSquare, ForegroundImageAttribute.Highlight);
+            }
+        }
+
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            if (!PlayingBoard.IsMoving && canPieceBeMoved(e.Location))
+            if (!PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Highlight);
+                highlightHoverSquare();
             }
         }
 
@@ -258,17 +267,12 @@ namespace Sandra.UI.WF
 
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
-            var hoverSquare = PlayingBoard.HoverSquare;
-
-            var resetImgAttribute = hoverSquare != null && hoverSquare == e.Start
-                                  ? ForegroundImageAttribute.Highlight
-                                  : ForegroundImageAttribute.Default;
-            PlayingBoard.SetForegroundImageAttribute(e.Start, resetImgAttribute);
-
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
+                PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Default);
                 PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
             }
+            highlightHoverSquare();
         }
 
         private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
