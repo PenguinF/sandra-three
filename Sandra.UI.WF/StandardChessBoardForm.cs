@@ -16,7 +16,9 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -93,6 +95,15 @@ namespace Sandra.UI.WF
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
 
             PlayingBoard.Paint += playingBoard_Paint;
+
+            dotPen = new Pen(Color.DimGray)
+            {
+                DashStyle = DashStyle.Dot,
+                Width = 2,
+                Alignment = PenAlignment.Center,
+                StartCap = LineCap.RoundAnchor,
+                EndCap = LineCap.Round,
+            };
         }
 
         /// <summary>
@@ -308,6 +319,7 @@ namespace Sandra.UI.WF
             if (currentPosition.TryMakeMove(move, true) == Chess.MoveCheckResult.OK)
             {
                 copyPositionToBoard();
+                lastCommittedMove = e;
             }
 
             resetMoveStartSquareHighlight(e);
@@ -318,9 +330,36 @@ namespace Sandra.UI.WF
             resetMoveStartSquareHighlight(e);
         }
 
+        MoveCommitEventArgs lastCommittedMove;
+
+        Pen dotPen;
+
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
             var hoverSquare = PlayingBoard.HoverSquare;
+
+            // Draw a dotted line between the centers of the squares of the last move.
+            if (lastCommittedMove != null)
+            {
+                Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Start);
+                int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
+                int startSquareCenterY = startSquareRect.Y + startSquareRect.Height / 2;
+                Rectangle targetSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Target);
+                int targetSquareCenterX = targetSquareRect.X + targetSquareRect.Width / 2;
+                int targetSquareCenterY = targetSquareRect.Y + targetSquareRect.Height / 2;
+
+                // Cut off the last segment over the target square.
+                int distance = Math.Max(
+                    Math.Abs(lastCommittedMove.Start.X - lastCommittedMove.Target.X),
+                    Math.Abs(lastCommittedMove.Start.Y - lastCommittedMove.Target.Y));
+
+                int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
+                int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
+
+                e.Graphics.DrawLine(dotPen,
+                                    startSquareCenterX, startSquareCenterY,
+                                    endPointX, endPointY);
+            }
 
             // Draw subtle corners just inside the edges of a legal target square.
             if (hoverSquare != null && PlayingBoard.IsMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
@@ -352,6 +391,16 @@ namespace Sandra.UI.WF
                                          rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
                 }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                dotPen.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
