@@ -304,7 +304,7 @@ namespace Sandra.Chess
     public enum MoveCheckResult
     {
         /// <summary>
-        /// The move is a valid move in the given position.
+        /// The move is valid in the current position.
         /// </summary>
         OK,
         /// <summary>
@@ -316,11 +316,11 @@ namespace Sandra.Chess
         /// </summary>
         SourceSquareIsEmpty = 2,
         /// <summary>
-        /// The piece on the source square does not belong to the color which turn it is.
+        /// The piece on the source square does not belong to the side to move.
         /// </summary>
         NotSideToMove = 4,
         /// <summary>
-        /// The move would result in capturing a piece of the same color.
+        /// The move would result in the capture of a piece of the same color.
         /// </summary>
         CannotCaptureOwnPiece = 8,
         /// <summary>
@@ -328,7 +328,7 @@ namespace Sandra.Chess
         /// </summary>
         IllegalTargetSquare = 16,
         /// <summary>
-        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or knight.
+        /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
         /// </summary>
         IllegalPromotion = 32,
         /// <summary>

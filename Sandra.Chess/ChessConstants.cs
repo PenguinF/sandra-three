@@ -231,7 +231,7 @@ namespace Sandra.Chess
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> Neighbours;
 
-        // Occupancy tables and multipliers.
+        // Total number of indices is 8 - 2 = 6 bits, since the two outermost squares don't matter for reachability of squares.
         private const int totalOccupancies = 1 << 6;
 
         private static readonly EnumIndexedArray<Square, ulong> fileMultipliers;
@@ -325,20 +325,22 @@ namespace Sandra.Chess
                 ulong sqVector = sq.ToVector();
                 int x = sq.X();
                 int y = sq.Y();
+                int a1h8Index = 7 + x - y;
+                int a8h1Index = x + y;
 
                 FileMasks[sq] = allFiles[x];
                 InnerFileMasks[sq] = FileMasks[sq] & ~Rank1 & ~Rank8;
                 RankMasks[sq] = allRanks[y];
                 InnerRankMasks[sq] = RankMasks[sq] & ~FileA & ~FileH;
-                A1H8Masks[sq] = allDiagsA1H8[7 + x - y];
+                A1H8Masks[sq] = allDiagsA1H8[a1h8Index];
                 InnerA1H8Masks[sq] = A1H8Masks[sq] & ~FileA & ~FileH & ~Rank1 & ~Rank8;
-                A8H1Masks[sq] = allDiagsA8H1[x + y];
+                A8H1Masks[sq] = allDiagsA8H1[a8h1Index];
                 InnerA8H1Masks[sq] = A8H1Masks[sq] & ~FileA & ~FileH & ~Rank1 & ~Rank8;
 
                 fileMultipliers[sq] = fileMultipliers8[x];
                 rankShifts[sq] = y * 8 + 1;
-                a1h8Multipliers[sq] = a1h8Multipliers8[7 + x - y];
-                a8h1Multipliers[sq] = a8h1Multipliers8[x + y];
+                a1h8Multipliers[sq] = a1h8Multipliers8[a1h8Index];
+                a8h1Multipliers[sq] = a8h1Multipliers8[a8h1Index];
 
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
                                            | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
@@ -369,32 +371,34 @@ namespace Sandra.Chess
                                | (sqVector & ~Rank1 & ~FileA) >> 9; // SW
             }
 
-            // Occupancy calculation is done in a few stages.
+            // Reachability calculation is done in a few stages.
             // Given are a bitfield of occupied squares, a source square for which to calculate sliding moves,
             // and a direction, N-S, W-E, NW-SE or SW-NE.
-            // Example: take a bitfield in which a white queen is on E1, a black king on C3, and a white king on G8.
+            // Example: take a position in which a white queen is on C3, a black king on E1, and a white king on G8.
             // We'd like to calculate whether or not the black king is in check, so:
-            // source square = E1, direction = NW-SE.
+            // source square = E1, direction = NW-SE, occupied square bitfield = 2^4 (E1) + 2^18 (C3) + 2^62 (G8).
             //
             // A) Zero out everything that's not on the file/rank/diagonal to consider.
-            //    In the example, only E1, D2, C3, B4, A5 are relevant, so square G8 is zeroed out.
-            // B) Also ignore the two edge squares, because no further squares can be blocked.
+            //    In the example, only A5, B4, C3, D2, E1 are relevant, so square G8 is zeroed out.
+            //    Also ignore the two edge squares, because no further squares can be blocked.
             //    In the example, this means that square E1 is zeroed out as well.
-            //    Only six bits of information remain.
-            // C) Multiply by a 'magic' value to map and rotate the value onto the eighth rank.
-            //    This will generate garbage on the other seven ranks.
-            // D) Shift right by 57 positions to move the value to the first rank instead. This also removes the garbage.
+            //    Only a maximum of six bits of information remain, in the example only three (B4, C3, D2).
+            // B) Multiply by a 'magic' value to map and rotate the value onto the eighth rank.
+            //    This will generate some garbage on the other seven ranks.
+            // C) Shift right by 57 positions to move the value to the first rank instead. This also shifts out the garbage.
             //    In the example, the result binary is: 000010
-            //    Had B4 been occupied as well, the result would have been: 000110
-            //    And had D2 been occupied as well, the result would have been: 000111
-            // E) Given the source square and the 6-bit occupancy index, convert into a bitfield of reachable squares.
-            //    The end result of the example then is a bitfield in which bits are set for C3 and D2.
+            //    Had D2 been occupied as well, the result would have been: 000110
+            //    And had B4 been occupied as well, the result would have been: 000111
+            // D) Given the source square and the 6-bit occupancy index, use a lookup table to obtain a bitfield of reachable
+            //    squares. The end result of the example then is a bitfield in which bits are set for C3 and D2.
+            //    Since there's a queen is on C3, this means that the black king is indeed in check.
             //
             // Note that the color of the piece occupying a square can be safely ignored,
             // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
+            // The number of necessary operations is always four: zero out, multiply, shift right, lookup in table.
 
-            // Order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.
-            // This in turn is determined by the multipliers which are used in step C.
+            // The order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.
+            // This in turn is determined indirectly by the multipliers which are used in step B.
             Square[] baseFile = new Square[] { Square.A8, Square.A7, Square.A6, Square.A5, Square.A4, Square.A3, Square.A2, Square.A1 };
             ulong[,] baseFileOccupancy = calculateRayOccupancyTable(baseFile);
             fileOccupancy = new ulong[TotalSquareCount, totalOccupancies];
@@ -428,6 +432,9 @@ namespace Sandra.Chess
             {
                 int x = sq.X();
                 int y = sq.Y();
+                // Diagonal indexes relative to the long diagonals.
+                int a1h8Index = x - y;
+                int a8h1Index = x + y - 7;
 
                 for (int o = totalOccupancies - 1; o >= 0; --o)
                 {
@@ -441,28 +448,28 @@ namespace Sandra.Chess
                     }
                     else if (x < y)
                     {
-                        ulong a1h8Diag = baseA1H8Occupancy[x, o] & partialDiagMasks[y - x];
-                        a1h8Occupancy[(int)sq, o] = a1h8Diag << ((y - x) * 8);
+                        ulong a1h8Diag = baseA1H8Occupancy[x, o] & partialDiagMasks[-a1h8Index];
+                        a1h8Occupancy[(int)sq, o] = a1h8Diag << (-a1h8Index * 8);
                     }
                     else
                     {
-                        ulong a1h8Diag = baseA1H8Occupancy[y, o] & partialDiagMasks[x - y];
-                        a1h8Occupancy[(int)sq, o] = a1h8Diag << (x - y);
+                        ulong a1h8Diag = baseA1H8Occupancy[y, o] & partialDiagMasks[a1h8Index];
+                        a1h8Occupancy[(int)sq, o] = a1h8Diag << a1h8Index;
                     }
 
-                    if (x + y == 7)
+                    if (a8h1Index == 0)
                     {
                         a8h1Occupancy[(int)sq, o] = baseA8H1Occupancy[x, o];
                     }
-                    else if (x + y < 7)
+                    else if (a8h1Index < 0)
                     {
-                        ulong a8h1Diag = baseA8H1Occupancy[x, o] & partialDiagMasks[7 - x - y];
-                        a8h1Occupancy[(int)sq, o] = a8h1Diag >> ((7 - x - y) * 8);
+                        ulong a8h1Diag = baseA8H1Occupancy[x, o] & partialDiagMasks[-a8h1Index];
+                        a8h1Occupancy[(int)sq, o] = a8h1Diag >> (-a8h1Index * 8);
                     }
                     else
                     {
-                        ulong a8h1Diag = baseA8H1Occupancy[7 - y, o] & partialDiagMasks[x + y - 7];
-                        a8h1Occupancy[(int)sq, o] = a8h1Diag << (x + y - 7);
+                        ulong a8h1Diag = baseA8H1Occupancy[7 - y, o] & partialDiagMasks[a8h1Index];
+                        a8h1Occupancy[(int)sq, o] = a8h1Diag << a8h1Index;
                     }
                 }
             }
@@ -566,7 +573,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Forces runtime precalculation lookup tables.
+        /// Forces runtime precalculation of lookup tables.
         /// </summary>
         public static void ForceInitialize()
         {
