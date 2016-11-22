@@ -214,7 +214,7 @@ namespace Sandra.UI.WF
         {
             if (!PlayingBoard.IsMoving && canPieceBeMoved(squareLocation))
             {
-                PlayingBoard.SetForegroundImageAttribute(squareLocation.X, squareLocation.Y, ForegroundImageAttribute.Highlight);
+                PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Highlight);
             }
         }
 
@@ -228,7 +228,7 @@ namespace Sandra.UI.WF
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
             if (!PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetForegroundImageAttribute(e.Location.X, e.Location.Y, ForegroundImageAttribute.Default);
+                PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
             }
         }
 
@@ -252,6 +252,8 @@ namespace Sandra.UI.WF
                         PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));
                     }
                 }
+
+                PlayingBoard.SetForegroundImageAttribute(e.Start, ForegroundImageAttribute.HalfTransparent);
             }
             else
             {
@@ -262,10 +264,12 @@ namespace Sandra.UI.WF
         private void resetMoveStartSquareHighlight(MoveEventArgs e)
         {
             var hoverSquare = PlayingBoard.HoverSquare;
-            if (hoverSquare == null || hoverSquare.X != e.Start.X || hoverSquare.Y != e.Start.Y)
-            {
-                PlayingBoard.SetForegroundImageAttribute(e.Start.X, e.Start.Y, ForegroundImageAttribute.Default);
-            }
+
+            var resetImgAttribute = hoverSquare != null && hoverSquare == e.Start
+                                  ? ForegroundImageAttribute.Highlight
+                                  : ForegroundImageAttribute.Default;
+            PlayingBoard.SetForegroundImageAttribute(e.Start, resetImgAttribute);
+
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
                 PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());

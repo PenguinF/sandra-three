@@ -1274,13 +1274,9 @@ namespace Sandra.UI.WF
                             Image currentImg = foregroundImages[index];
                             if (currentImg != null)
                             {
-                                // Draw current image - but use a color transformation if the current square was
-                                // used to start moving from, or if the image must be highlighted.
-                                var imgAttribute = foregroundImageAttributes[index];
-                                if (index == moveStartSquareIndex) imgAttribute = ForegroundImageAttribute.HalfTransparent;
                                 drawForegroundImage(g, currentImg,
                                                     new Rectangle(x, y, sizeH, sizeV),
-                                                    imgAttribute);
+                                                    foregroundImageAttributes[index]);
                             }
                             x += delta;
                             ++index;
