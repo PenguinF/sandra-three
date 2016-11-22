@@ -359,6 +359,8 @@ namespace Sandra.UI.WF
                 e.Graphics.DrawLine(dotPen,
                                     startSquareCenterX, startSquareCenterY,
                                     endPointX, endPointY);
+
+                e.Graphics.FillEllipse(Brushes.DimGray, new RectangleF(endPointX - 3.5f, endPointY - 3.5f, 7, 7));
             }
 
             // Draw subtle corners just inside the edges of a legal target square.
