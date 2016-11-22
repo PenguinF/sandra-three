@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF", "Sandra.UI.W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess", "Sandra.Chess\Sandra.Chess.csproj", "{1B805A61-6E0C-455F-A8CF-343B7915180D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess.Tests", "Sandra.Chess\Tests\Sandra.Chess.Tests.csproj", "{9DDB6AD7-4822-4732-9E18-309405917032}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1B805A61-6E0C-455F-A8CF-343B7915180D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B805A61-6E0C-455F-A8CF-343B7915180D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B805A61-6E0C-455F-A8CF-343B7915180D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DDB6AD7-4822-4732-9E18-309405917032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DDB6AD7-4822-4732-9E18-309405917032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DDB6AD7-4822-4732-9E18-309405917032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DDB6AD7-4822-4732-9E18-309405917032}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

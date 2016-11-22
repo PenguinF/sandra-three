@@ -23,6 +23,23 @@ using System.Linq;
 namespace Sandra
 {
     /// <summary>
+    /// Contains utility extension methods.
+    /// </summary>
+    public static class UtilityExtensions
+    {
+        /// <summary>
+        /// Sets a single value at each index of the array.
+        /// </summary>
+        public static void Fill<T>(this T[] array, T value)
+        {
+            for (int i = array.Length - 1; i >= 0; --i)
+            {
+                array[i] = value;
+            }
+        }
+    }
+
+    /// <summary>
     /// Contains general helper methods for enumerations.
     /// </summary>
     /// <remarks>
@@ -57,6 +74,81 @@ namespace Sandra
                     yield return value;
                 }
             }
+        }
+    }
+}
+
+namespace System.Linq
+{
+    public static class LinqExtensions
+    {
+        /// <summary>
+        /// Determines whether there is any element in a sequence, and returns that element.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// An <see cref="IEnumerable{TSource}"/> whose elements to check.
+        /// </param>
+        /// <param name="value">
+        /// Returns the found element if true was returned, otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// true if any elements in the source sequence pass the test in the specified predicate, otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        public static bool Any<TSource>(this IEnumerable<TSource> source, out TSource value)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            foreach (var element in source)
+            {
+                value = element;
+                return true;
+            }
+            value = default(TSource);
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether any element of a sequence satisfies a condition, and returns such an element.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// An <see cref="IEnumerable{TSource}"/> whose elements to apply the predicate to.
+        /// </param>
+        /// <param name="predicate">
+        /// A function to test each element for a condition.
+        /// </param>
+        /// <param name="value">
+        /// Returns the found element if true was returned, otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// true if any elements in the source sequence pass the test in the specified predicate, otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> or <paramref name="predicate"/> is null (Nothing in Visual Basic).
+        /// </exception>
+        public static bool Any<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out TSource value)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (predicate == null) throw new ArgumentNullException(nameof(predicate));
+
+            foreach (var element in source)
+            {
+                if (predicate(element))
+                {
+                    value = element;
+                    return true;
+                }
+            }
+            value = default(TSource);
+            return false;
         }
     }
 }

@@ -59,12 +59,29 @@ namespace Sandra.Chess
     }
 
     /// <summary>
+    /// Specifies a rank on a standard 8x8 chess board.
+    /// </summary>
+    /// <remarks>
+    /// Be aware that when casting to integer, the 'value' decreases with one, for example (int)Rank._3 yields 2.
+    /// </remarks>
+    public enum Rank
+    {
+        _1, _2, _3, _4, _5, _6, _7, _8,
+    }
+
+    /// <summary>
+    /// Specifies a file on a standard 8x8 chess board.
+    /// </summary>
+    public enum File
+    {
+        A, B, C, D, E, F, G, H,
+    }
+
+    /// <summary>
     /// Specifies a square on a standard 8x8 chess board.
     /// </summary>
     public enum Square
     {
-        None = -1,
-
         A1, B1, C1, D1, E1, F1, G1, H1,
         A2, B2, C2, D2, E2, F2, G2, H2,
         A3, B3, C3, D3, E3, F3, G3, H3,
@@ -79,10 +96,50 @@ namespace Sandra.Chess
 namespace Sandra
 {
     /// <summary>
-    /// Contains extension methods for chess enumeration types and bit vectors (<see cref="uint"/>).
+    /// Contains extension methods for chess enumeration types and bit vectors (<see cref="ulong"/>).
     /// </summary>
     public static class ChessExtensions
     {
+        /// <summary>
+        /// Returns the opposite of a given <see cref="Color"/>.
+        /// </summary>
+        public static Color Opposite(this Color color)
+        {
+            return 1 - color;
+        }
+
+        /// <summary>
+        /// Returns the <see cref="Color"/> of a given piece.
+        /// </summary>
+        public static Color GetColor(this NonEmptyColoredPiece coloredPiece)
+        {
+            return (Color)((int)coloredPiece / Constants.PieceCount);
+        }
+
+        /// <summary>
+        /// Returns the <see cref="Piece"/> part of a given coloured piece.
+        /// </summary>
+        public static Piece GetPiece(this NonEmptyColoredPiece coloredPiece)
+        {
+            return (Piece)((int)coloredPiece % Constants.PieceCount);
+        }
+
+        /// <summary>
+        /// Returns the colored piece combination of a piece and a color.
+        /// </summary>
+        public static NonEmptyColoredPiece Combine(this Piece piece, Color color)
+        {
+            return (NonEmptyColoredPiece)((int)color * Constants.PieceCount + piece);
+        }
+
+        /// <summary>
+        /// Returns the square at the position specified by the file and rank.
+        /// </summary>
+        public static Square Combine(this File file, Rank rank)
+        {
+            return (Square)((int)rank * Constants.SquareCount + file);
+        }
+
         /// <summary>
         /// Returns the X-coordinate of a non-empty square.
         /// </summary>
@@ -97,6 +154,14 @@ namespace Sandra
         public static int Y(this Square square)
         {
             return (int)square / Constants.SquareCount;
+        }
+
+        /// <summary>
+        /// Returns a bitfield which is true only at the given square.
+        /// </summary>
+        public static ulong ToVector(this Square square)
+        {
+            return 1UL << (int)square;
         }
 
         /// <summary>
@@ -142,6 +207,14 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Gets the single square for which this bitfield is set, or an undefined value if the number of squares in the bitfield is not equal to one.
+        /// </summary>
+        public static Square GetSingleSquare(this ulong oneBit)
+        {
+            return (Square)GetSingleBitIndex(oneBit);
+        }
+
+        /// <summary>
         /// Enumerates all squares for which this bitfield is set.
         /// </summary>
         public static IEnumerable<Square> AllSquares(this ulong bitVector64)
@@ -150,6 +223,14 @@ namespace Sandra
             {
                 yield return ((Square)index);
             }
+        }
+
+        /// <summary>
+        /// Tests if another bitfield has any bits in common with this one.
+        /// </summary>
+        public static bool Test(this ulong bitVector64, ulong otherVector)
+        {
+            return (bitVector64 & otherVector) != 0;
         }
     }
 }

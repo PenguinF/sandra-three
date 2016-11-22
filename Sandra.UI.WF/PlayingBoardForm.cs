@@ -39,6 +39,10 @@ namespace Sandra.UI.WF
             PlayingBoard.Dock = DockStyle.Fill;
             PlayingBoard.Visible = true;
             Controls.Add(PlayingBoard);
+
+            ShowIcon = false;
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.SizableToolWindow;
         }
 
         /// <summary>

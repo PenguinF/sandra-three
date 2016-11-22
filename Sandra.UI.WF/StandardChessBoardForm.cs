@@ -26,17 +26,60 @@ namespace Sandra.UI.WF
     /// </summary>
     public class StandardChessBoardForm : PlayingBoardForm
     {
-        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages { get; private set; }
+        private EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages;
 
-        public void UpdatePieceImages(EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages)
+        /// <summary>
+        /// Gets or sets the image set to use for the playing board.
+        /// </summary>
+        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages
         {
-            PieceImages = pieceImages;
+            get
+            {
+                return pieceImages;
+            }
+            set
+            {
+                pieceImages = value;
+                copyPositionToBoard();
+            }
+        }
+
+        private Chess.Position currentPosition;
+
+        private Chess.Square toSquare(SquareLocation squareLocation)
+        {
+            // Reverse y-index, because square A1 is at y == 7.
+            return ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
+        }
+
+        private void copyPositionToBoard()
+        {
+            // Copy all pieces.
+            foreach (Chess.NonEmptyColoredPiece coloredPiece in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
+            {
+                foreach (var square in currentPosition.GetVector(coloredPiece).AllSquares())
+                {
+                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[coloredPiece]);
+                }
+            }
+
+            // Clear all squares that are empty.
+            foreach (var square in currentPosition.GetVector(Chess.ColoredPiece.Empty).AllSquares())
+            {
+                PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
+            }
+        }
+
+        private bool canPieceBeMoved(SquareLocation squareLocation)
+        {
+            // Check if location is a member of all squares where a piece sits of the current colour.
+            ulong allowed = currentPosition.GetVector(currentPosition.SideToMove);
+            return (allowed & toSquare(squareLocation).ToVector()) != 0;
         }
 
         public StandardChessBoardForm()
         {
-            ShowIcon = false;
-            MaximizeBox = false;
+            currentPosition = Chess.Position.GetInitialPosition();
 
             PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
             PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
@@ -44,6 +87,8 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
+
+            PlayingBoard.MoveStart += playingBoard_MoveStart;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
 
@@ -120,29 +165,24 @@ namespace Sandra.UI.WF
             }
         }
 
-        private bool isPromoting(SquareLocation location, out Chess.Color promoteColor)
+        private bool isPromoting(SquareLocation location)
         {
-            if (PlayingBoard.IsMoving && location != null && PlayingBoard.MoveStartSquare != location)
+            if (PlayingBoard.IsMoving && location != null)
             {
-                if (location.Y == 0)
+                // Create fake illegal promotion move to check what TryMakeMove() returns.
+                Chess.Move move = new Chess.Move()
                 {
-                    promoteColor = Chess.Color.White;
-                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.WhitePawn];
-                }
-                else if (location.Y == 7)
-                {
-                    promoteColor = Chess.Color.Black;
-                    return PlayingBoard.GetForegroundImage(PlayingBoard.MoveStartSquare) == PieceImages[Chess.NonEmptyColoredPiece.BlackPawn];
-                }
+                    SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
+                    TargetSquare = toSquare(location),
+                };
+                return currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.MissingPromotionInformation);
             }
-            promoteColor = default(Chess.Color);
             return false;
         }
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            Chess.Color promoteColor;
-            if (isPromoting(PlayingBoard.HoverSquare, out promoteColor))
+            if (isPromoting(PlayingBoard.HoverSquare))
             {
                 Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
                 SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
@@ -166,32 +206,56 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-                updateHoverQuadrant(hitQuadrant, promoteColor);
+                updateHoverQuadrant(hitQuadrant, currentPosition.SideToMove);
+            }
+        }
+
+        private void setMoveStartHighlight(SquareLocation squareLocation)
+        {
+            if (!PlayingBoard.IsMoving && canPieceBeMoved(squareLocation))
+            {
+                PlayingBoard.SetIsImageHighLighted(squareLocation.X, squareLocation.Y, true);
             }
         }
 
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            if (PlayingBoard.IsMoving)
-            {
-                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(80, 255, 255, 255));
-            }
-            else
-            {
-                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, true);
-            }
+            setMoveStartHighlight(e.Location);
         }
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
-            if (PlayingBoard.IsMoving)
+            if (!PlayingBoard.IsMoving)
             {
-                PlayingBoard.SetSquareOverlayColor(e.Location.X, e.Location.Y, Color.FromArgb(48, 255, 190, 0));
+                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
+            }
+        }
+
+        private void playingBoard_MoveStart(object sender, CancellableMoveEventArgs e)
+        {
+            if (canPieceBeMoved(e.Start))
+            {
+                // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
+                Chess.Move move = new Chess.Move()
+                {
+                    SourceSquare = toSquare(e.Start),
+                };
+
+                foreach (var square in EnumHelper<Chess.Square>.AllValues)
+                {
+                    move.TargetSquare = square;
+                    var moveCheckResult = currentPosition.TryMakeMove(move, false);
+                    if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
+                    {
+                        // Highlight each found square.
+                        PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));
+                    }
+                }
             }
             else
             {
-                PlayingBoard.SetIsImageHighLighted(e.Location.X, e.Location.Y, false);
+                e.Cancel = true;
             }
         }
 
@@ -202,10 +266,6 @@ namespace Sandra.UI.WF
             {
                 PlayingBoard.SetIsImageHighLighted(e.Start.X, e.Start.Y, false);
             }
-            if (hoverSquare != null)
-            {
-                PlayingBoard.SetIsImageHighLighted(hoverSquare.X, hoverSquare.Y, true);
-            }
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
                 PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
@@ -214,22 +274,25 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
         {
-            resetMoveStartSquareHighlight(e);
-
             // Move piece from source to destination.
-            if (e.Start.X != e.Target.X || e.Start.Y != e.Target.Y)
+            Chess.Move move = new Chess.Move()
             {
-                Chess.Color promoteColor;
-                if (isPromoting(e.Target, out promoteColor))
-                {
-                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PieceImages[getPromoteToPiece(hoverQuadrant, promoteColor)]);
-                }
-                else
-                {
-                    PlayingBoard.SetForegroundImage(e.Target.X, e.Target.Y, PlayingBoard.GetForegroundImage(e.Start.X, e.Start.Y));
-                }
-                PlayingBoard.SetForegroundImage(e.Start.X, e.Start.Y, null);
+                SourceSquare = toSquare(e.Start),
+                TargetSquare = toSquare(e.Target),
+            };
+
+            if (isPromoting(e.Target))
+            {
+                move.MoveType = Chess.MoveType.Promotion;
+                move.PromoteTo = getPromoteToPiece(hoverQuadrant, currentPosition.SideToMove).GetPiece();
             }
+
+            if (currentPosition.TryMakeMove(move, true) == Chess.MoveCheckResult.OK)
+            {
+                copyPositionToBoard();
+            }
+
+            resetMoveStartSquareHighlight(e);
         }
 
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
@@ -241,8 +304,17 @@ namespace Sandra.UI.WF
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            Chess.Color promoteColor;
-            if (isPromoting(hoverSquare, out promoteColor))
+            // Draw subtle corners just inside the edges of a legal target square.
+            if (hoverSquare != null && PlayingBoard.IsMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
+            {
+                Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
+                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
+                e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
+                e.Graphics.DrawRectangle(Pens.Gray, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+                e.Graphics.ResetClip();
+            }
+
+            if (isPromoting(hoverSquare))
             {
                 int squareSize = PlayingBoard.SquareSize;
                 if (squareSize >= 2)
@@ -251,6 +323,7 @@ namespace Sandra.UI.WF
                     int halfSquareSize = (squareSize + 1) / 2;
                     int otherHalfSquareSize = squareSize - halfSquareSize;
 
+                    Chess.Color promoteColor = currentPosition.SideToMove;
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft, promoteColor)],
                                          rect.X, rect.Y, halfSquareSize, halfSquareSize);
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight, promoteColor)],
@@ -259,42 +332,6 @@ namespace Sandra.UI.WF
                                          rect.X, rect.Y + halfSquareSize, halfSquareSize, otherHalfSquareSize);
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
                                          rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
-                }
-            }
-        }
-
-        private void clearBoard()
-        {
-            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
-            {
-                PlayingBoard.SetForegroundImage(squareLocation, null);
-            }
-        }
-
-        public void InitializeStartPosition()
-        {
-            clearBoard();
-
-            var startPosition = EnumIndexedArray<Chess.NonEmptyColoredPiece, ulong>.New();
-
-            startPosition[Chess.NonEmptyColoredPiece.WhitePawn] = Chess.Constants.WhiteInStartPosition & Chess.Constants.PawnsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.WhiteKnight] = Chess.Constants.WhiteInStartPosition & Chess.Constants.KnightsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.WhiteBishop] = Chess.Constants.WhiteInStartPosition & Chess.Constants.BishopsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.WhiteRook] = Chess.Constants.WhiteInStartPosition & Chess.Constants.RooksInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.WhiteQueen] = Chess.Constants.WhiteInStartPosition & Chess.Constants.QueensInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.WhiteKing] = Chess.Constants.WhiteInStartPosition & Chess.Constants.KingsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackPawn] = Chess.Constants.BlackInStartPosition & Chess.Constants.PawnsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackKnight] = Chess.Constants.BlackInStartPosition & Chess.Constants.KnightsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackBishop] = Chess.Constants.BlackInStartPosition & Chess.Constants.BishopsInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackRook] = Chess.Constants.BlackInStartPosition & Chess.Constants.RooksInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackQueen] = Chess.Constants.BlackInStartPosition & Chess.Constants.QueensInStartPosition;
-            startPosition[Chess.NonEmptyColoredPiece.BlackKing] = Chess.Constants.BlackInStartPosition & Chess.Constants.KingsInStartPosition;
-
-            foreach (Chess.NonEmptyColoredPiece chessPieceImage in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
-            {
-                foreach (var square in startPosition[chessPieceImage].AllSquares())
-                {
-                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[chessPieceImage]);
                 }
             }
         }

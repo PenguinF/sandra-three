@@ -29,6 +29,7 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            Chess.Constants.ForceInitialize();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
