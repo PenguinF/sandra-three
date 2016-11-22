@@ -221,7 +221,22 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
         {
-            if (!PlayingBoard.IsMoving)
+            if (PlayingBoard.IsMoving)
+            {
+                // If a legal move, display any piece about to be captured with a half-transparent effect.
+                Chess.Move move = new Chess.Move()
+                {
+                    SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
+                    TargetSquare = toSquare(e.Location),
+                };
+
+                var moveCheckResult = currentPosition.TryMakeMove(move, false);
+                if (moveCheckResult == Chess.MoveCheckResult.OK || moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
+                {
+                    PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
+                }
+            }
+            else
             {
                 highlightHoverSquare();
             }
@@ -230,7 +245,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
-            if (!PlayingBoard.IsMoving)
+            if (!PlayingBoard.IsMoving || e.Location != PlayingBoard.MoveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
             }
