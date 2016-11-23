@@ -152,10 +152,10 @@ namespace Sandra.Chess
                     return MoveCheckResult.IllegalMoveTypePromotion;
                 case MoveType.EnPassant:
                     return MoveCheckResult.IllegalMoveTypeEnPassant;
-                case MoveType.CastleQueenSide:
-                    return MoveCheckResult.IllegalMoveTypeCastleQueenSide;
-                case MoveType.CastleKingSide:
-                    return MoveCheckResult.IllegalMoveTypeCastleKingSide;
+                case MoveType.CastleQueenside:
+                    return MoveCheckResult.IllegalMoveTypeCastleQueenside;
+                case MoveType.CastleKingside:
+                    return MoveCheckResult.IllegalMoveTypeCastleKingside;
             }
             return MoveCheckResult.OK;
         }
@@ -177,11 +177,11 @@ namespace Sandra.Chess
                     case MoveType.EnPassant:
                         moveCheckResult |= MoveCheckResult.MissingEnPassant;
                         break;
-                    case MoveType.CastleQueenSide:
-                        moveCheckResult |= MoveCheckResult.MissingCastleQueenSide;
+                    case MoveType.CastleQueenside:
+                        moveCheckResult |= MoveCheckResult.MissingCastleQueenside;
                         break;
-                    case MoveType.CastleKingSide:
-                        moveCheckResult |= MoveCheckResult.MissingCastleKingSide;
+                    case MoveType.CastleKingside:
+                        moveCheckResult |= MoveCheckResult.MissingCastleKingside;
                         break;
                 }
             }
@@ -335,7 +335,7 @@ namespace Sandra.Chess
                             }
                             if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
                             {
-                                mandatoryMoveType(MoveType.CastleKingSide, move.MoveType, ref moveCheckResult);
+                                mandatoryMoveType(MoveType.CastleKingside, move.MoveType, ref moveCheckResult);
                                 if (isSquareUnderAttack(move.SourceSquare + 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
@@ -344,7 +344,7 @@ namespace Sandra.Chess
                             }
                             else
                             {
-                                mandatoryMoveType(MoveType.CastleQueenSide, move.MoveType, ref moveCheckResult);
+                                mandatoryMoveType(MoveType.CastleQueenside, move.MoveType, ref moveCheckResult);
                                 if (isSquareUnderAttack(move.SourceSquare - 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
@@ -465,13 +465,13 @@ namespace Sandra.Chess
         /// </summary>
         IllegalMoveTypeEnPassant = 64,
         /// <summary>
-        /// <see cref="MoveType.CastleQueenSide"/> was specified for a non-castling move.
+        /// <see cref="MoveType.CastleQueenside"/> was specified for a non-castling move.
         /// </summary>
-        IllegalMoveTypeCastleQueenSide = 128,
+        IllegalMoveTypeCastleQueenside = 128,
         /// <summary>
-        /// <see cref="MoveType.CastleKingSide"/> was specified for a non-castling move.
+        /// <see cref="MoveType.CastleKingside"/> was specified for a non-castling move.
         /// </summary>
-        IllegalMoveTypeCastleKingSide = 256,
+        IllegalMoveTypeCastleKingside = 256,
         /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
@@ -491,17 +491,17 @@ namespace Sandra.Chess
         /// </summary>
         MissingEnPassant = 2048,
         /// <summary>
-        /// A castling move does not specify <see cref="MoveType.CastleQueenSide"/>.
+        /// A castling move does not specify <see cref="MoveType.CastleQueenside"/>.
         /// </summary>
-        MissingCastleQueenSide = 4096,
+        MissingCastleQueenside = 4096,
         /// <summary>
-        /// A castling move does not specify <see cref="MoveType.CastleKingSide"/>.
+        /// A castling move does not specify <see cref="MoveType.CastleKingside"/>.
         /// </summary>
-        MissingCastleKingSide = 8192,
+        MissingCastleKingside = 8192,
 
         /// <summary>
         /// Mask which selects all flags which denote an incomplete move.
         /// </summary>
-        IncompleteMove = MissingPromotionInformation | MissingEnPassant | MissingCastleQueenSide | MissingCastleKingSide,
+        IncompleteMove = MissingPromotionInformation | MissingEnPassant | MissingCastleQueenside | MissingCastleKingside,
     }
 }

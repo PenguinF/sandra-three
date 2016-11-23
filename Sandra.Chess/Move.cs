@@ -25,8 +25,8 @@ namespace Sandra.Chess
         Default,
         Promotion,
         EnPassant,
-        CastleQueenSide,
-        CastleKingSide,
+        CastleQueenside,
+        CastleKingside,
     }
 
     public class Move
@@ -38,7 +38,7 @@ namespace Sandra.Chess
 
         public void ThrowWhenOutOfRange()
         {
-            if (MoveType < 0 || MoveType > MoveType.CastleKingSide)
+            if (MoveType < 0 || MoveType > MoveType.CastleKingside)
             {
                 throw new ArgumentOutOfRangeException(nameof(MoveType));
             }
