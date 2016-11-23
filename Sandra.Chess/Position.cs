@@ -144,23 +144,8 @@ namespace Sandra.Chess
             return false;
         }
 
-        private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
-        {
-            MoveCheckResult defaultMoveCheckResult = getIllegalMoveTypeResult(moveType);
-            if (movingPiece == Piece.Pawn)
-            {
-                if (defaultMoveCheckResult != MoveCheckResult.IllegalMoveTypeCastling) return MoveCheckResult.OK;
-            }
-            else if (movingPiece == Piece.King)
-            {
-                if (defaultMoveCheckResult == MoveCheckResult.IllegalMoveTypeCastling) return MoveCheckResult.OK;
-            }
-            return defaultMoveCheckResult;
-        }
-
         private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
         {
-            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
             switch (moveType)
             {
                 case MoveType.Promotion:
@@ -171,6 +156,30 @@ namespace Sandra.Chess
                     return MoveCheckResult.IllegalMoveTypeCastling;
             }
             return MoveCheckResult.OK;
+        }
+
+        private void mandatoryMoveType(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
+        {
+            if (actualMoveType == expectedMoveType)
+            {
+                // Cancel out illegal move type results again.
+                moveCheckResult &= ~getIllegalMoveTypeResult(expectedMoveType);
+            }
+            else if (actualMoveType == MoveType.Default)
+            {
+                switch (expectedMoveType)
+                {
+                    case MoveType.Promotion:
+                        moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                        break;
+                    case MoveType.EnPassant:
+                        moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                        break;
+                    case MoveType.Castling:
+                        moveCheckResult |= MoveCheckResult.MissingCastling;
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -237,7 +246,7 @@ namespace Sandra.Chess
             }
 
             // Check for illegal move types.
-            moveCheckResult |= getIllegalMoveTypeResult(movingPiece, move.MoveType);
+            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
 
             // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
             ulong captureVector = targetVector;
@@ -256,46 +265,26 @@ namespace Sandra.Chess
                     {
                         if (Constants.PromotionSquares.Test(targetVector))
                         {
-                            if (move.MoveType != MoveType.Promotion
-                                || move.PromoteTo == Piece.Pawn
-                                || move.PromoteTo == Piece.King)
+                            mandatoryMoveType(MoveType.Promotion, move.MoveType, ref moveCheckResult);
+                            if (move.MoveType == MoveType.Promotion)
                             {
-                                // Must specify the correct MoveType, and allow only 4 promote-to pieces.
-                                if (move.MoveType == MoveType.Default)
+                                if (move.PromoteTo == Piece.Pawn || move.PromoteTo == Piece.King)
                                 {
+                                    // Allow only 4 promote-to pieces.
                                     moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
-                                }
-                                else
-                                {
-                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                                 }
                             }
                         }
                         else if (enPassantVector.Test(targetVector))
                         {
-                            if (move.MoveType != MoveType.EnPassant)
-                            {
-                                if (move.MoveType == MoveType.Default)
-                                {
-                                    moveCheckResult |= MoveCheckResult.MissingEnPassant;
-                                }
-                                else
-                                {
-                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
-                                }
-                            }
+                            mandatoryMoveType(MoveType.EnPassant, move.MoveType, ref moveCheckResult);
                             // Don't capture on the target square, but capture the pawn instead.
                             captureVector = enPassantCaptureVector;
-                        }
-                        else
-                        {
-                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                         }
                     }
                     else
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
-                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                     }
                     break;
                 case Piece.Knight:
@@ -324,12 +313,7 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.King:
-                    if (Constants.Neighbours[move.SourceSquare].Test(targetVector))
-                    {
-                        // Disallow castling move type.
-                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
-                    }
-                    else
+                    if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
                     {
                         // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
                         // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
@@ -339,22 +323,11 @@ namespace Sandra.Chess
 
                         if (castlingTargets.Test(targetVector))
                         {
-                            if (move.MoveType != MoveType.Castling)
-                            {
-                                if (move.MoveType == MoveType.Default)
-                                {
-                                    moveCheckResult |= MoveCheckResult.MissingCastling;
-                                }
-                                else
-                                {
-                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
-                                }
-                            }
+                            mandatoryMoveType(MoveType.Castling, move.MoveType, ref moveCheckResult);
                         }
                         else
                         {
                             moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
-                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                         }
                     }
                     break;
