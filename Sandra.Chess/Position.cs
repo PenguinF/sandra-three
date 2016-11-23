@@ -30,6 +30,8 @@ namespace Sandra.Chess
 
         private EnumIndexedArray<Color, ulong> colorVectors;
         private EnumIndexedArray<Piece, ulong> pieceVectors;
+        private ulong enPassantVector;
+        private ulong enPassantCaptureVector;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -292,11 +294,25 @@ namespace Sandra.Chess
 
                 if (make && moveCheckResult == MoveCheckResult.OK)
                 {
-                    if (move.MoveType == MoveType.Promotion)
+                    // Reset en passant vectors.
+                    enPassantVector = 0;
+                    enPassantCaptureVector = 0;
+
+                    if (movingPiece == Piece.Pawn)
                     {
-                        // Change type of piece.
-                        pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
-                        pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                        if (move.MoveType == MoveType.Promotion)
+                        {
+                            // Change type of piece.
+                            pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
+                            pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                        }
+                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
+                        {
+                            // If the moving piece was a pawn on its starting square and moved two steps ahead,
+                            // it can be captured en passant on the next move.
+                            enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
+                            enPassantCaptureVector = targetVector;
+                        }
                     }
                     sideToMove = sideToMove.Opposite();
                 }
