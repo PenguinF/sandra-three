@@ -222,6 +222,16 @@ namespace Sandra.Chess
         public static readonly ColorSquareIndexedArray<ulong> PawnCaptures;
 
         /// <summary>
+        /// Contains a bitfield which is true for each square in front of a pawn of a given color in the starting position.
+        /// </summary>
+        public static readonly ColorSquareIndexedArray<ulong> EnPassantSquares;
+
+        /// <summary>
+        /// Contains a bitfield which is true for each square that is two squares ahead of a pawn of a given color in the starting position.
+        /// </summary>
+        public static readonly ColorSquareIndexedArray<ulong> PawnTwoSquaresAhead;
+
+        /// <summary>
         /// Contains a bitfield which is true for each target square where a knight can jump to from a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
@@ -257,6 +267,8 @@ namespace Sandra.Chess
 
             PawnMoves = ColorSquareIndexedArray<ulong>.New();
             PawnCaptures = ColorSquareIndexedArray<ulong>.New();
+            EnPassantSquares = ColorSquareIndexedArray<ulong>.New();
+            PawnTwoSquaresAhead = ColorSquareIndexedArray<ulong>.New();
             KnightMoves = EnumIndexedArray<Square, ulong>.New();
             Neighbours = EnumIndexedArray<Square, ulong>.New();
 
@@ -342,15 +354,21 @@ namespace Sandra.Chess
                 a1h8Multipliers[sq] = a1h8Multipliers8[a1h8Index];
                 a8h1Multipliers[sq] = a8h1Multipliers8[a8h1Index];
 
+                PawnTwoSquaresAhead[Color.White, sq] = (sqVector & Rank2) << 16;
+                PawnTwoSquaresAhead[Color.Black, sq] = (sqVector & Rank7) >> 16;
+
                 PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
-                                           | (sqVector & Rank2) << 16;   // 2 squares ahead allowed from the starting square.
+                                           | PawnTwoSquaresAhead[Color.White, sq];  // 2 squares ahead allowed from the starting square.
                 PawnMoves[Color.Black, sq] = (sqVector & ~Rank1) >> 8
-                                           | (sqVector & Rank7) >> 16;
+                                           | PawnTwoSquaresAhead[Color.Black, sq];
 
                 PawnCaptures[Color.White, sq] = (sqVector & ~Rank8 & ~FileA) << 7
                                               | (sqVector & ~Rank8 & ~FileH) << 9;
                 PawnCaptures[Color.Black, sq] = (sqVector & ~Rank1 & ~FileA) >> 9
                                               | (sqVector & ~Rank1 & ~FileH) >> 7;
+
+                EnPassantSquares[Color.White, sq] = (sqVector & Rank2) << 8;
+                EnPassantSquares[Color.Black, sq] = (sqVector & Rank7) >> 8;
 
                 KnightMoves[sq] = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
                                 | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE

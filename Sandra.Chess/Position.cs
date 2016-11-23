@@ -30,6 +30,8 @@ namespace Sandra.Chess
 
         private EnumIndexedArray<Color, ulong> colorVectors;
         private EnumIndexedArray<Piece, ulong> pieceVectors;
+        private ulong enPassantVector;
+        private ulong enPassantCaptureVector;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -75,6 +77,14 @@ namespace Sandra.Chess
             return GetVector((NonEmptyColoredPiece)coloredPiece);
         }
 
+        /// <summary>
+        /// If a pawn can be captured en passant in this position, returns the vector which is true for the square of that pawn.
+        /// </summary>
+        public ulong EnPassantCaptureVector
+        {
+            get { return enPassantCaptureVector; }
+        }
+
 
         private Position()
         {
@@ -102,6 +112,27 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
             return initialPosition;
+        }
+
+        private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
+        {
+            if (movingPiece != Piece.Pawn)
+            {
+                switch (moveType)
+                {
+                    case MoveType.Promotion:
+                        return MoveCheckResult.IllegalMoveTypePromotion;
+                    case MoveType.EnPassant:
+                        return MoveCheckResult.IllegalMoveTypeEnPassant;
+                }
+            }
+            return MoveCheckResult.OK;
+        }
+
+        private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
+        {
+            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
+            return getIllegalMoveTypeResult(Piece.Knight, moveType);
         }
 
         /// <summary>
@@ -167,17 +198,17 @@ namespace Sandra.Chess
                 moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
-            if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
-            {
-                // Cannot promote a non-pawn.
-                moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
-            }
+            // Check for illegal move types.
+            moveCheckResult |= getIllegalMoveTypeResult(movingPiece, move.MoveType);
+
+            // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
+            ulong captureVector = targetVector;
 
             // Check legal target squares and specific rules depending on the moving piece.
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    ulong legalCaptureSquares = oppositeColorVector
+                    ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
                                               & Constants.PawnCaptures[sideToMove, move.SourceSquare];
                     ulong legalMoveToSquares = ~occupied
                                              & Constants.PawnMoves[sideToMove, move.SourceSquare]
@@ -192,18 +223,41 @@ namespace Sandra.Chess
                                 || move.PromoteTo == Piece.King)
                             {
                                 // Must specify the correct MoveType, and allow only 4 promote-to pieces.
-                                moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                                if (move.MoveType == MoveType.Default)
+                                {
+                                    moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                                }
+                                else
+                                {
+                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                                }
                             }
                         }
-                        else if (move.MoveType == MoveType.Promotion)
+                        else if (enPassantVector.Test(targetVector))
                         {
-                            // Cannot promote to a non-promotion square.
-                            moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
+                            if (move.MoveType != MoveType.EnPassant)
+                            {
+                                if (move.MoveType == MoveType.Default)
+                                {
+                                    moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                                }
+                                else
+                                {
+                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                                }
+                            }
+                            // Don't capture on the target square, but capture the pawn instead.
+                            captureVector = enPassantCaptureVector;
+                        }
+                        else
+                        {
+                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                         }
                     }
                     else
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                     }
                     break;
                 case Piece.Knight:
@@ -243,11 +297,11 @@ namespace Sandra.Chess
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
-                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(targetVector), out capturedPiece);
+                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
                 if (isCapture)
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
-                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                 }
 
                 // Move from source to target.
@@ -279,11 +333,25 @@ namespace Sandra.Chess
 
                 if (make && moveCheckResult == MoveCheckResult.OK)
                 {
-                    if (move.MoveType == MoveType.Promotion)
+                    // Reset en passant vectors.
+                    enPassantVector = 0;
+                    enPassantCaptureVector = 0;
+
+                    if (movingPiece == Piece.Pawn)
                     {
-                        // Change type of piece.
-                        pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
-                        pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                        if (move.MoveType == MoveType.Promotion)
+                        {
+                            // Change type of piece.
+                            pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
+                            pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                        }
+                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
+                        {
+                            // If the moving piece was a pawn on its starting square and moved two steps ahead,
+                            // it can be captured en passant on the next move.
+                            enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
+                            enPassantCaptureVector = targetVector;
+                        }
                     }
                     sideToMove = sideToMove.Opposite();
                 }
@@ -294,8 +362,8 @@ namespace Sandra.Chess
                     pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
                     if (isCapture)
                     {
-                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
-                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
+                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                     }
                 }
             }
@@ -339,12 +407,20 @@ namespace Sandra.Chess
         /// </summary>
         IllegalMoveTypePromotion = 32,
         /// <summary>
+        /// <see cref="MoveType.EnPassant"/> was specified for a move which does not capture a pawn en passant.
+        /// </summary>
+        IllegalMoveTypeEnPassant = 64,
+        /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
-        FriendlyKingInCheck = 64,
+        FriendlyKingInCheck = 128,
         /// <summary>
         /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
         /// </summary>
-        MissingPromotionInformation = 128,
+        MissingPromotionInformation = 256,
+        /// <summary>
+        /// A move which captures a pawn en passant does not specify <see cref="MoveType.EnPassant"/>.
+        /// </summary>
+        MissingEnPassant = 512,
     }
 }
