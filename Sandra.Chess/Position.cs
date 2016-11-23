@@ -32,7 +32,7 @@ namespace Sandra.Chess
         private EnumIndexedArray<Piece, ulong> pieceVectors;
         private ulong enPassantVector;
         private ulong enPassantCaptureVector;
-        private ulong castlingRightsVector;
+        private EnumIndexedArray<Color, ulong> castlingRightsVectors;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -91,6 +91,7 @@ namespace Sandra.Chess
         {
             colorVectors = EnumIndexedArray<Color, ulong>.New();
             pieceVectors = EnumIndexedArray<Piece, ulong>.New();
+            castlingRightsVectors = EnumIndexedArray<Color, ulong>.New();
         }
 
         /// <summary>
@@ -112,7 +113,8 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
-            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
+            initialPosition.castlingRightsVectors[Color.White] = Constants.CastlingTargetSquaresWhite;
+            initialPosition.castlingRightsVectors[Color.Black] = Constants.CastlingTargetSquaresBlack;
 
             return initialPosition;
         }
@@ -322,9 +324,38 @@ namespace Sandra.Chess
                     }
                     break;
                 case Piece.King:
-                    if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
+                    if (Constants.Neighbours[move.SourceSquare].Test(targetVector))
                     {
-                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                        // Disallow castling move type.
+                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                    }
+                    else
+                    {
+                        // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
+                        // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
+                        ulong castlingTargets = castlingRightsVectors[sideToMove]
+                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)
+                                              & ~occupied;  // Necessary because captures are not allowed.
+
+                        if (castlingTargets.Test(targetVector))
+                        {
+                            if (move.MoveType != MoveType.Castling)
+                            {
+                                if (move.MoveType == MoveType.Default)
+                                {
+                                    moveCheckResult |= MoveCheckResult.MissingCastling;
+                                }
+                                else
+                                {
+                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                        }
                     }
                     break;
             }
