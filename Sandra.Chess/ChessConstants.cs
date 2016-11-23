@@ -171,8 +171,7 @@ namespace Sandra.Chess
 
         public const ulong PromotionSquares = Rank1 | Rank8;
 
-        public const ulong CastlingTargetSquaresWhite = C1 | G1;
-        public const ulong CastlingTargetSquaresBlack = C8 | G8;
+        public const ulong CastlingTargetSquares = C1 | G1 | C8 | G8;
         public const ulong KingsideCastlingTargetSquares = G1 | G8;
 
         /// <summary>

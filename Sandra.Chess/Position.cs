@@ -32,7 +32,7 @@ namespace Sandra.Chess
         private EnumIndexedArray<Piece, ulong> pieceVectors;
         private ulong enPassantVector;
         private ulong enPassantCaptureVector;
-        private EnumIndexedArray<Color, ulong> castlingRightsVectors;
+        private ulong castlingRightsVector;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -91,7 +91,6 @@ namespace Sandra.Chess
         {
             colorVectors = EnumIndexedArray<Color, ulong>.New();
             pieceVectors = EnumIndexedArray<Piece, ulong>.New();
-            castlingRightsVectors = EnumIndexedArray<Color, ulong>.New();
         }
 
         /// <summary>
@@ -113,8 +112,7 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
-            initialPosition.castlingRightsVectors[Color.White] = Constants.CastlingTargetSquaresWhite;
-            initialPosition.castlingRightsVectors[Color.Black] = Constants.CastlingTargetSquaresBlack;
+            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
 
             return initialPosition;
         }
@@ -322,7 +320,8 @@ namespace Sandra.Chess
                     {
                         // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
                         // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
-                        ulong castlingTargets = castlingRightsVectors[sideToMove]
+                        ulong castlingTargets = castlingRightsVector
+                                              & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8)
                                               & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)
                                               & ~occupied;  // Necessary because captures are not allowed.
 
