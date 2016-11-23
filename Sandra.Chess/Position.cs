@@ -142,6 +142,18 @@ namespace Sandra.Chess
             return false;
         }
 
+        private static ulong revokedCastlingRights(ulong moveDelta)
+        {
+            ulong affectedKingSquares = moveDelta & Constants.KingsInStartPosition;
+            // If king squares are affected, only rook squares on the same side of the board can be affected as well.
+            // Also a king move from E1 to E8 is impossible. Therefore, the rooks do not need to be checked anymore after a king square check.
+            if (affectedKingSquares != 0)
+            {
+                return (affectedKingSquares << 2) | (affectedKingSquares >> 2);
+            }
+            return ((moveDelta & Constants.RooksStartPositionQueenside) << 2) | ((moveDelta & Constants.RooksStartPositionKingside) >> 1);
+        }
+
         private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
         {
             switch (moveType)
@@ -421,6 +433,13 @@ namespace Sandra.Chess
                             colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
                             pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                         }
+                    }
+
+                    // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.
+                    if (castlingRightsVector != 0)
+                    {
+                        // Revoke castling rights if kings or rooks are gone from their starting position.
+                        castlingRightsVector &= ~revokedCastlingRights(moveDelta);
                     }
 
                     sideToMove = sideToMove.Opposite();

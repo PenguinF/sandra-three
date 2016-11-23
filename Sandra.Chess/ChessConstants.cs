@@ -160,9 +160,12 @@ namespace Sandra.Chess
         public const ulong DiagG8H7 = G8 | H7;
         public const ulong DiagH8 = H8;
 
+        public const ulong RooksStartPositionQueenside = A1 | A8;
+        public const ulong RooksStartPositionKingside = H1 | H8;
+
         public const ulong KingsInStartPosition = E1 | E8;
         public const ulong QueensInStartPosition = D1 | D8;
-        public const ulong RooksInStartPosition = A1 | A8 | H1 | H8;
+        public const ulong RooksInStartPosition = RooksStartPositionQueenside | RooksStartPositionKingside;
         public const ulong BishopsInStartPosition = C1 | F1 | C8 | F8;
         public const ulong KnightsInStartPosition = B1 | G1 | B8 | G8;
         public const ulong PawnsInStartPosition = Rank2 | Rank7;
