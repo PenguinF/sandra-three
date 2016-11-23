@@ -407,6 +407,23 @@ namespace Sandra.Chess
                             enPassantCaptureVector = targetVector;
                         }
                     }
+                    else if (movingPiece == Piece.King)
+                    {
+                        // Move the rooks as well when castling.
+                        if (move.MoveType == MoveType.CastleQueenside)
+                        {
+                            var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
+                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+                        }
+                        else if (move.MoveType == MoveType.CastleKingside)
+                        {
+                            var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
+                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+                        }
+                    }
+
                     sideToMove = sideToMove.Opposite();
                 }
                 else
