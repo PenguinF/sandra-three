@@ -129,6 +129,12 @@ namespace Sandra.Chess
             return MoveCheckResult.OK;
         }
 
+        private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
+        {
+            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
+            return getIllegalMoveTypeResult(Piece.Knight, moveType);
+        }
+
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
         /// </summary>
@@ -217,28 +223,41 @@ namespace Sandra.Chess
                                 || move.PromoteTo == Piece.King)
                             {
                                 // Must specify the correct MoveType, and allow only 4 promote-to pieces.
-                                moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                                if (move.MoveType == MoveType.Default)
+                                {
+                                    moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                                }
+                                else
+                                {
+                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                                }
                             }
                         }
                         else if (enPassantVector.Test(targetVector))
                         {
                             if (move.MoveType != MoveType.EnPassant)
                             {
-                                moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                                if (move.MoveType == MoveType.Default)
+                                {
+                                    moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                                }
+                                else
+                                {
+                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
+                                }
                             }
                             // Don't capture on the target square, but capture the pawn instead.
                             captureVector = enPassantCaptureVector;
                         }
                         else
                         {
-                            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
-                            moveCheckResult |= getIllegalMoveTypeResult(Piece.Knight, move.MoveType);
+                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                         }
                     }
                     else
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
-                        moveCheckResult |= getIllegalMoveTypeResult(Piece.Knight, move.MoveType);
+                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                     }
                     break;
                 case Piece.Knight:
