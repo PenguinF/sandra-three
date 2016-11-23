@@ -187,11 +187,14 @@ namespace Sandra.Chess
             // Check for illegal move types.
             moveCheckResult |= getIllegalMoveTypeResult(movingPiece, move.MoveType);
 
+            // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
+            ulong captureVector = targetVector;
+
             // Check legal target squares and specific rules depending on the moving piece.
             switch (movingPiece)
             {
                 case Piece.Pawn:
-                    ulong legalCaptureSquares = oppositeColorVector
+                    ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
                                               & Constants.PawnCaptures[sideToMove, move.SourceSquare];
                     ulong legalMoveToSquares = ~occupied
                                              & Constants.PawnMoves[sideToMove, move.SourceSquare]
@@ -208,6 +211,15 @@ namespace Sandra.Chess
                                 // Must specify the correct MoveType, and allow only 4 promote-to pieces.
                                 moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
                             }
+                        }
+                        else if (enPassantVector.Test(targetVector))
+                        {
+                            if (move.MoveType != MoveType.EnPassant)
+                            {
+                                moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                            }
+                            // Don't capture on the target square, but capture the pawn instead.
+                            captureVector = enPassantCaptureVector;
                         }
                         else
                         {
@@ -258,11 +270,11 @@ namespace Sandra.Chess
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
-                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(targetVector), out capturedPiece);
+                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
                 if (isCapture)
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
-                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                 }
 
                 // Move from source to target.
@@ -323,8 +335,8 @@ namespace Sandra.Chess
                     pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
                     if (isCapture)
                     {
-                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
-                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ targetVector;
+                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                     }
                 }
             }
