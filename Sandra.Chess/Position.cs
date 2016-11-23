@@ -32,6 +32,7 @@ namespace Sandra.Chess
         private EnumIndexedArray<Piece, ulong> pieceVectors;
         private ulong enPassantVector;
         private ulong enPassantCaptureVector;
+        private ulong castlingRightsVector;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -110,6 +111,8 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.Rook] = Constants.RooksInStartPosition;
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
+
+            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
 
             return initialPosition;
         }
