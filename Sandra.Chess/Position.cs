@@ -104,6 +104,21 @@ namespace Sandra.Chess
             return initialPosition;
         }
 
+        private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
+        {
+            if (movingPiece != Piece.Pawn)
+            {
+                switch (moveType)
+                {
+                    case MoveType.Promotion:
+                        return MoveCheckResult.IllegalMoveTypePromotion;
+                    case MoveType.EnPassant:
+                        return MoveCheckResult.IllegalMoveTypeEnPassant;
+                }
+            }
+            return MoveCheckResult.OK;
+        }
+
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
         /// </summary>
@@ -167,11 +182,8 @@ namespace Sandra.Chess
                 moveCheckResult |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
-            if (move.MoveType == MoveType.Promotion && movingPiece != Piece.Pawn)
-            {
-                // Cannot promote a non-pawn.
-                moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
-            }
+            // Check for illegal move types.
+            moveCheckResult |= getIllegalMoveTypeResult(movingPiece, move.MoveType);
 
             // Check legal target squares and specific rules depending on the moving piece.
             switch (movingPiece)
@@ -195,15 +207,16 @@ namespace Sandra.Chess
                                 moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
                             }
                         }
-                        else if (move.MoveType == MoveType.Promotion)
+                        else
                         {
-                            // Cannot promote to a non-promotion square.
-                            moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
+                            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
+                            moveCheckResult |= getIllegalMoveTypeResult(Piece.Knight, move.MoveType);
                         }
                     }
                     else
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                        moveCheckResult |= getIllegalMoveTypeResult(Piece.Knight, move.MoveType);
                     }
                     break;
                 case Piece.Knight:
@@ -339,12 +352,20 @@ namespace Sandra.Chess
         /// </summary>
         IllegalMoveTypePromotion = 32,
         /// <summary>
+        /// <see cref="MoveType.EnPassant"/> was specified for a move which does not capture a pawn en passant.
+        /// </summary>
+        IllegalMoveTypeEnPassant = 64,
+        /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
-        FriendlyKingInCheck = 64,
+        FriendlyKingInCheck = 128,
         /// <summary>
         /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
         /// </summary>
-        MissingPromotionInformation = 128,
+        MissingPromotionInformation = 256,
+        /// <summary>
+        /// A move which captures a pawn en passant does not specify <see cref="MoveType.EnPassant"/>.
+        /// </summary>
+        MissingEnPassant = 512,
     }
 }
