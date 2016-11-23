@@ -208,6 +208,29 @@ namespace Sandra.UI.WF
             }
         }
 
+        private SquareLocation rookSquareWithCastlingEffect;
+        private SquareLocation rookTargetSquareWithCastlingEffect;
+
+        private void displayCastlingEffect(Chess.Square rookSquare, Chess.Square rookTargetSquare)
+        {
+            rookSquareWithCastlingEffect = new SquareLocation(rookSquare.X(), 7 - rookSquare.Y());
+            rookTargetSquareWithCastlingEffect = new SquareLocation(rookTargetSquare.X(), 7 - rookTargetSquare.Y());
+            PlayingBoard.SetForegroundImageAttribute(rookSquareWithCastlingEffect, ForegroundImageAttribute.HalfTransparent);
+            PlayingBoard.SetForegroundImage(rookTargetSquareWithCastlingEffect,
+                                            PlayingBoard.GetForegroundImage(rookSquareWithCastlingEffect));
+        }
+
+        private void stopDisplayCastlingEffect()
+        {
+            if (rookSquareWithCastlingEffect != null)
+            {
+                PlayingBoard.SetForegroundImageAttribute(rookSquareWithCastlingEffect, ForegroundImageAttribute.Default);
+                PlayingBoard.SetForegroundImage(rookTargetSquareWithCastlingEffect, null);
+                rookSquareWithCastlingEffect = null;
+                rookTargetSquareWithCastlingEffect = null;
+            }
+        }
+
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
             if (isPromoting(PlayingBoard.HoverSquare))
@@ -265,6 +288,14 @@ namespace Sandra.UI.WF
                     {
                         displayEnPassantEffect(currentPosition.EnPassantCaptureVector.GetSingleSquare());
                     }
+                    else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleQueenside)
+                    {
+                        displayCastlingEffect(move.SourceSquare - 4, move.SourceSquare - 1);
+                    }
+                    else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleKingside)
+                    {
+                        displayCastlingEffect(move.SourceSquare + 3, move.SourceSquare + 1);
+                    }
                     else
                     {
                         PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
@@ -281,6 +312,7 @@ namespace Sandra.UI.WF
         {
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
             stopDisplayEnPassantEffect();
+            stopDisplayCastlingEffect();
             if (!PlayingBoard.IsMoving || e.Location != PlayingBoard.MoveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
@@ -318,6 +350,8 @@ namespace Sandra.UI.WF
 
         private void resetMoveEffects(MoveEventArgs e)
         {
+            stopDisplayEnPassantEffect();
+            stopDisplayCastlingEffect();
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
                 PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Default);
@@ -340,19 +374,31 @@ namespace Sandra.UI.WF
                 // Must specify this MoveType to commit it.
                 move.MoveType = Chess.MoveType.EnPassant;
             }
+            else if (rookSquareWithCastlingEffect != null)
+            {
+                if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
+                {
+                    // Rook moves to the right.
+                    move.MoveType = Chess.MoveType.CastleQueenside;
+                }
+                else
+                {
+                    move.MoveType = Chess.MoveType.CastleKingside;
+                }
+            }
             else if (isPromoting(e.Target))
             {
                 move.MoveType = Chess.MoveType.Promotion;
                 move.PromoteTo = getPromoteToPiece(hoverQuadrant, currentPosition.SideToMove).GetPiece();
             }
 
+            resetMoveEffects(e);
+
             if (currentPosition.TryMakeMove(move, true) == Chess.MoveCheckResult.OK)
             {
                 copyPositionToBoard();
                 lastCommittedMove = e;
             }
-
-            resetMoveEffects(e);
         }
 
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
