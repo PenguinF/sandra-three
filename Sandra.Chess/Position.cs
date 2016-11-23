@@ -77,6 +77,14 @@ namespace Sandra.Chess
             return GetVector((NonEmptyColoredPiece)coloredPiece);
         }
 
+        /// <summary>
+        /// If a pawn can be captured en passant in this position, returns the vector which is true for the square of that pawn.
+        /// </summary>
+        public ulong EnPassantCaptureVector
+        {
+            get { return enPassantCaptureVector; }
+        }
+
 
         private Position()
         {

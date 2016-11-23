@@ -191,6 +191,23 @@ namespace Sandra.UI.WF
             return false;
         }
 
+        private SquareLocation currentSquareWithEnPassantEffect;
+
+        private void displayEnPassantEffect(Chess.Square enPassantCaptureSquare)
+        {
+            currentSquareWithEnPassantEffect = new SquareLocation(enPassantCaptureSquare.X(), 7 - enPassantCaptureSquare.Y());
+            PlayingBoard.SetForegroundImageAttribute(currentSquareWithEnPassantEffect, ForegroundImageAttribute.HalfTransparent);
+        }
+
+        private void stopDisplayEnPassantEffect()
+        {
+            if (currentSquareWithEnPassantEffect != null)
+            {
+                PlayingBoard.SetForegroundImageAttribute(currentSquareWithEnPassantEffect, ForegroundImageAttribute.Default);
+                currentSquareWithEnPassantEffect = null;
+            }
+        }
+
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
             if (isPromoting(PlayingBoard.HoverSquare))
@@ -244,7 +261,14 @@ namespace Sandra.UI.WF
                 var moveCheckResult = currentPosition.TryMakeMove(move, false);
                 if (moveCheckResult.IsLegalMove())
                 {
-                    PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
+                    if (moveCheckResult == Chess.MoveCheckResult.MissingEnPassant)
+                    {
+                        displayEnPassantEffect(currentPosition.EnPassantCaptureVector.GetSingleSquare());
+                    }
+                    else
+                    {
+                        PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
+                    }
                 }
             }
             else
@@ -256,6 +280,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
             updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
+            stopDisplayEnPassantEffect();
             if (!PlayingBoard.IsMoving || e.Location != PlayingBoard.MoveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
@@ -291,7 +316,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void resetMoveStartSquareHighlight(MoveEventArgs e)
+        private void resetMoveEffects(MoveEventArgs e)
         {
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
@@ -310,7 +335,12 @@ namespace Sandra.UI.WF
                 TargetSquare = toSquare(e.Target),
             };
 
-            if (isPromoting(e.Target))
+            if (currentSquareWithEnPassantEffect != null)
+            {
+                // Must specify this MoveType to commit it.
+                move.MoveType = Chess.MoveType.EnPassant;
+            }
+            else if (isPromoting(e.Target))
             {
                 move.MoveType = Chess.MoveType.Promotion;
                 move.PromoteTo = getPromoteToPiece(hoverQuadrant, currentPosition.SideToMove).GetPiece();
@@ -322,12 +352,12 @@ namespace Sandra.UI.WF
                 lastCommittedMove = e;
             }
 
-            resetMoveStartSquareHighlight(e);
+            resetMoveEffects(e);
         }
 
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
         {
-            resetMoveStartSquareHighlight(e);
+            resetMoveEffects(e);
         }
 
         MoveCommitEventArgs lastCommittedMove;
