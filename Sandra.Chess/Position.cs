@@ -324,6 +324,11 @@ namespace Sandra.Chess
                         if (castlingTargets.Test(targetVector))
                         {
                             mandatoryMoveType(MoveType.Castling, move.MoveType, ref moveCheckResult);
+                            if (isSquareUnderAttack(move.SourceSquare, sideToMove))
+                            {
+                                // Not allowed to castle out of a check.
+                                moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
+                            }
                         }
                         else
                         {
