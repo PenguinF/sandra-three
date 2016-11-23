@@ -114,6 +114,31 @@ namespace Sandra.Chess
             return initialPosition;
         }
 
+
+        /// <summary>
+        /// Returns if the given square is attacked by a piece of the opposite color.
+        /// </summary>
+        private bool isSquareUnderAttack(Square square, Color defenderColor)
+        {
+            ulong attackers = colorVectors[defenderColor.Opposite()];
+            ulong occupied = colorVectors[defenderColor] | attackers;
+
+            if (Constants.PawnCaptures[defenderColor, square]
+                            .Test(attackers & pieceVectors[Piece.Pawn])
+                || Constants.KnightMoves[square]
+                            .Test(attackers & pieceVectors[Piece.Knight])
+                || Constants.ReachableSquaresStraight(square, occupied)
+                            .Test(attackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
+                || Constants.ReachableSquaresDiagonal(square, occupied)
+                            .Test(attackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
+                || Constants.Neighbours[square]
+                            .Test(attackers & pieceVectors[Piece.King]))
+            {
+                return true;
+            }
+            return false;
+        }
+
         private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
         {
             if (movingPiece != Piece.Pawn)
@@ -312,21 +337,8 @@ namespace Sandra.Chess
                 // Find the king in the resulting position.
                 Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
 
-                // Evaluate colorVectors[sideToMove.Opposite()] again because it may have changed because of a capture.
-                ulong candidateAttackers = colorVectors[sideToMove.Opposite()];
-                ulong resultOccupied = colorVectors[sideToMove] | candidateAttackers;
-
                 // See if the friendly king is now under attack.
-                if (Constants.PawnCaptures[sideToMove, friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.Pawn])
-                    || Constants.KnightMoves[friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.Knight])
-                    || Constants.ReachableSquaresStraight(friendlyKing, resultOccupied)
-                                .Test(candidateAttackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
-                    || Constants.ReachableSquaresDiagonal(friendlyKing, resultOccupied)
-                                .Test(candidateAttackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
-                    || Constants.Neighbours[friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.King]))
+                if (isSquareUnderAttack(friendlyKing, sideToMove))
                 {
                     moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
                 }
