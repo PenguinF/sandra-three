@@ -141,23 +141,31 @@ namespace Sandra.Chess
 
         private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
         {
-            if (movingPiece != Piece.Pawn)
+            MoveCheckResult defaultMoveCheckResult = getIllegalMoveTypeResult(moveType);
+            if (movingPiece == Piece.Pawn)
             {
-                switch (moveType)
-                {
-                    case MoveType.Promotion:
-                        return MoveCheckResult.IllegalMoveTypePromotion;
-                    case MoveType.EnPassant:
-                        return MoveCheckResult.IllegalMoveTypeEnPassant;
-                }
+                if (defaultMoveCheckResult != MoveCheckResult.IllegalMoveTypeCastling) return MoveCheckResult.OK;
             }
-            return MoveCheckResult.OK;
+            else if (movingPiece == Piece.King)
+            {
+                if (defaultMoveCheckResult == MoveCheckResult.IllegalMoveTypeCastling) return MoveCheckResult.OK;
+            }
+            return defaultMoveCheckResult;
         }
 
         private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
         {
             // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
-            return getIllegalMoveTypeResult(Piece.Knight, moveType);
+            switch (moveType)
+            {
+                case MoveType.Promotion:
+                    return MoveCheckResult.IllegalMoveTypePromotion;
+                case MoveType.EnPassant:
+                    return MoveCheckResult.IllegalMoveTypeEnPassant;
+                case MoveType.Castling:
+                    return MoveCheckResult.IllegalMoveTypeCastling;
+            }
+            return MoveCheckResult.OK;
         }
 
         /// <summary>
@@ -423,16 +431,35 @@ namespace Sandra.Chess
         /// </summary>
         IllegalMoveTypeEnPassant = 64,
         /// <summary>
+        /// <see cref="MoveType.Castling"/> was specified for a non-castling move.
+        /// </summary>
+        IllegalMoveTypeCastling = 128,
+        /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
-        FriendlyKingInCheck = 128,
+        FriendlyKingInCheck = 256,
+
+        /// <summary>
+        /// Mask which selects all flags which denote an illegal move.
+        /// </summary>
+        IllegalMove = 511,
+
         /// <summary>
         /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
         /// </summary>
-        MissingPromotionInformation = 256,
+        MissingPromotionInformation = 512,
         /// <summary>
         /// A move which captures a pawn en passant does not specify <see cref="MoveType.EnPassant"/>.
         /// </summary>
-        MissingEnPassant = 512,
+        MissingEnPassant = 1024,
+        /// <summary>
+        /// A castling move does not specify <see cref="MoveType.Castling"/>.
+        /// </summary>
+        MissingCastling = 2048,
+
+        /// <summary>
+        /// Mask which selects all flags which denote an incomplete move.
+        /// </summary>
+        IncompleteMove = MissingPromotionInformation | MissingEnPassant | MissingCastling,
     }
 }
