@@ -160,9 +160,12 @@ namespace Sandra.Chess
         public const ulong DiagG8H7 = G8 | H7;
         public const ulong DiagH8 = H8;
 
+        public const ulong RooksStartPositionQueenside = A1 | A8;
+        public const ulong RooksStartPositionKingside = H1 | H8;
+
         public const ulong KingsInStartPosition = E1 | E8;
         public const ulong QueensInStartPosition = D1 | D8;
-        public const ulong RooksInStartPosition = A1 | A8 | H1 | H8;
+        public const ulong RooksInStartPosition = RooksStartPositionQueenside | RooksStartPositionKingside;
         public const ulong BishopsInStartPosition = C1 | F1 | C8 | F8;
         public const ulong KnightsInStartPosition = B1 | G1 | B8 | G8;
         public const ulong PawnsInStartPosition = Rank2 | Rank7;
@@ -170,6 +173,19 @@ namespace Sandra.Chess
         public const ulong BlackInStartPosition = Rank7 | Rank8;
 
         public const ulong PromotionSquares = Rank1 | Rank8;
+
+        public const ulong CastlingTargetSquares = C1 | G1 | C8 | G8;
+        public const ulong KingsideCastlingTargetSquares = G1 | G8;
+
+        /// <summary>
+        /// Contains a bitfield which encodes the movement of a rook during a queenside castling move.
+        /// </summary>
+        public static readonly EnumIndexedArray<Color, ulong> CastleQueensideRookDelta;
+
+        /// <summary>
+        /// Contains a bitfield which encodes the movement of a rook during a kingside castling move.
+        /// </summary>
+        public static readonly EnumIndexedArray<Color, ulong> CastleKingsideRookDelta;
 
         /// <summary>
         /// Contains a bitfield which is true for each square in the same file as a given square.
@@ -256,6 +272,9 @@ namespace Sandra.Chess
 
         static Constants()
         {
+            CastleQueensideRookDelta = EnumIndexedArray<Color, ulong>.New();
+            CastleKingsideRookDelta = EnumIndexedArray<Color, ulong>.New();
+
             FileMasks = EnumIndexedArray<Square, ulong>.New();
             InnerFileMasks = EnumIndexedArray<Square, ulong>.New();
             RankMasks = EnumIndexedArray<Square, ulong>.New();
@@ -331,6 +350,11 @@ namespace Sandra.Chess
                 0,                  //G8-H7
                 0                   //H8
             };
+
+            CastleQueensideRookDelta[Color.White] = A1 | D1;
+            CastleQueensideRookDelta[Color.Black] = A8 | D8;
+            CastleKingsideRookDelta[Color.White] = H1 | F1;
+            CastleKingsideRookDelta[Color.Black] = H8 | F8;
 
             for (Square sq = Square.H8; sq >= Square.A1; --sq)
             {

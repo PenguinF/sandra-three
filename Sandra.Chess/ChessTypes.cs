@@ -238,9 +238,7 @@ namespace Sandra
         /// </summary>
         public static bool IsLegalMove(this MoveCheckResult moveCheckResult)
         {
-            return moveCheckResult == MoveCheckResult.OK
-                || moveCheckResult == MoveCheckResult.MissingPromotionInformation
-                || moveCheckResult == MoveCheckResult.MissingEnPassant;
+            return (moveCheckResult & MoveCheckResult.IllegalMove) == MoveCheckResult.OK;
         }
     }
 }

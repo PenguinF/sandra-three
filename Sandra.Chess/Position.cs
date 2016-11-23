@@ -32,6 +32,7 @@ namespace Sandra.Chess
         private EnumIndexedArray<Piece, ulong> pieceVectors;
         private ulong enPassantVector;
         private ulong enPassantCaptureVector;
+        private ulong castlingRightsVector;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -111,28 +112,89 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
+            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
+
             return initialPosition;
         }
 
-        private MoveCheckResult getIllegalMoveTypeResult(Piece movingPiece, MoveType moveType)
+
+        /// <summary>
+        /// Returns if the given square is attacked by a piece of the opposite color.
+        /// </summary>
+        private bool isSquareUnderAttack(Square square, Color defenderColor)
         {
-            if (movingPiece != Piece.Pawn)
+            ulong attackers = colorVectors[defenderColor.Opposite()];
+            ulong occupied = colorVectors[defenderColor] | attackers;
+
+            if (Constants.PawnCaptures[defenderColor, square]
+                            .Test(attackers & pieceVectors[Piece.Pawn])
+                || Constants.KnightMoves[square]
+                            .Test(attackers & pieceVectors[Piece.Knight])
+                || Constants.ReachableSquaresStraight(square, occupied)
+                            .Test(attackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
+                || Constants.ReachableSquaresDiagonal(square, occupied)
+                            .Test(attackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
+                || Constants.Neighbours[square]
+                            .Test(attackers & pieceVectors[Piece.King]))
             {
-                switch (moveType)
-                {
-                    case MoveType.Promotion:
-                        return MoveCheckResult.IllegalMoveTypePromotion;
-                    case MoveType.EnPassant:
-                        return MoveCheckResult.IllegalMoveTypeEnPassant;
-                }
+                return true;
             }
-            return MoveCheckResult.OK;
+            return false;
+        }
+
+        private static ulong revokedCastlingRights(ulong moveDelta)
+        {
+            ulong affectedKingSquares = moveDelta & Constants.KingsInStartPosition;
+            // If king squares are affected, only rook squares on the same side of the board can be affected as well.
+            // Also a king move from E1 to E8 is impossible. Therefore, the rooks do not need to be checked anymore after a king square check.
+            if (affectedKingSquares != 0)
+            {
+                return (affectedKingSquares << 2) | (affectedKingSquares >> 2);
+            }
+            return ((moveDelta & Constants.RooksStartPositionQueenside) << 2) | ((moveDelta & Constants.RooksStartPositionKingside) >> 1);
         }
 
         private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
         {
-            // No special moves for knights, so use as dummy to obtain corresponding MoveCheckResult.
-            return getIllegalMoveTypeResult(Piece.Knight, moveType);
+            switch (moveType)
+            {
+                case MoveType.Promotion:
+                    return MoveCheckResult.IllegalMoveTypePromotion;
+                case MoveType.EnPassant:
+                    return MoveCheckResult.IllegalMoveTypeEnPassant;
+                case MoveType.CastleQueenside:
+                    return MoveCheckResult.IllegalMoveTypeCastleQueenside;
+                case MoveType.CastleKingside:
+                    return MoveCheckResult.IllegalMoveTypeCastleKingside;
+            }
+            return MoveCheckResult.OK;
+        }
+
+        private void mandatoryMoveType(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
+        {
+            if (actualMoveType == expectedMoveType)
+            {
+                // Cancel out illegal move type results again.
+                moveCheckResult &= ~getIllegalMoveTypeResult(expectedMoveType);
+            }
+            else if (actualMoveType == MoveType.Default)
+            {
+                switch (expectedMoveType)
+                {
+                    case MoveType.Promotion:
+                        moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                        break;
+                    case MoveType.EnPassant:
+                        moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                        break;
+                    case MoveType.CastleQueenside:
+                        moveCheckResult |= MoveCheckResult.MissingCastleQueenside;
+                        break;
+                    case MoveType.CastleKingside:
+                        moveCheckResult |= MoveCheckResult.MissingCastleKingside;
+                        break;
+                }
+            }
         }
 
         /// <summary>
@@ -199,7 +261,7 @@ namespace Sandra.Chess
             }
 
             // Check for illegal move types.
-            moveCheckResult |= getIllegalMoveTypeResult(movingPiece, move.MoveType);
+            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
 
             // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
             ulong captureVector = targetVector;
@@ -218,46 +280,26 @@ namespace Sandra.Chess
                     {
                         if (Constants.PromotionSquares.Test(targetVector))
                         {
-                            if (move.MoveType != MoveType.Promotion
-                                || move.PromoteTo == Piece.Pawn
-                                || move.PromoteTo == Piece.King)
+                            mandatoryMoveType(MoveType.Promotion, move.MoveType, ref moveCheckResult);
+                            if (move.MoveType == MoveType.Promotion)
                             {
-                                // Must specify the correct MoveType, and allow only 4 promote-to pieces.
-                                if (move.MoveType == MoveType.Default)
+                                if (move.PromoteTo == Piece.Pawn || move.PromoteTo == Piece.King)
                                 {
+                                    // Allow only 4 promote-to pieces.
                                     moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
-                                }
-                                else
-                                {
-                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                                 }
                             }
                         }
                         else if (enPassantVector.Test(targetVector))
                         {
-                            if (move.MoveType != MoveType.EnPassant)
-                            {
-                                if (move.MoveType == MoveType.Default)
-                                {
-                                    moveCheckResult |= MoveCheckResult.MissingEnPassant;
-                                }
-                                else
-                                {
-                                    moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
-                                }
-                            }
+                            mandatoryMoveType(MoveType.EnPassant, move.MoveType, ref moveCheckResult);
                             // Don't capture on the target square, but capture the pawn instead.
                             captureVector = enPassantCaptureVector;
-                        }
-                        else
-                        {
-                            moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                         }
                     }
                     else
                     {
                         moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
-                        moveCheckResult |= getIllegalMoveTypeResult(move.MoveType);
                     }
                     break;
                 case Piece.Knight:
@@ -288,7 +330,43 @@ namespace Sandra.Chess
                 case Piece.King:
                     if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
                     {
-                        moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                        // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
+                        // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
+                        ulong castlingTargets = castlingRightsVector
+                                              & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8)
+                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)
+                                              & ~occupied;  // Necessary because captures are not allowed.
+
+                        if (castlingTargets.Test(targetVector))
+                        {
+                            if (isSquareUnderAttack(move.SourceSquare, sideToMove))
+                            {
+                                // Not allowed to castle out of a check.
+                                moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
+                            }
+                            if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
+                            {
+                                mandatoryMoveType(MoveType.CastleKingside, move.MoveType, ref moveCheckResult);
+                                if (isSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                {
+                                    // Not allowed to castle over a check.
+                                    moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
+                                }
+                            }
+                            else
+                            {
+                                mandatoryMoveType(MoveType.CastleQueenside, move.MoveType, ref moveCheckResult);
+                                if (isSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                {
+                                    // Not allowed to castle over a check.
+                                    moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            moveCheckResult |= MoveCheckResult.IllegalTargetSquare;
+                        }
                     }
                     break;
             }
@@ -312,21 +390,8 @@ namespace Sandra.Chess
                 // Find the king in the resulting position.
                 Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
 
-                // Evaluate colorVectors[sideToMove.Opposite()] again because it may have changed because of a capture.
-                ulong candidateAttackers = colorVectors[sideToMove.Opposite()];
-                ulong resultOccupied = colorVectors[sideToMove] | candidateAttackers;
-
                 // See if the friendly king is now under attack.
-                if (Constants.PawnCaptures[sideToMove, friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.Pawn])
-                    || Constants.KnightMoves[friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.Knight])
-                    || Constants.ReachableSquaresStraight(friendlyKing, resultOccupied)
-                                .Test(candidateAttackers & (pieceVectors[Piece.Rook] | pieceVectors[Piece.Queen]))
-                    || Constants.ReachableSquaresDiagonal(friendlyKing, resultOccupied)
-                                .Test(candidateAttackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
-                    || Constants.Neighbours[friendlyKing]
-                                .Test(candidateAttackers & pieceVectors[Piece.King]))
+                if (isSquareUnderAttack(friendlyKing, sideToMove))
                 {
                     moveCheckResult |= MoveCheckResult.FriendlyKingInCheck;
                 }
@@ -353,6 +418,30 @@ namespace Sandra.Chess
                             enPassantCaptureVector = targetVector;
                         }
                     }
+                    else if (movingPiece == Piece.King)
+                    {
+                        // Move the rooks as well when castling.
+                        if (move.MoveType == MoveType.CastleQueenside)
+                        {
+                            var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
+                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+                        }
+                        else if (move.MoveType == MoveType.CastleKingside)
+                        {
+                            var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
+                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+                        }
+                    }
+
+                    // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.
+                    if (castlingRightsVector != 0)
+                    {
+                        // Revoke castling rights if kings or rooks are gone from their starting position.
+                        castlingRightsVector &= ~revokedCastlingRights(moveDelta);
+                    }
+
                     sideToMove = sideToMove.Opposite();
                 }
                 else
@@ -411,16 +500,43 @@ namespace Sandra.Chess
         /// </summary>
         IllegalMoveTypeEnPassant = 64,
         /// <summary>
+        /// <see cref="MoveType.CastleQueenside"/> was specified for a non-castling move.
+        /// </summary>
+        IllegalMoveTypeCastleQueenside = 128,
+        /// <summary>
+        /// <see cref="MoveType.CastleKingside"/> was specified for a non-castling move.
+        /// </summary>
+        IllegalMoveTypeCastleKingside = 256,
+        /// <summary>
         /// Making the move would put the friendly king in check.
         /// </summary>
-        FriendlyKingInCheck = 128,
+        FriendlyKingInCheck = 512,
+
+        /// <summary>
+        /// Mask which selects all flags which denote an illegal move.
+        /// </summary>
+        IllegalMove = 1023,
+
         /// <summary>
         /// A move which promotes a pawn does not specify <see cref="MoveType.Promotion"/>, and/or the promotion piece is a pawn or king.
         /// </summary>
-        MissingPromotionInformation = 256,
+        MissingPromotionInformation = 1024,
         /// <summary>
         /// A move which captures a pawn en passant does not specify <see cref="MoveType.EnPassant"/>.
         /// </summary>
-        MissingEnPassant = 512,
+        MissingEnPassant = 2048,
+        /// <summary>
+        /// A castling move does not specify <see cref="MoveType.CastleQueenside"/>.
+        /// </summary>
+        MissingCastleQueenside = 4096,
+        /// <summary>
+        /// A castling move does not specify <see cref="MoveType.CastleKingside"/>.
+        /// </summary>
+        MissingCastleKingside = 8192,
+
+        /// <summary>
+        /// Mask which selects all flags which denote an incomplete move.
+        /// </summary>
+        IncompleteMove = MissingPromotionInformation | MissingEnPassant | MissingCastleQueenside | MissingCastleKingside,
     }
 }
