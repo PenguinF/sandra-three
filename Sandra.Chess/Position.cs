@@ -58,7 +58,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets a bitfield which is true for all squares that contain the given colored piece.
         /// </summary>
-        public ulong GetVector(NonEmptyColoredPiece coloredPiece)
+        public ulong GetVector(ColoredPiece coloredPiece)
         {
             var colorVector = GetVector(coloredPiece.GetColor());
             var pieceVector = GetVector(coloredPiece.GetPiece());
@@ -75,7 +75,7 @@ namespace Sandra.Chess
                 // Take the bitfield with 1 values only, and zero out whatever is white or black.
                 return ulong.MaxValue ^ colorVectors[Color.White] ^ colorVectors[Color.Black];
             }
-            return GetVector((NonEmptyColoredPiece)coloredPiece);
+            return GetVector((ColoredPiece)coloredPiece);
         }
 
         /// <summary>

@@ -28,12 +28,12 @@ namespace Sandra.UI.WF
     /// </summary>
     public class StandardChessBoardForm : PlayingBoardForm
     {
-        private EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> pieceImages;
+        private EnumIndexedArray<Chess.ColoredPiece, Image> pieceImages;
 
         /// <summary>
         /// Gets or sets the image set to use for the playing board.
         /// </summary>
-        public EnumIndexedArray<Chess.NonEmptyColoredPiece, Image> PieceImages
+        public EnumIndexedArray<Chess.ColoredPiece, Image> PieceImages
         {
             get
             {
@@ -57,7 +57,7 @@ namespace Sandra.UI.WF
         private void copyPositionToBoard()
         {
             // Copy all pieces.
-            foreach (Chess.NonEmptyColoredPiece coloredPiece in EnumHelper<Chess.NonEmptyColoredPiece>.AllValues)
+            foreach (Chess.ColoredPiece coloredPiece in EnumHelper<Chess.ColoredPiece>.AllValues)
             {
                 foreach (var square in currentPosition.GetVector(coloredPiece).AllSquares())
                 {
@@ -122,7 +122,7 @@ namespace Sandra.UI.WF
             BottomRight,
         }
 
-        private Chess.NonEmptyColoredPiece getPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
+        private Chess.ColoredPiece getPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
         {
             switch (promoteColor)
             {
@@ -130,30 +130,30 @@ namespace Sandra.UI.WF
                     switch (quadrant)
                     {
                         case SquareQuadrant.TopLeft:
-                            return Chess.NonEmptyColoredPiece.WhiteRook;
+                            return Chess.ColoredPiece.WhiteRook;
                         case SquareQuadrant.TopRight:
-                            return Chess.NonEmptyColoredPiece.WhiteBishop;
+                            return Chess.ColoredPiece.WhiteBishop;
                         case SquareQuadrant.BottomRight:
-                            return Chess.NonEmptyColoredPiece.WhiteKnight;
+                            return Chess.ColoredPiece.WhiteKnight;
                         case SquareQuadrant.BottomLeft:
                         case SquareQuadrant.Indeterminate:
                         default:
-                            return Chess.NonEmptyColoredPiece.WhiteQueen;
+                            return Chess.ColoredPiece.WhiteQueen;
                     }
                 case Chess.Color.Black:
                 default:
                     switch (quadrant)
                     {
                         case SquareQuadrant.BottomLeft:
-                            return Chess.NonEmptyColoredPiece.BlackRook;
+                            return Chess.ColoredPiece.BlackRook;
                         case SquareQuadrant.BottomRight:
-                            return Chess.NonEmptyColoredPiece.BlackBishop;
+                            return Chess.ColoredPiece.BlackBishop;
                         case SquareQuadrant.TopRight:
-                            return Chess.NonEmptyColoredPiece.BlackKnight;
+                            return Chess.ColoredPiece.BlackKnight;
                         case SquareQuadrant.TopLeft:
                         case SquareQuadrant.Indeterminate:
                         default:
-                            return Chess.NonEmptyColoredPiece.BlackQueen;
+                            return Chess.ColoredPiece.BlackQueen;
                     }
             }
         }

@@ -39,9 +39,9 @@ namespace Sandra.Chess
 
     /// <summary>
     /// Specifies all twelve distinct types of chess pieces.
-    /// <see cref="NonEmptyColoredPiece"/> is a combination of the <see cref="Piece"/> and <see cref="Color"/> enumerations.
+    /// <see cref="ColoredPiece"/> is a combination of the <see cref="Piece"/> and <see cref="Color"/> enumerations.
     /// </summary>
-    public enum NonEmptyColoredPiece
+    public enum ColoredPiece
     {
         WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing,
         BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing,
@@ -111,7 +111,7 @@ namespace Sandra
         /// <summary>
         /// Returns the <see cref="Color"/> of a given piece.
         /// </summary>
-        public static Color GetColor(this NonEmptyColoredPiece coloredPiece)
+        public static Color GetColor(this ColoredPiece coloredPiece)
         {
             return (Color)((int)coloredPiece / Constants.PieceCount);
         }
@@ -119,7 +119,7 @@ namespace Sandra
         /// <summary>
         /// Returns the <see cref="Piece"/> part of a given coloured piece.
         /// </summary>
-        public static Piece GetPiece(this NonEmptyColoredPiece coloredPiece)
+        public static Piece GetPiece(this ColoredPiece coloredPiece)
         {
             return (Piece)((int)coloredPiece % Constants.PieceCount);
         }
@@ -127,9 +127,9 @@ namespace Sandra
         /// <summary>
         /// Returns the colored piece combination of a piece and a color.
         /// </summary>
-        public static NonEmptyColoredPiece Combine(this Piece piece, Color color)
+        public static ColoredPiece Combine(this Piece piece, Color color)
         {
-            return (NonEmptyColoredPiece)((int)color * Constants.PieceCount + piece);
+            return (ColoredPiece)((int)color * Constants.PieceCount + piece);
         }
 
         /// <summary>

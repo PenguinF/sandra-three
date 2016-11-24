@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public class MdiContainerForm : Form
     {
-        public EnumIndexedArray<NonEmptyColoredPiece, Image> PieceImages { get; private set; }
+        public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
         public MdiContainerForm()
         {
@@ -85,21 +85,21 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
-        EnumIndexedArray<NonEmptyColoredPiece, Image> loadChessPieceImages()
+        EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
         {
-            var array = EnumIndexedArray<NonEmptyColoredPiece, Image>.New();
-            array[NonEmptyColoredPiece.BlackPawn] = loadImage("bp");
-            array[NonEmptyColoredPiece.BlackKnight] = loadImage("bn");
-            array[NonEmptyColoredPiece.BlackBishop] = loadImage("bb");
-            array[NonEmptyColoredPiece.BlackRook] = loadImage("br");
-            array[NonEmptyColoredPiece.BlackQueen] = loadImage("bq");
-            array[NonEmptyColoredPiece.BlackKing] = loadImage("bk");
-            array[NonEmptyColoredPiece.WhitePawn] = loadImage("wp");
-            array[NonEmptyColoredPiece.WhiteKnight] = loadImage("wn");
-            array[NonEmptyColoredPiece.WhiteBishop] = loadImage("wb");
-            array[NonEmptyColoredPiece.WhiteRook] = loadImage("wr");
-            array[NonEmptyColoredPiece.WhiteQueen] = loadImage("wq");
-            array[NonEmptyColoredPiece.WhiteKing] = loadImage("wk");
+            var array = EnumIndexedArray<ColoredPiece, Image>.New();
+            array[ColoredPiece.BlackPawn] = loadImage("bp");
+            array[ColoredPiece.BlackKnight] = loadImage("bn");
+            array[ColoredPiece.BlackBishop] = loadImage("bb");
+            array[ColoredPiece.BlackRook] = loadImage("br");
+            array[ColoredPiece.BlackQueen] = loadImage("bq");
+            array[ColoredPiece.BlackKing] = loadImage("bk");
+            array[ColoredPiece.WhitePawn] = loadImage("wp");
+            array[ColoredPiece.WhiteKnight] = loadImage("wn");
+            array[ColoredPiece.WhiteBishop] = loadImage("wb");
+            array[ColoredPiece.WhiteRook] = loadImage("wr");
+            array[ColoredPiece.WhiteQueen] = loadImage("wq");
+            array[ColoredPiece.WhiteKing] = loadImage("wk");
             return array;
         }
 

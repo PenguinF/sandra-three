@@ -41,7 +41,7 @@ namespace Sandra.Chess.Tests
                 {
                     if (piecePerSquare[sq] != ColoredPieceOrEmpty.Empty)
                     {
-                        var coloredPiece = (NonEmptyColoredPiece)piecePerSquare[sq];
+                        var coloredPiece = (ColoredPiece)piecePerSquare[sq];
                         if (coloredPiece.GetColor() == color) vector |= indexVector;
                     }
                     indexVector <<= 1;
@@ -57,7 +57,7 @@ namespace Sandra.Chess.Tests
                 {
                     if (piecePerSquare[sq] != ColoredPieceOrEmpty.Empty)
                     {
-                        var coloredPiece = (NonEmptyColoredPiece)piecePerSquare[sq];
+                        var coloredPiece = (ColoredPiece)piecePerSquare[sq];
                         if (coloredPiece.GetPiece() == piece) vector |= indexVector;
                     }
                     indexVector <<= 1;
