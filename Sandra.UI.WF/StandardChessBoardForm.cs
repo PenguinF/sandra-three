@@ -54,6 +54,11 @@ namespace Sandra.UI.WF
             return ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
         }
 
+        private SquareLocation toSquareLocation(Chess.Square square)
+        {
+            return new SquareLocation(square.X(), 7 - square.Y());
+        }
+
         private void copyPositionToBoard()
         {
             // Copy all pieces.
@@ -61,14 +66,14 @@ namespace Sandra.UI.WF
             {
                 foreach (var square in currentPosition.GetVector(coloredPiece).AllSquares())
                 {
-                    PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), PieceImages[coloredPiece]);
+                    PlayingBoard.SetForegroundImage(toSquareLocation(square), PieceImages[coloredPiece]);
                 }
             }
 
             // Clear all squares that are empty.
             foreach (var square in currentPosition.GetEmptyVector().AllSquares())
             {
-                PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
+                PlayingBoard.SetForegroundImage(toSquareLocation(square), null);
             }
         }
 
@@ -195,7 +200,7 @@ namespace Sandra.UI.WF
 
         private void displayEnPassantEffect(Chess.Square enPassantCaptureSquare)
         {
-            currentSquareWithEnPassantEffect = new SquareLocation(enPassantCaptureSquare.X(), 7 - enPassantCaptureSquare.Y());
+            currentSquareWithEnPassantEffect = toSquareLocation(enPassantCaptureSquare);
             PlayingBoard.SetForegroundImageAttribute(currentSquareWithEnPassantEffect, ForegroundImageAttribute.HalfTransparent);
         }
 
@@ -213,8 +218,8 @@ namespace Sandra.UI.WF
 
         private void displayCastlingEffect(Chess.Square rookSquare, Chess.Square rookTargetSquare)
         {
-            rookSquareWithCastlingEffect = new SquareLocation(rookSquare.X(), 7 - rookSquare.Y());
-            rookTargetSquareWithCastlingEffect = new SquareLocation(rookTargetSquare.X(), 7 - rookTargetSquare.Y());
+            rookSquareWithCastlingEffect = toSquareLocation(rookSquare);
+            rookTargetSquareWithCastlingEffect = toSquareLocation(rookTargetSquare);
             PlayingBoard.SetForegroundImageAttribute(rookSquareWithCastlingEffect, ForegroundImageAttribute.HalfTransparent);
             PlayingBoard.SetForegroundImage(rookTargetSquareWithCastlingEffect,
                                             PlayingBoard.GetForegroundImage(rookSquareWithCastlingEffect));
@@ -336,7 +341,7 @@ namespace Sandra.UI.WF
                     if (moveCheckResult.IsLegalMove())
                     {
                         // Highlight each found square.
-                        PlayingBoard.SetSquareOverlayColor(square.X(), 7 - square.Y(), Color.FromArgb(48, 240, 90, 90));
+                        PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
                     }
                 }
 
