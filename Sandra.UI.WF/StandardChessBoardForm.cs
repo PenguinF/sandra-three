@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
             }
 
             // Clear all squares that are empty.
-            foreach (var square in currentPosition.GetVector(Chess.ColoredPiece.Empty).AllSquares())
+            foreach (var square in currentPosition.GetVector(Chess.ColoredPieceOrEmpty.Empty).AllSquares())
             {
                 PlayingBoard.SetForegroundImage(square.X(), 7 - square.Y(), null);
             }

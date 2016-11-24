@@ -29,7 +29,7 @@ namespace Sandra.Chess.Tests
         class ShadowPosition
         {
             Color sideToMove;
-            ColoredPiece[] piecePerSquare;
+            ColoredPieceOrEmpty[] piecePerSquare;
 
             public Color SideToMove { get { return sideToMove; } }
 
@@ -39,7 +39,7 @@ namespace Sandra.Chess.Tests
                 ulong indexVector = 1;
                 for (int sq = 0; sq < Constants.TotalSquareCount; ++sq)
                 {
-                    if (piecePerSquare[sq] != ColoredPiece.Empty)
+                    if (piecePerSquare[sq] != ColoredPieceOrEmpty.Empty)
                     {
                         var coloredPiece = (NonEmptyColoredPiece)piecePerSquare[sq];
                         if (coloredPiece.GetColor() == color) vector |= indexVector;
@@ -55,7 +55,7 @@ namespace Sandra.Chess.Tests
                 ulong indexVector = 1;
                 for (int sq = 0; sq < Constants.TotalSquareCount; ++sq)
                 {
-                    if (piecePerSquare[sq] != ColoredPiece.Empty)
+                    if (piecePerSquare[sq] != ColoredPieceOrEmpty.Empty)
                     {
                         var coloredPiece = (NonEmptyColoredPiece)piecePerSquare[sq];
                         if (coloredPiece.GetPiece() == piece) vector |= indexVector;
@@ -67,8 +67,8 @@ namespace Sandra.Chess.Tests
 
             private ShadowPosition()
             {
-                piecePerSquare = new ColoredPiece[Constants.TotalSquareCount];
-                piecePerSquare.Fill(ColoredPiece.Empty);
+                piecePerSquare = new ColoredPieceOrEmpty[Constants.TotalSquareCount];
+                piecePerSquare.Fill(ColoredPieceOrEmpty.Empty);
             }
 
             /// <summary>
@@ -80,27 +80,27 @@ namespace Sandra.Chess.Tests
 
                 initialPosition.sideToMove = Color.White;
 
-                initialPosition.piecePerSquare[0] = ColoredPiece.WhiteRook;
-                initialPosition.piecePerSquare[1] = ColoredPiece.WhiteKnight;
-                initialPosition.piecePerSquare[2] = ColoredPiece.WhiteBishop;
-                initialPosition.piecePerSquare[3] = ColoredPiece.WhiteQueen;
-                initialPosition.piecePerSquare[4] = ColoredPiece.WhiteKing;
-                initialPosition.piecePerSquare[5] = ColoredPiece.WhiteBishop;
-                initialPosition.piecePerSquare[6] = ColoredPiece.WhiteKnight;
-                initialPosition.piecePerSquare[7] = ColoredPiece.WhiteRook;
+                initialPosition.piecePerSquare[0] = ColoredPieceOrEmpty.WhiteRook;
+                initialPosition.piecePerSquare[1] = ColoredPieceOrEmpty.WhiteKnight;
+                initialPosition.piecePerSquare[2] = ColoredPieceOrEmpty.WhiteBishop;
+                initialPosition.piecePerSquare[3] = ColoredPieceOrEmpty.WhiteQueen;
+                initialPosition.piecePerSquare[4] = ColoredPieceOrEmpty.WhiteKing;
+                initialPosition.piecePerSquare[5] = ColoredPieceOrEmpty.WhiteBishop;
+                initialPosition.piecePerSquare[6] = ColoredPieceOrEmpty.WhiteKnight;
+                initialPosition.piecePerSquare[7] = ColoredPieceOrEmpty.WhiteRook;
 
-                for (int sq = 8; sq < 16; ++sq) initialPosition.piecePerSquare[sq] = ColoredPiece.WhitePawn;
+                for (int sq = 8; sq < 16; ++sq) initialPosition.piecePerSquare[sq] = ColoredPieceOrEmpty.WhitePawn;
 
-                for (int sq = 48; sq < 56; ++sq) initialPosition.piecePerSquare[sq] = ColoredPiece.BlackPawn;
+                for (int sq = 48; sq < 56; ++sq) initialPosition.piecePerSquare[sq] = ColoredPieceOrEmpty.BlackPawn;
 
-                initialPosition.piecePerSquare[56] = ColoredPiece.BlackRook;
-                initialPosition.piecePerSquare[57] = ColoredPiece.BlackKnight;
-                initialPosition.piecePerSquare[58] = ColoredPiece.BlackBishop;
-                initialPosition.piecePerSquare[59] = ColoredPiece.BlackQueen;
-                initialPosition.piecePerSquare[60] = ColoredPiece.BlackKing;
-                initialPosition.piecePerSquare[61] = ColoredPiece.BlackBishop;
-                initialPosition.piecePerSquare[62] = ColoredPiece.BlackKnight;
-                initialPosition.piecePerSquare[63] = ColoredPiece.BlackRook;
+                initialPosition.piecePerSquare[56] = ColoredPieceOrEmpty.BlackRook;
+                initialPosition.piecePerSquare[57] = ColoredPieceOrEmpty.BlackKnight;
+                initialPosition.piecePerSquare[58] = ColoredPieceOrEmpty.BlackBishop;
+                initialPosition.piecePerSquare[59] = ColoredPieceOrEmpty.BlackQueen;
+                initialPosition.piecePerSquare[60] = ColoredPieceOrEmpty.BlackKing;
+                initialPosition.piecePerSquare[61] = ColoredPieceOrEmpty.BlackBishop;
+                initialPosition.piecePerSquare[62] = ColoredPieceOrEmpty.BlackKnight;
+                initialPosition.piecePerSquare[63] = ColoredPieceOrEmpty.BlackRook;
 
                 return initialPosition;
             }
