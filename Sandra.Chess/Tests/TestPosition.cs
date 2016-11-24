@@ -28,6 +28,13 @@ namespace Sandra.Chess.Tests
         /// </summary>
         class ShadowPosition
         {
+            enum ColoredPieceOrEmpty
+            {
+                Empty = -1,
+                WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing,
+                BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing,
+            }
+
             Color sideToMove;
             ColoredPieceOrEmpty[] piecePerSquare;
 

@@ -48,17 +48,6 @@ namespace Sandra.Chess
     }
 
     /// <summary>
-    /// Specifies all thirteen possible states of a square.
-    /// <see cref="ColoredPieceOrEmpty"/> is a combination of the <see cref="Piece"/> and <see cref="Color"/> enumerations, with an extra <see cref="Empty"/> value.
-    /// </summary>
-    public enum ColoredPieceOrEmpty
-    {
-        Empty = -1,
-        WhitePawn, WhiteKnight, WhiteBishop, WhiteRook, WhiteQueen, WhiteKing,
-        BlackPawn, BlackKnight, BlackBishop, BlackRook, BlackQueen, BlackKing,
-    }
-
-    /// <summary>
     /// Specifies a rank on a standard 8x8 chess board.
     /// </summary>
     /// <remarks>
