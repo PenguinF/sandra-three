@@ -410,59 +410,64 @@ namespace Sandra.UI.WF
 
         Pen lastMoveArrowPen;
 
+        private void drawLastMoveArrow(Graphics g, SquareLocation start, SquareLocation target)
+        {
+            Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
+            int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
+            int startSquareCenterY = startSquareRect.Y + startSquareRect.Height / 2;
+
+            Rectangle targetSquareRect = PlayingBoard.GetSquareRectangle(target);
+            int targetSquareCenterX = targetSquareRect.X + targetSquareRect.Width / 2;
+            int targetSquareCenterY = targetSquareRect.Y + targetSquareRect.Height / 2;
+
+            int deltaX = start.X - target.X;
+            int deltaY = start.Y - target.Y;
+
+            // Cut off the last segment over the target square.
+            int distance = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
+
+            int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
+            int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
+
+            g.DrawLine(lastMoveArrowPen,
+                       endPointX, endPointY,
+                       startSquareCenterX, startSquareCenterY);
+
+            // Draw two lines from the end point at a 30 degrees angle to make an arrow.
+            double phi = Math.Atan2(deltaY, deltaX);
+
+            double arrow1Phi = phi - Math.PI / 6;
+            double arrow2Phi = phi + Math.PI / 6;
+
+            const double targetLength = 12;
+            double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
+            double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
+            double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
+            double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
+
+            lastMoveArrowPen.DashStyle = DashStyle.Solid;
+            lastMoveArrowPen.EndCap = LineCap.Round;
+            g.DrawLine(lastMoveArrowPen,
+                       endPointX, endPointY,
+                       (float)arrow1EndX, (float)arrow1EndY);
+            g.DrawLine(lastMoveArrowPen,
+                       endPointX, endPointY,
+                       (float)arrow2EndX, (float)arrow2EndY);
+            lastMoveArrowPen.DashStyle = DashStyle.Dot;
+            lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
+        }
+
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
-            var hoverSquare = PlayingBoard.HoverSquare;
-
             // Draw a dotted line between the centers of the squares of the last move.
             if (lastCommittedMove != null)
             {
-                Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Start);
-                int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
-                int startSquareCenterY = startSquareRect.Y + startSquareRect.Height / 2;
-
-                Rectangle targetSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Target);
-                int targetSquareCenterX = targetSquareRect.X + targetSquareRect.Width / 2;
-                int targetSquareCenterY = targetSquareRect.Y + targetSquareRect.Height / 2;
-
-                int deltaX = lastCommittedMove.Start.X - lastCommittedMove.Target.X;
-                int deltaY = lastCommittedMove.Start.Y - lastCommittedMove.Target.Y;
-
-                // Cut off the last segment over the target square.
-                int distance = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
-
-                int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
-                int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
-
-                e.Graphics.DrawLine(lastMoveArrowPen,
-                                    endPointX, endPointY,
-                                    startSquareCenterX, startSquareCenterY);
-
-                // Draw two lines from the end point at a 30 degrees angle to make an arrow.
-                double phi = Math.Atan2(deltaY, deltaX);
-
-                double arrow1Phi = phi - Math.PI / 6;
-                double arrow2Phi = phi + Math.PI / 6;
-
-                const double targetLength = 12;
-                double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
-                double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
-                double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
-                double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
-
-                lastMoveArrowPen.DashStyle = DashStyle.Solid;
-                lastMoveArrowPen.EndCap = LineCap.Round;
-                e.Graphics.DrawLine(lastMoveArrowPen,
-                                    endPointX, endPointY,
-                                    (float)arrow1EndX, (float)arrow1EndY);
-                e.Graphics.DrawLine(lastMoveArrowPen,
-                                    endPointX, endPointY,
-                                    (float)arrow2EndX, (float)arrow2EndY);
-                lastMoveArrowPen.DashStyle = DashStyle.Dot;
-                lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
+                drawLastMoveArrow(e.Graphics, lastCommittedMove.Start, lastCommittedMove.Target);
             }
 
             // Draw subtle corners just inside the edges of a legal target square.
+            var hoverSquare = PlayingBoard.HoverSquare;
+
             if (hoverSquare != null && PlayingBoard.IsMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
             {
                 Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
