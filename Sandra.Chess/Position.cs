@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sandra.Chess
@@ -33,6 +34,104 @@ namespace Sandra.Chess
         private ulong enPassantVector;
         private ulong enPassantCaptureVector;
         private ulong castlingRightsVector;
+
+        private bool checkInvariants()
+        {
+            // Disjunct colors.
+            if (colorVectors[Color.White].Test(colorVectors[Color.Black])) return false;
+            ulong occupied = colorVectors[Color.White] | colorVectors[Color.Black];
+
+            // Disjunct pieces.
+            foreach (Piece piece1 in EnumHelper<Piece>.AllValues)
+            {
+                for (Piece piece2 = piece1 + 1; piece2 <= Piece.King; ++piece2)
+                {
+                    if (pieceVectors[piece1].Test(pieceVectors[piece2])) return false;
+                }
+            }
+
+            // Colors and pieces must match exactly.
+            if (occupied != (
+                    pieceVectors[Piece.Pawn]
+                  | pieceVectors[Piece.Knight]
+                  | pieceVectors[Piece.Bishop]
+                  | pieceVectors[Piece.Rook]
+                  | pieceVectors[Piece.Queen]
+                  | pieceVectors[Piece.King])) return false;
+
+            // There is exactly one king on both sides.
+            ulong whiteKing = colorVectors[Color.White] & pieceVectors[Piece.King];
+            if (whiteKing == 0) return false;
+            if ((whiteKing & ~(whiteKing & (0U - whiteKing))) != 0) return false;
+            ulong blackKing = colorVectors[Color.Black] & pieceVectors[Piece.King];
+            if (blackKing == 0) return false;
+            if ((blackKing & ~(blackKing & (0U - blackKing))) != 0) return false;
+
+            // The enemy king cannot be in check.
+            Square enemyKing = (colorVectors[sideToMove.Opposite()] & pieceVectors[Piece.King]).GetSingleSquare();
+            if (isSquareUnderAttack(enemyKing, sideToMove.Opposite())) return false;
+
+            // Pawns cannot be on the back rank.
+            if (pieceVectors[Piece.Pawn].Test(Constants.Rank1 | Constants.Rank8)) return false;
+
+            // Castling rights can only be set if king/rooks are in their starting position.
+            if (castlingRightsVector.Test(Constants.C8))
+            {
+                if (!blackKing.Test(Constants.E8)) return false;
+                if (!Constants.A8.Test(colorVectors[Color.Black] & pieceVectors[Piece.Rook])) return false;
+            }
+            if (castlingRightsVector.Test(Constants.G8))
+            {
+                if (!blackKing.Test(Constants.E8)) return false;
+                if (!Constants.H8.Test(colorVectors[Color.Black] & pieceVectors[Piece.Rook])) return false;
+            }
+            if (castlingRightsVector.Test(Constants.C1))
+            {
+                if (!whiteKing.Test(Constants.E1)) return false;
+                if (!Constants.A1.Test(colorVectors[Color.White] & pieceVectors[Piece.Rook])) return false;
+            }
+            if (castlingRightsVector.Test(Constants.C8))
+            {
+                if (!whiteKing.Test(Constants.E1)) return false;
+                if (!Constants.H1.Test(colorVectors[Color.White] & pieceVectors[Piece.Rook])) return false;
+            }
+
+            // En passant invariants.
+            if (enPassantVector == 0)
+            {
+                if (enPassantCaptureVector != 0) return false;
+            }
+            else
+            {
+                // enPassantVector must be empty.
+                if (occupied.Test(enPassantVector)) return false;
+
+                if (Constants.Rank4.Test(enPassantCaptureVector))
+                {
+                    // There must be a white pawn on the en passant capture square.
+                    if (!enPassantCaptureVector.Test(colorVectors[Color.White] & pieceVectors[Piece.Pawn])) return false;
+                    // enPassantVector must be directly south.
+                    if (enPassantCaptureVector >> 8 != enPassantVector) return false;
+                    // Starting square must be empty.
+                    if (occupied.Test(enPassantCaptureVector >> 16)) return false;
+                }
+                else if (Constants.Rank5.Test(enPassantCaptureVector))
+                {
+                    // There must be a black pawn on the en passant capture square.
+                    if (!enPassantCaptureVector.Test(colorVectors[Color.Black] & pieceVectors[Piece.Pawn])) return false;
+                    // enPassantVector must be directly north.
+                    if (enPassantCaptureVector << 8 != enPassantVector) return false;
+                    // Starting square must be empty.
+                    if (occupied.Test(enPassantCaptureVector << 16)) return false;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -109,6 +208,8 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
             initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
+
+            Debug.Assert(initialPosition.checkInvariants());
 
             return initialPosition;
         }
@@ -217,6 +318,8 @@ namespace Sandra.Chess
             // Null and range checks.
             if (move == null) throw new ArgumentNullException(nameof(move));
             move.ThrowWhenOutOfRange();
+
+            Debug.Assert(checkInvariants());
 
             ulong sourceVector = move.SourceSquare.ToVector();
             ulong targetVector = move.TargetSquare.ToVector();
@@ -452,6 +555,8 @@ namespace Sandra.Chess
                     }
                 }
             }
+
+            Debug.Assert(checkInvariants());
 
             return moveCheckResult;
         }
