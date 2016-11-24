@@ -96,7 +96,7 @@ namespace Sandra.UI.WF
 
             PlayingBoard.Paint += playingBoard_Paint;
 
-            dotPen = new Pen(Color.DimGray)
+            lastMoveArrowPen = new Pen(Color.DimGray)
             {
                 DashStyle = DashStyle.Dot,
                 Width = 2,
@@ -408,7 +408,7 @@ namespace Sandra.UI.WF
 
         MoveCommitEventArgs lastCommittedMove;
 
-        Pen dotPen;
+        Pen lastMoveArrowPen;
 
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
@@ -434,7 +434,7 @@ namespace Sandra.UI.WF
                 int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
                 int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
-                e.Graphics.DrawLine(dotPen,
+                e.Graphics.DrawLine(lastMoveArrowPen,
                                     endPointX, endPointY,
                                     startSquareCenterX, startSquareCenterY);
 
@@ -450,16 +450,16 @@ namespace Sandra.UI.WF
                 double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
                 double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
 
-                dotPen.DashStyle = DashStyle.Solid;
-                dotPen.EndCap = LineCap.Round;
-                e.Graphics.DrawLine(dotPen,
+                lastMoveArrowPen.DashStyle = DashStyle.Solid;
+                lastMoveArrowPen.EndCap = LineCap.Round;
+                e.Graphics.DrawLine(lastMoveArrowPen,
                                     endPointX, endPointY,
                                     (float)arrow1EndX, (float)arrow1EndY);
-                e.Graphics.DrawLine(dotPen,
+                e.Graphics.DrawLine(lastMoveArrowPen,
                                     endPointX, endPointY,
                                     (float)arrow2EndX, (float)arrow2EndY);
-                dotPen.DashStyle = DashStyle.Dot;
-                dotPen.EndCap = LineCap.RoundAnchor;
+                lastMoveArrowPen.DashStyle = DashStyle.Dot;
+                lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
             }
 
             // Draw subtle corners just inside the edges of a legal target square.
@@ -498,7 +498,7 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                dotPen.Dispose();
+                lastMoveArrowPen.Dispose();
             }
 
             base.Dispose(disposing);
