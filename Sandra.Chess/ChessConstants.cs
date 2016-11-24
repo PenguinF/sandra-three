@@ -438,7 +438,7 @@ namespace Sandra.Chess
             //    Since there's a queen is on C3, this means that the black king is indeed in check.
             //
             // Note that the color of the piece occupying a square can be safely ignored,
-            // because all squares occupied by pieces of the same colour can be zeroed out afterwards.
+            // because all squares occupied by pieces of the same color can be zeroed out afterwards.
             // The number of necessary operations is always four: zero out, multiply, shift right, lookup in table.
 
             // The order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.

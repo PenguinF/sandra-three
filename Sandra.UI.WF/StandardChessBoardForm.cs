@@ -79,7 +79,7 @@ namespace Sandra.UI.WF
 
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
-            // Check if location is a member of all squares where a piece sits of the current colour.
+            // Check if location is a member of all squares where a piece sits of the current color.
             ulong allowed = currentPosition.GetVector(currentPosition.SideToMove);
             return allowed.Test(toSquare(squareLocation).ToVector());
         }

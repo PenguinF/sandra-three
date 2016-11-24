@@ -106,7 +106,7 @@ namespace Sandra
         }
 
         /// <summary>
-        /// Returns the <see cref="Piece"/> part of a given coloured piece.
+        /// Returns the <see cref="Piece"/> part of a given colored piece.
         /// </summary>
         public static Piece GetPiece(this ColoredPiece coloredPiece)
         {
