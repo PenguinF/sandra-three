@@ -101,8 +101,8 @@ namespace Sandra.UI.WF
                 DashStyle = DashStyle.Dot,
                 Width = 2,
                 Alignment = PenAlignment.Center,
-                StartCap = LineCap.RoundAnchor,
-                EndCap = LineCap.Round,
+                StartCap = LineCap.Round,
+                EndCap = LineCap.RoundAnchor,
             };
         }
 
@@ -433,8 +433,8 @@ namespace Sandra.UI.WF
                 int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
 
                 e.Graphics.DrawLine(dotPen,
-                                    startSquareCenterX, startSquareCenterY,
-                                    endPointX, endPointY);
+                                    endPointX, endPointY,
+                                    startSquareCenterX, startSquareCenterY);
 
                 e.Graphics.FillEllipse(Brushes.DimGray, new RectangleF(endPointX - 3.5f, endPointY - 3.5f, 7, 7));
             }
