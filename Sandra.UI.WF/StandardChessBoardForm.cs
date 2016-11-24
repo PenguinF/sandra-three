@@ -420,14 +420,16 @@ namespace Sandra.UI.WF
                 Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Start);
                 int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
                 int startSquareCenterY = startSquareRect.Y + startSquareRect.Height / 2;
+
                 Rectangle targetSquareRect = PlayingBoard.GetSquareRectangle(lastCommittedMove.Target);
                 int targetSquareCenterX = targetSquareRect.X + targetSquareRect.Width / 2;
                 int targetSquareCenterY = targetSquareRect.Y + targetSquareRect.Height / 2;
 
+                int deltaX = lastCommittedMove.Start.X - lastCommittedMove.Target.X;
+                int deltaY = lastCommittedMove.Start.Y - lastCommittedMove.Target.Y;
+
                 // Cut off the last segment over the target square.
-                int distance = Math.Max(
-                    Math.Abs(lastCommittedMove.Start.X - lastCommittedMove.Target.X),
-                    Math.Abs(lastCommittedMove.Start.Y - lastCommittedMove.Target.Y));
+                int distance = Math.Max(Math.Abs(deltaX), Math.Abs(deltaY));
 
                 int endPointX = targetSquareCenterX - (targetSquareCenterX - startSquareCenterX) / distance * 3 / 8;
                 int endPointY = targetSquareCenterY - (targetSquareCenterY - startSquareCenterY) / distance * 3 / 8;
