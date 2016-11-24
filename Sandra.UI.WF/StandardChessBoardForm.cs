@@ -438,7 +438,28 @@ namespace Sandra.UI.WF
                                     endPointX, endPointY,
                                     startSquareCenterX, startSquareCenterY);
 
-                e.Graphics.FillEllipse(Brushes.DimGray, new RectangleF(endPointX - 3.5f, endPointY - 3.5f, 7, 7));
+                // Draw two lines from the end point at a 30 degrees angle to make an arrow.
+                double phi = Math.Atan2(deltaY, deltaX);
+
+                double arrow1Phi = phi - Math.PI / 6;
+                double arrow2Phi = phi + Math.PI / 6;
+
+                const double targetLength = 12;
+                double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
+                double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
+                double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
+                double arrow2EndY = endPointY + Math.Sin(arrow2Phi) * targetLength;
+
+                dotPen.DashStyle = DashStyle.Solid;
+                dotPen.EndCap = LineCap.Round;
+                e.Graphics.DrawLine(dotPen,
+                                    endPointX, endPointY,
+                                    (float)arrow1EndX, (float)arrow1EndY);
+                e.Graphics.DrawLine(dotPen,
+                                    endPointX, endPointY,
+                                    (float)arrow2EndX, (float)arrow2EndY);
+                dotPen.DashStyle = DashStyle.Dot;
+                dotPen.EndCap = LineCap.RoundAnchor;
             }
 
             // Draw subtle corners just inside the edges of a legal target square.
