@@ -90,7 +90,7 @@ namespace Sandra.Chess
                 if (!whiteKing.Test(Constants.E1)) return false;
                 if (!Constants.A1.Test(colorVectors[Color.White] & pieceVectors[Piece.Rook])) return false;
             }
-            if (castlingRightsVector.Test(Constants.C8))
+            if (castlingRightsVector.Test(Constants.G1))
             {
                 if (!whiteKing.Test(Constants.E1)) return false;
                 if (!Constants.H1.Test(colorVectors[Color.White] & pieceVectors[Piece.Rook])) return false;
