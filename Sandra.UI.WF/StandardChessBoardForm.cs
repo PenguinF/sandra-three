@@ -181,19 +181,20 @@ namespace Sandra.UI.WF
             }
         }
 
-        private bool isPromoting(SquareLocation location)
+        private SquareLocation currentSquareWithPromoteEffect;
+
+        private void displayPromoteEffect(Chess.Square promoteSquare)
         {
-            if (PlayingBoard.IsMoving && location != null)
+            currentSquareWithPromoteEffect = toSquareLocation(promoteSquare);
+        }
+
+        private void stopDisplayPromoteEffect()
+        {
+            if (currentSquareWithPromoteEffect != null)
             {
-                // Create fake illegal promotion move to check what TryMakeMove() returns.
-                Chess.Move move = new Chess.Move()
-                {
-                    SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
-                    TargetSquare = toSquare(location),
-                };
-                return currentPosition.TryMakeMove(move, false).HasFlag(Chess.MoveCheckResult.MissingPromotionInformation);
+                updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
+                currentSquareWithPromoteEffect = null;
             }
-            return false;
         }
 
         private SquareLocation currentSquareWithEnPassantEffect;
@@ -238,9 +239,9 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
-            if (isPromoting(PlayingBoard.HoverSquare))
+            if (currentSquareWithPromoteEffect != null)
             {
-                Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(PlayingBoard.HoverSquare);
+                Rectangle hoverSquareRectangle = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
                 SquareQuadrant hitQuadrant = SquareQuadrant.Indeterminate;
                 if (hoverSquareRectangle.Contains(e.X, e.Y))
                 {
@@ -280,6 +281,7 @@ namespace Sandra.UI.WF
             if (PlayingBoard.IsMoving)
             {
                 // If a legal move, display any piece about to be captured with a half-transparent effect.
+                // Also display additional effects for special moves, detectable by the returned MoveCheckResult.
                 Chess.Move move = new Chess.Move()
                 {
                     SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
@@ -303,6 +305,10 @@ namespace Sandra.UI.WF
                     }
                     else
                     {
+                        if (moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
+                        {
+                            displayPromoteEffect(move.TargetSquare);
+                        }
                         PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
                     }
                 }
@@ -315,7 +321,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
         {
-            updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
+            stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
             if (!PlayingBoard.IsMoving || e.Location != PlayingBoard.MoveStartSquare)
@@ -355,6 +361,7 @@ namespace Sandra.UI.WF
 
         private void resetMoveEffects(MoveEventArgs e)
         {
+            stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
@@ -391,7 +398,7 @@ namespace Sandra.UI.WF
                     move.MoveType = Chess.MoveType.CastleKingside;
                 }
             }
-            else if (isPromoting(e.Target))
+            else if (currentSquareWithPromoteEffect != null)
             {
                 move.MoveType = Chess.MoveType.Promotion;
                 move.PromoteTo = getPromoteToPiece(hoverQuadrant, currentPosition.SideToMove).GetPiece();
@@ -454,12 +461,12 @@ namespace Sandra.UI.WF
                 e.Graphics.ResetClip();
             }
 
-            if (isPromoting(hoverSquare))
+            if (currentSquareWithPromoteEffect != null)
             {
                 int squareSize = PlayingBoard.SquareSize;
                 if (squareSize >= 2)
                 {
-                    Rectangle rect = PlayingBoard.GetSquareRectangle(hoverSquare.X, hoverSquare.Y);
+                    Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
                     int halfSquareSize = (squareSize + 1) / 2;
                     int otherHalfSquareSize = squareSize - halfSquareSize;
 
