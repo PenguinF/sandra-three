@@ -229,5 +229,25 @@ namespace Sandra
         {
             return (moveCheckResult & MoveCheckResult.IllegalMove) == MoveCheckResult.OK;
         }
+
+        public static ulong North(this ulong bitVector64)
+        {
+            return (bitVector64 & ~Constants.Rank8) << 8;
+        }
+
+        public static ulong South(this ulong bitVector64)
+        {
+            return (bitVector64 & ~Constants.Rank1) >> 8;
+        }
+
+        public static ulong East(this ulong bitVector64)
+        {
+            return (bitVector64 & ~Constants.FileH) << 1;
+        }
+
+        public static ulong West(this ulong bitVector64)
+        {
+            return (bitVector64 & ~Constants.FileA) >> 1;
+        }
     }
 }

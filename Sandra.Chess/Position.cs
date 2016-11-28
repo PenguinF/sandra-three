@@ -111,18 +111,18 @@ namespace Sandra.Chess
                     // There must be a white pawn on the en passant capture square.
                     if (!enPassantCaptureVector.Test(colorVectors[Color.White] & pieceVectors[Piece.Pawn])) return false;
                     // enPassantVector must be directly south.
-                    if (enPassantCaptureVector >> 8 != enPassantVector) return false;
+                    if (enPassantCaptureVector.South() != enPassantVector) return false;
                     // Starting square must be empty.
-                    if (occupied.Test(enPassantCaptureVector >> 16)) return false;
+                    if (occupied.Test(enPassantCaptureVector.South().South())) return false;
                 }
                 else if (Constants.Rank5.Test(enPassantCaptureVector))
                 {
                     // There must be a black pawn on the en passant capture square.
                     if (!enPassantCaptureVector.Test(colorVectors[Color.Black] & pieceVectors[Piece.Pawn])) return false;
                     // enPassantVector must be directly north.
-                    if (enPassantCaptureVector << 8 != enPassantVector) return false;
+                    if (enPassantCaptureVector.North() != enPassantVector) return false;
                     // Starting square must be empty.
-                    if (occupied.Test(enPassantCaptureVector << 16)) return false;
+                    if (occupied.Test(enPassantCaptureVector.North().North())) return false;
                 }
                 else
                 {
@@ -246,9 +246,9 @@ namespace Sandra.Chess
             // Also a king move from E1 to E8 is impossible. Therefore, the rooks do not need to be checked anymore after a king square check.
             if (affectedKingSquares != 0)
             {
-                return (affectedKingSquares << 2) | (affectedKingSquares >> 2);
+                return affectedKingSquares.West().West() | affectedKingSquares.East().East();
             }
-            return ((moveDelta & Constants.RooksStartPositionQueenside) << 2) | ((moveDelta & Constants.RooksStartPositionKingside) >> 1);
+            return (moveDelta & Constants.RooksStartPositionQueenside).East().East() | (moveDelta & Constants.RooksStartPositionKingside).West();
         }
 
         private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
