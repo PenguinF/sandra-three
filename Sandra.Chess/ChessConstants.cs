@@ -380,39 +380,39 @@ namespace Sandra.Chess
                 a1h8Multipliers[sq] = a1h8Multipliers8[a1h8Index];
                 a8h1Multipliers[sq] = a8h1Multipliers8[a8h1Index];
 
-                PawnTwoSquaresAhead[Color.White, sq] = (sqVector & Rank2) << 16;
-                PawnTwoSquaresAhead[Color.Black, sq] = (sqVector & Rank7) >> 16;
+                PawnTwoSquaresAhead[Color.White, sq] = (sqVector & Rank2).North().North();
+                PawnTwoSquaresAhead[Color.Black, sq] = (sqVector & Rank7).South().South();
 
-                PawnMoves[Color.White, sq] = (sqVector & ~Rank8) << 8
+                PawnMoves[Color.White, sq] = sqVector.North()
                                            | PawnTwoSquaresAhead[Color.White, sq];  // 2 squares ahead allowed from the starting square.
-                PawnMoves[Color.Black, sq] = (sqVector & ~Rank1) >> 8
+                PawnMoves[Color.Black, sq] = sqVector.South()
                                            | PawnTwoSquaresAhead[Color.Black, sq];
 
-                PawnCaptures[Color.White, sq] = (sqVector & ~Rank8 & ~FileA) << 7
-                                              | (sqVector & ~Rank8 & ~FileH) << 9;
-                PawnCaptures[Color.Black, sq] = (sqVector & ~Rank1 & ~FileA) >> 9
-                                              | (sqVector & ~Rank1 & ~FileH) >> 7;
+                PawnCaptures[Color.White, sq] = sqVector.North().West()
+                                              | sqVector.North().East();
+                PawnCaptures[Color.Black, sq] = sqVector.South().West()
+                                              | sqVector.South().East();
 
-                EnPassantSquares[Color.White, sq] = (sqVector & Rank2) << 8;
-                EnPassantSquares[Color.Black, sq] = (sqVector & Rank7) >> 8;
+                EnPassantSquares[Color.White, sq] = (sqVector & Rank2).North();
+                EnPassantSquares[Color.Black, sq] = (sqVector & Rank7).South();
 
-                KnightMoves[sq] = (sqVector & ~Rank8 & ~Rank7 & ~FileA) << 15  // NNW
-                                | (sqVector & ~Rank8 & ~Rank7 & ~FileH) << 17  // NNE
-                                | (sqVector & ~Rank8 & ~FileG & ~FileH) << 10  // ENE
-                                | (sqVector & ~Rank1 & ~FileG & ~FileH) >> 6   // ESE
-                                | (sqVector & ~Rank1 & ~Rank2 & ~FileH) >> 15  // SSE
-                                | (sqVector & ~Rank1 & ~Rank2 & ~FileA) >> 17  // SSW
-                                | (sqVector & ~Rank1 & ~FileB & ~FileA) >> 10  // WSW
-                                | (sqVector & ~Rank8 & ~FileB & ~FileA) << 6;  // WNW
+                KnightMoves[sq] = sqVector.North().North().West()
+                                | sqVector.North().North().East()
+                                | sqVector.North().West().West()
+                                | sqVector.North().East().East()
+                                | sqVector.South().West().West()
+                                | sqVector.South().East().East()
+                                | sqVector.South().South().West()
+                                | sqVector.South().South().East();
 
-                Neighbours[sq] = (sqVector & ~Rank8 & ~FileH) << 9  // NE
-                               | (sqVector & ~Rank8) << 8           // N
-                               | (sqVector & ~Rank8 & ~FileA) << 7  // NW
-                               | (sqVector & ~FileH) << 1           // E
-                               | (sqVector & ~FileA) >> 1           // W
-                               | (sqVector & ~Rank1 & ~FileH) >> 7  // SE
-                               | (sqVector & ~Rank1) >> 8           // S
-                               | (sqVector & ~Rank1 & ~FileA) >> 9; // SW
+                Neighbours[sq] = sqVector.North().East()
+                               | sqVector.North()
+                               | sqVector.North().West()
+                               | sqVector.East()
+                               | sqVector.West()
+                               | sqVector.South().East()
+                               | sqVector.South()
+                               | sqVector.South().West();
             }
 
             // Reachability calculation is done in a few stages.
