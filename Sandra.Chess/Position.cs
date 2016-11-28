@@ -61,11 +61,11 @@ namespace Sandra.Chess
 
             // There is exactly one king on both sides.
             ulong whiteKing = colorVectors[Color.White] & pieceVectors[Piece.King];
-            if (whiteKing == 0) return false;
-            if ((whiteKing & ~(whiteKing & (0U - whiteKing))) != 0) return false;
+            if (!whiteKing.Test()) return false;
+            if (!whiteKing.IsMaxOneBit()) return false;
             ulong blackKing = colorVectors[Color.Black] & pieceVectors[Piece.King];
-            if (blackKing == 0) return false;
-            if ((blackKing & ~(blackKing & (0U - blackKing))) != 0) return false;
+            if (!blackKing.Test()) return false;
+            if (!blackKing.IsMaxOneBit()) return false;
 
             // The enemy king cannot be in check.
             Square enemyKing = (colorVectors[sideToMove.Opposite()] & pieceVectors[Piece.King]).GetSingleSquare();
@@ -97,9 +97,9 @@ namespace Sandra.Chess
             }
 
             // En passant invariants.
-            if (enPassantVector == 0)
+            if (!enPassantVector.Test())
             {
-                if (enPassantCaptureVector != 0) return false;
+                if (enPassantCaptureVector.Test()) return false;
             }
             else
             {

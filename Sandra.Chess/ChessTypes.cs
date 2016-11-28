@@ -215,6 +215,22 @@ namespace Sandra
         }
 
         /// <summary>
+        /// Tests if a bitfield has any set bits.
+        /// </summary>
+        public static bool Test(this ulong bitVector64)
+        {
+            return bitVector64 != 0;
+        }
+
+        /// <summary>
+        /// Tests if a bitfield is equal to zero or a power of two, i.e. is true for zero or one bits exactly.
+        /// </summary>
+        public static bool IsMaxOneBit(this ulong bitVector64)
+        {
+            return !bitVector64.Test(bitVector64 - 1);
+        }
+
+        /// <summary>
         /// Tests if another bitfield has any bits in common with this one.
         /// </summary>
         public static bool Test(this ulong bitVector64, ulong otherVector)
