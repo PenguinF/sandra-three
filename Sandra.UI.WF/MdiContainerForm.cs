@@ -60,6 +60,7 @@ namespace Sandra.UI.WF
                 ClientSize = new Size(400, 400),
                 Visible = true,
             };
+            mdiChild.Game = new Game(Position.GetInitialPosition());
             mdiChild.PieceImages = PieceImages;
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
