@@ -338,8 +338,7 @@ namespace Sandra.Chess
             }
 
             // Obtain moving piece.
-            Piece movingPiece;
-            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out movingPiece))
+            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out moveInfo.MovingPiece))
             {
                 moveInfo.Result |= MoveCheckResult.SourceSquareIsEmpty;
             }
@@ -368,7 +367,7 @@ namespace Sandra.Chess
             ulong captureVector = targetVector;
 
             // Check legal target squares and specific rules depending on the moving piece.
-            switch (movingPiece)
+            switch (moveInfo.MovingPiece)
             {
                 case Piece.Pawn:
                     ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
@@ -476,8 +475,8 @@ namespace Sandra.Chess
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
-                bool isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
-                if (isCapture)
+                moveInfo.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
+                if (moveInfo.IsCapture)
                 {
                     colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
                     pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
@@ -486,7 +485,7 @@ namespace Sandra.Chess
                 // Move from source to target.
                 ulong moveDelta = sourceVector | targetVector;
                 colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
-                pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
+                pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ moveDelta;
 
                 // Find the king in the resulting position.
                 Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
@@ -503,12 +502,12 @@ namespace Sandra.Chess
                     enPassantVector = 0;
                     enPassantCaptureVector = 0;
 
-                    if (movingPiece == Piece.Pawn)
+                    if (moveInfo.MovingPiece == Piece.Pawn)
                     {
                         if (move.MoveType == MoveType.Promotion)
                         {
                             // Change type of piece.
-                            pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ targetVector;
+                            pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ targetVector;
                             pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
                         }
                         else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
@@ -519,7 +518,7 @@ namespace Sandra.Chess
                             enPassantCaptureVector = targetVector;
                         }
                     }
-                    else if (movingPiece == Piece.King)
+                    else if (moveInfo.MovingPiece == Piece.King)
                     {
                         // Move the rooks as well when castling.
                         if (move.MoveType == MoveType.CastleQueenside)
@@ -549,8 +548,8 @@ namespace Sandra.Chess
                 {
                     // Reverse move.
                     colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
-                    pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
-                    if (isCapture)
+                    pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ moveDelta;
+                    if (moveInfo.IsCapture)
                     {
                         colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
                         pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;

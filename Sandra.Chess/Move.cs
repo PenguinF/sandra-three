@@ -60,5 +60,7 @@ namespace Sandra.Chess
     public struct MoveInfo
     {
         public MoveCheckResult Result;
+        public Piece MovingPiece;
+        public bool IsCapture;
     }
 }
