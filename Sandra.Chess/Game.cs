@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -89,7 +90,39 @@ namespace Sandra.Chess
         /// </exception>
         public MoveCheckResult TryMakeMove(Move move, bool make)
         {
-            return currentPosition.TryMakeMove(move, make).Result;
+            MoveInfo moveInfo = currentPosition.TryMakeMove(move, make);
+            if (make && moveInfo.Result == MoveCheckResult.OK) RaiseMoveMade(move, moveInfo);
+            return moveInfo.Result;
+        }
+
+        /// <summary>
+        /// Occurs when a move has been made successfully.
+        /// </summary>
+        public event EventHandler<MoveMadeEventArgs> MoveMade;
+
+        /// <summary>
+        /// Raises the <see cref="MoveMade"/> event. 
+        /// </summary>
+        protected virtual void OnMoveMade(MoveMadeEventArgs e)
+        {
+            MoveMade?.Invoke(this, e);
+        }
+
+        protected void RaiseMoveMade(Move move, MoveInfo moveInfo)
+        {
+            OnMoveMade(new MoveMadeEventArgs(move, moveInfo));
+        }
+    }
+
+    public class MoveMadeEventArgs : EventArgs
+    {
+        public readonly Move Move;
+        public readonly MoveInfo MoveInfo;
+
+        public MoveMadeEventArgs(Move move, MoveInfo moveInfo)
+        {
+            Move = move;
+            MoveInfo = moveInfo;
         }
     }
 }
