@@ -89,7 +89,7 @@ namespace Sandra.Chess
         /// </exception>
         public MoveCheckResult TryMakeMove(Move move, bool make)
         {
-            return currentPosition.TryMakeMove(move, make);
+            return currentPosition.TryMakeMove(move, make).Result;
         }
     }
 }

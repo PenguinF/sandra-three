@@ -56,4 +56,9 @@ namespace Sandra.Chess
             }
         }
     }
+
+    public struct MoveInfo
+    {
+        public MoveCheckResult Result;
+    }
 }
