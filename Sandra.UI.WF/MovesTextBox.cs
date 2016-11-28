@@ -35,5 +35,7 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10);
             AutoWordSelection = true;
         }
+
+        public Chess.Game Game;
     }
 }

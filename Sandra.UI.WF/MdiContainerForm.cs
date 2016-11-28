@@ -54,16 +54,42 @@ namespace Sandra.UI.WF
 
         public void NewPlayingBoard()
         {
+            Game game = new Game(Position.GetInitialPosition());
+
             StandardChessBoardForm mdiChild = new StandardChessBoardForm()
             {
                 MdiParent = this,
                 ClientSize = new Size(400, 400),
-                Visible = true,
             };
-            mdiChild.Game = new Game(Position.GetInitialPosition());
+            mdiChild.Game = game;
             mdiChild.PieceImages = PieceImages;
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
+
+            mdiChild.Load += (_, __) =>
+            {
+                var mdiChildBounds = mdiChild.Bounds;
+                SnappingMdiChildForm movesForm = new SnappingMdiChildForm()
+                {
+                    MdiParent = this,
+                    StartPosition = FormStartPosition.Manual,
+                    Left = mdiChildBounds.Right,
+                    Top = mdiChildBounds.Top,
+                    Width = 200,
+                    Height = mdiChildBounds.Height,
+                    ShowIcon = false,
+                    MaximizeBox = false,
+                    FormBorderStyle = FormBorderStyle.SizableToolWindow,
+                };
+                movesForm.Controls.Add(new MovesTextBox()
+                {
+                    Dock = DockStyle.Fill,
+                    Game = game,
+                });
+                movesForm.Visible = true;
+            };
+
+            mdiChild.Visible = true;
         }
 
         protected override void OnLoad(EventArgs e)
