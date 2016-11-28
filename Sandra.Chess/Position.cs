@@ -214,6 +214,24 @@ namespace Sandra.Chess
             return initialPosition;
         }
 
+        /// <summary>
+        /// Creates an exact copy of this position and returns it.
+        /// </summary>
+        public Position Copy()
+        {
+            var copiedPosition = new Position();
+
+            copiedPosition.sideToMove = sideToMove;
+            copiedPosition.colorVectors = colorVectors.Copy();
+            copiedPosition.pieceVectors = pieceVectors.Copy();
+
+            copiedPosition.enPassantCaptureVector = enPassantCaptureVector;
+            copiedPosition.enPassantVector = enPassantVector;
+            copiedPosition.castlingRightsVector = castlingRightsVector;
+
+            return copiedPosition;
+        }
+
 
         /// <summary>
         /// Returns if the given square is attacked by a piece of the opposite color.
