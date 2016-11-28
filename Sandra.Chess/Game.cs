@@ -102,6 +102,7 @@ namespace Sandra.Chess
         /// True if the move must actually be made, false if only validated.
         /// </param>
         /// <returns>
+        /// A <see cref="MoveInfo"/> structure with <see cref="MoveInfo.Result"/> equal to  
         /// <see cref="MoveCheckResult.OK"/> if the move was legal, otherwise one of the other <see cref="MoveCheckResult"/> values.
         /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
         /// </returns>
@@ -111,7 +112,7 @@ namespace Sandra.Chess
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public MoveCheckResult TryMakeMove(Move move, bool make)
+        public MoveInfo TryMakeMove(Move move, bool make)
         {
             MoveInfo moveInfo = currentPosition.TryMakeMove(move, make);
             if (make && moveInfo.Result == MoveCheckResult.OK)
@@ -119,7 +120,7 @@ namespace Sandra.Chess
                 moveList.Add(move);
                 RaiseMoveMade(move, moveInfo);
             }
-            return moveInfo.Result;
+            return moveInfo;
         }
 
         /// <summary>

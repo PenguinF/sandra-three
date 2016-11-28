@@ -49,6 +49,7 @@ namespace Sandra.UI.WF
                 if (moveFormatter != value)
                 {
                     moveFormatter = value;
+                    updateText();
                 }
             }
         }
@@ -68,16 +69,45 @@ namespace Sandra.UI.WF
                     if (game != null) game.MoveMade -= game_MoveMade;
                     game = value;
                     if (game != null) game.MoveMade += game_MoveMade;
+                    updateText();
                 }
             }
         }
 
         private void game_MoveMade(object sender, Chess.MoveMadeEventArgs e)
         {
+            updateText();
+        }
+
+        private void updateText()
+        {
+            Clear();
+
             if (moveFormatter != null && game != null)
             {
-                if (Text.Length > 0) AppendText(" ");
-                AppendText(moveFormatter.FormatMove(game, e.Move, e.MoveInfo));
+                Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
+
+                bool first = true;
+                int plyCounter = simulatedGame.SideToMove == Chess.Color.White ? 0 : 1;
+
+                foreach (Chess.Move move in game.Moves)
+                {
+                    if (!first) AppendText(" ");
+
+                    bool even = plyCounter % 2 == 0;
+                    if (even || first)
+                    {
+                        AppendText((plyCounter / 2 + 1) + ".");
+                        if (!even) AppendText("..");
+                        AppendText(" ");
+                    }
+
+                    var moveInfo = simulatedGame.TryMakeMove(move, true);
+                    AppendText(moveFormatter.FormatMove(simulatedGame, move, moveInfo));
+
+                    first = false;
+                    ++plyCounter;
+                }
             }
         }
     }

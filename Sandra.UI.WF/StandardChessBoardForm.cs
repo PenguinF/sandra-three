@@ -320,7 +320,7 @@ namespace Sandra.UI.WF
                     TargetSquare = toSquare(e.Location),
                 };
 
-                var moveCheckResult = game.TryMakeMove(move, false);
+                var moveCheckResult = game.TryMakeMove(move, false).Result;
                 if (moveCheckResult.IsLegalMove())
                 {
                     if (moveCheckResult == Chess.MoveCheckResult.MissingEnPassant)
@@ -375,7 +375,7 @@ namespace Sandra.UI.WF
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
                 {
                     move.TargetSquare = square;
-                    var moveCheckResult = game.TryMakeMove(move, false);
+                    var moveCheckResult = game.TryMakeMove(move, false).Result;
                     if (moveCheckResult.IsLegalMove())
                     {
                         // Highlight each found square.
