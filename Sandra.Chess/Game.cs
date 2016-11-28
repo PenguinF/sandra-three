@@ -27,17 +27,46 @@ namespace Sandra.Chess
     /// </summary>
     public class Game
     {
+        private readonly Position initialPosition;
         private readonly Position currentPosition;
+        private readonly List<Move> moveList = new List<Move>();
 
         public Game(Position initialPosition)
         {
-            currentPosition = initialPosition;
+            this.initialPosition = initialPosition;
+            currentPosition = initialPosition.Copy();
+        }
+
+        /// <summary>
+        /// Gets the initial position of this game.
+        /// </summary>
+        public Position InitialPosition => initialPosition.Copy();
+
+        /// <summary>
+        /// Gets the current position of this game.
+        /// </summary>
+        public Position CurrentPosition => currentPosition.Copy();
+
+        /// <summary>
+        /// Returns the number of moves played after the initial position.
+        /// </summary>
+        public int MoveCount => moveList.Count;
+
+        /// <summary>
+        /// Enumerates all moves that led from the initial to the current position.
+        /// </summary>
+        public IEnumerable<Move> Moves
+        {
+            get
+            {
+                foreach (var move in moveList) yield return move;
+            }
         }
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
-        public Color SideToMove { get { return currentPosition.SideToMove; } }
+        public Color SideToMove => currentPosition.SideToMove;
 
         /// <summary>
         /// Gets the <see cref="ColoredPiece"/> which occupies a square, or null if the square is not occupied.
@@ -61,13 +90,7 @@ namespace Sandra.Chess
         /// If a pawn can be captured en passant in this position, returns the square of that pawn.
         /// Otherwise <see cref="Square.A1"/> is returned. 
         /// </summary>
-        public Square EnPassantCaptureSquare
-        {
-            get
-            {
-                return currentPosition.EnPassantCaptureVector.GetSingleSquare();
-            }
-        }
+        public Square EnPassantCaptureSquare => currentPosition.EnPassantCaptureVector.GetSingleSquare();
 
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
@@ -91,7 +114,11 @@ namespace Sandra.Chess
         public MoveCheckResult TryMakeMove(Move move, bool make)
         {
             MoveInfo moveInfo = currentPosition.TryMakeMove(move, make);
-            if (make && moveInfo.Result == MoveCheckResult.OK) RaiseMoveMade(move, moveInfo);
+            if (make && moveInfo.Result == MoveCheckResult.OK)
+            {
+                moveList.Add(move);
+                RaiseMoveMade(move, moveInfo);
+            }
             return moveInfo.Result;
         }
 
