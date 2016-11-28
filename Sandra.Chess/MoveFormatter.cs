@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Text;
+
 namespace Sandra.Chess
 {
     /// <summary>
@@ -27,15 +29,88 @@ namespace Sandra.Chess
         /// Generates a formatted notation for a move in a given position.
         /// As a side effect, the position is updated to the resulting position after the move.
         /// </summary>
-        /// <param name="positionBefore">
-        /// The position in which the move was made.
+        /// <param name="game">
+        /// The game in which the move was made.
         /// </param>
         /// <param name="move">
         /// The move to be formatted.
         /// </param>
+        /// <param name="moveInfo">
+        /// Extra move information.
+        /// </param>
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        public abstract string FormatMove(Position positionBefore, Move move);
+        public abstract string FormatMove(Game game, Move move, MoveInfo moveInfo);
+    }
+
+    /// <summary>
+    /// Move formatter which generates short algebraic notation.
+    /// </summary>
+    public sealed class ShortAlgebraicMoveFormatter : AbstractMoveFormatter
+    {
+        /// <summary>
+        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// </summary>
+        public const string IllegalMove = "???";
+
+        private static readonly EnumIndexedArray<Piece, string> pieceSymbols = EnumIndexedArray<Piece, string>.New();
+
+        static ShortAlgebraicMoveFormatter()
+        {
+            pieceSymbols[Piece.Pawn] = string.Empty;
+            pieceSymbols[Piece.Knight] = "N";
+            pieceSymbols[Piece.Bishop] = "B";
+            pieceSymbols[Piece.Rook] = "R";
+            pieceSymbols[Piece.Queen] = "Q";
+            pieceSymbols[Piece.King] = "K";
+        }
+
+        public override string FormatMove(Game game, Move move, MoveInfo moveInfo)
+        {
+            if (moveInfo.Result == MoveCheckResult.OK)
+            {
+                if (move.MoveType == MoveType.CastleQueenside)
+                {
+                    return "O-O-O";
+                }
+                else if (move.MoveType == MoveType.CastleKingside)
+                {
+                    return "O-O";
+                }
+
+                StringBuilder builder = new StringBuilder();
+
+                // Start with the moving piece.
+                builder.Append(pieceSymbols[moveInfo.MovingPiece]);
+
+                // When a pawn captures, append the file of the source square of the pawn.
+                if (moveInfo.MovingPiece == Piece.Pawn && moveInfo.IsCapture)
+                {
+                    builder.Append((char)('a' + move.SourceSquare.X()));
+                }
+
+                // Append a 'x' for capturing moves.
+                if (moveInfo.IsCapture)
+                {
+                    builder.Append("x");
+                }
+
+                // Append the target square.
+                builder.Append((char)('a' + move.TargetSquare.X()));
+                builder.Append(move.TargetSquare.Y() + 1);
+
+                // For promotion moves, append the symbol of the promotion piece.
+                if (move.MoveType == MoveType.Promotion)
+                {
+                    builder.Append("=");
+                    builder.Append(pieceSymbols[move.PromoteTo]);
+                }
+
+                return builder.ToString();
+            }
+
+            return IllegalMove;
+        }
     }
 }

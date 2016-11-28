@@ -85,6 +85,7 @@ namespace Sandra.UI.WF
                 {
                     Dock = DockStyle.Fill,
                     Game = game,
+                    MoveFormatter = new ShortAlgebraicMoveFormatter(),
                 });
                 movesForm.Visible = true;
             };

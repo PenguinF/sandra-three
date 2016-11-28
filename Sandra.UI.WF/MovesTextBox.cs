@@ -36,6 +36,49 @@ namespace Sandra.UI.WF
             AutoWordSelection = true;
         }
 
-        public Chess.Game Game;
+        private Chess.AbstractMoveFormatter moveFormatter;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Chess.AbstractMoveFormatter"/> to use for formatting the moves.
+        /// </summary>
+        public Chess.AbstractMoveFormatter MoveFormatter
+        {
+            get { return moveFormatter; }
+            set
+            {
+                if (moveFormatter != value)
+                {
+                    moveFormatter = value;
+                }
+            }
+        }
+
+        private Chess.Game game;
+
+        /// <summary>
+        /// Gets or sets the chess game which contains the moves to be formatted.
+        /// </summary>
+        public Chess.Game Game
+        {
+            get { return game; }
+            set
+            {
+                if (game != value)
+                {
+                    if (game != null) game.MoveMade -= game_MoveMade;
+                    game = value;
+                    if (game != null) game.MoveMade += game_MoveMade;
+                }
+            }
+        }
+
+        private void game_MoveMade(object sender, Chess.MoveMadeEventArgs e)
+        {
+            if (moveFormatter != null && game != null)
+            {
+                if (Text.Length > 0) AppendText(" ");
+                AppendText(moveFormatter.FormatMove(game, e.Move, e.MoveInfo));
+            }
+        }
     }
 }
