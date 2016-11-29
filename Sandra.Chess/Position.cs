@@ -344,7 +344,13 @@ namespace Sandra.Chess
 
             Debug.Assert(checkInvariants());
 
-            Move move = new Move();
+            Move move = new Move()
+            {
+                MoveType = MoveType.Default,
+                SourceSquare = moveInfo.SourceSquare,
+                TargetSquare = moveInfo.TargetSquare,
+                PromoteTo = moveInfo.PromoteTo,
+            };
 
             ulong sourceVector = moveInfo.SourceSquare.ToVector();
             ulong targetVector = moveInfo.TargetSquare.ToVector();
@@ -403,7 +409,7 @@ namespace Sandra.Chess
                     {
                         if (Constants.PromotionSquares.Test(targetVector))
                         {
-                            mandatoryMoveType(MoveType.Promotion, moveInfo.MoveType, ref move.Result);
+                            move.MoveType = MoveType.Promotion;
                             if (moveInfo.MoveType == MoveType.Promotion)
                             {
                                 if (moveInfo.PromoteTo == Piece.Pawn || moveInfo.PromoteTo == Piece.King)
@@ -415,7 +421,7 @@ namespace Sandra.Chess
                         }
                         else if (enPassantVector.Test(targetVector))
                         {
-                            mandatoryMoveType(MoveType.EnPassant, moveInfo.MoveType, ref move.Result);
+                            move.MoveType = MoveType.EnPassant;
                             // Don't capture on the target square, but capture the pawn instead.
                             captureVector = enPassantCaptureVector;
                         }
@@ -469,7 +475,7 @@ namespace Sandra.Chess
                             }
                             if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
                             {
-                                mandatoryMoveType(MoveType.CastleKingside, moveInfo.MoveType, ref move.Result);
+                                move.MoveType = MoveType.CastleKingside;
                                 if (IsSquareUnderAttack(moveInfo.SourceSquare + 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
@@ -478,7 +484,7 @@ namespace Sandra.Chess
                             }
                             else
                             {
-                                mandatoryMoveType(MoveType.CastleQueenside, moveInfo.MoveType, ref move.Result);
+                                move.MoveType = MoveType.CastleQueenside;
                                 if (IsSquareUnderAttack(moveInfo.SourceSquare - 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
@@ -492,6 +498,11 @@ namespace Sandra.Chess
                         }
                     }
                     break;
+            }
+
+            if (move.MoveType != MoveType.Default)
+            {
+                mandatoryMoveType(move.MoveType, moveInfo.MoveType, ref move.Result);
             }
 
             if (move.Result.IsLegalMove())

@@ -60,6 +60,10 @@ namespace Sandra.Chess
     public struct Move
     {
         public MoveCheckResult Result;
+        public MoveType MoveType;
+        public Square SourceSquare;
+        public Square TargetSquare;
+        public Piece PromoteTo;
         public Piece MovingPiece;
         public bool IsCapture;
     }
