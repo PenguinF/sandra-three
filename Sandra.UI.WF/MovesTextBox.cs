@@ -102,8 +102,7 @@ namespace Sandra.UI.WF
                         AppendText(" ");
                     }
 
-                    var moveInfo = simulatedGame.TryMakeMove(move, true);
-                    AppendText(moveFormatter.FormatMove(simulatedGame, move, moveInfo));
+                    AppendText(moveFormatter.FormatMove(simulatedGame, move));
 
                     first = false;
                     ++plyCounter;

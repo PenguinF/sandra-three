@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
 using System.Text;
 
 namespace Sandra.Chess
@@ -35,13 +36,10 @@ namespace Sandra.Chess
         /// <param name="move">
         /// The move to be formatted.
         /// </param>
-        /// <param name="moveInfo">
-        /// Extra move information.
-        /// </param>
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        public abstract string FormatMove(Game game, Move move, MoveInfo moveInfo);
+        public abstract string FormatMove(Game game, Move move);
     }
 
     /// <summary>
@@ -66,8 +64,9 @@ namespace Sandra.Chess
             pieceSymbols[Piece.King] = "K";
         }
 
-        public override string FormatMove(Game game, Move move, MoveInfo moveInfo)
+        public override string FormatMove(Game game, Move move)
         {
+            MoveInfo moveInfo = game.TryMakeMove(move, false);
             if (moveInfo.Result == MoveCheckResult.OK)
             {
                 if (move.MoveType == MoveType.CastleQueenside)
@@ -90,6 +89,48 @@ namespace Sandra.Chess
                     builder.Append((char)('a' + move.SourceSquare.X()));
                 }
 
+                // Disambiguate source square, not needed for pawns or kings.
+                if (moveInfo.MovingPiece != Piece.Pawn && moveInfo.MovingPiece != Piece.King)
+                {
+                    Move testMove = new Move()
+                    {
+                        TargetSquare = move.TargetSquare,
+                    };
+
+                    bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
+                    foreach (var square in EnumHelper<Square>.AllValues)
+                    {
+                        if (square != move.SourceSquare)
+                        {
+                            testMove.SourceSquare = square;
+                            MoveInfo testInfo = game.TryMakeMove(testMove, false);
+                            if (testInfo.Result.IsLegalMove() && testInfo.MovingPiece == moveInfo.MovingPiece)
+                            {
+                                ambiguous = true;
+                                fileAmbiguous |= move.SourceSquare.X() == square.X();
+                                rankAmbiguous |= move.SourceSquare.Y() == square.Y();
+                            }
+                        }
+                    }
+
+                    if (ambiguous)
+                    {
+                        // Disambiguation necessary.
+                        if (fileAmbiguous)
+                        {
+                            if (rankAmbiguous)
+                            {
+                                builder.Append((char)('a' + move.SourceSquare.X()));
+                            }
+                            builder.Append(move.SourceSquare.Y() + 1);
+                        }
+                        else
+                        {
+                            builder.Append((char)('a' + move.SourceSquare.X()));
+                        }
+                    }
+                }
+
                 // Append a 'x' for capturing moves.
                 if (moveInfo.IsCapture)
                 {
@@ -106,6 +147,8 @@ namespace Sandra.Chess
                     builder.Append("=");
                     builder.Append(pieceSymbols[move.PromoteTo]);
                 }
+
+                game.TryMakeMove(move, true);
 
                 return builder.ToString();
             }
