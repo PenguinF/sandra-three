@@ -605,6 +605,88 @@ namespace Sandra.Chess
 
             return move;
         }
+
+        /// <summary>
+        /// This method is for internal use only.
+        /// </summary>
+        /// <remarks>
+        /// This is a copy of TryMakeMove() but without the checks and with make = true.
+        /// Only use if absolutely sure that the given Move is correct, or it will leave the position in a corrupted state.
+        /// </remarks>
+        internal void FastMakeMove(Move move)
+        {
+            Debug.Assert(checkInvariants());
+
+            ulong targetVector = move.TargetSquare.ToVector();
+
+            // Remove whatever was captured.
+            if (move.IsCapture)
+            {
+                if (move.MoveType != MoveType.EnPassant)
+                {
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
+                    pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ targetVector;
+                }
+                else
+                {
+                    // Don't capture on the target square, but capture the pawn instead.
+                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ enPassantCaptureVector;
+                    pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ enPassantCaptureVector;
+                }
+            }
+
+            // Move from source to target.
+            ulong moveDelta = move.SourceSquare.ToVector() | targetVector;
+            colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+            pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
+
+            // Update en passant vectors.
+            if (move.IsPawnTwoSquaresAheadMove)
+            {
+                // If the moving piece was a pawn on its starting square and moved two steps ahead,
+                // it can be captured en passant on the next move.
+                enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
+                enPassantCaptureVector = targetVector;
+            }
+            else
+            {
+                // Reset en passant vectors.
+                enPassantVector = 0;
+                enPassantCaptureVector = 0;
+            }
+
+            if (move.MoveType == MoveType.Promotion)
+            {
+                // Change type of piece.
+                pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ targetVector;
+                pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+            }
+            else if (move.MoveType == MoveType.CastleQueenside)
+            {
+                // Move the rooks as well when castling.
+                var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
+                colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+            }
+            else if (move.MoveType == MoveType.CastleKingside)
+            {
+                // Move the rooks as well when castling.
+                var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
+                colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+            }
+
+            // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.
+            if (castlingRightsVector != 0)
+            {
+                // Revoke castling rights if kings or rooks are gone from their starting position.
+                castlingRightsVector &= ~revokedCastlingRights(moveDelta);
+            }
+
+            sideToMove = sideToMove.Opposite();
+
+            Debug.Assert(checkInvariants());
+        }
     }
 
     /// <summary>
