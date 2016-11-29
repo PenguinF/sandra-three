@@ -323,187 +323,183 @@ namespace Sandra.Chess
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
         /// </summary>
-        /// <param name="move">
+        /// <param name="moveInfo">
         /// The move to validate and optionally perform.
         /// </param>
         /// <param name="make">
         /// True if the move must actually be made, false if only validated.
         /// </param>
         /// <returns>
-        /// A <see cref="MoveInfo"/> structure with <see cref="MoveInfo.Result"/> equal to  
+        /// A <see cref="Move"/> structure with <see cref="Move.Result"/> equal to  
         /// <see cref="MoveCheckResult.OK"/> if the move was legal, otherwise one of the other <see cref="MoveCheckResult"/> values.
         /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="move"/> is null (Nothing in Visual Basic).
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public MoveInfo TryMakeMove(Move move, bool make)
+        public Move TryMakeMove(MoveInfo moveInfo, bool make)
         {
-            // Null and range checks.
-            if (move == null) throw new ArgumentNullException(nameof(move));
-            move.ThrowWhenOutOfRange();
+            // Range checks.
+            moveInfo.ThrowWhenOutOfRange();
 
             Debug.Assert(checkInvariants());
 
-            MoveInfo moveInfo = new MoveInfo();
+            Move move = new Move();
 
-            ulong sourceVector = move.SourceSquare.ToVector();
-            ulong targetVector = move.TargetSquare.ToVector();
+            ulong sourceVector = moveInfo.SourceSquare.ToVector();
+            ulong targetVector = moveInfo.TargetSquare.ToVector();
 
             ulong sideToMoveVector = colorVectors[sideToMove];
             ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
 
-            moveInfo.Result = MoveCheckResult.OK;
+            move.Result = MoveCheckResult.OK;
             if (sourceVector == targetVector)
             {
                 // Can never move to the same square.
-                moveInfo.Result |= MoveCheckResult.SourceSquareIsTargetSquare;
+                move.Result |= MoveCheckResult.SourceSquareIsTargetSquare;
             }
 
             // Obtain moving piece.
-            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out moveInfo.MovingPiece))
+            if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out move.MovingPiece))
             {
-                moveInfo.Result |= MoveCheckResult.SourceSquareIsEmpty;
+                move.Result |= MoveCheckResult.SourceSquareIsEmpty;
             }
             else if (!sideToMoveVector.Test(sourceVector))
             {
                 // Allow only SideToMove to make a move.
-                moveInfo.Result |= MoveCheckResult.NotSideToMove;
+                move.Result |= MoveCheckResult.NotSideToMove;
             }
 
             // Can only check the rest if the basics are right.
-            if (moveInfo.Result != 0)
+            if (move.Result != 0)
             {
-                return moveInfo;
+                return move;
             }
 
             if (sideToMoveVector.Test(targetVector))
             {
                 // Do not allow capture of one's own pieces.
-                moveInfo.Result |= MoveCheckResult.CannotCaptureOwnPiece;
+                move.Result |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
             // Check for illegal move types.
-            moveInfo.Result |= getIllegalMoveTypeResult(move.MoveType);
+            move.Result |= getIllegalMoveTypeResult(moveInfo.MoveType);
 
             // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
             ulong captureVector = targetVector;
 
             // Check legal target squares and specific rules depending on the moving piece.
-            switch (moveInfo.MovingPiece)
+            switch (move.MovingPiece)
             {
                 case Piece.Pawn:
                     ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
-                                              & Constants.PawnCaptures[sideToMove, move.SourceSquare];
+                                              & Constants.PawnCaptures[sideToMove, moveInfo.SourceSquare];
                     ulong legalMoveToSquares = ~occupied
-                                             & Constants.PawnMoves[sideToMove, move.SourceSquare]
-                                             & Constants.ReachableSquaresStraight(move.SourceSquare, occupied);
+                                             & Constants.PawnMoves[sideToMove, moveInfo.SourceSquare]
+                                             & Constants.ReachableSquaresStraight(moveInfo.SourceSquare, occupied);
 
                     if ((legalCaptureSquares | legalMoveToSquares).Test(targetVector))
                     {
                         if (Constants.PromotionSquares.Test(targetVector))
                         {
-                            mandatoryMoveType(MoveType.Promotion, move.MoveType, ref moveInfo.Result);
-                            if (move.MoveType == MoveType.Promotion)
+                            mandatoryMoveType(MoveType.Promotion, moveInfo.MoveType, ref move.Result);
+                            if (moveInfo.MoveType == MoveType.Promotion)
                             {
-                                if (move.PromoteTo == Piece.Pawn || move.PromoteTo == Piece.King)
+                                if (moveInfo.PromoteTo == Piece.Pawn || moveInfo.PromoteTo == Piece.King)
                                 {
                                     // Allow only 4 promote-to pieces.
-                                    moveInfo.Result |= MoveCheckResult.MissingPromotionInformation;
+                                    move.Result |= MoveCheckResult.MissingPromotionInformation;
                                 }
                             }
                         }
                         else if (enPassantVector.Test(targetVector))
                         {
-                            mandatoryMoveType(MoveType.EnPassant, move.MoveType, ref moveInfo.Result);
+                            mandatoryMoveType(MoveType.EnPassant, moveInfo.MoveType, ref move.Result);
                             // Don't capture on the target square, but capture the pawn instead.
                             captureVector = enPassantCaptureVector;
                         }
                     }
                     else
                     {
-                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                        move.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Knight:
-                    if (!Constants.KnightMoves[move.SourceSquare].Test(targetVector))
+                    if (!Constants.KnightMoves[moveInfo.SourceSquare].Test(targetVector))
                     {
-                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                        move.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Bishop:
-                    if (!Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
+                    if (!Constants.ReachableSquaresDiagonal(moveInfo.SourceSquare, occupied).Test(targetVector))
                     {
-                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                        move.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Rook:
-                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector))
+                    if (!Constants.ReachableSquaresStraight(moveInfo.SourceSquare, occupied).Test(targetVector))
                     {
-                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                        move.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Queen:
-                    if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector)
-                        && !Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
+                    if (!Constants.ReachableSquaresStraight(moveInfo.SourceSquare, occupied).Test(targetVector)
+                        && !Constants.ReachableSquaresDiagonal(moveInfo.SourceSquare, occupied).Test(targetVector))
                     {
-                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                        move.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.King:
-                    if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
+                    if (!Constants.Neighbours[moveInfo.SourceSquare].Test(targetVector))
                     {
                         // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
                         // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
                         ulong castlingTargets = castlingRightsVector
                                               & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8)
-                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)
+                                              & Constants.ReachableSquaresStraight(moveInfo.SourceSquare, occupied)
                                               & ~occupied;  // Necessary because captures are not allowed.
 
                         if (castlingTargets.Test(targetVector))
                         {
-                            if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
+                            if (IsSquareUnderAttack(moveInfo.SourceSquare, sideToMove))
                             {
                                 // Not allowed to castle out of a check.
-                                moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                move.Result |= MoveCheckResult.FriendlyKingInCheck;
                             }
                             if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
                             {
-                                mandatoryMoveType(MoveType.CastleKingside, move.MoveType, ref moveInfo.Result);
-                                if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                mandatoryMoveType(MoveType.CastleKingside, moveInfo.MoveType, ref move.Result);
+                                if (IsSquareUnderAttack(moveInfo.SourceSquare + 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
-                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
                                 }
                             }
                             else
                             {
-                                mandatoryMoveType(MoveType.CastleQueenside, move.MoveType, ref moveInfo.Result);
-                                if (IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                mandatoryMoveType(MoveType.CastleQueenside, moveInfo.MoveType, ref move.Result);
+                                if (IsSquareUnderAttack(moveInfo.SourceSquare - 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
-                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
                                 }
                             }
                         }
                         else
                         {
-                            moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
+                            move.Result |= MoveCheckResult.IllegalTargetSquare;
                         }
                     }
                     break;
             }
 
-            if (moveInfo.Result.IsLegalMove())
+            if (move.Result.IsLegalMove())
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
-                moveInfo.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
-                if (moveInfo.IsCapture)
+                move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
+                if (move.IsCapture)
                 {
                     colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
                     pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
@@ -512,7 +508,7 @@ namespace Sandra.Chess
                 // Move from source to target.
                 ulong moveDelta = sourceVector | targetVector;
                 colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
-                pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ moveDelta;
+                pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
 
                 // Find the king in the resulting position.
                 Square friendlyKing = FindKing(sideToMove);
@@ -520,41 +516,41 @@ namespace Sandra.Chess
                 // See if the friendly king is now under attack.
                 if (IsSquareUnderAttack(friendlyKing, sideToMove))
                 {
-                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
                 }
 
-                if (make && moveInfo.Result == MoveCheckResult.OK)
+                if (make && move.Result == MoveCheckResult.OK)
                 {
                     // Reset en passant vectors.
                     enPassantVector = 0;
                     enPassantCaptureVector = 0;
 
-                    if (moveInfo.MovingPiece == Piece.Pawn)
+                    if (move.MovingPiece == Piece.Pawn)
                     {
-                        if (move.MoveType == MoveType.Promotion)
+                        if (moveInfo.MoveType == MoveType.Promotion)
                         {
                             // Change type of piece.
-                            pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ targetVector;
-                            pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                            pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ targetVector;
+                            pieceVectors[moveInfo.PromoteTo] = pieceVectors[moveInfo.PromoteTo] ^ targetVector;
                         }
-                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
+                        else if (Constants.PawnTwoSquaresAhead[sideToMove, moveInfo.SourceSquare].Test(targetVector))
                         {
                             // If the moving piece was a pawn on its starting square and moved two steps ahead,
                             // it can be captured en passant on the next move.
-                            enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
+                            enPassantVector = Constants.EnPassantSquares[sideToMove, moveInfo.SourceSquare];
                             enPassantCaptureVector = targetVector;
                         }
                     }
-                    else if (moveInfo.MovingPiece == Piece.King)
+                    else if (move.MovingPiece == Piece.King)
                     {
                         // Move the rooks as well when castling.
-                        if (move.MoveType == MoveType.CastleQueenside)
+                        if (moveInfo.MoveType == MoveType.CastleQueenside)
                         {
                             var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
                             colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
                             pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                         }
-                        else if (move.MoveType == MoveType.CastleKingside)
+                        else if (moveInfo.MoveType == MoveType.CastleKingside)
                         {
                             var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
                             colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
@@ -575,8 +571,8 @@ namespace Sandra.Chess
                 {
                     // Reverse move.
                     colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
-                    pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ moveDelta;
-                    if (moveInfo.IsCapture)
+                    pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
+                    if (move.IsCapture)
                     {
                         colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
                         pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
@@ -586,12 +582,12 @@ namespace Sandra.Chess
 
             Debug.Assert(checkInvariants());
 
-            return moveInfo;
+            return move;
         }
     }
 
     /// <summary>
-    /// Enumerates all possible results of <see cref="Position.TryMakeMove(Move, bool)"/>.
+    /// Enumerates all possible results of <see cref="Position.TryMakeMove(MoveInfo, bool)"/>.
     /// </summary>
     [Flags]
     public enum MoveCheckResult

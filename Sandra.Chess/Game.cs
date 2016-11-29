@@ -29,7 +29,7 @@ namespace Sandra.Chess
     {
         private readonly Position initialPosition;
         private readonly Position currentPosition;
-        private readonly List<Move> moveList = new List<Move>();
+        private readonly List<MoveInfo> moveList = new List<MoveInfo>();
 
         public Game(Position initialPosition)
         {
@@ -55,7 +55,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all moves that led from the initial to the current position.
         /// </summary>
-        public IEnumerable<Move> Moves
+        public IEnumerable<MoveInfo> Moves
         {
             get
             {
@@ -95,32 +95,29 @@ namespace Sandra.Chess
         /// <summary>
         /// Validates a move against the current position and optionally performs it.
         /// </summary>
-        /// <param name="move">
+        /// <param name="moveInfo">
         /// The move to validate and optionally perform.
         /// </param>
         /// <param name="make">
         /// True if the move must actually be made, false if only validated.
         /// </param>
         /// <returns>
-        /// A <see cref="MoveInfo"/> structure with <see cref="MoveInfo.Result"/> equal to  
+        /// A <see cref="Move"/> structure with <see cref="Move.Result"/> equal to  
         /// <see cref="MoveCheckResult.OK"/> if the move was legal, otherwise one of the other <see cref="MoveCheckResult"/> values.
         /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="move"/> is null (Nothing in Visual Basic).
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public MoveInfo TryMakeMove(Move move, bool make)
+        public Move TryMakeMove(MoveInfo moveInfo, bool make)
         {
-            MoveInfo moveInfo = currentPosition.TryMakeMove(move, make);
-            if (make && moveInfo.Result == MoveCheckResult.OK)
+            Move move = currentPosition.TryMakeMove(moveInfo, make);
+            if (make && move.Result == MoveCheckResult.OK)
             {
-                moveList.Add(move);
-                RaiseMoveMade(move, moveInfo);
+                moveList.Add(moveInfo);
+                RaiseMoveMade(moveInfo, move);
             }
-            return moveInfo;
+            return move;
         }
 
         /// <summary>
@@ -136,7 +133,7 @@ namespace Sandra.Chess
             MoveMade?.Invoke(this, e);
         }
 
-        protected void RaiseMoveMade(Move move, MoveInfo moveInfo)
+        protected void RaiseMoveMade(MoveInfo move, Move moveInfo)
         {
             OnMoveMade(new MoveMadeEventArgs(move, moveInfo));
         }
@@ -144,10 +141,10 @@ namespace Sandra.Chess
 
     public class MoveMadeEventArgs : EventArgs
     {
-        public readonly Move Move;
-        public readonly MoveInfo MoveInfo;
+        public readonly MoveInfo Move;
+        public readonly Move MoveInfo;
 
-        public MoveMadeEventArgs(Move move, MoveInfo moveInfo)
+        public MoveMadeEventArgs(MoveInfo move, Move moveInfo)
         {
             Move = move;
             MoveInfo = moveInfo;

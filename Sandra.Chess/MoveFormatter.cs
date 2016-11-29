@@ -38,7 +38,7 @@ namespace Sandra.Chess
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        public abstract string FormatMove(Game game, Move move);
+        public abstract string FormatMove(Game game, MoveInfo move);
     }
 
     /// <summary>
@@ -63,9 +63,9 @@ namespace Sandra.Chess
             pieceSymbols[Piece.King] = "K";
         }
 
-        public override string FormatMove(Game game, Move move)
+        public override string FormatMove(Game game, MoveInfo move)
         {
-            MoveInfo moveInfo = game.TryMakeMove(move, false);
+            Move moveInfo = game.TryMakeMove(move, false);
             if (moveInfo.Result == MoveCheckResult.OK)
             {
                 if (move.MoveType == MoveType.CastleQueenside)
@@ -91,7 +91,7 @@ namespace Sandra.Chess
                 // Disambiguate source square, not needed for pawns or kings.
                 if (moveInfo.MovingPiece != Piece.Pawn && moveInfo.MovingPiece != Piece.King)
                 {
-                    Move testMove = new Move()
+                    MoveInfo testMoveInfo = new MoveInfo()
                     {
                         TargetSquare = move.TargetSquare,
                     };
@@ -101,8 +101,8 @@ namespace Sandra.Chess
                     {
                         if (square != move.SourceSquare)
                         {
-                            testMove.SourceSquare = square;
-                            MoveInfo testInfo = game.TryMakeMove(testMove, false);
+                            testMoveInfo.SourceSquare = square;
+                            Move testInfo = game.TryMakeMove(testMoveInfo, false);
                             if (testInfo.Result.IsLegalMove() && testInfo.MovingPiece == moveInfo.MovingPiece)
                             {
                                 ambiguous = true;

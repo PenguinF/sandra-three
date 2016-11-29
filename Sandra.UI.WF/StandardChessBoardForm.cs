@@ -314,13 +314,13 @@ namespace Sandra.UI.WF
             {
                 // If a legal move, display any piece about to be captured with a half-transparent effect.
                 // Also display additional effects for special moves, detectable by the returned MoveCheckResult.
-                Chess.Move move = new Chess.Move()
+                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
                     SourceSquare = toSquare(PlayingBoard.MoveStartSquare),
                     TargetSquare = toSquare(e.Location),
                 };
 
-                var moveCheckResult = game.TryMakeMove(move, false).Result;
+                var moveCheckResult = game.TryMakeMove(moveInfo, false).Result;
                 if (moveCheckResult.IsLegalMove())
                 {
                     if (moveCheckResult == Chess.MoveCheckResult.MissingEnPassant)
@@ -329,17 +329,17 @@ namespace Sandra.UI.WF
                     }
                     else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleQueenside)
                     {
-                        displayCastlingEffect(move.SourceSquare - 4, move.SourceSquare - 1);
+                        displayCastlingEffect(moveInfo.SourceSquare - 4, moveInfo.SourceSquare - 1);
                     }
                     else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleKingside)
                     {
-                        displayCastlingEffect(move.SourceSquare + 3, move.SourceSquare + 1);
+                        displayCastlingEffect(moveInfo.SourceSquare + 3, moveInfo.SourceSquare + 1);
                     }
                     else
                     {
                         if (moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
                         {
-                            displayPromoteEffect(move.TargetSquare);
+                            displayPromoteEffect(moveInfo.TargetSquare);
                         }
                         PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
                     }
@@ -367,15 +367,15 @@ namespace Sandra.UI.WF
             if (canPieceBeMoved(e.Start))
             {
                 // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
-                Chess.Move move = new Chess.Move()
+                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
                     SourceSquare = toSquare(e.Start),
                 };
 
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
                 {
-                    move.TargetSquare = square;
-                    var moveCheckResult = game.TryMakeMove(move, false).Result;
+                    moveInfo.TargetSquare = square;
+                    var moveCheckResult = game.TryMakeMove(moveInfo, false).Result;
                     if (moveCheckResult.IsLegalMove())
                     {
                         // Highlight each found square.
@@ -407,7 +407,7 @@ namespace Sandra.UI.WF
         private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
         {
             // Move piece from source to destination.
-            Chess.Move move = new Chess.Move()
+            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
             {
                 SourceSquare = toSquare(e.Start),
                 TargetSquare = toSquare(e.Target),
@@ -416,29 +416,29 @@ namespace Sandra.UI.WF
             if (currentSquareWithEnPassantEffect != null)
             {
                 // Must specify this MoveType to commit it.
-                move.MoveType = Chess.MoveType.EnPassant;
+                moveInfo.MoveType = Chess.MoveType.EnPassant;
             }
             else if (rookSquareWithCastlingEffect != null)
             {
                 if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
                 {
                     // Rook moves to the right.
-                    move.MoveType = Chess.MoveType.CastleQueenside;
+                    moveInfo.MoveType = Chess.MoveType.CastleQueenside;
                 }
                 else
                 {
-                    move.MoveType = Chess.MoveType.CastleKingside;
+                    moveInfo.MoveType = Chess.MoveType.CastleKingside;
                 }
             }
             else if (currentSquareWithPromoteEffect != null)
             {
-                move.MoveType = Chess.MoveType.Promotion;
-                move.PromoteTo = getPromoteToPiece(hoverQuadrant, game.SideToMove).GetPiece();
+                moveInfo.MoveType = Chess.MoveType.Promotion;
+                moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.SideToMove).GetPiece();
             }
 
             resetMoveEffects(e);
 
-            game.TryMakeMove(move, true);
+            game.TryMakeMove(moveInfo, true);
         }
 
         private void game_MoveMade(object sender, Chess.MoveMadeEventArgs e)
@@ -452,7 +452,7 @@ namespace Sandra.UI.WF
             resetMoveEffects(e);
         }
 
-        Chess.Move lastCommittedMove;
+        Chess.MoveInfo? lastCommittedMove;
 
         Pen lastMoveArrowPen;
 
@@ -509,8 +509,8 @@ namespace Sandra.UI.WF
             if (lastCommittedMove != null)
             {
                 drawLastMoveArrow(e.Graphics,
-                                  toSquareLocation(lastCommittedMove.SourceSquare),
-                                  toSquareLocation(lastCommittedMove.TargetSquare));
+                                  toSquareLocation(lastCommittedMove.Value.SourceSquare),
+                                  toSquareLocation(lastCommittedMove.Value.TargetSquare));
             }
 
             // Draw subtle corners just inside the edges of a legal target square.

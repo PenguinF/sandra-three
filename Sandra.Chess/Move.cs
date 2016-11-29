@@ -29,7 +29,7 @@ namespace Sandra.Chess
         CastleKingside,
     }
 
-    public class Move
+    public struct MoveInfo
     {
         public MoveType MoveType;
         public Square SourceSquare;
@@ -57,7 +57,7 @@ namespace Sandra.Chess
         }
     }
 
-    public struct MoveInfo
+    public struct Move
     {
         public MoveCheckResult Result;
         public Piece MovingPiece;
