@@ -349,7 +349,6 @@ namespace Sandra.Chess
                 MoveType = MoveType.Default,
                 SourceSquare = moveInfo.SourceSquare,
                 TargetSquare = moveInfo.TargetSquare,
-                PromoteTo = moveInfo.PromoteTo,
             };
 
             ulong sourceVector = moveInfo.SourceSquare.ToVector();
@@ -389,9 +388,6 @@ namespace Sandra.Chess
                 move.Result |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
-            // Check for illegal move types.
-            move.Result |= getIllegalMoveTypeResult(moveInfo.MoveType);
-
             // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
             ulong captureVector = targetVector;
 
@@ -416,6 +412,10 @@ namespace Sandra.Chess
                                 {
                                     // Allow only 4 promote-to pieces.
                                     move.Result |= MoveCheckResult.MissingPromotionInformation;
+                                }
+                                else
+                                {
+                                    move.PromoteTo = moveInfo.PromoteTo;
                                 }
                             }
                         }
@@ -500,6 +500,8 @@ namespace Sandra.Chess
                     break;
             }
 
+            // Check for illegal move types.
+            move.Result |= getIllegalMoveTypeResult(moveInfo.MoveType);
             if (move.MoveType != MoveType.Default)
             {
                 mandatoryMoveType(move.MoveType, moveInfo.MoveType, ref move.Result);
