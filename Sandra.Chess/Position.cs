@@ -389,9 +389,6 @@ namespace Sandra.Chess
                 moveInfo.Result |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
-            // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
-            ulong captureVector = targetVector;
-
             // Check legal target squares and specific rules depending on the moving piece.
             switch (move.MovingPiece)
             {
@@ -423,8 +420,6 @@ namespace Sandra.Chess
                         else if (enPassantVector.Test(targetVector))
                         {
                             move.MoveType = MoveType.EnPassant;
-                            // Don't capture on the target square, but capture the pawn instead.
-                            captureVector = enPassantCaptureVector;
                         }
                     }
                     else
@@ -506,8 +501,23 @@ namespace Sandra.Chess
 
             if (moveInfo.Result.IsLegalMove())
             {
+                // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
+                ulong captureVector;
+                if (move.MoveType == MoveType.EnPassant)
+                {
+                    // Don't capture on the target square, but capture the pawn instead.
+                    captureVector = enPassantCaptureVector;
+                    move.CapturedPiece = Piece.Pawn;
+                    move.IsCapture = true;
+                }
+                else
+                {
+                    // Find the possible piece on the target square.
+                    captureVector = targetVector;
+                    move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out move.CapturedPiece);
+                }
+
                 // Remove whatever was captured.
-                move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out move.CapturedPiece);
                 if (move.IsCapture)
                 {
                     colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
