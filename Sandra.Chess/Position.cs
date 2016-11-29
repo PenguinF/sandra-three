@@ -277,45 +277,47 @@ namespace Sandra.Chess
             return (moveDelta & Constants.RooksStartPositionQueenside).East().East() | (moveDelta & Constants.RooksStartPositionKingside).West();
         }
 
-        private MoveCheckResult getIllegalMoveTypeResult(MoveType moveType)
+        private void compareMoveTypes(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
         {
-            switch (moveType)
+            if (actualMoveType != expectedMoveType)
             {
-                case MoveType.Promotion:
-                    return MoveCheckResult.IllegalMoveTypePromotion;
-                case MoveType.EnPassant:
-                    return MoveCheckResult.IllegalMoveTypeEnPassant;
-                case MoveType.CastleQueenside:
-                    return MoveCheckResult.IllegalMoveTypeCastleQueenside;
-                case MoveType.CastleKingside:
-                    return MoveCheckResult.IllegalMoveTypeCastleKingside;
-            }
-            return MoveCheckResult.OK;
-        }
-
-        private void mandatoryMoveType(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
-        {
-            if (actualMoveType == expectedMoveType)
-            {
-                // Cancel out illegal move type results again.
-                moveCheckResult &= ~getIllegalMoveTypeResult(expectedMoveType);
-            }
-            else if (actualMoveType == MoveType.Default)
-            {
-                switch (expectedMoveType)
+                if (expectedMoveType == MoveType.Default || actualMoveType != MoveType.Default)
                 {
-                    case MoveType.Promotion:
-                        moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
-                        break;
-                    case MoveType.EnPassant:
-                        moveCheckResult |= MoveCheckResult.MissingEnPassant;
-                        break;
-                    case MoveType.CastleQueenside:
-                        moveCheckResult |= MoveCheckResult.MissingCastleQueenside;
-                        break;
-                    case MoveType.CastleKingside:
-                        moveCheckResult |= MoveCheckResult.MissingCastleKingside;
-                        break;
+                    // Given actualMoveType should not have been specified.
+                    switch (actualMoveType)
+                    {
+                        case MoveType.Promotion:
+                            moveCheckResult |= MoveCheckResult.IllegalMoveTypePromotion;
+                            break;
+                        case MoveType.EnPassant:
+                            moveCheckResult |= MoveCheckResult.IllegalMoveTypeEnPassant;
+                            break;
+                        case MoveType.CastleQueenside:
+                            moveCheckResult |= MoveCheckResult.IllegalMoveTypeCastleQueenside;
+                            break;
+                        case MoveType.CastleKingside:
+                            moveCheckResult |= MoveCheckResult.IllegalMoveTypeCastleKingside;
+                            break;
+                    }
+                }
+                else
+                {
+                    // Only warn that a different MoveType was expected. Not an illegal move though.
+                    switch (expectedMoveType)
+                    {
+                        case MoveType.Promotion:
+                            moveCheckResult |= MoveCheckResult.MissingPromotionInformation;
+                            break;
+                        case MoveType.EnPassant:
+                            moveCheckResult |= MoveCheckResult.MissingEnPassant;
+                            break;
+                        case MoveType.CastleQueenside:
+                            moveCheckResult |= MoveCheckResult.MissingCastleQueenside;
+                            break;
+                        case MoveType.CastleKingside:
+                            moveCheckResult |= MoveCheckResult.MissingCastleKingside;
+                            break;
+                    }
                 }
             }
         }
@@ -501,11 +503,7 @@ namespace Sandra.Chess
             }
 
             // Check for illegal move types.
-            move.Result |= getIllegalMoveTypeResult(moveInfo.MoveType);
-            if (move.MoveType != MoveType.Default)
-            {
-                mandatoryMoveType(move.MoveType, moveInfo.MoveType, ref move.Result);
-            }
+            compareMoveTypes(move.MoveType, moveInfo.MoveType, ref move.Result);
 
             if (move.Result.IsLegalMove())
             {
@@ -540,7 +538,7 @@ namespace Sandra.Chess
 
                     if (move.MovingPiece == Piece.Pawn)
                     {
-                        if (moveInfo.MoveType == MoveType.Promotion)
+                        if (move.MoveType == MoveType.Promotion)
                         {
                             // Change type of piece.
                             pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ targetVector;
@@ -557,13 +555,13 @@ namespace Sandra.Chess
                     else if (move.MovingPiece == Piece.King)
                     {
                         // Move the rooks as well when castling.
-                        if (moveInfo.MoveType == MoveType.CastleQueenside)
+                        if (move.MoveType == MoveType.CastleQueenside)
                         {
                             var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
                             colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
                             pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                         }
-                        else if (moveInfo.MoveType == MoveType.CastleKingside)
+                        else if (move.MoveType == MoveType.CastleKingside)
                         {
                             var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
                             colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
