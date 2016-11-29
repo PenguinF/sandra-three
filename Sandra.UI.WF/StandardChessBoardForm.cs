@@ -59,7 +59,6 @@ namespace Sandra.UI.WF
                     game = value;
                     if (game != null) game.MoveMade += game_MoveMade;
 
-                    lastCommittedMove = null;
                     copyPositionToBoard();
                 }
             }
@@ -447,15 +446,12 @@ namespace Sandra.UI.WF
         private void game_MoveMade(object sender, Chess.MoveMadeEventArgs e)
         {
             copyPositionToBoard();
-            lastCommittedMove = e.Move;
         }
 
         private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
         {
             resetMoveEffects(e);
         }
-
-        Chess.Move? lastCommittedMove;
 
         Pen lastMoveArrowPen;
 
@@ -509,11 +505,12 @@ namespace Sandra.UI.WF
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
             // Draw a dotted line between the centers of the squares of the last move.
-            if (lastCommittedMove != null)
+            if (game != null && game.MoveCount > 0)
             {
+                Chess.Move lastCommittedMove = game.GetMove(game.MoveCount - 1);
                 drawLastMoveArrow(e.Graphics,
-                                  toSquareLocation(lastCommittedMove.Value.SourceSquare),
-                                  toSquareLocation(lastCommittedMove.Value.TargetSquare));
+                                  toSquareLocation(lastCommittedMove.SourceSquare),
+                                  toSquareLocation(lastCommittedMove.TargetSquare));
             }
 
             // Draw subtle corners just inside the edges of a legal target square.

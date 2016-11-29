@@ -64,6 +64,11 @@ namespace Sandra.Chess
         }
 
         /// <summary>
+        /// Gets the <see cref="Move"/> at position <paramref name="moveIndex"/>.
+        /// </summary>
+        public Move GetMove(int moveIndex) => moveList[moveIndex];
+
+        /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
         public Color SideToMove => currentPosition.SideToMove;
