@@ -150,6 +150,13 @@ namespace Sandra.Chess
 
                 game.TryMakeMove(move, true);
 
+                Position current = game.CurrentPosition;
+                Square friendlyKing = (current.GetVector(current.SideToMove) & current.GetVector(Piece.King)).GetSingleSquare();
+                if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
+                {
+                    builder.Append("+");
+                }
+
                 return builder.ToString();
             }
 

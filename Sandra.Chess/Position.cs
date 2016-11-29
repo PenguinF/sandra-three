@@ -69,7 +69,7 @@ namespace Sandra.Chess
 
             // The enemy king cannot be in check.
             Square enemyKing = (colorVectors[sideToMove.Opposite()] & pieceVectors[Piece.King]).GetSingleSquare();
-            if (isSquareUnderAttack(enemyKing, sideToMove.Opposite())) return false;
+            if (IsSquareUnderAttack(enemyKing, sideToMove.Opposite())) return false;
 
             // Pawns cannot be on the back rank.
             if (pieceVectors[Piece.Pawn].Test(Constants.Rank1 | Constants.Rank8)) return false;
@@ -236,7 +236,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Returns if the given square is attacked by a piece of the opposite color.
         /// </summary>
-        private bool isSquareUnderAttack(Square square, Color defenderColor)
+        public bool IsSquareUnderAttack(Square square, Color defenderColor)
         {
             ulong attackers = colorVectors[defenderColor.Opposite()];
             ulong occupied = colorVectors[defenderColor] | attackers;
@@ -458,7 +458,7 @@ namespace Sandra.Chess
 
                         if (castlingTargets.Test(targetVector))
                         {
-                            if (isSquareUnderAttack(move.SourceSquare, sideToMove))
+                            if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
                             {
                                 // Not allowed to castle out of a check.
                                 moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
@@ -466,7 +466,7 @@ namespace Sandra.Chess
                             if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
                             {
                                 mandatoryMoveType(MoveType.CastleKingside, move.MoveType, ref moveInfo.Result);
-                                if (isSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
                                     moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
@@ -475,7 +475,7 @@ namespace Sandra.Chess
                             else
                             {
                                 mandatoryMoveType(MoveType.CastleQueenside, move.MoveType, ref moveInfo.Result);
-                                if (isSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                if (IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
                                     moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
@@ -510,7 +510,7 @@ namespace Sandra.Chess
                 Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
 
                 // See if the friendly king is now under attack.
-                if (isSquareUnderAttack(friendlyKing, sideToMove))
+                if (IsSquareUnderAttack(friendlyKing, sideToMove))
                 {
                     moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                 }
