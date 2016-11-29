@@ -507,12 +507,11 @@ namespace Sandra.Chess
             if (moveInfo.Result.IsLegalMove())
             {
                 // Remove whatever was captured.
-                Piece capturedPiece;
-                move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
+                move.IsCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out move.CapturedPiece);
                 if (move.IsCapture)
                 {
                     colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
-                    pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
+                    pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ captureVector;
                 }
 
                 // Move from source to target.
@@ -585,7 +584,7 @@ namespace Sandra.Chess
                     if (move.IsCapture)
                     {
                         colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
-                        pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
+                        pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ captureVector;
                     }
                 }
             }
