@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
 using System.Text;
 
 namespace Sandra.Chess
@@ -151,7 +150,7 @@ namespace Sandra.Chess
                 game.TryMakeMove(move, true);
 
                 Position current = game.CurrentPosition;
-                Square friendlyKing = (current.GetVector(current.SideToMove) & current.GetVector(Piece.King)).GetSingleSquare();
+                Square friendlyKing = current.FindKing(current.SideToMove);
                 if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
                 {
                     builder.Append("+");

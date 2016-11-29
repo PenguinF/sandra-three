@@ -68,7 +68,7 @@ namespace Sandra.Chess
             if (!blackKing.IsMaxOneBit()) return false;
 
             // The enemy king cannot be in check.
-            Square enemyKing = (colorVectors[sideToMove.Opposite()] & pieceVectors[Piece.King]).GetSingleSquare();
+            Square enemyKing = FindKing(sideToMove.Opposite());
             if (IsSquareUnderAttack(enemyKing, sideToMove.Opposite())) return false;
 
             // Pawns cannot be on the back rank.
@@ -255,6 +255,14 @@ namespace Sandra.Chess
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Returns the position of the king of the given color.
+        /// </summary>
+        public Square FindKing(Color color)
+        {
+            return (colorVectors[color] & pieceVectors[Piece.King]).GetSingleSquare();
         }
 
         private static ulong revokedCastlingRights(ulong moveDelta)
@@ -507,7 +515,7 @@ namespace Sandra.Chess
                 pieceVectors[moveInfo.MovingPiece] = pieceVectors[moveInfo.MovingPiece] ^ moveDelta;
 
                 // Find the king in the resulting position.
-                Square friendlyKing = (colorVectors[sideToMove] & pieceVectors[Piece.King]).GetSingleSquare();
+                Square friendlyKing = FindKing(sideToMove);
 
                 // See if the friendly king is now under attack.
                 if (IsSquareUnderAttack(friendlyKing, sideToMove))
