@@ -332,8 +332,8 @@ namespace Sandra.Chess
         /// True if the move must actually be made, false if only validated.
         /// </param>
         /// <returns>
-        /// A <see cref="Move"/> structure with <see cref="Move.Result"/> equal to  
-        /// <see cref="MoveCheckResult.OK"/> if the move was legal, otherwise one of the other <see cref="MoveCheckResult"/> values.
+        /// A valid legal <see cref="Move"/> structure if <see cref="MoveInfo.Result"/> is equal to  
+        /// <see cref="MoveCheckResult.OK"/>, or an incomplete <see cref="Move"/> if one of the other <see cref="MoveCheckResult"/> values.
         /// If <paramref name="make"/> is true, the move is only made if <see cref="MoveCheckResult.OK"/> is returned.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
@@ -356,6 +356,9 @@ namespace Sandra.Chess
             ulong sideToMoveVector = colorVectors[sideToMove];
             ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
+
+            // Reset result before returning or checking anything.
+            moveInfo.Result = MoveCheckResult.OK;
 
             if (sourceVector == targetVector)
             {
