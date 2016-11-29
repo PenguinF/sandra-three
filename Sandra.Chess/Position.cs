@@ -421,6 +421,10 @@ namespace Sandra.Chess
                         {
                             move.MoveType = MoveType.EnPassant;
                         }
+                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
+                        {
+                            move.IsPawnTwoSquaresAheadMove = true;
+                        }
                     }
                     else
                     {
@@ -540,41 +544,39 @@ namespace Sandra.Chess
 
                 if (make && moveInfo.Result == MoveCheckResult.OK)
                 {
-                    // Reset en passant vectors.
-                    enPassantVector = 0;
-                    enPassantCaptureVector = 0;
-
-                    if (move.MovingPiece == Piece.Pawn)
+                    if (move.IsPawnTwoSquaresAheadMove)
                     {
-                        if (move.MoveType == MoveType.Promotion)
-                        {
-                            // Change type of piece.
-                            pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ targetVector;
-                            pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
-                        }
-                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
-                        {
-                            // If the moving piece was a pawn on its starting square and moved two steps ahead,
-                            // it can be captured en passant on the next move.
-                            enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
-                            enPassantCaptureVector = targetVector;
-                        }
+                        // If the moving piece was a pawn on its starting square and moved two steps ahead,
+                        // it can be captured en passant on the next move.
+                        enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
+                        enPassantCaptureVector = targetVector;
                     }
-                    else if (move.MovingPiece == Piece.King)
+                    else
+                    {
+                        // Reset en passant vectors.
+                        enPassantVector = 0;
+                        enPassantCaptureVector = 0;
+                    }
+
+                    if (move.MoveType == MoveType.Promotion)
+                    {
+                        // Change type of piece.
+                        pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ targetVector;
+                        pieceVectors[move.PromoteTo] = pieceVectors[move.PromoteTo] ^ targetVector;
+                    }
+                    else if (move.MoveType == MoveType.CastleQueenside)
                     {
                         // Move the rooks as well when castling.
-                        if (move.MoveType == MoveType.CastleQueenside)
-                        {
-                            var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
-                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
-                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
-                        }
-                        else if (move.MoveType == MoveType.CastleKingside)
-                        {
-                            var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
-                            colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
-                            pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
-                        }
+                        var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
+                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                        pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
+                    }
+                    else if (move.MoveType == MoveType.CastleKingside)
+                    {
+                        // Move the rooks as well when castling.
+                        var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
+                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                        pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                     }
 
                     // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.

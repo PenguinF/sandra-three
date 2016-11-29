@@ -67,5 +67,6 @@ namespace Sandra.Chess
         public Piece MovingPiece;
         public bool IsCapture;
         public Piece CapturedPiece;
+        public bool IsPawnTwoSquaresAheadMove;
     }
 }
