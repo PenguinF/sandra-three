@@ -90,7 +90,7 @@ namespace Sandra.UI.WF
                 bool first = true;
                 int plyCounter = simulatedGame.SideToMove == Chess.Color.White ? 0 : 1;
 
-                foreach (Chess.MoveInfo move in game.Moves)
+                foreach (Chess.Move move in game.Moves)
                 {
                     if (!first) AppendText(" ");
 

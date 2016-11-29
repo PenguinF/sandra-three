@@ -29,7 +29,7 @@ namespace Sandra.Chess
     {
         private readonly Position initialPosition;
         private readonly Position currentPosition;
-        private readonly List<MoveInfo> moveList = new List<MoveInfo>();
+        private readonly List<Move> moveList = new List<Move>();
 
         public Game(Position initialPosition)
         {
@@ -55,7 +55,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all moves that led from the initial to the current position.
         /// </summary>
-        public IEnumerable<MoveInfo> Moves
+        public IEnumerable<Move> Moves
         {
             get
             {
@@ -114,8 +114,8 @@ namespace Sandra.Chess
             Move move = currentPosition.TryMakeMove(moveInfo, make);
             if (make && move.Result == MoveCheckResult.OK)
             {
-                moveList.Add(moveInfo);
-                RaiseMoveMade(moveInfo, move);
+                moveList.Add(move);
+                RaiseMoveMade(move);
             }
             return move;
         }
@@ -133,21 +133,19 @@ namespace Sandra.Chess
             MoveMade?.Invoke(this, e);
         }
 
-        protected void RaiseMoveMade(MoveInfo move, Move moveInfo)
+        protected void RaiseMoveMade(Move move)
         {
-            OnMoveMade(new MoveMadeEventArgs(move, moveInfo));
+            OnMoveMade(new MoveMadeEventArgs(move));
         }
     }
 
     public class MoveMadeEventArgs : EventArgs
     {
-        public readonly MoveInfo Move;
-        public readonly Move MoveInfo;
+        public readonly Move Move;
 
-        public MoveMadeEventArgs(MoveInfo move, Move moveInfo)
+        public MoveMadeEventArgs(Move move)
         {
             Move = move;
-            MoveInfo = moveInfo;
         }
     }
 }

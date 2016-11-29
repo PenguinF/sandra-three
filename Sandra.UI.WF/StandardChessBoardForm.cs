@@ -452,7 +452,7 @@ namespace Sandra.UI.WF
             resetMoveEffects(e);
         }
 
-        Chess.MoveInfo? lastCommittedMove;
+        Chess.Move? lastCommittedMove;
 
         Pen lastMoveArrowPen;
 
