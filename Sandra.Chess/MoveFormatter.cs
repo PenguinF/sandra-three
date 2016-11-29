@@ -65,19 +65,18 @@ namespace Sandra.Chess
 
         public override string FormatMove(Game game, Move move)
         {
-            if (move.Result == MoveCheckResult.OK)
+            StringBuilder builder = new StringBuilder();
+
+            if (move.MoveType == MoveType.CastleQueenside)
             {
-                if (move.MoveType == MoveType.CastleQueenside)
-                {
-                    return "O-O-O";
-                }
-                else if (move.MoveType == MoveType.CastleKingside)
-                {
-                    return "O-O";
-                }
-
-                StringBuilder builder = new StringBuilder();
-
+                builder.Append("O-O-O");
+            }
+            else if (move.MoveType == MoveType.CastleKingside)
+            {
+                builder.Append("O-O");
+            }
+            else
+            {
                 // Start with the moving piece.
                 builder.Append(pieceSymbols[move.MovingPiece]);
 
@@ -101,8 +100,8 @@ namespace Sandra.Chess
                         if (square != move.SourceSquare)
                         {
                             testMoveInfo.SourceSquare = square;
-                            Move testMove = game.TryMakeMove(testMoveInfo, false);
-                            if (testMove.Result.IsLegalMove() && testMove.MovingPiece == move.MovingPiece)
+                            Move testMove = game.TryMakeMove(ref testMoveInfo, false);
+                            if (testMoveInfo.Result.IsLegalMove() && testMove.MovingPiece == move.MovingPiece)
                             {
                                 ambiguous = true;
                                 fileAmbiguous |= move.SourceSquare.X() == square.X();
@@ -145,15 +144,20 @@ namespace Sandra.Chess
                     builder.Append("=");
                     builder.Append(pieceSymbols[move.PromoteTo]);
                 }
+            }
 
-                game.TryMakeMove(new MoveInfo()
-                {
-                    MoveType = move.MoveType,
-                    SourceSquare = move.SourceSquare,
-                    TargetSquare = move.TargetSquare,
-                    PromoteTo = move.PromoteTo,
-                }, true);
+            MoveInfo moveInfo = new MoveInfo()
+            {
+                MoveType = move.MoveType,
+                SourceSquare = move.SourceSquare,
+                TargetSquare = move.TargetSquare,
+                PromoteTo = move.PromoteTo,
+            };
 
+            game.TryMakeMove(ref moveInfo, true);
+
+            if (moveInfo.Result == MoveCheckResult.OK)
+            {
                 Position current = game.CurrentPosition;
                 Square friendlyKing = current.FindKing(current.SideToMove);
                 if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))

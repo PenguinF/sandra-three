@@ -339,7 +339,7 @@ namespace Sandra.Chess
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public Move TryMakeMove(MoveInfo moveInfo, bool make)
+        public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
         {
             // Range checks.
             moveInfo.ThrowWhenOutOfRange();
@@ -360,22 +360,22 @@ namespace Sandra.Chess
             if (sourceVector == targetVector)
             {
                 // Can never move to the same square.
-                move.Result |= MoveCheckResult.SourceSquareIsTargetSquare;
+                moveInfo.Result |= MoveCheckResult.SourceSquareIsTargetSquare;
             }
 
             // Obtain moving piece.
             if (!EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(sourceVector), out move.MovingPiece))
             {
-                move.Result |= MoveCheckResult.SourceSquareIsEmpty;
+                moveInfo.Result |= MoveCheckResult.SourceSquareIsEmpty;
             }
             else if (!sideToMoveVector.Test(sourceVector))
             {
                 // Allow only SideToMove to make a move.
-                move.Result |= MoveCheckResult.NotSideToMove;
+                moveInfo.Result |= MoveCheckResult.NotSideToMove;
             }
 
             // Can only check the rest if the basics are right.
-            if (move.Result != 0)
+            if (moveInfo.Result != 0)
             {
                 return move;
             }
@@ -383,7 +383,7 @@ namespace Sandra.Chess
             if (sideToMoveVector.Test(targetVector))
             {
                 // Do not allow capture of one's own pieces.
-                move.Result |= MoveCheckResult.CannotCaptureOwnPiece;
+                moveInfo.Result |= MoveCheckResult.CannotCaptureOwnPiece;
             }
 
             // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
@@ -409,7 +409,7 @@ namespace Sandra.Chess
                                 // Allow only 4 promote-to pieces.
                                 if (moveInfo.PromoteTo == Piece.Pawn || moveInfo.PromoteTo == Piece.King)
                                 {
-                                    move.Result |= MoveCheckResult.MissingPromotionInformation;
+                                    moveInfo.Result |= MoveCheckResult.MissingPromotionInformation;
                                 }
                                 else
                                 {
@@ -426,32 +426,32 @@ namespace Sandra.Chess
                     }
                     else
                     {
-                        move.Result |= MoveCheckResult.IllegalTargetSquare;
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Knight:
                     if (!Constants.KnightMoves[move.SourceSquare].Test(targetVector))
                     {
-                        move.Result |= MoveCheckResult.IllegalTargetSquare;
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Bishop:
                     if (!Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
                     {
-                        move.Result |= MoveCheckResult.IllegalTargetSquare;
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Rook:
                     if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector))
                     {
-                        move.Result |= MoveCheckResult.IllegalTargetSquare;
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.Queen:
                     if (!Constants.ReachableSquaresStraight(move.SourceSquare, occupied).Test(targetVector)
                         && !Constants.ReachableSquaresDiagonal(move.SourceSquare, occupied).Test(targetVector))
                     {
-                        move.Result |= MoveCheckResult.IllegalTargetSquare;
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
                 case Piece.King:
@@ -469,7 +469,7 @@ namespace Sandra.Chess
                             if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
                             {
                                 // Not allowed to castle out of a check.
-                                move.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                             }
                             if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
                             {
@@ -477,7 +477,7 @@ namespace Sandra.Chess
                                 if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
-                                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                                 }
                             }
                             else
@@ -486,22 +486,22 @@ namespace Sandra.Chess
                                 if (IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
                                 {
                                     // Not allowed to castle over a check.
-                                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                                 }
                             }
                         }
                         else
                         {
-                            move.Result |= MoveCheckResult.IllegalTargetSquare;
+                            moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                         }
                     }
                     break;
             }
 
             // Check for illegal move types.
-            compareMoveTypes(move.MoveType, moveInfo.MoveType, ref move.Result);
+            compareMoveTypes(move.MoveType, moveInfo.MoveType, ref moveInfo.Result);
 
-            if (move.Result.IsLegalMove())
+            if (moveInfo.Result.IsLegalMove())
             {
                 // Remove whatever was captured.
                 Piece capturedPiece;
@@ -523,10 +523,10 @@ namespace Sandra.Chess
                 // See if the friendly king is now under attack.
                 if (IsSquareUnderAttack(friendlyKing, sideToMove))
                 {
-                    move.Result |= MoveCheckResult.FriendlyKingInCheck;
+                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                 }
 
-                if (make && move.Result == MoveCheckResult.OK)
+                if (make && moveInfo.Result == MoveCheckResult.OK)
                 {
                     // Reset en passant vectors.
                     enPassantVector = 0;

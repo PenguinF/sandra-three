@@ -109,10 +109,10 @@ namespace Sandra.Chess
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when any of the move's members have an enumeration value which is outside of the allowed range.
         /// </exception>
-        public Move TryMakeMove(MoveInfo moveInfo, bool make)
+        public Move TryMakeMove(ref MoveInfo moveInfo, bool make)
         {
-            Move move = currentPosition.TryMakeMove(moveInfo, make);
-            if (make && move.Result == MoveCheckResult.OK)
+            Move move = currentPosition.TryMakeMove(ref moveInfo, make);
+            if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 moveList.Add(move);
                 RaiseMoveMade(move);

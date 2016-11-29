@@ -35,6 +35,7 @@ namespace Sandra.Chess
         public Square SourceSquare;
         public Square TargetSquare;
         public Piece PromoteTo;
+        public MoveCheckResult Result;
 
         public void ThrowWhenOutOfRange()
         {
@@ -59,7 +60,6 @@ namespace Sandra.Chess
 
     public struct Move
     {
-        public MoveCheckResult Result;
         public MoveType MoveType;
         public Square SourceSquare;
         public Square TargetSquare;
