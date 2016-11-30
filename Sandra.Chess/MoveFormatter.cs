@@ -103,6 +103,8 @@ namespace Sandra.Chess
                             Move testMove = game.TryMakeMove(ref testMoveInfo, false);
                             if (testMoveInfo.Result.IsLegalMove() && testMove.MovingPiece == move.MovingPiece)
                             {
+                                // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
+                                // For example: Nb1-d2 or Nf3-d2.
                                 ambiguous = true;
                                 fileAmbiguous |= move.SourceSquare.X() == square.X();
                                 rankAmbiguous |= move.SourceSquare.Y() == square.Y();
@@ -113,17 +115,13 @@ namespace Sandra.Chess
                     if (ambiguous)
                     {
                         // Disambiguation necessary.
-                        if (fileAmbiguous)
-                        {
-                            if (rankAmbiguous)
-                            {
-                                builder.Append((char)('a' + move.SourceSquare.X()));
-                            }
-                            builder.Append(move.SourceSquare.Y() + 1);
-                        }
-                        else
+                        if (!fileAmbiguous || rankAmbiguous)
                         {
                             builder.Append((char)('a' + move.SourceSquare.X()));
+                        }
+                        if (fileAmbiguous)
+                        {
+                            builder.Append(move.SourceSquare.Y() + 1);
                         }
                     }
                 }
