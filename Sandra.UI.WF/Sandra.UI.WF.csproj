@@ -53,6 +53,9 @@
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MovesTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>

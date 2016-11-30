@@ -1,0 +1,292 @@
+﻿/*********************************************************************************
+ * MovesTextBox.cs
+ * 
+ * Copyright (c) 2004-2016 Henk Nicolai
+ * 
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ * 
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ * 
+ *********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace Sandra.UI.WF
+{
+    /// <summary>
+    /// Represents a read-only Windows rich text box which displays a list of chess moves.
+    /// </summary>
+    public class MovesTextBox : RichTextBox
+    {
+        readonly Font regularFont = new Font("Candara", 10);
+        readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
+
+        public MovesTextBox()
+        {
+            ReadOnly = true;
+            BorderStyle = BorderStyle.None;
+            BackColor = Color.White;
+            ForeColor = Color.Black;
+            Font = regularFont;
+            AutoWordSelection = true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                regularFont.Dispose();
+                lastMoveFont.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private Chess.AbstractMoveFormatter moveFormatter;
+
+        /// <summary>
+        /// Gets or sets the <see cref="Chess.AbstractMoveFormatter"/> to use for formatting the moves.
+        /// </summary>
+        public Chess.AbstractMoveFormatter MoveFormatter
+        {
+            get { return moveFormatter; }
+            set
+            {
+                if (moveFormatter != value)
+                {
+                    moveFormatter = value;
+                    updateText();
+                }
+            }
+        }
+
+        private Chess.Game game;
+
+        /// <summary>
+        /// Gets or sets the chess game which contains the moves to be formatted.
+        /// </summary>
+        public Chess.Game Game
+        {
+            get { return game; }
+            set
+            {
+                if (game != value)
+                {
+                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
+                    game = value;
+                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
+                    updateText();
+                }
+            }
+        }
+
+        private void game_ActiveMoveIndexChanged(object sender, EventArgs e)
+        {
+            if (!updatingText)
+            {
+                updateText();
+            }
+        }
+
+        private abstract class TextElement
+        {
+            public int Start;
+            public int Length;
+            public abstract string GetText();
+
+            public sealed class Space : TextElement
+            {
+                public const string SpaceText = " ";
+                public override string GetText() => SpaceText;
+            }
+
+            public sealed class InitialBlackSideToMoveEllipsis : TextElement
+            {
+                public const string EllipsisText = "1...";
+                public override string GetText() => EllipsisText;
+            }
+
+            public sealed class MoveCounter : TextElement
+            {
+                readonly int value;
+                public override string GetText() => value + ".";
+                public MoveCounter(int value) { this.value = value; }
+            }
+
+            public sealed class FormattedMove : TextElement
+            {
+                readonly string value;
+                public override string GetText() => value;
+                public int MoveIndex;
+                public FormattedMove(string value) { this.value = value; }
+            }
+        }
+
+        private class SavedSelectionState : IDisposable
+        {
+            public MovesTextBox Owner;
+            public int SelectionStart, SelectionLength;
+
+            public void Dispose()
+            {
+                Owner.Select(SelectionStart, SelectionLength);
+            }
+        }
+
+        private SavedSelectionState savedSelection()
+        {
+            return new SavedSelectionState()
+            {
+                Owner = this,
+                SelectionStart = SelectionStart,
+                SelectionLength = SelectionLength,
+            };
+        }
+
+        private List<TextElement> elements;
+        private List<TextElement.FormattedMove> moveElements;
+        private bool updatingText;
+
+        private void updateFont(TextElement element, Font newFont)
+        {
+            Select(element.Start, element.Length);
+            SelectionFont = newFont;
+        }
+
+        private void updateText()
+        {
+            // Block OnSelectionChanged() which will be raised as a side effect of this method.
+            updatingText = true;
+            try
+            {
+                elements = null;
+                moveElements = null;
+                Clear();
+
+                if (moveFormatter != null && game != null)
+                {
+                    elements = new List<TextElement>();
+                    moveElements = new List<TextElement.FormattedMove>();
+
+                    // Simulate a game to be able to format moves correctly.
+                    Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
+
+                    foreach (Chess.Move move in game.Moves)
+                    {
+                        int plyCounter = simulatedGame.MoveCount;
+                        if (plyCounter > 0) elements.Add(new TextElement.Space());
+
+                        if (simulatedGame.InitialSideToMove == Chess.Color.Black)
+                        {
+                            if (plyCounter == 0)
+                            {
+                                elements.Add(new TextElement.InitialBlackSideToMoveEllipsis());
+                                elements.Add(new TextElement.Space());
+                            }
+                            ++plyCounter;
+                        }
+
+                        if (plyCounter % 2 == 0)
+                        {
+                            elements.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
+                            elements.Add(new TextElement.Space());
+                        }
+
+                        var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
+                        elements.Add(formattedMoveElement);
+                        formattedMoveElement.MoveIndex = moveElements.Count;
+                        moveElements.Add(formattedMoveElement);
+                    }
+
+                    elements.ForEach(element =>
+                    {
+                        element.Start = TextLength;
+                        AppendText(element.GetText());
+                        element.Length = TextLength - element.Start;
+                    });
+
+                    // Make the last move bold. This is the move before, not after ActiveMoveIndex.
+                    if (game.ActiveMoveIndex > 0)
+                    {
+                        var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                        updateFont(lastMoveElement, lastMoveFont);
+
+                        if (!ContainsFocus)
+                        {
+                            // Also update the caret so the active move is in view.
+                            Select(lastMoveElement.Start + lastMoveElement.Length, 0);
+                            ScrollToCaret();
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                updatingText = false;
+            }
+        }
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            if (!updatingText && elements != null)
+            {
+                int selectionStart = SelectionStart;
+
+                List<int> startIndexes = moveElements.Select(x => x.Start).ToList();
+
+                // Get the index of the element that contains the caret.
+                int elemIndex = startIndexes.BinarySearch(selectionStart);
+                if (elemIndex < 0) elemIndex = ~elemIndex - 1;
+
+                int newActiveMoveIndex;
+                if (elemIndex < 0)
+                {
+                    // Exceptional case to go to the initial position.
+                    newActiveMoveIndex = 0;
+                }
+                else
+                {
+                    // Go to the position after the selected move.
+                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex + 1;
+                }
+
+                // Update the active move index in the game.
+                if (game.ActiveMoveIndex != newActiveMoveIndex)
+                {
+                    updatingText = true;
+                    try
+                    {
+                        using (savedSelection())
+                        {
+                            if (game.ActiveMoveIndex > 0)
+                            {
+                                updateFont(moveElements[game.ActiveMoveIndex - 1], regularFont);
+                            }
+                            game.ActiveMoveIndex = newActiveMoveIndex;
+                            if (game.ActiveMoveIndex > 0)
+                            {
+                                updateFont(moveElements[game.ActiveMoveIndex - 1], lastMoveFont);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        updatingText = false;
+                    }
+                }
+            }
+
+            base.OnSelectionChanged(e);
+        }
+    }
+}

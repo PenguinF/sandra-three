@@ -96,6 +96,25 @@ namespace Sandra
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a copy of this array and returns it.
+        /// </summary>
+        public EnumIndexedArray<TEnum, TValue> Copy()
+        {
+            var copy = New();
+            try
+            {
+                Array.Copy(arr, copy.arr, Length);
+                return copy;
+            }
+            catch (NullReferenceException)
+            {
+                init();
+                Array.Copy(arr, copy.arr, Length);
+                return copy;
+            }
+        }
     }
 }
 
