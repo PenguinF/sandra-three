@@ -47,16 +47,39 @@ namespace Sandra.Chess
     }
 
     /// <summary>
-    /// Move formatter which generates short algebraic notation.
+    /// Common base class for <see cref="ShortAlgebraicMoveFormatter"/> and <see cref="LongAlgebraicMoveFormatter"/>. 
     /// </summary>
-    public sealed class ShortAlgebraicMoveFormatter : AbstractMoveFormatter
+    public abstract class AlgebraicMoveFormatter : AbstractMoveFormatter
     {
-        private readonly EnumIndexedArray<Piece, string> pieceSymbols;
+        protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
-        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+        public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
         {
             this.pieceSymbols = pieceSymbols;
         }
+    }
+
+    /// <summary>
+    /// Move formatter which generates long algebraic notation.
+    /// </summary>
+    public sealed class LongAlgebraicMoveFormatter : AlgebraicMoveFormatter
+    {
+        public LongAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+            : base(pieceSymbols) { }
+
+        public override string FormatMove(Game game, Move move)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Move formatter which generates short algebraic notation.
+    /// </summary>
+    public sealed class ShortAlgebraicMoveFormatter : AlgebraicMoveFormatter
+    {
+        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+            : base(pieceSymbols) { }
 
         public override string FormatMove(Game game, Move move)
         {
