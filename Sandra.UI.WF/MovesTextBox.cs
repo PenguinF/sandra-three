@@ -212,36 +212,27 @@ namespace Sandra.UI.WF
             if (!updatingText && elements != null)
             {
                 int selectionStart = SelectionStart;
-                int newActiveMoveIndex = -1;
 
-                if (moveElements.Count == 0 || selectionStart < moveElements[0].Start)
+                List<int> startIndexes = moveElements.Select(x => x.Start).ToList();
+
+                // Get the index of the element that contains the caret.
+                int elemIndex = startIndexes.BinarySearch(selectionStart);
+                if (elemIndex < 0) elemIndex = ~elemIndex - 1;
+
+                int newActiveMoveIndex;
+                if (elemIndex < 0)
                 {
                     // Exceptional case to go to the initial position.
                     newActiveMoveIndex = 0;
                 }
                 else
                 {
-                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
-
-                    // Get the index of the element after the element that contains the selection.
-                    int elemIndex = startIndexes.BinarySearch(selectionStart);
-                    if (elemIndex < 0) elemIndex = ~elemIndex;
-                    else if (elemIndex < startIndexes.Count) ++elemIndex;
-
-                    if (elemIndex > 0 && elemIndex <= startIndexes.Count)
-                    {
-                        --elemIndex;
-                        var selectedTextElement = elements[elemIndex];
-                        var formattedMoveElement = selectedTextElement as TextElement.FormattedMove;
-                        if (formattedMoveElement != null)
-                        {
-                            newActiveMoveIndex = formattedMoveElement.MoveIndex + 1;
-                        }
-                    }
+                    // Go to the position after the selected move.
+                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex + 1;
                 }
 
                 // Update the active move index in the game.
-                if (newActiveMoveIndex >= 0 && game.ActiveMoveIndex != newActiveMoveIndex)
+                if (game.ActiveMoveIndex != newActiveMoveIndex)
                 {
                     updatingText = true;
                     try
