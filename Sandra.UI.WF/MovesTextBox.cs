@@ -206,10 +206,7 @@ namespace Sandra.UI.WF
                         formattedMoveElement.MoveIndex = moveElements.Count;
                         moveElements.Add(formattedMoveElement);
                     }
-                }
 
-                if (elements != null)
-                {
                     elements.ForEach(element =>
                     {
                         element.Start = TextLength;
@@ -221,9 +218,13 @@ namespace Sandra.UI.WF
                     {
                         var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
                         updateFont(lastMoveElement, lastMoveFont);
-                        // Also update the caret so the active move is in view.
-                        Select(lastMoveElement.Start + lastMoveElement.Text.Length, 0);
-                        ScrollToCaret();
+
+                        if (!ContainsFocus)
+                        {
+                            // Also update the caret so the active move is in view.
+                            Select(lastMoveElement.Start + lastMoveElement.Text.Length, 0);
+                            ScrollToCaret();
+                        }
                     }
                 }
             }
