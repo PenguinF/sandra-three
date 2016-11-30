@@ -131,9 +131,36 @@ namespace Sandra.UI.WF
             }
         }
 
+        private class SavedSelectionState : IDisposable
+        {
+            public MovesTextBox Owner;
+            public int SelectionStart, SelectionLength;
+
+            public void Dispose()
+            {
+                Owner.Select(SelectionStart, SelectionLength);
+            }
+        }
+
+        private SavedSelectionState savedSelection()
+        {
+            return new SavedSelectionState()
+            {
+                Owner = this,
+                SelectionStart = SelectionStart,
+                SelectionLength = SelectionLength,
+            };
+        }
+
         private List<TextElement> elements;
         private List<TextElement.FormattedMove> moveElements;
         private bool updatingText;
+
+        private void updateFont(TextElement element, Font newFont)
+        {
+            Select(element.Start, element.Text.Length);
+            SelectionFont = newFont;
+        }
 
         private void updateText()
         {
@@ -193,8 +220,7 @@ namespace Sandra.UI.WF
                     if (game.ActiveMoveIndex > 0)
                     {
                         var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
-                        Select(lastMoveElement.Start, lastMoveElement.Text.Length);
-                        SelectionFont = lastMoveFont;
+                        updateFont(lastMoveElement, lastMoveFont);
                         // Also update the caret so the active move is in view.
                         Select(lastMoveElement.Text.Length, 0);
                         ScrollToCaret();
@@ -237,25 +263,18 @@ namespace Sandra.UI.WF
                     updatingText = true;
                     try
                     {
-                        var savedSelectionStart = SelectionStart;
-                        var savedSelectionLength = SelectionLength;
-
-                        if (game.ActiveMoveIndex > 0)
+                        using (savedSelection())
                         {
-                            var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
-                            Select(lastMoveElement.Start, lastMoveElement.Text.Length);
-                            SelectionFont = regularFont;
+                            if (game.ActiveMoveIndex > 0)
+                            {
+                                updateFont(moveElements[game.ActiveMoveIndex - 1], regularFont);
+                            }
+                            game.ActiveMoveIndex = newActiveMoveIndex;
+                            if (game.ActiveMoveIndex > 0)
+                            {
+                                updateFont(moveElements[game.ActiveMoveIndex - 1], lastMoveFont);
+                            }
                         }
-                        game.ActiveMoveIndex = newActiveMoveIndex;
-                        if (game.ActiveMoveIndex > 0)
-                        {
-                            var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
-                            Select(lastMoveElement.Start, lastMoveElement.Text.Length);
-                            SelectionFont = lastMoveFont;
-                        }
-
-                        SelectionStart = savedSelectionStart;
-                        SelectionLength = savedSelectionLength;
                     }
                     finally
                     {
