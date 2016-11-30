@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -79,37 +80,87 @@ namespace Sandra.UI.WF
             updateText();
         }
 
+        private abstract class TextElement
+        {
+            public int Start;
+            public abstract string Text { get; }
+
+            public sealed class Space : TextElement
+            {
+                public const string SpaceText = " ";
+                public override string Text => SpaceText;
+            }
+
+            public sealed class InitialBlackSideToMoveEllipsis : TextElement
+            {
+                public const string EllipsisText = "1...";
+                public override string Text => EllipsisText;
+            }
+
+            public sealed class MoveCounter : TextElement
+            {
+                readonly int value;
+                public override string Text => value + ".";
+                public MoveCounter(int value) { this.value = value; }
+            }
+
+            public sealed class FormattedMove : TextElement
+            {
+                readonly string value;
+                public override string Text => value;
+                public FormattedMove(string value) { this.value = value; }
+            }
+        }
+
+        private List<TextElement> elements;
+
         private void updateText()
         {
+            elements = null;
             Clear();
 
             if (moveFormatter != null && game != null)
             {
+                elements = new List<TextElement>();
+
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
 
                 foreach (Chess.Move move in game.Moves)
                 {
                     int plyCounter = simulatedGame.MoveCount;
-                    if (plyCounter > 0) AppendText(" ");
+                    if (plyCounter > 0) elements.Add(new TextElement.Space());
 
                     if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                     {
                         if (plyCounter == 0)
                         {
-                            AppendText("1... ");
+                            elements.Add(new TextElement.InitialBlackSideToMoveEllipsis());
+                            elements.Add(new TextElement.Space());
                         }
                         ++plyCounter;
                     }
 
                     if (plyCounter % 2 == 0)
                     {
-                        AppendText((plyCounter / 2 + 1).ToString());
-                        AppendText(". ");
+                        elements.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
+                        elements.Add(new TextElement.Space());
                     }
 
-                    AppendText(moveFormatter.FormatMove(simulatedGame, move));
+                    elements.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
                 }
+            }
+
+            if (elements != null)
+            {
+                int cumulativeLength = 0;
+                elements.ForEach(element =>
+                {
+                    element.Start = cumulativeLength;
+                    var text = element.Text;
+                    AppendText(text);
+                    cumulativeLength += text.Length;
+                });
             }
         }
     }
