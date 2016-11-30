@@ -146,13 +146,7 @@ namespace Sandra.Chess
                 }
             }
 
-            MoveInfo moveInfo = new MoveInfo()
-            {
-                MoveType = move.MoveType,
-                SourceSquare = move.SourceSquare,
-                TargetSquare = move.TargetSquare,
-                PromoteTo = move.PromoteTo,
-            };
+            MoveInfo moveInfo = move.CreateMoveInfo();
 
             game.TryMakeMove(ref moveInfo, true);
 

@@ -157,12 +157,21 @@ namespace Sandra.Chess
             Move move = currentPosition.TryMakeMove(ref moveInfo, make);
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
+                bool add = true;
                 if (activeMoveIndex < moveList.Count)
                 {
-                    // Erase the active move and everything after.
-                    moveList.RemoveRange(activeMoveIndex, moveList.Count - activeMoveIndex);
+                    if (moveList[activeMoveIndex].CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                    {
+                        // Moves are the same, only move forward.
+                        add = false;
+                    }
+                    else
+                    {
+                        // Erase the active move and everything after.
+                        moveList.RemoveRange(activeMoveIndex, moveList.Count - activeMoveIndex);
+                    }
                 }
-                moveList.Add(move);
+                if (add) moveList.Add(move);
                 ++activeMoveIndex;
                 RaiseActiveMoveIndexChanged();
             }

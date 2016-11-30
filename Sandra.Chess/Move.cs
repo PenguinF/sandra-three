@@ -35,7 +35,19 @@ namespace Sandra.Chess
         public Square SourceSquare;
         public Square TargetSquare;
         public Piece PromoteTo;
+
         public MoveCheckResult Result;
+
+        /// <summary>
+        /// Returns if both move info structures are equal while ignoring their results.
+        /// </summary>
+        public bool InputEquals(MoveInfo other)
+        {
+            return MoveType == other.MoveType
+                && SourceSquare == other.SourceSquare
+                && TargetSquare == other.TargetSquare
+                && PromoteTo == other.PromoteTo;
+        }
 
         public void ThrowWhenOutOfRange()
         {
@@ -64,9 +76,21 @@ namespace Sandra.Chess
         public Square SourceSquare;
         public Square TargetSquare;
         public Piece PromoteTo;
+
         public Piece MovingPiece;
         public bool IsCapture;
         public Piece CapturedPiece;
         public bool IsPawnTwoSquaresAheadMove;
+
+        public MoveInfo CreateMoveInfo()
+        {
+            return new MoveInfo()
+            {
+                MoveType = MoveType,
+                SourceSquare = SourceSquare,
+                TargetSquare = TargetSquare,
+                PromoteTo = PromoteTo,
+            };
+        }
     }
 }
