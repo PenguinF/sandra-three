@@ -57,29 +57,18 @@ namespace Sandra.Chess
         {
             this.pieceSymbols = pieceSymbols;
         }
-    }
 
-    /// <summary>
-    /// Move formatter which generates long algebraic notation.
-    /// </summary>
-    public sealed class LongAlgebraicMoveFormatter : AlgebraicMoveFormatter
-    {
-        public LongAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
-            : base(pieceSymbols) { }
-
-        public override string FormatMove(Game game, Move move)
+        protected void AppendFile(StringBuilder builder, Square square)
         {
-            throw new System.NotImplementedException();
+            builder.Append((char)('a' + square.X()));
         }
-    }
 
-    /// <summary>
-    /// Move formatter which generates short algebraic notation.
-    /// </summary>
-    public sealed class ShortAlgebraicMoveFormatter : AlgebraicMoveFormatter
-    {
-        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
-            : base(pieceSymbols) { }
+        protected void AppendRank(StringBuilder builder, Square square)
+        {
+            builder.Append(square.Y() + 1);
+        }
+
+        protected abstract void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move);
 
         public override string FormatMove(Game game, Move move)
         {
@@ -100,54 +89,8 @@ namespace Sandra.Chess
                     // Start with the moving piece.
                     builder.Append(pieceSymbols[move.MovingPiece]);
                 }
-                else
-                {
-                    // When a pawn captures, append the file of the source square of the pawn.
-                    if (move.IsCapture)
-                    {
-                        builder.Append((char)('a' + move.SourceSquare.X()));
-                    }
-                }
 
-                // Disambiguate source square, not needed for pawns or kings.
-                if (move.MovingPiece != Piece.Pawn && move.MovingPiece != Piece.King)
-                {
-                    MoveInfo testMoveInfo = new MoveInfo()
-                    {
-                        TargetSquare = move.TargetSquare,
-                    };
-
-                    bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
-                    foreach (var square in game.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.SideToMove)))
-                    {
-                        if (square != move.SourceSquare)
-                        {
-                            testMoveInfo.SourceSquare = square;
-                            game.TryMakeMove(ref testMoveInfo, false);
-                            if (testMoveInfo.Result.IsLegalMove())
-                            {
-                                // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
-                                // For example: Nb1-d2 or Nf3-d2.
-                                ambiguous = true;
-                                fileAmbiguous |= move.SourceSquare.X() == square.X();
-                                rankAmbiguous |= move.SourceSquare.Y() == square.Y();
-                            }
-                        }
-                    }
-
-                    if (ambiguous)
-                    {
-                        // Disambiguation necessary.
-                        if (!fileAmbiguous || rankAmbiguous)
-                        {
-                            builder.Append((char)('a' + move.SourceSquare.X()));
-                        }
-                        if (fileAmbiguous)
-                        {
-                            builder.Append(move.SourceSquare.Y() + 1);
-                        }
-                    }
-                }
+                AppendDisambiguatingMoveSource(builder, game, move);
 
                 // Append a 'x' for capturing moves.
                 if (move.IsCapture)
@@ -156,8 +99,8 @@ namespace Sandra.Chess
                 }
 
                 // Append the target square.
-                builder.Append((char)('a' + move.TargetSquare.X()));
-                builder.Append(move.TargetSquare.Y() + 1);
+                AppendFile(builder, move.TargetSquare);
+                AppendRank(builder, move.TargetSquare);
 
                 // For promotion moves, append the symbol of the promotion piece.
                 if (move.MoveType == MoveType.Promotion)
@@ -184,6 +127,80 @@ namespace Sandra.Chess
             }
 
             return IllegalMove;
+        }
+    }
+
+    /// <summary>
+    /// Move formatter which generates long algebraic notation.
+    /// </summary>
+    public sealed class LongAlgebraicMoveFormatter : AlgebraicMoveFormatter
+    {
+        public LongAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+            : base(pieceSymbols) { }
+
+        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Move formatter which generates short algebraic notation.
+    /// </summary>
+    public sealed class ShortAlgebraicMoveFormatter : AlgebraicMoveFormatter
+    {
+        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
+            : base(pieceSymbols) { }
+
+        protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
+        {
+            if (move.MovingPiece == Piece.Pawn)
+            {
+                if (move.IsCapture)
+                {
+                    // When a pawn captures, append the file of the source square of the pawn.
+                    AppendFile(builder, move.SourceSquare);
+                }
+            }
+            else if (move.MovingPiece != Piece.King)
+            {
+                // Disambiguate source square, not needed for pawns or kings.
+                MoveInfo testMoveInfo = new MoveInfo()
+                {
+                    TargetSquare = move.TargetSquare,
+                };
+
+                bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
+                foreach (var square in game.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.SideToMove)))
+                {
+                    if (square != move.SourceSquare)
+                    {
+                        testMoveInfo.SourceSquare = square;
+                        game.TryMakeMove(ref testMoveInfo, false);
+                        if (testMoveInfo.Result.IsLegalMove())
+                        {
+                            // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
+                            // For example: Nb1-d2 or Nf3-d2.
+                            ambiguous = true;
+                            fileAmbiguous |= move.SourceSquare.X() == square.X();
+                            rankAmbiguous |= move.SourceSquare.Y() == square.Y();
+                        }
+                    }
+                }
+
+                if (ambiguous)
+                {
+                    // Disambiguation necessary.
+                    if (!fileAmbiguous || rankAmbiguous)
+                    {
+                        AppendFile(builder, move.SourceSquare);
+                    }
+                    if (fileAmbiguous)
+                    {
+                        AppendRank(builder, move.SourceSquare);
+                    }
+                }
+            }
         }
     }
 }
