@@ -28,8 +28,13 @@ namespace Sandra.Chess
     public class Game
     {
         private readonly Position initialPosition;
-        private readonly Position currentPosition;
         private readonly List<Move> moveList = new List<Move>();
+
+        private Position currentPosition;
+
+        // Points at the index of the move which was played in the current position.
+        // Is moveList.Count if currentPosition corresponds to the end of the moves list.
+        private int activeMoveIndex;
 
         public Game(Position initialPosition)
         {
@@ -43,6 +48,11 @@ namespace Sandra.Chess
         public Position InitialPosition => initialPosition.Copy();
 
         /// <summary>
+        /// Gets the <see cref="Color"/> of the side to move in the initial position.
+        /// </summary>
+        public Color InitialSideToMove => initialPosition.SideToMove;
+
+        /// <summary>
         /// Gets the current position of this game.
         /// </summary>
         public Position CurrentPosition => currentPosition.Copy();
@@ -51,6 +61,33 @@ namespace Sandra.Chess
         /// Returns the number of moves played after the initial position.
         /// </summary>
         public int MoveCount => moveList.Count;
+
+        /// <summary>
+        /// Gets or sets the index of the active move. This is a value between 0 and <see cref="MoveCount"/>.
+        /// </summary>
+        public int ActiveMoveIndex
+        {
+            get
+            {
+                return activeMoveIndex;
+            }
+            set
+            {
+                if (value < 0 || moveList.Count < value)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                if (activeMoveIndex != value)
+                {
+                    activeMoveIndex = value;
+                    currentPosition = initialPosition.Copy();
+                    for (int i = 0; i < activeMoveIndex; ++i)
+                    {
+                        currentPosition.FastMakeMove(moveList[i]);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Enumerates all moves that led from the initial to the current position.
@@ -119,7 +156,13 @@ namespace Sandra.Chess
             Move move = currentPosition.TryMakeMove(ref moveInfo, make);
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
+                if (activeMoveIndex < moveList.Count)
+                {
+                    // Erase the active move and everything after.
+                    moveList.RemoveRange(activeMoveIndex, moveList.Count - activeMoveIndex);
+                }
                 moveList.Add(move);
+                ++activeMoveIndex;
                 RaiseMoveMade(move);
             }
             return move;
