@@ -95,13 +95,13 @@ namespace Sandra.Chess
                     };
 
                     bool ambiguous = false, fileAmbiguous = false, rankAmbiguous = false;
-                    foreach (var square in EnumHelper<Square>.AllValues)
+                    foreach (var square in game.AllSquaresOccupiedBy(move.MovingPiece.Combine(game.SideToMove)))
                     {
                         if (square != move.SourceSquare)
                         {
                             testMoveInfo.SourceSquare = square;
-                            Move testMove = game.TryMakeMove(ref testMoveInfo, false);
-                            if (testMoveInfo.Result.IsLegalMove() && testMove.MovingPiece == move.MovingPiece)
+                            game.TryMakeMove(ref testMoveInfo, false);
+                            if (testMoveInfo.Result.IsLegalMove())
                             {
                                 // ambiguous can be true while both fileAmbiguous and rankAmbiguous are false.
                                 // For example: Nb1-d2 or Nf3-d2.
