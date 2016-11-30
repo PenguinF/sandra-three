@@ -140,7 +140,14 @@ namespace Sandra.Chess
 
         protected override void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move)
         {
-            throw new System.NotImplementedException();
+            AppendFile(builder, move.SourceSquare);
+            AppendRank(builder, move.SourceSquare);
+
+            // Append a '-' for non-capturing moves.
+            if (!move.IsCapture)
+            {
+                builder.Append("-");
+            }
         }
     }
 
