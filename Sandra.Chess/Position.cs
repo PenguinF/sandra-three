@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -686,6 +687,27 @@ namespace Sandra.Chess
             sideToMove = sideToMove.Opposite();
 
             Debug.Assert(checkInvariants());
+        }
+
+        /// <summary>
+        /// Genrates and enumerates all moves which are legal in this position.
+        /// </summary>
+        public IEnumerable<MoveInfo> GenerateAllLegalMoves()
+        {
+            MoveInfo moveInfo = new MoveInfo();
+            foreach (var sourceSquare in EnumHelper<Square>.AllValues)
+            {
+                moveInfo.SourceSquare = sourceSquare;
+                foreach (var targetSquare in EnumHelper<Square>.AllValues)
+                {
+                    moveInfo.TargetSquare = targetSquare;
+                    TryMakeMove(ref moveInfo, false);
+                    if (moveInfo.Result.IsLegalMove())
+                    {
+                        yield return moveInfo;
+                    }
+                }
+            }
         }
     }
 
