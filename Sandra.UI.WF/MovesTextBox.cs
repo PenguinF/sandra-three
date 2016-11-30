@@ -27,14 +27,27 @@ namespace Sandra.UI.WF
     /// </summary>
     public class MovesTextBox : RichTextBox
     {
+        readonly Font regularFont = new Font("Candara", 10);
+        readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
+
         public MovesTextBox()
         {
             ReadOnly = true;
             BorderStyle = BorderStyle.None;
             BackColor = Color.White;
             ForeColor = Color.Black;
-            Font = new Font("Candara", 10);
+            Font = regularFont;
             AutoWordSelection = true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                regularFont.Dispose();
+                lastMoveFont.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         private Chess.AbstractMoveFormatter moveFormatter;
@@ -113,15 +126,18 @@ namespace Sandra.UI.WF
         }
 
         private List<TextElement> elements;
+        private List<TextElement.FormattedMove> moveElements;
 
         private void updateText()
         {
             elements = null;
+            moveElements = null;
             Clear();
 
             if (moveFormatter != null && game != null)
             {
                 elements = new List<TextElement>();
+                moveElements = new List<TextElement.FormattedMove>();
 
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
@@ -147,20 +163,28 @@ namespace Sandra.UI.WF
                         elements.Add(new TextElement.Space());
                     }
 
-                    elements.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
+                    var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
+                    elements.Add(formattedMoveElement);
+                    moveElements.Add(formattedMoveElement);
                 }
             }
 
             if (elements != null)
             {
-                int cumulativeLength = 0;
                 elements.ForEach(element =>
                 {
-                    element.Start = cumulativeLength;
-                    var text = element.Text;
-                    AppendText(text);
-                    cumulativeLength += text.Length;
+                    element.Start = TextLength;
+                    AppendText(element.Text);
                 });
+
+                // Make the last move bold. This is the move before, not after ActiveMoveIndex.
+                if (game.ActiveMoveIndex > 0)
+                {
+                    var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                    Select(lastMoveElement.Start, lastMoveElement.Text.Length);
+                    SelectionFont = lastMoveFont;
+                    Select(lastMoveElement.Text.Length, 0);
+                }
             }
         }
     }

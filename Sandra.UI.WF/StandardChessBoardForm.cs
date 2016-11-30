@@ -505,9 +505,9 @@ namespace Sandra.UI.WF
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
             // Draw a dotted line between the centers of the squares of the last move.
-            if (game != null && game.MoveCount > 0)
+            if (game != null && game.ActiveMoveIndex > 0)
             {
-                Chess.Move lastCommittedMove = game.GetMove(game.MoveCount - 1);
+                Chess.Move lastCommittedMove = game.GetMove(game.ActiveMoveIndex - 1);
                 drawLastMoveArrow(e.Graphics,
                                   toSquareLocation(lastCommittedMove.SourceSquare),
                                   toSquareLocation(lastCommittedMove.TargetSquare));
