@@ -222,7 +222,7 @@ namespace Sandra.UI.WF
                         var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
                         updateFont(lastMoveElement, lastMoveFont);
                         // Also update the caret so the active move is in view.
-                        Select(lastMoveElement.Text.Length, 0);
+                        Select(lastMoveElement.Start + lastMoveElement.Text.Length, 0);
                         ScrollToCaret();
                     }
                 }
