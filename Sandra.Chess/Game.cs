@@ -33,7 +33,7 @@ namespace Sandra.Chess
         private Position currentPosition;
 
         // Points at the index of the move which was played in the current position.
-        // Is moveList.Count if currentPosition corresponds to the end of the moves list.
+        // Is moveList.Count if currentPosition is at the end of the game.
         private int activeMoveIndex;
 
         public Game(Position initialPosition)
@@ -91,7 +91,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Enumerates all moves that led from the initial to the current position.
+        /// Enumerates all moves that led from the initial position to the end of the game.
         /// </summary>
         public IEnumerable<Move> Moves
         {
