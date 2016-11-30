@@ -81,11 +81,19 @@ namespace Sandra.UI.WF
                     MaximizeBox = false,
                     FormBorderStyle = FormBorderStyle.SizableToolWindow,
                 };
+
+                EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
+                englishPieceSymbols[Piece.Knight] = "N";
+                englishPieceSymbols[Piece.Bishop] = "B";
+                englishPieceSymbols[Piece.Rook] = "R";
+                englishPieceSymbols[Piece.Queen] = "Q";
+                englishPieceSymbols[Piece.King] = "K";
+
                 movesForm.Controls.Add(new MovesTextBox()
                 {
                     Dock = DockStyle.Fill,
                     Game = game,
-                    MoveFormatter = new ShortAlgebraicMoveFormatter(),
+                    MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 });
                 movesForm.Visible = true;
             };

@@ -26,8 +26,13 @@ namespace Sandra.Chess
     public abstract class AbstractMoveFormatter
     {
         /// <summary>
+        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// </summary>
+        public const string IllegalMove = "???";
+
+        /// <summary>
         /// Generates a formatted notation for a move in a given position.
-        /// As a side effect, the position is updated to the resulting position after the move.
+        /// As a side effect, the game is updated to the resulting position after the move.
         /// </summary>
         /// <param name="game">
         /// The game in which the move was made.
@@ -46,21 +51,11 @@ namespace Sandra.Chess
     /// </summary>
     public sealed class ShortAlgebraicMoveFormatter : AbstractMoveFormatter
     {
-        /// <summary>
-        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
-        /// </summary>
-        public const string IllegalMove = "???";
+        private readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
-        private static readonly EnumIndexedArray<Piece, string> pieceSymbols = EnumIndexedArray<Piece, string>.New();
-
-        static ShortAlgebraicMoveFormatter()
+        public ShortAlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
         {
-            pieceSymbols[Piece.Pawn] = string.Empty;
-            pieceSymbols[Piece.Knight] = "N";
-            pieceSymbols[Piece.Bishop] = "B";
-            pieceSymbols[Piece.Rook] = "R";
-            pieceSymbols[Piece.Queen] = "Q";
-            pieceSymbols[Piece.King] = "K";
+            this.pieceSymbols = pieceSymbols;
         }
 
         public override string FormatMove(Game game, Move move)
@@ -77,13 +72,18 @@ namespace Sandra.Chess
             }
             else
             {
-                // Start with the moving piece.
-                builder.Append(pieceSymbols[move.MovingPiece]);
-
-                // When a pawn captures, append the file of the source square of the pawn.
-                if (move.MovingPiece == Piece.Pawn && move.IsCapture)
+                if (move.MovingPiece != Piece.Pawn)
                 {
-                    builder.Append((char)('a' + move.SourceSquare.X()));
+                    // Start with the moving piece.
+                    builder.Append(pieceSymbols[move.MovingPiece]);
+                }
+                else
+                {
+                    // When a pawn captures, append the file of the source square of the pawn.
+                    if (move.IsCapture)
+                    {
+                        builder.Append((char)('a' + move.SourceSquare.X()));
+                    }
                 }
 
                 // Disambiguate source square, not needed for pawns or kings.
