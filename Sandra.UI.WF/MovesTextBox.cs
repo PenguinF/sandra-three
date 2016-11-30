@@ -16,8 +16,10 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -121,71 +123,111 @@ namespace Sandra.UI.WF
             {
                 readonly string value;
                 public override string Text => value;
+                public int FormattedMoveIndex;
                 public FormattedMove(string value) { this.value = value; }
             }
         }
 
         private List<TextElement> elements;
         private List<TextElement.FormattedMove> moveElements;
+        private bool updatingText;
 
         private void updateText()
         {
-            elements = null;
-            moveElements = null;
-            Clear();
-
-            if (moveFormatter != null && game != null)
+            // Block OnSelectionChanged() which will be raised as a side effect of this method.
+            updatingText = true;
+            try
             {
-                elements = new List<TextElement>();
-                moveElements = new List<TextElement.FormattedMove>();
+                elements = null;
+                moveElements = null;
+                Clear();
 
-                // Simulate a game to be able to format moves correctly.
-                Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
-
-                foreach (Chess.Move move in game.Moves)
+                if (moveFormatter != null && game != null)
                 {
-                    int plyCounter = simulatedGame.MoveCount;
-                    if (plyCounter > 0) elements.Add(new TextElement.Space());
+                    elements = new List<TextElement>();
+                    moveElements = new List<TextElement.FormattedMove>();
 
-                    if (simulatedGame.InitialSideToMove == Chess.Color.Black)
+                    // Simulate a game to be able to format moves correctly.
+                    Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
+
+                    foreach (Chess.Move move in game.Moves)
                     {
-                        if (plyCounter == 0)
+                        int plyCounter = simulatedGame.MoveCount;
+                        if (plyCounter > 0) elements.Add(new TextElement.Space());
+
+                        if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                         {
-                            elements.Add(new TextElement.InitialBlackSideToMoveEllipsis());
+                            if (plyCounter == 0)
+                            {
+                                elements.Add(new TextElement.InitialBlackSideToMoveEllipsis());
+                                elements.Add(new TextElement.Space());
+                            }
+                            ++plyCounter;
+                        }
+
+                        if (plyCounter % 2 == 0)
+                        {
+                            elements.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
                             elements.Add(new TextElement.Space());
                         }
-                        ++plyCounter;
-                    }
 
-                    if (plyCounter % 2 == 0)
+                        var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
+                        elements.Add(formattedMoveElement);
+                        formattedMoveElement.FormattedMoveIndex = moveElements.Count;
+                        moveElements.Add(formattedMoveElement);
+                    }
+                }
+
+                if (elements != null)
+                {
+                    elements.ForEach(element =>
                     {
-                        elements.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
-                        elements.Add(new TextElement.Space());
+                        element.Start = TextLength;
+                        AppendText(element.Text);
+                    });
+
+                    // Make the last move bold. This is the move before, not after ActiveMoveIndex.
+                    if (game.ActiveMoveIndex > 0)
+                    {
+                        var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                        Select(lastMoveElement.Start, lastMoveElement.Text.Length);
+                        SelectionFont = lastMoveFont;
+                        Select(lastMoveElement.Text.Length, 0);
                     }
-
-                    var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
-                    elements.Add(formattedMoveElement);
-                    moveElements.Add(formattedMoveElement);
                 }
             }
-
-            if (elements != null)
+            finally
             {
-                elements.ForEach(element =>
-                {
-                    element.Start = TextLength;
-                    AppendText(element.Text);
-                });
+                updatingText = false;
+            }
+        }
 
-                // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                if (game.ActiveMoveIndex > 0)
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            if (!updatingText && elements != null)
+            {
+                List<int> startIndexes = elements.Select(x => x.Start).ToList();
+                int selectionStart = SelectionStart;
+
+                // Get the index of the element after the element that contains the selection.
+                int elemIndex = startIndexes.BinarySearch(selectionStart);
+                if (elemIndex < 0) elemIndex = ~elemIndex;
+                else if (elemIndex < startIndexes.Count) ++elemIndex;
+
+                // Update the active move index in the game.
+                if (elemIndex > 0 && elemIndex <= startIndexes.Count)
                 {
-                    var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
-                    Select(lastMoveElement.Start, lastMoveElement.Text.Length);
-                    SelectionFont = lastMoveFont;
-                    Select(lastMoveElement.Text.Length, 0);
+                    --elemIndex;
+                    var selectedTextElement = elements[elemIndex];
+                    var formattedMoveElement = selectedTextElement as TextElement.FormattedMove;
+                    if (formattedMoveElement != null)
+                    {
+                        //...
+                    }
                 }
             }
+
+            base.OnSelectionChanged(e);
         }
     }
 }
