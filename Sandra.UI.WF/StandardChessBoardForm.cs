@@ -55,9 +55,9 @@ namespace Sandra.UI.WF
             {
                 if (game != value)
                 {
-                    if (game != null) game.MoveMade -= game_MoveMade;
+                    if (game != null) game.ActiveMoveIndexChanged -= game_MoveMade;
                     game = value;
-                    if (game != null) game.MoveMade += game_MoveMade;
+                    if (game != null) game.ActiveMoveIndexChanged += game_MoveMade;
 
                     copyPositionToBoard();
                 }
@@ -443,7 +443,7 @@ namespace Sandra.UI.WF
             game.TryMakeMove(ref moveInfo, true);
         }
 
-        private void game_MoveMade(object sender, Chess.MoveMadeEventArgs e)
+        private void game_MoveMade(object sender, EventArgs e)
         {
             copyPositionToBoard();
         }

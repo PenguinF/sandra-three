@@ -85,6 +85,7 @@ namespace Sandra.Chess
                     {
                         currentPosition.FastMakeMove(moveList[i]);
                     }
+                    RaiseActiveMoveIndexChanged();
                 }
             }
         }
@@ -163,37 +164,27 @@ namespace Sandra.Chess
                 }
                 moveList.Add(move);
                 ++activeMoveIndex;
-                RaiseMoveMade(move);
+                RaiseActiveMoveIndexChanged();
             }
             return move;
         }
 
         /// <summary>
-        /// Occurs when a move has been made successfully.
+        /// Occurs when the active move index of the game was updated.
         /// </summary>
-        public event EventHandler<MoveMadeEventArgs> MoveMade;
+        public event EventHandler ActiveMoveIndexChanged;
 
         /// <summary>
-        /// Raises the <see cref="MoveMade"/> event. 
+        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
         /// </summary>
-        protected virtual void OnMoveMade(MoveMadeEventArgs e)
+        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
         {
-            MoveMade?.Invoke(this, e);
+            ActiveMoveIndexChanged?.Invoke(this, e);
         }
 
-        protected void RaiseMoveMade(Move move)
+        protected void RaiseActiveMoveIndexChanged()
         {
-            OnMoveMade(new MoveMadeEventArgs(move));
-        }
-    }
-
-    public class MoveMadeEventArgs : EventArgs
-    {
-        public readonly Move Move;
-
-        public MoveMadeEventArgs(Move move)
-        {
-            Move = move;
+            OnActiveMoveIndexChanged(EventArgs.Empty);
         }
     }
 }
