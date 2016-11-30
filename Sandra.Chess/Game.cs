@@ -132,7 +132,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all squares that are occupied by the given colored piece.
         /// </summary>
-        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => CurrentPosition.GetVector(coloredPiece).AllSquares();
+        public IEnumerable<Square> AllSquaresOccupiedBy(ColoredPiece coloredPiece) => currentPosition.GetVector(coloredPiece).AllSquares();
 
         /// <summary>
         /// If a pawn can be captured en passant in this position, returns the square of that pawn.
