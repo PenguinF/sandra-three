@@ -121,8 +121,8 @@ namespace Sandra.Chess
                 Square friendlyKing = current.FindKing(current.SideToMove);
                 if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
                 {
-                    // Check or checkmate.
-                    if (current.GenerateAllLegalMoves().Any())
+                    // No need to generate castling moves since castling out of a check is illegal.
+                    if (current.GenerateLegalMoves().Any())
                     {
                         builder.Append("+");
                     }
