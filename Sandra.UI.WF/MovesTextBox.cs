@@ -82,17 +82,20 @@ namespace Sandra.UI.WF
             {
                 if (game != value)
                 {
-                    if (game != null) game.ActiveMoveIndexChanged -= game_MoveMade;
+                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
-                    if (game != null) game.ActiveMoveIndexChanged += game_MoveMade;
+                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
                     updateText();
                 }
             }
         }
 
-        private void game_MoveMade(object sender, EventArgs e)
+        private void game_ActiveMoveIndexChanged(object sender, EventArgs e)
         {
-            updateText();
+            if (!updatingText)
+            {
+                updateText();
+            }
         }
 
         private abstract class TextElement
@@ -123,7 +126,7 @@ namespace Sandra.UI.WF
             {
                 readonly string value;
                 public override string Text => value;
-                public int FormattedMoveIndex;
+                public int MoveIndex;
                 public FormattedMove(string value) { this.value = value; }
             }
         }
@@ -173,7 +176,7 @@ namespace Sandra.UI.WF
 
                         var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
                         elements.Add(formattedMoveElement);
-                        formattedMoveElement.FormattedMoveIndex = moveElements.Count;
+                        formattedMoveElement.MoveIndex = moveElements.Count;
                         moveElements.Add(formattedMoveElement);
                     }
                 }
@@ -192,7 +195,9 @@ namespace Sandra.UI.WF
                         var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
                         Select(lastMoveElement.Start, lastMoveElement.Text.Length);
                         SelectionFont = lastMoveFont;
+                        // Also update the caret so the active move is in view.
                         Select(lastMoveElement.Text.Length, 0);
+                        ScrollToCaret();
                     }
                 }
             }
@@ -206,23 +211,64 @@ namespace Sandra.UI.WF
         {
             if (!updatingText && elements != null)
             {
-                List<int> startIndexes = elements.Select(x => x.Start).ToList();
                 int selectionStart = SelectionStart;
+                int newActiveMoveIndex = -1;
 
-                // Get the index of the element after the element that contains the selection.
-                int elemIndex = startIndexes.BinarySearch(selectionStart);
-                if (elemIndex < 0) elemIndex = ~elemIndex;
-                else if (elemIndex < startIndexes.Count) ++elemIndex;
+                if (moveElements.Count == 0 || selectionStart < moveElements[0].Start)
+                {
+                    // Exceptional case to go to the initial position.
+                    newActiveMoveIndex = 0;
+                }
+                else
+                {
+                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
+
+                    // Get the index of the element after the element that contains the selection.
+                    int elemIndex = startIndexes.BinarySearch(selectionStart);
+                    if (elemIndex < 0) elemIndex = ~elemIndex;
+                    else if (elemIndex < startIndexes.Count) ++elemIndex;
+
+                    if (elemIndex > 0 && elemIndex <= startIndexes.Count)
+                    {
+                        --elemIndex;
+                        var selectedTextElement = elements[elemIndex];
+                        var formattedMoveElement = selectedTextElement as TextElement.FormattedMove;
+                        if (formattedMoveElement != null)
+                        {
+                            newActiveMoveIndex = formattedMoveElement.MoveIndex + 1;
+                        }
+                    }
+                }
 
                 // Update the active move index in the game.
-                if (elemIndex > 0 && elemIndex <= startIndexes.Count)
+                if (newActiveMoveIndex >= 0 && game.ActiveMoveIndex != newActiveMoveIndex)
                 {
-                    --elemIndex;
-                    var selectedTextElement = elements[elemIndex];
-                    var formattedMoveElement = selectedTextElement as TextElement.FormattedMove;
-                    if (formattedMoveElement != null)
+                    updatingText = true;
+                    try
                     {
-                        //...
+                        var savedSelectionStart = SelectionStart;
+                        var savedSelectionLength = SelectionLength;
+
+                        if (game.ActiveMoveIndex > 0)
+                        {
+                            var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                            Select(lastMoveElement.Start, lastMoveElement.Text.Length);
+                            SelectionFont = regularFont;
+                        }
+                        game.ActiveMoveIndex = newActiveMoveIndex;
+                        if (game.ActiveMoveIndex > 0)
+                        {
+                            var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                            Select(lastMoveElement.Start, lastMoveElement.Text.Length);
+                            SelectionFont = lastMoveFont;
+                        }
+
+                        SelectionStart = savedSelectionStart;
+                        SelectionLength = savedSelectionLength;
+                    }
+                    finally
+                    {
+                        updatingText = false;
                     }
                 }
             }
