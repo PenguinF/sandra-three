@@ -101,31 +101,32 @@ namespace Sandra.UI.WF
         private abstract class TextElement
         {
             public int Start;
-            public abstract string Text { get; }
+            public int Length;
+            public abstract string GetText();
 
             public sealed class Space : TextElement
             {
                 public const string SpaceText = " ";
-                public override string Text => SpaceText;
+                public override string GetText() => SpaceText;
             }
 
             public sealed class InitialBlackSideToMoveEllipsis : TextElement
             {
                 public const string EllipsisText = "1...";
-                public override string Text => EllipsisText;
+                public override string GetText() => EllipsisText;
             }
 
             public sealed class MoveCounter : TextElement
             {
                 readonly int value;
-                public override string Text => value + ".";
+                public override string GetText() => value + ".";
                 public MoveCounter(int value) { this.value = value; }
             }
 
             public sealed class FormattedMove : TextElement
             {
                 readonly string value;
-                public override string Text => value;
+                public override string GetText() => value;
                 public int MoveIndex;
                 public FormattedMove(string value) { this.value = value; }
             }
@@ -158,7 +159,7 @@ namespace Sandra.UI.WF
 
         private void updateFont(TextElement element, Font newFont)
         {
-            Select(element.Start, element.Text.Length);
+            Select(element.Start, element.Length);
             SelectionFont = newFont;
         }
 
@@ -210,7 +211,8 @@ namespace Sandra.UI.WF
                     elements.ForEach(element =>
                     {
                         element.Start = TextLength;
-                        AppendText(element.Text);
+                        AppendText(element.GetText());
+                        element.Length = TextLength - element.Start;
                     });
 
                     // Make the last move bold. This is the move before, not after ActiveMoveIndex.
@@ -222,7 +224,7 @@ namespace Sandra.UI.WF
                         if (!ContainsFocus)
                         {
                             // Also update the caret so the active move is in view.
-                            Select(lastMoveElement.Start + lastMoveElement.Text.Length, 0);
+                            Select(lastMoveElement.Start + lastMoveElement.Length, 0);
                             ScrollToCaret();
                         }
                     }
