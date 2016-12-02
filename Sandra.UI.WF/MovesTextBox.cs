@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
                 if (moveFormatter != value)
                 {
                     moveFormatter = value;
-                    updateText();
+                    refreshText();
                 }
             }
         }
@@ -85,7 +85,7 @@ namespace Sandra.UI.WF
                     if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
                     if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
-                    updateText();
+                    refreshText();
                 }
             }
         }
@@ -163,70 +163,142 @@ namespace Sandra.UI.WF
             SelectionFont = newFont;
         }
 
+        private List<TextElement> getUpdatedElements()
+        {
+            if (moveFormatter != null && game != null)
+            {
+                var updated = new List<TextElement>();
+
+                // Simulate a game to be able to format moves correctly.
+                Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
+
+                foreach (Chess.Move move in game.Moves)
+                {
+                    int plyCounter = simulatedGame.MoveCount;
+                    if (plyCounter > 0) updated.Add(new TextElement.Space());
+
+                    if (simulatedGame.InitialSideToMove == Chess.Color.Black)
+                    {
+                        if (plyCounter == 0)
+                        {
+                            updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
+                            updated.Add(new TextElement.Space());
+                        }
+                        ++plyCounter;
+                    }
+
+                    if (plyCounter % 2 == 0)
+                    {
+                        updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
+                        updated.Add(new TextElement.Space());
+                    }
+
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
+                }
+
+                return updated;
+            }
+
+            return null;
+        }
+
+        private void refreshText()
+        {
+            // Clear and build the entire text anew by resetting the old element lists.
+            elements = null;
+            updateText();
+        }
+
         private void updateText()
         {
             // Block OnSelectionChanged() which will be raised as a side effect of this method.
             updatingText = true;
             try
             {
-                elements = null;
-                moveElements = null;
-                Clear();
+                var updated = getUpdatedElements();
 
-                if (moveFormatter != null && game != null)
+                int existingElementCount = elements == null
+                                         ? 0
+                                         : elements.Count;
+
+                int updatedElementCount = updated == null
+                                        ? 0
+                                        : updated.Count;
+
+
+                // Instead of clearing and updating the entire textbox, compare the elements one by one.
+                int minLength = Math.Min(existingElementCount, updatedElementCount);
+                int agreeIndex = 0;
+                while (agreeIndex < minLength)
                 {
-                    elements = new List<TextElement>();
-                    moveElements = new List<TextElement.FormattedMove>();
-
-                    // Simulate a game to be able to format moves correctly.
-                    Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
-
-                    foreach (Chess.Move move in game.Moves)
+                    var existingElement = elements[agreeIndex];
+                    if (existingElement.GetText() == updated[agreeIndex].GetText())
                     {
-                        int plyCounter = simulatedGame.MoveCount;
-                        if (plyCounter > 0) elements.Add(new TextElement.Space());
+                        // Keep using the existing element so no derived information gets lost.
+                        updated[agreeIndex] = existingElement;
+                        ++agreeIndex;
+                    }
+                    else
+                    {
+                        // agreeIndex is now at the first index where both element lists disagree.
+                        break;
+                    }
+                }
 
-                        if (simulatedGame.InitialSideToMove == Chess.Color.Black)
-                        {
-                            if (plyCounter == 0)
-                            {
-                                elements.Add(new TextElement.InitialBlackSideToMoveEllipsis());
-                                elements.Add(new TextElement.Space());
-                            }
-                            ++plyCounter;
-                        }
+                if (agreeIndex < existingElementCount)
+                {
+                    // Clear existing tail part.
+                    int startDisagree = elements[agreeIndex].Start;
+                    Select(startDisagree, TextLength - startDisagree);
+                    // This only works if not read-only, so temporarily turn it off.
+                    ReadOnly = false;
+                    SelectedText = string.Empty;
+                    ReadOnly = true;
+                }
 
-                        if (plyCounter % 2 == 0)
-                        {
-                            elements.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
-                            elements.Add(new TextElement.Space());
-                        }
+                // Append new element texts.
+                while (agreeIndex < updatedElementCount)
+                {
+                    var updatedElement = updated[agreeIndex];
+                    updatedElement.Start = TextLength;
+                    AppendText(updatedElement.GetText());
+                    updatedElement.Length = TextLength - updatedElement.Start;
+                    ++agreeIndex;
+                }
 
-                        var formattedMoveElement = new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move));
-                        elements.Add(formattedMoveElement);
+                elements = updated;
+
+                // Reset all markup.
+                SelectAll();
+                SelectionFont = regularFont;
+
+                // Update moveElements as well.
+                if (elements == null)
+                {
+                    moveElements = null;
+                }
+                else
+                {
+                    moveElements = new List<TextElement.FormattedMove>();
+                    foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                    {
                         formattedMoveElement.MoveIndex = moveElements.Count;
                         moveElements.Add(formattedMoveElement);
                     }
+                }
 
-                    elements.ForEach(element =>
-                    {
-                        element.Start = TextLength;
-                        AppendText(element.GetText());
-                        element.Length = TextLength - element.Start;
-                    });
-
+                // elementLists.Elements can only be non-null if game is non-null as well.
+                if (elements != null && game.ActiveMoveIndex > 0)
+                {
                     // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                    if (game.ActiveMoveIndex > 0)
-                    {
-                        var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
-                        updateFont(lastMoveElement, lastMoveFont);
+                    var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                    updateFont(lastMoveElement, lastMoveFont);
 
-                        if (!ContainsFocus)
-                        {
-                            // Also update the caret so the active move is in view.
-                            Select(lastMoveElement.Start + lastMoveElement.Length, 0);
-                            ScrollToCaret();
-                        }
+                    if (!ContainsFocus)
+                    {
+                        // Also update the caret so the active move is in view.
+                        Select(lastMoveElement.Start + lastMoveElement.Length, 0);
+                        ScrollToCaret();
                     }
                 }
             }

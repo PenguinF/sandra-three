@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -684,6 +685,131 @@ namespace Sandra.Chess
             }
 
             sideToMove = sideToMove.Opposite();
+
+            Debug.Assert(checkInvariants());
+        }
+
+        /// <summary>
+        /// Genrates and enumerates all non-castling moves which are legal in this position.
+        /// </summary>
+        public IEnumerable<MoveInfo> GenerateLegalMoves()
+        {
+            Debug.Assert(checkInvariants());
+
+            ulong sideToMoveVector = colorVectors[sideToMove];
+            ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
+            ulong occupied = sideToMoveVector | oppositeColorVector;
+
+            foreach (var movingPiece in EnumHelper<Piece>.AllValues)
+            {
+                // Enumerate over all squares occupied by this piece.
+                ulong coloredPieceVector = pieceVectors[movingPiece] & colorVectors[sideToMove];
+                foreach (var sourceSquare in coloredPieceVector.AllSquares())
+                {
+                    // Initialize possible target squares of the moving piece.
+                    ulong targetSquares = 0;
+                    switch (movingPiece)
+                    {
+                        case Piece.Pawn:
+                            ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
+                                                      & Constants.PawnCaptures[sideToMove, sourceSquare];
+                            ulong legalMoveToSquares = ~occupied
+                                                     & Constants.PawnMoves[sideToMove, sourceSquare]
+                                                     & Constants.ReachableSquaresStraight(sourceSquare, occupied);
+
+                            targetSquares = legalCaptureSquares | legalMoveToSquares;
+                            break;
+                        case Piece.Knight:
+                            targetSquares = Constants.KnightMoves[sourceSquare];
+                            break;
+                        case Piece.Bishop:
+                            targetSquares = Constants.ReachableSquaresDiagonal(sourceSquare, occupied);
+                            break;
+                        case Piece.Rook:
+                            targetSquares = Constants.ReachableSquaresStraight(sourceSquare, occupied);
+                            break;
+                        case Piece.Queen:
+                            targetSquares = Constants.ReachableSquaresStraight(sourceSquare, occupied)
+                                          | Constants.ReachableSquaresDiagonal(sourceSquare, occupied);
+                            break;
+                        case Piece.King:
+                            targetSquares = Constants.Neighbours[sourceSquare];
+                            break;
+                    }
+
+                    // Can never capture one's own pieces. This also filters out targetSquare == sourceSquare.
+                    targetSquares &= ~sideToMoveVector;
+
+                    foreach (var targetSquare in targetSquares.AllSquares())
+                    {
+                        // Reset/initialize move.
+                        MoveInfo move = new MoveInfo();
+
+                        ulong targetVector = targetSquare.ToVector();
+
+                        // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
+                        bool isCapture = false;
+                        Piece capturedPiece = default(Piece);
+                        ulong captureVector;
+                        if (movingPiece == Piece.Pawn && enPassantVector.Test(targetVector))
+                        {
+                            // Don't capture on the target square, but capture the pawn instead.
+                            move.MoveType = MoveType.EnPassant;
+                            captureVector = enPassantCaptureVector;
+                            capturedPiece = Piece.Pawn;
+                            isCapture = true;
+                        }
+                        else
+                        {
+                            // Find the possible piece on the target square.
+                            captureVector = targetVector;
+                            isCapture = EnumHelper<Piece>.AllValues.Any(x => pieceVectors[x].Test(captureVector), out capturedPiece);
+                        }
+
+                        // Remove whatever was captured.
+                        if (isCapture)
+                        {
+                            colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                            pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
+                        }
+
+                        // Move from source to target.
+                        ulong moveDelta = sourceSquare.ToVector() | targetVector;
+                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                        pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
+
+                        // See if the friendly king is now under attack.
+                        bool kingInCheck = IsSquareUnderAttack(FindKing(sideToMove), sideToMove);
+
+                        // Move must be reversed before continuing.
+                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                        pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
+                        if (isCapture)
+                        {
+                            colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                            pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
+                        }
+
+                        if (!kingInCheck)
+                        {
+                            move.SourceSquare = sourceSquare;
+                            move.TargetSquare = targetSquare;
+                            if (movingPiece == Piece.Pawn && Constants.PromotionSquares.Test(targetVector))
+                            {
+                                move.MoveType = MoveType.Promotion;
+                                move.PromoteTo = Piece.Knight; yield return move;
+                                move.PromoteTo = Piece.Bishop; yield return move;
+                                move.PromoteTo = Piece.Rook; yield return move;
+                                move.PromoteTo = Piece.Queen; yield return move;
+                            }
+                            else
+                            {
+                                yield return move;
+                            }
+                        }
+                    }
+                }
+            }
 
             Debug.Assert(checkInvariants());
         }

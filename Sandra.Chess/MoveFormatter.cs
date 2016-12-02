@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Linq;
 using System.Text;
 
 namespace Sandra.Chess
@@ -120,7 +121,15 @@ namespace Sandra.Chess
                 Square friendlyKing = current.FindKing(current.SideToMove);
                 if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
                 {
-                    builder.Append("+");
+                    // No need to generate castling moves since castling out of a check is illegal.
+                    if (current.GenerateLegalMoves().Any())
+                    {
+                        builder.Append("+");
+                    }
+                    else
+                    {
+                        builder.Append("#");
+                    }
                 }
 
                 return builder.ToString();
