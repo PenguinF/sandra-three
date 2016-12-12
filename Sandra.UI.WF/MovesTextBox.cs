@@ -27,7 +27,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public class MovesTextBox : RichTextBox
+    public class MovesTextBox : UpdatableRichTextBox
     {
         readonly Font regularFont = new Font("Candara", 10);
         readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
@@ -213,6 +213,7 @@ namespace Sandra.UI.WF
         {
             // Block OnSelectionChanged() which will be raised as a side effect of this method.
             updatingText = true;
+            BeginUpdate();
             try
             {
                 var updated = getUpdatedElements();
@@ -304,6 +305,7 @@ namespace Sandra.UI.WF
             }
             finally
             {
+                EndUpdate();
                 updatingText = false;
             }
         }
@@ -336,6 +338,7 @@ namespace Sandra.UI.WF
                 if (game.ActiveMoveIndex != newActiveMoveIndex)
                 {
                     updatingText = true;
+                    BeginUpdate();
                     try
                     {
                         using (savedSelection())
@@ -353,6 +356,7 @@ namespace Sandra.UI.WF
                     }
                     finally
                     {
+                        EndUpdate();
                         updatingText = false;
                     }
                 }
