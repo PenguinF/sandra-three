@@ -95,7 +95,7 @@ namespace System.Linq
         /// Returns the found element if true was returned, otherwise a default value.
         /// </param>
         /// <returns>
-        /// true if any elements in the source sequence pass the test in the specified predicate, otherwise false.
+        /// true if the source sequence contains an element, otherwise false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null (Nothing in Visual Basic).
