@@ -672,7 +672,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Genrates and enumerates all non-castling moves which are legal in this position.
+        /// Generates and enumerates all non-castling moves which are legal in this position.
         /// </summary>
         public IEnumerable<MoveInfo> GenerateLegalMoves()
         {
