@@ -92,71 +92,51 @@ namespace Sandra
         /// <summary>
         /// Returns the opposite of a given <see cref="Color"/>.
         /// </summary>
-        public static Color Opposite(this Color color)
-        {
-            return 1 - color;
-        }
+        public static Color Opposite(this Color color) => 1 - color;
 
         /// <summary>
         /// Returns the <see cref="Color"/> of a given piece.
         /// </summary>
         public static Color GetColor(this ColoredPiece coloredPiece)
-        {
-            return (Color)((int)coloredPiece / Constants.PieceCount);
-        }
+            => (Color)((int)coloredPiece / Constants.PieceCount);
 
         /// <summary>
         /// Returns the <see cref="Piece"/> part of a given colored piece.
         /// </summary>
         public static Piece GetPiece(this ColoredPiece coloredPiece)
-        {
-            return (Piece)((int)coloredPiece % Constants.PieceCount);
-        }
+            => (Piece)((int)coloredPiece % Constants.PieceCount);
 
         /// <summary>
         /// Returns the colored piece combination of a piece and a color.
         /// </summary>
         public static ColoredPiece Combine(this Piece piece, Color color)
-        {
-            return (ColoredPiece)((int)color * Constants.PieceCount + piece);
-        }
+            => (ColoredPiece)((int)color * Constants.PieceCount + piece);
 
         /// <summary>
         /// Returns the square at the position specified by the file and rank.
         /// </summary>
         public static Square Combine(this File file, Rank rank)
-        {
-            return (Square)((int)rank * Constants.SquareCount + file);
-        }
+            => (Square)((int)rank * Constants.SquareCount + file);
 
         /// <summary>
-        /// Returns the X-coordinate of a non-empty square.
+        /// Returns the X-coordinate of a square.
         /// </summary>
-        public static int X(this Square square)
-        {
-            return (int)square % Constants.SquareCount;
-        }
+        public static int X(this Square square) => (int)square % Constants.SquareCount;
 
         /// <summary>
-        /// Returns the Y-coordinate of a non-empty square.
+        /// Returns the Y-coordinate of a square.
         /// </summary>
-        public static int Y(this Square square)
-        {
-            return (int)square / Constants.SquareCount;
-        }
+        public static int Y(this Square square) => (int)square / Constants.SquareCount;
 
         /// <summary>
-        /// Returns a bitfield which is true only at the given square.
+        /// Returns a vector which is true only at the given square.
         /// </summary>
-        public static ulong ToVector(this Square square)
-        {
-            return 1UL << (int)square;
-        }
+        public static ulong ToVector(this Square square) => 1UL << (int)square;
 
         /// <summary>
-        /// Gets the index of the single bit of the bitfield, or an undefined value if the number of set bits in the bitfield is not equal to one.
+        /// Gets the index of the single bit of the vector, or an undefined value if the number of set bits in the vector is not equal to one.
         /// </summary>
-        public static int GetSingleBitIndex(this ulong oneBit)
+        public static int GetSingleBitIndex(this ulong oneBitVector)
         {
             // Constant masks.
             const ulong m1 = 0x5555555555555555;  // 010101010101...
@@ -168,102 +148,72 @@ namespace Sandra
 
             // Calculate the index of the single set bit by testing it against several predefined constants.
             // This index is built as a binary value.
-            int index = ((oneBit & m32) == 0 ? 32 : 0) |
-                        ((oneBit & m16) == 0 ? 16 : 0) |
-                        ((oneBit & m8) == 0 ? 8 : 0) |
-                        ((oneBit & m4) == 0 ? 4 : 0) |
-                        ((oneBit & m2) == 0 ? 2 : 0) |
-                        ((oneBit & m1) == 0 ? 1 : 0);
+            int index = ((oneBitVector & m32) == 0 ? 32 : 0) |
+                        ((oneBitVector & m16) == 0 ? 16 : 0) |
+                        ((oneBitVector & m8) == 0 ? 8 : 0) |
+                        ((oneBitVector & m4) == 0 ? 4 : 0) |
+                        ((oneBitVector & m2) == 0 ? 2 : 0) |
+                        ((oneBitVector & m1) == 0 ? 1 : 0);
 
             return index;
         }
 
         /// <summary>
-        /// Enumerates all indices for which the corresponding bit in the value is true.
+        /// Enumerates all indices for which the corresponding bit in the vector is true.
         /// </summary>
-        public static IEnumerable<int> Indices(this ulong bitVector64)
+        public static IEnumerable<int> Indices(this ulong vector)
         {
-            // Don't enumerate on indices, but use a specialized algorithm to 'magically' get the lowest 1 index from the current bitfield value.
-            while (bitVector64 != 0)
+            while (vector != 0)
             {
-                // Select the least significant 1-bit using a trick.
-                ulong oneBit = bitVector64 & (0U - bitVector64);
+                // Select the least significant 1-bit using a well known trick.
+                ulong oneBit = vector & (0U - vector);
                 yield return GetSingleBitIndex(oneBit);
 
                 // Zero the least significant 1-bit so the index of the next 1-bit can be yielded.
-                bitVector64 ^= oneBit;
+                vector ^= oneBit;
             }
         }
 
         /// <summary>
-        /// Gets the single square for which this bitfield is set, or an undefined value if the number of squares in the bitfield is not equal to one.
+        /// Gets the single square for which this vector is set, or an undefined value if the number of squares in the vector is not equal to one.
         /// </summary>
-        public static Square GetSingleSquare(this ulong oneBit)
-        {
-            return (Square)GetSingleBitIndex(oneBit);
-        }
+        public static Square GetSingleSquare(this ulong oneBitVector) => (Square)GetSingleBitIndex(oneBitVector);
 
         /// <summary>
-        /// Enumerates all squares for which this bitfield is set.
+        /// Enumerates all squares for which this vector is set.
         /// </summary>
-        public static IEnumerable<Square> AllSquares(this ulong bitVector64)
+        public static IEnumerable<Square> AllSquares(this ulong vector)
         {
-            foreach (var index in bitVector64.Indices())
+            foreach (var index in vector.Indices())
             {
                 yield return ((Square)index);
             }
         }
 
         /// <summary>
-        /// Tests if a bitfield has any set bits.
+        /// Tests if a vector has any set bits.
         /// </summary>
-        public static bool Test(this ulong bitVector64)
-        {
-            return bitVector64 != 0;
-        }
+        public static bool Test(this ulong vector) => vector != 0;
 
         /// <summary>
-        /// Tests if a bitfield is equal to zero or a power of two, i.e. is true for zero or one bits exactly.
+        /// Tests if a vector is equal to zero or a power of two, i.e. is true for zero or one bits exactly.
         /// </summary>
-        public static bool IsMaxOneBit(this ulong bitVector64)
-        {
-            return !bitVector64.Test(bitVector64 - 1);
-        }
+        public static bool IsMaxOneBit(this ulong vector) => !vector.Test(vector - 1);
 
         /// <summary>
-        /// Tests if another bitfield has any bits in common with this one.
+        /// Tests if another vector has any bits in common with this one.
         /// </summary>
-        public static bool Test(this ulong bitVector64, ulong otherVector)
-        {
-            return (bitVector64 & otherVector) != 0;
-        }
+        public static bool Test(this ulong vector, ulong otherVector) => (vector & otherVector) != 0;
 
         /// <summary>
         /// Returns if the given <see cref="MoveCheckResult"/> represents a legal move, even if that move is incomplete.
         /// </summary>
         public static bool IsLegalMove(this MoveCheckResult moveCheckResult)
-        {
-            return (moveCheckResult & MoveCheckResult.IllegalMove) == MoveCheckResult.OK;
-        }
+            => (moveCheckResult & MoveCheckResult.IllegalMove) == MoveCheckResult.OK;
 
-        public static ulong North(this ulong bitVector64)
-        {
-            return (bitVector64 & ~Constants.Rank8) << 8;
-        }
-
-        public static ulong South(this ulong bitVector64)
-        {
-            return (bitVector64 & ~Constants.Rank1) >> 8;
-        }
-
-        public static ulong East(this ulong bitVector64)
-        {
-            return (bitVector64 & ~Constants.FileH) << 1;
-        }
-
-        public static ulong West(this ulong bitVector64)
-        {
-            return (bitVector64 & ~Constants.FileA) >> 1;
-        }
+        public static ulong North(this ulong vector) => (vector & ~Constants.Rank8) << 8;
+        public static ulong South(this ulong vector) => (vector & ~Constants.Rank1) >> 8;
+        public static ulong East(this ulong vector) => (vector & ~Constants.FileH) << 1;
+        public static ulong West(this ulong vector) => (vector & ~Constants.FileA) >> 1;
     }
 }

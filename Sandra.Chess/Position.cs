@@ -36,6 +36,8 @@ namespace Sandra.Chess
         private ulong enPassantCaptureVector;
         private ulong castlingRightsVector;
 
+        private Position() { }
+
         private bool checkInvariants()
         {
             // Disjunct colors.
@@ -137,57 +139,35 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
-        public Color SideToMove { get { return sideToMove; } }
+        public Color SideToMove => sideToMove;
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given color.
+        /// Gets a vector which is true for all squares that contain the given color.
         /// </summary>
-        public ulong GetVector(Color color)
-        {
-            return colorVectors[color];
-        }
+        public ulong GetVector(Color color) => colorVectors[color];
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given piece.
+        /// Gets a vector which is true for all squares that contain the given piece.
         /// </summary>
-        public ulong GetVector(Piece piece)
-        {
-            return pieceVectors[piece];
-        }
+        public ulong GetVector(Piece piece) => pieceVectors[piece];
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given colored piece.
+        /// Gets a vector which is true for all squares that contain the given colored piece.
         /// </summary>
         public ulong GetVector(ColoredPiece coloredPiece)
-        {
-            var colorVector = GetVector(coloredPiece.GetColor());
-            var pieceVector = GetVector(coloredPiece.GetPiece());
-            return colorVector & pieceVector;
-        }
+            => GetVector(coloredPiece.GetColor()) & GetVector(coloredPiece.GetPiece());
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that are empty.
+        /// Gets a vector which is true for all squares that are empty.
         /// </summary>
         public ulong GetEmptyVector()
-        {
-            // Take the bitfield with 1 values only, and zero out whatever is white or black.
-            return ulong.MaxValue ^ colorVectors[Color.White] ^ colorVectors[Color.Black];
-        }
+            => ulong.MaxValue ^ colorVectors[Color.White] ^ colorVectors[Color.Black];
 
         /// <summary>
         /// If a pawn can be captured en passant in this position, returns the vector which is true for the square of that pawn.
         /// </summary>
-        public ulong EnPassantCaptureVector
-        {
-            get { return enPassantCaptureVector; }
-        }
+        public ulong EnPassantCaptureVector => enPassantCaptureVector;
 
-
-        private Position()
-        {
-            colorVectors = EnumIndexedArray<Color, ulong>.New();
-            pieceVectors = EnumIndexedArray<Piece, ulong>.New();
-        }
 
         /// <summary>
         /// Returns the standard initial position.
@@ -198,9 +178,11 @@ namespace Sandra.Chess
 
             initialPosition.sideToMove = Color.White;
 
+            initialPosition.colorVectors = EnumIndexedArray<Color, ulong>.New();
             initialPosition.colorVectors[Color.White] = Constants.WhiteInStartPosition;
             initialPosition.colorVectors[Color.Black] = Constants.BlackInStartPosition;
 
+            initialPosition.pieceVectors = EnumIndexedArray<Piece, ulong>.New();
             initialPosition.pieceVectors[Piece.Pawn] = Constants.PawnsInStartPosition;
             initialPosition.pieceVectors[Piece.Knight] = Constants.KnightsInStartPosition;
             initialPosition.pieceVectors[Piece.Bishop] = Constants.BishopsInStartPosition;
@@ -690,7 +672,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Genrates and enumerates all non-castling moves which are legal in this position.
+        /// Generates and enumerates all non-castling moves which are legal in this position.
         /// </summary>
         public IEnumerable<MoveInfo> GenerateLegalMoves()
         {

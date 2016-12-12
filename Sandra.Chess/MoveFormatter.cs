@@ -24,13 +24,8 @@ namespace Sandra.Chess
     /// <summary>
     /// Defines methods for showing moves in text, and parsing moves from textual input.
     /// </summary>
-    public abstract class AbstractMoveFormatter
+    public interface IMoveFormatter
     {
-        /// <summary>
-        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
-        /// </summary>
-        public const string IllegalMove = "???";
-
         /// <summary>
         /// Generates a formatted notation for a move in a given position.
         /// As a side effect, the game is updated to the resulting position after the move.
@@ -44,14 +39,19 @@ namespace Sandra.Chess
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        public abstract string FormatMove(Game game, Move move);
+        string FormatMove(Game game, Move move);
     }
 
     /// <summary>
     /// Common base class for <see cref="ShortAlgebraicMoveFormatter"/> and <see cref="LongAlgebraicMoveFormatter"/>. 
     /// </summary>
-    public abstract class AlgebraicMoveFormatter : AbstractMoveFormatter
+    public abstract class AlgebraicMoveFormatter : IMoveFormatter
     {
+        /// <summary>
+        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// </summary>
+        public const string IllegalMove = "???";
+
         protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
         public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
@@ -71,7 +71,7 @@ namespace Sandra.Chess
 
         protected abstract void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move);
 
-        public override string FormatMove(Game game, Move move)
+        public string FormatMove(Game game, Move move)
         {
             StringBuilder builder = new StringBuilder();
 
@@ -178,9 +178,9 @@ namespace Sandra.Chess
                     AppendFile(builder, move.SourceSquare);
                 }
             }
-            else if (move.MovingPiece != Piece.King)
+            else
             {
-                // Disambiguate source square, not needed for pawns or kings.
+                // Disambiguate source square.
                 MoveInfo testMoveInfo = new MoveInfo()
                 {
                     TargetSquare = move.TargetSquare,

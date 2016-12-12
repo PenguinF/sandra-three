@@ -72,6 +72,9 @@
     <Compile Include="StandardChessBoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UpdatableRichTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="WinUtils.cs" />
   </ItemGroup>
   <ItemGroup>

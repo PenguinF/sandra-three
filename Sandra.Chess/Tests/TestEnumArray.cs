@@ -45,14 +45,15 @@ namespace Sandra.Chess.Tests
             Assert.IsInstanceOfType(exception, typeof(TypeInitializationException));
         }
 
-        enum IllegalEnum1
+        enum EmptyEnum
         {
         }
 
         [TestMethod]
-        public void TestIllegalEnum1()
+        public void TestEmptyEnum()
         {
-            testIllegalEnum<IllegalEnum1>();
+            var array = EnumIndexedArray<EmptyEnum, int>.New();
+            Assert.AreEqual(array.Length, 0);
         }
 
         enum IllegalEnum2
