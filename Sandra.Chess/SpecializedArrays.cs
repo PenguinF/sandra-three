@@ -38,9 +38,12 @@ namespace Sandra
         {
             // Examine the enumeration.
             TEnum[] values = EnumHelper<TEnum>.AllValues.ToArray();
-            if ((int)(object)values[0] != 0 || (int)(object)values[values.Length - 1] != values.Length - 1)
+            for (int i = values.Length - 1; i >= 0; --i)
             {
-                throw new NotSupportedException("EnumIndexedArray<TEnum, TValue> does not support discontinuous enumerations, or enumerations that have a non-zero lower bound.");
+                if ((int)(object)values[i] != i)
+                {
+                    throw new NotSupportedException("EnumIndexedArray<TEnum, TValue> does not support discontinuous enumerations, or enumerations that have a non-zero lower bound.");
+                }
             }
         }
 
