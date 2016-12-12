@@ -52,12 +52,12 @@ namespace Sandra.UI.WF
             base.Dispose(disposing);
         }
 
-        private Chess.AbstractMoveFormatter moveFormatter;
+        private Chess.IMoveFormatter moveFormatter;
 
         /// <summary>
-        /// Gets or sets the <see cref="Chess.AbstractMoveFormatter"/> to use for formatting the moves.
+        /// Gets or sets the <see cref="Chess.IMoveFormatter"/> to use for formatting the moves.
         /// </summary>
-        public Chess.AbstractMoveFormatter MoveFormatter
+        public Chess.IMoveFormatter MoveFormatter
         {
             get { return moveFormatter; }
             set

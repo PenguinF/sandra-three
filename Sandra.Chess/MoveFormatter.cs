@@ -24,7 +24,7 @@ namespace Sandra.Chess
     /// <summary>
     /// Defines methods for showing moves in text, and parsing moves from textual input.
     /// </summary>
-    public abstract class AbstractMoveFormatter
+    public interface IMoveFormatter
     {
         /// <summary>
         /// Generates a formatted notation for a move in a given position.
@@ -39,13 +39,13 @@ namespace Sandra.Chess
         /// <returns>
         /// The formatted notation for the move.
         /// </returns>
-        public abstract string FormatMove(Game game, Move move);
+        string FormatMove(Game game, Move move);
     }
 
     /// <summary>
     /// Common base class for <see cref="ShortAlgebraicMoveFormatter"/> and <see cref="LongAlgebraicMoveFormatter"/>. 
     /// </summary>
-    public abstract class AlgebraicMoveFormatter : AbstractMoveFormatter
+    public abstract class AlgebraicMoveFormatter : IMoveFormatter
     {
         /// <summary>
         /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
@@ -71,7 +71,7 @@ namespace Sandra.Chess
 
         protected abstract void AppendDisambiguatingMoveSource(StringBuilder builder, Game game, Move move);
 
-        public override string FormatMove(Game game, Move move)
+        public string FormatMove(Game game, Move move)
         {
             StringBuilder builder = new StringBuilder();
 
