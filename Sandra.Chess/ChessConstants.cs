@@ -179,82 +179,82 @@ namespace Sandra.Chess
         public const ulong KingsideCastlingTargetSquares = G1 | G8;
 
         /// <summary>
-        /// Contains a bitfield which encodes the movement of a rook during a queenside castling move.
+        /// Contains a vector which encodes the movement of a rook during a queenside castling move.
         /// </summary>
         public static readonly EnumIndexedArray<Color, ulong> CastleQueensideRookDelta;
 
         /// <summary>
-        /// Contains a bitfield which encodes the movement of a rook during a kingside castling move.
+        /// Contains a vector which encodes the movement of a rook during a kingside castling move.
         /// </summary>
         public static readonly EnumIndexedArray<Color, ulong> CastleKingsideRookDelta;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same file as a given square.
+        /// Contains a vector which is true for each square in the same file as a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> FileMasks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same file as a given square, except the two outermost squares.
+        /// Contains a vector which is true for each square in the same file as a given square, except the two outermost squares.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> InnerFileMasks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same rank as a given square.
+        /// Contains a vector which is true for each square in the same rank as a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> RankMasks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same rank as a given square, except the two outermost squares.
+        /// Contains a vector which is true for each square in the same rank as a given square, except the two outermost squares.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> InnerRankMasks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same SW-NE diagonal as a given square.
+        /// Contains a vector which is true for each square in the same SW-NE diagonal as a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> A1H8Masks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same SW-NE diagonal as a given square, except the two outermost squares.
+        /// Contains a vector which is true for each square in the same SW-NE diagonal as a given square, except the two outermost squares.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> InnerA1H8Masks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same NW-SE diagonal as a given square.
+        /// Contains a vector which is true for each square in the same NW-SE diagonal as a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> A8H1Masks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in the same NW-SE diagonal as a given square, except the two outermost squares.
+        /// Contains a vector which is true for each square in the same NW-SE diagonal as a given square, except the two outermost squares.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> InnerA8H1Masks;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square where a pawn of a given color on a given square can move to.
+        /// Contains a vector which is true for each square where a pawn of a given color on a given square can move to.
         /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnMoves;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square where a pawn of a given color on a given square can capture a piece of the opposite color.
+        /// Contains a vector which is true for each square where a pawn of a given color on a given square can capture a piece of the opposite color.
         /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnCaptures;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square in front of a pawn of a given color in the starting position.
+        /// Contains a vector which is true for each square in front of a pawn of a given color in the starting position.
         /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> EnPassantSquares;
 
         /// <summary>
-        /// Contains a bitfield which is true for each square that is two squares ahead of a pawn of a given color in the starting position.
+        /// Contains a vector which is true for each square that is two squares ahead of a pawn of a given color in the starting position.
         /// </summary>
         public static readonly ColorSquareIndexedArray<ulong> PawnTwoSquaresAhead;
 
         /// <summary>
-        /// Contains a bitfield which is true for each target square where a knight can jump to from a given square.
+        /// Contains a vector which is true for each target square where a knight can jump to from a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> KnightMoves;
 
         /// <summary>
-        /// Contains a bitfield which is true for each target square where a king can move to from a given square.
+        /// Contains a vector which is true for each target square where a king can move to from a given square.
         /// </summary>
         public static readonly EnumIndexedArray<Square, ulong> Neighbours;
 
@@ -606,7 +606,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Given a bitfield of occupied squares, returns a bitfield with all squares which are reachable from a source square with a rook.
+        /// Given a vector of occupied squares, returns a vector with all squares which are reachable from a source square with a rook.
         /// </summary>
         public static ulong ReachableSquaresStraight(Square sourceSquare, ulong occupied)
         {
@@ -615,7 +615,7 @@ namespace Sandra.Chess
         }
 
         /// <summary>
-        /// Given a bitfield of occupied squares, returns a bitfield with all squares which are reachable from a source square with a bishop.
+        /// Given a vector of occupied squares, returns a vector with all squares which are reachable from a source square with a bishop.
         /// </summary>
         public static ulong ReachableSquaresDiagonal(Square sourceSquare, ulong occupied)
         {

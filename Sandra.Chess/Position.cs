@@ -142,23 +142,23 @@ namespace Sandra.Chess
         public Color SideToMove => sideToMove;
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given color.
+        /// Gets a vector which is true for all squares that contain the given color.
         /// </summary>
         public ulong GetVector(Color color) => colorVectors[color];
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given piece.
+        /// Gets a vector which is true for all squares that contain the given piece.
         /// </summary>
         public ulong GetVector(Piece piece) => pieceVectors[piece];
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that contain the given colored piece.
+        /// Gets a vector which is true for all squares that contain the given colored piece.
         /// </summary>
         public ulong GetVector(ColoredPiece coloredPiece)
             => GetVector(coloredPiece.GetColor()) & GetVector(coloredPiece.GetPiece());
 
         /// <summary>
-        /// Gets a bitfield which is true for all squares that are empty.
+        /// Gets a vector which is true for all squares that are empty.
         /// </summary>
         public ulong GetEmptyVector()
             => ulong.MaxValue ^ colorVectors[Color.White] ^ colorVectors[Color.Black];
