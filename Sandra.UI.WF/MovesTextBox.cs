@@ -132,27 +132,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private class SavedSelectionState : IDisposable
-        {
-            public MovesTextBox Owner;
-            public int SelectionStart, SelectionLength;
-
-            public void Dispose()
-            {
-                Owner.Select(SelectionStart, SelectionLength);
-            }
-        }
-
-        private SavedSelectionState savedSelection()
-        {
-            return new SavedSelectionState()
-            {
-                Owner = this,
-                SelectionStart = SelectionStart,
-                SelectionLength = SelectionLength,
-            };
-        }
-
         private List<TextElement> elements;
         private List<TextElement.FormattedMove> moveElements;
 
@@ -309,7 +288,7 @@ namespace Sandra.UI.WF
 
         protected override void OnSelectionChanged(EventArgs e)
         {
-            if (!IsUpdating && elements != null)
+            if (!IsUpdating && elements != null && SelectionLength == 0)
             {
                 int selectionStart = SelectionStart;
 
@@ -337,21 +316,19 @@ namespace Sandra.UI.WF
                     BeginUpdate();
                     try
                     {
-                        using (savedSelection())
+                        if (game.ActiveMoveIndex > 0)
                         {
-                            if (game.ActiveMoveIndex > 0)
-                            {
-                                updateFont(moveElements[game.ActiveMoveIndex - 1], regularFont);
-                            }
-                            game.ActiveMoveIndex = newActiveMoveIndex;
-                            if (game.ActiveMoveIndex > 0)
-                            {
-                                updateFont(moveElements[game.ActiveMoveIndex - 1], lastMoveFont);
-                            }
+                            updateFont(moveElements[game.ActiveMoveIndex - 1], regularFont);
+                        }
+                        game.ActiveMoveIndex = newActiveMoveIndex;
+                        if (game.ActiveMoveIndex > 0)
+                        {
+                            updateFont(moveElements[game.ActiveMoveIndex - 1], lastMoveFont);
                         }
                     }
                     finally
                     {
+                        Select(selectionStart, 0);
                         EndUpdate();
                     }
                 }
