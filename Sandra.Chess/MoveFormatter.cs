@@ -27,11 +27,6 @@ namespace Sandra.Chess
     public abstract class AbstractMoveFormatter
     {
         /// <summary>
-        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
-        /// </summary>
-        public const string IllegalMove = "???";
-
-        /// <summary>
         /// Generates a formatted notation for a move in a given position.
         /// As a side effect, the game is updated to the resulting position after the move.
         /// </summary>
@@ -52,6 +47,11 @@ namespace Sandra.Chess
     /// </summary>
     public abstract class AlgebraicMoveFormatter : AbstractMoveFormatter
     {
+        /// <summary>
+        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// </summary>
+        public const string IllegalMove = "???";
+
         protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
         public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
