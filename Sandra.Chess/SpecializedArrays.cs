@@ -67,10 +67,7 @@ namespace Sandra
         /// <summary>
         /// Gets the number of keys in the array, which is equal to the number of members in the enumeration.
         /// </summary>
-        public int Length
-        {
-            get { return EnumHelper<TEnum>.EnumCount; }
-        }
+        public int Length => EnumHelper<TEnum>.EnumCount;
 
         public TValue this[TEnum index]
         {
