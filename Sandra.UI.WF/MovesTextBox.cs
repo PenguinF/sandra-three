@@ -92,7 +92,7 @@ namespace Sandra.UI.WF
 
         private void game_ActiveMoveIndexChanged(object sender, EventArgs e)
         {
-            if (!updatingText)
+            if (!IsUpdating)
             {
                 updateText();
             }
@@ -155,7 +155,6 @@ namespace Sandra.UI.WF
 
         private List<TextElement> elements;
         private List<TextElement.FormattedMove> moveElements;
-        private bool updatingText;
 
         private void updateFont(TextElement element, Font newFont)
         {
@@ -212,7 +211,6 @@ namespace Sandra.UI.WF
         private void updateText()
         {
             // Block OnSelectionChanged() which will be raised as a side effect of this method.
-            updatingText = true;
             BeginUpdate();
             try
             {
@@ -306,13 +304,12 @@ namespace Sandra.UI.WF
             finally
             {
                 EndUpdate();
-                updatingText = false;
             }
         }
 
         protected override void OnSelectionChanged(EventArgs e)
         {
-            if (!updatingText && elements != null)
+            if (!IsUpdating && elements != null)
             {
                 int selectionStart = SelectionStart;
 
@@ -337,7 +334,6 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.ActiveMoveIndex != newActiveMoveIndex)
                 {
-                    updatingText = true;
                     BeginUpdate();
                     try
                     {
@@ -357,7 +353,6 @@ namespace Sandra.UI.WF
                     finally
                     {
                         EndUpdate();
-                        updatingText = false;
                     }
                 }
             }
