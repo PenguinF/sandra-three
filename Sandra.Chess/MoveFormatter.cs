@@ -178,9 +178,9 @@ namespace Sandra.Chess
                     AppendFile(builder, move.SourceSquare);
                 }
             }
-            else if (move.MovingPiece != Piece.King)
+            else
             {
-                // Disambiguate source square, not needed for pawns or kings.
+                // Disambiguate source square.
                 MoveInfo testMoveInfo = new MoveInfo()
                 {
                     TargetSquare = move.TargetSquare,
