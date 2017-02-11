@@ -18,4 +18,15 @@
  *********************************************************************************/
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Groups a set of optional properties to allow for one shared definition of a <see cref="UIAction"/> 
+    /// across several components and ways of exposing those actions (menu, shortcut key, buttons, etc).
+    /// </summary>
+    public struct UIActionBinding
+    {
+        /// <summary>
+        /// Shortcut which is displayed in menu items, as well as used for creating a <see cref="KeyUIActionMapping"/>.
+        /// </summary>
+        public ShortcutKeys MainShortcut;
+    }
 }
