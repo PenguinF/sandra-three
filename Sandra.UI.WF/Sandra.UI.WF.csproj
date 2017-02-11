@@ -73,6 +73,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIAction\UIAction.cs" />
+    <Compile Include="UIAction\UIActionBinding.cs" />
     <Compile Include="UIAction\UIActionHandler.cs" />
     <Compile Include="UpdatableRichTextBox.cs">
       <SubType>Component</SubType>
