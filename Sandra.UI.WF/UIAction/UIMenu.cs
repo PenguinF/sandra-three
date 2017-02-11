@@ -37,6 +37,7 @@ namespace Sandra.UI.WF
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
                 Key = key;
+                Caption = binding.MenuCaption;
                 Shortcut = binding.MainShortcut;
             }
 
