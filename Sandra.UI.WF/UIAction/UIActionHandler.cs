@@ -41,11 +41,17 @@ namespace Sandra.UI.WF
     {
         private readonly Dictionary<UIAction, UIActionHandlerFunc> handlers = new Dictionary<UIAction, UIActionHandlerFunc>();
         private readonly List<KeyUIActionMapping> keyMappings = new List<KeyUIActionMapping>();
+        private readonly UIMenuNode.Container rootMenuNode = new UIMenuNode.Container();
 
         /// <summary>
         /// Enumerates all non-empty <see cref="ShortcutKeys"/> which are bound to this handler.
         /// </summary>
         public IEnumerable<KeyUIActionMapping> KeyMappings => keyMappings;
+
+        /// <summary>
+        /// Gets the top level node of a <see cref="UIMenuNode"/> tree.
+        /// </summary>
+        public UIMenuNode.Container RootMenuNode => rootMenuNode;
 
         /// <summary>
         /// Binds a handler function for a <see cref="UIAction"/> to this <see cref="UIActionHandler"/>,
@@ -78,6 +84,11 @@ namespace Sandra.UI.WF
                 {
                     keyMappings.Add(new KeyUIActionMapping(alternativeShortcut, action));
                 }
+            }
+
+            if (binding.ShowInMenu)
+            {
+                (binding.MenuContainer ?? rootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding));
             }
         }
 

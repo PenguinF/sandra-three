@@ -35,5 +35,21 @@ namespace Sandra.UI.WF
         /// List of alternative shortcut keys which will invoke the action as well, but are not shown in e.g. the context menu.
         /// </summary>
         public List<ShortcutKeys> AlternativeShortcuts;
+
+        /// <summary>
+        /// Whether or not the action is shown in the context menu.
+        /// </summary>
+        public bool ShowInMenu;
+
+        /// <summary>
+        /// If <see cref="ShowInMenu"/> is true, defines the container in which a menu item must be generated for this binding.
+        /// If this is null, the root node is used.
+        /// </summary>
+        public UIMenuNode.Container MenuContainer;
+
+        /// <summary>
+        /// If <see cref="ShowInMenu"/> is true, defines the caption to display for the generated menu item.
+        /// </summary>
+        public string MenuCaption;
     }
 }

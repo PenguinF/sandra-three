@@ -38,8 +38,17 @@ namespace Sandra.UI.WF
         {
             IsMdiContainer = true;
 
+            UIMenuNode.Container container = new UIMenuNode.Container()
+            {
+                Caption = "Games",
+            };
+            ActionHandler.RootMenuNode.Nodes.Add(container);
+
             var openNewPlayingBoard = new UIActionBinding()
             {
+                ShowInMenu = true,
+                MenuContainer = container,
+                MenuCaption = "New playing board",
                 MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
             };
             UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
@@ -86,6 +95,8 @@ namespace Sandra.UI.WF
 
             var gotoPreviousMove = new UIActionBinding()
             {
+                ShowInMenu = true,
+                MenuCaption = "Previous move",
                 MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
                 AlternativeShortcuts = new List<ShortcutKeys>
                 {
@@ -102,6 +113,8 @@ namespace Sandra.UI.WF
 
             var gotoNextMove = new UIActionBinding()
             {
+                ShowInMenu = true,
+                MenuCaption = "Next move",
                 MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
                 AlternativeShortcuts = new List<ShortcutKeys>
                 {
