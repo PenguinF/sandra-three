@@ -36,6 +36,19 @@ namespace Sandra.UI.WF
         public MdiContainerForm()
         {
             IsMdiContainer = true;
+
+            var openNewPlayingBoard = new UIActionBinding()
+            {
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
+            };
+            UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
+            {
+                if (perform) NewPlayingBoard();
+                return UIActionAccessType.Enabled;
+            };
+
+            this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
+
             MainMenuStrip = new MenuStrip();
             MainMenuStrip.Items.Add("New playing board (Ctrl+B)", null, (_, __) => { NewPlayingBoard(); });
             MainMenuStrip.Visible = true;
@@ -49,9 +62,8 @@ namespace Sandra.UI.WF
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == (Keys.Control | Keys.B))
+            if (KeyUtils.TryExecute(keyData))
             {
-                NewPlayingBoard();
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -157,5 +169,10 @@ namespace Sandra.UI.WF
                 return null;
             }
         }
+    }
+
+    public static class ActionKeys
+    {
+        public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }

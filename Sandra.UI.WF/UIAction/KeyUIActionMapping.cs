@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -94,5 +95,123 @@ namespace Sandra.UI.WF
         /// Gets the <see cref="UIAction"/> for this mapping.
         /// </summary>
         public UIAction Action { get; }
+    }
+
+    public static class KeyUtils
+    {
+        /// <summary>
+        /// Converts a <see cref="ShortcutKeys"/> key combination to a <see cref="Keys"/>.
+        /// </summary>
+        public static Keys ConvertToKeys(ShortcutKeys shortcut)
+        {
+            if (shortcut.IsEmpty) return Keys.None;
+
+            Keys result = (Keys)shortcut.Key;
+
+            KeyModifiers code = shortcut.Modifiers;
+            if (code.HasFlag(KeyModifiers.Shift)) result |= Keys.Shift;
+            if (code.HasFlag(KeyModifiers.Control)) result |= Keys.Control;
+            if (code.HasFlag(KeyModifiers.Alt)) result |= Keys.Alt;
+
+            return result;
+        }
+
+        /// <summary>
+        /// For a given shortcut key, enumerates all alternative shortcut keys which are generally considered equivalent.
+        /// An example is Ctrl+., where there are usually two keys that map to the '.' character.
+        /// </summary>
+        public static IEnumerable<Keys> EnumerateEquivalentKeys(Keys shortcut)
+        {
+            Keys keyCode = shortcut & Keys.KeyCode;
+
+            if (keyCode == Keys.None) yield break;
+
+            yield return shortcut;
+
+            Keys modifiers = shortcut & Keys.Modifiers;
+            bool shift = shortcut.HasFlag(Keys.Shift);
+            if (keyCode >= Keys.D0 && keyCode <= Keys.D9)
+            {
+                yield return shortcut - Keys.D0 + Keys.NumPad0;
+            }
+            else if (keyCode >= Keys.NumPad0 && keyCode <= Keys.NumPad9)
+            {
+                yield return shortcut - Keys.NumPad0 + Keys.D0;
+            }
+            else if (keyCode == Keys.Add)
+            {
+                if (!shift) yield return modifiers | Keys.Shift | Keys.Oemplus;
+            }
+            else if (keyCode == Keys.Oemplus)
+            {
+                if (shift) yield return modifiers | Keys.Add;
+            }
+            else if (keyCode == Keys.Subtract)
+            {
+                yield return modifiers | Keys.OemMinus;
+            }
+            else if (keyCode == Keys.OemMinus)
+            {
+                yield return modifiers | Keys.Subtract;
+            }
+            else if (keyCode == Keys.Multiply)
+            {
+                if (!shift) yield return modifiers | Keys.Shift | Keys.D8;
+            }
+            else if (keyCode == Keys.D8)
+            {
+                if (shift) yield return modifiers | Keys.Multiply;
+            }
+            else if (keyCode == Keys.Divide)
+            {
+                yield return modifiers | Keys.OemQuestion;
+            }
+            else if (keyCode == Keys.OemQuestion)
+            {
+                yield return modifiers | Keys.Divide;
+            }
+        }
+
+        /// <summary>
+        /// Tries to convert a user command key to a <see cref="UIAction"/> and then execute it on the currently focused .NET control.
+        /// </summary>
+        /// <param name="shortcut">
+        /// The shortcut key pressed by the user.
+        /// </param>
+        /// <returns>
+        /// Whether or not the key was processed.
+        /// </returns>
+        public static bool TryExecute(Keys shortcut)
+        {
+            try
+            {
+                Control control = FocusHelper.GetFocusedControl();
+                while (control != null)
+                {
+                    IUIActionHandlerProvider consumer = control as IUIActionHandlerProvider;
+                    if (consumer != null && consumer.ActionHandler != null)
+                    {
+                        // Try to find an action with given shortcut.
+                        foreach (var mapping in consumer.ActionHandler.KeyMappings)
+                        {
+                            foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
+                            {
+                                if (mappedShortcut == shortcut && consumer.ActionHandler.TryPerformAction(mapping.Action, true).Enabled)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    control = control.Parent;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return true;
+            }
+        }
     }
 }

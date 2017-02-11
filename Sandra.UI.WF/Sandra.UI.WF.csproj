@@ -49,6 +49,7 @@
     <Compile Include="ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FocusHelper.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
