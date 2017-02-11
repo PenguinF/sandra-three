@@ -16,6 +16,43 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.UI.WF
 {
+    public abstract class UIMenuNode
+    {
+        public abstract TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor);
+
+        public sealed class Element : UIMenuNode
+        {
+            public readonly UIAction Key;
+            public readonly string Caption;
+            public readonly ShortcutKeys Shortcut;
+
+            public Element(UIAction key, UIActionBinding binding)
+            {
+                if (key == null) throw new ArgumentNullException(nameof(key));
+                Key = key;
+                Shortcut = binding.MainShortcut;
+            }
+
+            public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
+        }
+
+        public sealed class Container : UIMenuNode
+        {
+            public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
+            public string Caption = string.Empty;
+
+            public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitContainer(this);
+        }
+    }
+
+    public interface IUIActionTreeVisitor<TResult>
+    {
+        TResult VisitContainer(UIMenuNode.Container container);
+        TResult VisitElement(UIMenuNode.Element element);
+    }
 }
