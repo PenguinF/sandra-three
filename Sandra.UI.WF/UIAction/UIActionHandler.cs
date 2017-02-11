@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -69,6 +70,14 @@ namespace Sandra.UI.WF
             if (!binding.MainShortcut.IsEmpty)
             {
                 keyMappings.Add(new KeyUIActionMapping(binding.MainShortcut, action));
+            }
+
+            if (binding.AlternativeShortcuts != null)
+            {
+                foreach (var alternativeShortcut in binding.AlternativeShortcuts.Where(x => !x.IsEmpty))
+                {
+                    keyMappings.Add(new KeyUIActionMapping(alternativeShortcut, action));
+                }
             }
         }
 

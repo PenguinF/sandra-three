@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -28,5 +30,10 @@ namespace Sandra.UI.WF
         /// Shortcut which is displayed in menu items, as well as used for creating a <see cref="KeyUIActionMapping"/>.
         /// </summary>
         public ShortcutKeys MainShortcut;
+
+        /// <summary>
+        /// List of alternative shortcut keys which will invoke the action as well, but are not shown in e.g. the context menu.
+        /// </summary>
+        public List<ShortcutKeys> AlternativeShortcuts;
     }
 }

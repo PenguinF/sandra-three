@@ -18,6 +18,7 @@
  *********************************************************************************/
 using Sandra.Chess;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -86,6 +87,11 @@ namespace Sandra.UI.WF
             var gotoPreviousMove = new UIActionBinding()
             {
                 MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
+                AlternativeShortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
+                    new ShortcutKeys(ConsoleKey.Z),
+                },
             };
             UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
             {
@@ -97,6 +103,11 @@ namespace Sandra.UI.WF
             var gotoNextMove = new UIActionBinding()
             {
                 MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
+                AlternativeShortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
+                    new ShortcutKeys(ConsoleKey.X),
+                },
             };
             UIActionHandlerFunc gotoNextMoveHandler = perform =>
             {
