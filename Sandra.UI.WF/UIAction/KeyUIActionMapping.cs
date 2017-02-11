@@ -100,6 +100,14 @@ namespace Sandra.UI.WF
     public static class KeyUtils
     {
         /// <summary>
+        /// Helper method to make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
+        /// </summary>
+        public static string EscapeAmpersand(string caption)
+        {
+            return caption.Replace("&", "&&");
+        }
+
+        /// <summary>
         /// Converts a <see cref="ShortcutKeys"/> key combination to a <see cref="Keys"/>.
         /// </summary>
         public static Keys ConvertToKeys(ShortcutKeys shortcut)
