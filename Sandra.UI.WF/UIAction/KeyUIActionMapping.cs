@@ -73,4 +73,26 @@ namespace Sandra.UI.WF
 
         public string DisplayString => string.Join("+", displayStringParts());
     }
+
+    /// <summary>
+    /// Represents a mapping between a shortcut key and a <see cref="UIAction"/>.
+    /// </summary>
+    public struct KeyUIActionMapping
+    {
+        public KeyUIActionMapping(ShortcutKeys shortcut, UIAction action)
+        {
+            Shortcut = shortcut;
+            Action = action;
+        }
+
+        /// <summary>
+        /// Gets the shortcut key for this mapping.
+        /// </summary>
+        public ShortcutKeys Shortcut { get; }
+
+        /// <summary>
+        /// Gets the <see cref="UIAction"/> for this mapping.
+        /// </summary>
+        public UIAction Action { get; }
+    }
 }
