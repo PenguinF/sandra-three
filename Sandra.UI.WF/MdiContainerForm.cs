@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public class MdiContainerForm : Form
+    public class MdiContainerForm : Form, IUIActionHandlerProvider
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
@@ -41,6 +41,11 @@ namespace Sandra.UI.WF
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
         }
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {

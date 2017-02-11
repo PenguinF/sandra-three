@@ -30,7 +30,7 @@ namespace Sandra.UI.WF
     /// Represents a playing board of squares occupied by pieces represented by foreground images.
     /// Square coordinate (0, 0) is the top left square.
     /// </summary>
-    public class PlayingBoard : Control
+    public class PlayingBoard : Control, IUIActionHandlerProvider
     {
         public PlayingBoard()
         {
@@ -94,6 +94,12 @@ namespace Sandra.UI.WF
             { nameof(darkSquareBrush), null },
             { nameof(lightSquareBrush), null },
         };
+
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
 
         /// <summary>

@@ -18,4 +18,18 @@
  *********************************************************************************/
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Responsible for managing a set of <see cref="UIAction"/>s and their associated handlers.
+    /// </summary>
+    public class UIActionHandler
+    {
+    }
+
+    /// <summary>
+    /// Interface implemented by <see cref="System.Windows.Forms.Control"/> subclasses to hook into the <see cref="UIAction"/> framework.
+    /// </summary>
+    public interface IUIActionHandlerProvider
+    {
+        UIActionHandler ActionHandler { get; }
+    }
 }

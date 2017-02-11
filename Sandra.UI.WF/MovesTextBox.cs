@@ -27,7 +27,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public class MovesTextBox : UpdatableRichTextBox
+    public class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
     {
         readonly Font regularFont = new Font("Candara", 10);
         readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
@@ -51,6 +51,11 @@ namespace Sandra.UI.WF
             }
             base.Dispose(disposing);
         }
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         private Chess.IMoveFormatter moveFormatter;
 
