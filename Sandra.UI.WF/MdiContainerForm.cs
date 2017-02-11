@@ -60,7 +60,7 @@ namespace Sandra.UI.WF
             this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
 
             MainMenuStrip = new MenuStrip();
-            MainMenuStrip.Items.Add("New playing board (Ctrl+B)", null, (_, __) => { NewPlayingBoard(); });
+            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
         }
@@ -131,6 +131,7 @@ namespace Sandra.UI.WF
 
             mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
             mdiChild.PlayingBoard.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+            UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
             {
@@ -164,6 +165,7 @@ namespace Sandra.UI.WF
 
                 movesTextBox.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
                 movesTextBox.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+                UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);
 
