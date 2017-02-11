@@ -65,4 +65,63 @@ namespace Sandra.UI.WF
             return first.Key != second.Key;
         }
     }
+
+    /// <summary>
+    /// Represents one of three types of access to a <see cref="UIAction"/>.
+    /// </summary>
+    public enum UIActionAccessType
+    {
+        /// <summary>
+        /// The <see cref="UIAction"/> is currently not visible.
+        /// </summary>
+        Hidden,
+        /// <summary>
+        /// The <see cref="UIAction"/> is currently visible, but disabled.
+        /// </summary>
+        Disabled,
+        /// <summary>
+        /// The <see cref="UIAction"/> is currently visible and enabled.
+        /// </summary>
+        Enabled,
+    }
+
+    /// <summary>
+    /// Encodes a current state of a <see cref="UIAction"/> in how it is represented in e.g. menu items.
+    /// </summary>
+    public struct UIActionState
+    {
+        /// <summary>
+        /// Gets the current type of access to the <see cref="UIAction"/>.
+        /// </summary>
+        public UIActionAccessType UIActionAccessType { get; }
+
+        /// <summary>
+        /// Gets if the <see cref="UIAction"/> is currently in a checked state.
+        /// </summary>
+        public bool Checked { get; }
+
+        /// <summary>
+        /// Gets if the <see cref="UIAction"/> is currently visible.
+        /// </summary>
+        public bool Visible => UIActionAccessType != UIActionAccessType.Hidden;
+
+        /// <summary>
+        /// Gets if the <see cref="UIAction"/> is currently enabled.
+        /// </summary>
+        public bool Enabled => UIActionAccessType == UIActionAccessType.Enabled;
+
+        public UIActionState(UIActionAccessType accessType)
+        {
+            UIActionAccessType = accessType;
+            Checked = false;
+        }
+
+        public UIActionState(UIActionAccessType accessType, bool isChecked)
+        {
+            UIActionAccessType = accessType;
+            Checked = isChecked;
+        }
+
+        public static implicit operator UIActionState(UIActionAccessType accessType) => new UIActionState(accessType);
+    }
 }

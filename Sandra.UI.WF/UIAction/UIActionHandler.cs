@@ -19,6 +19,18 @@
 namespace Sandra.UI.WF
 {
     /// <summary>
+    /// Delegate which verifies if an action can be performed, and optionally performs it.
+    /// </summary>
+    /// <param name="perform">
+    /// Whether or not to actually perform the action.
+    /// </param>
+    /// <returns>
+    /// A complete <see cref="UIActionState"/> if <paramref name="perform"/> is false,
+    /// or a <see cref="UIActionState"/> indicating whether or not the action was performed successfully, if <paramref name="perform"/> is true.
+    /// </returns>
+    public delegate UIActionState UIActionHandlerFunc(bool perform);
+
+    /// <summary>
     /// Responsible for managing a set of <see cref="UIAction"/>s and their associated handlers.
     /// </summary>
     public class UIActionHandler
