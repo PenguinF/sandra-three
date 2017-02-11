@@ -83,6 +83,31 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
+            var gotoPreviousMove = new UIActionBinding()
+            {
+                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
+            };
+            UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
+            {
+                if (game.ActiveMoveIndex == 0) return UIActionAccessType.Disabled;
+                if (perform) game.ActiveMoveIndex--;
+                return UIActionAccessType.Enabled;
+            };
+
+            var gotoNextMove = new UIActionBinding()
+            {
+                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
+            };
+            UIActionHandlerFunc gotoNextMoveHandler = perform =>
+            {
+                if (game.ActiveMoveIndex == game.MoveCount) return UIActionAccessType.Disabled;
+                if (perform) game.ActiveMoveIndex++;
+                return UIActionAccessType.Enabled;
+            };
+
+            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
+            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+
             mdiChild.Load += (_, __) =>
             {
                 var mdiChildBounds = mdiChild.Bounds;
@@ -106,12 +131,18 @@ namespace Sandra.UI.WF
                 englishPieceSymbols[Piece.Queen] = "Q";
                 englishPieceSymbols[Piece.King] = "K";
 
-                movesForm.Controls.Add(new MovesTextBox()
+                var movesTextBox = new MovesTextBox()
                 {
                     Dock = DockStyle.Fill,
                     Game = game,
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
-                });
+                };
+
+                movesTextBox.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
+                movesTextBox.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+
+                movesForm.Controls.Add(movesTextBox);
+
                 movesForm.Visible = true;
             };
 
@@ -173,6 +204,8 @@ namespace Sandra.UI.WF
 
     public static class ActionKeys
     {
+        public static readonly UIAction GotoNextMove = new UIAction(nameof(GotoNextMove));
+        public static readonly UIAction GotoPreviousMove = new UIAction(nameof(GotoPreviousMove));
         public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }
