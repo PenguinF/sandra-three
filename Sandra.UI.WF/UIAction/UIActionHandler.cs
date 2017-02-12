@@ -41,7 +41,7 @@ namespace Sandra.UI.WF
     {
         private readonly Dictionary<UIAction, UIActionHandlerFunc> handlers = new Dictionary<UIAction, UIActionHandlerFunc>();
         private readonly List<KeyUIActionMapping> keyMappings = new List<KeyUIActionMapping>();
-        private readonly UIMenuNode.Container rootMenuNode = new UIMenuNode.Container();
+        private readonly UIMenuNode.Container rootMenuNode = new UIMenuNode.Container(null);
 
         /// <summary>
         /// Enumerates all non-empty <see cref="ShortcutKeys"/> which are bound to this handler.

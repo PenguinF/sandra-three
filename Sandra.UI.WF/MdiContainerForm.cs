@@ -38,10 +38,7 @@ namespace Sandra.UI.WF
         {
             IsMdiContainer = true;
 
-            UIMenuNode.Container container = new UIMenuNode.Container()
-            {
-                Caption = "Games",
-            };
+            UIMenuNode.Container container = new UIMenuNode.Container("Games");
             ActionHandler.RootMenuNode.Nodes.Add(container);
 
             var openNewPlayingBoard = new UIActionBinding()

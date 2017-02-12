@@ -27,17 +27,22 @@ namespace Sandra.UI.WF
     {
         public abstract TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor);
 
+        public readonly string Caption;
+
+        protected UIMenuNode(string caption)
+        {
+            Caption = caption;
+        }
+
         public sealed class Element : UIMenuNode
         {
             public readonly UIAction Action;
-            public readonly string Caption;
             public readonly ShortcutKeys Shortcut;
 
-            public Element(UIAction action, UIActionBinding binding)
+            public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaption)
             {
                 if (action == null) throw new ArgumentNullException(nameof(action));
                 Action = action;
-                Caption = binding.MenuCaption;
                 Shortcut = binding.MainShortcut;
             }
 
@@ -47,7 +52,10 @@ namespace Sandra.UI.WF
         public sealed class Container : UIMenuNode
         {
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
-            public string Caption = string.Empty;
+
+            public Container(string caption) : base(caption)
+            {
+            }
 
             public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitContainer(this);
         }
