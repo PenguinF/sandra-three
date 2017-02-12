@@ -181,21 +181,29 @@ namespace Sandra.UI.WF
             }
         }
 
+        ToolStripMenuItem createMenuItem(UIMenuNode node)
+        {
+            if (string.IsNullOrEmpty(node.Caption)) return null;
+
+            return new ToolStripMenuItem()
+            {
+                Text = KeyUtils.EscapeAmpersand(node.Caption),
+            };
+        }
+
         ToolStripMenuItem IUIActionTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (string.IsNullOrEmpty(element.Caption)) return null;
-
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
             if (!currentActionState.Visible) return null;
 
-            var menuItem = new ToolStripMenuItem()
-            {
-                Enabled = currentActionState.Enabled,
-                Checked = currentActionState.Checked,
-                ShortcutKeyDisplayString = element.Shortcut.DisplayString,
-                Text = KeyUtils.EscapeAmpersand(element.Caption),
-            };
+            var menuItem = createMenuItem(element);
+
+            if (menuItem == null) return null;
+
+            menuItem.Enabled = currentActionState.Enabled;
+            menuItem.Checked = currentActionState.Checked;
+            menuItem.ShortcutKeyDisplayString = element.Shortcut.DisplayString;
 
             var actionHandler = ActionHandler;
             menuItem.Click += (_, __) =>
@@ -215,16 +223,13 @@ namespace Sandra.UI.WF
 
         ToolStripMenuItem IUIActionTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (string.IsNullOrEmpty(container.Caption)) return null;
+            var menuItem = createMenuItem(container);
 
-            var menuItem = new ToolStripMenuItem()
-            {
-                Text = KeyUtils.EscapeAmpersand(container.Caption),
-            };
+            if (menuItem == null) return null;
 
             buildMenu(container.Nodes, menuItem.DropDownItems);
 
-            // No empty menu items.
+            // No empty submenu items.
             if (menuItem.DropDownItems.Count == 0) return null;
 
             return menuItem;
