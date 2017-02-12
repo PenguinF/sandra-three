@@ -26,7 +26,7 @@ namespace Sandra.UI.WF
     public sealed class FocusHelper
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr GetFocus();
+        static extern IntPtr GetFocus();
 
         /// <summary>
         /// Returns the .NET control that has the keyboard focus in this application.
