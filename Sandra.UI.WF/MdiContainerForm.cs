@@ -18,6 +18,7 @@
  *********************************************************************************/
 using Sandra.Chess;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -29,24 +30,47 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public class MdiContainerForm : Form
+    public class MdiContainerForm : Form, IUIActionHandlerProvider
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
         public MdiContainerForm()
         {
             IsMdiContainer = true;
+
+            UIMenuNode.Container container = new UIMenuNode.Container("Games");
+            ActionHandler.RootMenuNode.Nodes.Add(container);
+
+            var openNewPlayingBoard = new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuContainer = container,
+                MenuCaption = "New playing board",
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
+            };
+            UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
+            {
+                if (perform) NewPlayingBoard();
+                return UIActionVisibility.Enabled;
+            };
+
+            this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
+
             MainMenuStrip = new MenuStrip();
-            MainMenuStrip.Items.Add("New playing board (Ctrl+B)", null, (_, __) => { NewPlayingBoard(); });
+            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
         }
 
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == (Keys.Control | Keys.B))
+            if (KeyUtils.TryExecute(keyData))
             {
-                NewPlayingBoard();
                 return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
@@ -65,6 +89,46 @@ namespace Sandra.UI.WF
             mdiChild.PieceImages = PieceImages;
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
+
+            var gotoPreviousMove = new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Previous move",
+                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
+                AlternativeShortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
+                    new ShortcutKeys(ConsoleKey.Z),
+                },
+            };
+            UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
+            {
+                if (game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
+                if (perform) game.ActiveMoveIndex--;
+                return UIActionVisibility.Enabled;
+            };
+
+            var gotoNextMove = new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Next move",
+                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
+                AlternativeShortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
+                    new ShortcutKeys(ConsoleKey.X),
+                },
+            };
+            UIActionHandlerFunc gotoNextMoveHandler = perform =>
+            {
+                if (game.ActiveMoveIndex == game.MoveCount) return UIActionVisibility.Disabled;
+                if (perform) game.ActiveMoveIndex++;
+                return UIActionVisibility.Enabled;
+            };
+
+            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
+            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+            UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
             {
@@ -89,12 +153,19 @@ namespace Sandra.UI.WF
                 englishPieceSymbols[Piece.Queen] = "Q";
                 englishPieceSymbols[Piece.King] = "K";
 
-                movesForm.Controls.Add(new MovesTextBox()
+                var movesTextBox = new MovesTextBox()
                 {
                     Dock = DockStyle.Fill,
                     Game = game,
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
-                });
+                };
+
+                movesTextBox.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
+                movesTextBox.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+                UIMenu.AddTo(movesTextBox);
+
+                movesForm.Controls.Add(movesTextBox);
+
                 movesForm.Visible = true;
             };
 
@@ -152,5 +223,12 @@ namespace Sandra.UI.WF
                 return null;
             }
         }
+    }
+
+    public static class ActionKeys
+    {
+        public static readonly UIAction GotoNextMove = new UIAction(nameof(GotoNextMove));
+        public static readonly UIAction GotoPreviousMove = new UIAction(nameof(GotoPreviousMove));
+        public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }
