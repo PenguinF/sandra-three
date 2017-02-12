@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents the shortcut key combination for a <see cref="UIAction"/>.
+    /// Represents a shortcut key combination for a <see cref="UIAction"/>.
     /// </summary>
     public struct ShortcutKeys
     {
@@ -181,7 +181,7 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Tries to convert a user command key to a <see cref="UIAction"/> and then execute it on the currently focused .NET control.
+        /// Tries to convert a user command key to a <see cref="UIAction"/> and perform it on the currently focused .NET control.
         /// </summary>
         /// <param name="shortcut">
         /// The shortcut key pressed by the user.
@@ -196,15 +196,15 @@ namespace Sandra.UI.WF
                 Control control = FocusHelper.GetFocusedControl();
                 while (control != null)
                 {
-                    IUIActionHandlerProvider consumer = control as IUIActionHandlerProvider;
-                    if (consumer != null && consumer.ActionHandler != null)
+                    IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
+                    if (provider != null && provider.ActionHandler != null)
                     {
                         // Try to find an action with given shortcut.
-                        foreach (var mapping in consumer.ActionHandler.KeyMappings)
+                        foreach (var mapping in provider.ActionHandler.KeyMappings)
                         {
                             foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
                             {
-                                if (mappedShortcut == shortcut && consumer.ActionHandler.TryPerformAction(mapping.Action, true).Enabled)
+                                if (mappedShortcut == shortcut && provider.ActionHandler.TryPerformAction(mapping.Action, true).Enabled)
                                 {
                                     return true;
                                 }
