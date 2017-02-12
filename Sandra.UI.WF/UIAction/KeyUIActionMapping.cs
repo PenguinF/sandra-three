@@ -204,7 +204,10 @@ namespace Sandra.UI.WF
                         {
                             foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
                             {
-                                if (mappedShortcut == shortcut && provider.ActionHandler.TryPerformAction(mapping.Action, true).Enabled)
+                                // If the shortcut matches, then try to perform the action.
+                                // If the action was disabled, but is visible, then swallow the key by returning true.
+                                if (mappedShortcut == shortcut
+                                    && provider.ActionHandler.TryPerformAction(mapping.Action, true).Visible)
                                 {
                                     return true;
                                 }
