@@ -49,6 +49,12 @@ namespace Sandra.UI.WF
         public UIMenuNode.Container MenuContainer;
 
         /// <summary>
+        /// Gets or sets if this action is the first in a group of actions.
+        /// This will result in a separator generated above the menu item generated for this binding.
+        /// </summary>
+        public bool IsFirstInGroup;
+
+        /// <summary>
         /// If <see cref="ShowInMenu"/> is true, defines the caption to display for the generated menu item.
         /// </summary>
         public string MenuCaption;

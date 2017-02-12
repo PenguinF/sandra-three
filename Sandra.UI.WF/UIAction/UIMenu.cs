@@ -38,6 +38,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public readonly Image Icon;
 
+        /// <summary>
+        /// Gets or sets if this node is the first in a group of nodes.
+        /// </summary>
+        public bool IsFirstInGroup;
+
         protected UIMenuNode(string caption)
         {
             Caption = caption;
@@ -58,6 +63,7 @@ namespace Sandra.UI.WF
                 if (action == null) throw new ArgumentNullException(nameof(action));
                 Action = action;
                 Shortcut = binding.MainShortcut;
+                IsFirstInGroup = binding.IsFirstInGroup;
             }
 
             public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
@@ -189,12 +195,26 @@ namespace Sandra.UI.WF
 
         void buildMenu(IEnumerable<UIMenuNode> actionList, ToolStripItemCollection destination)
         {
+            bool first = true;
+            bool firstInGroup = false;
+
             foreach (var node in actionList)
             {
+                // Remember to add a ToolStripSeparator, but prevent multiple separators in a row
+                // by only adding the separator right before a new visible menu item.
+                if (node.IsFirstInGroup) firstInGroup = true;
+
                 var generatedItem = node.Accept(this);
                 if (generatedItem != null)
                 {
+                    // Add separator between this menu-item and the previous one?
+                    if (firstInGroup && !first)
+                    {
+                        destination.Add(new ToolStripSeparator());
+                    }
                     destination.Add(generatedItem);
+                    first = false;
+                    firstInGroup = false;
                 }
             }
         }
