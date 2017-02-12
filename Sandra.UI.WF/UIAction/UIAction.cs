@@ -67,9 +67,9 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents one of three types of access to a <see cref="UIAction"/>.
+    /// Represents one of three types of visibility to a <see cref="UIAction"/>.
     /// </summary>
-    public enum UIActionAccessType
+    public enum UIActionVisibility
     {
         /// <summary>
         /// The <see cref="UIAction"/> is currently not visible.
@@ -91,9 +91,9 @@ namespace Sandra.UI.WF
     public struct UIActionState
     {
         /// <summary>
-        /// Gets the current type of access to the <see cref="UIAction"/>.
+        /// Gets the current visibility of the <see cref="UIAction"/>.
         /// </summary>
-        public UIActionAccessType UIActionAccessType { get; }
+        public UIActionVisibility UIActionVisibility { get; }
 
         /// <summary>
         /// Gets if the <see cref="UIAction"/> is currently in a checked state.
@@ -103,25 +103,25 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets if the <see cref="UIAction"/> is currently visible.
         /// </summary>
-        public bool Visible => UIActionAccessType != UIActionAccessType.Hidden;
+        public bool Visible => UIActionVisibility != UIActionVisibility.Hidden;
 
         /// <summary>
         /// Gets if the <see cref="UIAction"/> is currently enabled.
         /// </summary>
-        public bool Enabled => UIActionAccessType == UIActionAccessType.Enabled;
+        public bool Enabled => UIActionVisibility == UIActionVisibility.Enabled;
 
-        public UIActionState(UIActionAccessType accessType)
+        public UIActionState(UIActionVisibility visibility)
         {
-            UIActionAccessType = accessType;
+            UIActionVisibility = visibility;
             Checked = false;
         }
 
-        public UIActionState(UIActionAccessType accessType, bool isChecked)
+        public UIActionState(UIActionVisibility visibility, bool isChecked)
         {
-            UIActionAccessType = accessType;
+            UIActionVisibility = visibility;
             Checked = isChecked;
         }
 
-        public static implicit operator UIActionState(UIActionAccessType accessType) => new UIActionState(accessType);
+        public static implicit operator UIActionState(UIActionVisibility visibility) => new UIActionState(visibility);
     }
 }

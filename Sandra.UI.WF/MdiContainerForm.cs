@@ -51,7 +51,7 @@ namespace Sandra.UI.WF
             UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
             {
                 if (perform) NewPlayingBoard();
-                return UIActionAccessType.Enabled;
+                return UIActionVisibility.Enabled;
             };
 
             this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
@@ -103,9 +103,9 @@ namespace Sandra.UI.WF
             };
             UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
             {
-                if (game.ActiveMoveIndex == 0) return UIActionAccessType.Disabled;
+                if (game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
                 if (perform) game.ActiveMoveIndex--;
-                return UIActionAccessType.Enabled;
+                return UIActionVisibility.Enabled;
             };
 
             var gotoNextMove = new UIActionBinding()
@@ -121,9 +121,9 @@ namespace Sandra.UI.WF
             };
             UIActionHandlerFunc gotoNextMoveHandler = perform =>
             {
-                if (game.ActiveMoveIndex == game.MoveCount) return UIActionAccessType.Disabled;
+                if (game.ActiveMoveIndex == game.MoveCount) return UIActionVisibility.Disabled;
                 if (perform) game.ActiveMoveIndex++;
-                return UIActionAccessType.Enabled;
+                return UIActionVisibility.Enabled;
             };
 
             mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
