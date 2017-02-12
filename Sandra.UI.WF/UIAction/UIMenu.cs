@@ -29,14 +29,14 @@ namespace Sandra.UI.WF
 
         public sealed class Element : UIMenuNode
         {
-            public readonly UIAction Key;
+            public readonly UIAction Action;
             public readonly string Caption;
             public readonly ShortcutKeys Shortcut;
 
-            public Element(UIAction key, UIActionBinding binding)
+            public Element(UIAction action, UIActionBinding binding)
             {
-                if (key == null) throw new ArgumentNullException(nameof(key));
-                Key = key;
+                if (action == null) throw new ArgumentNullException(nameof(action));
+                Action = action;
                 Caption = binding.MenuCaption;
                 Shortcut = binding.MainShortcut;
             }
@@ -177,7 +177,7 @@ namespace Sandra.UI.WF
         {
             if (string.IsNullOrEmpty(element.Caption)) return null;
 
-            UIActionState currentActionState = ActionHandler.TryPerformAction(element.Key, false);
+            UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
             if (!currentActionState.Visible) return null;
 
@@ -194,7 +194,7 @@ namespace Sandra.UI.WF
             {
                 try
                 {
-                    actionHandler.TryPerformAction(element.Key, true);
+                    actionHandler.TryPerformAction(element.Action, true);
                 }
                 catch (Exception exc)
                 {
