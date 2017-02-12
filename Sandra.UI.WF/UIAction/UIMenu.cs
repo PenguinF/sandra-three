@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -27,11 +28,24 @@ namespace Sandra.UI.WF
     {
         public abstract TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor);
 
+        /// <summary>
+        /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
+        /// </summary>
         public readonly string Caption;
+
+        /// <summary>
+        /// Gets the icon to display for this node.
+        /// </summary>
+        public readonly Image Icon;
 
         protected UIMenuNode(string caption)
         {
             Caption = caption;
+        }
+
+        protected UIMenuNode(string caption, Image icon) : this(caption)
+        {
+            Icon = icon;
         }
 
         public sealed class Element : UIMenuNode
@@ -39,7 +53,7 @@ namespace Sandra.UI.WF
             public readonly UIAction Action;
             public readonly ShortcutKeys Shortcut;
 
-            public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaption)
+            public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaption, binding.MenuIcon)
             {
                 if (action == null) throw new ArgumentNullException(nameof(action));
                 Action = action;
@@ -54,6 +68,10 @@ namespace Sandra.UI.WF
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
 
             public Container(string caption) : base(caption)
+            {
+            }
+
+            public Container(string caption, Image icon) : base(caption, icon)
             {
             }
 
@@ -188,6 +206,7 @@ namespace Sandra.UI.WF
             return new ToolStripMenuItem()
             {
                 Text = KeyUtils.EscapeAmpersand(node.Caption),
+                Image = node.Icon,
             };
         }
 

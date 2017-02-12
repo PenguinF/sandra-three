@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace Sandra.UI.WF
 {
@@ -51,5 +52,10 @@ namespace Sandra.UI.WF
         /// If <see cref="ShowInMenu"/> is true, defines the caption to display for the generated menu item.
         /// </summary>
         public string MenuCaption;
+
+        /// <summary>
+        /// If <see cref="ShowInMenu"/> is true, defines the image to display for the generated menu item.
+        /// </summary>
+        public Image MenuIcon;
     }
 }
