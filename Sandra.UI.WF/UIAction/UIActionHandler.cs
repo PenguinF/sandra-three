@@ -116,7 +116,7 @@ namespace Sandra.UI.WF
                 return handler(perform);
             }
 
-            // Default is hidden for unsupported actions.
+            // Default is to look at parent controls for unsupported actions.
             return default(UIActionState);
         }
     }

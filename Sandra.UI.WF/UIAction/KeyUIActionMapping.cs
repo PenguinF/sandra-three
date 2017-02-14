@@ -205,9 +205,9 @@ namespace Sandra.UI.WF
                             foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
                             {
                                 // If the shortcut matches, then try to perform the action.
-                                // If the action was disabled, but is visible, then swallow the key by returning true.
+                                // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
                                 if (mappedShortcut == shortcut
-                                    && provider.ActionHandler.TryPerformAction(mapping.Action, true).Visible)
+                                    && provider.ActionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
                                 {
                                     return true;
                                 }
