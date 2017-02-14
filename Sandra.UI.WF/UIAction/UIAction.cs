@@ -72,6 +72,10 @@ namespace Sandra.UI.WF
     public enum UIActionVisibility
     {
         /// <summary>
+        /// The visibility of a <see cref="UIAction"/> is determined by some parent control.
+        /// </summary>
+        Parent,
+        /// <summary>
         /// The <see cref="UIAction"/> is currently not visible.
         /// </summary>
         Hidden,
@@ -103,7 +107,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets if the <see cref="UIAction"/> is currently visible.
         /// </summary>
-        public bool Visible => UIActionVisibility != UIActionVisibility.Hidden;
+        public bool Visible => UIActionVisibility == UIActionVisibility.Disabled || Enabled;
 
         /// <summary>
         /// Gets if the <see cref="UIAction"/> is currently enabled.

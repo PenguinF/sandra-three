@@ -17,7 +17,7 @@
  * 
  *********************************************************************************/
 using System;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -25,7 +25,7 @@ namespace Sandra.UI.WF
 {
     public sealed class FocusHelper
     {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         static extern IntPtr GetFocus();
 
         /// <summary>
@@ -39,19 +39,87 @@ namespace Sandra.UI.WF
         public static Control GetFocusedControl()
         {
             IntPtr focusedHandle = GetFocus();
-
-            int lastError = Marshal.GetLastWin32Error();
-            if (lastError != 0)
-            {
-                throw new Win32Exception(lastError);
-            }
-
             if (focusedHandle != IntPtr.Zero)
             {
                 // If the focused control is not a .NET control, then this will return null.
                 return Control.FromHandle(focusedHandle);
             }
             return null;
+        }
+
+
+        Control currentFocusedControl;
+
+        FocusHelper()
+        {
+            Application.Idle += (_, __) =>
+            {
+                try
+                {
+                    Control newFocusedControl = GetFocusedControl();
+                    if (currentFocusedControl != newFocusedControl)
+                    {
+                        Control previousFocusedControl = currentFocusedControl;
+                        currentFocusedControl = newFocusedControl;
+                        event_FocusChanged.Raise(this, new FocusChangedEventArgs(previousFocusedControl, currentFocusedControl));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Uh... write to Debug? This certainly is no reason to crash.
+                    Debug.WriteLine($"{ex.GetType().FullName}: {ex.Message}");
+                }
+            };
+        }
+
+        // Lazy<T> is thread-safe.
+        static readonly Lazy<FocusHelper> instance = new Lazy<FocusHelper>(() => new FocusHelper());
+
+        /// <summary>
+        /// Returns the singleton <see cref="FocusHelper"/> which is created on the thread which first uses it.
+        /// </summary>
+        public static FocusHelper Instance => instance.Value;
+
+        readonly WeakEvent event_FocusChanged = new WeakEvent();
+
+        /// <summary>
+        /// <see cref="WeakEvent"/> which occurs when the focused control changed.
+        /// </summary>
+        public event EventHandler<FocusChangedEventArgs> FocusChanged
+        {
+            add { event_FocusChanged.AddListener(value); }
+            remove { event_FocusChanged.RemoveListener(value); }
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="FocusHelper.FocusChanged"/> event.
+    /// </summary>
+    public class FocusChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the <see cref="Control"/> that previously contained focus.
+        /// </summary>
+        public Control PreviousFocusedControl { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Control"/> that currently contains focus.
+        /// </summary>
+        public Control CurrentFocusedControl { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FocusChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="previousFocusedControl">
+        /// The <see cref="Control"/> that previously contained focus.
+        /// </param>
+        /// <param name="currentFocusedControl">
+        /// The <see cref="Control"/> that currently contains focus.
+        /// </param>
+        public FocusChangedEventArgs(Control previousFocusedControl, Control currentFocusedControl)
+        {
+            PreviousFocusedControl = previousFocusedControl;
+            CurrentFocusedControl = currentFocusedControl;
         }
     }
 }

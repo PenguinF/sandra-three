@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -93,6 +94,19 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Occurs when all actions have been invalidated.
+        /// </summary>
+        public event EventHandler UIActionsInvalidated;
+
+        /// <summary>
+        /// Raises the <see cref="UIActionsInvalidated"/> event. 
+        /// </summary>
+        protected virtual void OnUIActionsInvalidated(EventArgs e)
+        {
+            UIActionsInvalidated?.Invoke(this, e);
+        }
+
+        /// <summary>
         /// Verifies if an action can be performed, and optionally performs it.
         /// </summary>
         /// <param name="action">
@@ -113,11 +127,48 @@ namespace Sandra.UI.WF
             if (handlers.TryGetValue(action, out handler))
             {
                 // Call the handler.
-                return handler(perform);
+                UIActionState result = handler(perform);
+
+                // Raise event if an action has been performed successfully.
+                if (perform && result.UIActionVisibility == UIActionVisibility.Enabled)
+                {
+                    Invalidate();
+                }
+
+                return result;
             }
 
-            // Default is hidden for unsupported actions.
+            // Default is to look at parent controls for unsupported actions.
             return default(UIActionState);
+        }
+
+        /// <summary>
+        /// Helper function which enumerates all <see cref="UIActionHandler"/> instances
+        /// which are available on any parent of a <see cref="Control"/>.
+        /// </summary>
+        /// <param name="startControl">
+        /// <see cref="Control"/> where to start searching.
+        /// </param>
+        public static IEnumerable<UIActionHandler> EnumerateUIActionHandlers(Control startControl)
+        {
+            Control control = startControl;
+            while (control != null)
+            {
+                IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
+                if (provider != null && provider.ActionHandler != null)
+                {
+                    yield return provider.ActionHandler;
+                }
+                control = control.Parent;
+            }
+        }
+
+        /// <summary>
+        /// Invalidates this <see cref="UIActionHandler"/> manually.
+        /// </summary>
+        public void Invalidate()
+        {
+            OnUIActionsInvalidated(EventArgs.Empty);
         }
     }
 

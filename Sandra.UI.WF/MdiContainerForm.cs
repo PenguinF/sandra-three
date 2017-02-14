@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -38,28 +39,16 @@ namespace Sandra.UI.WF
         {
             IsMdiContainer = true;
 
-            UIMenuNode.Container container = new UIMenuNode.Container("Games");
-            ActionHandler.RootMenuNode.Nodes.Add(container);
-
-            var openNewPlayingBoard = new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuContainer = container,
-                MenuCaption = "New playing board",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
-            };
-            UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
-            {
-                if (perform) NewPlayingBoard();
-                return UIActionVisibility.Enabled;
-            };
-
-            this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
+            // Initialize UIActions before building the MainMenuStrip based on it.
+            initializeUIActions();
 
             MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
+
+            // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
+            indexFocusDependentUIActions(MainMenuStrip.Items);
         }
 
         /// <summary>
@@ -67,18 +56,169 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
+        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + " ";
+
+        public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
+
+        public UIActionState TryOpenNewPlayingBoard(bool perform)
+        {
+            if (perform) NewPlayingBoard();
+            return UIActionVisibility.Enabled;
+        }
+
+
+        class FocusDependentUIActionState
+        {
+            public UIActionToolStripMenuItem MenuItem;
+            public UIActionHandler CurrentHandler;
+            public bool IsDirty;
+        }
+
+        readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
+
+        void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
+        {
+            // Add a menu item inside the given container which will update itself after focus changes.
+            binding.MenuContainer = container;
+
+            // Register in a Dictionary to be able to figure out which menu items should be updated.
+            focusDependentUIActions.Add(action, new FocusDependentUIActionState());
+
+            this.BindAction(action, perform =>
+            {
+                try
+                {
+                    var state = focusDependentUIActions[action];
+                    state.CurrentHandler = null;
+                    state.IsDirty = false;
+
+                    // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                    {
+                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        {
+                            // Remember the action handler this UIAction is now bound to.
+                            state.CurrentHandler = actionHandler;
+                            return currentActionState;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
+                }
+
+                // No handler in the chain that processes the UIAction actively, so set to disabled.
+                return UIActionVisibility.Disabled;
+
+            }, binding);
+        }
+
+        void initializeUIActions()
+        {
+            UIMenuNode.Container container = new UIMenuNode.Container("Game");
+            ActionHandler.RootMenuNode.Nodes.Add(container);
+
+            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuContainer = container,
+                MenuCaption = "New playing board",
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
+            });
+
+            bindFocusDependentUIAction(container,
+                                       InteractiveGame.GotoPreviousMoveUIAction,
+                                       InteractiveGame.DefaultGotoPreviousMoveBinding());
+
+            bindFocusDependentUIAction(container,
+                                       InteractiveGame.GotoNextMoveUIAction,
+                                       InteractiveGame.DefaultGotoNextMoveBinding());
+
+            FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
+        }
+
+        void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
+        {
+            UIActionHandler previousHandler;
+            if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
+            {
+                previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
+            }
+            UIActionHandler currentHandler;
+            if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
+            {
+                currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
+            }
+
+            // Invalidate all focus dependent items.
+            foreach (var state in focusDependentUIActions.Values)
+            {
+                state.IsDirty = true;
+            }
+
+            updateFocusDependentMenuItems();
+        }
+
+        void focusedHandler_UIActionsInvalidated(object sender, EventArgs e)
+        {
+            UIActionHandler activeHandler = (UIActionHandler)sender;
+            foreach (var state in focusDependentUIActions.Values)
+            {
+                // Invalidate all UIActions which are influenced by the active handler.
+                state.IsDirty |= state.CurrentHandler == activeHandler;
+            }
+
+            // Register on the Idle event since focus changes might happen as well.
+            // Do make sure the Idle event is registered at most once.
+            Application.Idle -= application_Idle;
+            Application.Idle += application_Idle;
+        }
+
+        void application_Idle(object sender, EventArgs e)
+        {
+            updateFocusDependentMenuItems();
+        }
+
+        void updateFocusDependentMenuItems()
+        {
+            Application.Idle -= application_Idle;
+            foreach (var state in focusDependentUIActions.Values.Where(x => x.IsDirty))
+            {
+                state.MenuItem.Update(ActionHandler.TryPerformAction(state.MenuItem.Action, false));
+            }
+        }
+
+        void indexFocusDependentUIActions(ToolStripItemCollection collection)
+        {
+            foreach (ToolStripMenuItem item in collection.OfType<ToolStripMenuItem>())
+            {
+                UIActionToolStripMenuItem actionItem = item as UIActionToolStripMenuItem;
+                if (actionItem != null)
+                {
+                    FocusDependentUIActionState state;
+                    if (focusDependentUIActions.TryGetValue(actionItem.Action, out state))
+                    {
+                        state.MenuItem = actionItem;
+                    }
+                }
+                else
+                {
+                    indexFocusDependentUIActions(item.DropDownItems);
+                }
+            }
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (KeyUtils.TryExecute(keyData))
-            {
-                return true;
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
+            // This code makes shortcuts work for all UIActionHandlers.
+            return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
         }
 
         public void NewPlayingBoard()
         {
-            Game game = new Game(Position.GetInitialPosition());
+            InteractiveGame game = new InteractiveGame(Position.GetInitialPosition());
 
             StandardChessBoardForm mdiChild = new StandardChessBoardForm()
             {
@@ -90,44 +230,8 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
-            var gotoPreviousMove = new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Previous move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
-                },
-            };
-            UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
-            {
-                if (game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-                if (perform) game.ActiveMoveIndex--;
-                return UIActionVisibility.Enabled;
-            };
-
-            var gotoNextMove = new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Next move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
-                },
-            };
-            UIActionHandlerFunc gotoNextMoveHandler = perform =>
-            {
-                if (game.ActiveMoveIndex == game.MoveCount) return UIActionVisibility.Disabled;
-                if (perform) game.ActiveMoveIndex++;
-                return UIActionVisibility.Enabled;
-            };
-
-            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
-            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
@@ -160,8 +264,8 @@ namespace Sandra.UI.WF
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 };
 
-                movesTextBox.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
-                movesTextBox.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+                movesTextBox.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
+                movesTextBox.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
                 UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);
@@ -223,12 +327,5 @@ namespace Sandra.UI.WF
                 return null;
             }
         }
-    }
-
-    public static class ActionKeys
-    {
-        public static readonly UIAction GotoNextMove = new UIAction(nameof(GotoNextMove));
-        public static readonly UIAction GotoPreviousMove = new UIAction(nameof(GotoPreviousMove));
-        public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }

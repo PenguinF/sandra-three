@@ -193,28 +193,22 @@ namespace Sandra.UI.WF
         {
             try
             {
-                Control control = FocusHelper.GetFocusedControl();
-                while (control != null)
+                foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                 {
-                    IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
-                    if (provider != null && provider.ActionHandler != null)
+                    // Try to find an action with given shortcut.
+                    foreach (var mapping in actionHandler.KeyMappings)
                     {
-                        // Try to find an action with given shortcut.
-                        foreach (var mapping in provider.ActionHandler.KeyMappings)
+                        foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
                         {
-                            foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
+                            // If the shortcut matches, then try to perform the action.
+                            // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                            if (mappedShortcut == shortcut
+                                && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
                             {
-                                // If the shortcut matches, then try to perform the action.
-                                // If the action was disabled, but is visible, then swallow the key by returning true.
-                                if (mappedShortcut == shortcut
-                                    && provider.ActionHandler.TryPerformAction(mapping.Action, true).Visible)
-                                {
-                                    return true;
-                                }
+                                return true;
                             }
                         }
                     }
-                    control = control.Parent;
                 }
                 return false;
             }
