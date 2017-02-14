@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -25,7 +24,7 @@ namespace Sandra.UI.WF
 {
     public sealed class FocusHelper
     {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         static extern IntPtr GetFocus();
 
         /// <summary>
@@ -39,13 +38,6 @@ namespace Sandra.UI.WF
         public static Control GetFocusedControl()
         {
             IntPtr focusedHandle = GetFocus();
-
-            int lastError = Marshal.GetLastWin32Error();
-            if (lastError != 0)
-            {
-                throw new Win32Exception(lastError);
-            }
-
             if (focusedHandle != IntPtr.Zero)
             {
                 // If the focused control is not a .NET control, then this will return null.
