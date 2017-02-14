@@ -50,6 +50,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FocusHelper.cs" />
+    <Compile Include="InteractiveGame.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
