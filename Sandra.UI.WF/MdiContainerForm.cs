@@ -144,12 +144,12 @@ namespace Sandra.UI.WF
             UIActionHandler previousHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
             {
-                previousHandler.UIActionPerformed -= focusedHandler_UIActionPerformed;
+                previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
             }
             UIActionHandler currentHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
             {
-                currentHandler.UIActionPerformed += focusedHandler_UIActionPerformed;
+                currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
             }
 
             // Invalidate all focus dependent items.
@@ -161,7 +161,7 @@ namespace Sandra.UI.WF
             updateFocusDependentMenuItems();
         }
 
-        void focusedHandler_UIActionPerformed(object sender, UIActionPerformedEventArgs e)
+        void focusedHandler_UIActionsInvalidated(object sender, EventArgs e)
         {
             UIActionHandler activeHandler = (UIActionHandler)sender;
             foreach (var state in focusDependentUIActions.Values)

@@ -94,16 +94,16 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Occurs when an action has been performed successfully.
+        /// Occurs when all actions have been invalidated.
         /// </summary>
-        public event EventHandler<UIActionPerformedEventArgs> UIActionPerformed;
+        public event EventHandler UIActionsInvalidated;
 
         /// <summary>
-        /// Raises the <see cref="UIActionPerformed"/> event. 
+        /// Raises the <see cref="UIActionsInvalidated"/> event. 
         /// </summary>
-        protected virtual void OnUIActionPerformed(UIActionPerformedEventArgs e)
+        protected virtual void OnUIActionsInvalidated(EventArgs e)
         {
-            UIActionPerformed?.Invoke(this, e);
+            UIActionsInvalidated?.Invoke(this, e);
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Sandra.UI.WF
                 // Raise event if an action has been performed successfully.
                 if (perform && result.UIActionVisibility == UIActionVisibility.Enabled)
                 {
-                    OnUIActionPerformed(new UIActionPerformedEventArgs(action));
+                    OnUIActionsInvalidated(EventArgs.Empty);
                 }
 
                 return result;
@@ -161,29 +161,6 @@ namespace Sandra.UI.WF
                 }
                 control = control.Parent;
             }
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="UIActionHandler.UIActionPerformed"/> event.
-    /// </summary>
-    public class UIActionPerformedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the action that was performed.
-        /// </summary>
-        public UIAction Action { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UIActionPerformedEventArgs"/> class.
-        /// </summary>
-        /// <param name="action">
-        /// The action that was performed.
-        /// </param>
-        public UIActionPerformedEventArgs(UIAction action)
-        {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-            Action = action;
         }
     }
 
