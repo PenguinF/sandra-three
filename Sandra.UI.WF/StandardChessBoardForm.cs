@@ -441,6 +441,7 @@ namespace Sandra.UI.WF
             resetMoveEffects(e);
 
             game.Game.TryMakeMove(ref moveInfo, true);
+            PlayingBoard.ActionHandler.Invalidate();
         }
 
         private void game_ActiveMoveIndexChanged(object sender, EventArgs e)

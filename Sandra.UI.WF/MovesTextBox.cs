@@ -326,6 +326,7 @@ namespace Sandra.UI.WF
                             updateFont(moveElements[game.Game.ActiveMoveIndex - 1], regularFont);
                         }
                         game.Game.ActiveMoveIndex = newActiveMoveIndex;
+                        ActionHandler.Invalidate();
                         if (game.Game.ActiveMoveIndex > 0)
                         {
                             updateFont(moveElements[game.Game.ActiveMoveIndex - 1], lastMoveFont);

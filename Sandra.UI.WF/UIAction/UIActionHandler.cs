@@ -132,7 +132,7 @@ namespace Sandra.UI.WF
                 // Raise event if an action has been performed successfully.
                 if (perform && result.UIActionVisibility == UIActionVisibility.Enabled)
                 {
-                    OnUIActionsInvalidated(EventArgs.Empty);
+                    Invalidate();
                 }
 
                 return result;
@@ -161,6 +161,14 @@ namespace Sandra.UI.WF
                 }
                 control = control.Parent;
             }
+        }
+
+        /// <summary>
+        /// Invalidates this <see cref="UIActionHandler"/> manually.
+        /// </summary>
+        public void Invalidate()
+        {
+            OnUIActionsInvalidated(EventArgs.Empty);
         }
     }
 
