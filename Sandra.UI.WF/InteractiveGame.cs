@@ -18,4 +18,13 @@
  *********************************************************************************/
 namespace Sandra.UI.WF
 {
+    public class InteractiveGame
+    {
+        public readonly Chess.Game Game;
+
+        public InteractiveGame(Chess.Position initialPosition)
+        {
+            Game = new Chess.Game(initialPosition);
+        }
+    }
 }

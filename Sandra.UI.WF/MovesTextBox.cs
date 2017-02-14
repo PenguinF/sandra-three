@@ -75,21 +75,21 @@ namespace Sandra.UI.WF
             }
         }
 
-        private Chess.Game game;
+        private InteractiveGame game;
 
         /// <summary>
         /// Gets or sets the chess game which contains the moves to be formatted.
         /// </summary>
-        public Chess.Game Game
+        public InteractiveGame Game
         {
             get { return game; }
             set
             {
                 if (game != value)
                 {
-                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
+                    if (game != null) game.Game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
-                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
+                    if (game != null) game.Game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
                     refreshText();
                 }
             }
@@ -153,9 +153,9 @@ namespace Sandra.UI.WF
                 var updated = new List<TextElement>();
 
                 // Simulate a game to be able to format moves correctly.
-                Chess.Game simulatedGame = new Chess.Game(game.InitialPosition);
+                Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
-                foreach (Chess.Move move in game.Moves)
+                foreach (Chess.Move move in game.Game.Moves)
                 {
                     int plyCounter = simulatedGame.MoveCount;
                     if (plyCounter > 0) updated.Add(new TextElement.Space());
@@ -271,10 +271,10 @@ namespace Sandra.UI.WF
                 }
 
                 // elementLists.Elements can only be non-null if game is non-null as well.
-                if (elements != null && game.ActiveMoveIndex > 0)
+                if (elements != null && game.Game.ActiveMoveIndex > 0)
                 {
                     // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                    var lastMoveElement = moveElements[game.ActiveMoveIndex - 1];
+                    var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
                     updateFont(lastMoveElement, lastMoveFont);
 
                     if (!ContainsFocus)
@@ -316,19 +316,19 @@ namespace Sandra.UI.WF
                 }
 
                 // Update the active move index in the game.
-                if (game.ActiveMoveIndex != newActiveMoveIndex)
+                if (game.Game.ActiveMoveIndex != newActiveMoveIndex)
                 {
                     BeginUpdate();
                     try
                     {
-                        if (game.ActiveMoveIndex > 0)
+                        if (game.Game.ActiveMoveIndex > 0)
                         {
-                            updateFont(moveElements[game.ActiveMoveIndex - 1], regularFont);
+                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], regularFont);
                         }
-                        game.ActiveMoveIndex = newActiveMoveIndex;
-                        if (game.ActiveMoveIndex > 0)
+                        game.Game.ActiveMoveIndex = newActiveMoveIndex;
+                        if (game.Game.ActiveMoveIndex > 0)
                         {
-                            updateFont(moveElements[game.ActiveMoveIndex - 1], lastMoveFont);
+                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], lastMoveFont);
                         }
                     }
                     finally

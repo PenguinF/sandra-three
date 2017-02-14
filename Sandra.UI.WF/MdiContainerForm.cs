@@ -78,7 +78,7 @@ namespace Sandra.UI.WF
 
         public void NewPlayingBoard()
         {
-            Game game = new Game(Position.GetInitialPosition());
+            InteractiveGame game = new InteractiveGame(Position.GetInitialPosition());
 
             StandardChessBoardForm mdiChild = new StandardChessBoardForm()
             {
@@ -103,8 +103,8 @@ namespace Sandra.UI.WF
             };
             UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
             {
-                if (game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-                if (perform) game.ActiveMoveIndex--;
+                if (game.Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
+                if (perform) game.Game.ActiveMoveIndex--;
                 return UIActionVisibility.Enabled;
             };
 
@@ -121,8 +121,8 @@ namespace Sandra.UI.WF
             };
             UIActionHandlerFunc gotoNextMoveHandler = perform =>
             {
-                if (game.ActiveMoveIndex == game.MoveCount) return UIActionVisibility.Disabled;
-                if (perform) game.ActiveMoveIndex++;
+                if (game.Game.ActiveMoveIndex == game.Game.MoveCount) return UIActionVisibility.Disabled;
+                if (perform) game.Game.ActiveMoveIndex++;
                 return UIActionVisibility.Enabled;
             };
 
