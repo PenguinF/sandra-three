@@ -77,11 +77,8 @@ namespace Sandra.UI.WF
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (KeyUtils.TryExecute(keyData))
-            {
-                return true;
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
+            // This code makes shortcuts work for all UIActionHandlers.
+            return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
         }
 
         public void NewPlayingBoard()
