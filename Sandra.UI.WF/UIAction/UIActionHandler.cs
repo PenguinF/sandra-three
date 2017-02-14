@@ -94,6 +94,19 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Occurs when an action has been performed successfully.
+        /// </summary>
+        public event EventHandler<UIActionPerformedEventArgs> UIActionPerformed;
+
+        /// <summary>
+        /// Raises the <see cref="UIActionPerformed"/> event. 
+        /// </summary>
+        protected virtual void OnUIActionPerformed(UIActionPerformedEventArgs e)
+        {
+            UIActionPerformed?.Invoke(this, e);
+        }
+
+        /// <summary>
         /// Verifies if an action can be performed, and optionally performs it.
         /// </summary>
         /// <param name="action">
@@ -114,7 +127,15 @@ namespace Sandra.UI.WF
             if (handlers.TryGetValue(action, out handler))
             {
                 // Call the handler.
-                return handler(perform);
+                UIActionState result = handler(perform);
+
+                // Raise event if an action has been performed successfully.
+                if (perform && result.UIActionVisibility == UIActionVisibility.Enabled)
+                {
+                    OnUIActionPerformed(new UIActionPerformedEventArgs(action));
+                }
+
+                return result;
             }
 
             // Default is to look at parent controls for unsupported actions.
@@ -140,6 +161,29 @@ namespace Sandra.UI.WF
                 }
                 control = control.Parent;
             }
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="UIActionHandler.UIActionPerformed"/> event.
+    /// </summary>
+    public class UIActionPerformedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the action that was performed.
+        /// </summary>
+        public UIAction Action { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UIActionPerformedEventArgs"/> class.
+        /// </summary>
+        /// <param name="action">
+        /// The action that was performed.
+        /// </param>
+        public UIActionPerformedEventArgs(UIAction action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            Action = action;
         }
     }
 
