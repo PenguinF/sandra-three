@@ -21,6 +21,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -88,6 +89,31 @@ namespace Sandra.UI.WF
             bindFocusDependentUIAction(container,
                                        InteractiveGame.GotoNextMoveUIAction,
                                        InteractiveGame.DefaultGotoNextMoveBinding());
+
+            FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
+        }
+
+        void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
+        {
+            // Temp non generic code.
+            foreach (UIActionToolStripMenuItem item in ((ToolStripMenuItem)MainMenuStrip.Items[0]).DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                if (item.Action != OpenNewPlayingBoardUIAction)
+                {
+                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
+                    {
+                        UIActionState currentActionState = actionHandler.TryPerformAction(item.Action, false);
+                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        {
+                            item.Update(currentActionState);
+                            return;
+                        }
+                    }
+
+                    // No handler in the chain that processes the UIAction actively, so set to disabled.
+                    item.Update(default(UIActionState));
+                }
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
