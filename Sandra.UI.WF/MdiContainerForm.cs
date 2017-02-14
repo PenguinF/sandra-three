@@ -18,6 +18,7 @@
  *********************************************************************************/
 using Sandra.Chess;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -62,10 +63,16 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
+
+        readonly HashSet<UIAction> focusDependentUIActions = new HashSet<UIAction>();
+
         void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
         {
             // Add a menu item inside the given container which will update itself after focus changes.
             binding.MenuContainer = container;
+
+            // Register in a Hashset to be able to figure out which menu items should be updated.
+            focusDependentUIActions.Add(action);
 
             this.BindAction(action, perform =>
             {
@@ -111,10 +118,31 @@ namespace Sandra.UI.WF
 
         void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
         {
+            UIActionHandler previousHandler;
+            if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
+            {
+                previousHandler.UIActionPerformed -= focusedHandler_UIActionPerformed;
+            }
+            UIActionHandler currentHandler;
+            if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
+            {
+                currentHandler.UIActionPerformed += focusedHandler_UIActionPerformed;
+            }
+
+            updateFocusDependentMenuItems();
+        }
+
+        void focusedHandler_UIActionPerformed(object sender, UIActionPerformedEventArgs e)
+        {
+            updateFocusDependentMenuItems();
+        }
+
+        void updateFocusDependentMenuItems()
+        {
             // Temp non generic code.
             foreach (UIActionToolStripMenuItem item in ((ToolStripMenuItem)MainMenuStrip.Items[0]).DropDownItems.OfType<UIActionToolStripMenuItem>())
             {
-                if (item.Action != OpenNewPlayingBoardUIAction)
+                if (focusDependentUIActions.Contains(item.Action))
                 {
                     item.Update(ActionHandler.TryPerformAction(item.Action, false));
                 }
