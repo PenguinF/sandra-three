@@ -26,7 +26,7 @@ namespace Sandra.UI.WF
 {
     public abstract class UIMenuNode
     {
-        public abstract TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor);
+        public abstract TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor);
 
         /// <summary>
         /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = binding.IsFirstInGroup;
             }
 
-            public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
+            public override TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
         }
 
         public sealed class Container : UIMenuNode
@@ -81,11 +81,11 @@ namespace Sandra.UI.WF
             {
             }
 
-            public override TResult Accept<TResult>(IUIActionTreeVisitor<TResult> visitor) => visitor.VisitContainer(this);
+            public override TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor) => visitor.VisitContainer(this);
         }
     }
 
-    public interface IUIActionTreeVisitor<TResult>
+    public interface IUIMenuTreeVisitor<TResult>
     {
         TResult VisitContainer(UIMenuNode.Container container);
         TResult VisitElement(UIMenuNode.Element element);
@@ -169,7 +169,7 @@ namespace Sandra.UI.WF
         }
     }
 
-    public struct UIMenuBuilder : IUIActionTreeVisitor<ToolStripMenuItem>
+    public struct UIMenuBuilder : IUIMenuTreeVisitor<ToolStripMenuItem>
     {
         /// <summary>
         /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>
@@ -230,7 +230,7 @@ namespace Sandra.UI.WF
             };
         }
 
-        ToolStripMenuItem IUIActionTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
+        ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -260,7 +260,7 @@ namespace Sandra.UI.WF
             return menuItem;
         }
 
-        ToolStripMenuItem IUIActionTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
+        ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
             var menuItem = createMenuItem(container);
 
