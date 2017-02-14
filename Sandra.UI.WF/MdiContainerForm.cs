@@ -37,6 +37,22 @@ namespace Sandra.UI.WF
         {
             IsMdiContainer = true;
 
+            // Initialize UIActions before building the MainMenuStrip based on it.
+            initializeUIActions();
+
+            MainMenuStrip = new MenuStrip();
+            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
+            MainMenuStrip.Visible = true;
+            Controls.Add(MainMenuStrip);
+        }
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        void initializeUIActions()
+        {
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             ActionHandler.RootMenuNode.Nodes.Add(container);
 
@@ -54,17 +70,7 @@ namespace Sandra.UI.WF
             };
 
             this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
-
-            MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
-            MainMenuStrip.Visible = true;
-            Controls.Add(MainMenuStrip);
         }
-
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
