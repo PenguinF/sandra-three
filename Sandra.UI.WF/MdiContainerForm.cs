@@ -66,7 +66,23 @@ namespace Sandra.UI.WF
         {
             // Add a menu item inside the given container which will update itself after focus changes.
             binding.MenuContainer = container;
-            this.BindAction(action, perform => UIActionVisibility.Disabled, binding);
+
+            this.BindAction(action, perform =>
+            {
+                // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                {
+                    UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                    if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                    {
+                        return currentActionState;
+                    }
+                }
+
+                // No handler in the chain that processes the UIAction actively, so set to disabled.
+                return UIActionVisibility.Disabled;
+
+            }, binding);
         }
 
         void initializeUIActions()
@@ -100,18 +116,7 @@ namespace Sandra.UI.WF
             {
                 if (item.Action != OpenNewPlayingBoardUIAction)
                 {
-                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
-                    {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(item.Action, false);
-                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
-                        {
-                            item.Update(currentActionState);
-                            return;
-                        }
-                    }
-
-                    // No handler in the chain that processes the UIAction actively, so set to disabled.
-                    item.Update(default(UIActionState));
+                    item.Update(ActionHandler.TryPerformAction(item.Action, false));
                 }
             }
         }
