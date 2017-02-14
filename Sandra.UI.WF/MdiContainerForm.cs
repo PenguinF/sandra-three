@@ -46,6 +46,9 @@ namespace Sandra.UI.WF
             UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
+
+            // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
+            indexFocusDependentUIActions(MainMenuStrip.Items);
         }
 
         /// <summary>
@@ -64,15 +67,15 @@ namespace Sandra.UI.WF
         }
 
 
-        readonly HashSet<UIAction> focusDependentUIActions = new HashSet<UIAction>();
+        readonly Dictionary<UIAction, UIActionToolStripMenuItem> focusDependentUIActions = new Dictionary<UIAction, UIActionToolStripMenuItem>();
 
         void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
         {
             // Add a menu item inside the given container which will update itself after focus changes.
             binding.MenuContainer = container;
 
-            // Register in a Hashset to be able to figure out which menu items should be updated.
-            focusDependentUIActions.Add(action);
+            // Register in a Dictionary to be able to figure out which menu items should be updated.
+            focusDependentUIActions.Add(action, null);
 
             this.BindAction(action, perform =>
             {
@@ -146,12 +149,27 @@ namespace Sandra.UI.WF
 
         void updateFocusDependentMenuItems()
         {
-            // Temp non generic code.
-            foreach (UIActionToolStripMenuItem item in ((ToolStripMenuItem)MainMenuStrip.Items[0]).DropDownItems.OfType<UIActionToolStripMenuItem>())
+            foreach (UIActionToolStripMenuItem item in focusDependentUIActions.Values)
             {
-                if (focusDependentUIActions.Contains(item.Action))
+                item.Update(ActionHandler.TryPerformAction(item.Action, false));
+            }
+        }
+
+        void indexFocusDependentUIActions(ToolStripItemCollection collection)
+        {
+            foreach (ToolStripMenuItem item in collection.OfType<ToolStripMenuItem>())
+            {
+                UIActionToolStripMenuItem actionItem = item as UIActionToolStripMenuItem;
+                if (actionItem != null)
                 {
-                    item.Update(ActionHandler.TryPerformAction(item.Action, false));
+                    if (focusDependentUIActions.ContainsKey(actionItem.Action))
+                    {
+                        focusDependentUIActions[actionItem.Action] = actionItem;
+                    }
+                }
+                else
+                {
+                    indexFocusDependentUIActions(item.DropDownItems);
                 }
             }
         }
