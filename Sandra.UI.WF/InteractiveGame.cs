@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
     public class InteractiveGame
@@ -25,6 +27,26 @@ namespace Sandra.UI.WF
         public InteractiveGame(Chess.Position initialPosition)
         {
             Game = new Chess.Game(initialPosition);
+            Game.ActiveMoveIndexChanged += (_, e) => OnActiveMoveIndexChanged(e);
+        }
+
+        readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();
+
+        /// <summary>
+        /// <see cref="WeakEvent"/> which occurs when the active move index of the game was updated.
+        /// </summary>
+        public event EventHandler ActiveMoveIndexChanged
+        {
+            add { event_ActiveMoveIndexChanged.AddListener(value); }
+            remove { event_ActiveMoveIndexChanged.RemoveListener(value); }
+        }
+
+        /// <summary>
+        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
+        /// </summary>
+        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
+        {
+            event_ActiveMoveIndexChanged.Raise(this, e);
         }
     }
 }

@@ -55,9 +55,9 @@ namespace Sandra.UI.WF
             {
                 if (game != value)
                 {
-                    if (game != null) game.Game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
+                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
-                    if (game != null) game.Game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
+                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
 
                     copyPositionToBoard();
                 }
