@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -118,6 +119,27 @@ namespace Sandra.UI.WF
 
             // Default is to look at parent controls for unsupported actions.
             return default(UIActionState);
+        }
+
+        /// <summary>
+        /// Helper function which enumerates all <see cref="UIActionHandler"/> instances
+        /// which are available on any parent of a <see cref="Control"/>.
+        /// </summary>
+        /// <param name="startControl">
+        /// <see cref="Control"/> where to start searching.
+        /// </param>
+        public static IEnumerable<UIActionHandler> EnumerateUIActionHandlers(Control startControl)
+        {
+            Control control = startControl;
+            while (control != null)
+            {
+                IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
+                if (provider != null && provider.ActionHandler != null)
+                {
+                    yield return provider.ActionHandler;
+                }
+                control = control.Parent;
+            }
         }
     }
 
