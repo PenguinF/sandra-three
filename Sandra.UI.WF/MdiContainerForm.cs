@@ -51,25 +51,28 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
+        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + " ";
+
+        public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
+
+        public UIActionState TryOpenNewPlayingBoard(bool perform)
+        {
+            if (perform) NewPlayingBoard();
+            return UIActionVisibility.Enabled;
+        }
+
         void initializeUIActions()
         {
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             ActionHandler.RootMenuNode.Nodes.Add(container);
 
-            var openNewPlayingBoard = new UIActionBinding()
+            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, new UIActionBinding()
             {
                 ShowInMenu = true,
                 MenuContainer = container,
                 MenuCaption = "New playing board",
                 MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
-            };
-            UIActionHandlerFunc openNewPlayingBoardHandler = perform =>
-            {
-                if (perform) NewPlayingBoard();
-                return UIActionVisibility.Enabled;
-            };
-
-            this.BindAction(ActionKeys.OpenNewPlayingBoard, openNewPlayingBoardHandler, openNewPlayingBoard);
+            });
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -192,10 +195,5 @@ namespace Sandra.UI.WF
                 return null;
             }
         }
-    }
-
-    public static class ActionKeys
-    {
-        public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }
