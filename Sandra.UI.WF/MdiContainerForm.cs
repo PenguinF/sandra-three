@@ -76,14 +76,21 @@ namespace Sandra.UI.WF
 
             this.BindAction(action, perform =>
             {
-                // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                try
                 {
-                    UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
-                    if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                    // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
-                        return currentActionState;
+                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        {
+                            return currentActionState;
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
                 }
 
                 // No handler in the chain that processes the UIAction actively, so set to disabled.
