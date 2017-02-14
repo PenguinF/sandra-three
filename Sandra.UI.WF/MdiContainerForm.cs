@@ -18,7 +18,6 @@
  *********************************************************************************/
 using Sandra.Chess;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -90,44 +89,8 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
-            var gotoPreviousMove = new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Previous move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
-                },
-            };
-            UIActionHandlerFunc gotoPreviousMoveHandler = perform =>
-            {
-                if (game.Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-                if (perform) game.Game.ActiveMoveIndex--;
-                return UIActionVisibility.Enabled;
-            };
-
-            var gotoNextMove = new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Next move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
-                },
-            };
-            UIActionHandlerFunc gotoNextMoveHandler = perform =>
-            {
-                if (game.Game.ActiveMoveIndex == game.Game.MoveCount) return UIActionVisibility.Disabled;
-                if (perform) game.Game.ActiveMoveIndex++;
-                return UIActionVisibility.Enabled;
-            };
-
-            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
-            mdiChild.PlayingBoard.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
@@ -160,8 +123,8 @@ namespace Sandra.UI.WF
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 };
 
-                movesTextBox.BindAction(ActionKeys.GotoPreviousMove, gotoPreviousMoveHandler, gotoPreviousMove);
-                movesTextBox.BindAction(ActionKeys.GotoNextMove, gotoNextMoveHandler, gotoNextMove);
+                movesTextBox.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
+                movesTextBox.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
                 UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);
@@ -227,8 +190,6 @@ namespace Sandra.UI.WF
 
     public static class ActionKeys
     {
-        public static readonly UIAction GotoNextMove = new UIAction(nameof(GotoNextMove));
-        public static readonly UIAction GotoPreviousMove = new UIAction(nameof(GotoPreviousMove));
         public static readonly UIAction OpenNewPlayingBoard = new UIAction(nameof(OpenNewPlayingBoard));
     }
 }
