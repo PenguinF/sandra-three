@@ -61,6 +61,13 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
+        void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
+        {
+            // Add a menu item inside the given container which will update itself after focus changes.
+            binding.MenuContainer = container;
+            this.BindAction(action, perform => UIActionVisibility.Disabled, binding);
+        }
+
         void initializeUIActions()
         {
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
@@ -73,6 +80,14 @@ namespace Sandra.UI.WF
                 MenuCaption = "New playing board",
                 MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
             });
+
+            bindFocusDependentUIAction(container,
+                                       InteractiveGame.GotoPreviousMoveUIAction,
+                                       InteractiveGame.DefaultGotoPreviousMoveBinding());
+
+            bindFocusDependentUIAction(container,
+                                       InteractiveGame.GotoNextMoveUIAction,
+                                       InteractiveGame.DefaultGotoNextMoveBinding());
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
