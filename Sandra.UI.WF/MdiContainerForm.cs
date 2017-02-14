@@ -67,7 +67,14 @@ namespace Sandra.UI.WF
         }
 
 
-        readonly Dictionary<UIAction, UIActionToolStripMenuItem> focusDependentUIActions = new Dictionary<UIAction, UIActionToolStripMenuItem>();
+        class FocusDependentUIActionState
+        {
+            public UIActionToolStripMenuItem MenuItem;
+            public UIActionHandler CurrentHandler;
+            public bool IsDirty;
+        }
+
+        readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
 
         void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
         {
@@ -75,18 +82,24 @@ namespace Sandra.UI.WF
             binding.MenuContainer = container;
 
             // Register in a Dictionary to be able to figure out which menu items should be updated.
-            focusDependentUIActions.Add(action, null);
+            focusDependentUIActions.Add(action, new FocusDependentUIActionState());
 
             this.BindAction(action, perform =>
             {
                 try
                 {
+                    var state = focusDependentUIActions[action];
+                    state.CurrentHandler = null;
+                    state.IsDirty = false;
+
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
                         UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
                         if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
                         {
+                            // Remember the action handler this UIAction is now bound to.
+                            state.CurrentHandler = actionHandler;
                             return currentActionState;
                         }
                     }
@@ -139,19 +152,41 @@ namespace Sandra.UI.WF
                 currentHandler.UIActionPerformed += focusedHandler_UIActionPerformed;
             }
 
+            // Invalidate all focus dependent items.
+            foreach (var state in focusDependentUIActions.Values)
+            {
+                state.IsDirty = true;
+            }
+
             updateFocusDependentMenuItems();
         }
 
         void focusedHandler_UIActionPerformed(object sender, UIActionPerformedEventArgs e)
+        {
+            UIActionHandler activeHandler = (UIActionHandler)sender;
+            foreach (var state in focusDependentUIActions.Values)
+            {
+                // Invalidate all UIActions which are influenced by the active handler.
+                state.IsDirty |= state.CurrentHandler == activeHandler;
+            }
+
+            // Register on the Idle event since focus changes might happen as well.
+            // Do make sure the Idle event is registered at most once.
+            Application.Idle -= application_Idle;
+            Application.Idle += application_Idle;
+        }
+
+        void application_Idle(object sender, EventArgs e)
         {
             updateFocusDependentMenuItems();
         }
 
         void updateFocusDependentMenuItems()
         {
-            foreach (UIActionToolStripMenuItem item in focusDependentUIActions.Values)
+            Application.Idle -= application_Idle;
+            foreach (var state in focusDependentUIActions.Values.Where(x => x.IsDirty))
             {
-                item.Update(ActionHandler.TryPerformAction(item.Action, false));
+                state.MenuItem.Update(ActionHandler.TryPerformAction(state.MenuItem.Action, false));
             }
         }
 
@@ -162,9 +197,10 @@ namespace Sandra.UI.WF
                 UIActionToolStripMenuItem actionItem = item as UIActionToolStripMenuItem;
                 if (actionItem != null)
                 {
-                    if (focusDependentUIActions.ContainsKey(actionItem.Action))
+                    FocusDependentUIActionState state;
+                    if (focusDependentUIActions.TryGetValue(actionItem.Action, out state))
                     {
-                        focusDependentUIActions[actionItem.Action] = actionItem;
+                        state.MenuItem = actionItem;
                     }
                 }
                 else
