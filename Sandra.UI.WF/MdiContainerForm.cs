@@ -136,6 +136,10 @@ namespace Sandra.UI.WF
                                        InteractiveGame.GotoNextMoveUIAction,
                                        InteractiveGame.DefaultGotoNextMoveBinding());
 
+            bindFocusDependentUIAction(container,
+                                       PlayingBoard.TakeScreenshotUIAction,
+                                       PlayingBoard.DefaultTakeScreenshotBinding());
+
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
 
@@ -232,6 +236,7 @@ namespace Sandra.UI.WF
 
             mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
             mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
+            mdiChild.PlayingBoard.BindAction(PlayingBoard.TakeScreenshotUIAction, mdiChild.PlayingBoard.TryTakeScreenshot, PlayingBoard.DefaultTakeScreenshotBinding());
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
