@@ -17,12 +17,14 @@
  * 
  *********************************************************************************/
 using System;
+using System.Diagnostics;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Represents an immutable, opaque atom for a user action.
     /// </summary>
+    [DebuggerDisplay("{Key}")]
     public sealed class UIAction : IEquatable<UIAction>
     {
         private readonly string Key;
