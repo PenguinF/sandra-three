@@ -182,7 +182,7 @@ namespace Sandra.UI.WF
         /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
         /// </summary>
         /// <param name="provider">
-        /// The <see cref="System.Windows.Forms.Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
         /// </param>
         /// <param name="action">
         /// The <see cref="UIAction"/> to bind.
@@ -198,6 +198,27 @@ namespace Sandra.UI.WF
             if (provider != null && provider.ActionHandler != null)
             {
                 provider.ActionHandler.BindAction(action, handler, binding);
+            }
+        }
+
+        /// <summary>
+        /// Binds a handler function for a <see cref="UIAction"/> to a <see cref="IUIActionHandlerProvider"/>,
+        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
+        /// </summary>
+        /// <param name="provider">
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// </param>
+        /// <param name="binding">
+        /// Contains the <see cref="UIAction"/> with default binding.
+        /// </param>
+        /// <param name="handler">
+        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public static void BindAction(this IUIActionHandlerProvider provider, DefaultUIActionBinding binding, UIActionHandlerFunc handler)
+        {
+            if (provider != null && provider.ActionHandler != null)
+            {
+                provider.ActionHandler.BindAction(binding.Action, handler, binding.DefaultBinding);
             }
         }
     }

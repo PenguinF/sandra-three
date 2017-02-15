@@ -59,4 +59,20 @@ namespace Sandra.UI.WF
         /// </summary>
         public Image MenuIcon;
     }
+
+    /// <summary>
+    /// Helper class which encapsulates a <see cref="IUIActionHandlerProvider"/>'s default suggested binding for a <see cref="UIAction"/>.
+    /// </summary>
+    public sealed class DefaultUIActionBinding
+    {
+        /// <summary>
+        /// Gets the <see cref="UIAction"/> to bind.
+        /// </summary>
+        public UIAction Action { get; }
+
+        /// <summary>
+        /// Gets the <see cref="UIActionBinding"/> which contains the default parameters that define how the action is exposed to the user interface.
+        /// </summary>
+        public UIActionBinding DefaultBinding { get; }
+    }
 }
