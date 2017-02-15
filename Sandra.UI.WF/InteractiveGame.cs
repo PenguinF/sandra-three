@@ -24,7 +24,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Encapsulates a chess game which publishes a set of shared <see cref="UIAction"/>s.
     /// </summary>
-    public class InteractiveGame
+    public partial class InteractiveGame
     {
         public readonly Chess.Game Game;
 
