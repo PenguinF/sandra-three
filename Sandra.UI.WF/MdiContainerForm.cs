@@ -88,62 +88,65 @@ namespace Sandra.UI.WF
 
         readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
 
-        void bindFocusDependentUIAction(UIMenuNode.Container container, DefaultUIActionBinding binding)
+        void bindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
         {
-            // Copy the default binding and modify it.
-            UIActionBinding modifiedBinding = binding.DefaultBinding;
-
-            // Add a menu item inside the given container which will update itself after focus changes.
-            modifiedBinding.MenuContainer = container;
-
-            // Always show in the menu.
-            modifiedBinding.ShowInMenu = true;
-
-            // Register in a Dictionary to be able to figure out which menu items should be updated.
-            focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
-
-            // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-            mainMenuActionHandler.BindAction(binding.Action, perform =>
+            foreach (DefaultUIActionBinding binding in bindings)
             {
-                try
+                // Copy the default binding and modify it.
+                UIActionBinding modifiedBinding = binding.DefaultBinding;
+
+                // Add a menu item inside the given container which will update itself after focus changes.
+                modifiedBinding.MenuContainer = container;
+
+                // Always show in the menu.
+                modifiedBinding.ShowInMenu = true;
+
+                // Register in a Dictionary to be able to figure out which menu items should be updated.
+                focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
+
+                // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+                mainMenuActionHandler.BindAction(binding.Action, perform =>
                 {
-                    var state = focusDependentUIActions[binding.Action];
-
-                    if (!perform)
+                    try
                     {
-                        // Only clear/set the state when called from updateFocusDependentMenuItems().
-                        state.CurrentHandler = null;
-                        state.IsDirty = false;
-                    }
+                        var state = focusDependentUIActions[binding.Action];
 
-                    // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
-                    {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        if (!perform)
                         {
-                            // Remember the action handler this UIAction is now bound to.
-                            if (!perform)
-                            {
-                                // Only clear/set the state when called from updateFocusDependentMenuItems().
-                                state.CurrentHandler = actionHandler;
-                            }
-                            return currentActionState;
+                            // Only clear/set the state when called from updateFocusDependentMenuItems().
+                            state.CurrentHandler = null;
+                            state.IsDirty = false;
                         }
 
-                        // Only consider handlers which are defined in the context of this one.
-                        if (ActionHandler == actionHandler) break;
+                        // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                        foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                        {
+                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            {
+                                // Remember the action handler this UIAction is now bound to.
+                                if (!perform)
+                                {
+                                    // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                    state.CurrentHandler = actionHandler;
+                                }
+                                return currentActionState;
+                            }
+
+                            // Only consider handlers which are defined in the context of this one.
+                            if (ActionHandler == actionHandler) break;
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
 
-                // No handler in the chain that processes the UIAction actively, so set to disabled.
-                return UIActionVisibility.Disabled;
+                    // No handler in the chain that processes the UIAction actively, so set to disabled.
+                    return UIActionVisibility.Disabled;
 
-            }, modifiedBinding);
+                }, modifiedBinding);
+            }
         }
 
         void initializeUIActions()
@@ -153,12 +156,14 @@ namespace Sandra.UI.WF
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
 
-            // Also display in the main manu.
-            bindFocusDependentUIAction(container, OpenNewPlayingBoard);
-            bindFocusDependentUIAction(container, InteractiveGame.GotoPreviousMove);
-            bindFocusDependentUIAction(container, InteractiveGame.GotoNextMove);
-            bindFocusDependentUIAction(container, StandardChessBoardForm.TakeScreenshot);
+            // Add these actions to the "Game" dropdown list.
+            bindFocusDependentUIActions(container,
+                                        OpenNewPlayingBoard,
+                                        InteractiveGame.GotoPreviousMove,
+                                        InteractiveGame.GotoNextMove,
+                                        StandardChessBoardForm.TakeScreenshot);
 
+            // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
 
