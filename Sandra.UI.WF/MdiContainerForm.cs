@@ -94,6 +94,10 @@ namespace Sandra.UI.WF
             // Add a menu item inside the given container which will update itself after focus changes.
             binding.MenuContainer = container;
 
+            // Always show in the menu, and clear the alternative shortcuts.
+            binding.ShowInMenu = true;
+            binding.AlternativeShortcuts = null;
+
             // Register in a Dictionary to be able to figure out which menu items should be updated.
             focusDependentUIActions.Add(action, new FocusDependentUIActionState());
 
