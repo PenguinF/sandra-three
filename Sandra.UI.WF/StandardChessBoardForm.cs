@@ -26,7 +26,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Form which contains a chess board on which a standard game of chess is played.
     /// </summary>
-    public class StandardChessBoardForm : PlayingBoardForm
+    public partial class StandardChessBoardForm : PlayingBoardForm
     {
         private EnumIndexedArray<Chess.ColoredPiece, Image> pieceImages = EnumIndexedArray<Chess.ColoredPiece, Image>.New();
 

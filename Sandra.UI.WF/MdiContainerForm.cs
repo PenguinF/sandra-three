@@ -62,7 +62,14 @@ namespace Sandra.UI.WF
 
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
-        public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
+        public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "New game",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+            });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)
         {
@@ -70,15 +77,6 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
-        public UIActionBinding DefaultOpenNewPlayingBoardBinding()
-        {
-            return new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "New game",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N),
-            };
-        }
 
 
         class FocusDependentUIActionState
@@ -90,86 +88,81 @@ namespace Sandra.UI.WF
 
         readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
 
-        void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
+        void bindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
         {
-            // Add a menu item inside the given container which will update itself after focus changes.
-            binding.MenuContainer = container;
-
-            // Always show in the menu, and clear the alternative shortcuts.
-            binding.ShowInMenu = true;
-            binding.AlternativeShortcuts = null;
-
-            // Register in a Dictionary to be able to figure out which menu items should be updated.
-            focusDependentUIActions.Add(action, new FocusDependentUIActionState());
-
-            // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-            mainMenuActionHandler.BindAction(action, perform =>
+            foreach (DefaultUIActionBinding binding in bindings)
             {
-                try
+                // Copy the default binding and modify it.
+                UIActionBinding modifiedBinding = binding.DefaultBinding;
+
+                // Add a menu item inside the given container which will update itself after focus changes.
+                modifiedBinding.MenuContainer = container;
+
+                // Always show in the menu.
+                modifiedBinding.ShowInMenu = true;
+
+                // Register in a Dictionary to be able to figure out which menu items should be updated.
+                focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
+
+                // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+                mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
                 {
-                    var state = focusDependentUIActions[action];
-
-                    if (!perform)
+                    try
                     {
-                        // Only clear/set the state when called from updateFocusDependentMenuItems().
-                        state.CurrentHandler = null;
-                        state.IsDirty = false;
-                    }
+                        var state = focusDependentUIActions[binding.Action];
 
-                    // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
-                    {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
-                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        if (!perform)
                         {
-                            // Remember the action handler this UIAction is now bound to.
-                            if (!perform)
-                            {
-                                // Only clear/set the state when called from updateFocusDependentMenuItems().
-                                state.CurrentHandler = actionHandler;
-                            }
-                            return currentActionState;
+                            // Only clear/set the state when called from updateFocusDependentMenuItems().
+                            state.CurrentHandler = null;
+                            state.IsDirty = false;
                         }
 
-                        // Only consider handlers which are defined in the context of this one.
-                        if (ActionHandler == actionHandler) break;
+                        // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                        foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                        {
+                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            {
+                                // Remember the action handler this UIAction is now bound to.
+                                if (!perform)
+                                {
+                                    // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                    state.CurrentHandler = actionHandler;
+                                }
+                                return currentActionState;
+                            }
+
+                            // Only consider handlers which are defined in the context of this one.
+                            if (ActionHandler == actionHandler) break;
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
 
-                // No handler in the chain that processes the UIAction actively, so set to disabled.
-                return UIActionVisibility.Disabled;
-
-            }, binding);
+                    // No handler in the chain that processes the UIAction actively, so set to disabled.
+                    return UIActionVisibility.Disabled;
+                });
+            }
         }
 
         void initializeUIActions()
         {
-            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, DefaultOpenNewPlayingBoardBinding());
+            this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
 
-            // Also display in the main manu.
-            bindFocusDependentUIAction(container,
-                                       OpenNewPlayingBoardUIAction,
-                                       DefaultOpenNewPlayingBoardBinding());
+            // Add these actions to the "Game" dropdown list.
+            bindFocusDependentUIActions(container,
+                                        OpenNewPlayingBoard,
+                                        InteractiveGame.GotoPreviousMove,
+                                        InteractiveGame.GotoNextMove,
+                                        StandardChessBoardForm.TakeScreenshot);
 
-            bindFocusDependentUIAction(container,
-                                       InteractiveGame.GotoPreviousMoveUIAction,
-                                       InteractiveGame.DefaultGotoPreviousMoveBinding());
-
-            bindFocusDependentUIAction(container,
-                                       InteractiveGame.GotoNextMoveUIAction,
-                                       InteractiveGame.DefaultGotoNextMoveBinding());
-
-            bindFocusDependentUIAction(container,
-                                       PlayingBoard.TakeScreenshotUIAction,
-                                       PlayingBoard.DefaultTakeScreenshotBinding());
-
+            // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
 
@@ -270,9 +263,13 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
-            mdiChild.PlayingBoard.BindAction(PlayingBoard.TakeScreenshotUIAction, mdiChild.PlayingBoard.TryTakeScreenshot, PlayingBoard.DefaultTakeScreenshotBinding());
+            mdiChild.PlayingBoard.BindActions(new UIActionBindings
+            {
+                { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
+                { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
+                { StandardChessBoardForm.TakeScreenshot, mdiChild.TryTakeScreenshot },
+            });
+
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
@@ -305,8 +302,12 @@ namespace Sandra.UI.WF
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 };
 
-                movesTextBox.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
-                movesTextBox.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
+                movesTextBox.BindActions(new UIActionBindings
+                {
+                    { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
+                    { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
+                });
+
                 UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);

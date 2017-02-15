@@ -61,29 +61,24 @@ namespace Sandra.UI.WF
         /// <param name="action">
         /// The <see cref="UIAction"/> to bind.
         /// </param>
+        /// <param name="binding">
+        /// <see cref="UIActionBinding"/> structure containing parameters that define how the <see cref="UIAction"/> is exposed to the user interface.
+        /// </param>
         /// <param name="handler">
         /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
         /// </param>
-        /// <param name="binding">
-        /// Structure containing parameters that define how the action is exposed to the user interface.
-        /// </param>
-        public void BindAction(UIAction action, UIActionHandlerFunc handler, UIActionBinding binding)
+        public void BindAction(UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
             handlers.Add(action, handler);
 
-            if (!binding.MainShortcut.IsEmpty)
+            if (binding.Shortcuts != null)
             {
-                keyMappings.Add(new KeyUIActionMapping(binding.MainShortcut, action));
-            }
-
-            if (binding.AlternativeShortcuts != null)
-            {
-                foreach (var alternativeShortcut in binding.AlternativeShortcuts.Where(x => !x.IsEmpty))
+                foreach (var shortcut in binding.Shortcuts.Where(x => !x.IsEmpty))
                 {
-                    keyMappings.Add(new KeyUIActionMapping(alternativeShortcut, action));
+                    keyMappings.Add(new KeyUIActionMapping(shortcut, action));
                 }
             }
 
@@ -110,7 +105,7 @@ namespace Sandra.UI.WF
         /// Verifies if an action can be performed, and optionally performs it.
         /// </summary>
         /// <param name="action">
-        /// The action to perform.
+        /// The <see cref="UIAction"/> to perform.
         /// </param>
         /// <param name="perform">
         /// Whether or not to perform the action.
@@ -173,10 +168,14 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Interface implemented by <see cref="System.Windows.Forms.Control"/> subclasses to hook into the <see cref="UIAction"/> framework.
+    /// Interface implemented by <see cref="Control"/> subclasses to hook into the <see cref="UIAction"/> framework.
     /// </summary>
     public interface IUIActionHandlerProvider
     {
+        /// <summary>
+        /// Returns the <see cref="UIActionHandler"/> for the <see cref="Control"/>,
+        /// to which handlers for <see cref="UIAction"/>s can be bound.
+        /// </summary>
         UIActionHandler ActionHandler { get; }
     }
 
@@ -187,22 +186,66 @@ namespace Sandra.UI.WF
         /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
         /// </summary>
         /// <param name="provider">
-        /// The <see cref="System.Windows.Forms.Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
         /// </param>
         /// <param name="action">
         /// The <see cref="UIAction"/> to bind.
         /// </param>
+        /// <param name="binding">
+        /// <see cref="UIActionBinding"/> structure containing parameters that define how the <see cref="UIAction"/> is exposed to the user interface.
+        /// </param>
         /// <param name="handler">
         /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
         /// </param>
-        /// <param name="binding">
-        /// Structure containing parameters that define how the action is exposed to the user interface.
-        /// </param>
-        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, UIActionHandlerFunc handler, UIActionBinding binding)
+        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
         {
             if (provider != null && provider.ActionHandler != null)
             {
-                provider.ActionHandler.BindAction(action, handler, binding);
+                provider.ActionHandler.BindAction(action, binding, handler);
+            }
+        }
+
+        /// <summary>
+        /// Binds a handler function for a <see cref="UIAction"/> to a <see cref="IUIActionHandlerProvider"/>,
+        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
+        /// </summary>
+        /// <param name="provider">
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// </param>
+        /// <param name="binding">
+        /// Contains the <see cref="UIAction"/> with default <see cref="UIActionBinding"/>.
+        /// </param>
+        /// <param name="handler">
+        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public static void BindAction(this IUIActionHandlerProvider provider, DefaultUIActionBinding binding, UIActionHandlerFunc handler)
+        {
+            if (provider != null && provider.ActionHandler != null)
+            {
+                provider.ActionHandler.BindAction(binding.Action, binding.DefaultBinding, handler);
+            }
+        }
+
+        /// <summary>
+        /// Binds a collection of handlers for <see cref="UIAction"/>s to a <see cref="IUIActionHandlerProvider"/>.
+        /// </summary>
+        /// <param name="provider">
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// </param>
+        /// <param name="bindings">
+        /// A collection of triples of a <see cref="UIAction"/> to bind, a <see cref="UIActionBinding"/> that defines how the action
+        /// is exposed to the user interface, and a handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public static void BindActions(this IUIActionHandlerProvider provider, UIActionBindings bindings)
+        {
+            if (provider != null && provider.ActionHandler != null)
+            {
+                foreach (var bindingHandlerPair in bindings)
+                {
+                    provider.ActionHandler.BindAction(bindingHandlerPair.Binding.Action,
+                                                      bindingHandlerPair.Binding.DefaultBinding,
+                                                      bindingHandlerPair.Handler);
+                }
             }
         }
     }

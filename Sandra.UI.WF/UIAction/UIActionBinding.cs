@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -28,14 +29,9 @@ namespace Sandra.UI.WF
     public struct UIActionBinding
     {
         /// <summary>
-        /// Shortcut which is displayed in menu items, as well as used for creating a <see cref="KeyUIActionMapping"/>.
+        /// List of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
         /// </summary>
-        public ShortcutKeys MainShortcut;
-
-        /// <summary>
-        /// List of alternative shortcut keys which will invoke the action as well, but are not shown in e.g. the context menu.
-        /// </summary>
-        public List<ShortcutKeys> AlternativeShortcuts;
+        public List<ShortcutKeys> Shortcuts;
 
         /// <summary>
         /// Whether or not the action is shown in the context menu.
@@ -63,5 +59,58 @@ namespace Sandra.UI.WF
         /// If <see cref="ShowInMenu"/> is true, defines the image to display for the generated menu item.
         /// </summary>
         public Image MenuIcon;
+    }
+
+    /// <summary>
+    /// Helper class which encapsulates a <see cref="IUIActionHandlerProvider"/>'s default suggested binding for a <see cref="UIAction"/>.
+    /// </summary>
+    public sealed class DefaultUIActionBinding
+    {
+        /// <summary>
+        /// Gets the <see cref="UIAction"/> to bind.
+        /// </summary>
+        public UIAction Action { get; }
+
+        /// <summary>
+        /// Gets the <see cref="UIActionBinding"/> which contains the default parameters that define how the action is exposed to the user interface.
+        /// </summary>
+        public UIActionBinding DefaultBinding { get; }
+
+        public DefaultUIActionBinding(UIAction action, UIActionBinding defaultBinding)
+        {
+            Action = action;
+            DefaultBinding = defaultBinding;
+        }
+    }
+
+    /// <summary>
+    /// Defines a <see cref="UIActionHandlerFunc"/> for a given <see cref="DefaultUIActionBinding"/>.
+    /// </summary>
+    public sealed class BindingHandlerPair
+    {
+        public readonly DefaultUIActionBinding Binding;
+        public readonly UIActionHandlerFunc Handler;
+
+        public BindingHandlerPair(DefaultUIActionBinding binding, UIActionHandlerFunc handler)
+        {
+            Binding = binding;
+            Handler = handler;
+        }
+    }
+
+    /// <summary>
+    /// Enumerates a collection of handlers for a set of <see cref="UIAction"/> bindings.
+    /// Instances of this class can be declared with a collection initializer.
+    /// </summary>
+    public sealed class UIActionBindings : IEnumerable<BindingHandlerPair>
+    {
+        readonly List<BindingHandlerPair> added = new List<BindingHandlerPair>();
+
+        public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new BindingHandlerPair(key, value));
+
+        IEnumerator<BindingHandlerPair> enumerate() { foreach (var x in added) yield return x; }
+
+        IEnumerator IEnumerable.GetEnumerator() => enumerate();
+        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => enumerate();
     }
 }

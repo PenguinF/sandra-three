@@ -17,14 +17,13 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Encapsulates a chess game which publishes a set of shared <see cref="UIAction"/>s.
     /// </summary>
-    public class InteractiveGame
+    public partial class InteractiveGame
     {
         public readonly Chess.Game Game;
 
@@ -51,58 +50,6 @@ namespace Sandra.UI.WF
         protected virtual void OnActiveMoveIndexChanged(EventArgs e)
         {
             event_ActiveMoveIndexChanged.Raise(this, e);
-        }
-
-
-        public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
-
-        public static readonly UIAction GotoPreviousMoveUIAction = new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMoveUIAction));
-
-        public UIActionState TryGotoPreviousMove(bool perform)
-        {
-            if (Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex--;
-            return UIActionVisibility.Enabled;
-        }
-
-        public static UIActionBinding DefaultGotoPreviousMoveBinding()
-        {
-            return new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaption = "Previous move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
-                },
-            };
-        }
-
-        public static readonly UIAction GotoNextMoveUIAction = new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMoveUIAction));
-
-        public UIActionState TryGotoNextMove(bool perform)
-        {
-            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex++;
-            return UIActionVisibility.Enabled;
-        }
-
-        public static UIActionBinding DefaultGotoNextMoveBinding()
-        {
-            return new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Next move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
-                },
-            };
         }
     }
 }
