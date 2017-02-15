@@ -95,12 +95,15 @@ namespace Sandra.UI.WF
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
-                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        if (actionHandler != ActionHandler)
                         {
-                            // Remember the action handler this UIAction is now bound to.
-                            state.CurrentHandler = actionHandler;
-                            return currentActionState;
+                            UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            {
+                                // Remember the action handler this UIAction is now bound to.
+                                state.CurrentHandler = actionHandler;
+                                return currentActionState;
+                            }
                         }
                     }
                 }
@@ -148,12 +151,18 @@ namespace Sandra.UI.WF
             UIActionHandler previousHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
             {
-                previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
+                if (previousHandler != ActionHandler)
+                {
+                    previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
+                }
             }
             UIActionHandler currentHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
             {
-                currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
+                if (currentHandler != ActionHandler)
+                {
+                    currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
+                }
             }
 
             // Invalidate all focus dependent items.
