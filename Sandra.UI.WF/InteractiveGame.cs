@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections.Generic;
 
 namespace Sandra.UI.WF
 {
@@ -51,52 +50,6 @@ namespace Sandra.UI.WF
         protected virtual void OnActiveMoveIndexChanged(EventArgs e)
         {
             event_ActiveMoveIndexChanged.Raise(this, e);
-        }
-
-
-        public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
-
-        public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
-            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaption = "Previous move",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(ConsoleKey.LeftArrow),
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
-                },
-            });
-
-        public UIActionState TryGotoPreviousMove(bool perform)
-        {
-            if (Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex--;
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
-            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "Next move",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(ConsoleKey.RightArrow),
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
-                },
-            });
-
-        public UIActionState TryGotoNextMove(bool perform)
-        {
-            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex++;
-            return UIActionVisibility.Enabled;
         }
     }
 }
