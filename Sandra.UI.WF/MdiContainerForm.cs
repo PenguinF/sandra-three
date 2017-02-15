@@ -264,9 +264,13 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove);
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMove, game.TryGotoNextMove);
-            mdiChild.PlayingBoard.BindAction(StandardChessBoardForm.TakeScreenshot, mdiChild.TryTakeScreenshot);
+            mdiChild.PlayingBoard.BindActions(new UIActionBindings
+            {
+                { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
+                { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
+                { StandardChessBoardForm.TakeScreenshot, mdiChild.TryTakeScreenshot },
+            });
+
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
@@ -299,8 +303,12 @@ namespace Sandra.UI.WF
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 };
 
-                movesTextBox.BindAction(InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove);
-                movesTextBox.BindAction(InteractiveGame.GotoNextMove, game.TryGotoNextMove);
+                movesTextBox.BindActions(new UIActionBindings
+                {
+                    { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
+                    { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
+                });
+
                 UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);
