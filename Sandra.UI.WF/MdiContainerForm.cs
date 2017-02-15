@@ -103,8 +103,13 @@ namespace Sandra.UI.WF
                 try
                 {
                     var state = focusDependentUIActions[action];
-                    state.CurrentHandler = null;
-                    state.IsDirty = false;
+
+                    if (!perform)
+                    {
+                        // Only clear/set the state when called from updateFocusDependentMenuItems().
+                        state.CurrentHandler = null;
+                        state.IsDirty = false;
+                    }
 
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
@@ -113,7 +118,11 @@ namespace Sandra.UI.WF
                         if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
                         {
                             // Remember the action handler this UIAction is now bound to.
-                            state.CurrentHandler = actionHandler;
+                            if (!perform)
+                            {
+                                // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                state.CurrentHandler = actionHandler;
+                            }
                             return currentActionState;
                         }
 
