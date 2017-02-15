@@ -187,13 +187,13 @@ namespace Sandra.UI.WF
         /// <param name="action">
         /// The <see cref="UIAction"/> to bind.
         /// </param>
-        /// <param name="handler">
-        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
-        /// </param>
         /// <param name="binding">
         /// Structure containing parameters that define how the action is exposed to the user interface.
         /// </param>
-        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, UIActionHandlerFunc handler, UIActionBinding binding)
+        /// <param name="handler">
+        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
         {
             if (provider != null && provider.ActionHandler != null)
             {
