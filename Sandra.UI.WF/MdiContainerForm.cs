@@ -44,7 +44,7 @@ namespace Sandra.UI.WF
             initializeUIActions();
 
             MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
 
@@ -57,7 +57,10 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + " ";
+        // Separate action handler for building the MainMenuStrip.
+        readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+
+        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
         public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
 
@@ -65,6 +68,16 @@ namespace Sandra.UI.WF
         {
             if (perform) NewPlayingBoard();
             return UIActionVisibility.Enabled;
+        }
+
+        public UIActionBinding DefaultOpenNewPlayingBoardBinding()
+        {
+            return new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "New game",
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N),
+            };
         }
 
 
@@ -82,16 +95,26 @@ namespace Sandra.UI.WF
             // Add a menu item inside the given container which will update itself after focus changes.
             binding.MenuContainer = container;
 
+            // Always show in the menu, and clear the alternative shortcuts.
+            binding.ShowInMenu = true;
+            binding.AlternativeShortcuts = null;
+
             // Register in a Dictionary to be able to figure out which menu items should be updated.
             focusDependentUIActions.Add(action, new FocusDependentUIActionState());
 
-            this.BindAction(action, perform =>
+            // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+            mainMenuActionHandler.BindAction(action, perform =>
             {
                 try
                 {
                     var state = focusDependentUIActions[action];
-                    state.CurrentHandler = null;
-                    state.IsDirty = false;
+
+                    if (!perform)
+                    {
+                        // Only clear/set the state when called from updateFocusDependentMenuItems().
+                        state.CurrentHandler = null;
+                        state.IsDirty = false;
+                    }
 
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
@@ -100,9 +123,16 @@ namespace Sandra.UI.WF
                         if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
                         {
                             // Remember the action handler this UIAction is now bound to.
-                            state.CurrentHandler = actionHandler;
+                            if (!perform)
+                            {
+                                // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                state.CurrentHandler = actionHandler;
+                            }
                             return currentActionState;
                         }
+
+                        // Only consider handlers which are defined in the context of this one.
+                        if (ActionHandler == actionHandler) break;
                     }
                 }
                 catch (Exception e)
@@ -118,16 +148,15 @@ namespace Sandra.UI.WF
 
         void initializeUIActions()
         {
-            UIMenuNode.Container container = new UIMenuNode.Container("Game");
-            ActionHandler.RootMenuNode.Nodes.Add(container);
+            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, DefaultOpenNewPlayingBoardBinding());
 
-            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuContainer = container,
-                MenuCaption = "New playing board",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
-            });
+            UIMenuNode.Container container = new UIMenuNode.Container("Game");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
+
+            // Also display in the main manu.
+            bindFocusDependentUIAction(container,
+                                       OpenNewPlayingBoardUIAction,
+                                       DefaultOpenNewPlayingBoardBinding());
 
             bindFocusDependentUIAction(container,
                                        InteractiveGame.GotoPreviousMoveUIAction,
@@ -136,6 +165,10 @@ namespace Sandra.UI.WF
             bindFocusDependentUIAction(container,
                                        InteractiveGame.GotoNextMoveUIAction,
                                        InteractiveGame.DefaultGotoNextMoveBinding());
+
+            bindFocusDependentUIAction(container,
+                                       PlayingBoard.TakeScreenshotUIAction,
+                                       PlayingBoard.DefaultTakeScreenshotBinding());
 
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
@@ -187,7 +220,9 @@ namespace Sandra.UI.WF
             Application.Idle -= application_Idle;
             foreach (var state in focusDependentUIActions.Values.Where(x => x.IsDirty))
             {
-                state.MenuItem.Update(ActionHandler.TryPerformAction(state.MenuItem.Action, false));
+                // If not yet indexed, then fast-exit.
+                if (state.MenuItem == null) return;
+                state.MenuItem.Update(mainMenuActionHandler.TryPerformAction(state.MenuItem.Action, false));
             }
         }
 
@@ -201,6 +236,7 @@ namespace Sandra.UI.WF
                     FocusDependentUIActionState state;
                     if (focusDependentUIActions.TryGetValue(actionItem.Action, out state))
                     {
+                        state.IsDirty = true;
                         state.MenuItem = actionItem;
                     }
                 }
@@ -209,6 +245,8 @@ namespace Sandra.UI.WF
                     indexFocusDependentUIActions(item.DropDownItems);
                 }
             }
+
+            updateFocusDependentMenuItems();
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -216,6 +254,7 @@ namespace Sandra.UI.WF
             // This code makes shortcuts work for all UIActionHandlers.
             return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
         }
+
 
         public void NewPlayingBoard()
         {
@@ -233,6 +272,7 @@ namespace Sandra.UI.WF
 
             mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
             mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
+            mdiChild.PlayingBoard.BindAction(PlayingBoard.TakeScreenshotUIAction, mdiChild.PlayingBoard.TryTakeScreenshot, PlayingBoard.DefaultTakeScreenshotBinding());
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
