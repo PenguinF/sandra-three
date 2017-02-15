@@ -164,18 +164,12 @@ namespace Sandra.UI.WF
             UIActionHandler previousHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
             {
-                if (previousHandler != ActionHandler)
-                {
-                    previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
-                }
+                previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
             }
             UIActionHandler currentHandler;
             if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
             {
-                if (currentHandler != ActionHandler)
-                {
-                    currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
-                }
+                currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
             }
 
             // Invalidate all focus dependent items.
