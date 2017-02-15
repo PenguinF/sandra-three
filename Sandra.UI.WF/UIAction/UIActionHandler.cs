@@ -221,5 +221,28 @@ namespace Sandra.UI.WF
                 provider.ActionHandler.BindAction(binding.Action, handler, binding.DefaultBinding);
             }
         }
+
+        /// <summary>
+        /// Binds a collection of handlers for <see cref="UIAction"/>s to a <see cref="IUIActionHandlerProvider"/>.
+        /// </summary>
+        /// <param name="provider">
+        /// The <see cref="Control"/> which allows binding of actions by implementing the <see cref="IUIActionHandlerProvider"/> interface.
+        /// </param>
+        /// <param name="bindings">
+        /// A collection of triples of a <see cref="UIAction"/> to bind, a <see cref="UIActionBinding"/> that defines how the action
+        /// is exposed to the user interface, and a handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public static void BindActions(this IUIActionHandlerProvider provider, UIActionBindings bindings)
+        {
+            if (provider != null && provider.ActionHandler != null)
+            {
+                foreach (var bindingHandlerPair in bindings)
+                {
+                    provider.ActionHandler.BindAction(bindingHandlerPair.Binding.Action,
+                                                      bindingHandlerPair.Handler,
+                                                      bindingHandlerPair.Binding.DefaultBinding);
+                }
+            }
+        }
     }
 }
