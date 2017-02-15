@@ -56,18 +56,9 @@ namespace Sandra.UI.WF
 
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
-        public static readonly UIAction GotoPreviousMoveUIAction = new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMoveUIAction));
-
-        public UIActionState TryGotoPreviousMove(bool perform)
-        {
-            if (Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex--;
-            return UIActionVisibility.Enabled;
-        }
-
-        public static UIActionBinding DefaultGotoPreviousMoveBinding()
-        {
-            return new UIActionBinding()
+        public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
+            new UIActionBinding()
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -78,21 +69,18 @@ namespace Sandra.UI.WF
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     new ShortcutKeys(ConsoleKey.Z),
                 },
-            };
-        }
+            });
 
-        public static readonly UIAction GotoNextMoveUIAction = new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMoveUIAction));
-
-        public UIActionState TryGotoNextMove(bool perform)
+        public UIActionState TryGotoPreviousMove(bool perform)
         {
-            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex++;
+            if (Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
+            if (perform) Game.ActiveMoveIndex--;
             return UIActionVisibility.Enabled;
         }
 
-        public static UIActionBinding DefaultGotoNextMoveBinding()
-        {
-            return new UIActionBinding()
+        public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
+            new UIActionBinding()
             {
                 ShowInMenu = true,
                 MenuCaption = "Next move",
@@ -102,7 +90,13 @@ namespace Sandra.UI.WF
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     new ShortcutKeys(ConsoleKey.X),
                 },
-            };
+            });
+
+        public UIActionState TryGotoNextMove(bool perform)
+        {
+            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
+            if (perform) Game.ActiveMoveIndex++;
+            return UIActionVisibility.Enabled;
         }
     }
 }

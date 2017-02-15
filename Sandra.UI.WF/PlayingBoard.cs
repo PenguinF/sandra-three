@@ -103,7 +103,15 @@ namespace Sandra.UI.WF
 
         public const string PlayingBoardUIActionPrefix = nameof(PlayingBoard) + ".";
 
-        public static readonly UIAction TakeScreenshotUIAction = new UIAction(PlayingBoardUIActionPrefix + nameof(TakeScreenshotUIAction));
+        public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
+            new UIAction(PlayingBoardUIActionPrefix + nameof(TakeScreenshot)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Copy screenshot to clipboard",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+            });
 
         public UIActionState TryTakeScreenshot(bool perform)
         {
@@ -117,17 +125,6 @@ namespace Sandra.UI.WF
                 }
             }
             return UIActionVisibility.Enabled;
-        }
-
-        public static UIActionBinding DefaultTakeScreenshotBinding()
-        {
-            return new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaption = "Copy screenshot to clipboard",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-            };
         }
 
 

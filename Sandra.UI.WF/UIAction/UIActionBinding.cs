@@ -74,5 +74,11 @@ namespace Sandra.UI.WF
         /// Gets the <see cref="UIActionBinding"/> which contains the default parameters that define how the action is exposed to the user interface.
         /// </summary>
         public UIActionBinding DefaultBinding { get; }
+
+        public DefaultUIActionBinding(UIAction action, UIActionBinding defaultBinding)
+        {
+            Action = action;
+            DefaultBinding = defaultBinding;
+        }
     }
 }

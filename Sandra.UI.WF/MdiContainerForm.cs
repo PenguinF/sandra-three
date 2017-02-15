@@ -62,7 +62,14 @@ namespace Sandra.UI.WF
 
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
-        public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
+        public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "New game",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+            });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)
         {
@@ -70,15 +77,6 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
-        public UIActionBinding DefaultOpenNewPlayingBoardBinding()
-        {
-            return new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaption = "New game",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
-            };
-        }
 
 
         class FocusDependentUIActionState
@@ -90,23 +88,26 @@ namespace Sandra.UI.WF
 
         readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
 
-        void bindFocusDependentUIAction(UIMenuNode.Container container, UIAction action, UIActionBinding binding)
+        void bindFocusDependentUIAction(UIMenuNode.Container container, DefaultUIActionBinding binding)
         {
+            // Copy the default binding and modify it.
+            UIActionBinding modifiedBinding = binding.DefaultBinding;
+
             // Add a menu item inside the given container which will update itself after focus changes.
-            binding.MenuContainer = container;
+            modifiedBinding.MenuContainer = container;
 
             // Always show in the menu.
-            binding.ShowInMenu = true;
+            modifiedBinding.ShowInMenu = true;
 
             // Register in a Dictionary to be able to figure out which menu items should be updated.
-            focusDependentUIActions.Add(action, new FocusDependentUIActionState());
+            focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
 
             // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-            mainMenuActionHandler.BindAction(action, perform =>
+            mainMenuActionHandler.BindAction(binding.Action, perform =>
             {
                 try
                 {
-                    var state = focusDependentUIActions[action];
+                    var state = focusDependentUIActions[binding.Action];
 
                     if (!perform)
                     {
@@ -118,7 +119,7 @@ namespace Sandra.UI.WF
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                        UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
                         if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
                         {
                             // Remember the action handler this UIAction is now bound to.
@@ -142,32 +143,21 @@ namespace Sandra.UI.WF
                 // No handler in the chain that processes the UIAction actively, so set to disabled.
                 return UIActionVisibility.Disabled;
 
-            }, binding);
+            }, modifiedBinding);
         }
 
         void initializeUIActions()
         {
-            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, DefaultOpenNewPlayingBoardBinding());
+            this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
 
             // Also display in the main manu.
-            bindFocusDependentUIAction(container,
-                                       OpenNewPlayingBoardUIAction,
-                                       DefaultOpenNewPlayingBoardBinding());
-
-            bindFocusDependentUIAction(container,
-                                       InteractiveGame.GotoPreviousMoveUIAction,
-                                       InteractiveGame.DefaultGotoPreviousMoveBinding());
-
-            bindFocusDependentUIAction(container,
-                                       InteractiveGame.GotoNextMoveUIAction,
-                                       InteractiveGame.DefaultGotoNextMoveBinding());
-
-            bindFocusDependentUIAction(container,
-                                       PlayingBoard.TakeScreenshotUIAction,
-                                       PlayingBoard.DefaultTakeScreenshotBinding());
+            bindFocusDependentUIAction(container, OpenNewPlayingBoard);
+            bindFocusDependentUIAction(container, InteractiveGame.GotoPreviousMove);
+            bindFocusDependentUIAction(container, InteractiveGame.GotoNextMove);
+            bindFocusDependentUIAction(container, PlayingBoard.TakeScreenshot);
 
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
@@ -269,9 +259,9 @@ namespace Sandra.UI.WF
             mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
             mdiChild.PerformAutoFit();
 
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
-            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
-            mdiChild.PlayingBoard.BindAction(PlayingBoard.TakeScreenshotUIAction, mdiChild.PlayingBoard.TryTakeScreenshot, PlayingBoard.DefaultTakeScreenshotBinding());
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove);
+            mdiChild.PlayingBoard.BindAction(InteractiveGame.GotoNextMove, game.TryGotoNextMove);
+            mdiChild.PlayingBoard.BindAction(PlayingBoard.TakeScreenshot, mdiChild.PlayingBoard.TryTakeScreenshot);
             UIMenu.AddTo(mdiChild.PlayingBoard);
 
             mdiChild.Load += (_, __) =>
@@ -304,8 +294,8 @@ namespace Sandra.UI.WF
                     MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
                 };
 
-                movesTextBox.BindAction(InteractiveGame.GotoPreviousMoveUIAction, game.TryGotoPreviousMove, InteractiveGame.DefaultGotoPreviousMoveBinding());
-                movesTextBox.BindAction(InteractiveGame.GotoNextMoveUIAction, game.TryGotoNextMove, InteractiveGame.DefaultGotoNextMoveBinding());
+                movesTextBox.BindAction(InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove);
+                movesTextBox.BindAction(InteractiveGame.GotoNextMove, game.TryGotoNextMove);
                 UIMenu.AddTo(movesTextBox);
 
                 movesForm.Controls.Add(movesTextBox);
