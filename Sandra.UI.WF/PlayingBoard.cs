@@ -107,6 +107,15 @@ namespace Sandra.UI.WF
 
         public UIActionState TryTakeScreenshot(bool perform)
         {
+            if (perform)
+            {
+                Rectangle bounds = Bounds;
+                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+                {
+                    DrawToBitmap(bitmap, new Rectangle(0, 0, bounds.Width, bounds.Height));
+                    Clipboard.SetImage(bitmap);
+                }
+            }
             return UIActionVisibility.Enabled;
         }
 
