@@ -54,7 +54,7 @@ namespace Sandra.UI.WF
         }
 
 
-        public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + " ";
+        public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
         public static readonly UIAction GotoPreviousMoveUIAction = new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMoveUIAction));
 

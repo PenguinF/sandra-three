@@ -56,7 +56,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + " ";
+        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
         public static readonly UIAction OpenNewPlayingBoardUIAction = new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoardUIAction));
 

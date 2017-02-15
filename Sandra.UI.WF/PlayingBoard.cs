@@ -101,7 +101,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        public const string PlayingBoardUIActionPrefix = nameof(PlayingBoard) + " ";
+        public const string PlayingBoardUIActionPrefix = nameof(PlayingBoard) + ".";
 
         public static readonly UIAction TakeScreenshotUIAction = new UIAction(PlayingBoardUIActionPrefix + nameof(TakeScreenshotUIAction));
 
