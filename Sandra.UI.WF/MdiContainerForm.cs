@@ -66,6 +66,16 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
+        public UIActionBinding DefaultOpenNewPlayingBoardBinding()
+        {
+            return new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "New playing board",
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
+            };
+        }
+
 
         class FocusDependentUIActionState
         {
@@ -123,13 +133,9 @@ namespace Sandra.UI.WF
             UIMenuNode.Container container = new UIMenuNode.Container("Game");
             ActionHandler.RootMenuNode.Nodes.Add(container);
 
-            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuContainer = container,
-                MenuCaption = "New playing board",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
-            });
+            var openNewPlayingBoardBinding = DefaultOpenNewPlayingBoardBinding();
+            openNewPlayingBoardBinding.MenuContainer = container;
+            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, openNewPlayingBoardBinding);
 
             bindFocusDependentUIAction(container,
                                        InteractiveGame.GotoPreviousMoveUIAction,
@@ -228,6 +234,7 @@ namespace Sandra.UI.WF
             // This code makes shortcuts work for all UIActionHandlers.
             return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
         }
+
 
         public void NewPlayingBoard()
         {
