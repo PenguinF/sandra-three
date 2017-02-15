@@ -71,8 +71,8 @@ namespace Sandra.UI.WF
             return new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "New playing board",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B),
+                MenuCaption = "New game",
+                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N),
             };
         }
 
