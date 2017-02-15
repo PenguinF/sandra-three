@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -95,5 +96,21 @@ namespace Sandra.UI.WF
             Binding = binding;
             Handler = handler;
         }
+    }
+
+    /// <summary>
+    /// Enumerates a collection of handlers for a set of <see cref="UIAction"/> bindings.
+    /// Instances of this class can be declared with a collection initializer.
+    /// </summary>
+    public sealed class UIActionBindings : IEnumerable<BindingHandlerPair>
+    {
+        readonly List<BindingHandlerPair> added = new List<BindingHandlerPair>();
+
+        public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new BindingHandlerPair(key, value));
+
+        IEnumerator<BindingHandlerPair> enumerate() { foreach (var x in added) yield return x; }
+
+        IEnumerator IEnumerable.GetEnumerator() => enumerate();
+        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => enumerate();
     }
 }
