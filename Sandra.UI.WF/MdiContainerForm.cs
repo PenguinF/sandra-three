@@ -205,6 +205,8 @@ namespace Sandra.UI.WF
             Application.Idle -= application_Idle;
             foreach (var state in focusDependentUIActions.Values.Where(x => x.IsDirty))
             {
+                // If not yet indexed, then fast-exit.
+                if (state.MenuItem == null) return;
                 state.MenuItem.Update(ActionHandler.TryPerformAction(state.MenuItem.Action, false));
             }
         }
@@ -219,6 +221,7 @@ namespace Sandra.UI.WF
                     FocusDependentUIActionState state;
                     if (focusDependentUIActions.TryGetValue(actionItem.Action, out state))
                     {
+                        state.IsDirty = true;
                         state.MenuItem = actionItem;
                     }
                 }
@@ -227,6 +230,8 @@ namespace Sandra.UI.WF
                     indexFocusDependentUIActions(item.DropDownItems);
                 }
             }
+
+            updateFocusDependentMenuItems();
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
