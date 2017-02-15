@@ -74,16 +74,11 @@ namespace Sandra.UI.WF
 
             handlers.Add(action, handler);
 
-            if (!binding.MainShortcut.IsEmpty)
+            if (binding.Shortcuts != null)
             {
-                keyMappings.Add(new KeyUIActionMapping(binding.MainShortcut, action));
-            }
-
-            if (binding.AlternativeShortcuts != null)
-            {
-                foreach (var alternativeShortcut in binding.AlternativeShortcuts.Where(x => !x.IsEmpty))
+                foreach (var shortcut in binding.Shortcuts.Where(x => !x.IsEmpty))
                 {
-                    keyMappings.Add(new KeyUIActionMapping(alternativeShortcut, action));
+                    keyMappings.Add(new KeyUIActionMapping(shortcut, action));
                 }
             }
 

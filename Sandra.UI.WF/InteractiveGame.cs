@@ -72,9 +72,9 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaption = "Previous move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.LeftArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
+                Shortcuts = new List<ShortcutKeys>
                 {
+                    new ShortcutKeys(ConsoleKey.LeftArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     new ShortcutKeys(ConsoleKey.Z),
                 },
@@ -96,9 +96,9 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Next move",
-                MainShortcut = new ShortcutKeys(ConsoleKey.RightArrow),
-                AlternativeShortcuts = new List<ShortcutKeys>
+                Shortcuts = new List<ShortcutKeys>
                 {
+                    new ShortcutKeys(ConsoleKey.RightArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     new ShortcutKeys(ConsoleKey.X),
                 },

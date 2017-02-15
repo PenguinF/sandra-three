@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -62,7 +63,7 @@ namespace Sandra.UI.WF
             {
                 if (action == null) throw new ArgumentNullException(nameof(action));
                 Action = action;
-                Shortcut = binding.MainShortcut;
+                if (binding.Shortcuts != null) Shortcut = binding.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
                 IsFirstInGroup = binding.IsFirstInGroup;
             }
 

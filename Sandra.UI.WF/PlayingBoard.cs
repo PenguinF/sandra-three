@@ -126,7 +126,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaption = "Copy screenshot to clipboard",
-                MainShortcut = new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C),
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             };
         }
 
