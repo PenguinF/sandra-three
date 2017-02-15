@@ -101,32 +101,6 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        public const string PlayingBoardUIActionPrefix = nameof(PlayingBoard) + ".";
-
-        public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
-            new UIAction(PlayingBoardUIActionPrefix + nameof(TakeScreenshot)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaption = "Copy screenshot to clipboard",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-            });
-
-        public UIActionState TryTakeScreenshot(bool perform)
-        {
-            if (perform)
-            {
-                Rectangle bounds = Bounds;
-                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
-                {
-                    DrawToBitmap(bitmap, new Rectangle(0, 0, bounds.Width, bounds.Height));
-                    Clipboard.SetImage(bitmap);
-                }
-            }
-            return UIActionVisibility.Enabled;
-        }
-
 
         /// <summary>
         /// Gets the default value for the <see cref="BoardHeight"/> property.

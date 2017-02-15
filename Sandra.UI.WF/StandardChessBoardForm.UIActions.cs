@@ -16,9 +16,39 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace Sandra.UI.WF
 {
     public partial class StandardChessBoardForm
     {
+        public const string StandardChessBoardFormUIActionPrefix = nameof(StandardChessBoardForm) + ".";
+
+        public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
+            new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Copy screenshot to clipboard",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+            });
+
+        public UIActionState TryTakeScreenshot(bool perform)
+        {
+            if (perform)
+            {
+                Rectangle bounds = PlayingBoard.Bounds;
+                using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+                {
+                    PlayingBoard.DrawToBitmap(bitmap, new Rectangle(0, 0, bounds.Width, bounds.Height));
+                    Clipboard.SetImage(bitmap);
+                }
+            }
+            return UIActionVisibility.Enabled;
+        }
     }
 }
