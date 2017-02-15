@@ -61,13 +61,13 @@ namespace Sandra.UI.WF
         /// <param name="action">
         /// The <see cref="UIAction"/> to bind.
         /// </param>
-        /// <param name="handler">
-        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
-        /// </param>
         /// <param name="binding">
         /// Structure containing parameters that define how the action is exposed to the user interface.
         /// </param>
-        public void BindAction(UIAction action, UIActionHandlerFunc handler, UIActionBinding binding)
+        /// <param name="handler">
+        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
+        /// </param>
+        public void BindAction(UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
@@ -197,7 +197,7 @@ namespace Sandra.UI.WF
         {
             if (provider != null && provider.ActionHandler != null)
             {
-                provider.ActionHandler.BindAction(action, handler, binding);
+                provider.ActionHandler.BindAction(action, binding, handler);
             }
         }
 
@@ -218,7 +218,7 @@ namespace Sandra.UI.WF
         {
             if (provider != null && provider.ActionHandler != null)
             {
-                provider.ActionHandler.BindAction(binding.Action, handler, binding.DefaultBinding);
+                provider.ActionHandler.BindAction(binding.Action, binding.DefaultBinding, handler);
             }
         }
 
@@ -239,8 +239,8 @@ namespace Sandra.UI.WF
                 foreach (var bindingHandlerPair in bindings)
                 {
                     provider.ActionHandler.BindAction(bindingHandlerPair.Binding.Action,
-                                                      bindingHandlerPair.Handler,
-                                                      bindingHandlerPair.Binding.DefaultBinding);
+                                                      bindingHandlerPair.Binding.DefaultBinding,
+                                                      bindingHandlerPair.Handler);
                 }
             }
         }

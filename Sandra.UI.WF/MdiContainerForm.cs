@@ -105,7 +105,7 @@ namespace Sandra.UI.WF
                 focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
 
                 // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-                mainMenuActionHandler.BindAction(binding.Action, perform =>
+                mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
                 {
                     try
                     {
@@ -144,8 +144,7 @@ namespace Sandra.UI.WF
 
                     // No handler in the chain that processes the UIAction actively, so set to disabled.
                     return UIActionVisibility.Disabled;
-
-                }, modifiedBinding);
+                });
             }
         }
 
