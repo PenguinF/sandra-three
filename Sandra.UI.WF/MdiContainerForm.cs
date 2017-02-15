@@ -109,16 +109,16 @@ namespace Sandra.UI.WF
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
                     foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
-                        if (actionHandler != ActionHandler)
+                        UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
+                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
                         {
-                            UIActionState currentActionState = actionHandler.TryPerformAction(action, perform);
-                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
-                            {
-                                // Remember the action handler this UIAction is now bound to.
-                                state.CurrentHandler = actionHandler;
-                                return currentActionState;
-                            }
+                            // Remember the action handler this UIAction is now bound to.
+                            state.CurrentHandler = actionHandler;
+                            return currentActionState;
                         }
+
+                        // Only consider handlers which are defined in the context of this one.
+                        if (ActionHandler == actionHandler) break;
                     }
                 }
                 catch (Exception e)
