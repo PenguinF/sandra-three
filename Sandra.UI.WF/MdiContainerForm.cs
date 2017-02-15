@@ -43,7 +43,7 @@ namespace Sandra.UI.WF
             initializeUIActions();
 
             MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(ActionHandler, MainMenuStrip.Items);
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
             MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
 
@@ -55,6 +55,9 @@ namespace Sandra.UI.WF
         /// Gets the action handler for this control.
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        // Separate action handler for building the MainMenuStrip.
+        readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
 
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
@@ -94,7 +97,8 @@ namespace Sandra.UI.WF
             // Register in a Dictionary to be able to figure out which menu items should be updated.
             focusDependentUIActions.Add(action, new FocusDependentUIActionState());
 
-            this.BindAction(action, perform =>
+            // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+            mainMenuActionHandler.BindAction(action, perform =>
             {
                 try
                 {
@@ -130,12 +134,15 @@ namespace Sandra.UI.WF
 
         void initializeUIActions()
         {
-            UIMenuNode.Container container = new UIMenuNode.Container("Game");
-            ActionHandler.RootMenuNode.Nodes.Add(container);
+            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, DefaultOpenNewPlayingBoardBinding());
 
-            var openNewPlayingBoardBinding = DefaultOpenNewPlayingBoardBinding();
-            openNewPlayingBoardBinding.MenuContainer = container;
-            this.BindAction(OpenNewPlayingBoardUIAction, TryOpenNewPlayingBoard, openNewPlayingBoardBinding);
+            UIMenuNode.Container container = new UIMenuNode.Container("Game");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
+
+            // Also display in the main manu.
+            bindFocusDependentUIAction(container,
+                                       OpenNewPlayingBoardUIAction,
+                                       DefaultOpenNewPlayingBoardBinding());
 
             bindFocusDependentUIAction(container,
                                        InteractiveGame.GotoPreviousMoveUIAction,
@@ -207,7 +214,7 @@ namespace Sandra.UI.WF
             {
                 // If not yet indexed, then fast-exit.
                 if (state.MenuItem == null) return;
-                state.MenuItem.Update(ActionHandler.TryPerformAction(state.MenuItem.Action, false));
+                state.MenuItem.Update(mainMenuActionHandler.TryPerformAction(state.MenuItem.Action, false));
             }
         }
 
