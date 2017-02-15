@@ -1041,7 +1041,7 @@ namespace Sandra.UI.WF
         private Point moveCurrentPosition;
         private int moveStartSquareIndex = -1;
 
-        private int hitTest(Point clientLocation)
+        private int getSquareIndexFromLocation(Point clientLocation)
         {
             int squareSize = SquareSize;
 
@@ -1075,6 +1075,13 @@ namespace Sandra.UI.WF
                 // The location is inside a square.
                 hit = y * BoardWidth + x;
             }
+
+            return hit;
+        }
+
+        private int hitTest(Point clientLocation)
+        {
+            int hit = getSquareIndexFromLocation(clientLocation);
 
             // Update hovering information.
             if (hoveringSquareIndex != hit)
