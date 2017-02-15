@@ -81,4 +81,19 @@ namespace Sandra.UI.WF
             DefaultBinding = defaultBinding;
         }
     }
+
+    /// <summary>
+    /// Defines a <see cref="UIActionHandlerFunc"/> for a given <see cref="DefaultUIActionBinding"/>.
+    /// </summary>
+    public sealed class BindingHandlerPair
+    {
+        public readonly DefaultUIActionBinding Binding;
+        public readonly UIActionHandlerFunc Handler;
+
+        public BindingHandlerPair(DefaultUIActionBinding binding, UIActionHandlerFunc handler)
+        {
+            Binding = binding;
+            Handler = handler;
+        }
+    }
 }
