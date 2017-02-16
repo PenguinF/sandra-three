@@ -30,33 +30,40 @@ namespace Sandra.UI.WF
 
         public SnappingMdiChildForm OpenMovesForm()
         {
-            SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+            if (movesForm == null)
             {
-                MdiParent = OwnerForm,
-                StartPosition = FormStartPosition.Manual,
-                ShowIcon = false,
-                MaximizeBox = false,
-                FormBorderStyle = FormBorderStyle.SizableToolWindow,
-            };
+                SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+                {
+                    MdiParent = OwnerForm,
+                    StartPosition = FormStartPosition.Manual,
+                    ShowIcon = false,
+                    MaximizeBox = false,
+                    FormBorderStyle = FormBorderStyle.SizableToolWindow,
+                };
 
-            var movesTextBox = new MovesTextBox()
-            {
-                Dock = DockStyle.Fill,
-                Game = this,
-                MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
-            };
+                var movesTextBox = new MovesTextBox()
+                {
+                    Dock = DockStyle.Fill,
+                    Game = this,
+                    MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
+                };
 
-            movesTextBox.BindActions(new UIActionBindings
-            {
-                { GotoPreviousMove, TryGotoPreviousMove },
-                { GotoNextMove, TryGotoNextMove },
-            });
+                movesTextBox.BindActions(new UIActionBindings
+                {
+                    { GotoPreviousMove, TryGotoPreviousMove },
+                    { GotoNextMove, TryGotoNextMove },
+                });
 
-            UIMenu.AddTo(movesTextBox);
+                UIMenu.AddTo(movesTextBox);
 
-            newMovesForm.Controls.Add(movesTextBox);
+                newMovesForm.Controls.Add(movesTextBox);
 
-            return newMovesForm;
+                movesForm = newMovesForm;
+
+                movesForm.Disposed += (_, __) => movesForm = null;
+            }
+
+            return movesForm;
         }
 
 

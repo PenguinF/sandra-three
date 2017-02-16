@@ -35,6 +35,9 @@ namespace Sandra.UI.WF
             Game.ActiveMoveIndexChanged += (_, e) => OnActiveMoveIndexChanged(e);
         }
 
+        // Keep track of which types of forms are opened.
+        SnappingMdiChildForm movesForm;
+
         readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();
 
         /// <summary>
