@@ -25,10 +25,12 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class InteractiveGame
     {
+        public readonly MdiContainerForm OwnerForm;
         public readonly Chess.Game Game;
 
-        public InteractiveGame(Chess.Position initialPosition)
+        public InteractiveGame(MdiContainerForm ownerForm, Chess.Position initialPosition)
         {
+            OwnerForm = ownerForm;
             Game = new Chess.Game(initialPosition);
             Game.ActiveMoveIndexChanged += (_, e) => OnActiveMoveIndexChanged(e);
         }

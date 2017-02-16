@@ -251,7 +251,7 @@ namespace Sandra.UI.WF
 
         public void NewPlayingBoard()
         {
-            InteractiveGame game = new InteractiveGame(Position.GetInitialPosition());
+            InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
             StandardChessBoardForm mdiChild = new StandardChessBoardForm()
             {
