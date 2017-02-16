@@ -165,7 +165,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="BorderColor"/> property.
         /// </summary>
-        public static Color DefaultBorderColor { get { return Color.Black; } }
+        public static Color DefaultBorderColor => Color.Black;
 
         /// <summary>
         /// Gets or sets the color of the border area.
@@ -216,7 +216,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="DarkSquareColor"/> property.
         /// </summary>
-        public static Color DefaultDarkSquareColor { get { return Color.LightBlue; } }
+        public static Color DefaultDarkSquareColor => Color.LightBlue;
 
         /// <summary>
         /// Gets or sets the color of dark squares.
@@ -260,7 +260,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="ForegroundImagePadding"/> property.
         /// </summary>
-        public static Padding DefaultForegroundImagePadding { get { return new Padding(0); } }
+        public static Padding DefaultForegroundImagePadding => new Padding(0);
 
         /// <summary>
         /// Gets or sets the absolute padding between a foreground image and the edge of the square in which it is shown.
@@ -344,7 +344,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the default value for the <see cref="LightSquareColor"/> property.
         /// </summary>
-        public static Color DefaultLightSquareColor { get { return Color.Azure; } }
+        public static Color DefaultLightSquareColor => Color.Azure;
 
         /// <summary>
         /// Gets or sets the color of light squares.
@@ -464,10 +464,7 @@ namespace Sandra.UI.WF
             set { propertyStore.SetOwnedDisposable(nameof(backgroundBrush), value); }
         }
 
-        private void updateBackgroundBrush()
-        {
-            backgroundBrush = new SolidBrush(BackColor);
-        }
+        private void updateBackgroundBrush() => backgroundBrush = new SolidBrush(BackColor);
 
         protected override void OnBackColorChanged(EventArgs e)
         {
@@ -483,10 +480,7 @@ namespace Sandra.UI.WF
             set { propertyStore.SetOwnedDisposable(nameof(borderBrush), value); }
         }
 
-        private void updateBorderBrush()
-        {
-            borderBrush = new SolidBrush(BorderColor);
-        }
+        private void updateBorderBrush() => borderBrush = new SolidBrush(BorderColor);
 
 
         private Brush darkSquareBrush
@@ -495,17 +489,8 @@ namespace Sandra.UI.WF
             set { propertyStore.SetOwnedDisposable(nameof(darkSquareBrush), value); }
         }
 
-        private void updateDarkSquareBrush()
-        {
-            if (DarkSquareImage != null)
-            {
-                darkSquareBrush = new TextureBrush(DarkSquareImage, WrapMode.Tile);
-            }
-            else
-            {
-                darkSquareBrush = new SolidBrush(DarkSquareColor);
-            }
-        }
+        private void updateDarkSquareBrush() => darkSquareBrush = DarkSquareImage != null ? new TextureBrush(DarkSquareImage, WrapMode.Tile)
+                                                                : (Brush)new SolidBrush(DarkSquareColor);
 
 
         private Brush lightSquareBrush
@@ -514,17 +499,8 @@ namespace Sandra.UI.WF
             set { propertyStore.SetOwnedDisposable(nameof(lightSquareBrush), value); }
         }
 
-        private void updateLightSquareBrush()
-        {
-            if (LightSquareImage != null)
-            {
-                lightSquareBrush = new TextureBrush(LightSquareImage, WrapMode.Tile);
-            }
-            else
-            {
-                lightSquareBrush = new SolidBrush(LightSquareColor);
-            }
-        }
+        private void updateLightSquareBrush() => lightSquareBrush = LightSquareImage != null ? new TextureBrush(LightSquareImage, WrapMode.Tile)
+                                                                  : (Brush)new SolidBrush(LightSquareColor);
 
 
         private Image[] foregroundImages;
@@ -535,11 +511,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Image GetForegroundImage(int x, int y)
-        {
-            int index = getIndex(x, y);
-            return foregroundImages[index];
-        }
+        public Image GetForegroundImage(int x, int y) => foregroundImages[getIndex(x, y)];
 
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
@@ -602,11 +574,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y)
-        {
-            int index = getIndex(x, y);
-            return foregroundImageAttributes[index];
-        }
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => foregroundImageAttributes[getIndex(x, y)];
 
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
@@ -669,11 +637,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Color GetSquareOverlayColor(int x, int y)
-        {
-            int index = getIndex(x, y);
-            return squareOverlayColors[index];
-        }
+        public Color GetSquareOverlayColor(int x, int y) => squareOverlayColors[getIndex(x, y)];
 
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
@@ -760,25 +724,13 @@ namespace Sandra.UI.WF
         /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
         /// </summary>
         [Browsable(false)]
-        public SquareLocation HoverSquare
-        {
-            get
-            {
-                return getSquareLocation(hoveringSquareIndex);
-            }
-        }
+        public SquareLocation HoverSquare => getSquareLocation(hoveringSquareIndex);
 
         /// <summary>
         /// Gets if an image is currently being moved.
         /// </summary>
         [Browsable(false)]
-        public bool IsMoving
-        {
-            get
-            {
-                return moveStartSquareIndex >= 0;
-            }
-        }
+        public bool IsMoving => moveStartSquareIndex >= 0;
 
         /// <summary>
         /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
@@ -814,17 +766,22 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Returns the square that is located at the specified coordinates.
+        /// </summary>
+        /// <param name="point">
+        /// A <see cref="Point"/> containing the coordinates relative to the upper left corner of the control.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SquareLocation"/> at the specified point, or null if there is none.
+        /// </returns>
+        public SquareLocation GetSquareLocation(Point point) => getSquareLocation(getSquareIndexFromLocation(point));
+
+        /// <summary>
         /// Gets the location of the square where the current move started if <see cref="IsMoving"/> is true,
         /// or null (Nothing in Visual Basic) if no move is currently being performed.
         /// </summary>
         [Browsable(false)]
-        public SquareLocation MoveStartSquare
-        {
-            get
-            {
-                return getSquareLocation(moveStartSquareIndex);
-            }
-        }
+        public SquareLocation MoveStartSquare => getSquareLocation(moveStartSquareIndex);
 
 
         /// <summary>
@@ -835,15 +792,12 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MouseEnterSquare"/> event. 
         /// </summary>
-        protected virtual void OnMouseEnterSquare(SquareEventArgs e)
-        {
-            MouseEnterSquare?.Invoke(this, e);
-        }
+        protected virtual void OnMouseEnterSquare(SquareEventArgs e) => MouseEnterSquare?.Invoke(this, e);
 
-        protected void RaiseMouseEnterSquare(int squareIndex)
-        {
-            OnMouseEnterSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
-        }
+        /// <summary>
+        /// Raises the <see cref="MouseEnterSquare"/> event. 
+        /// </summary>
+        protected void RaiseMouseEnterSquare(int squareIndex) => OnMouseEnterSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
 
 
         /// <summary>
@@ -854,15 +808,12 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MouseLeaveSquare"/> event. 
         /// </summary>
-        protected virtual void OnMouseLeaveSquare(SquareEventArgs e)
-        {
-            MouseLeaveSquare?.Invoke(this, e);
-        }
+        protected virtual void OnMouseLeaveSquare(SquareEventArgs e) => MouseLeaveSquare?.Invoke(this, e);
 
-        protected void RaiseMouseLeaveSquare(int squareIndex)
-        {
-            OnMouseLeaveSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
-        }
+        /// <summary>
+        /// Raises the <see cref="MouseLeaveSquare"/> event. 
+        /// </summary>
+        protected void RaiseMouseLeaveSquare(int squareIndex) => OnMouseLeaveSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
 
 
         /// <summary>
@@ -873,15 +824,12 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveCancel"/> event. 
         /// </summary>
-        protected virtual void OnMoveCancel(MoveEventArgs e)
-        {
-            MoveCancel?.Invoke(this, e);
-        }
+        protected virtual void OnMoveCancel(MoveEventArgs e) => MoveCancel?.Invoke(this, e);
 
-        protected void RaiseMoveCancel(int squareIndex)
-        {
-            OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
-        }
+        /// <summary>
+        /// Raises the <see cref="MoveCancel"/> event. 
+        /// </summary>
+        protected void RaiseMoveCancel(int squareIndex) => OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
 
 
         /// <summary>
@@ -892,16 +840,15 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveCommit"/> event. 
         /// </summary>
-        protected virtual void OnMoveCommit(MoveCommitEventArgs e)
-        {
-            MoveCommit?.Invoke(this, e);
-        }
+        protected virtual void OnMoveCommit(MoveCommitEventArgs e) => MoveCommit?.Invoke(this, e);
 
-        protected void RaiseMoveCommit(int sourceSquareIndex, int targetSquareIndex)
-        {
-            OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
-                                                 getSquareLocation(targetSquareIndex)));
-        }
+        /// <summary>
+        /// Raises the <see cref="MoveCommit"/> event. 
+        /// </summary>
+        protected void RaiseMoveCommit(int sourceSquareIndex,
+                                       int targetSquareIndex)
+            => OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
+                                                    getSquareLocation(targetSquareIndex)));
 
 
         /// <summary>
@@ -912,11 +859,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected virtual void OnMoveStart(CancellableMoveEventArgs e)
-        {
-            MoveStart?.Invoke(this, e);
-        }
+        protected virtual void OnMoveStart(CancellableMoveEventArgs e) => MoveStart?.Invoke(this, e);
 
+        /// <summary>
+        /// Raises the <see cref="MoveStart"/> event. 
+        /// </summary>
         protected bool RaiseMoveStart(int squareIndex)
         {
             var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex));
@@ -925,14 +872,11 @@ namespace Sandra.UI.WF
         }
 
 
-        private int getX(int index) { return index % BoardWidth; }
-        private int getY(int index) { return index / BoardWidth; }
+        private int getX(int index) => index % BoardWidth;
+        private int getY(int index) => index / BoardWidth;
 
-        private SquareLocation getSquareLocation(int index)
-        {
-            if (index < 0) return null;
-            return new SquareLocation(getX(index), getY(index));
-        }
+        private SquareLocation getSquareLocation(int index) => index < 0 ? null
+                                                             : new SquareLocation(getX(index), getY(index));
 
         private void throwIfNull(SquareLocation squareLocation)
         {
@@ -1041,7 +985,7 @@ namespace Sandra.UI.WF
         private Point moveCurrentPosition;
         private int moveStartSquareIndex = -1;
 
-        private int hitTest(Point clientLocation)
+        private int getSquareIndexFromLocation(Point clientLocation)
         {
             int squareSize = SquareSize;
 
@@ -1075,6 +1019,13 @@ namespace Sandra.UI.WF
                 // The location is inside a square.
                 hit = y * BoardWidth + x;
             }
+
+            return hit;
+        }
+
+        private int hitTest(Point clientLocation)
+        {
+            int hit = getSquareIndexFromLocation(clientLocation);
 
             // Update hovering information.
             if (hoveringSquareIndex != hit)
@@ -1409,33 +1360,19 @@ namespace Sandra.UI.WF
             X = x; Y = y;
         }
 
-        private bool equals(SquareLocation other)
-        {
-            if (other == null) return false;
-            return X == other.X && Y == other.Y;
-        }
+        private bool equals(SquareLocation other) => other != null && X == other.X && Y == other.Y;
 
-        public override bool Equals(object obj)
-        {
-            return equals(obj as SquareLocation);
-        }
+        public override bool Equals(object obj) => equals(obj as SquareLocation);
 
-        public override int GetHashCode()
-        {
-            // Rely on hash code generation of the built-in .NET library.
-            return new Tuple<int, int>(X, Y).GetHashCode();
-        }
+        // Rely on hash code generation of the built-in .NET library.
+        public override int GetHashCode() => new Tuple<int, int>(X, Y).GetHashCode();
 
         public static bool operator ==(SquareLocation left, SquareLocation right)
-        {
-            if (ReferenceEquals(left, null)) return ReferenceEquals(right, null);
-            return left.equals(right);
-        }
+            => ReferenceEquals(left, null) ? ReferenceEquals(right, null)
+             : left.equals(right);
 
         public static bool operator !=(SquareLocation left, SquareLocation right)
-        {
-            if (ReferenceEquals(left, null)) return !ReferenceEquals(right, null);
-            return !left.equals(right);
-        }
+            => ReferenceEquals(left, null) ? !ReferenceEquals(right, null)
+             : !left.equals(right);
     }
 }
