@@ -71,9 +71,6 @@
     <Compile Include="WinUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Sandra\Sandra.csproj">
       <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
       <Name>Sandra</Name>
