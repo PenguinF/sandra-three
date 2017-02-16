@@ -154,15 +154,23 @@ namespace Sandra.UI.WF
         {
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
-            UIMenuNode.Container container = new UIMenuNode.Container("Game");
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
+            UIMenuNode.Container gameMenu = new UIMenuNode.Container("Game");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
-            bindFocusDependentUIActions(container,
+            bindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard,
                                         InteractiveGame.GotoPreviousMove,
                                         InteractiveGame.GotoNextMove,
                                         StandardChessBoardForm.TakeScreenshot);
+
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
+
+            // Add these actions to the "View" dropdown list.
+            bindFocusDependentUIActions(viewMenu,
+                                        InteractiveGame.GotoChessBoardForm,
+                                        InteractiveGame.GotoMovesForm);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
