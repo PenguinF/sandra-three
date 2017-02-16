@@ -40,8 +40,6 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoChessBoardForm(bool perform)
         {
-            if (chessBoardForm != null && chessBoardForm.ContainsFocus) return UIActionVisibility.Hidden;
-
             if (perform)
             {
                 if (chessBoardForm == null)
@@ -83,11 +81,14 @@ namespace Sandra.UI.WF
                     chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
                 }
 
-                chessBoardForm.Visible = true;
-                chessBoardForm.Activate();
+                if (!chessBoardForm.ContainsFocus)
+                {
+                    chessBoardForm.Visible = true;
+                    chessBoardForm.Activate();
+                }
             }
 
-            return UIActionVisibility.Enabled;
+            return new UIActionState(UIActionVisibility.Enabled, chessBoardForm != null);
         }
 
 
@@ -101,8 +102,6 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoMovesForm(bool perform)
         {
-            if (movesForm != null && movesForm.ContainsFocus) return UIActionVisibility.Hidden;
-
             if (perform)
             {
                 if (movesForm == null)
@@ -152,11 +151,14 @@ namespace Sandra.UI.WF
                     movesForm.Disposed += (_, __) => movesForm = null;
                 }
 
-                movesForm.Visible = true;
-                movesForm.Activate();
+                if (!movesForm.ContainsFocus)
+                {
+                    movesForm.Visible = true;
+                    movesForm.Activate();
+                }
             }
 
-            return UIActionVisibility.Enabled;
+            return new UIActionState(UIActionVisibility.Enabled, movesForm != null);
         }
 
 
