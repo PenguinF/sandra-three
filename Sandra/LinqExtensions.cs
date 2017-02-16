@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * Utils.cs
+ * LinqExtensions.cs
  * 
  * Copyright (c) 2004-2017 Henk Nicolai
  * 
@@ -16,67 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System;
 using System.Collections.Generic;
-using System.Linq;
-
-namespace Sandra
-{
-    /// <summary>
-    /// Contains utility extension methods.
-    /// </summary>
-    public static class UtilityExtensions
-    {
-        /// <summary>
-        /// Sets a single value at each index of the array.
-        /// </summary>
-        public static void Fill<T>(this T[] array, T value)
-        {
-            for (int i = array.Length - 1; i >= 0; --i)
-            {
-                array[i] = value;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Contains general helper methods for enumerations.
-    /// </summary>
-    /// <remarks>
-    /// Declaring an <see cref="EnumHelper{TEnum}"/> with a non-enumeration type
-    /// results in a <see cref="TypeInitializationException"/> being thrown.
-    /// </remarks>
-    public static class EnumHelper<TEnum> where TEnum : struct
-    {
-        static readonly TEnum[] distinctValues;
-
-        static EnumHelper()
-        {
-            TEnum[] values = (TEnum[])Enum.GetValues(typeof(TEnum));
-            distinctValues = values.Distinct().OrderBy(x => x).ToArray();
-            EnumCount = distinctValues.Length;
-        }
-
-        /// <summary>
-        /// Gets the number of distinct values in the enumeration.
-        /// </summary>
-        public static readonly int EnumCount;
-
-        /// <summary>
-        /// Enumerates all distinct values in <typeparamref name="TEnum"/>.
-        /// </summary>
-        public static IEnumerable<TEnum> AllValues
-        {
-            get
-            {
-                foreach (var value in distinctValues)
-                {
-                    yield return value;
-                }
-            }
-        }
-    }
-}
 
 namespace System.Linq
 {
