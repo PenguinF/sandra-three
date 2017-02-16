@@ -110,6 +110,10 @@
       <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
       <Name>Sandra.Chess</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Sandra\Sandra.csproj">
+      <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
+      <Name>Sandra</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
