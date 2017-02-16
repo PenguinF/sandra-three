@@ -36,6 +36,7 @@ namespace Sandra.UI.WF
         }
 
         // Keep track of which types of forms are opened.
+        StandardChessBoardForm chessBoardForm;
         SnappingMdiChildForm movesForm;
 
         readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();

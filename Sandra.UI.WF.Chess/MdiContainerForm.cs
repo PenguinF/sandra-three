@@ -255,24 +255,7 @@ namespace Sandra.UI.WF
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
-            StandardChessBoardForm mdiChild = new StandardChessBoardForm()
-            {
-                MdiParent = this,
-                ClientSize = new Size(400, 400),
-            };
-            mdiChild.Game = game;
-            mdiChild.PieceImages = PieceImages;
-            mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-            mdiChild.PerformAutoFit();
-
-            mdiChild.PlayingBoard.BindActions(new UIActionBindings
-            {
-                { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
-                { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
-                { StandardChessBoardForm.TakeScreenshot, mdiChild.TryTakeScreenshot },
-            });
-
-            UIMenu.AddTo(mdiChild.PlayingBoard);
+            StandardChessBoardForm mdiChild = game.OpenChessBoardForm();
 
             mdiChild.Load += (_, __) =>
             {

@@ -19,6 +19,7 @@
 using Sandra.Chess;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -26,6 +27,38 @@ namespace Sandra.UI.WF
     public partial class InteractiveGame
     {
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
+
+
+        public StandardChessBoardForm OpenChessBoardForm()
+        {
+            if (chessBoardForm == null)
+            {
+                StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm()
+                {
+                    MdiParent = OwnerForm,
+                    ClientSize = new Size(400, 400),
+                };
+                newChessBoardForm.Game = this;
+                newChessBoardForm.PieceImages = OwnerForm.PieceImages;
+                newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+                newChessBoardForm.PerformAutoFit();
+
+                newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
+                {
+                    { GotoPreviousMove, TryGotoPreviousMove },
+                    { GotoNextMove, TryGotoNextMove },
+                    { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+                });
+
+                UIMenu.AddTo(newChessBoardForm.PlayingBoard);
+
+                chessBoardForm = newChessBoardForm;
+
+                chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
+            }
+
+            return chessBoardForm;
+        }
 
 
         public SnappingMdiChildForm OpenMovesForm()
