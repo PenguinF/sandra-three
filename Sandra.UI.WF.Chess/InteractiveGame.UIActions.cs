@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
 
-        public StandardChessBoardForm GotoChessBoardForm()
+        public void GotoChessBoardForm()
         {
             if (chessBoardForm == null)
             {
@@ -71,12 +71,10 @@ namespace Sandra.UI.WF
 
             chessBoardForm.Visible = true;
             chessBoardForm.Activate();
-
-            return chessBoardForm;
         }
 
 
-        public SnappingMdiChildForm GotoMovesForm()
+        public void GotoMovesForm()
         {
             if (movesForm == null)
             {
@@ -125,8 +123,6 @@ namespace Sandra.UI.WF
 
             movesForm.Visible = true;
             movesForm.Activate();
-
-            return movesForm;
         }
 
 
