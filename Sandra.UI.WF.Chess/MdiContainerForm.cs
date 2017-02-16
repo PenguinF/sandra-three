@@ -255,22 +255,18 @@ namespace Sandra.UI.WF
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
-            StandardChessBoardForm mdiChild = game.OpenChessBoardForm();
+            StandardChessBoardForm mdiChild = game.GotoChessBoardForm();
 
-            mdiChild.Load += (_, __) =>
-            {
-                var mdiChildBounds = mdiChild.Bounds;
+            var mdiChildBounds = mdiChild.Bounds;
 
-                SnappingMdiChildForm movesForm = game.OpenMovesForm();
-                movesForm.Left = mdiChildBounds.Right;
-                movesForm.Top = mdiChildBounds.Top;
-                movesForm.Width = 200;
-                movesForm.Height = mdiChildBounds.Height;
+            SnappingMdiChildForm movesForm = game.GotoMovesForm();
+            movesForm.Left = mdiChildBounds.Right;
+            movesForm.Top = mdiChildBounds.Top;
+            movesForm.Width = 200;
+            movesForm.Height = mdiChildBounds.Height;
 
-                movesForm.Visible = true;
-            };
-
-            mdiChild.Visible = true;
+            // Focus back on the chessboard form.
+            game.GotoChessBoardForm();
         }
 
         protected override void OnLoad(EventArgs e)
