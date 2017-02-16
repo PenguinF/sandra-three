@@ -35,6 +35,8 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
+        public EnumIndexedArray<Piece, string> CurrentPieceSymbols { get; private set; }
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -275,42 +277,12 @@ namespace Sandra.UI.WF
             mdiChild.Load += (_, __) =>
             {
                 var mdiChildBounds = mdiChild.Bounds;
-                SnappingMdiChildForm movesForm = new SnappingMdiChildForm()
-                {
-                    MdiParent = this,
-                    StartPosition = FormStartPosition.Manual,
-                    Left = mdiChildBounds.Right,
-                    Top = mdiChildBounds.Top,
-                    Width = 200,
-                    Height = mdiChildBounds.Height,
-                    ShowIcon = false,
-                    MaximizeBox = false,
-                    FormBorderStyle = FormBorderStyle.SizableToolWindow,
-                };
 
-                EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
-                englishPieceSymbols[Piece.Knight] = "N";
-                englishPieceSymbols[Piece.Bishop] = "B";
-                englishPieceSymbols[Piece.Rook] = "R";
-                englishPieceSymbols[Piece.Queen] = "Q";
-                englishPieceSymbols[Piece.King] = "K";
-
-                var movesTextBox = new MovesTextBox()
-                {
-                    Dock = DockStyle.Fill,
-                    Game = game,
-                    MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
-                };
-
-                movesTextBox.BindActions(new UIActionBindings
-                {
-                    { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
-                    { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
-                });
-
-                UIMenu.AddTo(movesTextBox);
-
-                movesForm.Controls.Add(movesTextBox);
+                SnappingMdiChildForm movesForm = game.OpenMovesForm();
+                movesForm.Left = mdiChildBounds.Right;
+                movesForm.Top = mdiChildBounds.Top;
+                movesForm.Width = 200;
+                movesForm.Height = mdiChildBounds.Height;
 
                 movesForm.Visible = true;
             };
@@ -334,6 +306,16 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
+
+            // Standard set of piece symbols.
+            EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
+            englishPieceSymbols[Piece.Knight] = "N";
+            englishPieceSymbols[Piece.Bishop] = "B";
+            englishPieceSymbols[Piece.Rook] = "R";
+            englishPieceSymbols[Piece.Queen] = "Q";
+            englishPieceSymbols[Piece.King] = "K";
+
+            CurrentPieceSymbols = englishPieceSymbols;
 
             NewPlayingBoard();
         }

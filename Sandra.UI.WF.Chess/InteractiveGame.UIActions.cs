@@ -16,14 +16,49 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Sandra.Chess;
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     public partial class InteractiveGame
     {
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
+
+
+        public SnappingMdiChildForm OpenMovesForm()
+        {
+            SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+            {
+                MdiParent = OwnerForm,
+                StartPosition = FormStartPosition.Manual,
+                ShowIcon = false,
+                MaximizeBox = false,
+                FormBorderStyle = FormBorderStyle.SizableToolWindow,
+            };
+
+            var movesTextBox = new MovesTextBox()
+            {
+                Dock = DockStyle.Fill,
+                Game = this,
+                MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
+            };
+
+            movesTextBox.BindActions(new UIActionBindings
+            {
+                { GotoPreviousMove, TryGotoPreviousMove },
+                { GotoNextMove, TryGotoNextMove },
+            });
+
+            UIMenu.AddTo(movesTextBox);
+
+            newMovesForm.Controls.Add(movesTextBox);
+
+            return newMovesForm;
+        }
+
 
         public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
@@ -46,6 +81,7 @@ namespace Sandra.UI.WF
             if (perform) Game.ActiveMoveIndex--;
             return UIActionVisibility.Enabled;
         }
+
 
         public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
