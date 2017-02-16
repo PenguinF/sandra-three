@@ -255,15 +255,8 @@ namespace Sandra.UI.WF
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
-            StandardChessBoardForm mdiChild = game.GotoChessBoardForm();
-
-            var mdiChildBounds = mdiChild.Bounds;
-
-            SnappingMdiChildForm movesForm = game.GotoMovesForm();
-            movesForm.Left = mdiChildBounds.Right;
-            movesForm.Top = mdiChildBounds.Top;
-            movesForm.Width = 200;
-            movesForm.Height = mdiChildBounds.Height;
+            game.GotoChessBoardForm();
+            game.GotoMovesForm();
 
             // Focus back on the chessboard form.
             game.GotoChessBoardForm();

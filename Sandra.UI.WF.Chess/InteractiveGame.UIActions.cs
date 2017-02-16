@@ -71,11 +71,24 @@ namespace Sandra.UI.WF
                 SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
                 {
                     MdiParent = OwnerForm,
-                    StartPosition = FormStartPosition.Manual,
                     ShowIcon = false,
                     MaximizeBox = false,
                     FormBorderStyle = FormBorderStyle.SizableToolWindow,
                 };
+
+                if (chessBoardForm != null && chessBoardForm.WindowState == FormWindowState.Normal)
+                {
+                    // Place directly to the right.
+                    var mdiChildBounds = chessBoardForm.Bounds;
+                    newMovesForm.StartPosition = FormStartPosition.Manual;
+                    newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
+                    newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientSize.Height);
+                }
+                else
+                {
+                    // Only specify its default size.
+                    newMovesForm.ClientSize = new Size(200, 400);
+                }
 
                 var movesTextBox = new MovesTextBox()
                 {
@@ -95,7 +108,6 @@ namespace Sandra.UI.WF
                 newMovesForm.Controls.Add(movesTextBox);
 
                 movesForm = newMovesForm;
-
                 movesForm.Disposed += (_, __) => movesForm = null;
             }
 
