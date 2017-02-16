@@ -70,6 +70,8 @@ namespace Sandra.UI.WF
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
+                        { GotoChessBoardForm, TryGotoChessBoardForm },
+                        { GotoMovesForm, TryGotoMovesForm },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
@@ -136,6 +138,8 @@ namespace Sandra.UI.WF
 
                     movesTextBox.BindActions(new UIActionBindings
                     {
+                        { GotoChessBoardForm, TryGotoChessBoardForm },
+                        { GotoMovesForm, TryGotoMovesForm },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                     });
