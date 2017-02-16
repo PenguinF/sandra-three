@@ -46,8 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InteractiveGame.cs" />
+    <Compile Include="InteractiveGame.UIActions.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MovesTextBox.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,6 +60,12 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="StandardChessBoardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StandardChessBoardForm.UIActions.cs">
+      <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

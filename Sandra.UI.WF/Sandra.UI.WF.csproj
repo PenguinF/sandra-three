@@ -45,14 +45,7 @@
     </Compile>
     <Compile Include="FocusHelper.cs" />
     <Compile Include="HandlerIsAnonymousException.cs" />
-    <Compile Include="InteractiveGame.cs" />
-    <Compile Include="InteractiveGame.UIActions.cs">
-      <DependentUpon>InteractiveGame.cs</DependentUpon>
-    </Compile>
     <Compile Include="LineSegment.cs" />
-    <Compile Include="MovesTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -63,13 +56,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyStore.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StandardChessBoardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StandardChessBoardForm.UIActions.cs">
-      <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UIAction\KeyUIActionMapping.cs" />
