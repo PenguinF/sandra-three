@@ -33,14 +33,26 @@ namespace Sandra.UI.WF
         {
             if (chessBoardForm == null)
             {
-                StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm()
-                {
-                    MdiParent = OwnerForm,
-                    ClientSize = new Size(400, 400),
-                };
+                StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm();
+                newChessBoardForm.MdiParent = OwnerForm;
                 newChessBoardForm.Game = this;
                 newChessBoardForm.PieceImages = OwnerForm.PieceImages;
                 newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+
+                if (movesForm != null && movesForm.WindowState == FormWindowState.Normal)
+                {
+                    // Place directly to the right.
+                    var mdiChildBounds = movesForm.Bounds;
+                    newChessBoardForm.StartPosition = FormStartPosition.Manual;
+                    newChessBoardForm.ClientSize = new Size(movesForm.ClientSize.Height, movesForm.ClientSize.Height);
+                    newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
+                }
+                else
+                {
+                    // Only specify its default size.
+                    newChessBoardForm.ClientSize = new Size(400, 400);
+                }
+
                 newChessBoardForm.PerformAutoFit();
 
                 newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
