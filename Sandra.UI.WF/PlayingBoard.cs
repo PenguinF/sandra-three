@@ -814,6 +814,17 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Returns the square that is located at the specified coordinates.
+        /// </summary>
+        /// <param name="point">
+        /// A <see cref="Point"/> containing the coordinates relative to the upper left corner of the control.
+        /// </param>
+        /// <returns>
+        /// The <see cref="SquareLocation"/> at the specified point, or null if there is none.
+        /// </returns>
+        public SquareLocation GetSquareLocation(Point point) => getSquareLocation(getSquareIndexFromLocation(point));
+
+        /// <summary>
         /// Gets the location of the square where the current move started if <see cref="IsMoving"/> is true,
         /// or null (Nothing in Visual Basic) if no move is currently being performed.
         /// </summary>
