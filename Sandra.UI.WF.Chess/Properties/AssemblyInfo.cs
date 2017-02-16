@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Sandra.UI.WF")]
+[assembly: AssemblyTitle("SandraChess")]
 [assembly: AssemblyDescription("Hosted on https://github.com/PenguinF/sandra-three")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Sandra.UI.WF</RootNamespace>
-    <AssemblyName>Sandra.UI.WF</AssemblyName>
+    <AssemblyName>SandraChess</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,6 +32,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Sandra.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Sandra.UI.WF.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -40,62 +46,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConstrainedMoveResizeForm.cs">
+    <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FocusHelper.cs" />
-    <Compile Include="HandlerIsAnonymousException.cs" />
-    <Compile Include="InteractiveGame.cs" />
-    <Compile Include="InteractiveGame.UIActions.cs">
-      <DependentUpon>InteractiveGame.cs</DependentUpon>
-    </Compile>
-    <Compile Include="LineSegment.cs" />
-    <Compile Include="MovesTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="PlayingBoard.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="PlayingBoard.EventArgs.cs" />
-    <Compile Include="PlayingBoardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyStore.cs" />
-    <Compile Include="SnappingMdiChildForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="StandardChessBoardForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="StandardChessBoardForm.UIActions.cs">
-      <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UIAction\KeyUIActionMapping.cs" />
-    <Compile Include="UIAction\UIAction.cs" />
-    <Compile Include="UIAction\UIActionBinding.cs" />
-    <Compile Include="UIAction\UIActionHandler.cs" />
-    <Compile Include="UIAction\UIMenu.cs" />
-    <Compile Include="UpdatableRichTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="WeakEvent.cs" />
-    <Compile Include="WeakEventInvocationException.cs" />
-    <Compile Include="WinUtils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
       <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
       <Name>Sandra.Chess</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Sandra.UI.WF\Sandra.UI.WF.csproj">
+      <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
+      <Name>Sandra.UI.WF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sandra\Sandra.csproj">
       <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
       <Name>Sandra</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Sandra.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
