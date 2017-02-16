@@ -29,100 +29,113 @@ namespace Sandra.UI.WF
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
 
-        public void GotoChessBoardForm()
+        public UIActionState TryGotoChessBoardForm(bool perform)
         {
-            if (chessBoardForm == null)
+            if (chessBoardForm != null && chessBoardForm.ContainsFocus) return UIActionVisibility.Hidden;
+
+            if (perform)
             {
-                StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm();
-                newChessBoardForm.MdiParent = OwnerForm;
-                newChessBoardForm.Game = this;
-                newChessBoardForm.PieceImages = OwnerForm.PieceImages;
-                newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-
-                if (movesForm != null && movesForm.WindowState == FormWindowState.Normal)
+                if (chessBoardForm == null)
                 {
-                    // Place directly to the right.
-                    var mdiChildBounds = movesForm.Bounds;
-                    newChessBoardForm.StartPosition = FormStartPosition.Manual;
-                    newChessBoardForm.ClientSize = new Size(movesForm.ClientSize.Height, movesForm.ClientSize.Height);
-                    newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
+                    StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm();
+                    newChessBoardForm.MdiParent = OwnerForm;
+                    newChessBoardForm.Game = this;
+                    newChessBoardForm.PieceImages = OwnerForm.PieceImages;
+                    newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
+
+                    if (movesForm != null && movesForm.WindowState == FormWindowState.Normal)
+                    {
+                        // Place directly to the right.
+                        var mdiChildBounds = movesForm.Bounds;
+                        newChessBoardForm.StartPosition = FormStartPosition.Manual;
+                        newChessBoardForm.ClientSize = new Size(movesForm.ClientSize.Height, movesForm.ClientSize.Height);
+                        newChessBoardForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
+                    }
+                    else
+                    {
+                        // Only specify its default size.
+                        newChessBoardForm.ClientSize = new Size(400, 400);
+                    }
+
+                    newChessBoardForm.PerformAutoFit();
+
+                    newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
+                    {
+                        { GotoPreviousMove, TryGotoPreviousMove },
+                        { GotoNextMove, TryGotoNextMove },
+                        { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+                    });
+
+                    UIMenu.AddTo(newChessBoardForm.PlayingBoard);
+
+                    chessBoardForm = newChessBoardForm;
+                    chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
                 }
-                else
-                {
-                    // Only specify its default size.
-                    newChessBoardForm.ClientSize = new Size(400, 400);
-                }
 
-                newChessBoardForm.PerformAutoFit();
-
-                newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
-                {
-                    { GotoPreviousMove, TryGotoPreviousMove },
-                    { GotoNextMove, TryGotoNextMove },
-                    { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
-                });
-
-                UIMenu.AddTo(newChessBoardForm.PlayingBoard);
-
-                chessBoardForm = newChessBoardForm;
-
-                chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
+                chessBoardForm.Visible = true;
+                chessBoardForm.Activate();
             }
 
-            chessBoardForm.Visible = true;
-            chessBoardForm.Activate();
+            return UIActionVisibility.Enabled;
         }
 
 
-        public void GotoMovesForm()
+        public UIActionState TryGotoMovesForm(bool perform)
         {
-            if (movesForm == null)
+            if (movesForm != null && movesForm.ContainsFocus) return UIActionVisibility.Hidden;
+
+            if (perform)
             {
-                SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+                if (movesForm == null)
                 {
-                    MdiParent = OwnerForm,
-                    ShowIcon = false,
-                    MaximizeBox = false,
-                    FormBorderStyle = FormBorderStyle.SizableToolWindow,
-                };
+                    SnappingMdiChildForm newMovesForm = new SnappingMdiChildForm()
+                    {
+                        MdiParent = OwnerForm,
+                        ShowIcon = false,
+                        MaximizeBox = false,
+                        FormBorderStyle = FormBorderStyle.SizableToolWindow,
+                    };
 
-                if (chessBoardForm != null && chessBoardForm.WindowState == FormWindowState.Normal)
-                {
-                    // Place directly to the right.
-                    var mdiChildBounds = chessBoardForm.Bounds;
-                    newMovesForm.StartPosition = FormStartPosition.Manual;
-                    newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
-                    newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientSize.Height);
+                    if (chessBoardForm != null && chessBoardForm.WindowState == FormWindowState.Normal)
+                    {
+                        // Place directly to the right.
+                        var mdiChildBounds = chessBoardForm.Bounds;
+                        newMovesForm.StartPosition = FormStartPosition.Manual;
+                        newMovesForm.Location = new Point(mdiChildBounds.Right, mdiChildBounds.Top);
+                        newMovesForm.ClientSize = new Size(200, chessBoardForm.ClientSize.Height);
+                    }
+                    else
+                    {
+                        // Only specify its default size.
+                        newMovesForm.ClientSize = new Size(200, 400);
+                    }
+
+                    var movesTextBox = new MovesTextBox()
+                    {
+                        Dock = DockStyle.Fill,
+                        Game = this,
+                        MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
+                    };
+
+                    movesTextBox.BindActions(new UIActionBindings
+                    {
+                        { GotoPreviousMove, TryGotoPreviousMove },
+                        { GotoNextMove, TryGotoNextMove },
+                    });
+
+                    UIMenu.AddTo(movesTextBox);
+
+                    newMovesForm.Controls.Add(movesTextBox);
+
+                    movesForm = newMovesForm;
+                    movesForm.Disposed += (_, __) => movesForm = null;
                 }
-                else
-                {
-                    // Only specify its default size.
-                    newMovesForm.ClientSize = new Size(200, 400);
-                }
 
-                var movesTextBox = new MovesTextBox()
-                {
-                    Dock = DockStyle.Fill,
-                    Game = this,
-                    MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
-                };
-
-                movesTextBox.BindActions(new UIActionBindings
-                {
-                    { GotoPreviousMove, TryGotoPreviousMove },
-                    { GotoNextMove, TryGotoNextMove },
-                });
-
-                UIMenu.AddTo(movesTextBox);
-
-                newMovesForm.Controls.Add(movesTextBox);
-
-                movesForm = newMovesForm;
-                movesForm.Disposed += (_, __) => movesForm = null;
+                movesForm.Visible = true;
+                movesForm.Activate();
             }
 
-            movesForm.Visible = true;
-            movesForm.Activate();
+            return UIActionVisibility.Enabled;
         }
 
 

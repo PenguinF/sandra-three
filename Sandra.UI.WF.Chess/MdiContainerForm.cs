@@ -255,11 +255,11 @@ namespace Sandra.UI.WF
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
-            game.GotoChessBoardForm();
-            game.GotoMovesForm();
+            game.TryGotoChessBoardForm(true);
+            game.TryGotoMovesForm(true);
 
             // Focus back on the chessboard form.
-            game.GotoChessBoardForm();
+            game.TryGotoChessBoardForm(true);
         }
 
         protected override void OnLoad(EventArgs e)
