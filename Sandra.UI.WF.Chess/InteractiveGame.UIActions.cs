@@ -29,6 +29,15 @@ namespace Sandra.UI.WF
         public const string InteractiveGameUIActionPrefix = nameof(InteractiveGame) + ".";
 
 
+        public static readonly DefaultUIActionBinding GotoChessBoardForm = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoChessBoardForm)),
+            new UIActionBinding()
+            {
+                IsFirstInGroup = true,
+                MenuCaption = "Chessboard",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
+            });
+
         public UIActionState TryGotoChessBoardForm(bool perform)
         {
             if (chessBoardForm != null && chessBoardForm.ContainsFocus) return UIActionVisibility.Hidden;
@@ -79,6 +88,14 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
+
+        public static readonly DefaultUIActionBinding GotoMovesForm = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
+            new UIActionBinding()
+            {
+                MenuCaption = "Moves",
+                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
+            });
 
         public UIActionState TryGotoMovesForm(bool perform)
         {
