@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System;
 
 namespace Sandra.UI.WF
 {
@@ -25,31 +24,31 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class InteractiveGame
     {
+        public readonly MdiContainerForm OwnerForm;
         public readonly Chess.Game Game;
 
-        public InteractiveGame(Chess.Position initialPosition)
+        public InteractiveGame(MdiContainerForm ownerForm, Chess.Position initialPosition)
         {
+            OwnerForm = ownerForm;
             Game = new Chess.Game(initialPosition);
-            Game.ActiveMoveIndexChanged += (_, e) => OnActiveMoveIndexChanged(e);
+            Game.ActiveMoveIndexChanged += (_, e) =>
+            {
+                // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
+                // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
+                if (chessBoardForm != null) chessBoardForm.GameUpdated();
+                MovesTextBox movesTextBox = getMovesTextBox();
+                if (movesTextBox != null) movesTextBox.GameUpdated();
+            };
         }
 
-        readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();
+        // Keep track of which types of forms are opened.
+        StandardChessBoardForm chessBoardForm;
+        SnappingMdiChildForm movesForm;
 
-        /// <summary>
-        /// <see cref="WeakEvent"/> which occurs when the active move index of the game was updated.
-        /// </summary>
-        public event EventHandler ActiveMoveIndexChanged
+        MovesTextBox getMovesTextBox()
         {
-            add { event_ActiveMoveIndexChanged.AddListener(value); }
-            remove { event_ActiveMoveIndexChanged.RemoveListener(value); }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
-        /// </summary>
-        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
-        {
-            event_ActiveMoveIndexChanged.Raise(this, e);
+            if (movesForm == null) return null;
+            return (MovesTextBox)movesForm.Controls[0];
         }
     }
 }

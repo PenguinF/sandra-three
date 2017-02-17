@@ -35,10 +35,13 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
+        public EnumIndexedArray<Piece, string> CurrentPieceSymbols { get; private set; }
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
             Icon = Properties.Resources.Sandra;
+            Text = "Sandra";
 
             // Initialize UIActions before building the MainMenuStrip based on it.
             initializeUIActions();
@@ -152,15 +155,23 @@ namespace Sandra.UI.WF
         {
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
-            UIMenuNode.Container container = new UIMenuNode.Container("Game");
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(container);
+            UIMenuNode.Container gameMenu = new UIMenuNode.Container("Game");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
-            bindFocusDependentUIActions(container,
+            bindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard,
                                         InteractiveGame.GotoPreviousMove,
                                         InteractiveGame.GotoNextMove,
                                         StandardChessBoardForm.TakeScreenshot);
+
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
+
+            // Add these actions to the "View" dropdown list.
+            bindFocusDependentUIActions(viewMenu,
+                                        InteractiveGame.GotoChessBoardForm,
+                                        InteractiveGame.GotoMovesForm);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
@@ -251,71 +262,13 @@ namespace Sandra.UI.WF
 
         public void NewPlayingBoard()
         {
-            InteractiveGame game = new InteractiveGame(Position.GetInitialPosition());
+            InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
 
-            StandardChessBoardForm mdiChild = new StandardChessBoardForm()
-            {
-                MdiParent = this,
-                ClientSize = new Size(400, 400),
-            };
-            mdiChild.Game = game;
-            mdiChild.PieceImages = PieceImages;
-            mdiChild.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
-            mdiChild.PerformAutoFit();
+            game.TryGotoChessBoardForm(true);
+            game.TryGotoMovesForm(true);
 
-            mdiChild.PlayingBoard.BindActions(new UIActionBindings
-            {
-                { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
-                { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
-                { StandardChessBoardForm.TakeScreenshot, mdiChild.TryTakeScreenshot },
-            });
-
-            UIMenu.AddTo(mdiChild.PlayingBoard);
-
-            mdiChild.Load += (_, __) =>
-            {
-                var mdiChildBounds = mdiChild.Bounds;
-                SnappingMdiChildForm movesForm = new SnappingMdiChildForm()
-                {
-                    MdiParent = this,
-                    StartPosition = FormStartPosition.Manual,
-                    Left = mdiChildBounds.Right,
-                    Top = mdiChildBounds.Top,
-                    Width = 200,
-                    Height = mdiChildBounds.Height,
-                    ShowIcon = false,
-                    MaximizeBox = false,
-                    FormBorderStyle = FormBorderStyle.SizableToolWindow,
-                };
-
-                EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
-                englishPieceSymbols[Piece.Knight] = "N";
-                englishPieceSymbols[Piece.Bishop] = "B";
-                englishPieceSymbols[Piece.Rook] = "R";
-                englishPieceSymbols[Piece.Queen] = "Q";
-                englishPieceSymbols[Piece.King] = "K";
-
-                var movesTextBox = new MovesTextBox()
-                {
-                    Dock = DockStyle.Fill,
-                    Game = game,
-                    MoveFormatter = new ShortAlgebraicMoveFormatter(englishPieceSymbols),
-                };
-
-                movesTextBox.BindActions(new UIActionBindings
-                {
-                    { InteractiveGame.GotoPreviousMove, game.TryGotoPreviousMove },
-                    { InteractiveGame.GotoNextMove, game.TryGotoNextMove },
-                });
-
-                UIMenu.AddTo(movesTextBox);
-
-                movesForm.Controls.Add(movesTextBox);
-
-                movesForm.Visible = true;
-            };
-
-            mdiChild.Visible = true;
+            // Focus back on the chessboard form.
+            game.TryGotoChessBoardForm(true);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -334,6 +287,16 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
+
+            // Standard set of piece symbols.
+            EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
+            englishPieceSymbols[Piece.Knight] = "N";
+            englishPieceSymbols[Piece.Bishop] = "B";
+            englishPieceSymbols[Piece.Rook] = "R";
+            englishPieceSymbols[Piece.Queen] = "Q";
+            englishPieceSymbols[Piece.King] = "K";
+
+            CurrentPieceSymbols = englishPieceSymbols;
 
             NewPlayingBoard();
         }
