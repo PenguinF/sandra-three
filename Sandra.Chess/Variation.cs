@@ -16,12 +16,28 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
+
 namespace Sandra.Chess
 {
     /// <summary>
     /// Represents a variation of a chess game.
     /// </summary>
+    /// <remarks>
+    /// For now implemented as a kind of linked list, but this is not ideal for localized access in memory.
+    /// </remarks>
     public class Variation
     {
+        /// <summary>
+        /// Gets the <see cref="Move"/> which starts this variation.
+        /// </summary>
+        public readonly Move Move;
+
+        public Variation Main;
+
+        public Variation(Move move)
+        {
+            Move = move;
+        }
     }
 }
