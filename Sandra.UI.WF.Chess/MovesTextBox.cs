@@ -275,20 +275,19 @@ namespace Sandra.UI.WF
                         formattedMoveElement.MoveIndex = moveElements.Count;
                         moveElements.Add(formattedMoveElement);
                     }
-                }
 
-                // elementLists.Elements can only be non-null if game is non-null as well.
-                if (elements != null && !game.Game.IsFirstMove)
-                {
-                    // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                    var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
-                    updateFont(lastMoveElement, lastMoveFont);
-
-                    if (!ContainsFocus)
+                    if (!game.Game.IsFirstMove)
                     {
-                        // Also update the caret so the active move is in view.
-                        Select(lastMoveElement.Start + lastMoveElement.Length, 0);
-                        ScrollToCaret();
+                        // Make the last move bold. This is the move before, not after ActiveMoveIndex.
+                        var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
+                        updateFont(lastMoveElement, lastMoveFont);
+
+                        if (!ContainsFocus)
+                        {
+                            // Also update the caret so the active move is in view.
+                            Select(lastMoveElement.Start + lastMoveElement.Length, 0);
+                            ScrollToCaret();
+                        }
                     }
                 }
             }
