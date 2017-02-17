@@ -58,11 +58,6 @@ namespace Sandra.Chess
         public Position CurrentPosition => currentPosition.Copy();
 
         /// <summary>
-        /// Returns the number of moves played after the initial position.
-        /// </summary>
-        public int MoveCount => moveList.Count;
-
-        /// <summary>
         /// Gets or sets the index of the active move. This is a value between 0 and <see cref="MoveCount"/>.
         /// </summary>
         public int ActiveMoveIndex
