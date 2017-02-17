@@ -95,11 +95,16 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.
         /// </summary>
-        public IEnumerable<Move> Moves
+        public IEnumerable<IndexedMove> Moves
         {
             get
             {
-                foreach (var move in moveList) yield return move;
+                int moveIndex = 1;
+                foreach (var move in moveList)
+                {
+                    yield return new IndexedMove(move, new MoveIndex(moveIndex));
+                    moveIndex++;
+                }
             }
         }
 

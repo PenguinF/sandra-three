@@ -50,4 +50,16 @@ namespace Sandra.Chess
 
         public static readonly MoveIndex BeforeFirstMove = new MoveIndex(0);
     }
+
+    public class IndexedMove
+    {
+        public readonly Move Move;
+        public readonly MoveIndex MoveIndex;
+
+        public IndexedMove(Move move, MoveIndex moveIndex)
+        {
+            Move = move;
+            MoveIndex = moveIndex;
+        }
+    }
 }

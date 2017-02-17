@@ -157,12 +157,12 @@ namespace Sandra.UI.WF
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
+                bool first = true;
                 int plyCounter = 0;
-                int moveCounter = 0;
 
-                foreach (Chess.Move move in game.Game.Moves)
+                foreach (Chess.IndexedMove move in game.Game.Moves)
                 {
-                    if (moveCounter == 0)
+                    if (first)
                     {
                         if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                         {
@@ -172,6 +172,8 @@ namespace Sandra.UI.WF
                             updated.Add(new TextElement.Space());
                             plyCounter++;
                         }
+
+                        first = false;
                     }
                     else
                     {
@@ -184,11 +186,9 @@ namespace Sandra.UI.WF
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move),
-                                                              new Chess.MoveIndex(moveCounter + 1)));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move.Move), move.MoveIndex));
 
                     ++plyCounter;
-                    ++moveCounter;
                 }
 
                 return updated;
