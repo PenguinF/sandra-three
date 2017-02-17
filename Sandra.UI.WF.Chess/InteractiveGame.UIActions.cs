@@ -78,7 +78,14 @@ namespace Sandra.UI.WF
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
 
                     chessBoardForm = newChessBoardForm;
-                    chessBoardForm.Disposed += (_, __) => chessBoardForm = null;
+                    chessBoardForm.Disposed += (_, __) =>
+                    {
+                        chessBoardForm = null;
+
+                        // To refresh the state of the GotoChessBoardForm action elsewhere.
+                        var movesTextBox = getMovesTextBox();
+                        if (movesTextBox != null) movesTextBox.ActionHandler.Invalidate();
+                    };
                 }
 
                 if (!chessBoardForm.ContainsFocus)
@@ -148,7 +155,13 @@ namespace Sandra.UI.WF
                     newMovesForm.Controls.Add(movesTextBox);
 
                     movesForm = newMovesForm;
-                    movesForm.Disposed += (_, __) => movesForm = null;
+                    movesForm.Disposed += (_, __) =>
+                    {
+                        movesForm = null;
+
+                        // To refresh the state of the GotoMovesForm action elsewhere.
+                        if (chessBoardForm != null) chessBoardForm.PlayingBoard.ActionHandler.Invalidate();
+                    };
                 }
 
                 if (!movesForm.ContainsFocus)

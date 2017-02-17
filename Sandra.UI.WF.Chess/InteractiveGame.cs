@@ -39,6 +39,12 @@ namespace Sandra.UI.WF
         StandardChessBoardForm chessBoardForm;
         SnappingMdiChildForm movesForm;
 
+        MovesTextBox getMovesTextBox()
+        {
+            if (movesForm == null) return null;
+            return (MovesTextBox)movesForm.Controls[0];
+        }
+
         readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();
 
         /// <summary>
