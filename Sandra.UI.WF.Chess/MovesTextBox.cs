@@ -278,7 +278,7 @@ namespace Sandra.UI.WF
                 }
 
                 // elementLists.Elements can only be non-null if game is non-null as well.
-                if (elements != null && game.Game.ActiveMoveIndex > 0)
+                if (elements != null && !game.Game.IsFirstMove)
                 {
                     // Make the last move bold. This is the move before, not after ActiveMoveIndex.
                     var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
@@ -328,13 +328,13 @@ namespace Sandra.UI.WF
                     BeginUpdate();
                     try
                     {
-                        if (game.Game.ActiveMoveIndex > 0)
+                        if (!game.Game.IsFirstMove)
                         {
                             updateFont(moveElements[game.Game.ActiveMoveIndex - 1], regularFont);
                         }
                         game.Game.ActiveMoveIndex = newActiveMoveIndex;
                         ActionHandler.Invalidate();
-                        if (game.Game.ActiveMoveIndex > 0)
+                        if (!game.Game.IsFirstMove)
                         {
                             updateFont(moveElements[game.Game.ActiveMoveIndex - 1], lastMoveFont);
                         }
