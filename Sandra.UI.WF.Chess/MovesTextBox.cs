@@ -274,23 +274,23 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    moveElements = new List<TextElement.FormattedMove>();
-                    foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
-                    {
-                        moveElements.Add(formattedMoveElement);
-                    }
+                    moveElements = new List<TextElement.FormattedMove>(elements.OfType<TextElement.FormattedMove>());
 
-                    if (!game.Game.IsFirstMove)
+                    foreach (var formattedMoveElement in moveElements)
                     {
-                        // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                        var lastMoveElement = moveElements[game.Game.ActiveMoveIndex.Value - 1];
-                        updateFont(lastMoveElement, lastMoveFont);
-
-                        if (!ContainsFocus)
+                        if (formattedMoveElement.MoveIndex.EqualTo(game.Game.ActiveMoveIndex))
                         {
-                            // Also update the caret so the active move is in view.
-                            Select(lastMoveElement.Start + lastMoveElement.Length, 0);
-                            ScrollToCaret();
+                            // Make the active move bold.
+                            updateFont(formattedMoveElement, lastMoveFont);
+
+                            if (!ContainsFocus)
+                            {
+                                // Also update the caret so the active move is in view.
+                                Select(formattedMoveElement.Start + formattedMoveElement.Length, 0);
+                                ScrollToCaret();
+                            }
+
+                            break;
                         }
                     }
                 }
@@ -313,33 +313,41 @@ namespace Sandra.UI.WF
                 int elemIndex = startIndexes.BinarySearch(selectionStart);
                 if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
+                TextElement.FormattedMove newActiveMoveElement;
                 Chess.MoveIndex newActiveMoveIndex;
                 if (elemIndex < 0)
                 {
                     // Exceptional case to go to the initial position.
+                    newActiveMoveElement = null;
                     newActiveMoveIndex = Chess.MoveIndex.BeforeFirstMove;
                 }
                 else
                 {
                     // Go to the position after the selected move.
-                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex;
+                    newActiveMoveElement = moveElements[elemIndex];
+                    newActiveMoveIndex = newActiveMoveElement.MoveIndex;
                 }
 
                 // Update the active move index in the game.
-                if (game.Game.ActiveMoveIndex.Value != newActiveMoveIndex.Value)
+                if (!game.Game.ActiveMoveIndex.EqualTo(newActiveMoveIndex))
                 {
                     BeginUpdate();
                     try
                     {
-                        if (!game.Game.IsFirstMove)
+                        // Search for the current active move element to clear its font.
+                        foreach (var formattedMoveElement in moveElements)
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex.Value - 1], regularFont);
+                            if (formattedMoveElement.MoveIndex.EqualTo(game.Game.ActiveMoveIndex))
+                            {
+                                updateFont(formattedMoveElement, regularFont);
+                            }
                         }
+
                         game.Game.ActiveMoveIndex = newActiveMoveIndex;
                         ActionHandler.Invalidate();
-                        if (!game.Game.IsFirstMove)
+                        if (newActiveMoveElement != null)
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex.Value - 1], lastMoveFont);
+                            updateFont(newActiveMoveElement, lastMoveFont);
                         }
                     }
                     finally

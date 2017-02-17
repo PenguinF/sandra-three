@@ -48,6 +48,8 @@ namespace Sandra.Chess
 
         public MoveIndex(int value) { Value = value; }
 
+        public bool EqualTo(MoveIndex other) { return Value == other.Value; }
+
         public static readonly MoveIndex BeforeFirstMove = new MoveIndex(0);
     }
 
