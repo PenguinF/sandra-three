@@ -28,7 +28,21 @@ namespace Sandra.Chess
     public class Game
     {
         private readonly Position initialPosition;
-        private readonly List<Move> moveList = new List<Move>();
+
+        // null == no moves.
+        private Variation mainVariation;
+
+        private List<Move> getMoveList()
+        {
+            List<Move> moveList = new List<Move>();
+            Variation current = mainVariation;
+            while (current != null)
+            {
+                moveList.Add(current.Move);
+                current = current.Main;
+            }
+            return moveList;
+        }
 
         private Position currentPosition;
 
@@ -74,6 +88,9 @@ namespace Sandra.Chess
             {
                 throw new ArgumentNullException(nameof(value));
             }
+
+            List<Move> moveList = getMoveList();
+
             if (value.Value < 0 || moveList.Count < value.Value)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
@@ -91,8 +108,8 @@ namespace Sandra.Chess
         }
 
         public bool IsFirstMove => activeMoveIndex.Value == 0;
-        public bool IsLastMove => activeMoveIndex.Value == moveList.Count;
-        public Move PreviousMove() => moveList[activeMoveIndex.Value - 1];
+        public bool IsLastMove => activeMoveIndex.Value == getMoveList().Count;
+        public Move PreviousMove() => getMoveList()[activeMoveIndex.Value - 1];
 
         public void Backward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value - 1));
         public void Forward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value + 1));
@@ -105,7 +122,7 @@ namespace Sandra.Chess
             get
             {
                 int moveIndex = 1;
-                foreach (var move in moveList)
+                foreach (var move in getMoveList())
                 {
                     yield return new IndexedMove(move, new MoveIndex(moveIndex));
                     moveIndex++;
@@ -170,9 +187,19 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 bool add = true;
-                if (activeMoveIndex.Value < moveList.Count)
+                Variation previous = null;
+                Variation current = mainVariation;
+                int moveCounter = 0;
+                while (moveCounter < activeMoveIndex.Value)
                 {
-                    if (moveList[activeMoveIndex.Value].CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                    if (current == null) throw new InvalidOperationException(); // then activeMoveIndex is corrupt.
+                    previous = current;
+                    current = current.Main;
+                    moveCounter++;
+                }
+                if (current != null)
+                {
+                    if (current.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
                     {
                         // Moves are the same, only move forward.
                         add = false;
@@ -180,10 +207,15 @@ namespace Sandra.Chess
                     else
                     {
                         // Erase the active move and everything after.
-                        moveList.RemoveRange(activeMoveIndex.Value, moveList.Count - activeMoveIndex.Value);
+                        if (previous == null) mainVariation = null;
+                        else previous.Main = null;
                     }
                 }
-                if (add) moveList.Add(move);
+                if (add)
+                {
+                    if (previous == null) mainVariation = new Variation(move);
+                    else previous.Main = new Variation(move);
+                }
                 activeMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
                 RaiseActiveMoveIndexChanged();
             }
