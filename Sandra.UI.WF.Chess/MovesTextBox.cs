@@ -162,7 +162,7 @@ namespace Sandra.UI.WF
                     {
                         if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                         {
-                            // Adjust plyCounter and add an ellipsis for the unknown previous white move. 
+                            // Adjust plyCounter and add an ellipsis for the previous white move. 
                             updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
                             updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
                             updated.Add(new TextElement.Space());
