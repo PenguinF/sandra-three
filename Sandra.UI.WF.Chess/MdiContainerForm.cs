@@ -41,6 +41,7 @@ namespace Sandra.UI.WF
         {
             IsMdiContainer = true;
             Icon = Properties.Resources.Sandra;
+            Text = "Sandra";
 
             // Initialize UIActions before building the MainMenuStrip based on it.
             initializeUIActions();
