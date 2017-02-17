@@ -87,7 +87,7 @@ namespace Sandra.Chess
 
         public bool IsFirstMove => activeMoveIndex == 0;
         public bool IsLastMove => activeMoveIndex == moveList.Count;
-        public Move PreviousMove() => GetMove(activeMoveIndex - 1);
+        public Move PreviousMove() => moveList[activeMoveIndex - 1];
 
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.
@@ -99,11 +99,6 @@ namespace Sandra.Chess
                 foreach (var move in moveList) yield return move;
             }
         }
-
-        /// <summary>
-        /// Gets the <see cref="Move"/> at position <paramref name="moveIndex"/>.
-        /// </summary>
-        public Move GetMove(int moveIndex) => moveList[moveIndex];
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
