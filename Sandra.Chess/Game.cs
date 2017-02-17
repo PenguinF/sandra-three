@@ -85,7 +85,9 @@ namespace Sandra.Chess
             }
         }
 
-        public bool IsLastMove => ActiveMoveIndex == moveList.Count;
+        public bool IsFirstMove => activeMoveIndex == 0;
+        public bool IsLastMove => activeMoveIndex == moveList.Count;
+        public Move PreviousMove() => GetMove(activeMoveIndex - 1);
 
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.
