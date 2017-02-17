@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System;
 
 namespace Sandra.UI.WF
 {
@@ -32,7 +31,14 @@ namespace Sandra.UI.WF
         {
             OwnerForm = ownerForm;
             Game = new Chess.Game(initialPosition);
-            Game.ActiveMoveIndexChanged += (_, e) => OnActiveMoveIndexChanged(e);
+            Game.ActiveMoveIndexChanged += (_, e) =>
+            {
+                // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
+                // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
+                if (chessBoardForm != null) chessBoardForm.GameUpdated();
+                MovesTextBox movesTextBox = getMovesTextBox();
+                if (movesTextBox != null) movesTextBox.GameUpdated();
+            };
         }
 
         // Keep track of which types of forms are opened.
@@ -43,25 +49,6 @@ namespace Sandra.UI.WF
         {
             if (movesForm == null) return null;
             return (MovesTextBox)movesForm.Controls[0];
-        }
-
-        readonly WeakEvent event_ActiveMoveIndexChanged = new WeakEvent();
-
-        /// <summary>
-        /// <see cref="WeakEvent"/> which occurs when the active move index of the game was updated.
-        /// </summary>
-        public event EventHandler ActiveMoveIndexChanged
-        {
-            add { event_ActiveMoveIndexChanged.AddListener(value); }
-            remove { event_ActiveMoveIndexChanged.RemoveListener(value); }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
-        /// </summary>
-        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
-        {
-            event_ActiveMoveIndexChanged.Raise(this, e);
         }
     }
 }

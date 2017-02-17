@@ -55,10 +55,7 @@ namespace Sandra.UI.WF
             {
                 if (game != value)
                 {
-                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
-                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
-
                     copyPositionToBoard();
                 }
             }
@@ -444,7 +441,7 @@ namespace Sandra.UI.WF
             PlayingBoard.ActionHandler.Invalidate();
         }
 
-        private void game_ActiveMoveIndexChanged(object sender, EventArgs e)
+        internal void GameUpdated()
         {
             copyPositionToBoard();
         }

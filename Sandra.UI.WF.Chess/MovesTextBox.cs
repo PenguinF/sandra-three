@@ -87,15 +87,13 @@ namespace Sandra.UI.WF
             {
                 if (game != value)
                 {
-                    if (game != null) game.ActiveMoveIndexChanged -= game_ActiveMoveIndexChanged;
                     game = value;
-                    if (game != null) game.ActiveMoveIndexChanged += game_ActiveMoveIndexChanged;
                     refreshText();
                 }
             }
         }
 
-        private void game_ActiveMoveIndexChanged(object sender, EventArgs e)
+        internal void GameUpdated()
         {
             if (!IsUpdating)
             {
