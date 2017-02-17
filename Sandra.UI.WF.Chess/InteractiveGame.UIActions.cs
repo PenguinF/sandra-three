@@ -214,7 +214,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoNextMove(bool perform)
         {
-            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform) Game.ActiveMoveIndex++;
             return UIActionVisibility.Enabled;
         }
