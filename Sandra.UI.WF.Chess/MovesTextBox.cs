@@ -279,7 +279,7 @@ namespace Sandra.UI.WF
                     if (!game.Game.IsFirstMove)
                     {
                         // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                        var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
+                        var lastMoveElement = moveElements[game.Game.ActiveMoveIndex.Value - 1];
                         updateFont(lastMoveElement, lastMoveFont);
 
                         if (!ContainsFocus)
@@ -322,20 +322,20 @@ namespace Sandra.UI.WF
                 }
 
                 // Update the active move index in the game.
-                if (game.Game.ActiveMoveIndex != newActiveMoveIndex)
+                if (game.Game.ActiveMoveIndex.Value != newActiveMoveIndex)
                 {
                     BeginUpdate();
                     try
                     {
                         if (!game.Game.IsFirstMove)
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], regularFont);
+                            updateFont(moveElements[game.Game.ActiveMoveIndex.Value - 1], regularFont);
                         }
-                        game.Game.ActiveMoveIndex = newActiveMoveIndex;
+                        game.Game.ActiveMoveIndex = new Chess.MoveIndex(newActiveMoveIndex);
                         ActionHandler.Invalidate();
                         if (!game.Game.IsFirstMove)
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], lastMoveFont);
+                            updateFont(moveElements[game.Game.ActiveMoveIndex.Value - 1], lastMoveFont);
                         }
                     }
                     finally

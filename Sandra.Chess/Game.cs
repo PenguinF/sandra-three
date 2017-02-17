@@ -34,7 +34,7 @@ namespace Sandra.Chess
 
         // Points at the index of the move which was played in the current position.
         // Is moveList.Count if currentPosition is at the end of the game.
-        private int activeMoveIndex;
+        private MoveIndex activeMoveIndex = new MoveIndex(0);
 
         public Game(Position initialPosition)
         {
@@ -60,7 +60,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets or sets the index of the active move. This is a value between 0 and <see cref="MoveCount"/>.
         /// </summary>
-        public int ActiveMoveIndex
+        public MoveIndex ActiveMoveIndex
         {
             get
             {
@@ -68,15 +68,15 @@ namespace Sandra.Chess
             }
             set
             {
-                if (value < 0 || moveList.Count < value)
+                if (value.Value < 0 || moveList.Count < value.Value)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                if (activeMoveIndex != value)
+                if (activeMoveIndex.Value != value.Value)
                 {
                     activeMoveIndex = value;
                     currentPosition = initialPosition.Copy();
-                    for (int i = 0; i < activeMoveIndex; ++i)
+                    for (int i = 0; i < activeMoveIndex.Value; ++i)
                     {
                         currentPosition.FastMakeMove(moveList[i]);
                     }
@@ -85,12 +85,12 @@ namespace Sandra.Chess
             }
         }
 
-        public bool IsFirstMove => activeMoveIndex == 0;
-        public bool IsLastMove => activeMoveIndex == moveList.Count;
-        public Move PreviousMove() => moveList[activeMoveIndex - 1];
+        public bool IsFirstMove => activeMoveIndex.Value == 0;
+        public bool IsLastMove => activeMoveIndex.Value == moveList.Count;
+        public Move PreviousMove() => moveList[activeMoveIndex.Value - 1];
 
-        public void Backward() => ActiveMoveIndex--;
-        public void Forward() => ActiveMoveIndex++;
+        public void Backward() => ActiveMoveIndex = new MoveIndex(activeMoveIndex.Value - 1);
+        public void Forward() => ActiveMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
 
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.
@@ -160,9 +160,9 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 bool add = true;
-                if (activeMoveIndex < moveList.Count)
+                if (activeMoveIndex.Value < moveList.Count)
                 {
-                    if (moveList[activeMoveIndex].CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                    if (moveList[activeMoveIndex.Value].CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
                     {
                         // Moves are the same, only move forward.
                         add = false;
@@ -170,11 +170,11 @@ namespace Sandra.Chess
                     else
                     {
                         // Erase the active move and everything after.
-                        moveList.RemoveRange(activeMoveIndex, moveList.Count - activeMoveIndex);
+                        moveList.RemoveRange(activeMoveIndex.Value, moveList.Count - activeMoveIndex.Value);
                     }
                 }
                 if (add) moveList.Add(move);
-                ++activeMoveIndex;
+                activeMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
                 RaiseActiveMoveIndexChanged();
             }
             return move;
