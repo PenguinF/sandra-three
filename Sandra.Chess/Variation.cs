@@ -33,6 +33,7 @@ namespace Sandra.Chess
         /// </summary>
         public readonly Move Move;
 
+        public Variation Parent;
         public Variation Main;
 
         public Variation(Move move)
