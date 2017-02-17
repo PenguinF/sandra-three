@@ -115,7 +115,7 @@ namespace Sandra.UI.WF
 
             public sealed class InitialBlackSideToMoveEllipsis : TextElement
             {
-                public const string EllipsisText = "1...";
+                public const string EllipsisText = "..";
                 public override string GetText() => EllipsisText;
             }
 
@@ -153,19 +153,25 @@ namespace Sandra.UI.WF
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
+                bool first = true;
+                int plyCounter = 0;
+
                 foreach (Chess.Move move in game.Game.Moves)
                 {
-                    int plyCounter = simulatedGame.MoveCount;
-                    if (plyCounter > 0) updated.Add(new TextElement.Space());
-
-                    if (simulatedGame.InitialSideToMove == Chess.Color.Black)
+                    if (first)
                     {
-                        if (plyCounter == 0)
+                        if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                         {
+                            // Adjust plyCounter and add an ellipsis for the unknown previous white move. 
+                            updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
                             updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
                             updated.Add(new TextElement.Space());
+                            plyCounter++;
                         }
-                        ++plyCounter;
+                    }
+                    else
+                    {
+                        updated.Add(new TextElement.Space());
                     }
 
                     if (plyCounter % 2 == 0)
@@ -175,6 +181,9 @@ namespace Sandra.UI.WF
                     }
 
                     updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
+
+                    ++plyCounter;
+                    first = false;
                 }
 
                 return updated;
