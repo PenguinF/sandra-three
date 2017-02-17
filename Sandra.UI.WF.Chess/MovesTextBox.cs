@@ -130,8 +130,12 @@ namespace Sandra.UI.WF
             {
                 readonly string value;
                 public override string GetText() => value;
-                public int MoveIndex;
-                public FormattedMove(string value) { this.value = value; }
+                public readonly Chess.MoveIndex MoveIndex;
+                public FormattedMove(string value, Chess.MoveIndex moveIndex)
+                {
+                    this.value = value;
+                    MoveIndex = moveIndex;
+                }
             }
         }
 
@@ -153,12 +157,12 @@ namespace Sandra.UI.WF
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
-                bool first = true;
                 int plyCounter = 0;
+                int moveCounter = 0;
 
                 foreach (Chess.Move move in game.Game.Moves)
                 {
-                    if (first)
+                    if (moveCounter == 0)
                     {
                         if (simulatedGame.InitialSideToMove == Chess.Color.Black)
                         {
@@ -180,10 +184,11 @@ namespace Sandra.UI.WF
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move),
+                                                              new Chess.MoveIndex(moveCounter + 1)));
 
                     ++plyCounter;
-                    first = false;
+                    ++moveCounter;
                 }
 
                 return updated;
@@ -272,7 +277,6 @@ namespace Sandra.UI.WF
                     moveElements = new List<TextElement.FormattedMove>();
                     foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                     {
-                        formattedMoveElement.MoveIndex = moveElements.Count;
                         moveElements.Add(formattedMoveElement);
                     }
 
@@ -309,20 +313,20 @@ namespace Sandra.UI.WF
                 int elemIndex = startIndexes.BinarySearch(selectionStart);
                 if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
-                int newActiveMoveIndex;
+                Chess.MoveIndex newActiveMoveIndex;
                 if (elemIndex < 0)
                 {
                     // Exceptional case to go to the initial position.
-                    newActiveMoveIndex = 0;
+                    newActiveMoveIndex = new Chess.MoveIndex(0);
                 }
                 else
                 {
                     // Go to the position after the selected move.
-                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex + 1;
+                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex;
                 }
 
                 // Update the active move index in the game.
-                if (game.Game.ActiveMoveIndex.Value != newActiveMoveIndex)
+                if (game.Game.ActiveMoveIndex.Value != newActiveMoveIndex.Value)
                 {
                     BeginUpdate();
                     try
@@ -331,7 +335,7 @@ namespace Sandra.UI.WF
                         {
                             updateFont(moveElements[game.Game.ActiveMoveIndex.Value - 1], regularFont);
                         }
-                        game.Game.ActiveMoveIndex = new Chess.MoveIndex(newActiveMoveIndex);
+                        game.Game.ActiveMoveIndex = newActiveMoveIndex;
                         ActionHandler.Invalidate();
                         if (!game.Game.IsFirstMove)
                         {
