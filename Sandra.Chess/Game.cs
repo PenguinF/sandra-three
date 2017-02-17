@@ -66,22 +66,27 @@ namespace Sandra.Chess
             {
                 return activeMoveIndex;
             }
-            set
+        }
+
+        public void SetActiveMoveIndex(MoveIndex value)
+        {
+            if (value == null)
             {
-                if (value.Value < 0 || moveList.Count < value.Value)
+                throw new ArgumentNullException(nameof(value));
+            }
+            if (value.Value < 0 || moveList.Count < value.Value)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+            if (activeMoveIndex.Value != value.Value)
+            {
+                activeMoveIndex = value;
+                currentPosition = initialPosition.Copy();
+                for (int i = 0; i < activeMoveIndex.Value; ++i)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    currentPosition.FastMakeMove(moveList[i]);
                 }
-                if (activeMoveIndex.Value != value.Value)
-                {
-                    activeMoveIndex = value;
-                    currentPosition = initialPosition.Copy();
-                    for (int i = 0; i < activeMoveIndex.Value; ++i)
-                    {
-                        currentPosition.FastMakeMove(moveList[i]);
-                    }
-                    RaiseActiveMoveIndexChanged();
-                }
+                RaiseActiveMoveIndexChanged();
             }
         }
 
@@ -89,8 +94,8 @@ namespace Sandra.Chess
         public bool IsLastMove => activeMoveIndex.Value == moveList.Count;
         public Move PreviousMove() => moveList[activeMoveIndex.Value - 1];
 
-        public void Backward() => ActiveMoveIndex = new MoveIndex(activeMoveIndex.Value - 1);
-        public void Forward() => ActiveMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
+        public void Backward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value - 1));
+        public void Forward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value + 1));
 
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.

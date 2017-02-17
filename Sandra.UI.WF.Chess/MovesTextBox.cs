@@ -343,7 +343,7 @@ namespace Sandra.UI.WF
                             }
                         }
 
-                        game.Game.ActiveMoveIndex = newActiveMoveIndex;
+                        game.Game.SetActiveMoveIndex(newActiveMoveIndex);
                         ActionHandler.Invalidate();
                         if (newActiveMoveElement != null)
                         {
