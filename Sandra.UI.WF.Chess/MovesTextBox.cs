@@ -317,7 +317,7 @@ namespace Sandra.UI.WF
                 if (elemIndex < 0)
                 {
                     // Exceptional case to go to the initial position.
-                    newActiveMoveIndex = new Chess.MoveIndex(0);
+                    newActiveMoveIndex = Chess.MoveIndex.BeforeFirstMove;
                 }
                 else
                 {

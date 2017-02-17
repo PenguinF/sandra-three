@@ -34,7 +34,7 @@ namespace Sandra.Chess
 
         // Points at the index of the move which was played in the current position.
         // Is moveList.Count if currentPosition is at the end of the game.
-        private MoveIndex activeMoveIndex = new MoveIndex(0);
+        private MoveIndex activeMoveIndex = MoveIndex.BeforeFirstMove;
 
         public Game(Position initialPosition)
         {

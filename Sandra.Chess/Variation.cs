@@ -47,5 +47,7 @@ namespace Sandra.Chess
         public readonly int Value;
 
         public MoveIndex(int value) { Value = value; }
+
+        public static readonly MoveIndex BeforeFirstMove = new MoveIndex(0);
     }
 }
