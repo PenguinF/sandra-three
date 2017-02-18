@@ -78,11 +78,11 @@ namespace Sandra.Chess
             }
 
             MoveIndex activeMoveIndex = activeVariation != null ? activeVariation.MoveIndex : MoveIndex.BeforeFirstMove;
-            if (activeMoveIndex.Value != value.Value)
+            if (!activeMoveIndex.EqualTo(value))
             {
                 Position newPosition = initialPosition.Copy();
                 Variation newActiveVariation = null;
-                if (value.Value != 0)
+                if (!value.EqualTo(MoveIndex.BeforeFirstMove))
                 {
                     // Linear search for the right move index.
                     Variation current = mainVariation;
@@ -113,8 +113,39 @@ namespace Sandra.Chess
         public bool IsLastMove => activeVariation == null ? mainVariation == null : activeVariation.Main == null;
         public Move PreviousMove() => activeVariation.Move;
 
-        public void Backward() => SetActiveMoveIndex(activeVariation.Parent != null ? activeVariation.Parent.MoveIndex : MoveIndex.BeforeFirstMove);
-        public void Forward() => SetActiveMoveIndex(activeVariation == null ? mainVariation.MoveIndex : activeVariation.Main.MoveIndex);
+        public void Backward()
+        {
+            if (IsFirstMove)
+            {
+                throw new InvalidOperationException("Cannot go backward when it's the first move.");
+            }
+
+            // Replay until the previous move.
+            Position newPosition = initialPosition.Copy();
+            Variation current = mainVariation;
+            while (current != activeVariation)
+            {
+                newPosition.FastMakeMove(current.Move);
+                current = current.Main;
+            }
+
+            currentPosition = newPosition;
+            activeVariation = activeVariation.Parent;
+            RaiseActiveMoveIndexChanged();
+        }
+
+        public void Forward()
+        {
+            if (IsLastMove)
+            {
+                throw new InvalidOperationException("Cannot go forward when it's the last move.");
+            }
+
+            Variation next = activeVariation != null ? activeVariation.Main : mainVariation;
+            currentPosition.FastMakeMove(next.Move);
+            activeVariation = next;
+            RaiseActiveMoveIndexChanged();
+        }
 
         public Variation MainVariation => mainVariation;
 
