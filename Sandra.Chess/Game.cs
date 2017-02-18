@@ -114,21 +114,7 @@ namespace Sandra.Chess
         public void Backward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value - 1));
         public void Forward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value + 1));
 
-        /// <summary>
-        /// Enumerates all moves that led from the initial position to the end of the game.
-        /// </summary>
-        public IEnumerable<Variation> Moves
-        {
-            get
-            {
-                Variation current = mainVariation;
-                while (current != null)
-                {
-                    yield return current;
-                    current = current.Main;
-                }
-            }
-        }
+        public Variation MainVariation => mainVariation;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.

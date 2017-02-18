@@ -160,7 +160,8 @@ namespace Sandra.UI.WF
                 bool first = true;
                 int plyCounter = 0;
 
-                foreach (Chess.Variation move in game.Game.Moves)
+                Chess.Variation current = game.Game.MainVariation;
+                while (current != null)
                 {
                     if (first)
                     {
@@ -186,9 +187,10 @@ namespace Sandra.UI.WF
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move.Move), move.MoveIndex));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Move), current.MoveIndex));
 
                     ++plyCounter;
+                    current = current.Main;
                 }
 
                 return updated;
