@@ -38,11 +38,12 @@ namespace Sandra.Chess
         /// </summary>
         public readonly MoveIndex MoveIndex;
 
-        public Variation Parent;
+        public readonly Variation Parent;
         public Variation Main;
 
-        public Variation(Move move, MoveIndex moveIndex)
+        public Variation(Variation parent, Move move, MoveIndex moveIndex)
         {
+            Parent = parent;
             Move = move;
             MoveIndex = moveIndex;
         }

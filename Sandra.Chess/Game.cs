@@ -32,23 +32,11 @@ namespace Sandra.Chess
         // null == no moves.
         private Variation mainVariation;
 
-        private List<Move> getMoveList()
-        {
-            List<Move> moveList = new List<Move>();
-            Variation current = mainVariation;
-            while (current != null)
-            {
-                moveList.Add(current.Move);
-                current = current.Main;
-            }
-            return moveList;
-        }
-
         private Position currentPosition;
 
-        // Points at the index of the move which was played in the current position.
-        // Is moveList.Count if currentPosition is at the end of the game.
-        private MoveIndex activeMoveIndex = MoveIndex.BeforeFirstMove;
+        // Points at the variation with the move which was just played in the current position.
+        // Is null at the start of the game.
+        private Variation activeVariation;
 
         public Game(Position initialPosition)
         {
@@ -78,7 +66,7 @@ namespace Sandra.Chess
         {
             get
             {
-                return activeMoveIndex;
+                return activeVariation != null ? activeVariation.MoveIndex : MoveIndex.BeforeFirstMove;
             }
         }
 
@@ -89,30 +77,44 @@ namespace Sandra.Chess
                 throw new ArgumentNullException(nameof(value));
             }
 
-            List<Move> moveList = getMoveList();
-
-            if (value.Value < 0 || moveList.Count < value.Value)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
+            MoveIndex activeMoveIndex = activeVariation != null ? activeVariation.MoveIndex : MoveIndex.BeforeFirstMove;
             if (activeMoveIndex.Value != value.Value)
             {
-                activeMoveIndex = value;
-                currentPosition = initialPosition.Copy();
-                for (int i = 0; i < activeMoveIndex.Value; ++i)
+                Position newPosition = initialPosition.Copy();
+                Variation newActiveVariation = null;
+                if (value.Value != 0)
                 {
-                    currentPosition.FastMakeMove(moveList[i]);
+                    // Linear search for the right move index.
+                    Variation current = mainVariation;
+                    while (current != null)
+                    {
+                        newPosition.FastMakeMove(current.Move);
+                        if (current.MoveIndex.EqualTo(value))
+                        {
+                            newActiveVariation = current;
+                            break;
+                        }
+                        current = current.Main;
+                    }
+
+                    if (newActiveVariation == null)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(value));
+                    }
                 }
+
+                currentPosition = newPosition;
+                activeVariation = newActiveVariation;
                 RaiseActiveMoveIndexChanged();
             }
         }
 
-        public bool IsFirstMove => activeMoveIndex.Value == 0;
-        public bool IsLastMove => activeMoveIndex.Value == getMoveList().Count;
-        public Move PreviousMove() => getMoveList()[activeMoveIndex.Value - 1];
+        public bool IsFirstMove => activeVariation == null;
+        public bool IsLastMove => activeVariation == null ? mainVariation == null : activeVariation.Main == null;
+        public Move PreviousMove() => activeVariation.Move;
 
-        public void Backward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value - 1));
-        public void Forward() => SetActiveMoveIndex(new MoveIndex(activeMoveIndex.Value + 1));
+        public void Backward() => SetActiveMoveIndex(activeVariation.Parent != null ? activeVariation.Parent.MoveIndex : MoveIndex.BeforeFirstMove);
+        public void Forward() => SetActiveMoveIndex(activeVariation == null ? mainVariation.MoveIndex : activeVariation.Main.MoveIndex);
 
         public Variation MainVariation => mainVariation;
 
@@ -173,35 +175,34 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 bool add = true;
-                Variation previous = null;
-                Variation current = mainVariation;
-                int moveCounter = 0;
-                while (moveCounter < activeMoveIndex.Value)
+                Variation next = activeVariation != null ? activeVariation.Main : mainVariation;
+                if (next != null)
                 {
-                    if (current == null) throw new InvalidOperationException(); // then activeMoveIndex is corrupt.
-                    previous = current;
-                    current = current.Main;
-                    moveCounter++;
-                }
-                if (current != null)
-                {
-                    if (current.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                    if (next.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
                     {
                         // Moves are the same, only move forward.
+                        activeVariation = next;
                         add = false;
                     }
                     else
                     {
                         // Erase the active move and everything after.
-                        if (previous == null) mainVariation = null;
-                        else previous.Main = null;
+                        if (activeVariation == null) mainVariation = null;
+                        else activeVariation.Main = null;
                     }
                 }
-                activeMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
                 if (add)
                 {
-                    if (previous == null) mainVariation = new Variation(move, activeMoveIndex);
-                    else previous.Main = new Variation(move, activeMoveIndex);
+                    if (activeVariation == null)
+                    {
+                        mainVariation = new Variation(activeVariation, move, new MoveIndex(1));
+                        activeVariation = mainVariation;
+                    }
+                    else
+                    {
+                        activeVariation.Main = new Variation(activeVariation, move, new MoveIndex(activeVariation.MoveIndex.Value + 1));
+                        activeVariation = activeVariation.Main;
+                    }
                 }
                 RaiseActiveMoveIndexChanged();
             }
