@@ -122,10 +122,12 @@ namespace Sandra.Chess
             get
             {
                 int moveIndex = 1;
-                foreach (var move in getMoveList())
+                Variation current = mainVariation;
+                while (current != null)
                 {
-                    yield return new IndexedMove(move, new MoveIndex(moveIndex));
+                    yield return new IndexedMove(current.Move, new MoveIndex(moveIndex));
                     moveIndex++;
+                    current = current.Main;
                 }
             }
         }
