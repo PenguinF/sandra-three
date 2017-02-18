@@ -117,16 +117,14 @@ namespace Sandra.Chess
         /// <summary>
         /// Enumerates all moves that led from the initial position to the end of the game.
         /// </summary>
-        public IEnumerable<IndexedMove> Moves
+        public IEnumerable<Variation> Moves
         {
             get
             {
-                int moveIndex = 1;
                 Variation current = mainVariation;
                 while (current != null)
                 {
-                    yield return new IndexedMove(current.Move, new MoveIndex(moveIndex));
-                    moveIndex++;
+                    yield return current;
                     current = current.Main;
                 }
             }
@@ -213,12 +211,12 @@ namespace Sandra.Chess
                         else previous.Main = null;
                     }
                 }
+                activeMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
                 if (add)
                 {
-                    if (previous == null) mainVariation = new Variation(move);
-                    else previous.Main = new Variation(move);
+                    if (previous == null) mainVariation = new Variation(move, activeMoveIndex);
+                    else previous.Main = new Variation(move, activeMoveIndex);
                 }
-                activeMoveIndex = new MoveIndex(activeMoveIndex.Value + 1);
                 RaiseActiveMoveIndexChanged();
             }
             return move;

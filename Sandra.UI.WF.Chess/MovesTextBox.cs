@@ -160,7 +160,7 @@ namespace Sandra.UI.WF
                 bool first = true;
                 int plyCounter = 0;
 
-                foreach (Chess.IndexedMove move in game.Game.Moves)
+                foreach (Chess.Variation move in game.Game.Moves)
                 {
                     if (first)
                     {

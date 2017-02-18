@@ -33,12 +33,18 @@ namespace Sandra.Chess
         /// </summary>
         public readonly Move Move;
 
+        /// <summary>
+        /// Gets the index for the <see cref="Move"/> which starts this variation.
+        /// </summary>
+        public readonly MoveIndex MoveIndex;
+
         public Variation Parent;
         public Variation Main;
 
-        public Variation(Move move)
+        public Variation(Move move, MoveIndex moveIndex)
         {
             Move = move;
+            MoveIndex = moveIndex;
         }
     }
 
@@ -51,17 +57,5 @@ namespace Sandra.Chess
         public bool EqualTo(MoveIndex other) { return Value == other.Value; }
 
         public static readonly MoveIndex BeforeFirstMove = new MoveIndex(0);
-    }
-
-    public class IndexedMove
-    {
-        public readonly Move Move;
-        public readonly MoveIndex MoveIndex;
-
-        public IndexedMove(Move move, MoveIndex moveIndex)
-        {
-            Move = move;
-            MoveIndex = moveIndex;
-        }
     }
 }
