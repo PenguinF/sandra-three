@@ -51,12 +51,15 @@ namespace Sandra.Chess
 
     public class MoveIndex
     {
-        public readonly int Value;
+        // To generate unique keys.
+        static int keyCounter;
 
-        public MoveIndex(int value) { Value = value; }
+        private readonly int key;
 
-        public bool EqualTo(MoveIndex other) { return Value == other.Value; }
+        public MoveIndex() { key = keyCounter++; }
 
-        public static readonly MoveIndex BeforeFirstMove = new MoveIndex(0);
+        public bool EqualTo(MoveIndex other) { return key == other.key; }
+
+        public static readonly MoveIndex BeforeFirstMove = new MoveIndex();
     }
 }

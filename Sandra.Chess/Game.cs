@@ -226,12 +226,12 @@ namespace Sandra.Chess
                 {
                     if (activeVariation == null)
                     {
-                        mainVariation = new Variation(activeVariation, move, new MoveIndex(1));
+                        mainVariation = new Variation(activeVariation, move, new MoveIndex());
                         activeVariation = mainVariation;
                     }
                     else
                     {
-                        activeVariation.Main = new Variation(activeVariation, move, new MoveIndex(activeVariation.MoveIndex.Value + 1));
+                        activeVariation.Main = new Variation(activeVariation, move, new MoveIndex());
                         activeVariation = activeVariation.Main;
                     }
                 }
