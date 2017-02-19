@@ -93,7 +93,7 @@ namespace Sandra.Chess
                             newActiveVariation = current;
                             break;
                         }
-                        current = current.Main;
+                        current = current.MoveTree.Main;
                     }
 
                     if (newActiveVariation == null)
@@ -109,7 +109,7 @@ namespace Sandra.Chess
         }
 
         public bool IsFirstMove => activeVariation == null;
-        public bool IsLastMove => activeVariation == null ? moveTree.Main == null : activeVariation.Main == null;
+        public bool IsLastMove => activeVariation == null ? moveTree.Main == null : activeVariation.MoveTree.Main == null;
         public Move PreviousMove() => activeVariation.Move;
 
         public void Backward()
@@ -122,14 +122,16 @@ namespace Sandra.Chess
             // Replay until the previous move.
             Position newPosition = initialPosition.Copy();
             Variation current = moveTree.Main;
+            Variation previous = null;
             while (current != activeVariation)
             {
                 newPosition.FastMakeMove(current.Move);
-                current = current.Main;
+                previous = current;
+                current = current.MoveTree.Main;
             }
 
             currentPosition = newPosition;
-            activeVariation = activeVariation.Parent;
+            activeVariation = previous;
             RaiseActiveMoveIndexChanged();
         }
 
@@ -140,7 +142,7 @@ namespace Sandra.Chess
                 throw new InvalidOperationException("Cannot go forward when it's the last move.");
             }
 
-            Variation next = activeVariation != null ? activeVariation.Main : moveTree.Main;
+            Variation next = activeVariation != null ? activeVariation.MoveTree.Main : moveTree.Main;
             currentPosition.FastMakeMove(next.Move);
             activeVariation = next;
             RaiseActiveMoveIndexChanged();
@@ -205,7 +207,7 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 bool add = true;
-                Variation next = activeVariation != null ? activeVariation.Main : moveTree.Main;
+                Variation next = activeVariation != null ? activeVariation.MoveTree.Main : moveTree.Main;
                 if (next != null)
                 {
                     if (next.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
@@ -218,7 +220,7 @@ namespace Sandra.Chess
                     {
                         // Erase the active move and everything after.
                         if (activeVariation == null) moveTree.Main = null;
-                        else activeVariation.Main = null;
+                        else activeVariation.MoveTree.Main = null;
                     }
                 }
                 if (add)
@@ -230,8 +232,8 @@ namespace Sandra.Chess
                     }
                     else
                     {
-                        activeVariation.Main = new Variation(activeVariation, move, new MoveIndex());
-                        activeVariation = activeVariation.Main;
+                        activeVariation.MoveTree.Main = new Variation(activeVariation, move, new MoveIndex());
+                        activeVariation = activeVariation.MoveTree.Main;
                     }
                 }
                 RaiseActiveMoveIndexChanged();

@@ -190,7 +190,7 @@ namespace Sandra.UI.WF
                     updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Move), current.MoveIndex));
 
                     ++plyCounter;
-                    current = current.Main;
+                    current = current.MoveTree.Main;
                 }
 
                 return updated;

@@ -39,7 +39,8 @@ namespace Sandra.Chess
         public readonly MoveIndex MoveIndex;
 
         public readonly Variation Parent;
-        public Variation Main;
+
+        public readonly MoveTree MoveTree = new MoveTree();
 
         public Variation(Variation parent, Move move, MoveIndex moveIndex)
         {
