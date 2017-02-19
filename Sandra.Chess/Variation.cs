@@ -16,8 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
-
 namespace Sandra.Chess
 {
     /// <summary>
@@ -33,20 +31,14 @@ namespace Sandra.Chess
         /// </summary>
         public readonly Move Move;
 
-        /// <summary>
-        /// Gets the index for the <see cref="Move"/> which starts this variation.
-        /// </summary>
-        public readonly MoveIndex MoveIndex;
-
         public readonly MoveTree ParentTree;
 
         public readonly MoveTree MoveTree;
 
-        public Variation(MoveTree parentTree, Move move, MoveIndex moveIndex)
+        public Variation(MoveTree parentTree, Move move)
         {
             ParentTree = parentTree;
             Move = move;
-            MoveIndex = moveIndex;
             MoveTree = new MoveTree(this);
         }
     }
@@ -60,23 +52,9 @@ namespace Sandra.Chess
 
         public Variation Main;
 
-        public MoveTree(Variation parentVariation)
+        internal MoveTree(Variation parentVariation)
         {
             ParentVariation = parentVariation;
         }
-    }
-
-    public class MoveIndex
-    {
-        // To generate unique keys.
-        static int keyCounter;
-
-        private readonly int key;
-
-        public MoveIndex() { key = keyCounter++; }
-
-        public bool EqualTo(MoveIndex other) { return key == other.key; }
-
-        public static readonly MoveIndex BeforeFirstMove = new MoveIndex();
     }
 }

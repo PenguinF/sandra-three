@@ -130,11 +130,11 @@ namespace Sandra.UI.WF
             {
                 readonly string value;
                 public override string GetText() => value;
-                public readonly Chess.MoveIndex MoveIndex;
-                public FormattedMove(string value, Chess.MoveIndex moveIndex)
+                public readonly Chess.Variation Variation;
+                public FormattedMove(string value, Chess.Variation variation)
                 {
                     this.value = value;
-                    MoveIndex = moveIndex;
+                    Variation = variation;
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace Sandra.UI.WF
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Move), current.MoveIndex));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Move), current));
 
                     ++plyCounter;
                     current = current.MoveTree.Main;
@@ -280,7 +280,7 @@ namespace Sandra.UI.WF
 
                     foreach (var formattedMoveElement in moveElements)
                     {
-                        if (formattedMoveElement.MoveIndex.EqualTo(game.Game.ActiveMoveIndex))
+                        if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
                             // Make the active move bold.
                             updateFont(formattedMoveElement, lastMoveFont);
@@ -316,22 +316,22 @@ namespace Sandra.UI.WF
                 if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                 TextElement.FormattedMove newActiveMoveElement;
-                Chess.MoveIndex newActiveMoveIndex;
+                Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
                     // Exceptional case to go to the initial position.
                     newActiveMoveElement = null;
-                    newActiveMoveIndex = Chess.MoveIndex.BeforeFirstMove;
+                    newActiveTree = game.Game.MoveTree;
                 }
                 else
                 {
                     // Go to the position after the selected move.
                     newActiveMoveElement = moveElements[elemIndex];
-                    newActiveMoveIndex = newActiveMoveElement.MoveIndex;
+                    newActiveTree = newActiveMoveElement.Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
-                if (!game.Game.ActiveMoveIndex.EqualTo(newActiveMoveIndex))
+                if (game.Game.ActiveTree != newActiveTree)
                 {
                     BeginUpdate();
                     try
@@ -339,13 +339,13 @@ namespace Sandra.UI.WF
                         // Search for the current active move element to clear its font.
                         foreach (var formattedMoveElement in moveElements)
                         {
-                            if (formattedMoveElement.MoveIndex.EqualTo(game.Game.ActiveMoveIndex))
+                            if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                             {
                                 updateFont(formattedMoveElement, regularFont);
                             }
                         }
 
-                        game.Game.SetActiveMoveIndex(newActiveMoveIndex);
+                        game.Game.SetActiveTree(newActiveTree);
                         ActionHandler.Invalidate();
                         if (newActiveMoveElement != null)
                         {

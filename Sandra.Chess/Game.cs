@@ -60,36 +60,29 @@ namespace Sandra.Chess
         public Position CurrentPosition => currentPosition.Copy();
 
         /// <summary>
-        /// Gets or sets the index of the active move. This is a value between 0 and <see cref="MoveCount"/>.
+        /// Gets the move tree which is currently active.
         /// </summary>
-        public MoveIndex ActiveMoveIndex
-        {
-            get
-            {
-                return activeTree.ParentVariation != null ? activeTree.ParentVariation.MoveIndex : MoveIndex.BeforeFirstMove;
-            }
-        }
+        public MoveTree ActiveTree => activeTree;
 
-        public void SetActiveMoveIndex(MoveIndex value)
+        public void SetActiveTree(MoveTree value)
         {
             if (value == null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
-            MoveIndex activeMoveIndex = activeTree.ParentVariation != null ? activeTree.ParentVariation.MoveIndex : MoveIndex.BeforeFirstMove;
-            if (!activeMoveIndex.EqualTo(value))
+            if (activeTree != value)
             {
                 Position newPosition = initialPosition.Copy();
                 MoveTree newActiveTree = moveTree;
-                if (!value.EqualTo(MoveIndex.BeforeFirstMove))
+                if (value != moveTree)
                 {
                     // Linear search for the right move index.
                     MoveTree current = moveTree;
                     while (current.Main != null)
                     {
                         newPosition.FastMakeMove(current.Main.Move);
-                        if (current.Main.MoveIndex.EqualTo(value))
+                        if (current.Main.MoveTree == value)
                         {
                             newActiveTree = current.Main.MoveTree;
                             break;
@@ -227,7 +220,7 @@ namespace Sandra.Chess
                 }
                 if (add)
                 {
-                    activeTree.Main = new Variation(activeTree, move, new MoveIndex());
+                    activeTree.Main = new Variation(activeTree, move);
                     activeTree = activeTree.Main.MoveTree;
                 }
                 RaiseActiveMoveIndexChanged();
