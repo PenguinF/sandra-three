@@ -29,7 +29,7 @@ namespace Sandra.Chess
     {
         private readonly Position initialPosition;
 
-        private readonly MoveTree moveTree = new MoveTree();
+        private readonly MoveTree moveTree = new MoveTree(null);
 
         private Position currentPosition;
 
@@ -227,12 +227,12 @@ namespace Sandra.Chess
                 {
                     if (activeVariation == null)
                     {
-                        moveTree.Main = new Variation(activeVariation, move, new MoveIndex());
+                        moveTree.Main = new Variation(moveTree, move, new MoveIndex());
                         activeVariation = moveTree.Main;
                     }
                     else
                     {
-                        activeVariation.MoveTree.Main = new Variation(activeVariation, move, new MoveIndex());
+                        activeVariation.MoveTree.Main = new Variation(activeVariation.MoveTree, move, new MoveIndex());
                         activeVariation = activeVariation.MoveTree.Main;
                     }
                 }

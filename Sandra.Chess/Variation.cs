@@ -38,15 +38,16 @@ namespace Sandra.Chess
         /// </summary>
         public readonly MoveIndex MoveIndex;
 
-        public readonly Variation Parent;
+        public readonly MoveTree ParentTree;
 
-        public readonly MoveTree MoveTree = new MoveTree();
+        public readonly MoveTree MoveTree;
 
-        public Variation(Variation parent, Move move, MoveIndex moveIndex)
+        public Variation(MoveTree parentTree, Move move, MoveIndex moveIndex)
         {
-            Parent = parent;
+            ParentTree = parentTree;
             Move = move;
             MoveIndex = moveIndex;
+            MoveTree = new MoveTree(this);
         }
     }
 
@@ -55,15 +56,13 @@ namespace Sandra.Chess
     /// </summary>
     public class MoveTree
     {
+        public readonly Variation ParentVariation;
+
         public Variation Main;
 
-        public MoveTree()
+        public MoveTree(Variation parentVariation)
         {
-        }
-
-        public MoveTree(Variation main)
-        {
-            Main = main;
+            ParentVariation = parentVariation;
         }
     }
 
