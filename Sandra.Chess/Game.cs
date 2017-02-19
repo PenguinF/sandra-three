@@ -29,8 +29,7 @@ namespace Sandra.Chess
     {
         private readonly Position initialPosition;
 
-        // null == no moves.
-        private Variation mainVariation;
+        private readonly MoveTree moveTree = new MoveTree();
 
         private Position currentPosition;
 
@@ -85,7 +84,7 @@ namespace Sandra.Chess
                 if (!value.EqualTo(MoveIndex.BeforeFirstMove))
                 {
                     // Linear search for the right move index.
-                    Variation current = mainVariation;
+                    Variation current = moveTree.Main;
                     while (current != null)
                     {
                         newPosition.FastMakeMove(current.Move);
@@ -110,7 +109,7 @@ namespace Sandra.Chess
         }
 
         public bool IsFirstMove => activeVariation == null;
-        public bool IsLastMove => activeVariation == null ? mainVariation == null : activeVariation.Main == null;
+        public bool IsLastMove => activeVariation == null ? moveTree.Main == null : activeVariation.Main == null;
         public Move PreviousMove() => activeVariation.Move;
 
         public void Backward()
@@ -122,7 +121,7 @@ namespace Sandra.Chess
 
             // Replay until the previous move.
             Position newPosition = initialPosition.Copy();
-            Variation current = mainVariation;
+            Variation current = moveTree.Main;
             while (current != activeVariation)
             {
                 newPosition.FastMakeMove(current.Move);
@@ -141,13 +140,13 @@ namespace Sandra.Chess
                 throw new InvalidOperationException("Cannot go forward when it's the last move.");
             }
 
-            Variation next = activeVariation != null ? activeVariation.Main : mainVariation;
+            Variation next = activeVariation != null ? activeVariation.Main : moveTree.Main;
             currentPosition.FastMakeMove(next.Move);
             activeVariation = next;
             RaiseActiveMoveIndexChanged();
         }
 
-        public Variation MainVariation => mainVariation;
+        public MoveTree MoveTree => moveTree;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -206,7 +205,7 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 bool add = true;
-                Variation next = activeVariation != null ? activeVariation.Main : mainVariation;
+                Variation next = activeVariation != null ? activeVariation.Main : moveTree.Main;
                 if (next != null)
                 {
                     if (next.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
@@ -218,7 +217,7 @@ namespace Sandra.Chess
                     else
                     {
                         // Erase the active move and everything after.
-                        if (activeVariation == null) mainVariation = null;
+                        if (activeVariation == null) moveTree.Main = null;
                         else activeVariation.Main = null;
                     }
                 }
@@ -226,8 +225,8 @@ namespace Sandra.Chess
                 {
                     if (activeVariation == null)
                     {
-                        mainVariation = new Variation(activeVariation, move, new MoveIndex());
-                        activeVariation = mainVariation;
+                        moveTree.Main = new Variation(activeVariation, move, new MoveIndex());
+                        activeVariation = moveTree.Main;
                     }
                     else
                     {

@@ -49,6 +49,23 @@ namespace Sandra.Chess
         }
     }
 
+    /// <summary>
+    /// Represents a tree of moves. At the top level, this is a choice of variations.
+    /// </summary>
+    public class MoveTree
+    {
+        public Variation Main;
+
+        public MoveTree()
+        {
+        }
+
+        public MoveTree(Variation main)
+        {
+            Main = main;
+        }
+    }
+
     public class MoveIndex
     {
         // To generate unique keys.

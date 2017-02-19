@@ -160,7 +160,7 @@ namespace Sandra.UI.WF
                 bool first = true;
                 int plyCounter = 0;
 
-                Chess.Variation current = game.Game.MainVariation;
+                Chess.Variation current = game.Game.MoveTree.Main;
                 while (current != null)
                 {
                     if (first)
