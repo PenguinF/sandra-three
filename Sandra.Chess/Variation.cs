@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
+
 namespace Sandra.Chess
 {
     /// <summary>
@@ -72,23 +74,31 @@ namespace Sandra.Chess
         /// </summary>
         public readonly Variation ParentVariation;
 
-        public Variation Main { get; private set; }
+        /// <summary>
+        /// All variations in this list have a unique move.
+        /// The first variation in this list can be null, to allow branches to extend from the end of a main variation.
+        /// The other varations in this list however are always not-null.
+        /// </summary>
+        private readonly List<Variation> branches = new List<Variation>();
+
+        public Variation Main => branches[0];
 
         public void AddVariation(Move move)
         {
-            Main = new Variation(this, move);
+            branches[0] = new Variation(this, move);
         }
 
         public void RemoveVariation(Move move)
         {
             if (Main != null && Main.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
             {
-                Main = null;
+                branches[0] = null;
             }
         }
 
         internal MoveTree(Variation parentVariation)
         {
+            branches.Add(null);
             MoveCount = parentVariation.ParentTree.MoveCount + 1;
             PlyCount = parentVariation.ParentTree.PlyCount + 1;
             ParentVariation = parentVariation;
@@ -96,6 +106,7 @@ namespace Sandra.Chess
 
         internal MoveTree(bool blackToMove)
         {
+            branches.Add(null);
             MoveCount = 0;
             PlyCount = blackToMove ? 1 : 0;
             ParentVariation = null;
