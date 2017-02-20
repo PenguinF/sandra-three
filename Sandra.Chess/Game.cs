@@ -29,7 +29,7 @@ namespace Sandra.Chess
     {
         private readonly Position initialPosition;
 
-        private readonly MoveTree moveTree = new MoveTree(null);
+        private readonly MoveTree moveTree;
 
         private Position currentPosition;
 
@@ -41,6 +41,7 @@ namespace Sandra.Chess
         {
             this.initialPosition = initialPosition;
             currentPosition = initialPosition.Copy();
+            moveTree = new MoveTree(initialPosition.SideToMove == Color.Black);
             activeTree = moveTree;
         }
 

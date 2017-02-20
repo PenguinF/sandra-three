@@ -35,8 +35,8 @@ namespace Sandra.Chess
 
         public readonly MoveTree MoveTree;
 
-        public Variation(MoveTree parentTree, Move move)
-        {
+        internal Variation(MoveTree parentTree, Move move)
+        {            
             ParentTree = parentTree;
             Move = move;
             MoveTree = new MoveTree(this);
@@ -48,6 +48,19 @@ namespace Sandra.Chess
     /// </summary>
     public class MoveTree
     {
+        /// <summary>
+        /// Gets the number of moves played before this move tree starts.
+        /// </summary>
+        public readonly int MoveCount;
+
+        /// <summary>
+        /// Gets the ply count at which this move tree starts.
+        /// </summary>
+        /// <remarks>
+        /// If in the initial position black is to move, the ply count starts at 1 rather than 0.
+        /// </remarks>
+        public readonly int PlyCount;
+
         public readonly Variation ParentVariation;
 
         public Variation Main { get; private set; }
@@ -67,7 +80,16 @@ namespace Sandra.Chess
 
         internal MoveTree(Variation parentVariation)
         {
+            MoveCount = parentVariation.ParentTree.MoveCount + 1;
+            PlyCount = parentVariation.ParentTree.PlyCount + 1;
             ParentVariation = parentVariation;
+        }
+
+        internal MoveTree(bool blackToMove)
+        {
+            MoveCount = 0;
+            PlyCount = blackToMove ? 1 : 0;
+            ParentVariation = null;
         }
     }
 }

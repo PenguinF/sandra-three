@@ -157,40 +157,33 @@ namespace Sandra.UI.WF
                 // Simulate a game to be able to format moves correctly.
                 Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
-                bool first = true;
-                int plyCounter = 0;
-
-                Chess.Variation current = game.Game.MoveTree.Main;
-                while (current != null)
+                Chess.MoveTree current = game.Game.MoveTree;
+                while (current.Main != null)
                 {
-                    if (first)
+                    if (current.MoveCount == 0)
                     {
-                        if (simulatedGame.InitialSideToMove == Chess.Color.Black)
+                        if (current.PlyCount == 1)
                         {
-                            // Adjust plyCounter and add an ellipsis for the previous white move. 
-                            updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
+                            // Add an ellipsis for the previous white move. 
+                            updated.Add(new TextElement.MoveCounter(current.PlyCount / 2 + 1));
                             updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
                             updated.Add(new TextElement.Space());
-                            plyCounter++;
                         }
-
-                        first = false;
                     }
                     else
                     {
                         updated.Add(new TextElement.Space());
                     }
 
-                    if (plyCounter % 2 == 0)
+                    if (current.PlyCount % 2 == 0)
                     {
-                        updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
+                        updated.Add(new TextElement.MoveCounter(current.PlyCount / 2 + 1));
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Move), current));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Main.Move), current.Main));
 
-                    ++plyCounter;
-                    current = current.MoveTree.Main;
+                    current = current.Main.MoveTree;
                 }
 
                 return updated;
