@@ -31,12 +31,18 @@ namespace Sandra.Chess
         /// </summary>
         public readonly Move Move;
 
+        /// <summary>
+        /// Gets the parent <see cref="MoveTree"/> in which this variation is embedded. This field is never equal to null.
+        /// </summary>
         public readonly MoveTree ParentTree;
 
+        /// <summary>
+        /// Gets the tree of moves after <see cref="Move"/> has been played.
+        /// </summary>
         public readonly MoveTree MoveTree;
 
         internal Variation(MoveTree parentTree, Move move)
-        {            
+        {
             ParentTree = parentTree;
             Move = move;
             MoveTree = new MoveTree(this);
@@ -61,6 +67,9 @@ namespace Sandra.Chess
         /// </remarks>
         public readonly int PlyCount;
 
+        /// <summary>
+        /// Gets the optional parent <see cref="Variation"/> with previous move in which this <see cref="MoveTree"/> is embedded.
+        /// </summary>
         public readonly Variation ParentVariation;
 
         public Variation Main { get; private set; }
