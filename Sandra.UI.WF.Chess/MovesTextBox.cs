@@ -162,7 +162,7 @@ namespace Sandra.UI.WF
                 {
                     if (current.Main.MoveIndex == 0)
                     {
-                        if (current.PlyCount == 1)
+                        if (current.PlyCount % 2 == 1)
                         {
                             // Add an ellipsis for the previous white move. 
                             updated.Add(new TextElement.MoveCounter(current.PlyCount / 2 + 1));
