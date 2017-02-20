@@ -192,26 +192,9 @@ namespace Sandra.Chess
             Move move = currentPosition.TryMakeMove(ref moveInfo, make);
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
-                bool add = true;
-                if (activeTree.Main != null)
-                {
-                    if (activeTree.Main.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
-                    {
-                        // Moves are the same, only move forward.
-                        activeTree = activeTree.Main.MoveTree;
-                        add = false;
-                    }
-                    else
-                    {
-                        // Erase the active move and everything after.
-                        activeTree.RemoveVariation(activeTree.Main.Move);
-                    }
-                }
-                if (add)
-                {
-                    activeTree.AddVariation(move);
-                    activeTree = activeTree.Main.MoveTree;
-                }
+                // Move to an existing variation, or create a new one.
+                Variation variation = activeTree.GetOrAddVariation(move);
+                activeTree = variation.MoveTree;
                 RaiseActiveMoveIndexChanged();
             }
             return move;

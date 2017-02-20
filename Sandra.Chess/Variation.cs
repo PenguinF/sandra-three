@@ -83,16 +83,26 @@ namespace Sandra.Chess
 
         public Variation Main => branches[0];
 
-        public void AddVariation(Move move)
+        public Variation GetOrAddVariation(Move move)
         {
-            branches[0] = new Variation(this, move);
-        }
-
-        public void RemoveVariation(Move move)
-        {
-            if (Main != null && Main.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+            if (branches[0] == null)
             {
-                branches[0] = null;
+                branches[0] = new Variation(this, move);
+                return branches[0];
+            }
+            else
+            {
+                foreach (Variation branch in branches)
+                {
+                    if (branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                    {
+                        return branch;
+                    }
+                }
+
+                Variation newBranch = new Variation(this, move);
+                branches.Add(newBranch);
+                return newBranch;
             }
         }
 
