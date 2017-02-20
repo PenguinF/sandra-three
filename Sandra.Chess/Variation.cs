@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.Chess
 {
@@ -85,6 +86,8 @@ namespace Sandra.Chess
         private readonly List<Variation> branches = new List<Variation>();
 
         public Variation Main => branches[0];
+
+        public IEnumerable<Variation> Branches => branches.Skip(1);
 
         public Variation GetOrAddVariation(Move move)
         {
