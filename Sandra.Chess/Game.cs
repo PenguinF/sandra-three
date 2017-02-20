@@ -65,6 +65,35 @@ namespace Sandra.Chess
         /// </summary>
         public MoveTree ActiveTree => activeTree;
 
+        private void setActiveTree(MoveTree value)
+        {
+            // Replay all moves until the new active tree has been reached.
+            Stack<Move> previousMoves = new Stack<Move>();
+            MoveTree newActiveTree = value;
+
+            MoveTree current;
+            for (current = newActiveTree; current.ParentVariation != null; current = current.ParentVariation.ParentTree)
+            {
+                previousMoves.Push(current.ParentVariation.Move);
+            }
+
+            // 'value' should be embedded somewhere inside this.moveTree.
+            if (current != moveTree)
+            {
+                throw new ArgumentException(nameof(value), "value is not embedded in Game.MoveTree.");
+            }
+
+            Position newPosition = initialPosition.Copy();
+            foreach (Move move in previousMoves)
+            {
+                newPosition.FastMakeMove(move);
+            }
+
+            currentPosition = newPosition;
+            activeTree = newActiveTree;
+            RaiseActiveMoveIndexChanged();
+        }
+
         public void SetActiveTree(MoveTree value)
         {
             if (value == null)
@@ -74,32 +103,7 @@ namespace Sandra.Chess
 
             if (activeTree != value)
             {
-                Position newPosition = initialPosition.Copy();
-                MoveTree newActiveTree = moveTree;
-                if (value != moveTree)
-                {
-                    // Linear search for the right move index.
-                    MoveTree current = moveTree;
-                    while (current.Main != null)
-                    {
-                        newPosition.FastMakeMove(current.Main.Move);
-                        if (current.Main.MoveTree == value)
-                        {
-                            newActiveTree = current.Main.MoveTree;
-                            break;
-                        }
-                        current = current.Main.MoveTree;
-                    }
-
-                    if (newActiveTree == moveTree)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(value));
-                    }
-                }
-
-                currentPosition = newPosition;
-                activeTree = newActiveTree;
-                RaiseActiveMoveIndexChanged();
+                setActiveTree(value);
             }
         }
 
@@ -115,23 +119,7 @@ namespace Sandra.Chess
             }
 
             // Replay until the previous move.
-            Position newPosition = initialPosition.Copy();
-            Stack<Move> previousMoves = new Stack<Move>();
-            MoveTree parentTree = activeTree.ParentVariation.ParentTree;
-
-            for (MoveTree current = parentTree; current.ParentVariation != null; current = current.ParentVariation.ParentTree)
-            {
-                previousMoves.Push(current.ParentVariation.Move);
-            }
-
-            foreach (Move move in previousMoves)
-            {
-                newPosition.FastMakeMove(move);
-            }
-
-            currentPosition = newPosition;
-            activeTree = parentTree;
-            RaiseActiveMoveIndexChanged();
+            setActiveTree(activeTree.ParentVariation.ParentTree);
         }
 
         public void Forward()
