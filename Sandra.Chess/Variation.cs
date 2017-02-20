@@ -29,23 +29,31 @@ namespace Sandra.Chess
     public class Variation
     {
         /// <summary>
+        /// Gets the parent <see cref="Chess.MoveTree"/> in which this variation is embedded. This field is never equal to null.
+        /// </summary>
+        public readonly MoveTree ParentTree;
+
+        /// <summary>
+        /// Gets the index of the move within the main variation.
+        /// At the root of new branches the move index resets to 0.
+        /// See also: <seealso cref="MoveTree.PlyCount"/>.
+        /// </summary>
+        public readonly int MoveIndex;
+
+        /// <summary>
         /// Gets the <see cref="Move"/> which starts this variation.
         /// </summary>
         public readonly Move Move;
-
-        /// <summary>
-        /// Gets the parent <see cref="MoveTree"/> in which this variation is embedded. This field is never equal to null.
-        /// </summary>
-        public readonly MoveTree ParentTree;
 
         /// <summary>
         /// Gets the tree of moves after <see cref="Move"/> has been played.
         /// </summary>
         public readonly MoveTree MoveTree;
 
-        internal Variation(MoveTree parentTree, Move move)
+        internal Variation(MoveTree parentTree, int moveIndex, Move move)
         {
             ParentTree = parentTree;
+            MoveIndex = moveIndex;
             Move = move;
             MoveTree = new MoveTree(this);
         }
@@ -56,11 +64,6 @@ namespace Sandra.Chess
     /// </summary>
     public class MoveTree
     {
-        /// <summary>
-        /// Gets the number of moves played before this move tree starts.
-        /// </summary>
-        public readonly int MoveCount;
-
         /// <summary>
         /// Gets the ply count at which this move tree starts.
         /// </summary>
@@ -87,7 +90,8 @@ namespace Sandra.Chess
         {
             if (branches[0] == null)
             {
-                branches[0] = new Variation(this, move);
+                // Continue adding to ParentVariation.MoveIndex for the main variation.
+                branches[0] = new Variation(this, ParentVariation == null ? 0 : ParentVariation.MoveIndex + 1, move);
                 return branches[0];
             }
             else
@@ -100,7 +104,8 @@ namespace Sandra.Chess
                     }
                 }
 
-                Variation newBranch = new Variation(this, move);
+                // Reset moveIndex at 0.
+                Variation newBranch = new Variation(this, 0, move);
                 branches.Add(newBranch);
                 return newBranch;
             }
@@ -109,7 +114,6 @@ namespace Sandra.Chess
         internal MoveTree(Variation parentVariation)
         {
             branches.Add(null);
-            MoveCount = parentVariation.ParentTree.MoveCount + 1;
             PlyCount = parentVariation.ParentTree.PlyCount + 1;
             ParentVariation = parentVariation;
         }
@@ -117,7 +121,6 @@ namespace Sandra.Chess
         internal MoveTree(bool blackToMove)
         {
             branches.Add(null);
-            MoveCount = 0;
             PlyCount = blackToMove ? 1 : 0;
             ParentVariation = null;
         }

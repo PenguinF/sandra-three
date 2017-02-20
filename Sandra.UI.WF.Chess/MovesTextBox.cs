@@ -160,7 +160,7 @@ namespace Sandra.UI.WF
                 Chess.MoveTree current = game.Game.MoveTree;
                 while (current.Main != null)
                 {
-                    if (current.MoveCount == 0)
+                    if (current.Main.MoveIndex == 0)
                     {
                         if (current.PlyCount == 1)
                         {
