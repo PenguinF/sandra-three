@@ -28,22 +28,32 @@ namespace Sandra.Chess
     public class Game
     {
         private readonly Position initialPosition;
-
         private readonly MoveTree moveTree;
 
         private Position currentPosition;
-
-        // Points at the variation with the move which was just played in the current position.
-        // Is null at the start of the game.
         private MoveTree activeTree;
 
-        public Game(Position initialPosition)
+        private Game(Position initialPosition, MoveTree moveTree)
         {
             this.initialPosition = initialPosition;
             currentPosition = initialPosition.Copy();
-            moveTree = new MoveTree(initialPosition.SideToMove == Color.Black);
+            this.moveTree = moveTree;
             activeTree = moveTree;
         }
+
+        /// <summary>
+        /// Creates a new game with a given initial <see cref="Position"/>.
+        /// </summary>
+        public Game(Position initialPosition) : this(initialPosition,
+                                                     new MoveTree(initialPosition.SideToMove == Color.Black))
+        {
+        }
+
+        /// <summary>
+        /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
+        /// but in which <see cref="ActiveTree"/> can be manipulated independently.
+        /// </summary>
+        public Game Copy() => new Game(initialPosition, moveTree);
 
         /// <summary>
         /// Gets the initial position of this game.
@@ -54,6 +64,11 @@ namespace Sandra.Chess
         /// Gets the <see cref="Color"/> of the side to move in the initial position.
         /// </summary>
         public Color InitialSideToMove => initialPosition.SideToMove;
+
+        /// <summary>
+        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
+        /// </summary>
+        public MoveTree MoveTree => moveTree;
 
         /// <summary>
         /// Gets the current position of this game.
@@ -133,8 +148,6 @@ namespace Sandra.Chess
             activeTree = activeTree.Main.MoveTree;
             RaiseActiveMoveIndexChanged();
         }
-
-        public MoveTree MoveTree => moveTree;
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
