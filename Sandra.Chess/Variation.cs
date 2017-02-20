@@ -50,7 +50,20 @@ namespace Sandra.Chess
     {
         public readonly Variation ParentVariation;
 
-        public Variation Main;
+        public Variation Main { get; private set; }
+
+        public void AddVariation(Move move)
+        {
+            Main = new Variation(this, move);
+        }
+
+        public void RemoveVariation(Move move)
+        {
+            if (Main != null && Main.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+            {
+                Main = null;
+            }
+        }
 
         internal MoveTree(Variation parentVariation)
         {

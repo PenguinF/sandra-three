@@ -215,12 +215,12 @@ namespace Sandra.Chess
                     else
                     {
                         // Erase the active move and everything after.
-                        activeTree.Main = null;
+                        activeTree.RemoveVariation(activeTree.Main.Move);
                     }
                 }
                 if (add)
                 {
-                    activeTree.Main = new Variation(activeTree, move);
+                    activeTree.AddVariation(move);
                     activeTree = activeTree.Main.MoveTree;
                 }
                 RaiseActiveMoveIndexChanged();
