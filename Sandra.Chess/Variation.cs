@@ -80,14 +80,14 @@ namespace Sandra.Chess
 
         /// <summary>
         /// All variations in this list have a unique move.
-        /// The first variation in this list can be null, to allow branches to extend from the end of a main variation.
+        /// The first variation in this list can be null, to allow side lines to extend from the end of a main line.
         /// The other varations in this list however are always not-null.
         /// </summary>
         private readonly List<Variation> branches = new List<Variation>();
 
-        public Variation Main => branches[0];
+        public Variation MainLine => branches[0];
 
-        public IEnumerable<Variation> Branches => branches.Skip(1);
+        public IEnumerable<Variation> SideLines => branches.Skip(1);
 
         public Variation GetOrAddVariation(Move move)
         {

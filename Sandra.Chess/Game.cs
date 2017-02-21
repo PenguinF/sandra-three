@@ -123,7 +123,7 @@ namespace Sandra.Chess
         }
 
         public bool IsFirstMove => activeTree.ParentVariation == null;
-        public bool IsLastMove => activeTree.Main == null;
+        public bool IsLastMove => activeTree.MainLine == null;
         public Move PreviousMove() => activeTree.ParentVariation.Move;
 
         public void Backward()
@@ -144,8 +144,8 @@ namespace Sandra.Chess
                 throw new InvalidOperationException("Cannot go forward when it's the last move.");
             }
 
-            currentPosition.FastMakeMove(activeTree.Main.Move);
-            activeTree = activeTree.Main.MoveTree;
+            currentPosition.FastMakeMove(activeTree.MainLine.Move);
+            activeTree = activeTree.MainLine.MoveTree;
             RaiseActiveMoveIndexChanged();
         }
 

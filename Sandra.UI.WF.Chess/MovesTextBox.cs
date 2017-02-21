@@ -158,9 +158,9 @@ namespace Sandra.UI.WF
                 Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
 
                 Chess.MoveTree current = game.Game.MoveTree;
-                while (current.Main != null)
+                while (current.MainLine != null)
                 {
-                    if (current.Main.MoveIndex == 0)
+                    if (current.MainLine.MoveIndex == 0)
                     {
                         if (current.PlyCount % 2 == 1)
                         {
@@ -181,9 +181,9 @@ namespace Sandra.UI.WF
                         updated.Add(new TextElement.Space());
                     }
 
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.Main.Move), current.Main));
+                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.MainLine.Move), current.MainLine));
 
-                    current = current.Main.MoveTree;
+                    current = current.MainLine.MoveTree;
                 }
 
                 return updated;
