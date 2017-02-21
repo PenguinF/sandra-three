@@ -159,6 +159,17 @@ namespace Sandra.UI.WF
             }
         }
 
+        private IEnumerable<TextElement> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
+        {
+            if (plyCount % 2 == 0)
+            {
+                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElement.Space();
+            }
+
+            yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+        }
+
         private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
         {
             Chess.MoveTree current = game.MoveTree;
@@ -173,13 +184,7 @@ namespace Sandra.UI.WF
                     yield return new TextElement.Space();
                 }
 
-                if (current.PlyCount % 2 == 0)
-                {
-                    yield return new TextElement.MoveCounter(current.PlyCount / 2 + 1);
-                    yield return new TextElement.Space();
-                }
-
-                yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                foreach (var element in emitMove(game, current.MainLine, current.PlyCount)) yield return element;
 
                 current = current.MainLine.MoveTree;
             }
