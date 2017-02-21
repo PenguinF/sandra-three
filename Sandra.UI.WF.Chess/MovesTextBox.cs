@@ -131,14 +131,16 @@ namespace Sandra.UI.WF
                 public override string GetText() => EllipsisText;
             }
 
-            public sealed class MoveCounter : TextElement
+            public abstract class MoveDelimiter : TextElement { }
+
+            public sealed class MoveCounter : MoveDelimiter
             {
                 readonly int value;
                 public override string GetText() => value + ".";
                 public MoveCounter(int value) { this.value = value; }
             }
 
-            public sealed class FormattedMove : TextElement
+            public sealed class FormattedMove : MoveDelimiter
             {
                 readonly string value;
                 public override string GetText() => value;
@@ -356,16 +358,25 @@ namespace Sandra.UI.WF
             {
                 int selectionStart = SelectionStart;
 
-                List<int> startIndexes = elements.Select(x => x.Start).ToList();
-
-                // Get the index of the element that contains the caret.
-                int elemIndex = startIndexes.BinarySearch(selectionStart);
-                if (elemIndex < 0) elemIndex = ~elemIndex - 1;
-
-                // Look for a FormattedMove element.
-                while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.FormattedMove))
+                int elemIndex;
+                if (selectionStart == 0)
                 {
-                    elemIndex--;
+                    // Go to the initial position when the caret is at the start.
+                    elemIndex = -1;
+                }
+                else
+                {
+                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
+
+                    // Get the index of the element that contains the caret.
+                    elemIndex = startIndexes.BinarySearch(selectionStart);
+                    if (elemIndex < 0) elemIndex = ~elemIndex - 1;
+
+                    // Look for an element which delimits a move.
+                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.MoveDelimiter))
+                    {
+                        elemIndex--;
+                    }
                 }
 
                 TextElement.FormattedMove newActiveMoveElement;
@@ -378,6 +389,9 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
+                    // If at a MoveCounter, go forward until the actual FormattedMove.
+                    while (!(elements[elemIndex] is TextElement.FormattedMove)) elemIndex++;
+
                     // Go to the position after the selected move.
                     newActiveMoveElement = (TextElement.FormattedMove)elements[elemIndex];
                     newActiveTree = newActiveMoveElement.Variation.MoveTree;
