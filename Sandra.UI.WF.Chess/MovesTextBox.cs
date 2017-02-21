@@ -113,6 +113,18 @@ namespace Sandra.UI.WF
                 public override string GetText() => SpaceText;
             }
 
+            public sealed class SideLineStart : TextElement
+            {
+                public const string SideLineStartText = "(";
+                public override string GetText() => SideLineStartText;
+            }
+
+            public sealed class SideLineEnd : TextElement
+            {
+                public const string SideLineEndText = ")";
+                public override string GetText() => SideLineEndText;
+            }
+
             public sealed class InitialBlackSideToMoveEllipsis : TextElement
             {
                 public const string EllipsisText = "..";
