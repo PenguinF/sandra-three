@@ -148,45 +148,46 @@ namespace Sandra.UI.WF
             SelectionFont = newFont;
         }
 
+        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        {
+            Chess.MoveTree current = game.MoveTree;
+            while (current.MainLine != null)
+            {
+                if (current.MainLine.MoveIndex == 0)
+                {
+                    if (current.PlyCount % 2 == 1)
+                    {
+                        // Add an ellipsis for the previous white move. 
+                        yield return new TextElement.MoveCounter(current.PlyCount / 2 + 1);
+                        yield return new TextElement.InitialBlackSideToMoveEllipsis();
+                        yield return new TextElement.Space();
+                    }
+                }
+                else
+                {
+                    yield return new TextElement.Space();
+                }
+
+                if (current.PlyCount % 2 == 0)
+                {
+                    yield return new TextElement.MoveCounter(current.PlyCount / 2 + 1);
+                    yield return new TextElement.Space();
+                }
+
+                yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+
+                current = current.MainLine.MoveTree;
+            }
+        }
+
         private List<TextElement> getUpdatedElements()
         {
             if (moveFormatter != null && game != null)
             {
-                var updated = new List<TextElement>();
+                // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
+                Chess.Game copiedGame = game.Game.Copy();
 
-                // Simulate a game to be able to format moves correctly.
-                Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
-
-                Chess.MoveTree current = game.Game.MoveTree;
-                while (current.MainLine != null)
-                {
-                    if (current.MainLine.MoveIndex == 0)
-                    {
-                        if (current.PlyCount % 2 == 1)
-                        {
-                            // Add an ellipsis for the previous white move. 
-                            updated.Add(new TextElement.MoveCounter(current.PlyCount / 2 + 1));
-                            updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
-                            updated.Add(new TextElement.Space());
-                        }
-                    }
-                    else
-                    {
-                        updated.Add(new TextElement.Space());
-                    }
-
-                    if (current.PlyCount % 2 == 0)
-                    {
-                        updated.Add(new TextElement.MoveCounter(current.PlyCount / 2 + 1));
-                        updated.Add(new TextElement.Space());
-                    }
-
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, current.MainLine.Move), current.MainLine));
-
-                    current = current.MainLine.MoveTree;
-                }
-
-                return updated;
+                return new List<TextElement>(emitMoveTree(copiedGame));
             }
 
             return null;
