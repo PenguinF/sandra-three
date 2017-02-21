@@ -170,16 +170,10 @@ namespace Sandra.UI.WF
             yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
         }
 
-        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        // Parametrized on emitSpace because this method may not yield anything,
+        // in which case no spaces should be emitted at all.
+        private IEnumerable<TextElement> emitMainLine(Chess.Game game, bool emitSpace)
         {
-            // Possible initial black side to move ellipsis.
-            if (game.MoveTree.MainLine != null)
-            {
-                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
-            }
-
-            bool emitSpace = false;
-
             for (;;)
             {
                 // Remember the game's active tree because it's the starting point of side lines.
@@ -200,6 +194,17 @@ namespace Sandra.UI.WF
                 // Goto next move in the main line.
                 game.SetActiveTree(current.MainLine.MoveTree);
             }
+        }
+
+        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        {
+            // Possible initial black side to move ellipsis.
+            if (game.MoveTree.MainLine != null)
+            {
+                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
+            }
+
+            foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
         private List<TextElement> getUpdatedElements()
