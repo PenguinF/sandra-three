@@ -178,15 +178,14 @@ namespace Sandra.UI.WF
                 foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
             }
 
+            bool emitSpace = false;
+
             Chess.MoveTree current = game.MoveTree;
             while (current.MainLine != null)
             {
-                if (current.MainLine.MoveIndex > 0)
-                {
-                    yield return new TextElement.Space();
-                }
-
+                if (emitSpace) yield return new TextElement.Space();
                 foreach (var element in emitMove(game, current.MainLine, current.PlyCount)) yield return element;
+                emitSpace = true;
 
                 current = current.MainLine.MoveTree;
             }
