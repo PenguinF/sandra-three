@@ -95,7 +95,7 @@ namespace Sandra.UI.WF
                 }
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, chessBoardForm != null);
+            return UIActionVisibility.Enabled;
         }
 
 
@@ -171,7 +171,7 @@ namespace Sandra.UI.WF
                 }
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, movesForm != null);
+            return UIActionVisibility.Enabled;
         }
 
 
