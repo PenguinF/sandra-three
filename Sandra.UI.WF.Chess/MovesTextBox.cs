@@ -172,14 +172,16 @@ namespace Sandra.UI.WF
 
         private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
         {
+            // Possible initial black side to move ellipsis.
+            if (game.MoveTree.MainLine != null)
+            {
+                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
+            }
+
             Chess.MoveTree current = game.MoveTree;
             while (current.MainLine != null)
             {
-                if (current.MainLine.MoveIndex == 0)
-                {
-                    foreach (var element in emitInitialBlackSideToMoveEllipsis(current.PlyCount)) yield return element;
-                }
-                else
+                if (current.MainLine.MoveIndex > 0)
                 {
                     yield return new TextElement.Space();
                 }
