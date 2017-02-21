@@ -152,7 +152,6 @@ namespace Sandra.UI.WF
         }
 
         private List<TextElement> elements;
-        private List<TextElement.FormattedMove> moveElements;
 
         private void updateFont(TextElement element, Font newFont)
         {
@@ -324,20 +323,13 @@ namespace Sandra.UI.WF
                 SelectAll();
                 SelectionFont = regularFont;
 
-                // Update moveElements as well.
-                if (elements == null)
+                // Make the active move bold.
+                if (elements != null)
                 {
-                    moveElements = null;
-                }
-                else
-                {
-                    moveElements = new List<TextElement.FormattedMove>(elements.OfType<TextElement.FormattedMove>());
-
-                    foreach (var formattedMoveElement in moveElements)
+                    foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                     {
                         if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            // Make the active move bold.
                             updateFont(formattedMoveElement, lastMoveFont);
 
                             if (!ContainsFocus)
@@ -364,11 +356,17 @@ namespace Sandra.UI.WF
             {
                 int selectionStart = SelectionStart;
 
-                List<int> startIndexes = moveElements.Select(x => x.Start).ToList();
+                List<int> startIndexes = elements.Select(x => x.Start).ToList();
 
                 // Get the index of the element that contains the caret.
                 int elemIndex = startIndexes.BinarySearch(selectionStart);
                 if (elemIndex < 0) elemIndex = ~elemIndex - 1;
+
+                // Look for a FormattedMove element.
+                while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.FormattedMove))
+                {
+                    elemIndex--;
+                }
 
                 TextElement.FormattedMove newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
@@ -381,7 +379,7 @@ namespace Sandra.UI.WF
                 else
                 {
                     // Go to the position after the selected move.
-                    newActiveMoveElement = moveElements[elemIndex];
+                    newActiveMoveElement = (TextElement.FormattedMove)elements[elemIndex];
                     newActiveTree = newActiveMoveElement.Variation.MoveTree;
                 }
 
@@ -392,7 +390,7 @@ namespace Sandra.UI.WF
                     try
                     {
                         // Search for the current active move element to clear its font.
-                        foreach (var formattedMoveElement in moveElements)
+                        foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                         {
                             if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                             {
