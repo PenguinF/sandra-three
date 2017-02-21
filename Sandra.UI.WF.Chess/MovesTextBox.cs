@@ -148,6 +148,17 @@ namespace Sandra.UI.WF
             SelectionFont = newFont;
         }
 
+        private IEnumerable<TextElement> emitInitialBlackSideToMoveEllipsis(int plyCount)
+        {
+            if (plyCount % 2 == 1)
+            {
+                // Add an ellipsis for the previous white move. 
+                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElement.InitialBlackSideToMoveEllipsis();
+                yield return new TextElement.Space();
+            }
+        }
+
         private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
         {
             Chess.MoveTree current = game.MoveTree;
@@ -155,13 +166,7 @@ namespace Sandra.UI.WF
             {
                 if (current.MainLine.MoveIndex == 0)
                 {
-                    if (current.PlyCount % 2 == 1)
-                    {
-                        // Add an ellipsis for the previous white move. 
-                        yield return new TextElement.MoveCounter(current.PlyCount / 2 + 1);
-                        yield return new TextElement.InitialBlackSideToMoveEllipsis();
-                        yield return new TextElement.Space();
-                    }
+                    foreach (var element in emitInitialBlackSideToMoveEllipsis(current.PlyCount)) yield return element;
                 }
                 else
                 {
