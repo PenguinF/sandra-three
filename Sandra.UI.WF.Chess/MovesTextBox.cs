@@ -180,14 +180,25 @@ namespace Sandra.UI.WF
 
             bool emitSpace = false;
 
-            Chess.MoveTree current = game.MoveTree;
-            while (current.MainLine != null)
+            for (;;)
             {
-                if (emitSpace) yield return new TextElement.Space();
-                foreach (var element in emitMove(game, current.MainLine, current.PlyCount)) yield return element;
-                emitSpace = true;
+                // Remember the game's active tree because it's the starting point of side lines.
+                Chess.MoveTree current = game.ActiveTree;
 
-                current = current.MainLine.MoveTree;
+                if (current.MainLine != null)
+                {
+                    if (emitSpace) yield return new TextElement.Space();
+                    foreach (var element in emitMove(game, current.MainLine, current.PlyCount)) yield return element;
+                    emitSpace = true;
+                }
+
+                if (current.MainLine == null)
+                {
+                    yield break;
+                }
+
+                // Goto next move in the main line.
+                game.SetActiveTree(current.MainLine.MoveTree);
             }
         }
 
