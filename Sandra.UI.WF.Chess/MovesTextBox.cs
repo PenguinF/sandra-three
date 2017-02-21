@@ -190,11 +190,32 @@ namespace Sandra.UI.WF
             {
                 // Remember the game's active tree because it's the starting point of side lines.
                 Chess.MoveTree current = game.ActiveTree;
+                int plyCount = current.PlyCount;
 
+                // Emit the main move before side lines which start at the same plyCount.
                 if (current.MainLine != null)
                 {
                     if (emitSpace) yield return new TextElement.Space();
-                    foreach (var element in emitMove(game, current.MainLine, current.PlyCount)) yield return element;
+                    foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
+                    emitSpace = true;
+                }
+
+                foreach (var sideLine in current.SideLines)
+                {
+                    // Reset active tree before going into each side line.
+                    game.SetActiveTree(current);
+
+                    if (emitSpace) yield return new TextElement.Space();
+                    yield return new TextElement.SideLineStart();
+
+                    // Emit first move.
+                    foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
+                    foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
+
+                    // Recurse here.
+                    foreach (var element in emitMainLine(game, true)) yield return element;
+                    yield return new TextElement.SideLineEnd();
+
                     emitSpace = true;
                 }
 
@@ -216,6 +237,7 @@ namespace Sandra.UI.WF
                 foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
             }
 
+            // Treat as a regular main line.
             foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
