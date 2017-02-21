@@ -252,6 +252,7 @@ namespace Sandra.UI.WF
                 // Reset all markup.
                 SelectAll();
                 SelectionFont = regularFont;
+                Select(0, 0);
 
                 // Update moveElements as well.
                 if (elements == null)
