@@ -128,10 +128,8 @@ namespace Sandra.Chess
 
         public void Backward()
         {
-            if (IsFirstMove)
-            {
-                throw new InvalidOperationException("Cannot go backward when it's the first move.");
-            }
+            // No effect if first move.
+            if (IsFirstMove) return;
 
             // Replay until the previous move.
             setActiveTree(activeTree.ParentVariation.ParentTree);
@@ -139,10 +137,8 @@ namespace Sandra.Chess
 
         public void Forward()
         {
-            if (IsLastMove)
-            {
-                throw new InvalidOperationException("Cannot go forward when it's the last move.");
-            }
+            // No effect if last move.
+            if (IsLastMove) return;
 
             currentPosition.FastMakeMove(activeTree.MainLine.Move);
             activeTree = activeTree.MainLine.MoveTree;
