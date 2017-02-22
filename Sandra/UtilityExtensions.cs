@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra
 {
     /// <summary>
@@ -32,6 +34,20 @@ namespace Sandra
             {
                 array[i] = value;
             }
+        }
+
+        /// <summary>
+        /// Iterates an action a number of times.
+        /// </summary>
+        public static void Times(this int numberOfIterations, Action action)
+        {
+            if (numberOfIterations < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(numberOfIterations),
+                                                      "Number of iterations cannot be lower than 0.");
+            }
+
+            for (int i = numberOfIterations; i != 0; --i) action();
         }
     }
 }
