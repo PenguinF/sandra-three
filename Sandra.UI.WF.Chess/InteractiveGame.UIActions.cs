@@ -200,7 +200,11 @@ namespace Sandra.UI.WF
         public UIActionState TryGotoFirstMove(bool perform)
         {
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform) do Game.Backward(); while (!Game.IsFirstMove);
+            if (perform)
+            {
+                do Game.Backward(); while (!Game.IsFirstMove);
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -221,7 +225,11 @@ namespace Sandra.UI.WF
         public UIActionState TryFastNavigateBackward(bool perform)
         {
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform) OwnerForm.FastNavigationInterval.Times(Game.Backward);
+            if (perform)
+            {
+                OwnerForm.FastNavigationInterval.Times(Game.Backward);
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -242,7 +250,11 @@ namespace Sandra.UI.WF
         public UIActionState TryGotoPreviousMove(bool perform)
         {
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform) Game.Backward();
+            if (perform)
+            {
+                Game.Backward();
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -263,7 +275,11 @@ namespace Sandra.UI.WF
         public UIActionState TryGotoNextMove(bool perform)
         {
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
-            if (perform) Game.Forward();
+            if (perform)
+            {
+                Game.Forward();
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -284,7 +300,11 @@ namespace Sandra.UI.WF
         public UIActionState TryFastNavigateForward(bool perform)
         {
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
-            if (perform) OwnerForm.FastNavigationInterval.Times(Game.Forward);
+            if (perform)
+            {
+                OwnerForm.FastNavigationInterval.Times(Game.Forward);
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -305,7 +325,11 @@ namespace Sandra.UI.WF
         public UIActionState TryGotoLastMove(bool perform)
         {
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
-            if (perform) do Game.Forward(); while (!Game.IsLastMove);
+            if (perform)
+            {
+                do Game.Forward(); while (!Game.IsLastMove);
+                Game.RaiseActiveMoveIndexChanged();
+            }
             return UIActionVisibility.Enabled;
         }
     }

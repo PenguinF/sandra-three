@@ -106,7 +106,6 @@ namespace Sandra.Chess
 
             currentPosition = newPosition;
             activeTree = newActiveTree;
-            RaiseActiveMoveIndexChanged();
         }
 
         public void SetActiveTree(MoveTree value)
@@ -142,7 +141,6 @@ namespace Sandra.Chess
 
             currentPosition.FastMakeMove(activeTree.MainLine.Move);
             activeTree = activeTree.MainLine.MoveTree;
-            RaiseActiveMoveIndexChanged();
         }
 
         /// <summary>
@@ -204,7 +202,6 @@ namespace Sandra.Chess
                 // Move to an existing variation, or create a new one.
                 Variation variation = activeTree.GetOrAddVariation(move);
                 activeTree = variation.MoveTree;
-                RaiseActiveMoveIndexChanged();
             }
             return move;
         }
@@ -222,7 +219,7 @@ namespace Sandra.Chess
             ActiveMoveIndexChanged?.Invoke(this, e);
         }
 
-        protected void RaiseActiveMoveIndexChanged()
+        public void RaiseActiveMoveIndexChanged()
         {
             OnActiveMoveIndexChanged(EventArgs.Empty);
         }

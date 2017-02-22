@@ -414,6 +414,7 @@ namespace Sandra.UI.WF
                         }
 
                         game.Game.SetActiveTree(newActiveTree);
+                        game.Game.RaiseActiveMoveIndexChanged();
                         ActionHandler.Invalidate();
                         if (newActiveMoveElement != null)
                         {
