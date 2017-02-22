@@ -24,6 +24,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class InteractiveGame
     {
+        // For accessing global settings and displaying windows.
         public readonly MdiContainerForm OwnerForm;
         public readonly Chess.Game Game;
 

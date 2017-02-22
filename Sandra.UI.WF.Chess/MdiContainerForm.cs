@@ -37,6 +37,11 @@ namespace Sandra.UI.WF
 
         public EnumIndexedArray<Piece, string> CurrentPieceSymbols { get; private set; }
 
+        /// <summary>
+        /// Contains the number of plies to move forward of backward in a game for fast navigation.
+        /// </summary>
+        public int FastNavigationInterval { get; private set; }
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -297,6 +302,9 @@ namespace Sandra.UI.WF
             englishPieceSymbols[Piece.King] = "K";
 
             CurrentPieceSymbols = englishPieceSymbols;
+
+            // 10 plies == 5 moves.
+            FastNavigationInterval = 10;
 
             NewPlayingBoard();
         }
