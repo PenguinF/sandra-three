@@ -70,8 +70,12 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+                        { GotoFirstMove, TryGotoFirstMove },
+                        { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
+                        { FastNavigateForward, TryFastNavigateForward },
+                        { GotoLastMove, TryGotoLastMove },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
 
@@ -146,8 +150,12 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+                        { GotoFirstMove, TryGotoFirstMove },
+                        { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
+                        { FastNavigateForward, TryFastNavigateForward },
+                        { GotoLastMove, TryGotoLastMove },
                     });
 
                     UIMenu.AddTo(movesTextBox);
@@ -175,18 +183,57 @@ namespace Sandra.UI.WF
         }
 
 
+        public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "First move",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.Home),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home),
+                },
+            });
+
+        public UIActionState TryGotoFirstMove(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding FastNavigateBackward = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateBackward)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Fast backward",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.PageUp),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
+                },
+            });
+
+        public UIActionState TryFastNavigateBackward(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            return UIActionVisibility.Enabled;
+        }
+
+
         public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                IsFirstInGroup = true,
                 MenuCaption = "Previous move",
                 Shortcuts = new List<ShortcutKeys>
                 {
                     new ShortcutKeys(ConsoleKey.LeftArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
                 },
             });
 
@@ -208,7 +255,6 @@ namespace Sandra.UI.WF
                 {
                     new ShortcutKeys(ConsoleKey.RightArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
                 },
             });
 
@@ -216,6 +262,46 @@ namespace Sandra.UI.WF
         {
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform) Game.Forward();
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding FastNavigateForward = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateForward)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Fast forward",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.PageDown),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
+                },
+            });
+
+        public UIActionState TryFastNavigateForward(bool perform)
+        {
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoLastMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoLastMove)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Last move",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.End),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
+                },
+            });
+
+        public UIActionState TryGotoLastMove(bool perform)
+        {
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
             return UIActionVisibility.Enabled;
         }
     }

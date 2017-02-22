@@ -166,8 +166,12 @@ namespace Sandra.UI.WF
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard,
+                                        InteractiveGame.GotoFirstMove,
+                                        InteractiveGame.FastNavigateBackward,
                                         InteractiveGame.GotoPreviousMove,
                                         InteractiveGame.GotoNextMove,
+                                        InteractiveGame.FastNavigateForward,
+                                        InteractiveGame.GotoLastMove,
                                         StandardChessBoardForm.TakeScreenshot);
 
             UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
