@@ -172,6 +172,10 @@ namespace Sandra.UI.WF
                                         InteractiveGame.GotoNextMove,
                                         InteractiveGame.FastNavigateForward,
                                         InteractiveGame.GotoLastMove,
+                                        InteractiveGame.GotoPreviousVariation,
+                                        InteractiveGame.GotoNextVariation,
+                                        InteractiveGame.PromoteActiveVariation,
+                                        InteractiveGame.DemoteActiveVariation,
                                         StandardChessBoardForm.TakeScreenshot);
 
             UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");

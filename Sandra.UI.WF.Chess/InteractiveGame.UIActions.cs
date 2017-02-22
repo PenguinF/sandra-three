@@ -70,12 +70,20 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+
                         { GotoFirstMove, TryGotoFirstMove },
                         { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                         { FastNavigateForward, TryFastNavigateForward },
                         { GotoLastMove, TryGotoLastMove },
+
+                        { GotoPreviousVariation, TryGotoPreviousVariation },
+                        { GotoNextVariation, TryGotoNextVariation },
+
+                        { PromoteActiveVariation, TryPromoteActiveVariation },
+                        { DemoteActiveVariation, TryDemoteActiveVariation },
+
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
 
@@ -150,12 +158,19 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+
                         { GotoFirstMove, TryGotoFirstMove },
                         { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                         { FastNavigateForward, TryFastNavigateForward },
                         { GotoLastMove, TryGotoLastMove },
+
+                        { GotoPreviousVariation, TryGotoPreviousVariation },
+                        { GotoNextVariation, TryGotoNextVariation },
+
+                        { PromoteActiveVariation, TryPromoteActiveVariation },
+                        { DemoteActiveVariation, TryDemoteActiveVariation },
                     });
 
                     UIMenu.AddTo(movesTextBox);
@@ -330,6 +345,84 @@ namespace Sandra.UI.WF
                 do Game.Forward(); while (!Game.IsLastMove);
                 ActiveMoveTreeUpdated();
             }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoPreviousVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Previous line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.UpArrow),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
+                },
+            });
+
+        public UIActionState TryGotoPreviousVariation(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoNextVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Next line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.DownArrow),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
+                },
+            });
+
+        public UIActionState TryGotoNextVariation(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding PromoteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(PromoteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Promote line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.P),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
+                },
+            });
+
+        public UIActionState TryPromoteActiveVariation(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding DemoteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(DemoteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Demote line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.D),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
+                },
+            });
+
+        public UIActionState TryDemoteActiveVariation(bool perform)
+        {
             return UIActionVisibility.Enabled;
         }
     }
