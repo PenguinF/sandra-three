@@ -32,14 +32,15 @@ namespace Sandra.UI.WF
         {
             OwnerForm = ownerForm;
             Game = new Chess.Game(initialPosition);
-            Game.ActiveMoveIndexChanged += (_, e) =>
-            {
-                // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
-                // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
-                if (chessBoardForm != null) chessBoardForm.GameUpdated();
-                MovesTextBox movesTextBox = getMovesTextBox();
-                if (movesTextBox != null) movesTextBox.GameUpdated();
-            };
+        }
+
+        public void ActiveMoveTreeUpdated()
+        {
+            // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
+            // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
+            if (chessBoardForm != null) chessBoardForm.GameUpdated();
+            MovesTextBox movesTextBox = getMovesTextBox();
+            if (movesTextBox != null) movesTextBox.GameUpdated();
         }
 
         // Keep track of which types of forms are opened.

@@ -203,7 +203,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 do Game.Backward(); while (!Game.IsFirstMove);
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }
@@ -228,7 +228,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 OwnerForm.FastNavigationInterval.Times(Game.Backward);
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }
@@ -253,7 +253,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Game.Backward();
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }
@@ -278,7 +278,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Game.Forward();
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }
@@ -303,7 +303,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 OwnerForm.FastNavigationInterval.Times(Game.Forward);
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }
@@ -328,7 +328,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 do Game.Forward(); while (!Game.IsLastMove);
-                Game.RaiseActiveMoveIndexChanged();
+                ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
         }

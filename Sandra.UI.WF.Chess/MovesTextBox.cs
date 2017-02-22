@@ -414,8 +414,10 @@ namespace Sandra.UI.WF
                         }
 
                         game.Game.SetActiveTree(newActiveTree);
-                        game.Game.RaiseActiveMoveIndexChanged();
+
+                        game.ActiveMoveTreeUpdated();
                         ActionHandler.Invalidate();
+
                         if (newActiveMoveElement != null)
                         {
                             updateFont(newActiveMoveElement, lastMoveFont);

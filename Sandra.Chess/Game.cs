@@ -205,23 +205,5 @@ namespace Sandra.Chess
             }
             return move;
         }
-
-        /// <summary>
-        /// Occurs when the active move index of the game was updated.
-        /// </summary>
-        public event EventHandler ActiveMoveIndexChanged;
-
-        /// <summary>
-        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
-        /// </summary>
-        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
-        {
-            ActiveMoveIndexChanged?.Invoke(this, e);
-        }
-
-        public void RaiseActiveMoveIndexChanged()
-        {
-            OnActiveMoveIndexChanged(EventArgs.Empty);
-        }
     }
 }

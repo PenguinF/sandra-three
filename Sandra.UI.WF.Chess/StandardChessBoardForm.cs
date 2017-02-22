@@ -439,7 +439,7 @@ namespace Sandra.UI.WF
 
             game.Game.TryMakeMove(ref moveInfo, true);
 
-            game.Game.RaiseActiveMoveIndexChanged();
+            game.ActiveMoveTreeUpdated();
             PlayingBoard.ActionHandler.Invalidate();
         }
 
