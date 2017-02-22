@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Copy screenshot to clipboard",
+                MenuCaption = "Copy diagram to clipboard",
                 Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             });
 
