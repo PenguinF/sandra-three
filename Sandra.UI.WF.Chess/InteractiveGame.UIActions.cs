@@ -192,8 +192,8 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoPreviousMove(bool perform)
         {
-            if (Game.ActiveMoveIndex == 0) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex--;
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform) Game.Backward();
             return UIActionVisibility.Enabled;
         }
 
@@ -214,8 +214,8 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoNextMove(bool perform)
         {
-            if (Game.ActiveMoveIndex == Game.MoveCount) return UIActionVisibility.Disabled;
-            if (perform) Game.ActiveMoveIndex++;
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            if (perform) Game.Forward();
             return UIActionVisibility.Enabled;
         }
     }

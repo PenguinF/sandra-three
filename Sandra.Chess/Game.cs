@@ -28,19 +28,32 @@ namespace Sandra.Chess
     public class Game
     {
         private readonly Position initialPosition;
-        private readonly List<Move> moveList = new List<Move>();
+        private readonly MoveTree moveTree;
 
         private Position currentPosition;
+        private MoveTree activeTree;
 
-        // Points at the index of the move which was played in the current position.
-        // Is moveList.Count if currentPosition is at the end of the game.
-        private int activeMoveIndex;
-
-        public Game(Position initialPosition)
+        private Game(Position initialPosition, MoveTree moveTree)
         {
             this.initialPosition = initialPosition;
             currentPosition = initialPosition.Copy();
+            this.moveTree = moveTree;
+            activeTree = moveTree;
         }
+
+        /// <summary>
+        /// Creates a new game with a given initial <see cref="Position"/>.
+        /// </summary>
+        public Game(Position initialPosition) : this(initialPosition,
+                                                     new MoveTree(initialPosition.SideToMove == Color.Black))
+        {
+        }
+
+        /// <summary>
+        /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
+        /// but in which <see cref="ActiveTree"/> can be manipulated independently.
+        /// </summary>
+        public Game Copy() => new Game(initialPosition, moveTree);
 
         /// <summary>
         /// Gets the initial position of this game.
@@ -53,58 +66,88 @@ namespace Sandra.Chess
         public Color InitialSideToMove => initialPosition.SideToMove;
 
         /// <summary>
+        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
+        /// </summary>
+        public MoveTree MoveTree => moveTree;
+
+        /// <summary>
         /// Gets the current position of this game.
         /// </summary>
         public Position CurrentPosition => currentPosition.Copy();
 
         /// <summary>
-        /// Returns the number of moves played after the initial position.
+        /// Gets the move tree which is currently active.
         /// </summary>
-        public int MoveCount => moveList.Count;
+        public MoveTree ActiveTree => activeTree;
 
-        /// <summary>
-        /// Gets or sets the index of the active move. This is a value between 0 and <see cref="MoveCount"/>.
-        /// </summary>
-        public int ActiveMoveIndex
+        private void setActiveTree(MoveTree value)
         {
-            get
+            // Replay all moves until the new active tree has been reached.
+            Stack<Move> previousMoves = new Stack<Move>();
+            MoveTree newActiveTree = value;
+
+            MoveTree current;
+            for (current = newActiveTree; current.ParentVariation != null; current = current.ParentVariation.ParentTree)
             {
-                return activeMoveIndex;
+                previousMoves.Push(current.ParentVariation.Move);
             }
-            set
+
+            // 'value' should be embedded somewhere inside this.moveTree.
+            if (current != moveTree)
             {
-                if (value < 0 || moveList.Count < value)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-                if (activeMoveIndex != value)
-                {
-                    activeMoveIndex = value;
-                    currentPosition = initialPosition.Copy();
-                    for (int i = 0; i < activeMoveIndex; ++i)
-                    {
-                        currentPosition.FastMakeMove(moveList[i]);
-                    }
-                    RaiseActiveMoveIndexChanged();
-                }
+                throw new ArgumentException(nameof(value), "value is not embedded in Game.MoveTree.");
+            }
+
+            Position newPosition = initialPosition.Copy();
+            foreach (Move move in previousMoves)
+            {
+                newPosition.FastMakeMove(move);
+            }
+
+            currentPosition = newPosition;
+            activeTree = newActiveTree;
+            RaiseActiveMoveIndexChanged();
+        }
+
+        public void SetActiveTree(MoveTree value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (activeTree != value)
+            {
+                setActiveTree(value);
             }
         }
 
-        /// <summary>
-        /// Enumerates all moves that led from the initial position to the end of the game.
-        /// </summary>
-        public IEnumerable<Move> Moves
+        public bool IsFirstMove => activeTree.ParentVariation == null;
+        public bool IsLastMove => activeTree.MainLine == null;
+        public Move PreviousMove() => activeTree.ParentVariation.Move;
+
+        public void Backward()
         {
-            get
+            if (IsFirstMove)
             {
-                foreach (var move in moveList) yield return move;
+                throw new InvalidOperationException("Cannot go backward when it's the first move.");
             }
+
+            // Replay until the previous move.
+            setActiveTree(activeTree.ParentVariation.ParentTree);
         }
 
-        /// <summary>
-        /// Gets the <see cref="Move"/> at position <paramref name="moveIndex"/>.
-        /// </summary>
-        public Move GetMove(int moveIndex) => moveList[moveIndex];
+        public void Forward()
+        {
+            if (IsLastMove)
+            {
+                throw new InvalidOperationException("Cannot go forward when it's the last move.");
+            }
+
+            currentPosition.FastMakeMove(activeTree.MainLine.Move);
+            activeTree = activeTree.MainLine.MoveTree;
+            RaiseActiveMoveIndexChanged();
+        }
 
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
@@ -162,22 +205,9 @@ namespace Sandra.Chess
             Move move = currentPosition.TryMakeMove(ref moveInfo, make);
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
-                bool add = true;
-                if (activeMoveIndex < moveList.Count)
-                {
-                    if (moveList[activeMoveIndex].CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
-                    {
-                        // Moves are the same, only move forward.
-                        add = false;
-                    }
-                    else
-                    {
-                        // Erase the active move and everything after.
-                        moveList.RemoveRange(activeMoveIndex, moveList.Count - activeMoveIndex);
-                    }
-                }
-                if (add) moveList.Add(move);
-                ++activeMoveIndex;
+                // Move to an existing variation, or create a new one.
+                Variation variation = activeTree.GetOrAddVariation(move);
+                activeTree = variation.MoveTree;
                 RaiseActiveMoveIndexChanged();
             }
             return move;

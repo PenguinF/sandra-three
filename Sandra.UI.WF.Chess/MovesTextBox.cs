@@ -113,30 +113,47 @@ namespace Sandra.UI.WF
                 public override string GetText() => SpaceText;
             }
 
+            public sealed class SideLineStart : TextElement
+            {
+                public const string SideLineStartText = "(";
+                public override string GetText() => SideLineStartText;
+            }
+
+            public sealed class SideLineEnd : TextElement
+            {
+                public const string SideLineEndText = ")";
+                public override string GetText() => SideLineEndText;
+            }
+
             public sealed class InitialBlackSideToMoveEllipsis : TextElement
             {
-                public const string EllipsisText = "1...";
+                public const string EllipsisText = "..";
                 public override string GetText() => EllipsisText;
             }
 
-            public sealed class MoveCounter : TextElement
+            public abstract class MoveDelimiter : TextElement { }
+
+            public sealed class MoveCounter : MoveDelimiter
             {
                 readonly int value;
                 public override string GetText() => value + ".";
                 public MoveCounter(int value) { this.value = value; }
             }
 
-            public sealed class FormattedMove : TextElement
+            public sealed class FormattedMove : MoveDelimiter
             {
                 readonly string value;
                 public override string GetText() => value;
-                public int MoveIndex;
-                public FormattedMove(string value) { this.value = value; }
+                public readonly Chess.Variation Variation;
+                public FormattedMove(string value, Chess.Variation variation)
+                {
+                    this.value = value;
+                    Variation = variation;
+                }
             }
         }
 
         private List<TextElement> elements;
-        private List<TextElement.FormattedMove> moveElements;
 
         private void updateFont(TextElement element, Font newFont)
         {
@@ -144,40 +161,95 @@ namespace Sandra.UI.WF
             SelectionFont = newFont;
         }
 
+        private IEnumerable<TextElement> emitInitialBlackSideToMoveEllipsis(int plyCount)
+        {
+            if (plyCount % 2 == 1)
+            {
+                // Add an ellipsis for the previous white move. 
+                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElement.InitialBlackSideToMoveEllipsis();
+                yield return new TextElement.Space();
+            }
+        }
+
+        private IEnumerable<TextElement> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
+        {
+            if (plyCount % 2 == 0)
+            {
+                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElement.Space();
+            }
+
+            yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+        }
+
+        // Parametrized on emitSpace because this method may not yield anything,
+        // in which case no spaces should be emitted at all.
+        private IEnumerable<TextElement> emitMainLine(Chess.Game game, bool emitSpace)
+        {
+            for (;;)
+            {
+                // Remember the game's active tree because it's the starting point of side lines.
+                Chess.MoveTree current = game.ActiveTree;
+                int plyCount = current.PlyCount;
+
+                // Emit the main move before side lines which start at the same plyCount.
+                if (current.MainLine != null)
+                {
+                    if (emitSpace) yield return new TextElement.Space();
+                    foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
+                    emitSpace = true;
+                }
+
+                foreach (var sideLine in current.SideLines)
+                {
+                    // Reset active tree before going into each side line.
+                    game.SetActiveTree(current);
+
+                    if (emitSpace) yield return new TextElement.Space();
+                    yield return new TextElement.SideLineStart();
+
+                    // Emit first move.
+                    foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
+                    foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
+
+                    // Recurse here.
+                    foreach (var element in emitMainLine(game, true)) yield return element;
+                    yield return new TextElement.SideLineEnd();
+
+                    emitSpace = true;
+                }
+
+                if (current.MainLine == null)
+                {
+                    yield break;
+                }
+
+                // Goto next move in the main line.
+                game.SetActiveTree(current.MainLine.MoveTree);
+            }
+        }
+
+        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        {
+            // Possible initial black side to move ellipsis.
+            if (game.MoveTree.MainLine != null)
+            {
+                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
+            }
+
+            // Treat as a regular main line.
+            foreach (var element in emitMainLine(game, false)) yield return element;
+        }
+
         private List<TextElement> getUpdatedElements()
         {
             if (moveFormatter != null && game != null)
             {
-                var updated = new List<TextElement>();
+                // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
+                Chess.Game copiedGame = game.Game.Copy();
 
-                // Simulate a game to be able to format moves correctly.
-                Chess.Game simulatedGame = new Chess.Game(game.Game.InitialPosition);
-
-                foreach (Chess.Move move in game.Game.Moves)
-                {
-                    int plyCounter = simulatedGame.MoveCount;
-                    if (plyCounter > 0) updated.Add(new TextElement.Space());
-
-                    if (simulatedGame.InitialSideToMove == Chess.Color.Black)
-                    {
-                        if (plyCounter == 0)
-                        {
-                            updated.Add(new TextElement.InitialBlackSideToMoveEllipsis());
-                            updated.Add(new TextElement.Space());
-                        }
-                        ++plyCounter;
-                    }
-
-                    if (plyCounter % 2 == 0)
-                    {
-                        updated.Add(new TextElement.MoveCounter(plyCounter / 2 + 1));
-                        updated.Add(new TextElement.Space());
-                    }
-
-                    updated.Add(new TextElement.FormattedMove(moveFormatter.FormatMove(simulatedGame, move)));
-                }
-
-                return updated;
+                return new List<TextElement>(emitMoveTree(copiedGame));
             }
 
             return null;
@@ -254,33 +326,24 @@ namespace Sandra.UI.WF
                 SelectionFont = regularFont;
                 Select(0, 0);
 
-                // Update moveElements as well.
-                if (elements == null)
+                // Make the active move bold.
+                if (elements != null)
                 {
-                    moveElements = null;
-                }
-                else
-                {
-                    moveElements = new List<TextElement.FormattedMove>();
                     foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                     {
-                        formattedMoveElement.MoveIndex = moveElements.Count;
-                        moveElements.Add(formattedMoveElement);
-                    }
-                }
+                        if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                        {
+                            updateFont(formattedMoveElement, lastMoveFont);
 
-                // elementLists.Elements can only be non-null if game is non-null as well.
-                if (elements != null && game.Game.ActiveMoveIndex > 0)
-                {
-                    // Make the last move bold. This is the move before, not after ActiveMoveIndex.
-                    var lastMoveElement = moveElements[game.Game.ActiveMoveIndex - 1];
-                    updateFont(lastMoveElement, lastMoveFont);
+                            if (!ContainsFocus)
+                            {
+                                // Also update the caret so the active move is in view.
+                                Select(formattedMoveElement.Start + formattedMoveElement.Length, 0);
+                                ScrollToCaret();
+                            }
 
-                    if (!ContainsFocus)
-                    {
-                        // Also update the caret so the active move is in view.
-                        Select(lastMoveElement.Start + lastMoveElement.Length, 0);
-                        ScrollToCaret();
+                            break;
+                        }
                     }
                 }
             }
@@ -296,39 +359,65 @@ namespace Sandra.UI.WF
             {
                 int selectionStart = SelectionStart;
 
-                List<int> startIndexes = moveElements.Select(x => x.Start).ToList();
-
-                // Get the index of the element that contains the caret.
-                int elemIndex = startIndexes.BinarySearch(selectionStart);
-                if (elemIndex < 0) elemIndex = ~elemIndex - 1;
-
-                int newActiveMoveIndex;
-                if (elemIndex < 0)
+                int elemIndex;
+                if (selectionStart == 0)
                 {
-                    // Exceptional case to go to the initial position.
-                    newActiveMoveIndex = 0;
+                    // Go to the initial position when the caret is at the start.
+                    elemIndex = -1;
                 }
                 else
                 {
+                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
+
+                    // Get the index of the element that contains the caret.
+                    elemIndex = startIndexes.BinarySearch(selectionStart);
+                    if (elemIndex < 0) elemIndex = ~elemIndex - 1;
+
+                    // Look for an element which delimits a move.
+                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.MoveDelimiter))
+                    {
+                        elemIndex--;
+                    }
+                }
+
+                TextElement.FormattedMove newActiveMoveElement;
+                Chess.MoveTree newActiveTree;
+                if (elemIndex < 0)
+                {
+                    // Exceptional case to go to the initial position.
+                    newActiveMoveElement = null;
+                    newActiveTree = game.Game.MoveTree;
+                }
+                else
+                {
+                    // If at a MoveCounter, go forward until the actual FormattedMove.
+                    while (!(elements[elemIndex] is TextElement.FormattedMove)) elemIndex++;
+
                     // Go to the position after the selected move.
-                    newActiveMoveIndex = moveElements[elemIndex].MoveIndex + 1;
+                    newActiveMoveElement = (TextElement.FormattedMove)elements[elemIndex];
+                    newActiveTree = newActiveMoveElement.Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
-                if (game.Game.ActiveMoveIndex != newActiveMoveIndex)
+                if (game.Game.ActiveTree != newActiveTree)
                 {
                     BeginUpdate();
                     try
                     {
-                        if (game.Game.ActiveMoveIndex > 0)
+                        // Search for the current active move element to clear its font.
+                        foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], regularFont);
+                            if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                            {
+                                updateFont(formattedMoveElement, regularFont);
+                            }
                         }
-                        game.Game.ActiveMoveIndex = newActiveMoveIndex;
+
+                        game.Game.SetActiveTree(newActiveTree);
                         ActionHandler.Invalidate();
-                        if (game.Game.ActiveMoveIndex > 0)
+                        if (newActiveMoveElement != null)
                         {
-                            updateFont(moveElements[game.Game.ActiveMoveIndex - 1], lastMoveFont);
+                            updateFont(newActiveMoveElement, lastMoveFont);
                         }
                     }
                     finally
