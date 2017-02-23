@@ -40,7 +40,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Contains the number of plies to move forward of backward in a game for fast navigation.
         /// </summary>
-        public int FastNavigationInterval { get; private set; }
+        public int FastNavigationPlyCount { get; private set; }
 
         public MdiContainerForm()
         {
@@ -312,7 +312,7 @@ namespace Sandra.UI.WF
             CurrentPieceSymbols = englishPieceSymbols;
 
             // 10 plies == 5 moves.
-            FastNavigationInterval = 10;
+            FastNavigationPlyCount = 10;
 
             NewPlayingBoard();
         }
