@@ -178,6 +178,7 @@ namespace Sandra.UI.WF
                                         InteractiveGame.GotoNextVariation,
                                         InteractiveGame.PromoteActiveVariation,
                                         InteractiveGame.DemoteActiveVariation,
+                                        InteractiveGame.BreakActiveVariation,
                                         InteractiveGame.DeleteActiveVariation,
                                         StandardChessBoardForm.TakeScreenshot);
 

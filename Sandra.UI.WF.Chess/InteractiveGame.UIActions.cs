@@ -85,6 +85,7 @@ namespace Sandra.UI.WF
 
                         { PromoteActiveVariation, TryPromoteActiveVariation },
                         { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
@@ -176,6 +177,7 @@ namespace Sandra.UI.WF
 
                         { PromoteActiveVariation, TryPromoteActiveVariation },
                         { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
                     });
 
@@ -513,6 +515,24 @@ namespace Sandra.UI.WF
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding BreakActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(BreakActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Break line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.B),
+                },
+            });
+
+        public UIActionState TryBreakActiveVariation(bool perform)
+        {
+            return UIActionVisibility.Disabled;
         }
 
 
