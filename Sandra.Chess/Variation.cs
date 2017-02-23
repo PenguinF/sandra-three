@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sandra.Chess
@@ -74,11 +75,25 @@ namespace Sandra.Chess
                 // Promote this line.
                 int oldVariationIndex = VariationIndex;
                 ParentTree.Variations.RemoveAt(oldVariationIndex);
-                ParentTree.Variations.Insert(destinationVariationIndex, this);
-                for (int i = destinationVariationIndex; i <= oldVariationIndex; ++i)
+
+                // Exceptional case where the main line is null.
+                int reIndexUpperBound;
+                if (destinationVariationIndex == 0 && ParentTree.Variations[0] == null)
+                {
+                    ParentTree.Variations[0] = this;
+                    reIndexUpperBound = ParentTree.Variations.Count - 1;
+                }
+                else
+                {
+                    ParentTree.Variations.Insert(destinationVariationIndex, this);
+                    reIndexUpperBound = oldVariationIndex;
+                }
+
+                for (int i = destinationVariationIndex; i <= reIndexUpperBound; ++i)
                 {
                     ParentTree.Variations[i].VariationIndex = i;
                 }
+                Debug.Assert(ParentTree.CheckVariationIndexes());
             }
             else if (VariationIndex + 1 < destinationVariationIndex)
             {
@@ -90,6 +105,7 @@ namespace Sandra.Chess
                 {
                     ParentTree.Variations[i].VariationIndex = i;
                 }
+                Debug.Assert(ParentTree.CheckVariationIndexes());
             }
         }
 
@@ -150,31 +166,47 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets the total number of variations branching from this position.
         /// </summary>
-        public int VariationCount => MainLine == null ? 0 : Variations.Count;
+        public int VariationCount => Variations.Count;
 
         public Variation GetOrAddVariation(Move move)
         {
+            foreach (Variation branch in Variations)
+            {
+                if (branch != null && branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                {
+                    return branch;
+                }
+            }
+
             if (Variations[0] == null)
             {
-                // Continue adding to ParentVariation.MoveIndex for the main variation.
                 Variations[0] = new Variation(this, 0, move);
+                Debug.Assert(CheckVariationIndexes());
                 return Variations[0];
             }
             else
             {
-                foreach (Variation branch in Variations)
-                {
-                    if (branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
-                    {
-                        return branch;
-                    }
-                }
-
-                // Reset moveIndex at 0.
                 Variation newBranch = new Variation(this, Variations.Count, move);
                 Variations.Add(newBranch);
+                Debug.Assert(CheckVariationIndexes());
                 return newBranch;
             }
+        }
+
+        /// <summary>
+        /// Turns the main line into a side line.
+        /// </summary>
+        public void Break()
+        {
+            if (Variations[0] != null)
+            {
+                Variations.Insert(0, null);
+                for (int i = 1; i < Variations.Count; ++i)
+                {
+                    Variations[i].VariationIndex = i;
+                }
+            }
+            Debug.Assert(CheckVariationIndexes());
         }
 
         internal MoveTree(Variation parentVariation)
@@ -189,6 +221,18 @@ namespace Sandra.Chess
             Variations.Add(null);
             PlyCount = blackToMove ? 1 : 0;
             ParentVariation = null;
+        }
+
+        internal bool CheckVariationIndexes()
+        {
+            for (int i = 0; i < Variations.Count; ++i)
+            {
+                if (Variations[i] != null && Variations[i].VariationIndex != i)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

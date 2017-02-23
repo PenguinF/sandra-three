@@ -495,7 +495,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryDemoteActiveVariation(bool perform)
         {
-            // Find the first move in this variation which has an 'less important' alternative.
+            // Find the first move in this variation which has a 'less important' side line.
             Variation moveWithSideLine = Game.ActiveTree.ParentVariation;
             while (moveWithSideLine != null
                 && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.VariationCount)
@@ -523,7 +523,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Break line",
+                MenuCaption = "Break at current position",
                 Shortcuts = new List<ShortcutKeys>
                 {
                     new ShortcutKeys(ConsoleKey.B),
@@ -532,7 +532,14 @@ namespace Sandra.UI.WF
 
         public UIActionState TryBreakActiveVariation(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            // If this move is the main line, turn it into a side line.
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                Game.ActiveTree.Break();
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
 
 
