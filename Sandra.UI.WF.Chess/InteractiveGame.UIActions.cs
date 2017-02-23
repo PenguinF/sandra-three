@@ -249,7 +249,7 @@ namespace Sandra.UI.WF
                 // Go to the first move in this line, but make sure to not get stuck with repeated use.
                 Game.Backward();
                 while (Game.ActiveTree.ParentVariation != null
-                    && Game.ActiveTree.ParentVariation.MoveIndex > 0)
+                    && Game.ActiveTree.ParentVariation.VariationIndex == 0)
                 {
                     Game.Backward();
                 }

@@ -35,11 +35,9 @@ namespace Sandra.Chess
         public readonly MoveTree ParentTree;
 
         /// <summary>
-        /// Gets the index of the move within the main variation.
-        /// At the root of new branches the move index resets to 0.
-        /// See also: <seealso cref="MoveTree.PlyCount"/>.
+        /// Gets the index of this variation within the list of branches before this move.
         /// </summary>
-        public readonly int MoveIndex;
+        public int VariationIndex { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="Move"/> which starts this variation.
@@ -51,10 +49,10 @@ namespace Sandra.Chess
         /// </summary>
         public readonly MoveTree MoveTree;
 
-        internal Variation(MoveTree parentTree, int moveIndex, Move move)
+        internal Variation(MoveTree parentTree, int variationIndex, Move move)
         {
             ParentTree = parentTree;
-            MoveIndex = moveIndex;
+            VariationIndex = variationIndex;
             Move = move;
             MoveTree = new MoveTree(this);
         }
@@ -94,7 +92,7 @@ namespace Sandra.Chess
             if (branches[0] == null)
             {
                 // Continue adding to ParentVariation.MoveIndex for the main variation.
-                branches[0] = new Variation(this, ParentVariation == null ? 0 : ParentVariation.MoveIndex + 1, move);
+                branches[0] = new Variation(this, 0, move);
                 return branches[0];
             }
             else
@@ -108,7 +106,7 @@ namespace Sandra.Chess
                 }
 
                 // Reset moveIndex at 0.
-                Variation newBranch = new Variation(this, 0, move);
+                Variation newBranch = new Variation(this, branches.Count, move);
                 branches.Add(newBranch);
                 return newBranch;
             }
