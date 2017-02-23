@@ -165,7 +165,16 @@ namespace Sandra.UI.WF
 
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(gameMenu,
-                                        OpenNewPlayingBoard,
+                                        OpenNewPlayingBoard);
+
+            UIMenuNode.Container goToMenu = new UIMenuNode.Container("Go to")
+            {
+                IsFirstInGroup = true,
+            };
+            gameMenu.Nodes.Add(goToMenu);
+
+            // Add all these to a submenu.
+            bindFocusDependentUIActions(goToMenu,
                                         InteractiveGame.GotoStart,
                                         InteractiveGame.GotoFirstMove,
                                         InteractiveGame.FastNavigateBackward,
@@ -175,7 +184,9 @@ namespace Sandra.UI.WF
                                         InteractiveGame.GotoLastMove,
                                         InteractiveGame.GotoEnd,
                                         InteractiveGame.GotoPreviousVariation,
-                                        InteractiveGame.GotoNextVariation,
+                                        InteractiveGame.GotoNextVariation);
+
+            bindFocusDependentUIActions(gameMenu,
                                         InteractiveGame.PromoteActiveVariation,
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
