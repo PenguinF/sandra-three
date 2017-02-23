@@ -71,18 +71,21 @@ namespace Sandra.UI.WF
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
 
+                        { GotoStart, TryGotoStart },
                         { GotoFirstMove, TryGotoFirstMove },
                         { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                         { FastNavigateForward, TryFastNavigateForward },
                         { GotoLastMove, TryGotoLastMove },
+                        { GotoEnd, TryGotoEnd },
 
                         { GotoPreviousVariation, TryGotoPreviousVariation },
                         { GotoNextVariation, TryGotoNextVariation },
 
                         { PromoteActiveVariation, TryPromoteActiveVariation },
                         { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { DeleteActiveVariation, TryDeleteActiveVariation },
 
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
@@ -159,18 +162,21 @@ namespace Sandra.UI.WF
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
 
+                        { GotoStart, TryGotoStart },
                         { GotoFirstMove, TryGotoFirstMove },
                         { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
                         { FastNavigateForward, TryFastNavigateForward },
                         { GotoLastMove, TryGotoLastMove },
+                        { GotoEnd, TryGotoEnd },
 
                         { GotoPreviousVariation, TryGotoPreviousVariation },
                         { GotoNextVariation, TryGotoNextVariation },
 
                         { PromoteActiveVariation, TryPromoteActiveVariation },
                         { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { DeleteActiveVariation, TryDeleteActiveVariation },
                     });
 
                     UIMenu.AddTo(movesTextBox);
@@ -198,21 +204,20 @@ namespace Sandra.UI.WF
         }
 
 
-        public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
-            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
+        public static readonly DefaultUIActionBinding GotoStart = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoStart)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "First move",
+                MenuCaption = "Start of game",
                 Shortcuts = new List<ShortcutKeys>
                 {
-                    new ShortcutKeys(ConsoleKey.Home),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home),
                 },
             });
 
-        public UIActionState TryGotoFirstMove(bool perform)
+        public UIActionState TryGotoStart(bool perform)
         {
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
             if (perform)
@@ -221,6 +226,24 @@ namespace Sandra.UI.WF
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "First move",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.Home),
+                },
+            });
+
+        public UIActionState TryGotoFirstMove(bool perform)
+        {
+            return UIActionVisibility.Disabled;
         }
 
 
@@ -333,7 +356,6 @@ namespace Sandra.UI.WF
                 Shortcuts = new List<ShortcutKeys>
                 {
                     new ShortcutKeys(ConsoleKey.End),
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
                 },
             });
 
@@ -346,6 +368,24 @@ namespace Sandra.UI.WF
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoEnd = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoEnd)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "End of game",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
+                },
+            });
+
+        public UIActionState TryGotoEnd(bool perform)
+        {
+            return UIActionVisibility.Disabled;
         }
 
 
@@ -365,7 +405,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoPreviousVariation(bool perform)
         {
-            return UIActionVisibility.Enabled;
+            return UIActionVisibility.Disabled;
         }
 
 
@@ -384,7 +424,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoNextVariation(bool perform)
         {
-            return UIActionVisibility.Enabled;
+            return UIActionVisibility.Disabled;
         }
 
 
@@ -404,7 +444,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryPromoteActiveVariation(bool perform)
         {
-            return UIActionVisibility.Enabled;
+            return UIActionVisibility.Disabled;
         }
 
 
@@ -423,7 +463,25 @@ namespace Sandra.UI.WF
 
         public UIActionState TryDemoteActiveVariation(bool perform)
         {
-            return UIActionVisibility.Enabled;
+            return UIActionVisibility.Disabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding DeleteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(DeleteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Delete line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete),
+                },
+            });
+
+        public UIActionState TryDeleteActiveVariation(bool perform)
+        {
+            return UIActionVisibility.Disabled;
         }
     }
 }
