@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -56,6 +57,65 @@ namespace Sandra.Chess
             Move = move;
             MoveTree = new MoveTree(this);
         }
+
+        private void reposition(int destinationVariationIndex, bool after)
+        {
+            if (destinationVariationIndex < 0
+                || destinationVariationIndex >= ParentTree.Variations.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(destinationVariationIndex));
+            }
+
+            // Only after the range check, increase the index.
+            if (after) destinationVariationIndex++;
+
+            if (VariationIndex > destinationVariationIndex)
+            {
+                // Promote this line.
+                int oldVariationIndex = VariationIndex;
+                ParentTree.Variations.RemoveAt(oldVariationIndex);
+                ParentTree.Variations.Insert(destinationVariationIndex, this);
+                for (int i = destinationVariationIndex; i <= oldVariationIndex; ++i)
+                {
+                    ParentTree.Variations[i].VariationIndex = i;
+                }
+            }
+            else if (VariationIndex + 1 < destinationVariationIndex)
+            {
+                // Demote this line.
+                int oldVariationIndex = VariationIndex;
+                ParentTree.Variations.RemoveAt(VariationIndex);
+                ParentTree.Variations.Insert(destinationVariationIndex - 1, this);
+                for (int i = oldVariationIndex; i < destinationVariationIndex; ++i)
+                {
+                    ParentTree.Variations[i].VariationIndex = i;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Attempts to reposition this variation before a destination index in the parent move tree.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="destinationVariationIndex"/> is less than zero
+        /// or greater than or equal to the number of variations in the parent move tree.
+        /// </exception>
+        public void RepositionBefore(int destinationVariationIndex)
+        {
+            reposition(destinationVariationIndex, false);
+        }
+
+        /// <summary>
+        /// Attempts to reposition this variation after a destination index in the parent move tree.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="destinationVariationIndex"/> is less than zero
+        /// or greater than or equal to the number of variations in the parent move tree.
+        /// </exception>
+        public void RepositionAfter(int destinationVariationIndex)
+        {
+            reposition(destinationVariationIndex, true);
+        }
     }
 
     /// <summary>
@@ -81,23 +141,28 @@ namespace Sandra.Chess
         /// The first variation in this list can be null, to allow side lines to extend from the end of a main line.
         /// The other varations in this list however are always not-null.
         /// </summary>
-        private readonly List<Variation> branches = new List<Variation>();
+        internal readonly List<Variation> Variations = new List<Variation>();
 
-        public Variation MainLine => branches[0];
+        public Variation MainLine => Variations[0];
 
-        public IEnumerable<Variation> SideLines => branches.Skip(1);
+        public IEnumerable<Variation> SideLines => Variations.Skip(1);
+
+        /// <summary>
+        /// Gets the total number of variations branching from this position.
+        /// </summary>
+        public int VariationCount => MainLine == null ? 0 : Variations.Count;
 
         public Variation GetOrAddVariation(Move move)
         {
-            if (branches[0] == null)
+            if (Variations[0] == null)
             {
                 // Continue adding to ParentVariation.MoveIndex for the main variation.
-                branches[0] = new Variation(this, 0, move);
-                return branches[0];
+                Variations[0] = new Variation(this, 0, move);
+                return Variations[0];
             }
             else
             {
-                foreach (Variation branch in branches)
+                foreach (Variation branch in Variations)
                 {
                     if (branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
                     {
@@ -106,22 +171,22 @@ namespace Sandra.Chess
                 }
 
                 // Reset moveIndex at 0.
-                Variation newBranch = new Variation(this, branches.Count, move);
-                branches.Add(newBranch);
+                Variation newBranch = new Variation(this, Variations.Count, move);
+                Variations.Add(newBranch);
                 return newBranch;
             }
         }
 
         internal MoveTree(Variation parentVariation)
         {
-            branches.Add(null);
+            Variations.Add(null);
             PlyCount = parentVariation.ParentTree.PlyCount + 1;
             ParentVariation = parentVariation;
         }
 
         internal MoveTree(bool blackToMove)
         {
-            branches.Add(null);
+            Variations.Add(null);
             PlyCount = blackToMove ? 1 : 0;
             ParentVariation = null;
         }

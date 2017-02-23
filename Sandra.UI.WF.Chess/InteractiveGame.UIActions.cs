@@ -456,7 +456,25 @@ namespace Sandra.UI.WF
 
         public UIActionState TryPromoteActiveVariation(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            // Find the first move in this variation.
+            Variation firstMoveInVariation = Game.ActiveTree.ParentVariation;
+            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
+            {
+                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
+            }
+
+            if (firstMoveInVariation == null)
+            {
+                // Already the main line of the game.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                firstMoveInVariation.RepositionBefore(firstMoveInVariation.VariationIndex - 1);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
 
 
@@ -475,7 +493,26 @@ namespace Sandra.UI.WF
 
         public UIActionState TryDemoteActiveVariation(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            // Find the first move in this variation which has an 'less important' alternative.
+            Variation moveWithSideLine = Game.ActiveTree.ParentVariation;
+            while (moveWithSideLine != null
+                && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.VariationCount)
+            {
+                moveWithSideLine = moveWithSideLine.ParentTree.ParentVariation;
+            }
+
+            if (moveWithSideLine == null)
+            {
+                // Already no sidelines below this one.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                moveWithSideLine.RepositionAfter(moveWithSideLine.VariationIndex + 1);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
 
 
