@@ -243,7 +243,19 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoFirstMove(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                // Go to the first move in this line, but make sure to not get stuck with repeated use.
+                Game.Backward();
+                while (Game.ActiveTree.ParentVariation != null
+                    && Game.ActiveTree.ParentVariation.MoveIndex > 0)
+                {
+                    Game.Backward();
+                }
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
 
 
