@@ -17,6 +17,8 @@
  * 
  *********************************************************************************/
 
+using Sandra.Chess;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -51,6 +53,17 @@ namespace Sandra.UI.WF
         {
             if (movesForm == null) return null;
             return (MovesTextBox)movesForm.Controls[0];
+        }
+
+        private Variation getFirstMoveInActiveVariation()
+        {
+            Variation firstMoveInVariation = Game.ActiveTree.ParentVariation;
+            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
+            {
+                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
+            }
+
+            return firstMoveInVariation;
         }
     }
 }

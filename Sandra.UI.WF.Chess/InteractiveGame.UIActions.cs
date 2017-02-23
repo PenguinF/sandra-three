@@ -399,7 +399,19 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoEnd(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            if (Game.IsLastMove && getFirstMoveInActiveVariation() == null)
+            {
+                // Last move in the main line of the game.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                Game.SetActiveTree(Game.MoveTree);
+                while (!Game.IsLastMove) Game.Forward();
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
 
 
@@ -459,11 +471,7 @@ namespace Sandra.UI.WF
         public UIActionState TryPromoteActiveVariation(bool perform)
         {
             // Find the first move in this variation.
-            Variation firstMoveInVariation = Game.ActiveTree.ParentVariation;
-            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
-            {
-                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
-            }
+            Variation firstMoveInVariation = getFirstMoveInActiveVariation();
 
             if (firstMoveInVariation == null)
             {
