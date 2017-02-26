@@ -85,7 +85,6 @@ namespace Sandra.UI.WF
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(LightSquareImage), null },
-            { nameof(MovingImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
@@ -380,23 +379,6 @@ namespace Sandra.UI.WF
                 {
                     updateLightSquareBrush();
                     Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image to display under the mouse pointer when moving.
-        /// A null value (Nothing in Visual Basic) means that the image of the move's start square is used.
-        /// </summary>
-        public Image MovingImage
-        {
-            get { return propertyStore.Get<Image>(nameof(MovingImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(MovingImage), value))
-                {
-                    if (IsMoving) Invalidate();
                 }
             }
         }
@@ -864,9 +846,9 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected bool RaiseMoveStart(int squareIndex)
+        protected bool RaiseMoveStart(int squareIndex, Point mouseStartPosition)
         {
-            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex));
+            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition);
             OnMoveStart(e);
             return !e.Cancel;
         }
@@ -911,9 +893,11 @@ namespace Sandra.UI.WF
             return new Point(px, py);
         }
 
-        private Rectangle getRelativeForegroundImageRectangle()
+        /// <summary>
+        /// Returns the rectangle of a foreground image relative to its containing square.
+        /// </summary>
+        public Rectangle GetRelativeForegroundImageRectangle()
         {
-            // Returns the rectangle of a foreground image relative to its containing square.
             if (SquareSize > 0)
             {
                 int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
@@ -981,8 +965,13 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private Point moveStartPosition;
-        private Point moveCurrentPosition;
+        /// <summary>
+        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
+        /// </summary>
+        public Point DragStartPosition => dragStartPosition;
+
+        private Point dragStartPosition;
+
         private int moveStartSquareIndex = -1;
 
         private int getSquareIndexFromLocation(Point clientLocation)
@@ -1063,13 +1052,9 @@ namespace Sandra.UI.WF
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
-                    if (RaiseMoveStart(hit))
+                    if (RaiseMoveStart(hit, e.Location))
                     {
-                        moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
-                        moveStartPosition.Offset(getLocationFromIndex(hit));
-                        Rectangle imageRect = getRelativeForegroundImageRectangle();
-                        moveStartPosition.Offset(imageRect.Location);
-                        moveCurrentPosition = e.Location;
+                        dragStartPosition = e.Location;
                         moveStartSquareIndex = hit;
                         Invalidate();
                     }
@@ -1083,13 +1068,6 @@ namespace Sandra.UI.WF
         {
             // Do a hit test, which updates hover information.
             hitTest(e.Location);
-
-            // Update moving information.
-            if (IsMoving)
-            {
-                moveCurrentPosition = e.Location;
-                Invalidate();
-            }
 
             // Remember position for mouse-enters without mouse-leaves.
             lastKnownMouseMovePoint = e.Location;
@@ -1210,7 +1188,7 @@ namespace Sandra.UI.WF
             {
                 // Draw foreground images.
                 // Determine the image size and the amount of space around a foreground image within a square.
-                Rectangle imgRect = getRelativeForegroundImageRectangle();
+                Rectangle imgRect = GetRelativeForegroundImageRectangle();
                 int sizeH = imgRect.Width,
                     sizeV = imgRect.Height;
 
@@ -1255,25 +1233,9 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-
-                base.OnPaint(pe);
-
-                if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
-                {
-                    // Draw moving image on top of the rest.
-                    Image currentImg = MovingImage ?? foregroundImages[moveStartSquareIndex];
-                    if (currentImg != null)
-                    {
-                        Point location = moveCurrentPosition;
-                        location.Offset(moveStartPosition);
-                        g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
-                    }
-                }
             }
-            else
-            {
-                base.OnPaint(pe);
-            }
+
+            base.OnPaint(pe);
         }
 
         private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)

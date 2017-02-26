@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Runtime.InteropServices;
 
 namespace Sandra.UI.WF
@@ -110,5 +111,36 @@ namespace Sandra.UI.WF
         /// This enumeration value is equal to WMSZ_BOTTOM + WMSZ_RIGHT.
         /// </remarks>
         BottomRight = 8,
+    }
+
+    /// <summary>
+    /// Encapsulates the ICONINFO structure which is used by the Windows API.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ICONINFO
+    {
+        public bool fIcon;
+        public int xHotspot;
+        public int yHotspot;
+        public IntPtr hbmMask;
+        public IntPtr hbmColor;
+    }
+
+    /// <summary>
+    /// Contains P/Invoke definitions for the Windows API.
+    /// </summary>
+    public static class WinAPI
+    {
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        public static extern bool DeleteObject(HandleRef hObject);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        public static extern bool DestroyIcon(HandleRef hIcon);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
     }
 }

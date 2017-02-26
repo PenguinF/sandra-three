@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace Sandra.UI.WF
 {
@@ -76,6 +77,11 @@ namespace Sandra.UI.WF
     public class CancellableMoveEventArgs : MoveEventArgs
     {
         /// <summary>
+        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
+        /// </summary>
+        public Point MouseStartPosition { get; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the event should be canceled.
         /// </summary>
         public bool Cancel { get; set; }
@@ -86,8 +92,12 @@ namespace Sandra.UI.WF
         /// <param name="start">
         /// The location of the square where moving started.
         /// </param>
-        public CancellableMoveEventArgs(SquareLocation start) : base(start)
+        /// <param name="mouseStartPosition">
+        /// The position of the mouse relative to the top left corner of the control when dragging started.
+        /// </param>
+        public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition) : base(start)
         {
+            MouseStartPosition = mouseStartPosition;
         }
     }
 

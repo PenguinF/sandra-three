@@ -139,6 +139,32 @@ namespace Sandra.UI.WF
             };
         }
 
+        private Cursor dragCursor;
+
+        private void updateDragImage(Image newImage, SquareLocation startSquare, Point dragStartPosition)
+        {
+            Cursor newDragCursor = null;
+            if (newImage != null && startSquare != null)
+            {
+                Rectangle imageRectangle = PlayingBoard.GetRelativeForegroundImageRectangle();
+                if (imageRectangle.Width > 0 && imageRectangle.Height > 0)
+                {
+                    Point dragStartSquareLocation = PlayingBoard.GetSquareRectangle(startSquare).Location;
+                    int hotSpotX = dragStartPosition.X - dragStartSquareLocation.X - imageRectangle.X;
+                    int hotSpotY = dragStartPosition.Y - dragStartSquareLocation.Y - imageRectangle.Y;
+
+                    newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
+                                                                        imageRectangle.Size,
+                                                                        Cursors.Default,
+                                                                        new Point(hotSpotX, hotSpotY));
+                }
+            }
+
+            if (dragCursor != null) dragCursor.Dispose();
+            dragCursor = newDragCursor;
+            Cursor.Current = newDragCursor ?? Cursors.Default;
+        }
+
         /// <summary>
         /// Identifies a quadrant of a square.
         /// </summary>
@@ -200,11 +226,16 @@ namespace Sandra.UI.WF
                 hoverQuadrant = value;
                 if (value == SquareQuadrant.Indeterminate)
                 {
-                    PlayingBoard.MovingImage = null;
+                    SquareLocation moveStartSquare = PlayingBoard.MoveStartSquare;
+                    updateDragImage(moveStartSquare != null ? PlayingBoard.GetForegroundImage(moveStartSquare) : null,
+                                    PlayingBoard.MoveStartSquare,
+                                    PlayingBoard.DragStartPosition);
                 }
                 else
                 {
-                    PlayingBoard.MovingImage = PieceImages[getPromoteToPiece(value, promoteColor)];
+                    updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
+                                    PlayingBoard.MoveStartSquare,
+                                    PlayingBoard.DragStartPosition);
                 }
             }
         }
@@ -383,6 +414,7 @@ namespace Sandra.UI.WF
                 }
 
                 PlayingBoard.SetForegroundImageAttribute(e.Start, ForegroundImageAttribute.HalfTransparent);
+                updateDragImage(PlayingBoard.GetForegroundImage(e.Start), e.Start, e.MouseStartPosition);
             }
             else
             {
@@ -392,6 +424,7 @@ namespace Sandra.UI.WF
 
         private void resetMoveEffects(MoveEventArgs e)
         {
+            updateDragImage(null, null, Point.Empty);
             stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
