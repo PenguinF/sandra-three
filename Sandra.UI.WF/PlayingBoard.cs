@@ -864,9 +864,9 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
         /// </summary>
-        protected bool RaiseMoveStart(int squareIndex)
+        protected bool RaiseMoveStart(int squareIndex, Point mouseStartPosition)
         {
-            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex));
+            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition);
             OnMoveStart(e);
             return !e.Cancel;
         }
@@ -1063,7 +1063,7 @@ namespace Sandra.UI.WF
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
                 {
-                    if (RaiseMoveStart(hit))
+                    if (RaiseMoveStart(hit, e.Location))
                     {
                         moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
                         moveStartPosition.Offset(getLocationFromIndex(hit));
