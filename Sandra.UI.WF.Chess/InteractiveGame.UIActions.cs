@@ -431,6 +431,20 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoPreviousVariation(bool perform)
         {
+            Variation currentVariation = Game.ActiveTree.ParentVariation;
+            if (currentVariation != null && currentVariation.VariationIndex > 0)
+            {
+                Variation previousVariation = currentVariation.ParentTree.Variations[currentVariation.VariationIndex - 1];
+                if (previousVariation != null)
+                {
+                    if (perform)
+                    {
+                        Game.SetActiveTree(previousVariation.MoveTree);
+                        ActiveMoveTreeUpdated();
+                    }
+                    return UIActionVisibility.Enabled;
+                }
+            }
             return UIActionVisibility.Disabled;
         }
 
