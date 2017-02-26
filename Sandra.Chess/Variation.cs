@@ -153,20 +153,22 @@ namespace Sandra.Chess
         public readonly Variation ParentVariation;
 
         /// <summary>
-        /// All variations in this list have a unique move.
+        /// Gets a list of variations branching from this position.
+        /// Each variation in this list starts with a unique move.
         /// The first variation in this list can be null, to allow side lines to extend from the end of a main line.
         /// The other varations in this list however are always not-null.
         /// </summary>
-        internal readonly List<Variation> Variations = new List<Variation>();
-
-        public Variation MainLine => Variations[0];
-
-        public IEnumerable<Variation> SideLines => Variations.Skip(1);
+        public readonly List<Variation> Variations = new List<Variation>();
 
         /// <summary>
-        /// Gets the total number of variations branching from this position.
+        /// Returns the first line in <see cref="Variations"/>.
         /// </summary>
-        public int VariationCount => Variations.Count;
+        public Variation MainLine => Variations[0];
+
+        /// <summary>
+        /// Enumerates all side lines in <see cref="Variations"/>.
+        /// </summary>
+        public IEnumerable<Variation> SideLines => Variations.Skip(1);
 
         public Variation GetOrAddVariation(Move move)
         {

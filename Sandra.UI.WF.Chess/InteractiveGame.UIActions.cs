@@ -506,7 +506,7 @@ namespace Sandra.UI.WF
             // Find the first move in this variation which has a 'less important' side line.
             Variation moveWithSideLine = Game.ActiveTree.ParentVariation;
             while (moveWithSideLine != null
-                && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.VariationCount)
+                && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.Variations.Count)
             {
                 moveWithSideLine = moveWithSideLine.ParentTree.ParentVariation;
             }

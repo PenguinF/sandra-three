@@ -62,7 +62,6 @@ namespace Sandra.UI.WF
             {
                 firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
             }
-
             return firstMoveInVariation;
         }
     }
