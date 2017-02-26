@@ -85,7 +85,6 @@ namespace Sandra.UI.WF
             { nameof(InnerSpacing), DefaultInnerSpacing },
             { nameof(LightSquareColor), DefaultLightSquareColor },
             { nameof(LightSquareImage), null },
-            { nameof(MovingImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
 
@@ -380,23 +379,6 @@ namespace Sandra.UI.WF
                 {
                     updateLightSquareBrush();
                     Invalidate();
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Gets or sets the image to display under the mouse pointer when moving.
-        /// A null value (Nothing in Visual Basic) means that the image of the move's start square is used.
-        /// </summary>
-        public Image MovingImage
-        {
-            get { return propertyStore.Get<Image>(nameof(MovingImage)); }
-            set
-            {
-                if (propertyStore.Set(nameof(MovingImage), value))
-                {
-                    if (IsMoving) Invalidate();
                 }
             }
         }
@@ -989,8 +971,7 @@ namespace Sandra.UI.WF
         public Point DragStartPosition => dragStartPosition;
 
         private Point dragStartPosition;
-        private Point moveStartPosition;
-        private Point moveCurrentPosition;
+
         private int moveStartSquareIndex = -1;
 
         private int getSquareIndexFromLocation(Point clientLocation)
@@ -1074,11 +1055,6 @@ namespace Sandra.UI.WF
                     if (RaiseMoveStart(hit, e.Location))
                     {
                         dragStartPosition = e.Location;
-                        moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
-                        moveStartPosition.Offset(getLocationFromIndex(hit));
-                        Rectangle imageRect = GetRelativeForegroundImageRectangle();
-                        moveStartPosition.Offset(imageRect.Location);
-                        moveCurrentPosition = e.Location;
                         moveStartSquareIndex = hit;
                         Invalidate();
                     }
@@ -1092,13 +1068,6 @@ namespace Sandra.UI.WF
         {
             // Do a hit test, which updates hover information.
             hitTest(e.Location);
-
-            // Update moving information.
-            if (IsMoving)
-            {
-                moveCurrentPosition = e.Location;
-                Invalidate();
-            }
 
             // Remember position for mouse-enters without mouse-leaves.
             lastKnownMouseMovePoint = e.Location;
