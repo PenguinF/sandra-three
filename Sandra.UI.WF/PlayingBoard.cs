@@ -981,6 +981,12 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
+        /// <summary>
+        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
+        /// </summary>
+        public Point DragStartPosition => dragStartPosition;
+
+        private Point dragStartPosition;
         private Point moveStartPosition;
         private Point moveCurrentPosition;
         private int moveStartSquareIndex = -1;
@@ -1065,6 +1071,7 @@ namespace Sandra.UI.WF
                 {
                     if (RaiseMoveStart(hit, e.Location))
                     {
+                        dragStartPosition = e.Location;
                         moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
                         moveStartPosition.Offset(getLocationFromIndex(hit));
                         Rectangle imageRect = getRelativeForegroundImageRectangle();
