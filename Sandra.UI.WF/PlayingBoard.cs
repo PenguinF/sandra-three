@@ -911,9 +911,11 @@ namespace Sandra.UI.WF
             return new Point(px, py);
         }
 
-        private Rectangle getRelativeForegroundImageRectangle()
+        /// <summary>
+        /// Returns the rectangle of a foreground image relative to its containing square.
+        /// </summary>
+        public Rectangle GetRelativeForegroundImageRectangle()
         {
-            // Returns the rectangle of a foreground image relative to its containing square.
             if (SquareSize > 0)
             {
                 int foregroundImageSize = (int)Math.Floor(SquareSize * ForegroundImageRelativeSize);
@@ -1074,7 +1076,7 @@ namespace Sandra.UI.WF
                         dragStartPosition = e.Location;
                         moveStartPosition = new Point(-e.Location.X, -e.Location.Y);
                         moveStartPosition.Offset(getLocationFromIndex(hit));
-                        Rectangle imageRect = getRelativeForegroundImageRectangle();
+                        Rectangle imageRect = GetRelativeForegroundImageRectangle();
                         moveStartPosition.Offset(imageRect.Location);
                         moveCurrentPosition = e.Location;
                         moveStartSquareIndex = hit;
@@ -1217,7 +1219,7 @@ namespace Sandra.UI.WF
             {
                 // Draw foreground images.
                 // Determine the image size and the amount of space around a foreground image within a square.
-                Rectangle imgRect = getRelativeForegroundImageRectangle();
+                Rectangle imgRect = GetRelativeForegroundImageRectangle();
                 int sizeH = imgRect.Width,
                     sizeV = imgRect.Height;
 
