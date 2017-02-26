@@ -1264,25 +1264,9 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-
-                base.OnPaint(pe);
-
-                if (sizeH > 0 && sizeV > 0 && moveStartSquareIndex >= 0)
-                {
-                    // Draw moving image on top of the rest.
-                    Image currentImg = MovingImage ?? foregroundImages[moveStartSquareIndex];
-                    if (currentImg != null)
-                    {
-                        Point location = moveCurrentPosition;
-                        location.Offset(moveStartPosition);
-                        g.DrawImage(currentImg, new Rectangle(location.X, location.Y, sizeH, sizeV));
-                    }
-                }
             }
-            else
-            {
-                base.OnPaint(pe);
-            }
+
+            base.OnPaint(pe);
         }
 
         private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
