@@ -43,6 +43,7 @@
     <Compile Include="ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DragUtils.cs" />
     <Compile Include="FocusHelper.cs" />
     <Compile Include="HandlerIsAnonymousException.cs" />
     <Compile Include="LineSegment.cs" />
