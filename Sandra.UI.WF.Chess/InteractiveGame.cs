@@ -55,9 +55,9 @@ namespace Sandra.UI.WF
             return (MovesTextBox)movesForm.Controls[0];
         }
 
-        private Variation getFirstMoveInActiveVariation()
+        private static Variation getFirstMove(Variation variation)
         {
-            Variation firstMoveInVariation = Game.ActiveTree.ParentVariation;
+            Variation firstMoveInVariation = variation;
             while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
             {
                 firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
