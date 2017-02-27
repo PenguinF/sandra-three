@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-
 using Sandra.Chess;
 
 namespace Sandra.UI.WF
