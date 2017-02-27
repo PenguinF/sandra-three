@@ -38,16 +38,11 @@ namespace Sandra
 
         /// <summary>
         /// Iterates an action a number of times.
+        /// If the number of iterations is zero or lower, the action won't get executed at all.
         /// </summary>
         public static void Times(this int numberOfIterations, Action action)
         {
-            if (numberOfIterations < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(numberOfIterations),
-                                                      "Number of iterations cannot be lower than 0.");
-            }
-
-            for (int i = numberOfIterations; i != 0; --i) action();
+            for (int i = numberOfIterations; i > 0; --i) action();
         }
     }
 }
