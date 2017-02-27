@@ -35,6 +35,8 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool IsUpdating => isUpdating;
 
+        const int WM_SETREDRAW = 0x0b;
+
         /// <summary>
         /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
         /// </summary>
@@ -43,8 +45,8 @@ namespace Sandra.UI.WF
             if (!isUpdating)
             {
                 isUpdating = true;
-                HideCaret(new HandleRef(this, Handle));
-                SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
+                WinAPI.HideCaret(new HandleRef(this, Handle));
+                WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
         }
 
@@ -55,22 +57,11 @@ namespace Sandra.UI.WF
         {
             if (isUpdating)
             {
-                SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
-                ShowCaret(new HandleRef(this, Handle));
+                WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+                WinAPI.ShowCaret(new HandleRef(this, Handle));
                 isUpdating = false;
                 Invalidate();
             }
         }
-
-        const int WM_SETREDRAW = 0x0b;
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        static extern IntPtr SendMessage(HandleRef hWnd, int msg, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        static extern bool HideCaret(HandleRef hWnd);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        static extern bool ShowCaret(HandleRef hWnd);
     }
 }
