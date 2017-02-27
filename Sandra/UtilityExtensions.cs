@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra
 {
     /// <summary>
@@ -32,6 +34,15 @@ namespace Sandra
             {
                 array[i] = value;
             }
+        }
+
+        /// <summary>
+        /// Iterates an action a number of times.
+        /// If the number of iterations is zero or lower, the action won't get executed at all.
+        /// </summary>
+        public static void Times(this int numberOfIterations, Action action)
+        {
+            for (int i = numberOfIterations; i > 0; --i) action();
         }
     }
 }

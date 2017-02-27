@@ -106,7 +106,6 @@ namespace Sandra.Chess
 
             currentPosition = newPosition;
             activeTree = newActiveTree;
-            RaiseActiveMoveIndexChanged();
         }
 
         public void SetActiveTree(MoveTree value)
@@ -128,10 +127,8 @@ namespace Sandra.Chess
 
         public void Backward()
         {
-            if (IsFirstMove)
-            {
-                throw new InvalidOperationException("Cannot go backward when it's the first move.");
-            }
+            // No effect if first move.
+            if (IsFirstMove) return;
 
             // Replay until the previous move.
             setActiveTree(activeTree.ParentVariation.ParentTree);
@@ -139,14 +136,11 @@ namespace Sandra.Chess
 
         public void Forward()
         {
-            if (IsLastMove)
-            {
-                throw new InvalidOperationException("Cannot go forward when it's the last move.");
-            }
+            // No effect if last move.
+            if (IsLastMove) return;
 
             currentPosition.FastMakeMove(activeTree.MainLine.Move);
             activeTree = activeTree.MainLine.MoveTree;
-            RaiseActiveMoveIndexChanged();
         }
 
         /// <summary>
@@ -208,27 +202,8 @@ namespace Sandra.Chess
                 // Move to an existing variation, or create a new one.
                 Variation variation = activeTree.GetOrAddVariation(move);
                 activeTree = variation.MoveTree;
-                RaiseActiveMoveIndexChanged();
             }
             return move;
-        }
-
-        /// <summary>
-        /// Occurs when the active move index of the game was updated.
-        /// </summary>
-        public event EventHandler ActiveMoveIndexChanged;
-
-        /// <summary>
-        /// Raises the <see cref="ActiveMoveIndexChanged"/> event. 
-        /// </summary>
-        protected virtual void OnActiveMoveIndexChanged(EventArgs e)
-        {
-            ActiveMoveIndexChanged?.Invoke(this, e);
-        }
-
-        protected void RaiseActiveMoveIndexChanged()
-        {
-            OnActiveMoveIndexChanged(EventArgs.Empty);
         }
     }
 }

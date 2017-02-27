@@ -20,6 +20,7 @@ using Sandra.Chess;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -70,8 +71,24 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+
+                        { GotoStart, TryGotoStart },
+                        { GotoFirstMove, TryGotoFirstMove },
+                        { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
+                        { FastNavigateForward, TryFastNavigateForward },
+                        { GotoLastMove, TryGotoLastMove },
+                        { GotoEnd, TryGotoEnd },
+
+                        { GotoPreviousVariation, TryGotoPreviousVariation },
+                        { GotoNextVariation, TryGotoNextVariation },
+
+                        { PromoteActiveVariation, TryPromoteActiveVariation },
+                        { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { BreakActiveVariation, TryBreakActiveVariation },
+                        { DeleteActiveVariation, TryDeleteActiveVariation },
+
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
 
@@ -146,8 +163,23 @@ namespace Sandra.UI.WF
                     {
                         { GotoChessBoardForm, TryGotoChessBoardForm },
                         { GotoMovesForm, TryGotoMovesForm },
+
+                        { GotoStart, TryGotoStart },
+                        { GotoFirstMove, TryGotoFirstMove },
+                        { FastNavigateBackward, TryFastNavigateBackward },
                         { GotoPreviousMove, TryGotoPreviousMove },
                         { GotoNextMove, TryGotoNextMove },
+                        { FastNavigateForward, TryFastNavigateForward },
+                        { GotoLastMove, TryGotoLastMove },
+                        { GotoEnd, TryGotoEnd },
+
+                        { GotoPreviousVariation, TryGotoPreviousVariation },
+                        { GotoNextVariation, TryGotoNextVariation },
+
+                        { PromoteActiveVariation, TryPromoteActiveVariation },
+                        { DemoteActiveVariation, TryDemoteActiveVariation },
+                        { BreakActiveVariation, TryBreakActiveVariation },
+                        { DeleteActiveVariation, TryDeleteActiveVariation },
                     });
 
                     UIMenu.AddTo(movesTextBox);
@@ -175,25 +207,107 @@ namespace Sandra.UI.WF
         }
 
 
+        public static readonly DefaultUIActionBinding GotoStart = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoStart)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Start of game",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home),
+                },
+            });
+
+        public UIActionState TryGotoStart(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                do Game.Backward(); while (!Game.IsFirstMove);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "First move",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.Home),
+                },
+            });
+
+        public UIActionState TryGotoFirstMove(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                // Go to the first move in this line, but make sure to not get stuck with repeated use.
+                Game.Backward();
+                while (Game.ActiveTree.ParentVariation != null
+                    && Game.ActiveTree.ParentVariation.VariationIndex == 0)
+                {
+                    Game.Backward();
+                }
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding FastNavigateBackward = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateBackward)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Fast backward",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.PageUp),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
+                },
+            });
+
+        public UIActionState TryFastNavigateBackward(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                OwnerForm.FastNavigationPlyCount.Times(Game.Backward);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
         public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                IsFirstInGroup = true,
                 MenuCaption = "Previous move",
                 Shortcuts = new List<ShortcutKeys>
                 {
                     new ShortcutKeys(ConsoleKey.LeftArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
-                    new ShortcutKeys(ConsoleKey.Z),
                 },
             });
 
         public UIActionState TryGotoPreviousMove(bool perform)
         {
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
-            if (perform) Game.Backward();
+            if (perform)
+            {
+                Game.Backward();
+                ActiveMoveTreeUpdated();
+            }
             return UIActionVisibility.Enabled;
         }
 
@@ -208,14 +322,296 @@ namespace Sandra.UI.WF
                 {
                     new ShortcutKeys(ConsoleKey.RightArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
-                    new ShortcutKeys(ConsoleKey.X),
                 },
             });
 
         public UIActionState TryGotoNextMove(bool perform)
         {
+            // Use this action to be able to navigate to side lines beyond the end of the main line.
+            if (Game.ActiveTree.MainLine == null && !Game.ActiveTree.SideLines.Any())
+            {
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                if (Game.ActiveTree.MainLine != null)
+                {
+                    Game.Forward();
+                }
+                else
+                {
+                    Game.SetActiveTree(Game.ActiveTree.SideLines.First().MoveTree);
+                }
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding FastNavigateForward = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateForward)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Fast forward",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.PageDown),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
+                },
+            });
+
+        public UIActionState TryFastNavigateForward(bool perform)
+        {
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
-            if (perform) Game.Forward();
+            if (perform)
+            {
+                OwnerForm.FastNavigationPlyCount.Times(Game.Forward);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoLastMove = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoLastMove)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Last move",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.End),
+                },
+            });
+
+        public UIActionState TryGotoLastMove(bool perform)
+        {
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                do Game.Forward(); while (!Game.IsLastMove);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoEnd = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoEnd)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "End of game",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
+                },
+            });
+
+        public UIActionState TryGotoEnd(bool perform)
+        {
+            if (Game.IsLastMove && getFirstMove(Game.ActiveTree.ParentVariation) == null)
+            {
+                // Last move in the main line of the game.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                Game.SetActiveTree(Game.MoveTree);
+                while (!Game.IsLastMove) Game.Forward();
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoPreviousVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Previous line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.UpArrow),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
+                },
+            });
+
+        public UIActionState TryGotoPreviousVariation(bool perform)
+        {
+            Variation currentVariation = Game.ActiveTree.ParentVariation;
+            if (currentVariation != null && currentVariation.VariationIndex > 0)
+            {
+                Variation previousVariation = currentVariation.ParentTree.Variations[currentVariation.VariationIndex - 1];
+                if (previousVariation != null)
+                {
+                    if (perform)
+                    {
+                        Game.SetActiveTree(previousVariation.MoveTree);
+                        ActiveMoveTreeUpdated();
+                    }
+                    return UIActionVisibility.Enabled;
+                }
+            }
+            return UIActionVisibility.Disabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding GotoNextVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Next line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.DownArrow),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
+                },
+            });
+
+        public UIActionState TryGotoNextVariation(bool perform)
+        {
+            Variation currentVariation = Game.ActiveTree.ParentVariation;
+            if (currentVariation != null && currentVariation.VariationIndex + 1 < currentVariation.ParentTree.Variations.Count)
+            {
+                if (perform)
+                {
+                    Variation nextVariation = currentVariation.ParentTree.Variations[currentVariation.VariationIndex + 1];
+                    Game.SetActiveTree(nextVariation.MoveTree);
+                    ActiveMoveTreeUpdated();
+                }
+                return UIActionVisibility.Enabled;
+            }
+            return UIActionVisibility.Disabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding PromoteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(PromoteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Promote line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.P),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
+                },
+            });
+
+        public UIActionState TryPromoteActiveVariation(bool perform)
+        {
+            // Find the first move in this variation.
+            Variation firstMoveInVariation = getFirstMove(Game.ActiveTree.ParentVariation);
+
+            if (firstMoveInVariation == null)
+            {
+                // Already the main line of the game.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                firstMoveInVariation.RepositionBefore(firstMoveInVariation.VariationIndex - 1);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding DemoteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(DemoteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Demote line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.D),
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
+                },
+            });
+
+        public UIActionState TryDemoteActiveVariation(bool perform)
+        {
+            // Find the first move in this variation which has a 'less important' side line.
+            Variation moveWithSideLine = Game.ActiveTree.ParentVariation;
+            while (moveWithSideLine != null
+                && moveWithSideLine.VariationIndex + 1 == moveWithSideLine.ParentTree.Variations.Count)
+            {
+                moveWithSideLine = moveWithSideLine.ParentTree.ParentVariation;
+            }
+
+            if (moveWithSideLine == null)
+            {
+                // Already no sidelines below this one.
+                return UIActionVisibility.Disabled;
+            }
+
+            if (perform)
+            {
+                moveWithSideLine.RepositionAfter(moveWithSideLine.VariationIndex + 1);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding BreakActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(BreakActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Break at current position",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(ConsoleKey.B),
+                },
+            });
+
+        public UIActionState TryBreakActiveVariation(bool perform)
+        {
+            // If this move is the main line, turn it into a side line.
+            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                Game.ActiveTree.Break();
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+
+        public static readonly DefaultUIActionBinding DeleteActiveVariation = new DefaultUIActionBinding(
+            new UIAction(InteractiveGameUIActionPrefix + nameof(DeleteActiveVariation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaption = "Delete line",
+                Shortcuts = new List<ShortcutKeys>
+                {
+                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete),
+                },
+            });
+
+        public UIActionState TryDeleteActiveVariation(bool perform)
+        {
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                // Go backward, then remove the move which was just active and its move tree.
+                Variation variationToRemove = Game.ActiveTree.ParentVariation;
+                Game.Backward();
+                Game.ActiveTree.RemoveVariation(variationToRemove);
+                ActiveMoveTreeUpdated();
+            }
             return UIActionVisibility.Enabled;
         }
     }

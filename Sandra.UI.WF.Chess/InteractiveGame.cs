@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Sandra.Chess;
 
 namespace Sandra.UI.WF
 {
@@ -24,6 +25,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class InteractiveGame
     {
+        // For accessing global settings and displaying windows.
         public readonly MdiContainerForm OwnerForm;
         public readonly Chess.Game Game;
 
@@ -31,14 +33,15 @@ namespace Sandra.UI.WF
         {
             OwnerForm = ownerForm;
             Game = new Chess.Game(initialPosition);
-            Game.ActiveMoveIndexChanged += (_, e) =>
-            {
-                // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
-                // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
-                if (chessBoardForm != null) chessBoardForm.GameUpdated();
-                MovesTextBox movesTextBox = getMovesTextBox();
-                if (movesTextBox != null) movesTextBox.GameUpdated();
-            };
+        }
+
+        public void ActiveMoveTreeUpdated()
+        {
+            // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
+            // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
+            if (chessBoardForm != null) chessBoardForm.GameUpdated();
+            MovesTextBox movesTextBox = getMovesTextBox();
+            if (movesTextBox != null) movesTextBox.GameUpdated();
         }
 
         // Keep track of which types of forms are opened.
@@ -49,6 +52,16 @@ namespace Sandra.UI.WF
         {
             if (movesForm == null) return null;
             return (MovesTextBox)movesForm.Controls[0];
+        }
+
+        private static Variation getFirstMove(Variation variation)
+        {
+            Variation firstMoveInVariation = variation;
+            while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
+            {
+                firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
+            }
+            return firstMoveInVariation;
         }
     }
 }

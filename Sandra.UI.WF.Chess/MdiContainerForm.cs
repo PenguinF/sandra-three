@@ -37,6 +37,11 @@ namespace Sandra.UI.WF
 
         public EnumIndexedArray<Piece, string> CurrentPieceSymbols { get; private set; }
 
+        /// <summary>
+        /// Contains the number of plies to move forward of backward in a game for fast navigation.
+        /// </summary>
+        public int FastNavigationPlyCount { get; private set; }
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -160,9 +165,32 @@ namespace Sandra.UI.WF
 
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(gameMenu,
-                                        OpenNewPlayingBoard,
+                                        OpenNewPlayingBoard);
+
+            UIMenuNode.Container goToMenu = new UIMenuNode.Container("Go to")
+            {
+                IsFirstInGroup = true,
+            };
+            gameMenu.Nodes.Add(goToMenu);
+
+            // Add all these to a submenu.
+            bindFocusDependentUIActions(goToMenu,
+                                        InteractiveGame.GotoStart,
+                                        InteractiveGame.GotoFirstMove,
+                                        InteractiveGame.FastNavigateBackward,
                                         InteractiveGame.GotoPreviousMove,
                                         InteractiveGame.GotoNextMove,
+                                        InteractiveGame.FastNavigateForward,
+                                        InteractiveGame.GotoLastMove,
+                                        InteractiveGame.GotoEnd,
+                                        InteractiveGame.GotoPreviousVariation,
+                                        InteractiveGame.GotoNextVariation);
+
+            bindFocusDependentUIActions(gameMenu,
+                                        InteractiveGame.PromoteActiveVariation,
+                                        InteractiveGame.DemoteActiveVariation,
+                                        InteractiveGame.BreakActiveVariation,
+                                        InteractiveGame.DeleteActiveVariation,
                                         StandardChessBoardForm.TakeScreenshot);
 
             UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
@@ -297,6 +325,9 @@ namespace Sandra.UI.WF
             englishPieceSymbols[Piece.King] = "K";
 
             CurrentPieceSymbols = englishPieceSymbols;
+
+            // 10 plies == 5 moves.
+            FastNavigationPlyCount = 10;
 
             NewPlayingBoard();
         }

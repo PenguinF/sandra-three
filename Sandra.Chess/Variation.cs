@@ -16,7 +16,9 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Sandra.Chess
@@ -35,11 +37,9 @@ namespace Sandra.Chess
         public readonly MoveTree ParentTree;
 
         /// <summary>
-        /// Gets the index of the move within the main variation.
-        /// At the root of new branches the move index resets to 0.
-        /// See also: <seealso cref="MoveTree.PlyCount"/>.
+        /// Gets the index of this variation within the list of branches before this move.
         /// </summary>
-        public readonly int MoveIndex;
+        public int VariationIndex { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="Move"/> which starts this variation.
@@ -51,12 +51,86 @@ namespace Sandra.Chess
         /// </summary>
         public readonly MoveTree MoveTree;
 
-        internal Variation(MoveTree parentTree, int moveIndex, Move move)
+        internal Variation(MoveTree parentTree, int variationIndex, Move move)
         {
             ParentTree = parentTree;
-            MoveIndex = moveIndex;
+            VariationIndex = variationIndex;
             Move = move;
             MoveTree = new MoveTree(this);
+        }
+
+        private void reposition(int destinationVariationIndex, bool after)
+        {
+            if (destinationVariationIndex < 0
+                || destinationVariationIndex >= ParentTree.Variations.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(destinationVariationIndex));
+            }
+
+            // Only after the range check, increase the index.
+            if (after) destinationVariationIndex++;
+
+            if (VariationIndex > destinationVariationIndex)
+            {
+                // Promote this line.
+                int oldVariationIndex = VariationIndex;
+                ParentTree.Variations.RemoveAt(oldVariationIndex);
+
+                // Exceptional case where the main line is null.
+                int reIndexUpperBound;
+                if (destinationVariationIndex == 0 && ParentTree.Variations[0] == null)
+                {
+                    ParentTree.Variations[0] = this;
+                    reIndexUpperBound = ParentTree.Variations.Count - 1;
+                }
+                else
+                {
+                    ParentTree.Variations.Insert(destinationVariationIndex, this);
+                    reIndexUpperBound = oldVariationIndex;
+                }
+
+                for (int i = destinationVariationIndex; i <= reIndexUpperBound; ++i)
+                {
+                    ParentTree.Variations[i].VariationIndex = i;
+                }
+                Debug.Assert(ParentTree.CheckVariationIndexes());
+            }
+            else if (VariationIndex + 1 < destinationVariationIndex)
+            {
+                // Demote this line.
+                int oldVariationIndex = VariationIndex;
+                ParentTree.Variations.RemoveAt(VariationIndex);
+                ParentTree.Variations.Insert(destinationVariationIndex - 1, this);
+                for (int i = oldVariationIndex; i < destinationVariationIndex; ++i)
+                {
+                    ParentTree.Variations[i].VariationIndex = i;
+                }
+                Debug.Assert(ParentTree.CheckVariationIndexes());
+            }
+        }
+
+        /// <summary>
+        /// Attempts to reposition this variation before a destination index in the parent move tree.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="destinationVariationIndex"/> is less than zero
+        /// or greater than or equal to the number of variations in the parent move tree.
+        /// </exception>
+        public void RepositionBefore(int destinationVariationIndex)
+        {
+            reposition(destinationVariationIndex, false);
+        }
+
+        /// <summary>
+        /// Attempts to reposition this variation after a destination index in the parent move tree.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when <paramref name="destinationVariationIndex"/> is less than zero
+        /// or greater than or equal to the number of variations in the parent move tree.
+        /// </exception>
+        public void RepositionAfter(int destinationVariationIndex)
+        {
+            reposition(destinationVariationIndex, true);
         }
     }
 
@@ -79,53 +153,113 @@ namespace Sandra.Chess
         public readonly Variation ParentVariation;
 
         /// <summary>
-        /// All variations in this list have a unique move.
+        /// Gets a list of variations branching from this position.
+        /// Each variation in this list starts with a unique move.
         /// The first variation in this list can be null, to allow side lines to extend from the end of a main line.
         /// The other varations in this list however are always not-null.
         /// </summary>
-        private readonly List<Variation> branches = new List<Variation>();
+        public readonly List<Variation> Variations = new List<Variation>();
 
-        public Variation MainLine => branches[0];
+        /// <summary>
+        /// Returns the first line in <see cref="Variations"/>.
+        /// </summary>
+        public Variation MainLine => Variations[0];
 
-        public IEnumerable<Variation> SideLines => branches.Skip(1);
+        /// <summary>
+        /// Enumerates all side lines in <see cref="Variations"/>.
+        /// </summary>
+        public IEnumerable<Variation> SideLines => Variations.Skip(1);
 
         public Variation GetOrAddVariation(Move move)
         {
-            if (branches[0] == null)
+            foreach (Variation branch in Variations)
             {
-                // Continue adding to ParentVariation.MoveIndex for the main variation.
-                branches[0] = new Variation(this, ParentVariation == null ? 0 : ParentVariation.MoveIndex + 1, move);
-                return branches[0];
+                if (branch != null && branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
+                {
+                    return branch;
+                }
+            }
+
+            if (Variations[0] == null)
+            {
+                Variations[0] = new Variation(this, 0, move);
+                Debug.Assert(CheckVariationIndexes());
+                return Variations[0];
             }
             else
             {
-                foreach (Variation branch in branches)
-                {
-                    if (branch.Move.CreateMoveInfo().InputEquals(move.CreateMoveInfo()))
-                    {
-                        return branch;
-                    }
-                }
-
-                // Reset moveIndex at 0.
-                Variation newBranch = new Variation(this, 0, move);
-                branches.Add(newBranch);
+                Variation newBranch = new Variation(this, Variations.Count, move);
+                Variations.Add(newBranch);
+                Debug.Assert(CheckVariationIndexes());
                 return newBranch;
             }
         }
 
+        public void RemoveVariation(Variation variation)
+        {
+            if (variation == null) throw new ArgumentNullException(nameof(variation));
+            if (0 <= variation.VariationIndex
+                && variation.VariationIndex < Variations.Count
+                && ReferenceEquals(variation, Variations[variation.VariationIndex]))
+            {
+                // Remove and re-index the variations after.
+                Variations.RemoveAt(variation.VariationIndex);
+                if (Variations.Count == 0)
+                {
+                    // Replace by an empty main line.
+                    Variations.Add(null);
+                }
+                else
+                {
+                    for (int i = variation.VariationIndex; i < Variations.Count; ++i)
+                    {
+                        Variations[i].VariationIndex = i;
+                    }
+                }
+                Debug.Assert(CheckVariationIndexes());
+            }
+        }
+
+        /// <summary>
+        /// Turns the main line into a side line.
+        /// </summary>
+        public void Break()
+        {
+            if (Variations[0] != null)
+            {
+                Variations.Insert(0, null);
+                for (int i = 1; i < Variations.Count; ++i)
+                {
+                    Variations[i].VariationIndex = i;
+                }
+            }
+            Debug.Assert(CheckVariationIndexes());
+        }
+
         internal MoveTree(Variation parentVariation)
         {
-            branches.Add(null);
+            Variations.Add(null);
             PlyCount = parentVariation.ParentTree.PlyCount + 1;
             ParentVariation = parentVariation;
         }
 
         internal MoveTree(bool blackToMove)
         {
-            branches.Add(null);
+            Variations.Add(null);
             PlyCount = blackToMove ? 1 : 0;
             ParentVariation = null;
+        }
+
+        internal bool CheckVariationIndexes()
+        {
+            for (int i = 0; i < Variations.Count; ++i)
+            {
+                if (Variations[i] != null && Variations[i].VariationIndex != i)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
