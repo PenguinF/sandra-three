@@ -131,28 +131,32 @@ namespace Sandra.UI.WF
     /// </summary>
     internal static class WinAPI
     {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
+        const string Gdi32 = "gdi32.dll";
 
-        [DllImport("gdi32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        [DllImport(Gdi32, CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         public static extern bool DeleteObject(HandleRef hObject);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        const string User32 = "user32.dll";
+
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
+
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         public static extern bool DestroyIcon(HandleRef hIcon);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern IntPtr GetFocus();
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool HideCaret(HandleRef hWnd);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport(User32, CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool ShowCaret(HandleRef hWnd);
     }
 }
