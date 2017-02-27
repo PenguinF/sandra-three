@@ -216,6 +216,7 @@ namespace Sandra.Chess
                         Variations[i].VariationIndex = i;
                     }
                 }
+                Debug.Assert(CheckVariationIndexes());
             }
         }
 
