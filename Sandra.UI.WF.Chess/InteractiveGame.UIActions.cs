@@ -603,7 +603,16 @@ namespace Sandra.UI.WF
 
         public UIActionState TryDeleteActiveVariation(bool perform)
         {
-            return UIActionVisibility.Disabled;
+            if (Game.IsFirstMove) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                // Go backward, then remove the move which was just active and its move tree.
+                Variation variationToRemove = Game.ActiveTree.ParentVariation;
+                Game.Backward();
+                Game.ActiveTree.RemoveVariation(variationToRemove);
+                ActiveMoveTreeUpdated();
+            }
+            return UIActionVisibility.Enabled;
         }
     }
 }

@@ -195,6 +195,30 @@ namespace Sandra.Chess
             }
         }
 
+        public void RemoveVariation(Variation variation)
+        {
+            if (variation == null) throw new ArgumentNullException(nameof(variation));
+            if (0 <= variation.VariationIndex
+                && variation.VariationIndex < Variations.Count
+                && ReferenceEquals(variation, Variations[variation.VariationIndex]))
+            {
+                // Remove and re-index the variations after.
+                Variations.RemoveAt(variation.VariationIndex);
+                if (Variations.Count == 0)
+                {
+                    // Replace by an empty main line.
+                    Variations.Add(null);
+                }
+                else
+                {
+                    for (int i = variation.VariationIndex; i < Variations.Count; ++i)
+                    {
+                        Variations[i].VariationIndex = i;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Turns the main line into a side line.
         /// </summary>
