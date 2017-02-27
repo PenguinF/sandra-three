@@ -129,7 +129,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Contains P/Invoke definitions for the Windows API.
     /// </summary>
-    public static class WinAPI
+    internal static class WinAPI
     {
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
@@ -139,6 +139,9 @@ namespace Sandra.UI.WF
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         public static extern bool DestroyIcon(HandleRef hIcon);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern IntPtr GetFocus();
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
