@@ -20,6 +20,7 @@ using Sandra.Chess;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -326,10 +327,22 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoNextMove(bool perform)
         {
-            if (Game.IsLastMove) return UIActionVisibility.Disabled;
+            // Use this action to be able to navigate to side lines beyond the end of the main line.
+            if (Game.ActiveTree.MainLine == null && !Game.ActiveTree.SideLines.Any())
+            {
+                return UIActionVisibility.Disabled;
+            }
+
             if (perform)
             {
-                Game.Forward();
+                if (Game.ActiveTree.MainLine != null)
+                {
+                    Game.Forward();
+                }
+                else
+                {
+                    Game.SetActiveTree(Game.ActiveTree.SideLines.First().MoveTree);
+                }
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
