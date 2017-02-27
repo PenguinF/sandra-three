@@ -18,16 +18,12 @@
  *********************************************************************************/
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     public sealed class FocusHelper
     {
-        [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        static extern IntPtr GetFocus();
-
         /// <summary>
         /// Returns the .NET control that has the keyboard focus in this application.
         /// </summary>
@@ -38,7 +34,7 @@ namespace Sandra.UI.WF
         /// </returns>
         public static Control GetFocusedControl()
         {
-            IntPtr focusedHandle = GetFocus();
+            IntPtr focusedHandle = WinAPI.GetFocus();
             if (focusedHandle != IntPtr.Zero)
             {
                 // If the focused control is not a .NET control, then this will return null.
