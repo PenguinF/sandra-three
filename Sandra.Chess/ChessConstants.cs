@@ -298,12 +298,12 @@ namespace Sandra.Chess
             a1h8Multipliers = EnumIndexedArray<Square, ulong>.New();
             a8h1Multipliers = EnumIndexedArray<Square, ulong>.New();
 
-            ulong[] allFiles = new ulong[] { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
-            ulong[] allRanks = new ulong[] { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
-            ulong[] allDiagsA1H8 = new ulong[] { DiagA8, DiagA7B8, DiagA6C8, DiagA5D8, DiagA4E8, DiagA3F8, DiagA2G8, DiagA1H8, DiagB1H7, DiagC1H6, DiagD1H5, DiagE1H4, DiagF1H3, DiagG1H2, DiagH1 };
-            ulong[] allDiagsA8H1 = new ulong[] { DiagA1, DiagA2B1, DiagA3C1, DiagA4D1, DiagA5E1, DiagA6F1, DiagA7G1, DiagA8H1, DiagB8H2, DiagC8H3, DiagD8H4, DiagE8H5, DiagF8H6, DiagG8H7, DiagH8 };
+            ulong[] allFiles = { FileA, FileB, FileC, FileD, FileE, FileF, FileG, FileH };
+            ulong[] allRanks = { Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8 };
+            ulong[] allDiagsA1H8 = { DiagA8, DiagA7B8, DiagA6C8, DiagA5D8, DiagA4E8, DiagA3F8, DiagA2G8, DiagA1H8, DiagB1H7, DiagC1H6, DiagD1H5, DiagE1H4, DiagF1H3, DiagG1H2, DiagH1 };
+            ulong[] allDiagsA8H1 = { DiagA1, DiagA2B1, DiagA3C1, DiagA4D1, DiagA5E1, DiagA6F1, DiagA7G1, DiagA8H1, DiagB8H2, DiagC8H3, DiagD8H4, DiagE8H5, DiagF8H6, DiagG8H7, DiagH8 };
 
-            ulong[] fileMultipliers8 = new ulong[]
+            ulong[] fileMultipliers8 =
             {
                 0x8040201008040200, //A
                 0x4020100804020100, //B
@@ -315,7 +315,7 @@ namespace Sandra.Chess
                 0x0100804020100804  //H
             };
 
-            ulong[] a1h8Multipliers8 = new ulong[]
+            ulong[] a1h8Multipliers8 =
             {
                 0,                  //A8
                 0,                  //A7-B8
@@ -334,7 +334,7 @@ namespace Sandra.Chess
                 0                   //H1
             };
 
-            ulong[] a8h1Multipliers8 = new ulong[]
+            ulong[] a8h1Multipliers8 =
             {
                 0,                  //A1
                 0,                  //A2-B1
@@ -443,24 +443,24 @@ namespace Sandra.Chess
 
             // The order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.
             // This in turn is determined indirectly by the multipliers which are used in step B.
-            Square[] baseFile = new Square[] { Square.A8, Square.A7, Square.A6, Square.A5, Square.A4, Square.A3, Square.A2, Square.A1 };
+            Square[] baseFile = { Square.A8, Square.A7, Square.A6, Square.A5, Square.A4, Square.A3, Square.A2, Square.A1 };
             ulong[,] baseFileReachability = calculateRayReachabilityTable(baseFile);
             fileReachability = new ulong[TotalSquareCount, totalOccupancies];
 
-            Square[] baseRank = new Square[] { Square.A1, Square.B1, Square.C1, Square.D1, Square.E1, Square.F1, Square.G1, Square.H1 };
+            Square[] baseRank = { Square.A1, Square.B1, Square.C1, Square.D1, Square.E1, Square.F1, Square.G1, Square.H1 };
             ulong[,] baseRankReachability = calculateRayReachabilityTable(baseRank);
             rankReachability = new ulong[TotalSquareCount, totalOccupancies];
 
-            Square[] baseA1H8 = new Square[] { Square.A1, Square.B2, Square.C3, Square.D4, Square.E5, Square.F6, Square.G7, Square.H8 };
+            Square[] baseA1H8 = { Square.A1, Square.B2, Square.C3, Square.D4, Square.E5, Square.F6, Square.G7, Square.H8 };
             ulong[,] baseA1H8Reachability = calculateRayReachabilityTable(baseA1H8);
             a1h8Reachability = new ulong[TotalSquareCount, totalOccupancies];
 
-            Square[] baseA8H1 = new Square[] { Square.A8, Square.B7, Square.C6, Square.D5, Square.E4, Square.F3, Square.G2, Square.H1 };
+            Square[] baseA8H1 = { Square.A8, Square.B7, Square.C6, Square.D5, Square.E4, Square.F3, Square.G2, Square.H1 };
             ulong[,] baseA8H1Reachability = calculateRayReachabilityTable(baseA8H1);
             a8h1Reachability = new ulong[TotalSquareCount, totalOccupancies];
 
             // To zero out part of a diagonal before shifting it to another shorter diagonal.
-            ulong[] partialDiagMasks = new ulong[]
+            ulong[] partialDiagMasks =
             {
                 ulong.MaxValue,
                 ulong.MaxValue & ~FileH,
