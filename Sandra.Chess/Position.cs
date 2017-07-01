@@ -224,7 +224,7 @@ namespace Sandra.Chess
             ulong attackers = colorVectors[defenderColor.Opposite()];
             ulong occupied = colorVectors[defenderColor] | attackers;
 
-            if (Constants.PawnCaptures[defenderColor, square]
+            return Constants.PawnCaptures[defenderColor, square]
                             .Test(attackers & pieceVectors[Piece.Pawn])
                 || Constants.KnightMoves[square]
                             .Test(attackers & pieceVectors[Piece.Knight])
@@ -233,11 +233,7 @@ namespace Sandra.Chess
                 || Constants.ReachableSquaresDiagonal(square, occupied)
                             .Test(attackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
                 || Constants.Neighbours[square]
-                            .Test(attackers & pieceVectors[Piece.King]))
-            {
-                return true;
-            }
-            return false;
+                            .Test(attackers & pieceVectors[Piece.King]);
         }
 
         /// <summary>
