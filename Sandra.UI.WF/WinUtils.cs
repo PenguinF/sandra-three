@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Sandra.UI.WF
@@ -25,22 +26,13 @@ namespace Sandra.UI.WF
     /// Encapsulates the RECT structure which is used by the Windows API.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
+    [DebuggerDisplay("({Left},{Top})-({Right},{Bottom})")]
     public struct RECT
     {
         public int Left;
         public int Top;
         public int Right;
         public int Bottom;
-
-#if DEBUG
-        /// <summary>
-        /// For debugging purposes.
-        /// </summary>
-        public override string ToString()
-        {
-            return string.Format("({0},{2})-({1},{3})", Left, Right, Top, Bottom);
-        }
-#endif
     }
 
     /// <summary>
