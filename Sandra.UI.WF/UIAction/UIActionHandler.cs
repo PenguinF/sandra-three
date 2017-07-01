@@ -47,7 +47,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Enumerates all non-empty <see cref="ShortcutKeys"/> which are bound to this handler.
         /// </summary>
-        public IEnumerable<KeyUIActionMapping> KeyMappings => keyMappings;
+        public IEnumerable<KeyUIActionMapping> KeyMappings => keyMappings.Enumerate();
 
         /// <summary>
         /// Gets the top level node of a <see cref="UIMenuNode"/> tree.
