@@ -29,9 +29,9 @@ namespace Sandra.UI.WF
     public struct UIActionBinding
     {
         /// <summary>
-        /// List of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
+        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
         /// </summary>
-        public List<ShortcutKeys> Shortcuts;
+        public ShortcutKeys[] Shortcuts;
 
         /// <summary>
         /// Whether or not the action is shown in the context menu.
@@ -108,9 +108,7 @@ namespace Sandra.UI.WF
 
         public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new BindingHandlerPair(key, value));
 
-        IEnumerator<BindingHandlerPair> enumerate() { foreach (var x in added) yield return x; }
-
-        IEnumerator IEnumerable.GetEnumerator() => enumerate();
-        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => enumerate();
+        IEnumerator IEnumerable.GetEnumerator() => added.GetEnumerator();
+        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => added.GetEnumerator();
     }
 }

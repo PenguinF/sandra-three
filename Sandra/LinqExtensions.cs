@@ -90,5 +90,32 @@ namespace System.Linq
             value = default(TSource);
             return false;
         }
+
+        /// <summary>
+        /// Enumerates each element of a sequence. This is useful to protect references to mutable collections
+        /// from being leaked. Instead, only the elements of a mutable collection are enumerated, and casts
+        /// to mutable destination collection types will fail.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// A sequence of values.
+        /// </param>
+        /// <returns>
+        /// A <see cref="IEnumerable{T}"/> whose elements are the same as the elements in <paramref name="source"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        public static IEnumerable<TSource> Enumerate<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            foreach (var element in source)
+            {
+                yield return element;
+            }
+        }
     }
 }

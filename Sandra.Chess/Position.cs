@@ -224,7 +224,7 @@ namespace Sandra.Chess
             ulong attackers = colorVectors[defenderColor.Opposite()];
             ulong occupied = colorVectors[defenderColor] | attackers;
 
-            if (Constants.PawnCaptures[defenderColor, square]
+            return Constants.PawnCaptures[defenderColor, square]
                             .Test(attackers & pieceVectors[Piece.Pawn])
                 || Constants.KnightMoves[square]
                             .Test(attackers & pieceVectors[Piece.Knight])
@@ -233,11 +233,7 @@ namespace Sandra.Chess
                 || Constants.ReachableSquaresDiagonal(square, occupied)
                             .Test(attackers & (pieceVectors[Piece.Bishop] | pieceVectors[Piece.Queen]))
                 || Constants.Neighbours[square]
-                            .Test(attackers & pieceVectors[Piece.King]))
-            {
-                return true;
-            }
-            return false;
+                            .Test(attackers & pieceVectors[Piece.King]);
         }
 
         /// <summary>
@@ -253,7 +249,7 @@ namespace Sandra.Chess
             ulong affectedKingSquares = moveDelta & Constants.KingsInStartPosition;
             // If king squares are affected, only rook squares on the same side of the board can be affected as well.
             // Also a king move from E1 to E8 is impossible. Therefore, the rooks do not need to be checked anymore after a king square check.
-            if (affectedKingSquares != 0)
+            if (affectedKingSquares.Test())
             {
                 return affectedKingSquares.West().West() | affectedKingSquares.East().East();
             }
@@ -563,7 +559,7 @@ namespace Sandra.Chess
                     }
 
                     // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.
-                    if (castlingRightsVector != 0)
+                    if (castlingRightsVector.Test())
                     {
                         // Revoke castling rights if kings or rooks are gone from their starting position.
                         castlingRightsVector &= ~revokedCastlingRights(moveDelta);
@@ -660,7 +656,7 @@ namespace Sandra.Chess
             }
 
             // Update castling rights. Must be done for all pieces because everything can capture a rook on its starting position.
-            if (castlingRightsVector != 0)
+            if (castlingRightsVector.Test())
             {
                 // Revoke castling rights if kings or rooks are gone from their starting position.
                 castlingRightsVector &= ~revokedCastlingRights(moveDelta);

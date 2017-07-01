@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * SpecializedArrays.cs
+ * ColorSquareIndexedArray.cs
  * 
  * Copyright (c) 2004-2017 Henk Nicolai
  * 

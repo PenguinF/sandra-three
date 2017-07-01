@@ -53,7 +53,6 @@ namespace Sandra.UI.WF
 
             MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
-            MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
@@ -76,7 +75,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "New game",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
             });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)
@@ -283,8 +282,16 @@ namespace Sandra.UI.WF
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // This code makes shortcuts work for all UIActionHandlers.
-            return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            try
+            {
+                // This code makes shortcuts work for all UIActionHandlers.
+                return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return true;
+            }
         }
 
 

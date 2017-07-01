@@ -48,15 +48,6 @@ namespace Sandra
         /// <summary>
         /// Enumerates all distinct values in <typeparamref name="TEnum"/>.
         /// </summary>
-        public static IEnumerable<TEnum> AllValues
-        {
-            get
-            {
-                foreach (var value in distinctValues)
-                {
-                    yield return value;
-                }
-            }
-        }
+        public static IEnumerable<TEnum> AllValues => distinctValues.Enumerate();
     }
 }

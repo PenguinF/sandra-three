@@ -48,11 +48,49 @@ namespace Sandra.Chess
     public abstract class AlgebraicMoveFormatter : IMoveFormatter
     {
         /// <summary>
-        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// Gets the notation which is generated for moves which are illegal in the position in which they are performed.
         /// </summary>
-        public const string IllegalMove = "???";
+        public static readonly string IllegalMove = "???";
+
+        /// <summary>
+        /// Gets the notation which is generated for castling queenside moves. (&quot;O-O-O&quot;)
+        /// </summary>
+        public static readonly string CastleQueenSideMove = "O-O-O";
+
+        /// <summary>
+        /// Gets the notation which is generated for castling kingside moves. (&quot;O-O&quot;)
+        /// </summary>
+        public static readonly string CastleKingSideMove = "O-O";
+
+        /// <summary>
+        /// Gets the symbol which is generated for moves without captures in long algebraic notation. ('-')
+        /// </summary>
+        public static readonly char MoveNonCaptureSymbol = '-';
+
+        /// <summary>
+        /// Gets the symbol which is generated for captures. ('x')
+        /// </summary>
+        public static readonly char CaptureSymbol = 'x';
+
+        /// <summary>
+        /// Gets the symbol which is generated before a piece a pawn promotes to. ('=')
+        /// </summary>
+        public static readonly char PromoteToPieceSymbol = '=';
+
+        /// <summary>
+        /// Gets the symbol which is generated for moves that put a king in check. ('+')
+        /// </summary>
+        public static readonly char CheckSymbol = '+';
+
+        /// <summary>
+        /// Gets the symbol which is generated for checkmating moves. ('#')
+        /// </summary>
+        public static readonly char CheckmateSymbol = '#';
 
         protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
+
+        // Allocate only one StringBuilder for formatting moves.
+        protected readonly StringBuilder moveBuilder = new StringBuilder();
 
         public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
         {
@@ -73,69 +111,75 @@ namespace Sandra.Chess
 
         public string FormatMove(Game game, Move move)
         {
-            StringBuilder builder = new StringBuilder();
-
-            if (move.MoveType == MoveType.CastleQueenside)
+            try
             {
-                builder.Append("O-O-O");
-            }
-            else if (move.MoveType == MoveType.CastleKingside)
-            {
-                builder.Append("O-O");
-            }
-            else
-            {
-                if (move.MovingPiece != Piece.Pawn)
+                if (move.MoveType == MoveType.CastleQueenside)
                 {
-                    // Start with the moving piece.
-                    builder.Append(pieceSymbols[move.MovingPiece]);
+                    moveBuilder.Append(CastleQueenSideMove);
                 }
-
-                AppendDisambiguatingMoveSource(builder, game, move);
-
-                // Append a 'x' for capturing moves.
-                if (move.IsCapture)
+                else if (move.MoveType == MoveType.CastleKingside)
                 {
-                    builder.Append("x");
+                    moveBuilder.Append(CastleKingSideMove);
                 }
-
-                // Append the target square.
-                AppendFile(builder, move.TargetSquare);
-                AppendRank(builder, move.TargetSquare);
-
-                // For promotion moves, append the symbol of the promotion piece.
-                if (move.MoveType == MoveType.Promotion)
+                else
                 {
-                    builder.Append("=");
-                    builder.Append(pieceSymbols[move.PromoteTo]);
-                }
-            }
-
-            MoveInfo moveInfo = move.CreateMoveInfo();
-
-            game.TryMakeMove(ref moveInfo, true);
-
-            if (moveInfo.Result == MoveCheckResult.OK)
-            {
-                Position current = game.CurrentPosition;
-                Square friendlyKing = current.FindKing(current.SideToMove);
-                if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
-                {
-                    // No need to generate castling moves since castling out of a check is illegal.
-                    if (current.GenerateLegalMoves().Any())
+                    if (move.MovingPiece != Piece.Pawn)
                     {
-                        builder.Append("+");
+                        // Start with the moving piece.
+                        moveBuilder.Append(pieceSymbols[move.MovingPiece]);
                     }
-                    else
+
+                    AppendDisambiguatingMoveSource(moveBuilder, game, move);
+
+                    // Append a 'x' for capturing moves.
+                    if (move.IsCapture)
                     {
-                        builder.Append("#");
+                        moveBuilder.Append(CaptureSymbol);
+                    }
+
+                    // Append the target square.
+                    AppendFile(moveBuilder, move.TargetSquare);
+                    AppendRank(moveBuilder, move.TargetSquare);
+
+                    // For promotion moves, append the symbol of the promotion piece.
+                    if (move.MoveType == MoveType.Promotion)
+                    {
+                        moveBuilder.Append(PromoteToPieceSymbol);
+                        moveBuilder.Append(pieceSymbols[move.PromoteTo]);
                     }
                 }
 
-                return builder.ToString();
-            }
+                MoveInfo moveInfo = move.CreateMoveInfo();
 
-            return IllegalMove;
+                game.TryMakeMove(ref moveInfo, true);
+
+                if (moveInfo.Result == MoveCheckResult.OK)
+                {
+                    Position current = game.CurrentPosition;
+                    Square friendlyKing = current.FindKing(current.SideToMove);
+                    if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
+                    {
+                        // No need to generate castling moves since castling out of a check is illegal.
+                        if (current.GenerateLegalMoves().Any())
+                        {
+                            moveBuilder.Append(CheckSymbol);
+                        }
+                        else
+                        {
+                            moveBuilder.Append(CheckmateSymbol);
+                        }
+                    }
+
+                    return moveBuilder.ToString();
+                }
+
+                return IllegalMove;
+            }
+            finally
+            {
+                // Clear the builder so it can be used again.
+                moveBuilder.Clear();
+            }
         }
     }
 
@@ -155,7 +199,7 @@ namespace Sandra.Chess
             // Append a '-' for non-capturing moves.
             if (!move.IsCapture)
             {
-                builder.Append("-");
+                builder.Append(MoveNonCaptureSymbol);
             }
         }
     }

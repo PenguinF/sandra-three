@@ -18,7 +18,6 @@
  *********************************************************************************/
 using Sandra.Chess;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -36,7 +35,7 @@ namespace Sandra.UI.WF
             {
                 IsFirstInGroup = true,
                 MenuCaption = "Chessboard",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
             });
 
         public UIActionState TryGotoChessBoardForm(bool perform)
@@ -121,7 +120,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 MenuCaption = "Moves",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
             });
 
         public UIActionState TryGotoMovesForm(bool perform)
@@ -214,10 +213,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaption = "Start of game",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
             });
 
         public UIActionState TryGotoStart(bool perform)
@@ -238,10 +234,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "First move",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(ConsoleKey.Home),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.Home), },
             });
 
         public UIActionState TryGotoFirstMove(bool perform)
@@ -268,7 +261,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Fast backward",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.PageUp),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
@@ -293,7 +286,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Previous move",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.LeftArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
@@ -318,7 +311,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Next move",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.RightArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
@@ -355,7 +348,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Fast forward",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.PageDown),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
@@ -380,10 +373,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Last move",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(ConsoleKey.End),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.End), },
             });
 
         public UIActionState TryGotoLastMove(bool perform)
@@ -404,10 +394,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "End of game",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
             });
 
         public UIActionState TryGotoEnd(bool perform)
@@ -435,7 +422,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaption = "Previous line",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.UpArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
@@ -468,7 +455,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Next line",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.DownArrow),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
@@ -499,7 +486,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaption = "Promote line",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.P),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
@@ -532,7 +519,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Demote line",
-                Shortcuts = new List<ShortcutKeys>
+                Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.D),
                     new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
@@ -570,10 +557,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Break at current position",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(ConsoleKey.B),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.B), },
             });
 
         public UIActionState TryBreakActiveVariation(bool perform)
@@ -595,10 +579,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "Delete line",
-                Shortcuts = new List<ShortcutKeys>
-                {
-                    new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete),
-                },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
             });
 
         public UIActionState TryDeleteActiveVariation(bool perform)
