@@ -50,7 +50,42 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
         /// </summary>
-        public const string IllegalMove = "???";
+        public static readonly string IllegalMove = "???";
+
+        /// <summary>
+        /// Gets the notation which is generated for castling queenside moves. (&quot;O-O-O&quot;)
+        /// </summary>
+        public static readonly string CastleQueenSideMove = "O-O-O";
+
+        /// <summary>
+        /// Gets the notation which is generated for castling kingside moves. (&quot;O-O&quot;)
+        /// </summary>
+        public static readonly string CastleKingSideMove = "O-O";
+
+        /// <summary>
+        /// Gets the symbol which is generated for moves without captures in long algebraic notation. ('-')
+        /// </summary>
+        public static readonly char MoveNonCaptureSymbol = '-';
+
+        /// <summary>
+        /// Gets the symbol which is generated for captures. ('x')
+        /// </summary>
+        public static readonly char CaptureSymbol = 'x';
+
+        /// <summary>
+        /// Gets the symbol which is generated before a piece a pawn promotes to. ('=')
+        /// </summary>
+        public static readonly char PromoteToPieceSymbol = '=';
+
+        /// <summary>
+        /// Gets the symbol which is generated for moves that put a king in check. ('+')
+        /// </summary>
+        public static readonly char CheckSymbol = '+';
+
+        /// <summary>
+        /// Gets the symbol which is generated for checkmating moves. ('#')
+        /// </summary>
+        public static readonly char CheckmateSymbol = '#';
 
         protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
@@ -80,11 +115,11 @@ namespace Sandra.Chess
             {
                 if (move.MoveType == MoveType.CastleQueenside)
                 {
-                    moveBuilder.Append("O-O-O");
+                    moveBuilder.Append(CastleQueenSideMove);
                 }
                 else if (move.MoveType == MoveType.CastleKingside)
                 {
-                    moveBuilder.Append("O-O");
+                    moveBuilder.Append(CastleKingSideMove);
                 }
                 else
                 {
@@ -99,7 +134,7 @@ namespace Sandra.Chess
                     // Append a 'x' for capturing moves.
                     if (move.IsCapture)
                     {
-                        moveBuilder.Append("x");
+                        moveBuilder.Append(CaptureSymbol);
                     }
 
                     // Append the target square.
@@ -109,7 +144,7 @@ namespace Sandra.Chess
                     // For promotion moves, append the symbol of the promotion piece.
                     if (move.MoveType == MoveType.Promotion)
                     {
-                        moveBuilder.Append("=");
+                        moveBuilder.Append(PromoteToPieceSymbol);
                         moveBuilder.Append(pieceSymbols[move.PromoteTo]);
                     }
                 }
@@ -127,11 +162,11 @@ namespace Sandra.Chess
                         // No need to generate castling moves since castling out of a check is illegal.
                         if (current.GenerateLegalMoves().Any())
                         {
-                            moveBuilder.Append("+");
+                            moveBuilder.Append(CheckSymbol);
                         }
                         else
                         {
-                            moveBuilder.Append("#");
+                            moveBuilder.Append(CheckmateSymbol);
                         }
                     }
 
@@ -164,7 +199,7 @@ namespace Sandra.Chess
             // Append a '-' for non-capturing moves.
             if (!move.IsCapture)
             {
-                builder.Append("-");
+                builder.Append(MoveNonCaptureSymbol);
             }
         }
     }
