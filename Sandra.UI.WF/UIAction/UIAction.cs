@@ -38,20 +38,11 @@ namespace Sandra.UI.WF
             Key = key;
         }
 
-        public bool Equals(UIAction other)
-        {
-            return other != null && Key == other.Key;
-        }
+        public bool Equals(UIAction other) => other != null && Key == other.Key;
 
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as UIAction);
-        }
+        public override bool Equals(object obj) => Equals(obj as UIAction);
 
-        public override int GetHashCode()
-        {
-            return Key.GetHashCode();
-        }
+        public override int GetHashCode() => Key.GetHashCode();
 
         public static bool operator ==(UIAction first, UIAction second)
         {
