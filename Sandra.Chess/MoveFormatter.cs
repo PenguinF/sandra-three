@@ -48,7 +48,7 @@ namespace Sandra.Chess
     public abstract class AlgebraicMoveFormatter : IMoveFormatter
     {
         /// <summary>
-        /// Gets the constant string which is generated for moves which are illegal in the position in which they are performed.
+        /// Gets the notation which is generated for moves which are illegal in the position in which they are performed.
         /// </summary>
         public static readonly string IllegalMove = "???";
 
