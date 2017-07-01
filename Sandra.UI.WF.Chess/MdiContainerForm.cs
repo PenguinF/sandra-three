@@ -76,7 +76,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaption = "New game",
-                Shortcuts = new List<ShortcutKeys> { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
             });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)

@@ -29,9 +29,9 @@ namespace Sandra.UI.WF
     public struct UIActionBinding
     {
         /// <summary>
-        /// List of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
+        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
         /// </summary>
-        public List<ShortcutKeys> Shortcuts;
+        public ShortcutKeys[] Shortcuts;
 
         /// <summary>
         /// Whether or not the action is shown in the context menu.
