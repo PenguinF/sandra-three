@@ -191,32 +191,24 @@ namespace Sandra.UI.WF
         /// </returns>
         public static bool TryExecute(Keys shortcut)
         {
-            try
+            foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
             {
-                foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                // Try to find an action with given shortcut.
+                foreach (var mapping in actionHandler.KeyMappings)
                 {
-                    // Try to find an action with given shortcut.
-                    foreach (var mapping in actionHandler.KeyMappings)
+                    foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
                     {
-                        foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
+                        // If the shortcut matches, then try to perform the action.
+                        // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                        if (mappedShortcut == shortcut
+                            && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
                         {
-                            // If the shortcut matches, then try to perform the action.
-                            // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                            if (mappedShortcut == shortcut
-                                && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                     }
                 }
-                return false;
             }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-                return true;
-            }
+            return false;
         }
     }
 }
