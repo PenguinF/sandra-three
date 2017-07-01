@@ -54,6 +54,9 @@ namespace Sandra.Chess
 
         protected readonly EnumIndexedArray<Piece, string> pieceSymbols;
 
+        // Allocate only one StringBuilder for formatting moves.
+        protected readonly StringBuilder moveBuilder = new StringBuilder();
+
         public AlgebraicMoveFormatter(EnumIndexedArray<Piece, string> pieceSymbols)
         {
             this.pieceSymbols = pieceSymbols;
@@ -73,69 +76,75 @@ namespace Sandra.Chess
 
         public string FormatMove(Game game, Move move)
         {
-            StringBuilder builder = new StringBuilder();
-
-            if (move.MoveType == MoveType.CastleQueenside)
+            try
             {
-                builder.Append("O-O-O");
-            }
-            else if (move.MoveType == MoveType.CastleKingside)
-            {
-                builder.Append("O-O");
-            }
-            else
-            {
-                if (move.MovingPiece != Piece.Pawn)
+                if (move.MoveType == MoveType.CastleQueenside)
                 {
-                    // Start with the moving piece.
-                    builder.Append(pieceSymbols[move.MovingPiece]);
+                    moveBuilder.Append("O-O-O");
                 }
-
-                AppendDisambiguatingMoveSource(builder, game, move);
-
-                // Append a 'x' for capturing moves.
-                if (move.IsCapture)
+                else if (move.MoveType == MoveType.CastleKingside)
                 {
-                    builder.Append("x");
+                    moveBuilder.Append("O-O");
                 }
-
-                // Append the target square.
-                AppendFile(builder, move.TargetSquare);
-                AppendRank(builder, move.TargetSquare);
-
-                // For promotion moves, append the symbol of the promotion piece.
-                if (move.MoveType == MoveType.Promotion)
+                else
                 {
-                    builder.Append("=");
-                    builder.Append(pieceSymbols[move.PromoteTo]);
-                }
-            }
-
-            MoveInfo moveInfo = move.CreateMoveInfo();
-
-            game.TryMakeMove(ref moveInfo, true);
-
-            if (moveInfo.Result == MoveCheckResult.OK)
-            {
-                Position current = game.CurrentPosition;
-                Square friendlyKing = current.FindKing(current.SideToMove);
-                if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
-                {
-                    // No need to generate castling moves since castling out of a check is illegal.
-                    if (current.GenerateLegalMoves().Any())
+                    if (move.MovingPiece != Piece.Pawn)
                     {
-                        builder.Append("+");
+                        // Start with the moving piece.
+                        moveBuilder.Append(pieceSymbols[move.MovingPiece]);
                     }
-                    else
+
+                    AppendDisambiguatingMoveSource(moveBuilder, game, move);
+
+                    // Append a 'x' for capturing moves.
+                    if (move.IsCapture)
                     {
-                        builder.Append("#");
+                        moveBuilder.Append("x");
+                    }
+
+                    // Append the target square.
+                    AppendFile(moveBuilder, move.TargetSquare);
+                    AppendRank(moveBuilder, move.TargetSquare);
+
+                    // For promotion moves, append the symbol of the promotion piece.
+                    if (move.MoveType == MoveType.Promotion)
+                    {
+                        moveBuilder.Append("=");
+                        moveBuilder.Append(pieceSymbols[move.PromoteTo]);
                     }
                 }
 
-                return builder.ToString();
-            }
+                MoveInfo moveInfo = move.CreateMoveInfo();
 
-            return IllegalMove;
+                game.TryMakeMove(ref moveInfo, true);
+
+                if (moveInfo.Result == MoveCheckResult.OK)
+                {
+                    Position current = game.CurrentPosition;
+                    Square friendlyKing = current.FindKing(current.SideToMove);
+                    if (current.IsSquareUnderAttack(friendlyKing, current.SideToMove))
+                    {
+                        // No need to generate castling moves since castling out of a check is illegal.
+                        if (current.GenerateLegalMoves().Any())
+                        {
+                            moveBuilder.Append("+");
+                        }
+                        else
+                        {
+                            moveBuilder.Append("#");
+                        }
+                    }
+
+                    return moveBuilder.ToString();
+                }
+
+                return IllegalMove;
+            }
+            finally
+            {
+                // Clear the builder so it can be used again.
+                moveBuilder.Clear();
+            }
         }
     }
 
