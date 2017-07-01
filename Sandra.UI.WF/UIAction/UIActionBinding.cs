@@ -108,9 +108,7 @@ namespace Sandra.UI.WF
 
         public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new BindingHandlerPair(key, value));
 
-        IEnumerator<BindingHandlerPair> enumerate() { foreach (var x in added) yield return x; }
-
-        IEnumerator IEnumerable.GetEnumerator() => enumerate();
-        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => enumerate();
+        IEnumerator IEnumerable.GetEnumerator() => added.GetEnumerator();
+        IEnumerator<BindingHandlerPair> IEnumerable<BindingHandlerPair>.GetEnumerator() => added.GetEnumerator();
     }
 }
