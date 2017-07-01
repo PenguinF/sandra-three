@@ -53,7 +53,6 @@ namespace Sandra.UI.WF
 
             MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
-            MainMenuStrip.Visible = true;
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
