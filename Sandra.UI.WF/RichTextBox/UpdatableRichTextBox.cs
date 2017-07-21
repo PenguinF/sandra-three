@@ -42,7 +42,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void BeginUpdate()
         {
-            if (blockingUpdateTokenCount == 0)
+            if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
                 WinAPI.HideCaret(new HandleRef(this, Handle));
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
@@ -56,7 +56,7 @@ namespace Sandra.UI.WF
         public void EndUpdate()
         {
             --blockingUpdateTokenCount;
-            if (blockingUpdateTokenCount == 0)
+            if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
                 WinAPI.ShowCaret(new HandleRef(this, Handle));
