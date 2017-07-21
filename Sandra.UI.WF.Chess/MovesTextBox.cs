@@ -55,6 +55,12 @@ namespace Sandra.UI.WF
             AutoWordSelection = true;
         }
 
+        private void applyStyle(TextElement element, TextElementStyle style)
+        {
+            Select(element.Start, element.Length);
+            if (style.HasFont) SelectionFont = style.Font;
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -167,12 +173,6 @@ namespace Sandra.UI.WF
         }
 
         private List<TextElement> elements;
-
-        private void updateFont(TextElement element, Font newFont)
-        {
-            Select(element.Start, element.Length);
-            SelectionFont = newFont;
-        }
 
         private IEnumerable<TextElement> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
@@ -345,7 +345,7 @@ namespace Sandra.UI.WF
                     {
                         if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            updateFont(formattedMoveElement, activeMoveStyle.Font);
+                            applyStyle(formattedMoveElement, activeMoveStyle);
 
                             if (!ContainsFocus)
                             {
@@ -418,7 +418,7 @@ namespace Sandra.UI.WF
                             {
                                 if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                                 {
-                                    updateFont(formattedMoveElement, defaultStyle.Font);
+                                    applyStyle(formattedMoveElement, defaultStyle);
                                 }
                             }
 
@@ -429,7 +429,7 @@ namespace Sandra.UI.WF
 
                             if (newActiveMoveElement != null)
                             {
-                                updateFont(newActiveMoveElement, activeMoveStyle.Font);
+                                applyStyle(newActiveMoveElement, activeMoveStyle);
                             }
                         }
                         finally
