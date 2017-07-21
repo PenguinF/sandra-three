@@ -28,12 +28,12 @@ namespace Sandra.UI.WF
     /// </summary>
     public class UpdatableRichTextBox : RichTextBox
     {
-        private bool isUpdating;
+        private uint blockingUpdateTokenCount;
 
         /// <summary>
         /// Gets if the <see cref="UpdatableRichTextBox"/> is currently being updated.
         /// </summary>
-        public bool IsUpdating => isUpdating;
+        public bool IsUpdating => blockingUpdateTokenCount > 0;
 
         const int WM_SETREDRAW = 0x0b;
 
@@ -42,12 +42,12 @@ namespace Sandra.UI.WF
         /// </summary>
         public void BeginUpdate()
         {
-            if (!isUpdating)
+            if (blockingUpdateTokenCount == 0)
             {
-                isUpdating = true;
                 WinAPI.HideCaret(new HandleRef(this, Handle));
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
+            ++blockingUpdateTokenCount;
         }
 
         /// <summary>
@@ -55,11 +55,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public void EndUpdate()
         {
-            if (isUpdating)
+            --blockingUpdateTokenCount;
+            if (blockingUpdateTokenCount == 0)
             {
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
                 WinAPI.ShowCaret(new HandleRef(this, Handle));
-                isUpdating = false;
                 Invalidate();
             }
         }
