@@ -28,6 +28,38 @@ namespace Sandra.UI.WF
     /// </summary>
     public class UpdatableRichTextBox : RichTextBox
     {
+        /// <summary>
+        /// Represents a unique update token returned from <see cref="BeginUpdate"/>().
+        /// Repainting of the <see cref="UpdatableRichTextBox"/> is suspended until <see cref="Dispose()"/> is called.
+        /// </summary>
+        public abstract class UpdateToken : IDisposable
+        {
+            public abstract void Dispose();
+        }
+
+        private sealed class _UpdateToken : UpdateToken
+        {
+            private readonly UpdatableRichTextBox owner;
+
+            public _UpdateToken(UpdatableRichTextBox owner)
+            {
+                this.owner = owner;
+            }
+
+            public override void Dispose()
+            {
+                owner.EndUpdate();
+                GC.SuppressFinalize(this);
+            }
+
+            ~_UpdateToken()
+            {
+                // Make sure that _UpdateTokens which go out of scope without being disposed
+                // stop blocking an UpdatableRichTextBox when they are garbage collected.
+                if (owner != null) owner.EndUpdate();
+            }
+        }
+
         private uint blockingUpdateTokenCount;
 
         /// <summary>
@@ -40,7 +72,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
         /// </summary>
-        public void BeginUpdate()
+        public UpdateToken BeginUpdate()
         {
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
@@ -48,12 +80,13 @@ namespace Sandra.UI.WF
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
             ++blockingUpdateTokenCount;
+            return new _UpdateToken(this);
         }
 
         /// <summary>
         /// Resumes repainting of the <see cref="UpdatableRichTextBox"/> after it's being updated.
         /// </summary>
-        public void EndUpdate()
+        private void EndUpdate()
         {
             --blockingUpdateTokenCount;
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)

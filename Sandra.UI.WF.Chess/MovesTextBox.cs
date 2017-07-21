@@ -265,8 +265,7 @@ namespace Sandra.UI.WF
         private void updateText()
         {
             // Block OnSelectionChanged() which will be raised as a side effect of this method.
-            BeginUpdate();
-            try
+            using (var updateToken = BeginUpdate())
             {
                 var updated = getUpdatedElements();
 
@@ -347,10 +346,6 @@ namespace Sandra.UI.WF
                     }
                 }
             }
-            finally
-            {
-                EndUpdate();
-            }
         }
 
         protected override void OnSelectionChanged(EventArgs e)
@@ -401,32 +396,33 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    BeginUpdate();
-                    try
+                    using (var updateToken = BeginUpdate())
                     {
-                        // Search for the current active move element to clear its font.
-                        foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                        try
                         {
-                            if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                            // Search for the current active move element to clear its font.
+                            foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
                             {
-                                updateFont(formattedMoveElement, regularFont);
+                                if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                                {
+                                    updateFont(formattedMoveElement, regularFont);
+                                }
+                            }
+
+                            game.Game.SetActiveTree(newActiveTree);
+
+                            game.ActiveMoveTreeUpdated();
+                            ActionHandler.Invalidate();
+
+                            if (newActiveMoveElement != null)
+                            {
+                                updateFont(newActiveMoveElement, lastMoveFont);
                             }
                         }
-
-                        game.Game.SetActiveTree(newActiveTree);
-
-                        game.ActiveMoveTreeUpdated();
-                        ActionHandler.Invalidate();
-
-                        if (newActiveMoveElement != null)
+                        finally
                         {
-                            updateFont(newActiveMoveElement, lastMoveFont);
+                            Select(selectionStart, 0);
                         }
-                    }
-                    finally
-                    {
-                        Select(selectionStart, 0);
-                        EndUpdate();
                     }
                 }
             }
