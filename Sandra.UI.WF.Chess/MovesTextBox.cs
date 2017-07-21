@@ -29,8 +29,21 @@ namespace Sandra.UI.WF
     /// </summary>
     public class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
     {
-        readonly Font regularFont = new Font("Candara", 10);
-        readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
+        private sealed class TextElementStyle
+        {
+            public bool HasFont => Font != null;
+            public Font Font { get; set; }
+        }
+
+        private readonly TextElementStyle defaultStyle = new TextElementStyle()
+        {
+            Font = new Font("Candara", 10),
+        };
+
+        private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
+        {
+            Font = new Font("Candara", 10, FontStyle.Bold),
+        };
 
         public MovesTextBox()
         {
@@ -38,7 +51,7 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             BackColor = Color.White;
             ForeColor = Color.Black;
-            Font = regularFont;
+            Font = defaultStyle.Font;
             AutoWordSelection = true;
         }
 
@@ -46,8 +59,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                regularFont.Dispose();
-                lastMoveFont.Dispose();
+                defaultStyle.Font.Dispose();
+                activeMoveStyle.Font.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -322,7 +335,7 @@ namespace Sandra.UI.WF
 
                 // Reset all markup.
                 SelectAll();
-                SelectionFont = regularFont;
+                SelectionFont = defaultStyle.Font;
                 Select(0, 0);
 
                 // Make the active move bold.
@@ -332,7 +345,7 @@ namespace Sandra.UI.WF
                     {
                         if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            updateFont(formattedMoveElement, lastMoveFont);
+                            updateFont(formattedMoveElement, activeMoveStyle.Font);
 
                             if (!ContainsFocus)
                             {
@@ -405,7 +418,7 @@ namespace Sandra.UI.WF
                             {
                                 if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                                 {
-                                    updateFont(formattedMoveElement, regularFont);
+                                    updateFont(formattedMoveElement, defaultStyle.Font);
                                 }
                             }
 
@@ -416,7 +429,7 @@ namespace Sandra.UI.WF
 
                             if (newActiveMoveElement != null)
                             {
-                                updateFont(newActiveMoveElement, lastMoveFont);
+                                updateFont(newActiveMoveElement, activeMoveStyle.Font);
                             }
                         }
                         finally
