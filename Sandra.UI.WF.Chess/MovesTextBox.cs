@@ -51,8 +51,15 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             BackColor = Color.White;
             ForeColor = Color.Black;
-            Font = defaultStyle.Font;
             AutoWordSelection = true;
+            applyDefaultStyle();
+        }
+
+        private void applyDefaultStyle()
+        {
+            Font = defaultStyle.Font;
+            SelectAll();
+            SelectionFont = defaultStyle.Font;
         }
 
         private void applyStyle(TextElement element, TextElementStyle style)
@@ -334,8 +341,7 @@ namespace Sandra.UI.WF
                 elements = updated;
 
                 // Reset all markup.
-                SelectAll();
-                SelectionFont = defaultStyle.Font;
+                applyDefaultStyle();
                 Select(0, 0);
 
                 // Make the active move bold.
