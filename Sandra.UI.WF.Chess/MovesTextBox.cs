@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
             SelectionFont = defaultStyle.Font;
         }
 
-        private void applyStyle(TextElement element, TextElementStyle style)
+        private void applyStyle(TextElement<TextElementOld> element, TextElementStyle style)
         {
             Select(element.Start, element.Length);
             if (style.HasFont) SelectionFont = style.Font;
@@ -136,9 +136,13 @@ namespace Sandra.UI.WF
         /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
         /// which maps to exactly one terminal symbol.
         /// </summary>
-        public sealed class TextElement
+        /// <typeparam name="TTerminal">
+        /// The type of terminal symbols to format.
+        /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
+        /// </typeparam>
+        public sealed class TextElement<TTerminal>
         {
-            public TextElementOld TerminalSymbol;
+            public TTerminal TerminalSymbol;
             public int Start;
             public int Length;
         }
@@ -193,7 +197,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private readonly List<TextElement> elements = new List<TextElement>();
+        private readonly List<TextElement<TextElementOld>> elements = new List<TextElement<TextElementOld>>();
 
         private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
@@ -345,7 +349,7 @@ namespace Sandra.UI.WF
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    var updatedElement = new TextElement() { TerminalSymbol = updated[agreeIndex] };
+                    var updatedElement = new TextElement<TextElementOld>() { TerminalSymbol = updated[agreeIndex] };
                     updatedElement.Start = TextLength;
                     AppendText(updatedElement.TerminalSymbol.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
@@ -407,7 +411,7 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                TextElement newActiveMoveElement;
+                TextElement<TextElementOld> newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
