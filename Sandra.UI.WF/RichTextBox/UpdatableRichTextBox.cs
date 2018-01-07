@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
 
             public override void Dispose()
             {
-                owner.EndUpdate();
+                owner.EndUpdate(rememberSelectionStart, selectionStart);
                 GC.SuppressFinalize(this);
             }
 
@@ -61,7 +61,7 @@ namespace Sandra.UI.WF
             {
                 // Make sure that _UpdateTokens which go out of scope without being disposed
                 // stop blocking an UpdatableRichTextBox when they are garbage collected.
-                if (owner != null) owner.EndUpdate();
+                if (owner != null) owner.EndUpdate(false, 0);
             }
         }
 
@@ -74,10 +74,7 @@ namespace Sandra.UI.WF
 
         const int WM_SETREDRAW = 0x0b;
 
-        /// <summary>
-        /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
-        /// </summary>
-        public UpdateToken BeginUpdate()
+        private UpdateToken beginUpdate(bool rememberCaret)
         {
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
@@ -85,14 +82,31 @@ namespace Sandra.UI.WF
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
             ++blockingUpdateTokenCount;
-            return new _UpdateToken(this, false, 0);
+            return new _UpdateToken(this, rememberCaret, rememberCaret ? SelectionStart : 0);
         }
+
+        /// <summary>
+        /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
+        /// </summary>
+        public UpdateToken BeginUpdate() => beginUpdate(false);
+
+        /// <summary>
+        /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
+        /// Attempts to restore the current position of the caret when the token is disposed.
+        /// As a result, the current selection state will always be reset.
+        /// </summary>
+        /// <remarks>
+        /// The RichTextBox API seems to have this hiatus that makes it impossible to decide what the direction was in which the text was selected.
+        /// For this reason, the SelectionLength is always set to zero when the token is disposed.
+        /// </remarks>
+        public UpdateToken BeginUpdateRememberCaret() => beginUpdate(true);
 
         /// <summary>
         /// Resumes repainting of the <see cref="UpdatableRichTextBox"/> after it's being updated.
         /// </summary>
-        private void EndUpdate()
+        private void EndUpdate(bool setSelectionStart, int selectionStart)
         {
+            if (setSelectionStart) Select(selectionStart, 0);
             --blockingUpdateTokenCount;
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {

@@ -411,31 +411,24 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    using (var updateToken = BeginUpdate())
+                    using (var updateToken = BeginUpdateRememberCaret())
                     {
-                        try
+                        // Reset markup of the previously active move element.
+                        if (currentActiveMoveStyleElement != null)
                         {
-                            // Reset markup of the previously active move element.
-                            if (currentActiveMoveStyleElement != null)
-                            {
-                                applyStyle(currentActiveMoveStyleElement, defaultStyle);
-                                currentActiveMoveStyleElement = null;
-                            }
-
-                            game.Game.SetActiveTree(newActiveTree);
-
-                            game.ActiveMoveTreeUpdated();
-                            ActionHandler.Invalidate();
-
-                            if (newActiveMoveElement != null)
-                            {
-                                currentActiveMoveStyleElement = newActiveMoveElement;
-                                applyStyle(newActiveMoveElement, activeMoveStyle);
-                            }
+                            applyStyle(currentActiveMoveStyleElement, defaultStyle);
+                            currentActiveMoveStyleElement = null;
                         }
-                        finally
+
+                        game.Game.SetActiveTree(newActiveTree);
+
+                        game.ActiveMoveTreeUpdated();
+                        ActionHandler.Invalidate();
+
+                        if (newActiveMoveElement != null)
                         {
-                            Select(selectionStart, 0);
+                            currentActiveMoveStyleElement = newActiveMoveElement;
+                            applyStyle(newActiveMoveElement, activeMoveStyle);
                         }
                     }
                 }
