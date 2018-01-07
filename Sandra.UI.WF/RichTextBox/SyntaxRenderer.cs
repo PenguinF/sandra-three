@@ -45,6 +45,28 @@ namespace Sandra.UI.WF
 
         public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
 
+        public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
+        {
+            if (terminal == null) throw new ArgumentNullException(nameof(terminal));
+            if (text == null) throw new ArgumentNullException(nameof(text));
+
+            int length = text.Length;
+            if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
+
+            int start = renderTarget.TextLength;
+            renderTarget.AppendText(text);
+
+            var textElement = new TextElement<TTerminal>()
+            {
+                TerminalSymbol = terminal,
+                Start = start,
+                Length = length,
+            };
+
+            Elements.Add(textElement);
+            return textElement;
+        }
+
         /// <summary>
         /// Clears all syntax from the renderer.
         /// </summary>

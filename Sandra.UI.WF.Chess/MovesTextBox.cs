@@ -325,12 +325,8 @@ namespace Sandra.UI.WF
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    var updatedElement = new TextElement<PGNTerminalSymbol>() { TerminalSymbol = updated[agreeIndex] };
-                    updatedElement.Start = TextLength;
-                    AppendText(updatedElement.TerminalSymbol.GetText());
-                    updatedElement.Length = TextLength - updatedElement.Start;
+                    syntaxRenderer.AppendTerminalSymbol(updated[agreeIndex], updated[agreeIndex].GetText());
                     ++agreeIndex;
-                    syntaxRenderer.Elements.Add(updatedElement);
                 }
 
                 // Make the active move bold.
