@@ -362,11 +362,11 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    foreach (var formattedMoveElement in elements.Select(x => x.TerminalSymbol).OfType<TextElementOld.FormattedMove>())
+                    foreach (var formattedMoveElement in elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
                     {
-                        if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                        if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            applyStyle(formattedMoveElement, activeMoveStyle);
+                            applyStyle(formattedMoveElement.TerminalSymbol, activeMoveStyle);
 
                             if (!ContainsFocus)
                             {
@@ -435,11 +435,11 @@ namespace Sandra.UI.WF
                         try
                         {
                             // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in elements.Select(x => x.TerminalSymbol).OfType<TextElementOld.FormattedMove>())
+                            foreach (var formattedMoveElement in elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
                             {
-                                if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
+                                if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                                 {
-                                    applyStyle(formattedMoveElement, defaultStyle);
+                                    applyStyle(formattedMoveElement.TerminalSymbol, defaultStyle);
                                 }
                             }
 
