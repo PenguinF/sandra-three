@@ -16,6 +16,55 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-namespace Sandra.Chess
+namespace Sandra.PGN
 {
+    public abstract class PGNTerminalSymbol
+    {
+        public abstract string GetText();
+
+        public sealed class Space : PGNTerminalSymbol
+        {
+            public const string SpaceText = " ";
+            public override string GetText() => SpaceText;
+        }
+
+        public sealed class SideLineStart : PGNTerminalSymbol
+        {
+            public const string SideLineStartText = "(";
+            public override string GetText() => SideLineStartText;
+        }
+
+        public sealed class SideLineEnd : PGNTerminalSymbol
+        {
+            public const string SideLineEndText = ")";
+            public override string GetText() => SideLineEndText;
+        }
+
+        public sealed class InitialBlackSideToMoveEllipsis : PGNTerminalSymbol
+        {
+            public const string EllipsisText = "..";
+            public override string GetText() => EllipsisText;
+        }
+
+        public abstract class MoveDelimiter : PGNTerminalSymbol { }
+
+        public sealed class MoveCounter : MoveDelimiter
+        {
+            readonly int value;
+            public override string GetText() => value + ".";
+            public MoveCounter(int value) { this.value = value; }
+        }
+
+        public sealed class FormattedMove : MoveDelimiter
+        {
+            readonly string value;
+            public override string GetText() => value;
+            public readonly Chess.Variation Variation;
+            public FormattedMove(string value, Chess.Variation variation)
+            {
+                this.value = value;
+                Variation = variation;
+            }
+        }
+    }
 }
