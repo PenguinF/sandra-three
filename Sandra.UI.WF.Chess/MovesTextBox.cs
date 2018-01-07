@@ -275,6 +275,8 @@ namespace Sandra.UI.WF
             return new List<PGNTerminalSymbol>();
         }
 
+        private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
+
         private void refreshText()
         {
             // Clear and build the entire text anew by clearing the old element list.
@@ -313,6 +315,7 @@ namespace Sandra.UI.WF
             {
                 // Reset any markup.
                 applyDefaultStyle();
+                currentActiveMoveStyleElement = null;
 
                 if (agreeIndex < existingElementCount)
                 {
@@ -327,27 +330,33 @@ namespace Sandra.UI.WF
                     ++agreeIndex;
                 }
 
-                // Make the active move bold.
                 if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
                 {
                     Select(0, 0);
                 }
                 else
                 {
+                    TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
                     foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is PGNTerminalSymbol.FormattedMove))
                     {
                         if (((PGNTerminalSymbol.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            applyStyle(formattedMoveElement, activeMoveStyle);
-
-                            if (!ContainsFocus)
-                            {
-                                // Also update the caret so the active move is in view.
-                                Select(formattedMoveElement.Start + formattedMoveElement.Length, 0);
-                                ScrollToCaret();
-                            }
-
+                            newActiveMoveElement = formattedMoveElement;
                             break;
+                        }
+                    }
+
+                    if (newActiveMoveElement != null)
+                    {
+                        // Make the active move bold.
+                        currentActiveMoveStyleElement = newActiveMoveElement;
+                        applyStyle(newActiveMoveElement, activeMoveStyle);
+
+                        if (!ContainsFocus)
+                        {
+                            // Also update the caret so the active move is in view.
+                            Select(newActiveMoveElement.Start + newActiveMoveElement.Length, 0);
+                            ScrollToCaret();
                         }
                     }
                 }
