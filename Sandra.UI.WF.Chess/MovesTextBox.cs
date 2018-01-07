@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
             SelectionFont = defaultStyle.Font;
         }
 
-        private void applyStyle(TextElement element, TextElementStyle style)
+        private void applyStyle(TextElementOld element, TextElementStyle style)
         {
             Select(element.Start, element.Length);
             if (style.HasFont) SelectionFont = style.Font;
@@ -132,37 +132,37 @@ namespace Sandra.UI.WF
             }
         }
 
-        private abstract class TextElement
+        private abstract class TextElementOld
         {
             public int Start;
             public int Length;
             public abstract string GetText();
 
-            public sealed class Space : TextElement
+            public sealed class Space : TextElementOld
             {
                 public const string SpaceText = " ";
                 public override string GetText() => SpaceText;
             }
 
-            public sealed class SideLineStart : TextElement
+            public sealed class SideLineStart : TextElementOld
             {
                 public const string SideLineStartText = "(";
                 public override string GetText() => SideLineStartText;
             }
 
-            public sealed class SideLineEnd : TextElement
+            public sealed class SideLineEnd : TextElementOld
             {
                 public const string SideLineEndText = ")";
                 public override string GetText() => SideLineEndText;
             }
 
-            public sealed class InitialBlackSideToMoveEllipsis : TextElement
+            public sealed class InitialBlackSideToMoveEllipsis : TextElementOld
             {
                 public const string EllipsisText = "..";
                 public override string GetText() => EllipsisText;
             }
 
-            public abstract class MoveDelimiter : TextElement { }
+            public abstract class MoveDelimiter : TextElementOld { }
 
             public sealed class MoveCounter : MoveDelimiter
             {
@@ -184,33 +184,33 @@ namespace Sandra.UI.WF
             }
         }
 
-        private List<TextElement> elements;
+        private List<TextElementOld> elements;
 
-        private IEnumerable<TextElement> emitInitialBlackSideToMoveEllipsis(int plyCount)
+        private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
             if (plyCount % 2 == 1)
             {
                 // Add an ellipsis for the previous white move. 
-                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElement.InitialBlackSideToMoveEllipsis();
-                yield return new TextElement.Space();
+                yield return new TextElementOld.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElementOld.InitialBlackSideToMoveEllipsis();
+                yield return new TextElementOld.Space();
             }
         }
 
-        private IEnumerable<TextElement> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
+        private IEnumerable<TextElementOld> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
         {
             if (plyCount % 2 == 0)
             {
-                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElement.Space();
+                yield return new TextElementOld.MoveCounter(plyCount / 2 + 1);
+                yield return new TextElementOld.Space();
             }
 
-            yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+            yield return new TextElementOld.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
         }
 
         // Parametrized on emitSpace because this method may not yield anything,
         // in which case no spaces should be emitted at all.
-        private IEnumerable<TextElement> emitMainLine(Chess.Game game, bool emitSpace)
+        private IEnumerable<TextElementOld> emitMainLine(Chess.Game game, bool emitSpace)
         {
             for (;;)
             {
@@ -221,7 +221,7 @@ namespace Sandra.UI.WF
                 // Emit the main move before side lines which start at the same plyCount.
                 if (current.MainLine != null)
                 {
-                    if (emitSpace) yield return new TextElement.Space();
+                    if (emitSpace) yield return new TextElementOld.Space();
                     foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
                     emitSpace = true;
                 }
@@ -231,8 +231,8 @@ namespace Sandra.UI.WF
                     // Reset active tree before going into each side line.
                     game.SetActiveTree(current);
 
-                    if (emitSpace) yield return new TextElement.Space();
-                    yield return new TextElement.SideLineStart();
+                    if (emitSpace) yield return new TextElementOld.Space();
+                    yield return new TextElementOld.SideLineStart();
 
                     // Emit first move.
                     foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
@@ -240,7 +240,7 @@ namespace Sandra.UI.WF
 
                     // Recurse here.
                     foreach (var element in emitMainLine(game, true)) yield return element;
-                    yield return new TextElement.SideLineEnd();
+                    yield return new TextElementOld.SideLineEnd();
 
                     emitSpace = true;
                 }
@@ -255,7 +255,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        private IEnumerable<TextElementOld> emitMoveTree(Chess.Game game)
         {
             // Possible initial black side to move ellipsis.
             if (game.MoveTree.MainLine != null)
@@ -267,14 +267,14 @@ namespace Sandra.UI.WF
             foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
-        private List<TextElement> getUpdatedElements()
+        private List<TextElementOld> getUpdatedElements()
         {
             if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<TextElement>(emitMoveTree(copiedGame));
+                return new List<TextElementOld>(emitMoveTree(copiedGame));
             }
 
             return null;
@@ -355,7 +355,7 @@ namespace Sandra.UI.WF
                 // Make the active move bold.
                 if (elements != null)
                 {
-                    foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                    foreach (var formattedMoveElement in elements.OfType<TextElementOld.FormattedMove>())
                     {
                         if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
@@ -396,13 +396,13 @@ namespace Sandra.UI.WF
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.MoveDelimiter))
+                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElementOld.MoveDelimiter))
                     {
                         elemIndex--;
                     }
                 }
 
-                TextElement.FormattedMove newActiveMoveElement;
+                TextElementOld.FormattedMove newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
@@ -413,10 +413,10 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(elements[elemIndex] is TextElement.FormattedMove)) elemIndex++;
+                    while (!(elements[elemIndex] is TextElementOld.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
-                    newActiveMoveElement = (TextElement.FormattedMove)elements[elemIndex];
+                    newActiveMoveElement = (TextElementOld.FormattedMove)elements[elemIndex];
                     newActiveTree = newActiveMoveElement.Variation.MoveTree;
                 }
 
@@ -428,7 +428,7 @@ namespace Sandra.UI.WF
                         try
                         {
                             // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                            foreach (var formattedMoveElement in elements.OfType<TextElementOld.FormattedMove>())
                             {
                                 if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                                 {
