@@ -38,13 +38,13 @@ namespace Sandra.UI.WF
         private SyntaxRenderer(UpdatableRichTextBox renderTarget)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
-            this.renderTarget = renderTarget;
+            RenderTarget = renderTarget;
 
             renderTarget.ReadOnly = true;
             renderTarget.Clear();
         }
 
-        private readonly UpdatableRichTextBox renderTarget;
+        internal readonly UpdatableRichTextBox RenderTarget;
 
         public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
 
@@ -56,10 +56,10 @@ namespace Sandra.UI.WF
             int length = text.Length;
             if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
 
-            int start = renderTarget.TextLength;
-            renderTarget.AppendText(text);
+            int start = RenderTarget.TextLength;
+            RenderTarget.AppendText(text);
 
-            var textElement = new TextElement<TTerminal>()
+            var textElement = new TextElement<TTerminal>(this)
             {
                 TerminalSymbol = terminal,
                 Start = start,
@@ -76,17 +76,17 @@ namespace Sandra.UI.WF
         public void Clear()
         {
             Elements.Clear();
-            renderTarget.Clear();
+            RenderTarget.Clear();
         }
 
         public void RemoveFrom(int index)
         {
             int textStart = Elements[index].Start;
-            renderTarget.Select(textStart, renderTarget.TextLength - textStart);
+            RenderTarget.Select(textStart, RenderTarget.TextLength - textStart);
             // This only works if not read-only, so temporarily turn it off.
-            renderTarget.ReadOnly = false;
-            renderTarget.SelectedText = string.Empty;
-            renderTarget.ReadOnly = true;
+            RenderTarget.ReadOnly = false;
+            RenderTarget.SelectedText = string.Empty;
+            RenderTarget.ReadOnly = true;
             Elements.RemoveRange(index, Elements.Count - index);
         }
     }

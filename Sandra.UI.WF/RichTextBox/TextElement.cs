@@ -28,8 +28,33 @@ namespace Sandra.UI.WF
     /// </typeparam>
     public sealed class TextElement<TTerminal>
     {
-        public TTerminal TerminalSymbol;
-        public int Start;
-        public int Length;
+        private readonly SyntaxRenderer<TTerminal> renderer;
+
+        internal TextElement(SyntaxRenderer<TTerminal> renderer)
+        {
+            this.renderer = renderer;
+        }
+
+        public TTerminal TerminalSymbol { get; internal set; }
+        public int Start { get; internal set; }
+        public int Length { get; internal set; }
+
+        /// <summary>
+        /// Sets the caret directly before this text element and brings it into view.
+        /// </summary>
+        public void BringIntoViewBefore()
+        {
+            renderer.RenderTarget.Select(Start, 0);
+            renderer.RenderTarget.ScrollToCaret();
+        }
+
+        /// <summary>
+        /// Sets the caret directly after this text element and brings it into view.
+        /// </summary>
+        public void BringIntoViewAfter()
+        {
+            renderer.RenderTarget.Select(Start + Length, 0);
+            renderer.RenderTarget.ScrollToCaret();
+        }
     }
 }
