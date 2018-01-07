@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
             SelectionFont = defaultStyle.Font;
         }
 
-        private void applyStyle(TextElementOld element, TextElementStyle style)
+        private void applyStyle(TextElement element, TextElementStyle style)
         {
             Select(element.Start, element.Length);
             if (style.HasFont) SelectionFont = style.Font;
@@ -366,7 +366,7 @@ namespace Sandra.UI.WF
                     {
                         if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                         {
-                            applyStyle(formattedMoveElement.TerminalSymbol, activeMoveStyle);
+                            applyStyle(formattedMoveElement, activeMoveStyle);
 
                             if (!ContainsFocus)
                             {
@@ -439,7 +439,7 @@ namespace Sandra.UI.WF
                             {
                                 if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                                 {
-                                    applyStyle(formattedMoveElement.TerminalSymbol, defaultStyle);
+                                    applyStyle(formattedMoveElement, defaultStyle);
                                 }
                             }
 
@@ -450,7 +450,7 @@ namespace Sandra.UI.WF
 
                             if (newActiveMoveElement != null)
                             {
-                                applyStyle(newActiveMoveElement.TerminalSymbol, activeMoveStyle);
+                                applyStyle(newActiveMoveElement, activeMoveStyle);
                             }
                         }
                         finally
