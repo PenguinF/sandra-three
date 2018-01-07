@@ -20,9 +20,16 @@ using System;
 
 namespace Sandra.UI.WF
 {
-    public class SyntaxRenderer
+    /// <summary>
+    /// Changes the behavior of a <see cref="UpdatableRichTextBox"/> so it shows a read-only list of formatted text elements.
+    /// </summary>
+    /// <typeparam name="TTerminal">
+    /// The type of terminal symbols to format.
+    /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
+    /// </typeparam>
+    public class SyntaxRenderer<TTerminal>
     {
-        public static SyntaxRenderer AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer(renderTarget);
+        public static SyntaxRenderer<TTerminal> AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
 
         private SyntaxRenderer(UpdatableRichTextBox renderTarget)
         {
