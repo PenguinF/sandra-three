@@ -39,10 +39,16 @@ namespace Sandra.UI.WF
         private sealed class _UpdateToken : UpdateToken
         {
             private readonly UpdatableRichTextBox owner;
+            private readonly bool rememberSelectionStart;
+            private readonly int selectionStart;
 
-            public _UpdateToken(UpdatableRichTextBox owner)
+            public _UpdateToken(UpdatableRichTextBox owner,
+                                bool rememberSelectionStart,
+                                int selectionStart)
             {
                 this.owner = owner;
+                this.rememberSelectionStart = rememberSelectionStart;
+                this.selectionStart = selectionStart;
             }
 
             public override void Dispose()
@@ -79,7 +85,7 @@ namespace Sandra.UI.WF
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
             ++blockingUpdateTokenCount;
-            return new _UpdateToken(this);
+            return new _UpdateToken(this, false, 0);
         }
 
         /// <summary>
