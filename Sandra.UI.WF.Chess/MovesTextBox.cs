@@ -139,14 +139,12 @@ namespace Sandra.UI.WF
         public sealed class TextElement
         {
             public TextElementOld TerminalSymbol;
-            public int Start { get { return TerminalSymbol.Start; } set { TerminalSymbol.Start = value; } }
-            public int Length { get { return TerminalSymbol.Length; } set { TerminalSymbol.Length = value; } }
+            public int Start;
+            public int Length;
         }
 
         public abstract class TextElementOld
         {
-            public int Start;
-            public int Length;
             public abstract string GetText();
 
             public sealed class Space : TextElementOld
