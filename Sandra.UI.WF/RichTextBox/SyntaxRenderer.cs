@@ -44,5 +44,16 @@ namespace Sandra.UI.WF
         private readonly UpdatableRichTextBox renderTarget;
 
         public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
+
+        public void RemoveFrom(int index)
+        {
+            int textStart = Elements[index].Start;
+            renderTarget.Select(textStart, renderTarget.TextLength - textStart);
+            // This only works if not read-only, so temporarily turn it off.
+            renderTarget.ReadOnly = false;
+            renderTarget.SelectedText = string.Empty;
+            renderTarget.ReadOnly = true;
+            Elements.RemoveRange(index, Elements.Count - index);
+        }
     }
 }

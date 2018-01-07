@@ -319,13 +319,7 @@ namespace Sandra.UI.WF
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
-                    int startDisagree = syntaxRenderer.Elements[agreeIndex].Start;
-                    Select(startDisagree, TextLength - startDisagree);
-                    // This only works if not read-only, so temporarily turn it off.
-                    ReadOnly = false;
-                    SelectedText = string.Empty;
-                    ReadOnly = true;
-                    syntaxRenderer.Elements.RemoveRange(agreeIndex, syntaxRenderer.Elements.Count - agreeIndex);
+                    syntaxRenderer.RemoveFrom(agreeIndex);
                 }
 
                 // Append new element texts.
