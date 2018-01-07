@@ -40,13 +40,17 @@ namespace Sandra.UI.WF
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             RenderTarget = renderTarget;
 
+            Elements = elements.AsReadOnly();
+
             renderTarget.ReadOnly = true;
             renderTarget.Clear();
         }
 
         internal readonly UpdatableRichTextBox RenderTarget;
 
-        public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
+        private readonly List<TextElement<TTerminal>> elements = new List<TextElement<TTerminal>>();
+
+        public readonly IReadOnlyList<TextElement<TTerminal>> Elements;
 
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
         {
@@ -66,7 +70,7 @@ namespace Sandra.UI.WF
                 Length = length,
             };
 
-            Elements.Add(textElement);
+            elements.Add(textElement);
             return textElement;
         }
 
@@ -75,19 +79,19 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Clear()
         {
-            Elements.Clear();
+            elements.Clear();
             RenderTarget.Clear();
         }
 
         public void RemoveFrom(int index)
         {
-            int textStart = Elements[index].Start;
+            int textStart = elements[index].Start;
             RenderTarget.Select(textStart, RenderTarget.TextLength - textStart);
             // This only works if not read-only, so temporarily turn it off.
             RenderTarget.ReadOnly = false;
             RenderTarget.SelectedText = string.Empty;
             RenderTarget.ReadOnly = true;
-            Elements.RemoveRange(index, Elements.Count - index);
+            elements.RemoveRange(index, elements.Count - index);
         }
     }
 }
