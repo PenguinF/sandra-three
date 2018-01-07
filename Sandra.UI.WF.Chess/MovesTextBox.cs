@@ -279,45 +279,50 @@ namespace Sandra.UI.WF
 
         private void refreshText()
         {
-            // Clear and build the entire text anew by resetting the old element lists.
-            elements = null;
-            updateText();
+            // Clear and build the entire text anew by clearing the old element list.
+            using (var updateToken = BeginUpdate())
+            {
+                elements = null;
+                updateText();
+            }
         }
 
         private void updateText()
         {
-            // Block OnSelectionChanged() which will be raised as a side effect of this method.
+            var updated = getUpdatedElements();
+
+            int existingElementCount = elements == null
+                                     ? 0
+                                     : elements.Count;
+
+            int updatedElementCount = updated == null
+                                    ? 0
+                                    : updated.Count;
+
+
+            // Instead of clearing and updating the entire textbox, compare the elements one by one.
+            int minLength = Math.Min(existingElementCount, updatedElementCount);
+            int agreeIndex = 0;
+            while (agreeIndex < minLength)
+            {
+                var existingElement = elements[agreeIndex];
+                if (existingElement.GetText() == updated[agreeIndex].GetText())
+                {
+                    // Keep using the existing element so no derived information gets lost.
+                    updated[agreeIndex] = existingElement;
+                    ++agreeIndex;
+                }
+                else
+                {
+                    // agreeIndex is now at the first index where both element lists disagree.
+                    break;
+                }
+            }
+
             using (var updateToken = BeginUpdate())
             {
-                var updated = getUpdatedElements();
-
-                int existingElementCount = elements == null
-                                         ? 0
-                                         : elements.Count;
-
-                int updatedElementCount = updated == null
-                                        ? 0
-                                        : updated.Count;
-
-
-                // Instead of clearing and updating the entire textbox, compare the elements one by one.
-                int minLength = Math.Min(existingElementCount, updatedElementCount);
-                int agreeIndex = 0;
-                while (agreeIndex < minLength)
-                {
-                    var existingElement = elements[agreeIndex];
-                    if (existingElement.GetText() == updated[agreeIndex].GetText())
-                    {
-                        // Keep using the existing element so no derived information gets lost.
-                        updated[agreeIndex] = existingElement;
-                        ++agreeIndex;
-                    }
-                    else
-                    {
-                        // agreeIndex is now at the first index where both element lists disagree.
-                        break;
-                    }
-                }
+                // Reset any markup.
+                applyDefaultStyle();
 
                 if (agreeIndex < existingElementCount)
                 {
@@ -342,8 +347,6 @@ namespace Sandra.UI.WF
 
                 elements = updated;
 
-                // Reset all markup.
-                applyDefaultStyle();
                 Select(0, 0);
 
                 // Make the active move bold.
