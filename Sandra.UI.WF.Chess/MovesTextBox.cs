@@ -195,7 +195,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private readonly List<TextElementOld> elements = new List<TextElementOld>();
+        private readonly List<TextElement> elements = new List<TextElement>();
 
         private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
@@ -313,7 +313,7 @@ namespace Sandra.UI.WF
             int agreeIndex = 0;
             while (agreeIndex < minLength)
             {
-                var existingElement = elements[agreeIndex];
+                var existingElement = elements[agreeIndex].TerminalSymbol;
                 if (existingElement.GetText() == updated[agreeIndex].GetText())
                 {
                     // Keep using the existing element so no derived information gets lost.
@@ -352,7 +352,7 @@ namespace Sandra.UI.WF
                     AppendText(updatedElement.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
                     ++agreeIndex;
-                    elements.Add(updatedElement);
+                    elements.Add(new TextElement() { TerminalSymbol = updatedElement });
                 }
 
                 // Make the active move bold.
@@ -362,7 +362,7 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    foreach (var formattedMoveElement in elements.OfType<TextElementOld.FormattedMove>())
+                    foreach (var formattedMoveElement in elements.Select(x => x.TerminalSymbol).OfType<TextElementOld.FormattedMove>())
                     {
                         if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                         {
@@ -403,7 +403,7 @@ namespace Sandra.UI.WF
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElementOld.MoveDelimiter))
+                    while (elemIndex >= 0 && !(elements[elemIndex].TerminalSymbol is TextElementOld.MoveDelimiter))
                     {
                         elemIndex--;
                     }
@@ -420,10 +420,10 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(elements[elemIndex] is TextElementOld.FormattedMove)) elemIndex++;
+                    while (!(elements[elemIndex].TerminalSymbol is TextElementOld.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
-                    newActiveMoveElement = (TextElementOld.FormattedMove)elements[elemIndex];
+                    newActiveMoveElement = (TextElementOld.FormattedMove)elements[elemIndex].TerminalSymbol;
                     newActiveTree = newActiveMoveElement.Variation.MoveTree;
                 }
 
@@ -435,7 +435,7 @@ namespace Sandra.UI.WF
                         try
                         {
                             // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in elements.OfType<TextElementOld.FormattedMove>())
+                            foreach (var formattedMoveElement in elements.Select(x => x.TerminalSymbol).OfType<TextElementOld.FormattedMove>())
                             {
                                 if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
                                 {
