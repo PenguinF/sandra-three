@@ -409,7 +409,7 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                TextElementOld.FormattedMove newActiveMoveElement;
+                TextElement newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
@@ -423,8 +423,8 @@ namespace Sandra.UI.WF
                     while (!(elements[elemIndex].TerminalSymbol is TextElementOld.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
-                    newActiveMoveElement = (TextElementOld.FormattedMove)elements[elemIndex].TerminalSymbol;
-                    newActiveTree = newActiveMoveElement.Variation.MoveTree;
+                    newActiveMoveElement = elements[elemIndex];
+                    newActiveTree = ((TextElementOld.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
@@ -450,7 +450,7 @@ namespace Sandra.UI.WF
 
                             if (newActiveMoveElement != null)
                             {
-                                applyStyle(newActiveMoveElement, activeMoveStyle);
+                                applyStyle(newActiveMoveElement.TerminalSymbol, activeMoveStyle);
                             }
                         }
                         finally
