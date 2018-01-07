@@ -59,15 +59,21 @@ namespace Sandra.UI.WF
 
         private void applyDefaultStyle()
         {
-            Font = defaultStyle.Font;
-            SelectAll();
-            SelectionFont = defaultStyle.Font;
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                Font = defaultStyle.Font;
+                SelectAll();
+                SelectionFont = defaultStyle.Font;
+            }
         }
 
         private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
         {
-            Select(element.Start, element.Length);
-            if (style.HasFont) SelectionFont = style.Font;
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                Select(element.Start, element.Length);
+                if (style.HasFont) SelectionFont = style.Font;
+            }
         }
 
         protected override void Dispose(bool disposing)
