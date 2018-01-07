@@ -45,12 +45,12 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
-        private readonly SyntaxRenderer<TextElementOld> syntaxRenderer;
+        private readonly SyntaxRenderer<PGNTerminalSymbol> syntaxRenderer;
 
         public MovesTextBox()
         {
             BorderStyle = BorderStyle.None;
-            syntaxRenderer = SyntaxRenderer<TextElementOld>.AttachTo(this);
+            syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             BackColor = Color.White;
             ForeColor = Color.Black;
             AutoWordSelection = true;
@@ -64,7 +64,7 @@ namespace Sandra.UI.WF
             SelectionFont = defaultStyle.Font;
         }
 
-        private void applyStyle(TextElement<TextElementOld> element, TextElementStyle style)
+        private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
         {
             Select(element.Start, element.Length);
             if (style.HasFont) SelectionFont = style.Font;
@@ -131,35 +131,35 @@ namespace Sandra.UI.WF
             }
         }
 
-        public abstract class TextElementOld
+        public abstract class PGNTerminalSymbol
         {
             public abstract string GetText();
 
-            public sealed class Space : TextElementOld
+            public sealed class Space : PGNTerminalSymbol
             {
                 public const string SpaceText = " ";
                 public override string GetText() => SpaceText;
             }
 
-            public sealed class SideLineStart : TextElementOld
+            public sealed class SideLineStart : PGNTerminalSymbol
             {
                 public const string SideLineStartText = "(";
                 public override string GetText() => SideLineStartText;
             }
 
-            public sealed class SideLineEnd : TextElementOld
+            public sealed class SideLineEnd : PGNTerminalSymbol
             {
                 public const string SideLineEndText = ")";
                 public override string GetText() => SideLineEndText;
             }
 
-            public sealed class InitialBlackSideToMoveEllipsis : TextElementOld
+            public sealed class InitialBlackSideToMoveEllipsis : PGNTerminalSymbol
             {
                 public const string EllipsisText = "..";
                 public override string GetText() => EllipsisText;
             }
 
-            public abstract class MoveDelimiter : TextElementOld { }
+            public abstract class MoveDelimiter : PGNTerminalSymbol { }
 
             public sealed class MoveCounter : MoveDelimiter
             {
@@ -181,31 +181,31 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
+        private IEnumerable<PGNTerminalSymbol> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
             if (plyCount % 2 == 1)
             {
                 // Add an ellipsis for the previous white move. 
-                yield return new TextElementOld.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElementOld.InitialBlackSideToMoveEllipsis();
-                yield return new TextElementOld.Space();
+                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
+                yield return new PGNTerminalSymbol.InitialBlackSideToMoveEllipsis();
+                yield return new PGNTerminalSymbol.Space();
             }
         }
 
-        private IEnumerable<TextElementOld> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
+        private IEnumerable<PGNTerminalSymbol> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
         {
             if (plyCount % 2 == 0)
             {
-                yield return new TextElementOld.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElementOld.Space();
+                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
+                yield return new PGNTerminalSymbol.Space();
             }
 
-            yield return new TextElementOld.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+            yield return new PGNTerminalSymbol.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
         }
 
         // Parametrized on emitSpace because this method may not yield anything,
         // in which case no spaces should be emitted at all.
-        private IEnumerable<TextElementOld> emitMainLine(Chess.Game game, bool emitSpace)
+        private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool emitSpace)
         {
             for (;;)
             {
@@ -216,7 +216,7 @@ namespace Sandra.UI.WF
                 // Emit the main move before side lines which start at the same plyCount.
                 if (current.MainLine != null)
                 {
-                    if (emitSpace) yield return new TextElementOld.Space();
+                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
                     foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
                     emitSpace = true;
                 }
@@ -226,8 +226,8 @@ namespace Sandra.UI.WF
                     // Reset active tree before going into each side line.
                     game.SetActiveTree(current);
 
-                    if (emitSpace) yield return new TextElementOld.Space();
-                    yield return new TextElementOld.SideLineStart();
+                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
+                    yield return new PGNTerminalSymbol.SideLineStart();
 
                     // Emit first move.
                     foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
@@ -235,7 +235,7 @@ namespace Sandra.UI.WF
 
                     // Recurse here.
                     foreach (var element in emitMainLine(game, true)) yield return element;
-                    yield return new TextElementOld.SideLineEnd();
+                    yield return new PGNTerminalSymbol.SideLineEnd();
 
                     emitSpace = true;
                 }
@@ -250,7 +250,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<TextElementOld> emitMoveTree(Chess.Game game)
+        private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
         {
             // Possible initial black side to move ellipsis.
             if (game.MoveTree.MainLine != null)
@@ -262,17 +262,17 @@ namespace Sandra.UI.WF
             foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
-        private List<TextElementOld> getUpdatedElements()
+        private List<PGNTerminalSymbol> getUpdatedElements()
         {
             if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<TextElementOld>(emitMoveTree(copiedGame));
+                return new List<PGNTerminalSymbol>(emitMoveTree(copiedGame));
             }
 
-            return new List<TextElementOld>();
+            return new List<PGNTerminalSymbol>();
         }
 
         private void refreshText()
@@ -325,7 +325,7 @@ namespace Sandra.UI.WF
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    var updatedElement = new TextElement<TextElementOld>() { TerminalSymbol = updated[agreeIndex] };
+                    var updatedElement = new TextElement<PGNTerminalSymbol>() { TerminalSymbol = updated[agreeIndex] };
                     updatedElement.Start = TextLength;
                     AppendText(updatedElement.TerminalSymbol.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
@@ -340,9 +340,9 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
+                    foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is PGNTerminalSymbol.FormattedMove))
                     {
-                        if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                        if (((PGNTerminalSymbol.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                         {
                             applyStyle(formattedMoveElement, activeMoveStyle);
 
@@ -381,13 +381,13 @@ namespace Sandra.UI.WF
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is TextElementOld.MoveDelimiter))
+                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveDelimiter))
                     {
                         elemIndex--;
                     }
                 }
 
-                TextElement<TextElementOld> newActiveMoveElement;
+                TextElement<PGNTerminalSymbol> newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
@@ -398,11 +398,11 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is TextElementOld.FormattedMove)) elemIndex++;
+                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
                     newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
-                    newActiveTree = ((TextElementOld.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
+                    newActiveTree = ((PGNTerminalSymbol.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
@@ -413,9 +413,9 @@ namespace Sandra.UI.WF
                         try
                         {
                             // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
+                            foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is PGNTerminalSymbol.FormattedMove))
                             {
-                                if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                                if (((PGNTerminalSymbol.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                                 {
                                     applyStyle(formattedMoveElement, defaultStyle);
                                 }
