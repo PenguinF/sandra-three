@@ -132,21 +132,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        /// <summary>
-        /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
-        /// which maps to exactly one terminal symbol.
-        /// </summary>
-        /// <typeparam name="TTerminal">
-        /// The type of terminal symbols to format.
-        /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
-        /// </typeparam>
-        public sealed class TextElement<TTerminal>
-        {
-            public TTerminal TerminalSymbol;
-            public int Start;
-            public int Length;
-        }
-
         public abstract class TextElementOld
         {
             public abstract string GetText();
