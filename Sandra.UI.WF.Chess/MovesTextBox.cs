@@ -53,7 +53,6 @@ namespace Sandra.UI.WF
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             BackColor = Color.White;
             ForeColor = Color.Black;
-            AutoWordSelection = true;
             applyDefaultStyle();
         }
 
