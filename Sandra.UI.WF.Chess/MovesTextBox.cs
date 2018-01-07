@@ -300,8 +300,6 @@ namespace Sandra.UI.WF
                 var existingElement = syntaxRenderer.Elements[agreeIndex].TerminalSymbol;
                 if (existingElement.GetText() == updated[agreeIndex].GetText())
                 {
-                    // Keep using the existing element so no derived information gets lost.
-                    updated[agreeIndex] = existingElement;
                     ++agreeIndex;
                 }
                 else
