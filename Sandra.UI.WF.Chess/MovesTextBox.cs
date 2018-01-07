@@ -415,13 +415,11 @@ namespace Sandra.UI.WF
                     {
                         try
                         {
-                            // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is PGNTerminalSymbol.FormattedMove))
+                            // Reset markup of the previously active move element.
+                            if (currentActiveMoveStyleElement != null)
                             {
-                                if (((PGNTerminalSymbol.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
-                                {
-                                    applyStyle(formattedMoveElement, defaultStyle);
-                                }
+                                applyStyle(currentActiveMoveStyleElement, defaultStyle);
+                                currentActiveMoveStyleElement = null;
                             }
 
                             game.Game.SetActiveTree(newActiveTree);
@@ -431,6 +429,7 @@ namespace Sandra.UI.WF
 
                             if (newActiveMoveElement != null)
                             {
+                                currentActiveMoveStyleElement = newActiveMoveElement;
                                 applyStyle(newActiveMoveElement, activeMoveStyle);
                             }
                         }
