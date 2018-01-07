@@ -245,18 +245,19 @@ namespace Sandra.UI.WF
 
         private void updateText()
         {
-            var updated = getUpdatedElements();
+            List<PGNTerminalSymbol> updatedTerminalSymbols = getUpdatedElements();
 
             int existingElementCount = syntaxRenderer.Elements.Count;
-            int updatedElementCount = updated.Count;
+            int updatedElementCount = updatedTerminalSymbols.Count;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
             int minLength = Math.Min(existingElementCount, updatedElementCount);
             int agreeIndex = 0;
             while (agreeIndex < minLength)
             {
-                var existingElement = syntaxRenderer.Elements[agreeIndex].TerminalSymbol;
-                if (existingElement.GetText() == updated[agreeIndex].GetText())
+                var existingElement = syntaxRenderer.Elements[agreeIndex];
+                var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
+                if (existingElement.TerminalSymbol.GetText() == updatedTerminalSymbol.GetText())
                 {
                     ++agreeIndex;
                 }
@@ -282,7 +283,8 @@ namespace Sandra.UI.WF
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    syntaxRenderer.AppendTerminalSymbol(updated[agreeIndex], updated[agreeIndex].GetText());
+                    var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
+                    syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
                     ++agreeIndex;
                 }
 
