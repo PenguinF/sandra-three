@@ -132,7 +132,18 @@ namespace Sandra.UI.WF
             }
         }
 
-        private abstract class TextElementOld
+        /// <summary>
+        /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
+        /// which maps to exactly one terminal symbol.
+        /// </summary>
+        public sealed class TextElement
+        {
+            public TextElementOld TerminalSymbol;
+            public int Start { get { return TerminalSymbol.Start; } set { TerminalSymbol.Start = value; } }
+            public int Length { get { return TerminalSymbol.Length; } set { TerminalSymbol.Length = value; } }
+        }
+
+        public abstract class TextElementOld
         {
             public int Start;
             public int Length;
