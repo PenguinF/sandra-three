@@ -45,10 +45,13 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
+        private readonly SyntaxRenderer syntaxRenderer;
+
         public MovesTextBox()
         {
             ReadOnly = true;
             BorderStyle = BorderStyle.None;
+            syntaxRenderer = SyntaxRenderer.AttachTo(this);
             BackColor = Color.White;
             ForeColor = Color.Black;
             AutoWordSelection = true;

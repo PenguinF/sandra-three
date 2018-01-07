@@ -16,6 +16,20 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
+    public class SyntaxRenderer
+    {
+        public static SyntaxRenderer AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer(renderTarget);
+
+        private SyntaxRenderer(UpdatableRichTextBox renderTarget)
+        {
+            if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
+            this.renderTarget = renderTarget;
+        }
+
+        private readonly UpdatableRichTextBox renderTarget;
+    }
 }
