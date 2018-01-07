@@ -119,6 +119,8 @@ namespace Sandra.UI.WF
             }
         }
 
+        private bool hasGameAndMoveFormatter => moveFormatter != null && game != null;
+
         internal void GameUpdated()
         {
             if (!IsUpdating)
@@ -264,7 +266,7 @@ namespace Sandra.UI.WF
 
         private List<TextElement> getUpdatedElements()
         {
-            if (moveFormatter != null && game != null)
+            if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
