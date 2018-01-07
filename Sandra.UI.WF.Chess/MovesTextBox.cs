@@ -49,7 +49,6 @@ namespace Sandra.UI.WF
 
         public MovesTextBox()
         {
-            ReadOnly = true;
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<TextElementOld>.AttachTo(this);
             BackColor = Color.White;

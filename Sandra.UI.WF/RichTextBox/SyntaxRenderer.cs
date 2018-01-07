@@ -36,6 +36,9 @@ namespace Sandra.UI.WF
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             this.renderTarget = renderTarget;
+
+            renderTarget.ReadOnly = true;
+            renderTarget.Clear();
         }
 
         private readonly UpdatableRichTextBox renderTarget;
