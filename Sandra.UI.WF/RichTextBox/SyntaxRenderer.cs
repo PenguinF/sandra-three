@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.UI.WF
 {
@@ -38,5 +39,7 @@ namespace Sandra.UI.WF
         }
 
         private readonly UpdatableRichTextBox renderTarget;
+
+        public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
     }
 }

@@ -182,8 +182,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private readonly List<TextElement<TextElementOld>> elements = new List<TextElement<TextElementOld>>();
-
         private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
             if (plyCount % 2 == 1)
@@ -283,7 +281,7 @@ namespace Sandra.UI.WF
             // Clear and build the entire text anew by clearing the old element list.
             using (var updateToken = BeginUpdate())
             {
-                elements.Clear();
+                syntaxRenderer.Elements.Clear();
                 updateText();
             }
         }
@@ -292,7 +290,7 @@ namespace Sandra.UI.WF
         {
             var updated = getUpdatedElements();
 
-            int existingElementCount = elements.Count;
+            int existingElementCount = syntaxRenderer.Elements.Count;
             int updatedElementCount = updated.Count;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
@@ -300,7 +298,7 @@ namespace Sandra.UI.WF
             int agreeIndex = 0;
             while (agreeIndex < minLength)
             {
-                var existingElement = elements[agreeIndex].TerminalSymbol;
+                var existingElement = syntaxRenderer.Elements[agreeIndex].TerminalSymbol;
                 if (existingElement.GetText() == updated[agreeIndex].GetText())
                 {
                     // Keep using the existing element so no derived information gets lost.
@@ -322,13 +320,13 @@ namespace Sandra.UI.WF
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
-                    int startDisagree = elements[agreeIndex].Start;
+                    int startDisagree = syntaxRenderer.Elements[agreeIndex].Start;
                     Select(startDisagree, TextLength - startDisagree);
                     // This only works if not read-only, so temporarily turn it off.
                     ReadOnly = false;
                     SelectedText = string.Empty;
                     ReadOnly = true;
-                    elements.RemoveRange(agreeIndex, elements.Count - agreeIndex);
+                    syntaxRenderer.Elements.RemoveRange(agreeIndex, syntaxRenderer.Elements.Count - agreeIndex);
                 }
 
                 // Append new element texts.
@@ -339,7 +337,7 @@ namespace Sandra.UI.WF
                     AppendText(updatedElement.TerminalSymbol.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
                     ++agreeIndex;
-                    elements.Add(updatedElement);
+                    syntaxRenderer.Elements.Add(updatedElement);
                 }
 
                 // Make the active move bold.
@@ -349,7 +347,7 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    foreach (var formattedMoveElement in elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
+                    foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
                     {
                         if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                         {
@@ -383,14 +381,14 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
+                    List<int> startIndexes = syntaxRenderer.Elements.Select(x => x.Start).ToList();
 
                     // Get the index of the element that contains the caret.
                     elemIndex = startIndexes.BinarySearch(selectionStart);
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(elements[elemIndex].TerminalSymbol is TextElementOld.MoveDelimiter))
+                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is TextElementOld.MoveDelimiter))
                     {
                         elemIndex--;
                     }
@@ -407,10 +405,10 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(elements[elemIndex].TerminalSymbol is TextElementOld.FormattedMove)) elemIndex++;
+                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is TextElementOld.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
-                    newActiveMoveElement = elements[elemIndex];
+                    newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
                     newActiveTree = ((TextElementOld.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
                 }
 
@@ -422,7 +420,7 @@ namespace Sandra.UI.WF
                         try
                         {
                             // Search for the current active move element to clear its font.
-                            foreach (var formattedMoveElement in elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
+                            foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is TextElementOld.FormattedMove))
                             {
                                 if (((TextElementOld.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                                 {
