@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Sandra.PGN;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,25 +30,58 @@ namespace Sandra.UI.WF
     /// </summary>
     public class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
     {
-        readonly Font regularFont = new Font("Candara", 10);
-        readonly Font lastMoveFont = new Font("Candara", 10, FontStyle.Bold);
+        private sealed class TextElementStyle
+        {
+            public bool HasFont => Font != null;
+            public Font Font { get; set; }
+        }
+
+        private readonly TextElementStyle defaultStyle = new TextElementStyle()
+        {
+            Font = new Font("Candara", 10),
+        };
+
+        private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
+        {
+            Font = new Font("Candara", 10, FontStyle.Bold),
+        };
+
+        private readonly SyntaxRenderer<PGNTerminalSymbol> syntaxRenderer;
 
         public MovesTextBox()
         {
-            ReadOnly = true;
             BorderStyle = BorderStyle.None;
+            syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             BackColor = Color.White;
             ForeColor = Color.Black;
-            Font = regularFont;
-            AutoWordSelection = true;
+            applyDefaultStyle();
+        }
+
+        private void applyDefaultStyle()
+        {
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                Font = defaultStyle.Font;
+                SelectAll();
+                SelectionFont = defaultStyle.Font;
+            }
+        }
+
+        private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
+        {
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                Select(element.Start, element.Length);
+                if (style.HasFont) SelectionFont = style.Font;
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                regularFont.Dispose();
-                lastMoveFont.Dispose();
+                defaultStyle.Font.Dispose();
+                activeMoveStyle.Font.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -93,6 +127,8 @@ namespace Sandra.UI.WF
             }
         }
 
+        private bool hasGameAndMoveFormatter => moveFormatter != null && game != null;
+
         internal void GameUpdated()
         {
             if (!IsUpdating)
@@ -101,91 +137,31 @@ namespace Sandra.UI.WF
             }
         }
 
-        private abstract class TextElement
-        {
-            public int Start;
-            public int Length;
-            public abstract string GetText();
-
-            public sealed class Space : TextElement
-            {
-                public const string SpaceText = " ";
-                public override string GetText() => SpaceText;
-            }
-
-            public sealed class SideLineStart : TextElement
-            {
-                public const string SideLineStartText = "(";
-                public override string GetText() => SideLineStartText;
-            }
-
-            public sealed class SideLineEnd : TextElement
-            {
-                public const string SideLineEndText = ")";
-                public override string GetText() => SideLineEndText;
-            }
-
-            public sealed class InitialBlackSideToMoveEllipsis : TextElement
-            {
-                public const string EllipsisText = "..";
-                public override string GetText() => EllipsisText;
-            }
-
-            public abstract class MoveDelimiter : TextElement { }
-
-            public sealed class MoveCounter : MoveDelimiter
-            {
-                readonly int value;
-                public override string GetText() => value + ".";
-                public MoveCounter(int value) { this.value = value; }
-            }
-
-            public sealed class FormattedMove : MoveDelimiter
-            {
-                readonly string value;
-                public override string GetText() => value;
-                public readonly Chess.Variation Variation;
-                public FormattedMove(string value, Chess.Variation variation)
-                {
-                    this.value = value;
-                    Variation = variation;
-                }
-            }
-        }
-
-        private List<TextElement> elements;
-
-        private void updateFont(TextElement element, Font newFont)
-        {
-            Select(element.Start, element.Length);
-            SelectionFont = newFont;
-        }
-
-        private IEnumerable<TextElement> emitInitialBlackSideToMoveEllipsis(int plyCount)
+        private IEnumerable<PGNTerminalSymbol> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
             if (plyCount % 2 == 1)
             {
                 // Add an ellipsis for the previous white move. 
-                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElement.InitialBlackSideToMoveEllipsis();
-                yield return new TextElement.Space();
+                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
+                yield return new PGNTerminalSymbol.InitialBlackSideToMoveEllipsis();
+                yield return new PGNTerminalSymbol.Space();
             }
         }
 
-        private IEnumerable<TextElement> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
+        private IEnumerable<PGNTerminalSymbol> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
         {
             if (plyCount % 2 == 0)
             {
-                yield return new TextElement.MoveCounter(plyCount / 2 + 1);
-                yield return new TextElement.Space();
+                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
+                yield return new PGNTerminalSymbol.Space();
             }
 
-            yield return new TextElement.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+            yield return new PGNTerminalSymbol.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
         }
 
         // Parametrized on emitSpace because this method may not yield anything,
         // in which case no spaces should be emitted at all.
-        private IEnumerable<TextElement> emitMainLine(Chess.Game game, bool emitSpace)
+        private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool emitSpace)
         {
             for (;;)
             {
@@ -196,7 +172,7 @@ namespace Sandra.UI.WF
                 // Emit the main move before side lines which start at the same plyCount.
                 if (current.MainLine != null)
                 {
-                    if (emitSpace) yield return new TextElement.Space();
+                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
                     foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
                     emitSpace = true;
                 }
@@ -206,8 +182,8 @@ namespace Sandra.UI.WF
                     // Reset active tree before going into each side line.
                     game.SetActiveTree(current);
 
-                    if (emitSpace) yield return new TextElement.Space();
-                    yield return new TextElement.SideLineStart();
+                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
+                    yield return new PGNTerminalSymbol.SideLineStart();
 
                     // Emit first move.
                     foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
@@ -215,7 +191,7 @@ namespace Sandra.UI.WF
 
                     // Recurse here.
                     foreach (var element in emitMainLine(game, true)) yield return element;
-                    yield return new TextElement.SideLineEnd();
+                    yield return new PGNTerminalSymbol.SideLineEnd();
 
                     emitSpace = true;
                 }
@@ -230,7 +206,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<TextElement> emitMoveTree(Chess.Game game)
+        private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
         {
             // Possible initial black side to move ellipsis.
             if (game.MoveTree.MainLine != null)
@@ -242,120 +218,115 @@ namespace Sandra.UI.WF
             foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
-        private List<TextElement> getUpdatedElements()
+        private List<PGNTerminalSymbol> getUpdatedElements()
         {
-            if (moveFormatter != null && game != null)
+            if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<TextElement>(emitMoveTree(copiedGame));
+                return new List<PGNTerminalSymbol>(emitMoveTree(copiedGame));
             }
 
-            return null;
+            return new List<PGNTerminalSymbol>();
         }
+
+        private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
 
         private void refreshText()
         {
-            // Clear and build the entire text anew by resetting the old element lists.
-            elements = null;
-            updateText();
+            // Clear and build the entire text anew by clearing the old element list.
+            using (var updateToken = BeginUpdate())
+            {
+                syntaxRenderer.Clear();
+                updateText();
+            }
         }
 
         private void updateText()
         {
-            // Block OnSelectionChanged() which will be raised as a side effect of this method.
-            BeginUpdate();
-            try
+            List<PGNTerminalSymbol> updatedTerminalSymbols = getUpdatedElements();
+
+            int existingElementCount = syntaxRenderer.Elements.Count;
+            int updatedElementCount = updatedTerminalSymbols.Count;
+
+            TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
+
+            // Instead of clearing and updating the entire textbox, compare the elements one by one.
+            int minLength = Math.Min(existingElementCount, updatedElementCount);
+            int agreeIndex = 0;
+            while (agreeIndex < minLength)
             {
-                var updated = getUpdatedElements();
-
-                int existingElementCount = elements == null
-                                         ? 0
-                                         : elements.Count;
-
-                int updatedElementCount = updated == null
-                                        ? 0
-                                        : updated.Count;
-
-
-                // Instead of clearing and updating the entire textbox, compare the elements one by one.
-                int minLength = Math.Min(existingElementCount, updatedElementCount);
-                int agreeIndex = 0;
-                while (agreeIndex < minLength)
+                var existingElement = syntaxRenderer.Elements[agreeIndex];
+                var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
+                if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
-                    var existingElement = elements[agreeIndex];
-                    if (existingElement.GetText() == updated[agreeIndex].GetText())
+                    ++agreeIndex;
+                    if (newActiveMoveElement == null
+                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
+                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                     {
-                        // Keep using the existing element so no derived information gets lost.
-                        updated[agreeIndex] = existingElement;
-                        ++agreeIndex;
-                    }
-                    else
-                    {
-                        // agreeIndex is now at the first index where both element lists disagree.
-                        break;
+                        newActiveMoveElement = existingElement;
                     }
                 }
+                else
+                {
+                    // agreeIndex is now at the first index where both element lists disagree.
+                    break;
+                }
+            }
+
+            using (var updateToken = BeginUpdate())
+            {
+                // Reset any markup.
+                applyDefaultStyle();
+                currentActiveMoveStyleElement = null;
 
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
-                    int startDisagree = elements[agreeIndex].Start;
-                    Select(startDisagree, TextLength - startDisagree);
-                    // This only works if not read-only, so temporarily turn it off.
-                    ReadOnly = false;
-                    SelectedText = string.Empty;
-                    ReadOnly = true;
+                    syntaxRenderer.RemoveFrom(agreeIndex);
                 }
 
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    var updatedElement = updated[agreeIndex];
-                    updatedElement.Start = TextLength;
-                    AppendText(updatedElement.GetText());
-                    updatedElement.Length = TextLength - updatedElement.Start;
+                    var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
+                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
+
+                    if (newActiveMoveElement == null
+                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
+                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    {
+                        newActiveMoveElement = newElement;
+                    }
+
                     ++agreeIndex;
                 }
 
-                elements = updated;
-
-                // Reset all markup.
-                SelectAll();
-                SelectionFont = regularFont;
-                Select(0, 0);
-
-                // Make the active move bold.
-                if (elements != null)
+                if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
                 {
-                    foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                    // If there's no active move, go to before the first move.
+                    if (syntaxRenderer.Elements.Count > 0)
                     {
-                        if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
-                        {
-                            updateFont(formattedMoveElement, lastMoveFont);
-
-                            if (!ContainsFocus)
-                            {
-                                // Also update the caret so the active move is in view.
-                                Select(formattedMoveElement.Start + formattedMoveElement.Length, 0);
-                                ScrollToCaret();
-                            }
-
-                            break;
-                        }
+                        syntaxRenderer.Elements[0].BringIntoViewBefore();
                     }
                 }
-            }
-            finally
-            {
-                EndUpdate();
+                else if (newActiveMoveElement != null)
+                {
+                    // Make the active move bold.
+                    currentActiveMoveStyleElement = newActiveMoveElement;
+                    applyStyle(newActiveMoveElement, activeMoveStyle);
+
+                    // Also update the caret so the active move is in view.
+                    newActiveMoveElement.BringIntoViewAfter();
+                }
             }
         }
 
         protected override void OnSelectionChanged(EventArgs e)
         {
-            if (!IsUpdating && elements != null && SelectionLength == 0)
+            if (!IsUpdating && SelectionLength == 0 && hasGameAndMoveFormatter)
             {
                 int selectionStart = SelectionStart;
 
@@ -367,20 +338,20 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    List<int> startIndexes = elements.Select(x => x.Start).ToList();
+                    List<int> startIndexes = syntaxRenderer.Elements.Select(x => x.Start).ToList();
 
                     // Get the index of the element that contains the caret.
                     elemIndex = startIndexes.BinarySearch(selectionStart);
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(elements[elemIndex] is TextElement.MoveDelimiter))
+                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveDelimiter))
                     {
                         elemIndex--;
                     }
                 }
 
-                TextElement.FormattedMove newActiveMoveElement;
+                TextElement<PGNTerminalSymbol> newActiveMoveElement;
                 Chess.MoveTree newActiveTree;
                 if (elemIndex < 0)
                 {
@@ -391,26 +362,23 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(elements[elemIndex] is TextElement.FormattedMove)) elemIndex++;
+                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove)) elemIndex++;
 
                     // Go to the position after the selected move.
-                    newActiveMoveElement = (TextElement.FormattedMove)elements[elemIndex];
-                    newActiveTree = newActiveMoveElement.Variation.MoveTree;
+                    newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
+                    newActiveTree = ((PGNTerminalSymbol.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    BeginUpdate();
-                    try
+                    using (var updateToken = BeginUpdateRememberCaret())
                     {
-                        // Search for the current active move element to clear its font.
-                        foreach (var formattedMoveElement in elements.OfType<TextElement.FormattedMove>())
+                        // Reset markup of the previously active move element.
+                        if (currentActiveMoveStyleElement != null)
                         {
-                            if (formattedMoveElement.Variation.MoveTree == game.Game.ActiveTree)
-                            {
-                                updateFont(formattedMoveElement, regularFont);
-                            }
+                            applyStyle(currentActiveMoveStyleElement, defaultStyle);
+                            currentActiveMoveStyleElement = null;
                         }
 
                         game.Game.SetActiveTree(newActiveTree);
@@ -420,13 +388,9 @@ namespace Sandra.UI.WF
 
                         if (newActiveMoveElement != null)
                         {
-                            updateFont(newActiveMoveElement, lastMoveFont);
+                            currentActiveMoveStyleElement = newActiveMoveElement;
+                            applyStyle(newActiveMoveElement, activeMoveStyle);
                         }
-                    }
-                    finally
-                    {
-                        Select(selectionStart, 0);
-                        EndUpdate();
                     }
                 }
             }
