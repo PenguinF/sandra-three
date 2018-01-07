@@ -250,6 +250,8 @@ namespace Sandra.UI.WF
             int existingElementCount = syntaxRenderer.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
+            TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
+
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
             int minLength = Math.Min(existingElementCount, updatedElementCount);
             int agreeIndex = 0;
@@ -260,6 +262,12 @@ namespace Sandra.UI.WF
                 if (existingElement.TerminalSymbol.GetText() == updatedTerminalSymbol.GetText())
                 {
                     ++agreeIndex;
+                    if (newActiveMoveElement == null
+                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
+                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    {
+                        newActiveMoveElement = existingElement;
+                    }
                 }
                 else
                 {
@@ -284,7 +292,15 @@ namespace Sandra.UI.WF
                 while (agreeIndex < updatedElementCount)
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
+                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
+
+                    if (newActiveMoveElement == null
+                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
+                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    {
+                        newActiveMoveElement = newElement;
+                    }
+
                     ++agreeIndex;
                 }
 
@@ -296,27 +312,14 @@ namespace Sandra.UI.WF
                         syntaxRenderer.Elements[0].BringIntoViewBefore();
                     }
                 }
-                else
+                else if (newActiveMoveElement != null)
                 {
-                    TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
-                    foreach (var formattedMoveElement in syntaxRenderer.Elements.Where(x => x.TerminalSymbol is PGNTerminalSymbol.FormattedMove))
-                    {
-                        if (((PGNTerminalSymbol.FormattedMove)formattedMoveElement.TerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
-                        {
-                            newActiveMoveElement = formattedMoveElement;
-                            break;
-                        }
-                    }
+                    // Make the active move bold.
+                    currentActiveMoveStyleElement = newActiveMoveElement;
+                    applyStyle(newActiveMoveElement, activeMoveStyle);
 
-                    if (newActiveMoveElement != null)
-                    {
-                        // Make the active move bold.
-                        currentActiveMoveStyleElement = newActiveMoveElement;
-                        applyStyle(newActiveMoveElement, activeMoveStyle);
-
-                        // Also update the caret so the active move is in view.
-                        newActiveMoveElement.BringIntoViewAfter();
-                    }
+                    // Also update the caret so the active move is in view.
+                    newActiveMoveElement.BringIntoViewAfter();
                 }
             }
         }
