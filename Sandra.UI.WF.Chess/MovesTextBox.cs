@@ -195,7 +195,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private List<TextElementOld> elements;
+        private List<TextElementOld> elements = new List<TextElementOld>();
 
         private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
@@ -288,7 +288,7 @@ namespace Sandra.UI.WF
                 return new List<TextElementOld>(emitMoveTree(copiedGame));
             }
 
-            return null;
+            return new List<TextElementOld>();
         }
 
         private void refreshText()
@@ -296,7 +296,7 @@ namespace Sandra.UI.WF
             // Clear and build the entire text anew by clearing the old element list.
             using (var updateToken = BeginUpdate())
             {
-                elements = null;
+                elements.Clear();
                 updateText();
             }
         }
@@ -305,14 +305,8 @@ namespace Sandra.UI.WF
         {
             var updated = getUpdatedElements();
 
-            int existingElementCount = elements == null
-                                     ? 0
-                                     : elements.Count;
-
-            int updatedElementCount = updated == null
-                                    ? 0
-                                    : updated.Count;
-
+            int existingElementCount = elements.Count;
+            int updatedElementCount = updated.Count;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
             int minLength = Math.Min(existingElementCount, updatedElementCount);
@@ -361,10 +355,12 @@ namespace Sandra.UI.WF
 
                 elements = updated;
 
-                Select(0, 0);
-
                 // Make the active move bold.
-                if (elements != null)
+                if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
+                {
+                    Select(0, 0);
+                }
+                else
                 {
                     foreach (var formattedMoveElement in elements.OfType<TextElementOld.FormattedMove>())
                     {
@@ -388,7 +384,7 @@ namespace Sandra.UI.WF
 
         protected override void OnSelectionChanged(EventArgs e)
         {
-            if (!IsUpdating && elements != null && SelectionLength == 0)
+            if (!IsUpdating && SelectionLength == 0 && hasGameAndMoveFormatter)
             {
                 int selectionStart = SelectionStart;
 
