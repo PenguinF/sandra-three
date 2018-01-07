@@ -16,33 +16,40 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.PGN
 {
-    public abstract class PGNTerminalSymbol
+    public abstract class PGNTerminalSymbol : IEquatable<PGNTerminalSymbol>
     {
+        public abstract bool Equals(PGNTerminalSymbol other);
         public abstract string GetText();
 
         public sealed class Space : PGNTerminalSymbol
         {
             public const string SpaceText = " ";
+            public override bool Equals(PGNTerminalSymbol other) => other is Space;
             public override string GetText() => SpaceText;
         }
 
         public sealed class SideLineStart : PGNTerminalSymbol
         {
             public const string SideLineStartText = "(";
+            public override bool Equals(PGNTerminalSymbol other) => other is SideLineStart;
             public override string GetText() => SideLineStartText;
         }
 
         public sealed class SideLineEnd : PGNTerminalSymbol
         {
             public const string SideLineEndText = ")";
+            public override bool Equals(PGNTerminalSymbol other) => other is SideLineEnd;
             public override string GetText() => SideLineEndText;
         }
 
         public sealed class InitialBlackSideToMoveEllipsis : PGNTerminalSymbol
         {
             public const string EllipsisText = "..";
+            public override bool Equals(PGNTerminalSymbol other) => other is InitialBlackSideToMoveEllipsis;
             public override string GetText() => EllipsisText;
         }
 
@@ -51,6 +58,7 @@ namespace Sandra.PGN
         public sealed class MoveCounter : MoveDelimiter
         {
             readonly int value;
+            public override bool Equals(PGNTerminalSymbol other) => other is MoveCounter && value == ((MoveCounter)other).value;
             public override string GetText() => value + ".";
             public MoveCounter(int value) { this.value = value; }
         }
@@ -58,6 +66,7 @@ namespace Sandra.PGN
         public sealed class FormattedMove : MoveDelimiter
         {
             readonly string value;
+            public override bool Equals(PGNTerminalSymbol other) => other is FormattedMove && value == ((FormattedMove)other).value;
             public override string GetText() => value;
             public readonly Chess.Variation Variation;
             public FormattedMove(string value, Chess.Variation variation)

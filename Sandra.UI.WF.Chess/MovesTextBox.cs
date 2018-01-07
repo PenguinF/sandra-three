@@ -259,7 +259,7 @@ namespace Sandra.UI.WF
             {
                 var existingElement = syntaxRenderer.Elements[agreeIndex];
                 var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                if (existingElement.TerminalSymbol.GetText() == updatedTerminalSymbol.GetText())
+                if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
                     ++agreeIndex;
                     if (newActiveMoveElement == null
