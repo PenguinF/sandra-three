@@ -195,7 +195,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private List<TextElementOld> elements = new List<TextElementOld>();
+        private readonly List<TextElementOld> elements = new List<TextElementOld>();
 
         private IEnumerable<TextElementOld> emitInitialBlackSideToMoveEllipsis(int plyCount)
         {
@@ -341,6 +341,7 @@ namespace Sandra.UI.WF
                     ReadOnly = false;
                     SelectedText = string.Empty;
                     ReadOnly = true;
+                    elements.RemoveRange(agreeIndex, elements.Count - agreeIndex);
                 }
 
                 // Append new element texts.
@@ -351,9 +352,8 @@ namespace Sandra.UI.WF
                     AppendText(updatedElement.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
                     ++agreeIndex;
+                    elements.Add(updatedElement);
                 }
-
-                elements = updated;
 
                 // Make the active move bold.
                 if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
