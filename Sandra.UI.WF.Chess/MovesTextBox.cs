@@ -347,12 +347,12 @@ namespace Sandra.UI.WF
                 // Append new element texts.
                 while (agreeIndex < updatedElementCount)
                 {
-                    var updatedElement = updated[agreeIndex];
+                    var updatedElement = new TextElement() { TerminalSymbol = updated[agreeIndex] };
                     updatedElement.Start = TextLength;
-                    AppendText(updatedElement.GetText());
+                    AppendText(updatedElement.TerminalSymbol.GetText());
                     updatedElement.Length = TextLength - updatedElement.Start;
                     ++agreeIndex;
-                    elements.Add(new TextElement() { TerminalSymbol = updatedElement });
+                    elements.Add(updatedElement);
                 }
 
                 // Make the active move bold.
