@@ -280,7 +280,7 @@ namespace Sandra.UI.WF
             // Clear and build the entire text anew by clearing the old element list.
             using (var updateToken = BeginUpdate())
             {
-                syntaxRenderer.Elements.Clear();
+                syntaxRenderer.Clear();
                 updateText();
             }
         }

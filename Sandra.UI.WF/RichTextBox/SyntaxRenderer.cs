@@ -45,6 +45,15 @@ namespace Sandra.UI.WF
 
         public readonly List<TextElement<TTerminal>> Elements = new List<TextElement<TTerminal>>();
 
+        /// <summary>
+        /// Clears all syntax from the renderer.
+        /// </summary>
+        public void Clear()
+        {
+            Elements.Clear();
+            renderTarget.Clear();
+        }
+
         public void RemoveFrom(int index)
         {
             int textStart = Elements[index].Start;
