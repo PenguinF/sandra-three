@@ -28,6 +28,9 @@ namespace Sandra.UI.WF
     /// The type of terminal symbols to format.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
+    /// <remarks>
+    /// This component is work in progress.
+    /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
         public static SyntaxRenderer<TTerminal> AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
