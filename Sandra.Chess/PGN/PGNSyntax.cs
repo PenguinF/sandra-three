@@ -112,7 +112,7 @@ namespace Sandra.PGN
             Variation = variation;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && value == ((FormattedMoveSymbol)other).value;
+        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Variation == ((FormattedMoveSymbol)other).Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
         public string GetText() => value;
