@@ -235,6 +235,7 @@ namespace Sandra.UI.WF
             int existingElementCount = syntaxRenderer.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
+            PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
             TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
@@ -247,9 +248,7 @@ namespace Sandra.UI.WF
                 if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
                     ++agreeIndex;
-                    if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is FormattedMoveSymbol
-                        && ((FormattedMoveSymbol)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
                         newActiveMoveElement = existingElement;
                     }
@@ -281,9 +280,7 @@ namespace Sandra.UI.WF
                     var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol,
                                                                          textGenerator.Visit(updatedTerminalSymbol));
 
-                    if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is FormattedMoveSymbol
-                        && ((FormattedMoveSymbol)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
                         newActiveMoveElement = newElement;
                     }

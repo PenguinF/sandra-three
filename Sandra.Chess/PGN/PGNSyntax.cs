@@ -125,4 +125,11 @@ namespace Sandra.PGN
         public override string VisitSideLineStartSymbol(SideLineStartSymbol symbol) => SideLineStartSymbol.SideLineStartText;
         public override string VisitSpaceSymbol(SpaceSymbol symbol) => SpaceSymbol.SpaceText;
     }
+
+    public class PGNMoveSearcher : PGNTerminalSymbolVisitor<bool>
+    {
+        private readonly Chess.MoveTree needle;
+        public PGNMoveSearcher(Chess.MoveTree needle) { this.needle = needle; }
+        public override bool VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Variation.MoveTree == needle;
+    }
 }
