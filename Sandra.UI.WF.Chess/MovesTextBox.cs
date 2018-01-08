@@ -141,10 +141,8 @@ namespace Sandra.UI.WF
         {
             if (plyCount % 2 == 1)
             {
-                // Add an ellipsis for the previous white move. 
                 yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
                 yield return new PGNTerminalSymbol.InitialBlackSideToMoveEllipsis();
-                yield return new PGNTerminalSymbol.Space();
             }
         }
 
@@ -153,43 +151,33 @@ namespace Sandra.UI.WF
             if (plyCount % 2 == 0)
             {
                 yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
-                yield return new PGNTerminalSymbol.Space();
             }
 
             yield return new PGNTerminalSymbol.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
         }
 
-        // Parametrized on emitSpace because this method may not yield anything,
-        // in which case no spaces should be emitted at all.
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool emitSpace)
         {
             for (;;)
             {
-                // Remember the game's active tree because it's the starting point of side lines.
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
-                // Emit the main move before side lines which start at the same plyCount.
                 if (current.MainLine != null)
                 {
-                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
                     foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
                     emitSpace = true;
                 }
 
                 foreach (var sideLine in current.SideLines)
                 {
-                    // Reset active tree before going into each side line.
                     game.SetActiveTree(current);
 
-                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
                     yield return new PGNTerminalSymbol.SideLineStart();
 
-                    // Emit first move.
                     foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
                     foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
 
-                    // Recurse here.
                     foreach (var element in emitMainLine(game, true)) yield return element;
                     yield return new PGNTerminalSymbol.SideLineEnd();
 
@@ -201,20 +189,17 @@ namespace Sandra.UI.WF
                     yield break;
                 }
 
-                // Goto next move in the main line.
                 game.SetActiveTree(current.MainLine.MoveTree);
             }
         }
 
         private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
         {
-            // Possible initial black side to move ellipsis.
             if (game.MoveTree.MainLine != null)
             {
                 foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
             }
 
-            // Treat as a regular main line.
             foreach (var element in emitMainLine(game, false)) yield return element;
         }
 
