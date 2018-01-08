@@ -93,28 +93,33 @@ namespace Sandra.PGN
 
     public sealed class MoveCounterSymbol : PGNTerminalSymbol
     {
-        readonly int value;
-        public MoveCounterSymbol(int value) { this.value = value; }
+        public readonly int MoveCounter;
 
-        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && value == ((MoveCounterSymbol)other).value;
+        public MoveCounterSymbol(int moveCounter)
+        {
+            MoveCounter = moveCounter;
+        }
+
+        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && MoveCounter == ((MoveCounterSymbol)other).MoveCounter;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
-        public string GetText() => value + ".";
+        public string GetText() => MoveCounter + ".";
     }
 
     public sealed class FormattedMoveSymbol : PGNTerminalSymbol
     {
-        readonly string value;
+        public readonly string Notation;
         public readonly Chess.Variation Variation;
-        public FormattedMoveSymbol(string value, Chess.Variation variation)
+
+        public FormattedMoveSymbol(string notation, Chess.Variation variation)
         {
-            this.value = value;
+            Notation = notation;
             Variation = variation;
         }
 
         public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Variation == ((FormattedMoveSymbol)other).Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
-        public string GetText() => value;
+        public string GetText() => Notation;
     }
 }
