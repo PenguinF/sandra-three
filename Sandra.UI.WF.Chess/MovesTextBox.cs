@@ -141,8 +141,8 @@ namespace Sandra.UI.WF
         {
             if (plyCount % 2 == 1)
             {
-                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
-                yield return new PGNTerminalSymbol.InitialBlackSideToMoveEllipsis();
+                yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                yield return new BlackToMoveEllipsisSymbol();
             }
         }
 
@@ -150,10 +150,10 @@ namespace Sandra.UI.WF
         {
             if (plyCount % 2 == 0)
             {
-                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
+                yield return new MoveCounterSymbol(plyCount / 2 + 1);
             }
 
-            yield return new PGNTerminalSymbol.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
+            yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, line.Move), line);
         }
 
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool emitSpace)
@@ -173,13 +173,13 @@ namespace Sandra.UI.WF
                 {
                     game.SetActiveTree(current);
 
-                    yield return new PGNTerminalSymbol.SideLineStart();
+                    yield return new SideLineStartSymbol();
 
                     foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
                     foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
 
                     foreach (var element in emitMainLine(game, true)) yield return element;
-                    yield return new PGNTerminalSymbol.SideLineEnd();
+                    yield return new SideLineEndSymbol();
 
                     emitSpace = true;
                 }
@@ -248,8 +248,8 @@ namespace Sandra.UI.WF
                 {
                     ++agreeIndex;
                     if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
-                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                        && updatedTerminalSymbol is FormattedMoveSymbol
+                        && ((FormattedMoveSymbol)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                     {
                         newActiveMoveElement = existingElement;
                     }
@@ -280,8 +280,8 @@ namespace Sandra.UI.WF
                     var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
 
                     if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
-                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                        && updatedTerminalSymbol is FormattedMoveSymbol
+                        && ((FormattedMoveSymbol)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
                     {
                         newActiveMoveElement = newElement;
                     }
@@ -331,8 +331,8 @@ namespace Sandra.UI.WF
 
                     // Look for an element which delimits a move.
                     while (elemIndex >= 0
-                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveCounter)
-                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove))
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is MoveCounterSymbol)
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol))
                     {
                         elemIndex--;
                     }
@@ -349,11 +349,11 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove)) elemIndex++;
+                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol)) elemIndex++;
 
                     // Go to the position after the selected move.
                     newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
-                    newActiveTree = ((PGNTerminalSymbol.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
+                    newActiveTree = ((FormattedMoveSymbol)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
