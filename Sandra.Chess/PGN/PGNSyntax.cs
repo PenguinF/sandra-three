@@ -20,53 +20,52 @@ using System;
 
 namespace Sandra.PGN
 {
-    public abstract class PGNTerminalSymbol : IEquatable<PGNTerminalSymbol>
+    public interface PGNTerminalSymbol : IEquatable<PGNTerminalSymbol>
     {
-        public abstract bool Equals(PGNTerminalSymbol other);
-        public abstract string GetText();
+        string GetText();
     }
 
     public sealed class SpaceSymbol : PGNTerminalSymbol
     {
         public const string SpaceText = " ";
-        public override bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
-        public override string GetText() => SpaceText;
+        public bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
+        public string GetText() => SpaceText;
     }
 
     public sealed class SideLineStartSymbol : PGNTerminalSymbol
     {
         public const string SideLineStartText = "(";
-        public override bool Equals(PGNTerminalSymbol other) => other is SideLineStartSymbol;
-        public override string GetText() => SideLineStartText;
+        public bool Equals(PGNTerminalSymbol other) => other is SideLineStartSymbol;
+        public string GetText() => SideLineStartText;
     }
 
     public sealed class SideLineEndSymbol : PGNTerminalSymbol
     {
         public const string SideLineEndText = ")";
-        public override bool Equals(PGNTerminalSymbol other) => other is SideLineEndSymbol;
-        public override string GetText() => SideLineEndText;
+        public bool Equals(PGNTerminalSymbol other) => other is SideLineEndSymbol;
+        public string GetText() => SideLineEndText;
     }
 
     public sealed class BlackToMoveEllipsisSymbol : PGNTerminalSymbol
     {
         public const string EllipsisText = "..";
-        public override bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol;
-        public override string GetText() => EllipsisText;
+        public bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol;
+        public string GetText() => EllipsisText;
     }
 
     public sealed class MoveCounterSymbol : PGNTerminalSymbol
     {
         readonly int value;
-        public override bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && value == ((MoveCounterSymbol)other).value;
-        public override string GetText() => value + ".";
+        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && value == ((MoveCounterSymbol)other).value;
+        public string GetText() => value + ".";
         public MoveCounterSymbol(int value) { this.value = value; }
     }
 
     public sealed class FormattedMoveSymbol : PGNTerminalSymbol
     {
         readonly string value;
-        public override bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && value == ((FormattedMoveSymbol)other).value;
-        public override string GetText() => value;
+        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && value == ((FormattedMoveSymbol)other).value;
+        public string GetText() => value;
         public readonly Chess.Variation Variation;
         public FormattedMoveSymbol(string value, Chess.Variation variation)
         {
