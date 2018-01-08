@@ -24,7 +24,6 @@ namespace Sandra.PGN
     {
         void Accept(PGNTerminalSymbolVisitor visitor);
         TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor);
-        string GetText();
     }
 
     public abstract class PGNTerminalSymbolVisitor
@@ -58,7 +57,6 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSpaceSymbol(this);
-        public string GetText() => SpaceText;
     }
 
     public sealed class SideLineStartSymbol : PGNTerminalSymbol
@@ -68,7 +66,6 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is SideLineStartSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineStartSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
-        public string GetText() => SideLineStartText;
     }
 
     public sealed class SideLineEndSymbol : PGNTerminalSymbol
@@ -78,7 +75,6 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is SideLineEndSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineEndSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineEndSymbol(this);
-        public string GetText() => SideLineEndText;
     }
 
     public sealed class BlackToMoveEllipsisSymbol : PGNTerminalSymbol
@@ -88,7 +84,6 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
-        public string GetText() => EllipsisText;
     }
 
     public sealed class MoveCounterSymbol : PGNTerminalSymbol
@@ -103,7 +98,6 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && MoveCounter == ((MoveCounterSymbol)other).MoveCounter;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
-        public string GetText() => MoveCounter + ".";
     }
 
     public sealed class FormattedMoveSymbol : PGNTerminalSymbol
@@ -120,6 +114,15 @@ namespace Sandra.PGN
         public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Variation == ((FormattedMoveSymbol)other).Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
-        public string GetText() => Notation;
+    }
+
+    public class PGNTerminalSymbolTextGenerator : PGNTerminalSymbolVisitor<string>
+    {
+        public override string VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => BlackToMoveEllipsisSymbol.EllipsisText;
+        public override string VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Notation;
+        public override string VisitMoveCounterSymbol(MoveCounterSymbol symbol) => $"{symbol.MoveCounter}.";
+        public override string VisitSideLineEndSymbol(SideLineEndSymbol symbol) => SideLineEndSymbol.SideLineEndText;
+        public override string VisitSideLineStartSymbol(SideLineStartSymbol symbol) => SideLineStartSymbol.SideLineStartText;
+        public override string VisitSpaceSymbol(SpaceSymbol symbol) => SpaceSymbol.SpaceText;
     }
 }

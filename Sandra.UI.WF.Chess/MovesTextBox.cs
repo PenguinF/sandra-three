@@ -274,10 +274,12 @@ namespace Sandra.UI.WF
                 }
 
                 // Append new element texts.
+                PGNTerminalSymbolTextGenerator textGenerator = new PGNTerminalSymbolTextGenerator();
                 while (agreeIndex < updatedElementCount)
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
+                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol,
+                                                                         textGenerator.Visit(updatedTerminalSymbol));
 
                     if (newActiveMoveElement == null
                         && updatedTerminalSymbol is FormattedMoveSymbol
