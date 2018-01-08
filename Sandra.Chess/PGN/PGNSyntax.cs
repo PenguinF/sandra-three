@@ -53,9 +53,7 @@ namespace Sandra.PGN
             public override string GetText() => EllipsisText;
         }
 
-        public abstract class MoveDelimiter : PGNTerminalSymbol { }
-
-        public sealed class MoveCounter : MoveDelimiter
+        public sealed class MoveCounter : PGNTerminalSymbol
         {
             readonly int value;
             public override bool Equals(PGNTerminalSymbol other) => other is MoveCounter && value == ((MoveCounter)other).value;
@@ -63,7 +61,7 @@ namespace Sandra.PGN
             public MoveCounter(int value) { this.value = value; }
         }
 
-        public sealed class FormattedMove : MoveDelimiter
+        public sealed class FormattedMove : PGNTerminalSymbol
         {
             readonly string value;
             public override bool Equals(PGNTerminalSymbol other) => other is FormattedMove && value == ((FormattedMove)other).value;

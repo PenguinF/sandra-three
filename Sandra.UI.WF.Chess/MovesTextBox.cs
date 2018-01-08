@@ -330,7 +330,9 @@ namespace Sandra.UI.WF
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveDelimiter))
+                    while (elemIndex >= 0
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveCounter)
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove))
                     {
                         elemIndex--;
                     }
