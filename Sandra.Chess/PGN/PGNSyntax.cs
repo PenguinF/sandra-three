@@ -35,12 +35,14 @@ namespace Sandra.PGN
         public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols()
         {
             bool precededByFormattedMoveSymbol = false;
+            bool emitSpace = false;
 
             foreach (var plyWithSidelines in Plies)
             {
                 // Emit the main move before side lines which start at the same plyCount.
                 if (plyWithSidelines.Ply != null)
                 {
+                    if (emitSpace) yield return SpaceSymbol.Value; else emitSpace = true;
                     foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(precededByFormattedMoveSymbol)) yield return symbol;
                     precededByFormattedMoveSymbol = true;
                 }
@@ -49,6 +51,7 @@ namespace Sandra.PGN
                 {
                     foreach (var pgnSideLine in plyWithSidelines.SideLines)
                     {
+                        if (emitSpace) yield return SpaceSymbol.Value; else emitSpace = true;
                         yield return new SideLineStartSymbol();
                         foreach (var element in pgnSideLine.GenerateTerminalSymbols()) yield return element;
                         yield return new SideLineEndSymbol();
@@ -95,11 +98,13 @@ namespace Sandra.PGN
             if (PlyCount % 2 == 0)
             {
                 yield return new MoveCounterSymbol(this);
+                yield return SpaceSymbol.Value;
             }
             else if (!precededByFormattedMoveSymbol)
             {
                 yield return new MoveCounterSymbol(this);
                 yield return new BlackToMoveEllipsisSymbol();
+                yield return SpaceSymbol.Value;
             }
             yield return new FormattedMoveSymbol(this);
         }
@@ -138,6 +143,8 @@ namespace Sandra.PGN
     public sealed class SpaceSymbol : PGNTerminalSymbol
     {
         public const string SpaceText = " ";
+
+        public static readonly SpaceSymbol Value = new SpaceSymbol();
 
         public bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
