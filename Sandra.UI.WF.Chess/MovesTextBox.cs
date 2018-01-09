@@ -174,17 +174,17 @@ namespace Sandra.UI.WF
             }
         }
 
-        private List<PGNTerminalSymbol> getUpdatedElements()
+        private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
         {
             if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<PGNTerminalSymbol>(emitMainLine(copiedGame, false));
+                return emitMainLine(copiedGame, false);
             }
 
-            return new List<PGNTerminalSymbol>();
+            return Enumerable.Empty<PGNTerminalSymbol>();
         }
 
         private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
@@ -201,7 +201,7 @@ namespace Sandra.UI.WF
 
         private void updateText()
         {
-            List<PGNTerminalSymbol> updatedTerminalSymbols = getUpdatedElements();
+            List<PGNTerminalSymbol> updatedTerminalSymbols = generatePGNTerminalSymbols().ToList();
 
             int existingElementCount = syntaxRenderer.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
