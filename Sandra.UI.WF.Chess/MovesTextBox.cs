@@ -137,31 +137,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> emitInitialBlackSideToMoveEllipsis(int plyCount)
-        {
-            if (plyCount % 2 == 1)
-            {
-                // Add an ellipsis for the previous white move. 
-                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
-                yield return new PGNTerminalSymbol.InitialBlackSideToMoveEllipsis();
-                yield return new PGNTerminalSymbol.Space();
-            }
-        }
-
-        private IEnumerable<PGNTerminalSymbol> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
-        {
-            if (plyCount % 2 == 0)
-            {
-                yield return new PGNTerminalSymbol.MoveCounter(plyCount / 2 + 1);
-                yield return new PGNTerminalSymbol.Space();
-            }
-
-            yield return new PGNTerminalSymbol.FormattedMove(moveFormatter.FormatMove(game, line.Move), line);
-        }
-
-        // Parametrized on emitSpace because this method may not yield anything,
-        // in which case no spaces should be emitted at all.
-        private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool emitSpace)
+        private PGNLine generatePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
         {
             for (;;)
             {
@@ -169,66 +145,50 @@ namespace Sandra.UI.WF
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
-                // Emit the main move before side lines which start at the same plyCount.
-                if (current.MainLine != null)
-                {
-                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
-                    foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
-                    emitSpace = true;
-                }
-
+                List<PGNLine> sideLines = null;
                 foreach (var sideLine in current.SideLines)
                 {
-                    // Reset active tree before going into each side line.
+                    if (sideLines == null) sideLines = new List<PGNLine>();
+
+                    // Add the first ply of the side line to the list, then generate the rest of the side line.
+                    sideLines.Add(generatePGNLine(game, new List<PGNPlyWithSidelines>
+                    {
+                        new PGNPlyWithSidelines(new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
+                    }));
+
+                    // Reset active tree after going into each side line.
                     game.SetActiveTree(current);
+                }
 
-                    if (emitSpace) yield return new PGNTerminalSymbol.Space();
-                    yield return new PGNTerminalSymbol.SideLineStart();
+                PGNPly ply = null;
+                if (current.MainLine != null)
+                {
+                    ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                }
 
-                    // Emit first move.
-                    foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
-                    foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
-
-                    // Recurse here.
-                    foreach (var element in emitMainLine(game, true)) yield return element;
-                    yield return new PGNTerminalSymbol.SideLineEnd();
-
-                    emitSpace = true;
+                if (ply != null || sideLines != null)
+                {
+                    moveList.Add(new PGNPlyWithSidelines(ply, sideLines));
                 }
 
                 if (current.MainLine == null)
                 {
-                    yield break;
+                    return new PGNLine(moveList);
                 }
-
-                // Goto next move in the main line.
-                game.SetActiveTree(current.MainLine.MoveTree);
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
-        {
-            // Possible initial black side to move ellipsis.
-            if (game.MoveTree.MainLine != null)
-            {
-                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
-            }
-
-            // Treat as a regular main line.
-            foreach (var element in emitMainLine(game, false)) yield return element;
-        }
-
-        private List<PGNTerminalSymbol> getUpdatedElements()
+        private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
         {
             if (hasGameAndMoveFormatter)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<PGNTerminalSymbol>(emitMoveTree(copiedGame));
+                return generatePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
-            return new List<PGNTerminalSymbol>();
+            return Enumerable.Empty<PGNTerminalSymbol>();
         }
 
         private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
@@ -245,11 +205,12 @@ namespace Sandra.UI.WF
 
         private void updateText()
         {
-            List<PGNTerminalSymbol> updatedTerminalSymbols = getUpdatedElements();
+            List<PGNTerminalSymbol> updatedTerminalSymbols = generatePGNTerminalSymbols().ToList();
 
             int existingElementCount = syntaxRenderer.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
+            PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
             TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
@@ -262,9 +223,7 @@ namespace Sandra.UI.WF
                 if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
                     ++agreeIndex;
-                    if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
-                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
                         newActiveMoveElement = existingElement;
                     }
@@ -289,14 +248,14 @@ namespace Sandra.UI.WF
                 }
 
                 // Append new element texts.
+                PGNTerminalSymbolTextGenerator textGenerator = new PGNTerminalSymbolTextGenerator();
                 while (agreeIndex < updatedElementCount)
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, updatedTerminalSymbol.GetText());
+                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol,
+                                                                         textGenerator.Visit(updatedTerminalSymbol));
 
-                    if (newActiveMoveElement == null
-                        && updatedTerminalSymbol is PGNTerminalSymbol.FormattedMove
-                        && ((PGNTerminalSymbol.FormattedMove)updatedTerminalSymbol).Variation.MoveTree == game.Game.ActiveTree)
+                    if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
                         newActiveMoveElement = newElement;
                     }
@@ -345,7 +304,9 @@ namespace Sandra.UI.WF
                     if (elemIndex < 0) elemIndex = ~elemIndex - 1;
 
                     // Look for an element which delimits a move.
-                    while (elemIndex >= 0 && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.MoveDelimiter))
+                    while (elemIndex >= 0
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is MoveCounterSymbol)
+                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol))
                     {
                         elemIndex--;
                     }
@@ -362,11 +323,11 @@ namespace Sandra.UI.WF
                 else
                 {
                     // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is PGNTerminalSymbol.FormattedMove)) elemIndex++;
+                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol)) elemIndex++;
 
                     // Go to the position after the selected move.
                     newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
-                    newActiveTree = ((PGNTerminalSymbol.FormattedMove)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
+                    newActiveTree = ((FormattedMoveSymbol)newActiveMoveElement.TerminalSymbol).Ply.Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
