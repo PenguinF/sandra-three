@@ -137,15 +137,10 @@ namespace Sandra.UI.WF
             }
         }
 
-        private class PGNSideLine
-        {
-            public PGNLine Line;
-        }
-
         private class PGNPlyWithSidelines
         {
             public PGNPly Ply;
-            public List<PGNSideLine> SideLines;
+            public List<PGNLine> SideLines;
         }
 
         private class PGNLine
@@ -164,13 +159,12 @@ namespace Sandra.UI.WF
 
                 foreach (var sideLine in current.SideLines)
                 {
-                    if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNSideLine>();
-                    PGNSideLine pgnSideLine = new PGNSideLine();
+                    if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNLine>();
                     List<PGNPlyWithSidelines> sideLineMoveList = new List<PGNPlyWithSidelines>();
                     PGNPlyWithSidelines sideLineFirstPly = new PGNPlyWithSidelines();
                     sideLineFirstPly.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     sideLineMoveList.Add(sideLineFirstPly);
-                    pgnSideLine.Line = generatePGNLine(game, sideLineMoveList);
+                    PGNLine pgnSideLine = generatePGNLine(game, sideLineMoveList);
                     plyWithSidelines.SideLines.Add(pgnSideLine);
 
                     game.SetActiveTree(current);
@@ -207,7 +201,7 @@ namespace Sandra.UI.WF
                     foreach (var pgnSideLine in plyWithSidelines.SideLines)
                     {
                         yield return new SideLineStartSymbol();
-                        foreach (var element in generatePGNTerminalSymbols(pgnSideLine.Line).ToList()) yield return element;
+                        foreach (var element in generatePGNTerminalSymbols(pgnSideLine)) yield return element;
                         yield return new SideLineEndSymbol();
                         previousWasMoveSymbol = false;
                     }
