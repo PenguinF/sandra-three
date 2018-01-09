@@ -139,7 +139,7 @@ namespace Sandra.UI.WF
 
         private class PGNSideLine
         {
-            public PGNPly FirstPly;
+            public PGNPlyWithSidelines FirstPly;
             public PGNLine Line;
         }
 
@@ -169,7 +169,8 @@ namespace Sandra.UI.WF
                 {
                     if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNSideLine>();
                     PGNSideLine pgnSideLine = new PGNSideLine();
-                    pgnSideLine.FirstPly = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
+                    pgnSideLine.FirstPly = new PGNPlyWithSidelines();
+                    pgnSideLine.FirstPly.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     pgnSideLine.Line = generatePGNLine(game);
                     plyWithSidelines.SideLines.Add(pgnSideLine);
 
@@ -205,7 +206,7 @@ namespace Sandra.UI.WF
                     foreach (var pgnSideLine in plyWithSidelines.SideLines)
                     {
                         yield return new SideLineStartSymbol();
-                        foreach (var symbol in pgnSideLine.FirstPly.GenerateTerminalSymbols(false)) yield return symbol;
+                        foreach (var symbol in pgnSideLine.FirstPly.Ply.GenerateTerminalSymbols(false)) yield return symbol;
                         foreach (var element in generatePGNTerminalSymbols(pgnSideLine.Line, true).ToList()) yield return element;
                         yield return new SideLineEndSymbol();
                         previousWasMoveSymbol = false;
