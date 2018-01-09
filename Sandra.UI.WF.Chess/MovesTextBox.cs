@@ -139,6 +139,8 @@ namespace Sandra.UI.WF
 
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game)
         {
+            bool previousWasMoveSymbol = true;
+
             for (;;)
             {
                 Chess.MoveTree current = game.ActiveTree;
@@ -146,11 +148,21 @@ namespace Sandra.UI.WF
 
                 if (current.MainLine != null)
                 {
+                    if (!previousWasMoveSymbol)
+                    {
+                        if (plyCount % 2 == 1)
+                        {
+                            yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                            yield return new BlackToMoveEllipsisSymbol();
+                        }
+                    }
+
                     if (plyCount % 2 == 0)
                     {
                         yield return new MoveCounterSymbol(plyCount / 2 + 1);
                     }
                     yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    previousWasMoveSymbol = true;
                 }
 
                 foreach (var sideLine in current.SideLines)
@@ -166,6 +178,8 @@ namespace Sandra.UI.WF
                     yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     foreach (var element in emitMainLine(game)) yield return element;
                     yield return new SideLineEndSymbol();
+
+                    previousWasMoveSymbol = false;
                 }
 
                 if (current.MainLine == null)
