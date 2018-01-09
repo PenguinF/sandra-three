@@ -157,20 +157,28 @@ namespace Sandra.UI.WF
                     previousWasMoveSymbol = true;
                 }
 
+                List<PGNSideLine> pgnSideLines = null;
                 foreach (var sideLine in current.SideLines)
                 {
                     game.SetActiveTree(current);
 
+                    if (pgnSideLines == null) pgnSideLines = new List<PGNSideLine>();
                     PGNSideLine pgnSideLine = new PGNSideLine();
                     pgnSideLine.FirstPly = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     pgnSideLine.GeneratedSymbols = emitMainLine(game, true).ToList();
+                    pgnSideLines.Add(pgnSideLine);
+                }
 
-                    yield return new SideLineStartSymbol();
-                    foreach (var symbol in pgnSideLine.FirstPly.GenerateTerminalSymbols(false)) yield return symbol;
-                    foreach (var element in pgnSideLine.GeneratedSymbols) yield return element;
-                    yield return new SideLineEndSymbol();
-
-                    previousWasMoveSymbol = false;
+                if (pgnSideLines != null)
+                {
+                    foreach (var pgnSideLine in pgnSideLines)
+                    {
+                        yield return new SideLineStartSymbol();
+                        foreach (var symbol in pgnSideLine.FirstPly.GenerateTerminalSymbols(false)) yield return symbol;
+                        foreach (var element in pgnSideLine.GeneratedSymbols) yield return element;
+                        yield return new SideLineEndSymbol();
+                        previousWasMoveSymbol = false;
+                    }
                 }
 
                 if (current.MainLine == null)
