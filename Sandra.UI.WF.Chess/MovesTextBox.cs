@@ -158,14 +158,10 @@ namespace Sandra.UI.WF
                     game.SetActiveTree(current);
 
                     yield return new SideLineStartSymbol();
+                    yield return new MoveCounterSymbol(plyCount / 2 + 1);
                     if (plyCount % 2 == 1)
                     {
-                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
                         yield return new BlackToMoveEllipsisSymbol();
-                    }
-                    if (plyCount % 2 == 0)
-                    {
-                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
                     }
                     yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     foreach (var element in emitMainLine(game)) yield return element;
