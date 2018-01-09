@@ -23,13 +23,24 @@ namespace Sandra.PGN
 {
     public sealed class PGNLine
     {
+        // Null for the root move list.
+        public PGNPlyWithSidelines Parent { get; internal set; }
+        public int ParentIndex { get; internal set; }
+
         // TODO: use System.Collections.Immutable.
         public readonly IReadOnlyList<PGNPlyWithSidelines> Plies;
 
         public PGNLine(IEnumerable<PGNPlyWithSidelines> plies)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
-            Plies = new List<PGNPlyWithSidelines>(plies);
+            var plyList = new List<PGNPlyWithSidelines>(plies);
+            for (int i = 0; i < plyList.Count; ++i)
+            {
+                if (plyList[i].Parent != null) throw new ArgumentException($"{nameof(plyList)}[{i}] already has a parent {nameof(PGNLine)}.");
+                plyList[i].Parent = this;
+                plyList[i].ParentIndex = i;
+            }
+            Plies = plyList;
         }
 
         public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols()
@@ -49,12 +60,12 @@ namespace Sandra.PGN
 
                 if (plyWithSidelines.SideLines != null)
                 {
-                    foreach (var pgnSideLine in plyWithSidelines.SideLines)
+                    foreach (var sideLine in plyWithSidelines.SideLines)
                     {
                         if (emitSpace) yield return SpaceSymbol.Value; else emitSpace = true;
-                        yield return new SideLineStartSymbol();
-                        foreach (var element in pgnSideLine.GenerateTerminalSymbols()) yield return element;
-                        yield return new SideLineEndSymbol();
+                        yield return new SideLineStartSymbol(sideLine);
+                        foreach (var element in sideLine.GenerateTerminalSymbols()) yield return element;
+                        yield return new SideLineEndSymbol(sideLine);
                         precededByFormattedMoveSymbol = false;
                     }
                 }
@@ -64,22 +75,39 @@ namespace Sandra.PGN
 
     public sealed class PGNPlyWithSidelines
     {
+        public PGNLine Parent { get; internal set; }
+        public int ParentIndex { get; internal set; }
+
         public readonly PGNPly Ply;
         // TODO: use System.Collections.Immutable.
         public readonly IReadOnlyList<PGNLine> SideLines;
 
         public PGNPlyWithSidelines(PGNPly ply, IEnumerable<PGNLine> sideLines)
         {
+            if (ply != null)
+            {
+                if (ply.Parent != null) throw new ArgumentException($"{nameof(ply)} already has a parent {nameof(PGNPlyWithSidelines)}.");
+                ply.Parent = this;
+            }
             Ply = ply;
             if (sideLines != null)
             {
-                SideLines = new List<PGNLine>(sideLines);
+                var sideLineList = new List<PGNLine>(sideLines);
+                for (int i = 0; i < sideLineList.Count; ++i)
+                {
+                    if (sideLineList[i].Parent != null) throw new ArgumentException($"{nameof(sideLines)}[{i}] already has a parent {nameof(PGNPlyWithSidelines)}.");
+                    sideLineList[i].Parent = this;
+                    sideLineList[i].ParentIndex = i;
+                }
+                SideLines = sideLineList;
             }
         }
     }
 
     public sealed class PGNPly
     {
+        public PGNPlyWithSidelines Parent { get; internal set; }
+
         public readonly int PlyCount;
         public readonly string Notation;
         public readonly Chess.Variation Variation;
@@ -103,7 +131,7 @@ namespace Sandra.PGN
             else if (!precededByFormattedMoveSymbol)
             {
                 yield return new MoveCounterSymbol(this);
-                yield return new BlackToMoveEllipsisSymbol();
+                yield return new BlackToMoveEllipsisSymbol(this);
                 yield return SpaceSymbol.Value;
             }
             yield return new FormattedMoveSymbol(this);
@@ -155,6 +183,13 @@ namespace Sandra.PGN
     {
         public const string SideLineStartText = "(";
 
+        public readonly PGNLine SideLine;
+
+        public SideLineStartSymbol(PGNLine sideLine)
+        {
+            SideLine = sideLine;
+        }
+
         public bool Equals(PGNTerminalSymbol other) => other is SideLineStartSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineStartSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
@@ -163,6 +198,13 @@ namespace Sandra.PGN
     public sealed class SideLineEndSymbol : PGNTerminalSymbol
     {
         public const string SideLineEndText = ")";
+
+        public readonly PGNLine SideLine;
+
+        public SideLineEndSymbol(PGNLine sideLine)
+        {
+            SideLine = sideLine;
+        }
 
         public bool Equals(PGNTerminalSymbol other) => other is SideLineEndSymbol;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineEndSymbol(this);
@@ -173,7 +215,14 @@ namespace Sandra.PGN
     {
         public const string EllipsisText = "..";
 
-        public bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol;
+        public readonly PGNPly Ply;
+
+        public BlackToMoveEllipsisSymbol(PGNPly ply)
+        {
+            Ply = ply;
+        }
+
+        public bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol && Ply.Variation == ((BlackToMoveEllipsisSymbol)other).Ply.Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
     }
