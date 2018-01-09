@@ -20,6 +20,20 @@ using System;
 
 namespace Sandra.PGN
 {
+    public sealed class PGNPly
+    {
+        public readonly string Notation;
+        public readonly Chess.Variation Variation;
+
+        public PGNPly(string notation, Chess.Variation variation)
+        {
+            if (notation == null) throw new ArgumentNullException(nameof(notation));
+            if (variation == null) throw new ArgumentNullException(nameof(variation));
+            Notation = notation;
+            Variation = variation;
+        }
+    }
+
     public interface PGNTerminalSymbol : IEquatable<PGNTerminalSymbol>
     {
         void Accept(PGNTerminalSymbolVisitor visitor);
@@ -102,16 +116,14 @@ namespace Sandra.PGN
 
     public sealed class FormattedMoveSymbol : PGNTerminalSymbol
     {
-        public readonly string Notation;
-        public readonly Chess.Variation Variation;
+        public readonly PGNPly Ply;
 
-        public FormattedMoveSymbol(string notation, Chess.Variation variation)
+        public FormattedMoveSymbol(PGNPly ply)
         {
-            Notation = notation;
-            Variation = variation;
+            Ply = ply;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Variation == ((FormattedMoveSymbol)other).Variation;
+        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Ply.Variation == ((FormattedMoveSymbol)other).Ply.Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
     }
@@ -119,7 +131,7 @@ namespace Sandra.PGN
     public class PGNTerminalSymbolTextGenerator : PGNTerminalSymbolVisitor<string>
     {
         public override string VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => BlackToMoveEllipsisSymbol.EllipsisText;
-        public override string VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Notation;
+        public override string VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Notation;
         public override string VisitMoveCounterSymbol(MoveCounterSymbol symbol) => $"{symbol.MoveCounter}.";
         public override string VisitSideLineEndSymbol(SideLineEndSymbol symbol) => SideLineEndSymbol.SideLineEndText;
         public override string VisitSideLineStartSymbol(SideLineStartSymbol symbol) => SideLineStartSymbol.SideLineStartText;
@@ -130,6 +142,6 @@ namespace Sandra.PGN
     {
         private readonly Chess.MoveTree needle;
         public PGNMoveSearcher(Chess.MoveTree needle) { this.needle = needle; }
-        public override bool VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Variation.MoveTree == needle;
+        public override bool VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Variation.MoveTree == needle;
     }
 }

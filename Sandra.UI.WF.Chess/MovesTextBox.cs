@@ -155,7 +155,7 @@ namespace Sandra.UI.WF
                         yield return new MoveCounterSymbol(plyCount / 2 + 1);
                         yield return new BlackToMoveEllipsisSymbol();
                     }
-                    yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    yield return new FormattedMoveSymbol(new PGNPly(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine));
 
                     previousWasMoveSymbol = true;
                 }
@@ -170,7 +170,7 @@ namespace Sandra.UI.WF
                     {
                         yield return new BlackToMoveEllipsisSymbol();
                     }
-                    yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, sideLine.Move), sideLine);
+                    yield return new FormattedMoveSymbol(new PGNPly(moveFormatter.FormatMove(game, sideLine.Move), sideLine));
                     foreach (var element in emitMainLine(game, true)) yield return element;
                     yield return new SideLineEndSymbol();
 
@@ -335,7 +335,7 @@ namespace Sandra.UI.WF
 
                     // Go to the position after the selected move.
                     newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
-                    newActiveTree = ((FormattedMoveSymbol)newActiveMoveElement.TerminalSymbol).Variation.MoveTree;
+                    newActiveTree = ((FormattedMoveSymbol)newActiveMoveElement.TerminalSymbol).Ply.Variation.MoveTree;
                 }
 
                 // Update the active move index in the game.
