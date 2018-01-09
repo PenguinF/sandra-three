@@ -143,6 +143,12 @@ namespace Sandra.UI.WF
             public List<PGNTerminalSymbol> GeneratedSymbols;
         }
 
+        private class PGNPlyWithSidelines
+        {
+            public PGNPly Ply;
+            public List<PGNSideLine> SideLines;
+        }
+
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool previousWasMoveSymbol)
         {
             for (;;)
@@ -150,28 +156,29 @@ namespace Sandra.UI.WF
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
+                PGNPlyWithSidelines plyWithSidelines = new PGNPlyWithSidelines();
+
                 if (current.MainLine != null)
                 {
-                    PGNPly ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
-                    foreach (var symbol in ply.GenerateTerminalSymbols(previousWasMoveSymbol)) yield return symbol;
+                    plyWithSidelines.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(previousWasMoveSymbol)) yield return symbol;
                     previousWasMoveSymbol = true;
                 }
 
-                List<PGNSideLine> pgnSideLines = null;
                 foreach (var sideLine in current.SideLines)
                 {
                     game.SetActiveTree(current);
 
-                    if (pgnSideLines == null) pgnSideLines = new List<PGNSideLine>();
+                    if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNSideLine>();
                     PGNSideLine pgnSideLine = new PGNSideLine();
                     pgnSideLine.FirstPly = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     pgnSideLine.GeneratedSymbols = emitMainLine(game, true).ToList();
-                    pgnSideLines.Add(pgnSideLine);
+                    plyWithSidelines.SideLines.Add(pgnSideLine);
                 }
 
-                if (pgnSideLines != null)
+                if (plyWithSidelines.SideLines != null)
                 {
-                    foreach (var pgnSideLine in pgnSideLines)
+                    foreach (var pgnSideLine in plyWithSidelines.SideLines)
                     {
                         yield return new SideLineStartSymbol();
                         foreach (var symbol in pgnSideLine.FirstPly.GenerateTerminalSymbols(false)) yield return symbol;
