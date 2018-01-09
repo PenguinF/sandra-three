@@ -149,7 +149,12 @@ namespace Sandra.UI.WF
             public List<PGNSideLine> SideLines;
         }
 
-        private List<PGNPlyWithSidelines> generatePGNLine(Chess.Game game)
+        private class PGNLine
+        {
+            public List<PGNPlyWithSidelines> Plies;
+        }
+
+        private PGNLine generatePGNLine(Chess.Game game)
         {
             List<PGNPlyWithSidelines> moveList = new List<PGNPlyWithSidelines>();
 
@@ -180,16 +185,16 @@ namespace Sandra.UI.WF
 
                 if (current.MainLine == null)
                 {
-                    return moveList;
+                    return new PGNLine() { Plies = moveList };
                 }
             }
         }
 
         private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols(Chess.Game game, bool previousWasMoveSymbol)
         {
-            var moveList = generatePGNLine(game);
+            PGNLine pgnLine = generatePGNLine(game);
 
-            foreach (var plyWithSidelines in moveList)
+            foreach (var plyWithSidelines in pgnLine.Plies)
             {
                 if (plyWithSidelines.Ply != null)
                 {
