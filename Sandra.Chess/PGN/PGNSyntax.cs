@@ -40,11 +40,11 @@ namespace Sandra.PGN
         {
             if (PlyCount % 2 == 0)
             {
-                yield return new MoveCounterSymbol(PlyCount / 2 + 1);
+                yield return new MoveCounterSymbol(this);
             }
             else if (!precededByFormattedMoveSymbol)
             {
-                yield return new MoveCounterSymbol(PlyCount / 2 + 1);
+                yield return new MoveCounterSymbol(this);
                 yield return new BlackToMoveEllipsisSymbol();
             }
             yield return new FormattedMoveSymbol(this);
@@ -119,14 +119,14 @@ namespace Sandra.PGN
 
     public sealed class MoveCounterSymbol : PGNTerminalSymbol
     {
-        public readonly int MoveCounter;
+        public readonly PGNPly Ply;
 
-        public MoveCounterSymbol(int moveCounter)
+        public MoveCounterSymbol(PGNPly ply)
         {
-            MoveCounter = moveCounter;
+            Ply = ply;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && MoveCounter == ((MoveCounterSymbol)other).MoveCounter;
+        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && Ply.Variation == ((MoveCounterSymbol)other).Ply.Variation;
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
     }
@@ -149,7 +149,7 @@ namespace Sandra.PGN
     {
         public override string VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => BlackToMoveEllipsisSymbol.EllipsisText;
         public override string VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Notation;
-        public override string VisitMoveCounterSymbol(MoveCounterSymbol symbol) => $"{symbol.MoveCounter}.";
+        public override string VisitMoveCounterSymbol(MoveCounterSymbol symbol) => $"{symbol.Ply.PlyCount / 2 + 1}.";
         public override string VisitSideLineEndSymbol(SideLineEndSymbol symbol) => SideLineEndSymbol.SideLineEndText;
         public override string VisitSideLineStartSymbol(SideLineStartSymbol symbol) => SideLineStartSymbol.SideLineStartText;
         public override string VisitSpaceSymbol(SpaceSymbol symbol) => SpaceSymbol.SpaceText;
