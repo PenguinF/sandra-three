@@ -176,31 +176,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols(PGNLine pgnLine)
-        {
-            bool previousWasMoveSymbol = false;
-
-            foreach (var plyWithSidelines in pgnLine.Plies)
-            {
-                if (plyWithSidelines.Ply != null)
-                {
-                    foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(previousWasMoveSymbol)) yield return symbol;
-                    previousWasMoveSymbol = true;
-                }
-
-                if (plyWithSidelines.SideLines != null)
-                {
-                    foreach (var pgnSideLine in plyWithSidelines.SideLines)
-                    {
-                        yield return new SideLineStartSymbol();
-                        foreach (var element in generatePGNTerminalSymbols(pgnSideLine)) yield return element;
-                        yield return new SideLineEndSymbol();
-                        previousWasMoveSymbol = false;
-                    }
-                }
-            }
-        }
-
         private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
         {
             if (hasGameAndMoveFormatter)
@@ -208,7 +183,7 @@ namespace Sandra.UI.WF
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return generatePGNTerminalSymbols(generatePGNLine(copiedGame, new List<PGNPlyWithSidelines>()));
+                return generatePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
             return Enumerable.Empty<PGNTerminalSymbol>();

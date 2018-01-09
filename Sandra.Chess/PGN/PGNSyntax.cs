@@ -31,6 +31,31 @@ namespace Sandra.PGN
             if (plies == null) throw new ArgumentNullException(nameof(plies));
             Plies = new List<PGNPlyWithSidelines>(plies);
         }
+
+        public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols()
+        {
+            bool precededByFormattedMoveSymbol = false;
+
+            foreach (var plyWithSidelines in Plies)
+            {
+                if (plyWithSidelines.Ply != null)
+                {
+                    foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(precededByFormattedMoveSymbol)) yield return symbol;
+                    precededByFormattedMoveSymbol = true;
+                }
+
+                if (plyWithSidelines.SideLines != null)
+                {
+                    foreach (var pgnSideLine in plyWithSidelines.SideLines)
+                    {
+                        yield return new SideLineStartSymbol();
+                        foreach (var element in pgnSideLine.GenerateTerminalSymbols()) yield return element;
+                        yield return new SideLineEndSymbol();
+                        precededByFormattedMoveSymbol = false;
+                    }
+                }
+            }
+        }
     }
 
     public sealed class PGNPlyWithSidelines
