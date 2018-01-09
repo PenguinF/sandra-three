@@ -137,16 +137,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
-        {
-            if (plyCount % 2 == 0)
-            {
-                yield return new MoveCounterSymbol(plyCount / 2 + 1);
-            }
-
-            yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, line.Move), line);
-        }
-
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game)
         {
             for (;;)
@@ -156,7 +146,11 @@ namespace Sandra.UI.WF
 
                 if (current.MainLine != null)
                 {
-                    foreach (var element in emitMove(game, current.MainLine, plyCount)) yield return element;
+                    if (plyCount % 2 == 0)
+                    {
+                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                    }
+                    yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
                 }
 
                 foreach (var sideLine in current.SideLines)
@@ -169,7 +163,11 @@ namespace Sandra.UI.WF
                         yield return new MoveCounterSymbol(plyCount / 2 + 1);
                         yield return new BlackToMoveEllipsisSymbol();
                     }
-                    foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
+                    if (plyCount % 2 == 0)
+                    {
+                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                    }
+                    yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     foreach (var element in emitMainLine(game)) yield return element;
                     yield return new SideLineEndSymbol();
                 }
