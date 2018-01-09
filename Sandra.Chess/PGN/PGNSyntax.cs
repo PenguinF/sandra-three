@@ -21,6 +21,34 @@ using System.Collections.Generic;
 
 namespace Sandra.PGN
 {
+    public sealed class PGNLine
+    {
+        // TODO: use System.Collections.Immutable.
+        public readonly IReadOnlyList<PGNPlyWithSidelines> Plies;
+
+        public PGNLine(IEnumerable<PGNPlyWithSidelines> plies)
+        {
+            if (plies == null) throw new ArgumentNullException(nameof(plies));
+            Plies = new List<PGNPlyWithSidelines>(plies);
+        }
+    }
+
+    public sealed class PGNPlyWithSidelines
+    {
+        public readonly PGNPly Ply;
+        // TODO: use System.Collections.Immutable.
+        public readonly IReadOnlyList<PGNLine> SideLines;
+
+        public PGNPlyWithSidelines(PGNPly ply, IEnumerable<PGNLine> sideLines)
+        {
+            Ply = ply;
+            if (sideLines != null)
+            {
+                SideLines = new List<PGNLine>(sideLines);
+            }
+        }
+    }
+
     public sealed class PGNPly
     {
         public readonly int PlyCount;

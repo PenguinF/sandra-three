@@ -137,17 +137,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private class PGNPlyWithSidelines
-        {
-            public PGNPly Ply;
-            public List<PGNLine> SideLines;
-        }
-
-        private class PGNLine
-        {
-            public List<PGNPlyWithSidelines> Plies;
-        }
-
         private PGNLine generatePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
         {
             for (;;)
@@ -155,31 +144,34 @@ namespace Sandra.UI.WF
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
-                PGNPlyWithSidelines plyWithSidelines = new PGNPlyWithSidelines();
-
+                List<PGNLine> sideLines = null;
                 foreach (var sideLine in current.SideLines)
                 {
-                    if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNLine>();
-                    List<PGNPlyWithSidelines> sideLineMoveList = new List<PGNPlyWithSidelines>();
-                    PGNPlyWithSidelines sideLineFirstPly = new PGNPlyWithSidelines();
-                    sideLineFirstPly.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
-                    sideLineMoveList.Add(sideLineFirstPly);
-                    PGNLine pgnSideLine = generatePGNLine(game, sideLineMoveList);
-                    plyWithSidelines.SideLines.Add(pgnSideLine);
+                    if (sideLines == null) sideLines = new List<PGNLine>();
+
+                    // Add the first ply of the side line to the list, then generate the rest of the side line.
+                    sideLines.Add(generatePGNLine(game, new List<PGNPlyWithSidelines>
+                    {
+                        new PGNPlyWithSidelines(new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
+                    }));
 
                     game.SetActiveTree(current);
                 }
 
+                PGNPly ply = null;
                 if (current.MainLine != null)
                 {
-                    plyWithSidelines.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
                 }
 
-                moveList.Add(plyWithSidelines);
+                if (ply != null || sideLines != null)
+                {
+                    moveList.Add(new PGNPlyWithSidelines(ply, sideLines));
+                }
 
                 if (current.MainLine == null)
                 {
-                    return new PGNLine() { Plies = moveList };
+                    return new PGNLine(moveList);
                 }
             }
         }
