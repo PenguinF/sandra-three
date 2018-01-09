@@ -146,20 +146,17 @@ namespace Sandra.UI.WF
 
                 if (current.MainLine != null)
                 {
-                    if (!previousWasMoveSymbol)
-                    {
-                        if (plyCount % 2 == 1)
-                        {
-                            yield return new MoveCounterSymbol(plyCount / 2 + 1);
-                            yield return new BlackToMoveEllipsisSymbol();
-                        }
-                    }
-
                     if (plyCount % 2 == 0)
                     {
                         yield return new MoveCounterSymbol(plyCount / 2 + 1);
                     }
+                    else if (!previousWasMoveSymbol)
+                    {
+                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                        yield return new BlackToMoveEllipsisSymbol();
+                    }
                     yield return new FormattedMoveSymbol(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+
                     previousWasMoveSymbol = true;
                 }
 
