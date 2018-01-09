@@ -137,15 +137,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> emitInitialBlackSideToMoveEllipsis(int plyCount)
-        {
-            if (plyCount % 2 == 1)
-            {
-                yield return new MoveCounterSymbol(plyCount / 2 + 1);
-                yield return new BlackToMoveEllipsisSymbol();
-            }
-        }
-
         private IEnumerable<PGNTerminalSymbol> emitMove(Chess.Game game, Chess.Variation line, int plyCount)
         {
             if (plyCount % 2 == 0)
@@ -173,7 +164,11 @@ namespace Sandra.UI.WF
                     game.SetActiveTree(current);
 
                     yield return new SideLineStartSymbol();
-                    foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
+                    if (plyCount % 2 == 1)
+                    {
+                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                        yield return new BlackToMoveEllipsisSymbol();
+                    }
                     foreach (var element in emitMove(game, sideLine, plyCount)) yield return element;
                     foreach (var element in emitMainLine(game)) yield return element;
                     yield return new SideLineEndSymbol();
@@ -195,7 +190,11 @@ namespace Sandra.UI.WF
 
             if (current.MainLine != null)
             {
-                foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
+                if (plyCount % 2 == 1)
+                {
+                    yield return new MoveCounterSymbol(plyCount / 2 + 1);
+                    yield return new BlackToMoveEllipsisSymbol();
+                }
             }
 
             foreach (var element in emitMainLine(game)) yield return element;
