@@ -189,11 +189,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
-        {
-            foreach (var element in emitMainLine(game, false)) yield return element;
-        }
-
         private List<PGNTerminalSymbol> getUpdatedElements()
         {
             if (hasGameAndMoveFormatter)
@@ -201,7 +196,7 @@ namespace Sandra.UI.WF
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return new List<PGNTerminalSymbol>(emitMoveTree(copiedGame));
+                return new List<PGNTerminalSymbol>(emitMainLine(copiedGame, false));
             }
 
             return new List<PGNTerminalSymbol>();
