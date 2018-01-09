@@ -141,6 +141,7 @@ namespace Sandra.UI.WF
         {
             for (;;)
             {
+                // Remember the game's active tree because it's the starting point of side lines.
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
@@ -155,6 +156,7 @@ namespace Sandra.UI.WF
                         new PGNPlyWithSidelines(new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
                     }));
 
+                    // Reset active tree after going into each side line.
                     game.SetActiveTree(current);
                 }
 

@@ -38,6 +38,7 @@ namespace Sandra.PGN
 
             foreach (var plyWithSidelines in Plies)
             {
+                // Emit the main move before side lines which start at the same plyCount.
                 if (plyWithSidelines.Ply != null)
                 {
                     foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(precededByFormattedMoveSymbol)) yield return symbol;
