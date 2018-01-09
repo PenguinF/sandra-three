@@ -175,6 +175,7 @@ namespace Sandra.PGN
         public static readonly SpaceSymbol Value = new SpaceSymbol();
 
         public bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSpaceSymbol(this);
     }
@@ -187,10 +188,15 @@ namespace Sandra.PGN
 
         public SideLineStartSymbol(PGNLine sideLine)
         {
+            if (sideLine == null) throw new ArgumentNullException(nameof(sideLine));
+            if (sideLine.Plies.Count == 0) throw new ArgumentException($"{nameof(sideLine)}.{nameof(sideLine.Plies)} must be one or greater.");
             SideLine = sideLine;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is SideLineStartSymbol;
+        public bool Equals(PGNTerminalSymbol other)
+            => other is SideLineStartSymbol
+            && SideLine.Plies[0].Ply.Variation == ((SideLineStartSymbol)other).SideLine.Plies[0].Ply.Variation;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineStartSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
     }
@@ -203,10 +209,15 @@ namespace Sandra.PGN
 
         public SideLineEndSymbol(PGNLine sideLine)
         {
+            if (sideLine == null) throw new ArgumentNullException(nameof(sideLine));
+            if (sideLine.Plies.Count == 0) throw new ArgumentException($"{nameof(sideLine)}.{nameof(sideLine.Plies)} must be one or greater.");
             SideLine = sideLine;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is SideLineEndSymbol;
+        public bool Equals(PGNTerminalSymbol other)
+            => other is SideLineEndSymbol
+            && SideLine.Plies[0].Ply.Variation == ((SideLineEndSymbol)other).SideLine.Plies[0].Ply.Variation;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineEndSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineEndSymbol(this);
     }
@@ -222,7 +233,10 @@ namespace Sandra.PGN
             Ply = ply;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is BlackToMoveEllipsisSymbol && Ply.Variation == ((BlackToMoveEllipsisSymbol)other).Ply.Variation;
+        public bool Equals(PGNTerminalSymbol other)
+            => other is BlackToMoveEllipsisSymbol
+            && Ply.Variation == ((BlackToMoveEllipsisSymbol)other).Ply.Variation;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
     }
@@ -236,7 +250,10 @@ namespace Sandra.PGN
             Ply = ply;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is MoveCounterSymbol && Ply.Variation == ((MoveCounterSymbol)other).Ply.Variation;
+        public bool Equals(PGNTerminalSymbol other)
+            => other is MoveCounterSymbol
+            && Ply.Variation == ((MoveCounterSymbol)other).Ply.Variation;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
     }
@@ -250,7 +267,10 @@ namespace Sandra.PGN
             Ply = ply;
         }
 
-        public bool Equals(PGNTerminalSymbol other) => other is FormattedMoveSymbol && Ply.Variation == ((FormattedMoveSymbol)other).Ply.Variation;
+        public bool Equals(PGNTerminalSymbol other)
+            => other is FormattedMoveSymbol
+            && Ply.Variation == ((FormattedMoveSymbol)other).Ply.Variation;
+
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
     }
