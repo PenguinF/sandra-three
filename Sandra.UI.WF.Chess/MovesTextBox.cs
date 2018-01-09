@@ -160,20 +160,20 @@ namespace Sandra.UI.WF
 
                 PGNPlyWithSidelines plyWithSidelines = new PGNPlyWithSidelines();
 
-                if (current.MainLine != null)
-                {
-                    plyWithSidelines.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
-                }
-
                 foreach (var sideLine in current.SideLines)
                 {
-                    game.SetActiveTree(current);
-
                     if (plyWithSidelines.SideLines == null) plyWithSidelines.SideLines = new List<PGNSideLine>();
                     PGNSideLine pgnSideLine = new PGNSideLine();
                     pgnSideLine.FirstPly = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
                     pgnSideLine.GeneratedSymbols = emitMainLine(game, true).ToList();
                     plyWithSidelines.SideLines.Add(pgnSideLine);
+
+                    game.SetActiveTree(current);
+                }
+
+                if (current.MainLine != null)
+                {
+                    plyWithSidelines.Ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
                 }
 
                 moveList.Add(plyWithSidelines);
@@ -182,8 +182,6 @@ namespace Sandra.UI.WF
                 {
                     break;
                 }
-
-                game.SetActiveTree(current.MainLine.MoveTree);
             }
 
             foreach (var plyWithSidelines in moveList)
