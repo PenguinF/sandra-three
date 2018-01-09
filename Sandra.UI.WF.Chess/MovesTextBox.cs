@@ -151,6 +151,8 @@ namespace Sandra.UI.WF
 
         private IEnumerable<PGNTerminalSymbol> emitMainLine(Chess.Game game, bool previousWasMoveSymbol)
         {
+            List<PGNPlyWithSidelines> moveList = new List<PGNPlyWithSidelines>();
+
             for (;;)
             {
                 Chess.MoveTree current = game.ActiveTree;
@@ -174,6 +176,18 @@ namespace Sandra.UI.WF
                     plyWithSidelines.SideLines.Add(pgnSideLine);
                 }
 
+                moveList.Add(plyWithSidelines);
+
+                if (current.MainLine == null)
+                {
+                    break;
+                }
+
+                game.SetActiveTree(current.MainLine.MoveTree);
+            }
+
+            foreach (var plyWithSidelines in moveList)
+            {
                 if (plyWithSidelines.Ply != null)
                 {
                     foreach (var symbol in plyWithSidelines.Ply.GenerateTerminalSymbols(previousWasMoveSymbol)) yield return symbol;
@@ -191,13 +205,6 @@ namespace Sandra.UI.WF
                         previousWasMoveSymbol = false;
                     }
                 }
-
-                if (current.MainLine == null)
-                {
-                    yield break;
-                }
-
-                game.SetActiveTree(current.MainLine.MoveTree);
             }
         }
 
