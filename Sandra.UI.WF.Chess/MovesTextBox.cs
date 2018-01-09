@@ -190,9 +190,12 @@ namespace Sandra.UI.WF
 
         private IEnumerable<PGNTerminalSymbol> emitMoveTree(Chess.Game game)
         {
-            if (game.MoveTree.MainLine != null)
+            Chess.MoveTree current = game.ActiveTree;
+            int plyCount = current.PlyCount;
+
+            if (current.MainLine != null)
             {
-                foreach (var element in emitInitialBlackSideToMoveEllipsis(game.MoveTree.PlyCount)) yield return element;
+                foreach (var element in emitInitialBlackSideToMoveEllipsis(plyCount)) yield return element;
             }
 
             foreach (var element in emitMainLine(game)) yield return element;
