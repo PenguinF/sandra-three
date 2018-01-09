@@ -17,20 +17,37 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.PGN
 {
     public sealed class PGNPly
     {
+        public readonly int PlyCount;
         public readonly string Notation;
         public readonly Chess.Variation Variation;
 
-        public PGNPly(string notation, Chess.Variation variation)
+        public PGNPly(int plyCount, string notation, Chess.Variation variation)
         {
             if (notation == null) throw new ArgumentNullException(nameof(notation));
             if (variation == null) throw new ArgumentNullException(nameof(variation));
+            PlyCount = plyCount;
             Notation = notation;
             Variation = variation;
+        }
+
+        public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
+        {
+            if (PlyCount % 2 == 0)
+            {
+                yield return new MoveCounterSymbol(PlyCount / 2 + 1);
+            }
+            else if (!precededByFormattedMoveSymbol)
+            {
+                yield return new MoveCounterSymbol(PlyCount / 2 + 1);
+                yield return new BlackToMoveEllipsisSymbol();
+            }
+            yield return new FormattedMoveSymbol(this);
         }
     }
 

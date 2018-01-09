@@ -146,17 +146,8 @@ namespace Sandra.UI.WF
 
                 if (current.MainLine != null)
                 {
-                    if (plyCount % 2 == 0)
-                    {
-                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
-                    }
-                    else if (!previousWasMoveSymbol)
-                    {
-                        yield return new MoveCounterSymbol(plyCount / 2 + 1);
-                        yield return new BlackToMoveEllipsisSymbol();
-                    }
-                    yield return new FormattedMoveSymbol(new PGNPly(moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine));
-
+                    PGNPly ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    foreach (var symbol in ply.GenerateTerminalSymbols(previousWasMoveSymbol)) yield return symbol;
                     previousWasMoveSymbol = true;
                 }
 
@@ -164,13 +155,10 @@ namespace Sandra.UI.WF
                 {
                     game.SetActiveTree(current);
 
+                    PGNPly ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine);
+
                     yield return new SideLineStartSymbol();
-                    yield return new MoveCounterSymbol(plyCount / 2 + 1);
-                    if (plyCount % 2 == 1)
-                    {
-                        yield return new BlackToMoveEllipsisSymbol();
-                    }
-                    yield return new FormattedMoveSymbol(new PGNPly(moveFormatter.FormatMove(game, sideLine.Move), sideLine));
+                    foreach (var symbol in ply.GenerateTerminalSymbols(false)) yield return symbol;
                     foreach (var element in emitMainLine(game, true)) yield return element;
                     yield return new SideLineEndSymbol();
 
