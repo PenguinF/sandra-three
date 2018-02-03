@@ -53,6 +53,8 @@ namespace Sandra.UI.WF
 
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
         {
+            HasForeColor = true,
+            ForeColor = Color.DarkRed,
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
