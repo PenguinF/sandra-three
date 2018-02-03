@@ -32,6 +32,12 @@ namespace Sandra.UI.WF
     {
         private sealed class TextElementStyle
         {
+            public bool HasBackColor { get; set; }
+            public Color BackColor { get; set; }
+
+            public bool HasForeColor { get; set; }
+            public Color ForeColor { get; set; }
+
             public bool HasFont => Font != null;
             public Font Font { get; set; }
         }
