@@ -111,4 +111,39 @@ namespace Sandra.UI.WF
             }
         }
     }
+
+    /// <summary>
+    /// Provides data for the <see cref="SyntaxRenderer{TTerminal}.CaretPositionChanged"/> event.
+    /// </summary>
+    public class CaretPositionChangedEventArgs<TTerminal> : EventArgs
+    {
+        /// <summary>
+        /// Gets the text element immediately before the caret, or null if the caret is at the start of the text.
+        /// If the caret is inside a text element, <see cref="ElementBefore"/> returns the same element as <see cref="ElementAfter"/>.
+        /// </summary>
+        public TextElement<TTerminal> ElementBefore { get; }
+
+        /// <summary>
+        /// Gets the text element immediately after the caret, or null if the caret is at the end of the text.
+        /// If the caret is inside a text element, <see cref="ElementAfter"/> returns the same element as <see cref="ElementBefore"/>.
+        /// </summary>
+        public TextElement<TTerminal> ElementAfter { get; }
+
+        /// <summary>
+        /// Returns the relative position of the caret in <see cref="ElementAfter"/>, or 0 if <see cref="ElementAfter"/> is null.
+        /// </summary>
+        public int RelativeCaretIndex { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CaretPositionChangedEventArgs"/> class.
+        /// </summary>
+        internal CaretPositionChangedEventArgs(TextElement<TTerminal> elementBefore,
+                                               TextElement<TTerminal> elementAfter,
+                                               int relativeCaretIndex)
+        {
+            ElementBefore = elementBefore;
+            ElementAfter = elementAfter;
+            RelativeCaretIndex = relativeCaretIndex;
+        }
+    }
 }
