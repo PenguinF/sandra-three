@@ -284,7 +284,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, EventArgs e)
+        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
         {
             if (hasGameAndMoveFormatter)
             {
