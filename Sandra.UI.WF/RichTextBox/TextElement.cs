@@ -40,6 +40,22 @@ namespace Sandra.UI.WF
         public int Length { get; internal set; }
 
         /// <summary>
+        /// Returns the text element before this element. Returns null if this is the first text element.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// This element is not part of a renderer.
+        /// </exception>
+        public TextElement<TTerminal> GetPreviousElement() => renderer.GetElementBefore(Start);
+
+        /// <summary>
+        /// Returns the text element before this element. Returns null if this is the first text element.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// This element is not part of a renderer.
+        /// </exception>
+        public TextElement<TTerminal> GetNextElement() => renderer.GetElementAfter(Start + Length);
+
+        /// <summary>
         /// Sets the caret directly before this text element and brings it into view.
         /// </summary>
         public void BringIntoViewBefore()
