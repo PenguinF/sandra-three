@@ -130,6 +130,29 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the length of the generated text.
+        /// </summary>
+        public int TextLength => elementIndexes.Count;
+
+        /// <summary>
+        /// Returns the text element before the given position. Returns null if the position is at the start of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementBefore(int position)
+            => position == 0 ? null : elements[elementIndexes[position - 1]];
+
+        /// <summary>
+        /// Returns the text element after the given position. Returns null if the position is at the end of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementAfter(int position)
+            => position == elementIndexes.Count ? null : elements[elementIndexes[position]];
+
+        /// <summary>
         /// Occurs when the position of the caret is updated by the user, when no text is selected.
         /// </summary>
         public event Action<SyntaxRenderer<TTerminal>, EventArgs> CaretPositionChanged;
