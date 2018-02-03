@@ -18,6 +18,8 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -45,13 +47,36 @@ namespace Sandra.UI.WF
             renderTarget.ReadOnly = true;
             renderTarget.Clear();
             renderTarget.SelectionChanged += (_, __) => tryInvokeCaretPositionChanged();
+
+            assertInvariants();
         }
 
         internal readonly UpdatableRichTextBox RenderTarget;
 
+        private readonly List<int> elementIndexes = new List<int>();
+
         private readonly List<TextElement<TTerminal>> elements = new List<TextElement<TTerminal>>();
 
         public readonly IReadOnlyList<TextElement<TTerminal>> Elements;
+
+        [Conditional("DEBUG")]
+        private void assertInvariants()
+        {
+            // Assert invariants about lengths being equal.
+            int textLength = elementIndexes.Count;
+            Debug.Assert(RenderTarget.TextLength == textLength);
+            if (textLength == 0)
+            {
+                Debug.Assert(elements.Count == 0);
+            }
+            else
+            {
+                var lastElementIndex = elementIndexes[textLength - 1];
+                Debug.Assert(lastElementIndex + 1 == elements.Count);
+                var lastElement = elements[lastElementIndex];
+                Debug.Assert(lastElement.Start + lastElement.Length == textLength);
+            }
+        }
 
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
         {
@@ -63,6 +88,7 @@ namespace Sandra.UI.WF
 
             int start = RenderTarget.TextLength;
             RenderTarget.AppendText(text);
+            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
 
             var textElement = new TextElement<TTerminal>(this)
             {
@@ -72,6 +98,7 @@ namespace Sandra.UI.WF
             };
 
             elements.Add(textElement);
+            assertInvariants();
             return textElement;
         }
 
@@ -80,6 +107,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Clear()
         {
+            elementIndexes.Clear();
             elements.Clear();
             RenderTarget.Clear();
         }
@@ -87,12 +115,18 @@ namespace Sandra.UI.WF
         public void RemoveFrom(int index)
         {
             int textStart = elements[index].Start;
-            RenderTarget.Select(textStart, RenderTarget.TextLength - textStart);
+            int textLength = RenderTarget.TextLength - textStart;
+
+            RenderTarget.Select(textStart, textLength);
             // This only works if not read-only, so temporarily turn it off.
             RenderTarget.ReadOnly = false;
             RenderTarget.SelectedText = string.Empty;
             RenderTarget.ReadOnly = true;
+
+            elementIndexes.RemoveRange(textStart, textLength);
             elements.RemoveRange(index, elements.Count - index);
+
+            assertInvariants();
         }
 
         /// <summary>
