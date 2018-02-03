@@ -110,6 +110,7 @@ namespace Sandra.UI.WF
             elementIndexes.Clear();
             elements.Clear();
             RenderTarget.Clear();
+            assertInvariants();
         }
 
         public void RemoveFrom(int index)
