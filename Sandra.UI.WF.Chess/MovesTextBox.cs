@@ -52,6 +52,7 @@ namespace Sandra.UI.WF
         {
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
+            syntaxRenderer.CaretPositionChanged += caretPositionChanged;
             BackColor = Color.White;
             ForeColor = Color.Black;
             applyDefaultStyle();
@@ -283,9 +284,9 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected override void OnSelectionChanged(EventArgs e)
+        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, EventArgs e)
         {
-            if (!IsUpdating && SelectionLength == 0 && hasGameAndMoveFormatter)
+            if (hasGameAndMoveFormatter)
             {
                 int selectionStart = SelectionStart;
 
@@ -355,8 +356,6 @@ namespace Sandra.UI.WF
                     }
                 }
             }
-
-            base.OnSelectionChanged(e);
         }
     }
 }

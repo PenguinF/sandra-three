@@ -44,6 +44,7 @@ namespace Sandra.UI.WF
 
             renderTarget.ReadOnly = true;
             renderTarget.Clear();
+            renderTarget.SelectionChanged += (_, __) => tryInvokeCaretPositionChanged();
         }
 
         internal readonly UpdatableRichTextBox RenderTarget;
@@ -92,6 +93,22 @@ namespace Sandra.UI.WF
             RenderTarget.SelectedText = string.Empty;
             RenderTarget.ReadOnly = true;
             elements.RemoveRange(index, elements.Count - index);
+        }
+
+        /// <summary>
+        /// Occurs when the position of the caret is updated by the user, when no text is selected.
+        /// </summary>
+        public event Action<SyntaxRenderer<TTerminal>, EventArgs> CaretPositionChanged;
+
+        private void tryInvokeCaretPositionChanged()
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!RenderTarget.IsUpdating && RenderTarget.SelectionLength == 0)
+            {
+                CaretPositionChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
