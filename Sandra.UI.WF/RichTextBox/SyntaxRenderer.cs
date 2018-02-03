@@ -156,7 +156,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the position of the caret is updated by the user, when no text is selected.
         /// </summary>
-        public event Action<SyntaxRenderer<TTerminal>, EventArgs> CaretPositionChanged;
+        public event Action<SyntaxRenderer<TTerminal>, CaretPositionChangedEventArgs<TTerminal>> CaretPositionChanged;
 
         private void tryInvokeCaretPositionChanged()
         {
@@ -165,7 +165,16 @@ namespace Sandra.UI.WF
             // Also check SelectionLength so the event is not raised for non-empty selections.
             if (!RenderTarget.IsUpdating && RenderTarget.SelectionLength == 0)
             {
-                CaretPositionChanged?.Invoke(this, EventArgs.Empty);
+                int selectionStart = RenderTarget.SelectionStart;
+
+                TextElement<TTerminal> elementBefore = GetElementBefore(selectionStart);
+                TextElement<TTerminal> elementAfter = GetElementAfter(selectionStart);
+                int relativeCaretIndex = elementAfter == null ? 0 : selectionStart - elementAfter.Start;
+
+                var eventArgs = new CaretPositionChangedEventArgs<TTerminal>(elementBefore,
+                                                                             elementAfter,
+                                                                             relativeCaretIndex);
+                CaretPositionChanged?.Invoke(this, eventArgs);
             }
         }
     }
