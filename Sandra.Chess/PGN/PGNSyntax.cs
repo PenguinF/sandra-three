@@ -230,6 +230,7 @@ namespace Sandra.PGN
 
         public BlackToMoveEllipsisSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
@@ -247,6 +248,7 @@ namespace Sandra.PGN
 
         public MoveCounterSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
@@ -264,6 +266,7 @@ namespace Sandra.PGN
 
         public FormattedMoveSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
