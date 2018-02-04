@@ -55,7 +55,11 @@ namespace Sandra.UI.WF
         /// <exception cref="InvalidOperationException">
         /// This element has been removed from a renderer.
         /// </exception>
-        public TextElement<TTerminal> GetPreviousElement() => renderer.GetElementBefore(Start);
+        public TextElement<TTerminal> GetPreviousElement()
+        {
+            throwIfNoRenderer();
+            return renderer.GetElementBefore(Start);
+        }
 
         /// <summary>
         /// Returns the text element before this element. Returns null if this is the first text element.
@@ -63,7 +67,11 @@ namespace Sandra.UI.WF
         /// <exception cref="InvalidOperationException">
         /// This element has been removed from a renderer.
         /// </exception>
-        public TextElement<TTerminal> GetNextElement() => renderer.GetElementAfter(Start + Length);
+        public TextElement<TTerminal> GetNextElement()
+        {
+            throwIfNoRenderer();
+            return renderer.GetElementAfter(Start + Length);
+        }
 
         /// <summary>
         /// Sets the caret directly before this text element and brings it into view.
@@ -73,6 +81,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void BringIntoViewBefore()
         {
+            throwIfNoRenderer();
             renderer.RenderTarget.Select(Start, 0);
             renderer.RenderTarget.ScrollToCaret();
         }
@@ -85,6 +94,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void BringIntoViewAfter()
         {
+            throwIfNoRenderer();
             renderer.RenderTarget.Select(Start + Length, 0);
             renderer.RenderTarget.ScrollToCaret();
         }
