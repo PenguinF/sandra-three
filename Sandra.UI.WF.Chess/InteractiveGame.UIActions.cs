@@ -88,6 +88,7 @@ namespace Sandra.UI.WF
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
+                        { StandardChessBoardForm.FlipBoard, newChessBoardForm.TryFlipBoard },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
 
@@ -179,6 +180,9 @@ namespace Sandra.UI.WF
                         { DemoteActiveVariation, TryDemoteActiveVariation },
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
+
+                        { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
+                        { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },
                     });
 
                     UIMenu.AddTo(movesTextBox);

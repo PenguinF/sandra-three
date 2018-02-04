@@ -190,6 +190,7 @@ namespace Sandra.UI.WF
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
                                         InteractiveGame.DeleteActiveVariation,
+                                        StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
             UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
