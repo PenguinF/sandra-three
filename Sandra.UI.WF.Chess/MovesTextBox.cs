@@ -32,17 +32,29 @@ namespace Sandra.UI.WF
     {
         private sealed class TextElementStyle
         {
+            public bool HasBackColor { get; set; }
+            public Color BackColor { get; set; }
+
+            public bool HasForeColor { get; set; }
+            public Color ForeColor { get; set; }
+
             public bool HasFont => Font != null;
             public Font Font { get; set; }
         }
 
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
+            HasBackColor = true,
+            BackColor = Color.White,
+            HasForeColor = true,
+            ForeColor = Color.Black,
             Font = new Font("Candara", 10),
         };
 
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
         {
+            HasForeColor = true,
+            ForeColor = Color.DarkRed,
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
@@ -52,8 +64,6 @@ namespace Sandra.UI.WF
         {
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
-            BackColor = Color.White;
-            ForeColor = Color.Black;
             applyDefaultStyle();
         }
 
@@ -61,8 +71,12 @@ namespace Sandra.UI.WF
         {
             using (var updateToken = BeginUpdateRememberCaret())
             {
+                BackColor = defaultStyle.BackColor;
+                ForeColor = defaultStyle.ForeColor;
                 Font = defaultStyle.Font;
                 SelectAll();
+                SelectionBackColor = defaultStyle.BackColor;
+                SelectionColor = defaultStyle.ForeColor;
                 SelectionFont = defaultStyle.Font;
             }
         }
@@ -72,6 +86,8 @@ namespace Sandra.UI.WF
             using (var updateToken = BeginUpdateRememberCaret())
             {
                 Select(element.Start, element.Length);
+                if (style.HasBackColor) SelectionBackColor = style.BackColor;
+                if (style.HasForeColor) SelectionColor = style.ForeColor;
                 if (style.HasFont) SelectionFont = style.Font;
             }
         }
