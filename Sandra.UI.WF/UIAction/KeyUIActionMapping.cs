@@ -108,28 +108,23 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Converts a <see cref="ShortcutKeys"/> key combination to a <see cref="Keys"/>.
-        /// </summary>
-        public static Keys ConvertToKeys(ShortcutKeys shortcut)
-        {
-            if (shortcut.IsEmpty) return Keys.None;
-
-            Keys result = (Keys)shortcut.Key;
-
-            KeyModifiers code = shortcut.Modifiers;
-            if (code.HasFlag(KeyModifiers.Shift)) result |= Keys.Shift;
-            if (code.HasFlag(KeyModifiers.Control)) result |= Keys.Control;
-            if (code.HasFlag(KeyModifiers.Alt)) result |= Keys.Alt;
-
-            return result;
-        }
-
-        /// <summary>
         /// For a given shortcut key, enumerates all alternative shortcut keys which are generally considered equivalent.
         /// An example is Ctrl+., where there are usually two keys that map to the '.' character.
         /// </summary>
-        public static IEnumerable<Keys> EnumerateEquivalentKeys(Keys shortcut)
+        public static IEnumerable<Keys> EnumerateEquivalentKeys(ShortcutKeys shortcutKeys)
         {
+            Keys shortcut = Keys.None;
+
+            if (!shortcutKeys.IsEmpty)
+            {
+                shortcut = (Keys)shortcutKeys.Key;
+
+                KeyModifiers code = shortcutKeys.Modifiers;
+                if (code.HasFlag(KeyModifiers.Shift)) shortcut |= Keys.Shift;
+                if (code.HasFlag(KeyModifiers.Control)) shortcut |= Keys.Control;
+                if (code.HasFlag(KeyModifiers.Alt)) shortcut |= Keys.Alt;
+            }
+
             Keys keyCode = shortcut & Keys.KeyCode;
 
             if (keyCode == Keys.None) yield break;
@@ -196,7 +191,7 @@ namespace Sandra.UI.WF
                 // Try to find an action with given shortcut.
                 foreach (var mapping in actionHandler.KeyMappings)
                 {
-                    foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
+                    foreach (var mappedShortcut in EnumerateEquivalentKeys(mapping.Shortcut))
                     {
                         // If the shortcut matches, then try to perform the action.
                         // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
