@@ -175,6 +175,21 @@ namespace Sandra.UI.WF
             }
         }
 
+        public static bool IsMatch(ShortcutKeys shortcutKeys, Keys shortcut)
+        {
+            foreach (var mappedShortcut in EnumerateEquivalentKeys(shortcutKeys))
+            {
+                // If the shortcut matches, then try to perform the action.
+                // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                if (mappedShortcut == shortcut)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Tries to convert a user command key to a <see cref="UIAction"/> and perform it on the currently focused .NET control.
         /// </summary>
@@ -191,15 +206,10 @@ namespace Sandra.UI.WF
                 // Try to find an action with given shortcut.
                 foreach (var mapping in actionHandler.KeyMappings)
                 {
-                    foreach (var mappedShortcut in EnumerateEquivalentKeys(mapping.Shortcut))
+                    if (IsMatch(mapping.Shortcut, shortcut)
+                        && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
                     {
-                        // If the shortcut matches, then try to perform the action.
-                        // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                        if (mappedShortcut == shortcut
-                            && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
