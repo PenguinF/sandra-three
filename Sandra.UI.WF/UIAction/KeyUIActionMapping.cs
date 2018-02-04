@@ -115,26 +115,26 @@ namespace Sandra.UI.WF
         {
             if (shortcutKeys.IsEmpty) yield break;
 
-            Keys shortcut = (Keys)shortcutKeys.Key;
+            Keys equivalentShortcut = (Keys)shortcutKeys.Key;
 
             KeyModifiers code = shortcutKeys.Modifiers;
-            if (code.HasFlag(KeyModifiers.Shift)) shortcut |= Keys.Shift;
-            if (code.HasFlag(KeyModifiers.Control)) shortcut |= Keys.Control;
-            if (code.HasFlag(KeyModifiers.Alt)) shortcut |= Keys.Alt;
+            if (code.HasFlag(KeyModifiers.Shift)) equivalentShortcut |= Keys.Shift;
+            if (code.HasFlag(KeyModifiers.Control)) equivalentShortcut |= Keys.Control;
+            if (code.HasFlag(KeyModifiers.Alt)) equivalentShortcut |= Keys.Alt;
 
-            Keys keyCode = shortcut & Keys.KeyCode;
+            Keys keyCode = equivalentShortcut & Keys.KeyCode;
 
-            yield return shortcut;
+            yield return equivalentShortcut;
 
-            Keys modifiers = shortcut & Keys.Modifiers;
-            bool shift = shortcut.HasFlag(Keys.Shift);
+            Keys modifiers = equivalentShortcut & Keys.Modifiers;
+            bool shift = equivalentShortcut.HasFlag(Keys.Shift);
             if (keyCode >= Keys.D0 && keyCode <= Keys.D9)
             {
-                yield return shortcut - Keys.D0 + Keys.NumPad0;
+                yield return equivalentShortcut - Keys.D0 + Keys.NumPad0;
             }
             else if (keyCode >= Keys.NumPad0 && keyCode <= Keys.NumPad9)
             {
-                yield return shortcut - Keys.NumPad0 + Keys.D0;
+                yield return equivalentShortcut - Keys.NumPad0 + Keys.D0;
             }
             else if (keyCode == Keys.Add)
             {
