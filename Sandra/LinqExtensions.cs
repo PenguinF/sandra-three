@@ -117,5 +117,28 @@ namespace System.Linq
                 yield return element;
             }
         }
+
+        /// <summary>
+        /// Performs an action on each element of a sequence.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// A sequence of elements.
+        /// </param>
+        /// <param name="action">
+        /// The action to perform on each element of the sequence.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> or <paramref name="action"/> is null.
+        /// </exception>
+        public static void ForEach<TSource>(this IEnumerable<TSource> source, Action<TSource> action)
+        {
+            foreach (var element in source)
+            {
+                action(element);
+            }
+        }
     }
 }
