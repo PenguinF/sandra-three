@@ -113,21 +113,16 @@ namespace Sandra.UI.WF
         /// </summary>
         public static IEnumerable<Keys> EnumerateEquivalentKeys(ShortcutKeys shortcutKeys)
         {
-            Keys shortcut = Keys.None;
+            if (shortcutKeys.IsEmpty) yield break;
 
-            if (!shortcutKeys.IsEmpty)
-            {
-                shortcut = (Keys)shortcutKeys.Key;
+            Keys shortcut = (Keys)shortcutKeys.Key;
 
-                KeyModifiers code = shortcutKeys.Modifiers;
-                if (code.HasFlag(KeyModifiers.Shift)) shortcut |= Keys.Shift;
-                if (code.HasFlag(KeyModifiers.Control)) shortcut |= Keys.Control;
-                if (code.HasFlag(KeyModifiers.Alt)) shortcut |= Keys.Alt;
-            }
+            KeyModifiers code = shortcutKeys.Modifiers;
+            if (code.HasFlag(KeyModifiers.Shift)) shortcut |= Keys.Shift;
+            if (code.HasFlag(KeyModifiers.Control)) shortcut |= Keys.Control;
+            if (code.HasFlag(KeyModifiers.Alt)) shortcut |= Keys.Alt;
 
             Keys keyCode = shortcut & Keys.KeyCode;
-
-            if (keyCode == Keys.None) yield break;
 
             yield return shortcut;
 
