@@ -26,6 +26,22 @@ namespace Sandra.UI.WF
     {
         public const string StandardChessBoardFormUIActionPrefix = nameof(StandardChessBoardForm) + ".";
 
+        public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
+            new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Flip board",
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+            });
+
+        public UIActionState TryFlipBoard(bool perform)
+        {
+            if (perform) IsBoardFlipped = !IsBoardFlipped;
+            return new UIActionState(UIActionVisibility.Enabled, IsBoardFlipped);
+        }
+
         public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
             new UIActionBinding()
