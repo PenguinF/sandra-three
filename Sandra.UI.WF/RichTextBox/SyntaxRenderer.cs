@@ -18,6 +18,8 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -44,13 +46,37 @@ namespace Sandra.UI.WF
 
             renderTarget.ReadOnly = true;
             renderTarget.Clear();
+            renderTarget.SelectionChanged += (_, __) => tryInvokeCaretPositionChanged();
+
+            assertInvariants();
         }
 
         internal readonly UpdatableRichTextBox RenderTarget;
 
+        private readonly List<int> elementIndexes = new List<int>();
+
         private readonly List<TextElement<TTerminal>> elements = new List<TextElement<TTerminal>>();
 
         public readonly IReadOnlyList<TextElement<TTerminal>> Elements;
+
+        [Conditional("DEBUG")]
+        private void assertInvariants()
+        {
+            // Assert invariants about lengths being equal.
+            int textLength = elementIndexes.Count;
+            Debug.Assert(RenderTarget.TextLength == textLength);
+            if (textLength == 0)
+            {
+                Debug.Assert(elements.Count == 0);
+            }
+            else
+            {
+                var lastElementIndex = elementIndexes[textLength - 1];
+                Debug.Assert(lastElementIndex + 1 == elements.Count);
+                var lastElement = elements[lastElementIndex];
+                Debug.Assert(lastElement.Start + lastElement.Length == textLength);
+            }
+        }
 
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
         {
@@ -62,6 +88,7 @@ namespace Sandra.UI.WF
 
             int start = RenderTarget.TextLength;
             RenderTarget.AppendText(text);
+            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
 
             var textElement = new TextElement<TTerminal>(this)
             {
@@ -71,6 +98,7 @@ namespace Sandra.UI.WF
             };
 
             elements.Add(textElement);
+            assertInvariants();
             return textElement;
         }
 
@@ -79,19 +107,112 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Clear()
         {
+            elementIndexes.Clear();
+            elements.ForEach(e => e.Detach());
             elements.Clear();
             RenderTarget.Clear();
+            assertInvariants();
         }
 
         public void RemoveFrom(int index)
         {
             int textStart = elements[index].Start;
-            RenderTarget.Select(textStart, RenderTarget.TextLength - textStart);
+            int textLength = RenderTarget.TextLength - textStart;
+
+            RenderTarget.Select(textStart, textLength);
             // This only works if not read-only, so temporarily turn it off.
             RenderTarget.ReadOnly = false;
             RenderTarget.SelectedText = string.Empty;
             RenderTarget.ReadOnly = true;
+
+            elementIndexes.RemoveRange(textStart, textLength);
+            elements.Skip(index).ForEach(e => e.Detach());
             elements.RemoveRange(index, elements.Count - index);
+
+            assertInvariants();
+        }
+
+        /// <summary>
+        /// Gets the length of the generated text.
+        /// </summary>
+        public int TextLength => elementIndexes.Count;
+
+        /// <summary>
+        /// Returns the text element before the given position. Returns null if the position is at the start of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementBefore(int position)
+            => position == 0 ? null : elements[elementIndexes[position - 1]];
+
+        /// <summary>
+        /// Returns the text element after the given position. Returns null if the position is at the end of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementAfter(int position)
+            => position == elementIndexes.Count ? null : elements[elementIndexes[position]];
+
+        /// <summary>
+        /// Occurs when the position of the caret is updated by the user, when no text is selected.
+        /// </summary>
+        public event Action<SyntaxRenderer<TTerminal>, CaretPositionChangedEventArgs<TTerminal>> CaretPositionChanged;
+
+        private void tryInvokeCaretPositionChanged()
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!RenderTarget.IsUpdating && RenderTarget.SelectionLength == 0)
+            {
+                int selectionStart = RenderTarget.SelectionStart;
+
+                TextElement<TTerminal> elementBefore = GetElementBefore(selectionStart);
+                TextElement<TTerminal> elementAfter = GetElementAfter(selectionStart);
+                int relativeCaretIndex = elementAfter == null ? 0 : selectionStart - elementAfter.Start;
+
+                var eventArgs = new CaretPositionChangedEventArgs<TTerminal>(elementBefore,
+                                                                             elementAfter,
+                                                                             relativeCaretIndex);
+                CaretPositionChanged?.Invoke(this, eventArgs);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="SyntaxRenderer{TTerminal}.CaretPositionChanged"/> event.
+    /// </summary>
+    public class CaretPositionChangedEventArgs<TTerminal> : EventArgs
+    {
+        /// <summary>
+        /// Gets the text element immediately before the caret, or null if the caret is at the start of the text.
+        /// If the caret is inside a text element, <see cref="ElementBefore"/> returns the same element as <see cref="ElementAfter"/>.
+        /// </summary>
+        public TextElement<TTerminal> ElementBefore { get; }
+
+        /// <summary>
+        /// Gets the text element immediately after the caret, or null if the caret is at the end of the text.
+        /// If the caret is inside a text element, <see cref="ElementAfter"/> returns the same element as <see cref="ElementBefore"/>.
+        /// </summary>
+        public TextElement<TTerminal> ElementAfter { get; }
+
+        /// <summary>
+        /// Returns the relative position of the caret in <see cref="ElementAfter"/>, or 0 if <see cref="ElementAfter"/> is null.
+        /// </summary>
+        public int RelativeCaretIndex { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CaretPositionChangedEventArgs"/> class.
+        /// </summary>
+        internal CaretPositionChangedEventArgs(TextElement<TTerminal> elementBefore,
+                                               TextElement<TTerminal> elementAfter,
+                                               int relativeCaretIndex)
+        {
+            ElementBefore = elementBefore;
+            ElementAfter = elementAfter;
+            RelativeCaretIndex = relativeCaretIndex;
         }
     }
 }

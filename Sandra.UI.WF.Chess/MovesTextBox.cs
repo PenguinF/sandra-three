@@ -64,6 +64,7 @@ namespace Sandra.UI.WF
         {
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
+            syntaxRenderer.CaretPositionChanged += caretPositionChanged;
             applyDefaultStyle();
         }
 
@@ -299,52 +300,32 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected override void OnSelectionChanged(EventArgs e)
+        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
         {
-            if (!IsUpdating && SelectionLength == 0 && hasGameAndMoveFormatter)
+            if (hasGameAndMoveFormatter)
             {
-                int selectionStart = SelectionStart;
+                TextElement<PGNTerminalSymbol> activeElement = e.ElementBefore;
+                PGNPly pgnPly;
 
-                int elemIndex;
-                if (selectionStart == 0)
-                {
-                    // Go to the initial position when the caret is at the start.
-                    elemIndex = -1;
-                }
-                else
-                {
-                    List<int> startIndexes = syntaxRenderer.Elements.Select(x => x.Start).ToList();
-
-                    // Get the index of the element that contains the caret.
-                    elemIndex = startIndexes.BinarySearch(selectionStart);
-                    if (elemIndex < 0) elemIndex = ~elemIndex - 1;
-
-                    // Look for an element which delimits a move.
-                    while (elemIndex >= 0
-                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is MoveCounterSymbol)
-                        && !(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol))
-                    {
-                        elemIndex--;
-                    }
-                }
-
-                TextElement<PGNTerminalSymbol> newActiveMoveElement;
-                Chess.MoveTree newActiveTree;
-                if (elemIndex < 0)
+                if (activeElement == null)
                 {
                     // Exceptional case to go to the initial position.
-                    newActiveMoveElement = null;
-                    newActiveTree = game.Game.MoveTree;
+                    pgnPly = null;
                 }
                 else
                 {
-                    // If at a MoveCounter, go forward until the actual FormattedMove.
-                    while (!(syntaxRenderer.Elements[elemIndex].TerminalSymbol is FormattedMoveSymbol)) elemIndex++;
+                    // Prefer to attach to a non-space element.
+                    // Use assumption that the terminal symbol list nowhere contains two adjacent SpaceSymbols.
+                    // Also use assumption that the terminal symbol list neither starts nor ends with a SpaceSymbol.
+                    if (activeElement.TerminalSymbol is SpaceSymbol && e.ElementAfter != null)
+                    {
+                        activeElement = e.ElementAfter;
+                    }
 
-                    // Go to the position after the selected move.
-                    newActiveMoveElement = syntaxRenderer.Elements[elemIndex];
-                    newActiveTree = ((FormattedMoveSymbol)newActiveMoveElement.TerminalSymbol).Ply.Variation.MoveTree;
+                    pgnPly = new PGNActivePlyDetector().Visit(activeElement.TerminalSymbol);
                 }
+
+                Chess.MoveTree newActiveTree = pgnPly == null ? game.Game.MoveTree : pgnPly.Variation.MoveTree;
 
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
@@ -359,20 +340,23 @@ namespace Sandra.UI.WF
                         }
 
                         game.Game.SetActiveTree(newActiveTree);
-
                         game.ActiveMoveTreeUpdated();
                         ActionHandler.Invalidate();
 
-                        if (newActiveMoveElement != null)
+                        // Search for the current active move element to set its font.
+                        PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
+                        foreach (TextElement<PGNTerminalSymbol> textElement in syntaxRenderer.Elements)
                         {
-                            currentActiveMoveStyleElement = newActiveMoveElement;
-                            applyStyle(newActiveMoveElement, activeMoveStyle);
+                            if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
+                            {
+                                currentActiveMoveStyleElement = textElement;
+                                applyStyle(textElement, activeMoveStyle);
+                                break;
+                            }
                         }
                     }
                 }
             }
-
-            base.OnSelectionChanged(e);
         }
     }
 }

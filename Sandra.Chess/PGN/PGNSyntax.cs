@@ -230,6 +230,7 @@ namespace Sandra.PGN
 
         public BlackToMoveEllipsisSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
@@ -247,6 +248,7 @@ namespace Sandra.PGN
 
         public MoveCounterSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
@@ -264,6 +266,7 @@ namespace Sandra.PGN
 
         public FormattedMoveSymbol(PGNPly ply)
         {
+            if (ply == null) throw new ArgumentNullException(nameof(ply));
             Ply = ply;
         }
 
@@ -290,5 +293,14 @@ namespace Sandra.PGN
         private readonly Chess.MoveTree needle;
         public PGNMoveSearcher(Chess.MoveTree needle) { this.needle = needle; }
         public override bool VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Variation.MoveTree == needle;
+    }
+
+    public class PGNActivePlyDetector : PGNTerminalSymbolVisitor<PGNPly>
+    {
+        public override PGNPly VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => symbol.Ply;
+        public override PGNPly VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply;
+        public override PGNPly VisitMoveCounterSymbol(MoveCounterSymbol symbol) => symbol.Ply;
+        public override PGNPly VisitSideLineEndSymbol(SideLineEndSymbol symbol) => symbol.SideLine.Plies[0].Ply;
+        public override PGNPly VisitSideLineStartSymbol(SideLineStartSymbol symbol) => symbol.SideLine.Plies[symbol.SideLine.Plies.Count - 1].Ply;
     }
 }
