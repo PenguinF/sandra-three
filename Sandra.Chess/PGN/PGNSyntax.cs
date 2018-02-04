@@ -300,7 +300,7 @@ namespace Sandra.PGN
         public override PGNPly VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => symbol.Ply;
         public override PGNPly VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply;
         public override PGNPly VisitMoveCounterSymbol(MoveCounterSymbol symbol) => symbol.Ply;
-        public override PGNPly VisitSideLineEndSymbol(SideLineEndSymbol symbol) => symbol.SideLine.Plies[0].Ply;
-        public override PGNPly VisitSideLineStartSymbol(SideLineStartSymbol symbol) => symbol.SideLine.Plies[symbol.SideLine.Plies.Count - 1].Ply;
+        public override PGNPly VisitSideLineEndSymbol(SideLineEndSymbol symbol) => symbol.SideLine.Plies[symbol.SideLine.Plies.Count - 1].Ply;
+        public override PGNPly VisitSideLineStartSymbol(SideLineStartSymbol symbol) => symbol.SideLine.Plies[0].Ply;
     }
 }
