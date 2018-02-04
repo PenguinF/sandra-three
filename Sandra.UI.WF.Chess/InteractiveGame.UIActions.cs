@@ -88,6 +88,7 @@ namespace Sandra.UI.WF
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
+                        { StandardChessBoardForm.FlipBoard, newChessBoardForm.TryFlipBoard },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
                     });
 
