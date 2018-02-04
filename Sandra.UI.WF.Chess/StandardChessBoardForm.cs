@@ -61,6 +61,24 @@ namespace Sandra.UI.WF
             }
         }
 
+        private bool isBoardFlipped;
+
+        /// <summary>
+        /// Gets or sets if the board is flipped.
+        /// </summary>
+        public bool IsBoardFlipped
+        {
+            get { return isBoardFlipped; }
+            set
+            {
+                if (isBoardFlipped != value)
+                {
+                    isBoardFlipped = value;
+                    copyPositionToBoard();
+                }
+            }
+        }
+
         private Chess.Square toSquare(SquareLocation squareLocation)
         {
             // Reverse y-index, because square A1 is at y == 7.
