@@ -16,6 +16,29 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
+    public partial class MovesTextBox
+    {
+        public const string MovesTextBoxUIActionPrefix = nameof(MovesTextBox) + ".";
+
+        public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(CopySelectionToClipBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Copy",
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+            });
+
+        public UIActionState TryCopySelectionToClipBoard(bool perform)
+        {
+            if (SelectionLength == 0) return UIActionVisibility.Disabled;
+            if (perform) Copy();
+            return UIActionVisibility.Enabled;
+        }
+    }
 }

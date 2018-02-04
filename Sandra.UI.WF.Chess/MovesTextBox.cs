@@ -28,7 +28,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
+    public partial class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
     {
         private sealed class TextElementStyle
         {
