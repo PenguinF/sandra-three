@@ -40,5 +40,22 @@ namespace Sandra.UI.WF
             if (perform) Copy();
             return UIActionVisibility.Enabled;
         }
+
+        public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(SelectAllText)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaption = "Select All",
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
+            });
+
+        public UIActionState TrySelectAllText(bool perform)
+        {
+            if (TextLength == 0) return UIActionVisibility.Disabled;
+            if (perform) SelectAll();
+            return UIActionVisibility.Enabled;
+        }
     }
 }
