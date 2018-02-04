@@ -108,6 +108,7 @@ namespace Sandra.UI.WF
         public void Clear()
         {
             elementIndexes.Clear();
+            elements.ForEach(e => e.Detach());
             elements.Clear();
             RenderTarget.Clear();
             assertInvariants();
@@ -125,6 +126,7 @@ namespace Sandra.UI.WF
             RenderTarget.ReadOnly = true;
 
             elementIndexes.RemoveRange(textStart, textLength);
+            elements.Skip(index).ForEach(e => e.Detach());
             elements.RemoveRange(index, elements.Count - index);
 
             assertInvariants();
