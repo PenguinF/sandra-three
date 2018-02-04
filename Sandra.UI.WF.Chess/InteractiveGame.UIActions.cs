@@ -180,6 +180,9 @@ namespace Sandra.UI.WF
                         { DemoteActiveVariation, TryDemoteActiveVariation },
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
+
+                        { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
+                        { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },
                     });
 
                     UIMenu.AddTo(movesTextBox);
