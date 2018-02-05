@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using System;
-using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -50,20 +49,34 @@ namespace Sandra.UI.WF
         {
             Application.Idle += (_, __) =>
             {
+                FocusChangedEventArgs e = null;
+
                 try
                 {
                     Control newFocusedControl = GetFocusedControl();
                     if (currentFocusedControl != newFocusedControl)
                     {
-                        Control previousFocusedControl = currentFocusedControl;
+                        e = new FocusChangedEventArgs(currentFocusedControl, newFocusedControl);
                         currentFocusedControl = newFocusedControl;
-                        event_FocusChanged.Raise(this, new FocusChangedEventArgs(previousFocusedControl, currentFocusedControl));
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Uh... write to Debug? This certainly is no reason to crash.
-                    Debug.WriteLine($"{ex.GetType().FullName}: {ex.Message}");
+                    // Do not crash if GetFocusedControl failed.
+                    // Just trace the exception and assume the focus was unchanged.
+                    ex.Trace();
+                }
+
+                if (e != null)
+                {
+                    try
+                    {
+                        event_FocusChanged.Raise(this, e);
+                    }
+                    catch (Exception ex)
+                    {
+                        Application.OnThreadException(ex);
+                    }
                 }
             };
         }
