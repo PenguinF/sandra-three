@@ -100,14 +100,6 @@ namespace Sandra.UI.WF
     public static class KeyUtils
     {
         /// <summary>
-        /// Helper method to make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-        /// </summary>
-        public static string EscapeAmpersand(string caption)
-        {
-            return caption.Replace("&", "&&");
-        }
-
-        /// <summary>
         /// Determines if a given shortcut matches a <see cref="ShortcutKeys"/> definition.
         /// This takes into account alternative shortcut keys which are generally considered equivalent.
         /// An example is Ctrl+., where there are usually two keys that map to the '.' character.

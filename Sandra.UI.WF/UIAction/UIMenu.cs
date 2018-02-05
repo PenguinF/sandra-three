@@ -248,7 +248,8 @@ namespace Sandra.UI.WF
 
         void initializeMenuItem(UIMenuNode node, ToolStripMenuItem menuItem)
         {
-            menuItem.Text = KeyUtils.EscapeAmpersand(node.Caption);
+            // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
+            menuItem.Text = node.Caption.Replace("&", "&&");
             menuItem.Image = node.Icon;
         }
 
