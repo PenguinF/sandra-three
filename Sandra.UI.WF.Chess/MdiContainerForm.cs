@@ -19,7 +19,6 @@
 using Sandra.Chess;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -205,15 +204,13 @@ namespace Sandra.UI.WF
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
 
-        void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
+        void focusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
         {
-            UIActionHandler previousHandler;
-            if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
+            foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
                 previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
             }
-            UIActionHandler currentHandler;
-            if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
+            foreach (UIActionHandler currentHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
             {
                 currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
             }
@@ -227,9 +224,8 @@ namespace Sandra.UI.WF
             updateFocusDependentMenuItems();
         }
 
-        void focusedHandler_UIActionsInvalidated(object sender, EventArgs e)
+        void focusedHandler_UIActionsInvalidated(UIActionHandler activeHandler)
         {
-            UIActionHandler activeHandler = (UIActionHandler)sender;
             foreach (var state in focusDependentUIActions.Values)
             {
                 // Invalidate all UIActions which are influenced by the active handler.
@@ -367,7 +363,7 @@ namespace Sandra.UI.WF
             }
             catch (Exception exc)
             {
-                Debug.Write(exc.Message);
+                exc.Trace();
                 return null;
             }
         }

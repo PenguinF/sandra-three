@@ -100,84 +100,73 @@ namespace Sandra.UI.WF
     public static class KeyUtils
     {
         /// <summary>
-        /// Helper method to make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-        /// </summary>
-        public static string EscapeAmpersand(string caption)
-        {
-            return caption.Replace("&", "&&");
-        }
-
-        /// <summary>
-        /// Converts a <see cref="ShortcutKeys"/> key combination to a <see cref="Keys"/>.
-        /// </summary>
-        public static Keys ConvertToKeys(ShortcutKeys shortcut)
-        {
-            if (shortcut.IsEmpty) return Keys.None;
-
-            Keys result = (Keys)shortcut.Key;
-
-            KeyModifiers code = shortcut.Modifiers;
-            if (code.HasFlag(KeyModifiers.Shift)) result |= Keys.Shift;
-            if (code.HasFlag(KeyModifiers.Control)) result |= Keys.Control;
-            if (code.HasFlag(KeyModifiers.Alt)) result |= Keys.Alt;
-
-            return result;
-        }
-
-        /// <summary>
-        /// For a given shortcut key, enumerates all alternative shortcut keys which are generally considered equivalent.
+        /// Determines if a given shortcut matches a <see cref="ShortcutKeys"/> definition.
+        /// This takes into account alternative shortcut keys which are generally considered equivalent.
         /// An example is Ctrl+., where there are usually two keys that map to the '.' character.
         /// </summary>
-        public static IEnumerable<Keys> EnumerateEquivalentKeys(Keys shortcut)
+        public static bool IsMatch(ShortcutKeys shortcutKeys, Keys shortcut)
         {
-            Keys keyCode = shortcut & Keys.KeyCode;
+            if (shortcutKeys.IsEmpty) return false;
 
-            if (keyCode == Keys.None) yield break;
+            Keys equivalentShortcut = (Keys)shortcutKeys.Key;
 
-            yield return shortcut;
+            KeyModifiers code = shortcutKeys.Modifiers;
+            if (code.HasFlag(KeyModifiers.Shift)) equivalentShortcut |= Keys.Shift;
+            if (code.HasFlag(KeyModifiers.Control)) equivalentShortcut |= Keys.Control;
+            if (code.HasFlag(KeyModifiers.Alt)) equivalentShortcut |= Keys.Alt;
 
-            Keys modifiers = shortcut & Keys.Modifiers;
-            bool shift = shortcut.HasFlag(Keys.Shift);
+            if (shortcut == equivalentShortcut) return true;
+
+            Keys keyCode = equivalentShortcut & Keys.KeyCode;
+            Keys modifiers = equivalentShortcut & Keys.Modifiers;
+            bool shift = equivalentShortcut.HasFlag(Keys.Shift);
+
             if (keyCode >= Keys.D0 && keyCode <= Keys.D9)
             {
-                yield return shortcut - Keys.D0 + Keys.NumPad0;
+                if (shortcut == equivalentShortcut - Keys.D0 + Keys.NumPad0) return true;
             }
             else if (keyCode >= Keys.NumPad0 && keyCode <= Keys.NumPad9)
             {
-                yield return shortcut - Keys.NumPad0 + Keys.D0;
+                if (shortcut == equivalentShortcut - Keys.NumPad0 + Keys.D0) return true;
             }
+
             else if (keyCode == Keys.Add)
             {
-                if (!shift) yield return modifiers | Keys.Shift | Keys.Oemplus;
+                if (!shift && shortcut == (modifiers | Keys.Shift | Keys.Oemplus)) return true;
             }
             else if (keyCode == Keys.Oemplus)
             {
-                if (shift) yield return modifiers | Keys.Add;
+                if (shift && shortcut == (modifiers | Keys.Add)) return true;
             }
+
             else if (keyCode == Keys.Subtract)
             {
-                yield return modifiers | Keys.OemMinus;
+                if (shortcut == (modifiers | Keys.OemMinus)) return true;
             }
             else if (keyCode == Keys.OemMinus)
             {
-                yield return modifiers | Keys.Subtract;
+                if (shortcut == (modifiers | Keys.Subtract)) return true;
             }
+
             else if (keyCode == Keys.Multiply)
             {
-                if (!shift) yield return modifiers | Keys.Shift | Keys.D8;
+                if (!shift && shortcut == (modifiers | Keys.Shift | Keys.D8)) return true;
             }
             else if (keyCode == Keys.D8)
             {
-                if (shift) yield return modifiers | Keys.Multiply;
+                if (shift && shortcut == (modifiers | Keys.Multiply)) return true;
             }
+
             else if (keyCode == Keys.Divide)
             {
-                yield return modifiers | Keys.OemQuestion;
+                if (shortcut == (modifiers | Keys.OemQuestion)) return true;
             }
             else if (keyCode == Keys.OemQuestion)
             {
-                yield return modifiers | Keys.Divide;
+                if (shortcut == (modifiers | Keys.Divide)) return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -196,18 +185,16 @@ namespace Sandra.UI.WF
                 // Try to find an action with given shortcut.
                 foreach (var mapping in actionHandler.KeyMappings)
                 {
-                    foreach (var mappedShortcut in EnumerateEquivalentKeys(ConvertToKeys(mapping.Shortcut)))
+                    // If the shortcut matches, then try to perform the action.
+                    // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                    if (IsMatch(mapping.Shortcut, shortcut)
+                        && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
                     {
-                        // If the shortcut matches, then try to perform the action.
-                        // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                        if (mappedShortcut == shortcut
-                            && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
+
             return false;
         }
     }

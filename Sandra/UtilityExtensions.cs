@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Diagnostics;
 
 namespace Sandra
 {
@@ -43,6 +44,20 @@ namespace Sandra
         public static void Times(this int numberOfIterations, Action action)
         {
             for (int i = numberOfIterations; i > 0; --i) action();
+        }
+
+        /// <summary>
+        /// Writes an <see cref="Exception"/> to <see cref="Debug"/>.  
+        /// </summary>
+        /// <param name="exception">
+        /// The <see cref="Exception"/> to trace.
+        /// </param>
+        public static void Trace(this Exception exception)
+        {
+            if (exception != null)
+            {
+                Debug.WriteLine($"{exception.GetType().FullName}: {exception.Message}");
+            }
         }
     }
 }

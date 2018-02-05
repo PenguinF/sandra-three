@@ -114,80 +114,84 @@ namespace Sandra.UI.WF
         }
     }
 
-    public class UIMenu : ContextMenuStrip
+    public static class UIMenu
     {
         /// <summary>
         /// Adds a dynamic <see cref="ContextMenuStrip"/> to a control if it implements <see cref="IUIActionHandlerProvider"/>.
         /// </summary>
-        public static void AddTo(Control control)
+        public static void AddTo<TUIActionControl>(TUIActionControl control)
+            where TUIActionControl : Control, IUIActionHandlerProvider
         {
-            IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
-            if (provider != null && provider.ActionHandler != null)
+            if (control != null && control.ActionHandler != null)
             {
-                control.ContextMenuStrip = new UIMenu(provider);
+                control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
             }
         }
 
-        private readonly ToolStripMenuItem dummyItem = new ToolStripMenuItem(nameof(dummyItem));
-        private readonly UIActionHandler ActionHandler;
-
-        private UIMenu(IUIActionHandlerProvider provider)
+        private class UIMenuStrip<TUIActionControl> : ContextMenuStrip
+            where TUIActionControl : Control, IUIActionHandlerProvider
         {
-            ActionHandler = provider.ActionHandler;
+            private readonly ToolStripMenuItem dummyItem = new ToolStripMenuItem(nameof(dummyItem));
+            private readonly UIActionHandler ActionHandler;
 
-            // Add a dummy item, or else no context menu strip will be opened even if the opening event is fired.
-            Items.Add(dummyItem);
-
-            // Dispose when the action provider is disposed.
-            ownerControl = (Control)provider;
-            ownerControl.Disposed += Parent_Disposed;
-        }
-
-        private Control ownerControl;
-
-        protected override void OnParentChanged(EventArgs e)
-        {
-            base.OnParentChanged(e);
-            if (ownerControl != Parent)
+            public UIMenuStrip(TUIActionControl ownerControl)
             {
-                if (ownerControl != null) ownerControl.Disposed -= Parent_Disposed;
-                if (Parent != null) Parent.Disposed += Parent_Disposed;
-                ownerControl = Parent;
-            }
-        }
+                ActionHandler = ownerControl.ActionHandler;
 
-        void Parent_Disposed(object sender, EventArgs e)
-        {
-            // Dispose automatically to prevent memory leaks when the owner of the context menu strip is disposed.
-            Dispose();
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                dummyItem.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
-        protected override void OnOpening(CancelEventArgs e)
-        {
-            base.OnOpening(e);
-
-            // Dynamically build the context menu here.
-            base.Items.Clear();
-            if (ownerControl != null && ownerControl.IsHandleCreated)
-            {
-                UIMenuBuilder.BuildMenu(ActionHandler, Items);
-            }
-
-            // If no items, add the dummy item again, or else no context menu strip will be opened even if the opening event is fired.
-            if (Items.Count == 0)
-            {
+                // Add a dummy item, or else no context menu strip will be opened even if the opening event is fired.
                 Items.Add(dummyItem);
-                e.Cancel = true;
+
+                // Dispose when the action provider is disposed.
+                this.ownerControl = ownerControl;
+                this.ownerControl.Disposed += Parent_Disposed;
+            }
+
+            private Control ownerControl;
+
+            protected override void OnParentChanged(EventArgs e)
+            {
+                base.OnParentChanged(e);
+                if (ownerControl != Parent)
+                {
+                    if (ownerControl != null) ownerControl.Disposed -= Parent_Disposed;
+                    if (Parent != null) Parent.Disposed += Parent_Disposed;
+                    ownerControl = Parent;
+                }
+            }
+
+            void Parent_Disposed(object sender, EventArgs e)
+            {
+                // Dispose automatically to prevent memory leaks when the owner of the context menu strip is disposed.
+                Dispose();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    dummyItem.Dispose();
+                }
+
+                base.Dispose(disposing);
+            }
+
+            protected override void OnOpening(CancelEventArgs e)
+            {
+                base.OnOpening(e);
+
+                // Dynamically build the context menu here.
+                base.Items.Clear();
+                if (ownerControl != null && ownerControl.IsHandleCreated)
+                {
+                    UIMenuBuilder.BuildMenu(ActionHandler, Items);
+                }
+
+                // If no items, add the dummy item again, or else no context menu strip will be opened even if the opening event is fired.
+                if (Items.Count == 0)
+                {
+                    Items.Add(dummyItem);
+                    e.Cancel = true;
+                }
             }
         }
     }
@@ -244,7 +248,8 @@ namespace Sandra.UI.WF
 
         void initializeMenuItem(UIMenuNode node, ToolStripMenuItem menuItem)
         {
-            menuItem.Text = KeyUtils.EscapeAmpersand(node.Caption);
+            // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
+            menuItem.Text = node.Caption.Replace("&", "&&");
             menuItem.Image = node.Icon;
         }
 
