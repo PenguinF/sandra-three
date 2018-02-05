@@ -373,7 +373,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_MouseEnterSquare(object sender, SquareEventArgs e)
+        private void playingBoard_MouseEnterSquare(PlayingBoard sender, SquareEventArgs e)
         {
             if (PlayingBoard.IsMoving)
             {
@@ -418,7 +418,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_MouseLeaveSquare(object sender, SquareEventArgs e)
+        private void playingBoard_MouseLeaveSquare(PlayingBoard sender, SquareEventArgs e)
         {
             stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
@@ -429,7 +429,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_MoveStart(object sender, CancellableMoveEventArgs e)
+        private void playingBoard_MoveStart(PlayingBoard sender, CancellableMoveEventArgs e)
         {
             if (canPieceBeMoved(e.Start))
             {
@@ -474,7 +474,7 @@ namespace Sandra.UI.WF
             highlightHoverSquare();
         }
 
-        private void playingBoard_MoveCommit(object sender, MoveCommitEventArgs e)
+        private void playingBoard_MoveCommit(PlayingBoard sender, MoveCommitEventArgs e)
         {
             // Move piece from source to destination.
             Chess.MoveInfo moveInfo = new Chess.MoveInfo()
@@ -519,7 +519,7 @@ namespace Sandra.UI.WF
             copyPositionToBoard();
         }
 
-        private void playingBoard_MoveCancel(object sender, MoveEventArgs e)
+        private void playingBoard_MoveCancel(PlayingBoard sender, MoveEventArgs e)
         {
             resetMoveEffects(e);
         }

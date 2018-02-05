@@ -224,9 +224,8 @@ namespace Sandra.UI.WF
             updateFocusDependentMenuItems();
         }
 
-        void focusedHandler_UIActionsInvalidated(object sender, EventArgs e)
+        void focusedHandler_UIActionsInvalidated(UIActionHandler activeHandler)
         {
-            UIActionHandler activeHandler = (UIActionHandler)sender;
             foreach (var state in focusDependentUIActions.Values)
             {
                 // Invalidate all UIActions which are influenced by the active handler.

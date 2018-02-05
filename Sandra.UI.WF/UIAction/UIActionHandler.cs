@@ -91,14 +91,14 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when all actions have been invalidated.
         /// </summary>
-        public event EventHandler UIActionsInvalidated;
+        public event Action<UIActionHandler> UIActionsInvalidated;
 
         /// <summary>
         /// Raises the <see cref="UIActionsInvalidated"/> event. 
         /// </summary>
-        protected virtual void OnUIActionsInvalidated(EventArgs e)
+        protected virtual void OnUIActionsInvalidated()
         {
-            UIActionsInvalidated?.Invoke(this, e);
+            UIActionsInvalidated?.Invoke(this);
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Invalidate()
         {
-            OnUIActionsInvalidated(EventArgs.Empty);
+            OnUIActionsInvalidated();
         }
     }
 

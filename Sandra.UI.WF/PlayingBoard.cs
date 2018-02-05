@@ -769,7 +769,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the mouse pointer enters a square.
         /// </summary>
-        public event EventHandler<SquareEventArgs> MouseEnterSquare;
+        public event Action<PlayingBoard, SquareEventArgs> MouseEnterSquare;
 
         /// <summary>
         /// Raises the <see cref="MouseEnterSquare"/> event. 
@@ -785,7 +785,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when the mouse pointer leaves a square.
         /// </summary>
-        public event EventHandler<SquareEventArgs> MouseLeaveSquare;
+        public event Action<PlayingBoard, SquareEventArgs> MouseLeaveSquare;
 
         /// <summary>
         /// Raises the <see cref="MouseLeaveSquare"/> event. 
@@ -801,7 +801,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when an image stops being moved, and is not dropped onto another square.
         /// </summary>
-        public event EventHandler<MoveEventArgs> MoveCancel;
+        public event Action<PlayingBoard, MoveEventArgs> MoveCancel;
 
         /// <summary>
         /// Raises the <see cref="MoveCancel"/> event. 
@@ -817,7 +817,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when an image is being moved and dropped onto another square.
         /// </summary>
-        public event EventHandler<MoveCommitEventArgs> MoveCommit;
+        public event Action<PlayingBoard, MoveCommitEventArgs> MoveCommit;
 
         /// <summary>
         /// Raises the <see cref="MoveCommit"/> event. 
@@ -836,7 +836,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Occurs when an image occupying a square starts being moved.
         /// </summary>
-        public event EventHandler<CancellableMoveEventArgs> MoveStart;
+        public event Action<PlayingBoard, CancellableMoveEventArgs> MoveStart;
 
         /// <summary>
         /// Raises the <see cref="MoveStart"/> event. 
