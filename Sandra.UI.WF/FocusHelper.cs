@@ -89,7 +89,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public static FocusHelper Instance => instance.Value;
 
-        readonly WeakEvent<FocusHelper> event_FocusChanged = new WeakEvent<FocusHelper>();
+        readonly WeakEvent<FocusHelper, FocusChangedEventArgs> event_FocusChanged = new WeakEvent<FocusHelper, FocusChangedEventArgs>();
 
         /// <summary>
         /// <see cref="WeakEvent"/> which occurs when the focused control changed.

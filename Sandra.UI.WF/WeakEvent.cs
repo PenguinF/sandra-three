@@ -34,7 +34,10 @@ namespace Sandra.UI.WF
     /// <typeparam name="TSender">
     /// The type of the sender of the <see cref="WeakEvent"/>.
     /// </typeparam>
-    public sealed class WeakEvent<TSender>
+    /// <typeparam name="TEventArgs">
+    /// The type of the event arguments of the <see cref="WeakEvent"/>.
+    /// </typeparam>
+    public sealed class WeakEvent<TSender, TEventArgs> where TEventArgs : EventArgs
     {
         /// <summary>
         /// Wrapper around an event handler that maintains a weak reference to a target instance, or just a strong reference to a static method if there is no target.
@@ -98,12 +101,15 @@ namespace Sandra.UI.WF
         /// Adds a handler to the event. This is equivalent to the statement:
         /// <code>myEvent += <paramref name="handler"/>;</code>
         /// </summary>
-        public void AddListener(Delegate handler)
+        public void AddListener(Action<TSender, TEventArgs> handler) => addListener(handler);
+
+        private void addListener(Delegate handler)
         {
             if (null == handler) throw new ArgumentNullException(nameof(handler));
 
             // Distinguish between static and instance methods by examining the target of the handler.
             object target = handler.Target;
+
             if (null != target)
             {
                 HandlerIsAnonymousException.ThrowIfCompilerGenerated(handler.Method);
@@ -116,11 +122,14 @@ namespace Sandra.UI.WF
         /// Removes a handler from the event. This is equivalent to the statement:
         /// <code>myEvent -= <param name="handler">handler</param>;</code>
         /// </summary>
-        public void RemoveListener(Delegate handler)
+        public void RemoveListener(Action<TSender, TEventArgs> handler) => removeListener(handler);
+
+        private void removeListener(Delegate handler)
         {
             if (null == handler) throw new ArgumentNullException(nameof(handler));
 
             bool purgeNeeded = false;
+
             foreach (HandlerRef wrapper in wrappers)
             {
                 wrapper.IfValidTarget(target =>
@@ -131,6 +140,7 @@ namespace Sandra.UI.WF
                         wrapper.Invalid = true;
                     }
                 });
+
                 purgeNeeded |= wrapper.Invalid;
             }
 
@@ -141,10 +151,10 @@ namespace Sandra.UI.WF
         /// Raises the event. This is equivalent to the statement:
         /// <code>myEvent?.Invoke(<param name="sender">sender</param>, <param name="e">e</param>);</code>
         /// </summary>
-        public void Raise(TSender sender, EventArgs e)
+        public void Raise(TSender sender, TEventArgs e)
         {
             // Build invocation list, and purge when needed.
-            Action<TSender, EventArgs> invocationList = null;
+            Action<TSender, TEventArgs> invocationList = null;
             bool purgeNeeded = false;
             foreach (HandlerRef wrapper in wrappers)
             {
@@ -166,6 +176,7 @@ namespace Sandra.UI.WF
                         }
                     };
                 });
+
                 purgeNeeded |= wrapper.Invalid;
             }
 
