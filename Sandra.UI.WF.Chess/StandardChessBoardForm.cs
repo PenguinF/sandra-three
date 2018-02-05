@@ -25,9 +25,15 @@ namespace Sandra.UI.WF
 {
     /// <summary>
     /// Form which contains a chess board on which a standard game of chess is played.
+    /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : PlayingBoardForm
+    public partial class StandardChessBoardForm : SnappingMdiChildForm
     {
+        /// <summary>
+        /// Gets a reference to the playing board control on this form.
+        /// </summary>
+        public PlayingBoard PlayingBoard { get; }
+
         private EnumIndexedArray<Chess.ColoredPiece, Image> pieceImages = EnumIndexedArray<Chess.ColoredPiece, Image>.New();
 
         /// <summary>
@@ -137,6 +143,16 @@ namespace Sandra.UI.WF
 
         public StandardChessBoardForm()
         {
+            PlayingBoard = new PlayingBoard();
+            PlayingBoard.Location = new Point(0, 0);
+            PlayingBoard.Dock = DockStyle.Fill;
+            PlayingBoard.Visible = true;
+            Controls.Add(PlayingBoard);
+
+            ShowIcon = false;
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.SizableToolWindow;
+
             PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
             PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
 
@@ -598,6 +614,119 @@ namespace Sandra.UI.WF
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
                                          rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Manually updates the size of the form to a value which it would have snapped to had it been resized by WM_SIZING messages.
+        /// </summary>
+        public void PerformAutoFit()
+        {
+            startResize();
+
+            // Simulate OnResizing event.
+            // No need to create a RECT with coordinates relative to the screen, since only the size may be affected.
+            RECT windowRect = new RECT()
+            {
+                Left = Left,
+                Right = Right,
+                Top = Top,
+                Bottom = Bottom,
+            };
+
+            performAutoFit(ref windowRect, ResizeMode.BottomRight);
+
+            SetBoundsCore(windowRect.Left, windowRect.Top,
+                          windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
+                          BoundsSpecified.Size);
+
+            PlayingBoard.Size = PlayingBoard.GetClosestAutoFitSize(ClientSize);
+        }
+
+        int widthDifference;
+        int heightDifference;
+
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            base.OnResizeBegin(e);
+
+            startResize();
+        }
+
+        private void startResize()
+        {
+            // Cache difference in size between the window and the client rectangle.
+            widthDifference = Bounds.Width - ClientRectangle.Width;
+            heightDifference = Bounds.Height - ClientRectangle.Height;
+        }
+
+        private void performAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
+        {
+            Size maxBounds;
+            switch (resizeMode)
+            {
+                case ResizeMode.Left:
+                case ResizeMode.Right:
+                    // Unrestricted vertical growth.
+                    maxBounds = new Size(resizeRect.Right - resizeRect.Left - widthDifference,
+                                         int.MaxValue);
+                    break;
+                case ResizeMode.Top:
+                case ResizeMode.Bottom:
+                    // Unrestricted horizontal growth.
+                    maxBounds = new Size(int.MaxValue,
+                                         resizeRect.Bottom - resizeRect.Top - heightDifference);
+                    break;
+                default:
+                    maxBounds = new Size(resizeRect.Right - resizeRect.Left - widthDifference,
+                                         resizeRect.Bottom - resizeRect.Top - heightDifference);
+                    break;
+            }
+
+            // Calculate closest auto fit size given the client height and width that would result from performing the given resize.
+            Size targetSize = PlayingBoard.GetClosestAutoFitSize(maxBounds);
+
+            // Left/right.
+            switch (resizeMode)
+            {
+                case ResizeMode.Left:
+                case ResizeMode.TopLeft:
+                case ResizeMode.BottomLeft:
+                    // Adjust left edge.
+                    resizeRect.Left = resizeRect.Right - targetSize.Width - widthDifference;
+                    break;
+                default:
+                    // Adjust right edge.
+                    resizeRect.Right = resizeRect.Left + targetSize.Width + widthDifference;
+                    break;
+            }
+
+            // Top/bottom.
+            switch (resizeMode)
+            {
+                case ResizeMode.Top:
+                case ResizeMode.TopLeft:
+                case ResizeMode.TopRight:
+                    // Adjust top edge.
+                    resizeRect.Top = resizeRect.Bottom - targetSize.Height - heightDifference;
+                    break;
+                default:
+                    // Adjust bottom edge.
+                    resizeRect.Bottom = resizeRect.Top + targetSize.Height + heightDifference;
+                    break;
+            }
+        }
+
+        protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
+        {
+            if (PlayingBoard.SizeToFit)
+            {
+                // Snap to auto-fit, instead of to other MDI children.
+                performAutoFit(ref resizeRect, resizeMode);
+            }
+            else
+            {
+                base.OnResizing(ref resizeRect, resizeMode);
             }
         }
 
