@@ -143,18 +143,13 @@ namespace Sandra.UI.WF
 
         public StandardChessBoardForm()
         {
-            PlayingBoard = new PlayingBoard();
-            PlayingBoard.Location = new Point(0, 0);
-            PlayingBoard.Dock = DockStyle.Fill;
-            PlayingBoard.Visible = true;
-            Controls.Add(PlayingBoard);
-
-            ShowIcon = false;
-            MaximizeBox = false;
-            FormBorderStyle = FormBorderStyle.SizableToolWindow;
-
-            PlayingBoard.BoardWidth = Chess.Constants.SquareCount;
-            PlayingBoard.BoardHeight = Chess.Constants.SquareCount;
+            PlayingBoard = new PlayingBoard
+            {
+                Location = new Point(0, 0),
+                Dock = DockStyle.Fill,
+                BoardWidth = Chess.Constants.SquareCount,
+                BoardHeight = Chess.Constants.SquareCount,
+            };
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -165,6 +160,12 @@ namespace Sandra.UI.WF
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
 
             PlayingBoard.Paint += playingBoard_Paint;
+
+            Controls.Add(PlayingBoard);
+
+            ShowIcon = false;
+            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
             lastMoveArrowPen = new Pen(Color.DimGray)
             {
