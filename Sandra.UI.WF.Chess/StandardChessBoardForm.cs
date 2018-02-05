@@ -719,15 +719,8 @@ namespace Sandra.UI.WF
 
         protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
         {
-            if (PlayingBoard.SizeToFit)
-            {
-                // Snap to auto-fit, instead of to other MDI children.
-                performAutoFit(ref resizeRect, resizeMode);
-            }
-            else
-            {
-                base.OnResizing(ref resizeRect, resizeMode);
-            }
+            // Snap to auto-fit.
+            performAutoFit(ref resizeRect, resizeMode);
         }
 
         protected override void Dispose(bool disposing)
