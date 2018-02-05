@@ -31,7 +31,10 @@ namespace Sandra.UI.WF
     /// and therefore are eligible for garbage collection. A <see cref="HandlerIsAnonymousException"/> is thrown at runtime when such a handler is registered.
     /// If an event handler is static, it is still strongly referenced.
     /// </summary>
-    public sealed class WeakEvent
+    /// <typeparam name="TSender">
+    /// The type of the sender of the <see cref="WeakEvent"/>.
+    /// </typeparam>
+    public sealed class WeakEvent<TSender>
     {
         /// <summary>
         /// Wrapper around an event handler that maintains a weak reference to a target instance, or just a strong reference to a static method if there is no target.
@@ -105,6 +108,7 @@ namespace Sandra.UI.WF
             {
                 HandlerIsAnonymousException.ThrowIfCompilerGenerated(handler.Method);
             }
+
             wrappers.Add(new HandlerRef(target, handler.Method));
         }
 
@@ -129,6 +133,7 @@ namespace Sandra.UI.WF
                 });
                 purgeNeeded |= wrapper.Invalid;
             }
+
             if (purgeNeeded) purge();
         }
 
@@ -136,10 +141,10 @@ namespace Sandra.UI.WF
         /// Raises the event. This is equivalent to the statement:
         /// <code>myEvent?.Invoke(<param name="sender">sender</param>, <param name="e">e</param>);</code>
         /// </summary>
-        public void Raise(object sender, EventArgs e)
+        public void Raise(TSender sender, EventArgs e)
         {
             // Build invocation list, and purge when needed.
-            EventHandler invocationList = null;
+            Action<TSender, EventArgs> invocationList = null;
             bool purgeNeeded = false;
             foreach (HandlerRef wrapper in wrappers)
             {

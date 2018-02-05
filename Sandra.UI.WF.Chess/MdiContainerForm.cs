@@ -204,7 +204,7 @@ namespace Sandra.UI.WF
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
         }
 
-        void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
+        void focusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
         {
             foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
