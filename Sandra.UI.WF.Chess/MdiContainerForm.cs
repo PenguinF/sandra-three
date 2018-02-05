@@ -207,13 +207,11 @@ namespace Sandra.UI.WF
 
         void focusHelper_FocusChanged(object sender, FocusChangedEventArgs e)
         {
-            UIActionHandler previousHandler;
-            if (UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl).Any(out previousHandler))
+            foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
                 previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
             }
-            UIActionHandler currentHandler;
-            if (UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl).Any(out currentHandler))
+            foreach (UIActionHandler currentHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
             {
                 currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
             }
