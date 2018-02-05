@@ -71,7 +71,7 @@
     <Compile Include="UIAction\UIMenu.cs" />
     <Compile Include="WeakEvent.cs" />
     <Compile Include="WeakEventInvocationException.cs" />
-    <Compile Include="WinUtils.cs" />
+    <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sandra\Sandra.csproj">
