@@ -19,7 +19,6 @@
 using Sandra.Chess;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -365,7 +364,7 @@ namespace Sandra.UI.WF
             }
             catch (Exception exc)
             {
-                Debug.Write(exc.Message);
+                exc.Trace();
                 return null;
             }
         }
