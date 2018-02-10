@@ -34,8 +34,6 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        public EnumIndexedArray<Piece, string> CurrentPieceSymbols { get; private set; }
-
         /// <summary>
         /// Contains the number of plies to move forward of backward in a game for fast navigation.
         /// </summary>
@@ -319,16 +317,6 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
-
-            // Standard set of piece symbols.
-            EnumIndexedArray<Piece, string> englishPieceSymbols = EnumIndexedArray<Piece, string>.New();
-            englishPieceSymbols[Piece.Knight] = "N";
-            englishPieceSymbols[Piece.Bishop] = "B";
-            englishPieceSymbols[Piece.Rook] = "R";
-            englishPieceSymbols[Piece.Queen] = "Q";
-            englishPieceSymbols[Piece.King] = "K";
-
-            CurrentPieceSymbols = englishPieceSymbols;
 
             // 10 plies == 5 moves.
             FastNavigationPlyCount = 10;

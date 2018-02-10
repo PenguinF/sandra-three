@@ -156,7 +156,6 @@ namespace Sandra.UI.WF
                     {
                         Dock = DockStyle.Fill,
                         Game = this,
-                        MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
                     };
 
                     movesTextBox.BindActions(new UIActionBindings
