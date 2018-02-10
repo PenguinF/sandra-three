@@ -114,11 +114,33 @@ namespace Sandra.UI.WF
         /// </summary>
         private const string PGNPieceSymbols = "NBRQK";
 
+        private enum MoveFormattingOption
+        {
+            UseLocalizedShortAlgebraic,
+            UsePGN,
+            UseLocalizedLongAlgebraic,
+        }
+
+        private MoveFormattingOption moveFormattingOption;
+
         private Chess.IMoveFormatter moveFormatter;
 
         private void initMoveFormatter()
         {
-            string pieceSymbols = PGNPieceSymbols;
+            string pieceSymbols;
+            if (moveFormattingOption == MoveFormattingOption.UsePGN)
+            {
+                pieceSymbols = PGNPieceSymbols;
+            }
+            else
+            {
+                pieceSymbols = Localizer.Current.Localize(LocalizedStringKeys.PieceSymbols);
+                if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
+                {
+                    // Revert back to PGN.
+                    pieceSymbols = PGNPieceSymbols;
+                }
+            }
 
             EnumIndexedArray<Chess.Piece, string> pgnPieceSymbolArray = EnumIndexedArray<Chess.Piece, string>.New();
 
@@ -135,7 +157,14 @@ namespace Sandra.UI.WF
             pgnPieceSymbolArray[Chess.Piece.Queen] = pieceSymbols[pieceIndex++].ToString();
             pgnPieceSymbolArray[Chess.Piece.King] = pieceSymbols[pieceIndex++].ToString();
 
-            moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
+            if (moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic)
+            {
+                moveFormatter = new Chess.LongAlgebraicMoveFormatter(pgnPieceSymbolArray);
+            }
+            else
+            {
+                moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
+            }
         }
 
         private InteractiveGame game;
