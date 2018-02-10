@@ -66,6 +66,7 @@ namespace Sandra.UI.WF
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
             applyDefaultStyle();
+            initMoveFormatter();
         }
 
         private void applyDefaultStyle()
@@ -108,22 +109,68 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
+        /// <summary>
+        /// Standardized PGN notation for pieces.
+        /// </summary>
+        private const string PGNPieceSymbols = "NBRQK";
+
+        private enum MoveFormattingOption
+        {
+            UseLocalizedShortAlgebraic,
+            UsePGN,
+            UseLocalizedLongAlgebraic,
+        }
+
+        private MoveFormattingOption moveFormattingOption;
+
         private Chess.IMoveFormatter moveFormatter;
 
-        /// <summary>
-        /// Gets or sets the <see cref="Chess.IMoveFormatter"/> to use for formatting the moves.
-        /// </summary>
-        public Chess.IMoveFormatter MoveFormatter
+        private void initMoveFormatter()
         {
-            get { return moveFormatter; }
-            set
+            string pieceSymbols;
+            if (moveFormattingOption == MoveFormattingOption.UsePGN)
             {
-                if (moveFormatter != value)
+                pieceSymbols = PGNPieceSymbols;
+            }
+            else
+            {
+                pieceSymbols = Localizer.Current.Localize(LocalizedStringKeys.PieceSymbols);
+                if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
-                    moveFormatter = value;
-                    refreshText();
+                    // Revert back to PGN.
+                    pieceSymbols = PGNPieceSymbols;
                 }
             }
+
+            EnumIndexedArray<Chess.Piece, string> pgnPieceSymbolArray = EnumIndexedArray<Chess.Piece, string>.New();
+
+            int pieceIndex = 0;
+            if (pieceSymbols.Length == 6)
+            {
+                // Support for an optional pawn piece symbol.
+                pgnPieceSymbolArray[Chess.Piece.Pawn] = pieceSymbols[pieceIndex++].ToString();
+            }
+
+            pgnPieceSymbolArray[Chess.Piece.Knight] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Bishop] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Rook] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Queen] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.King] = pieceSymbols[pieceIndex++].ToString();
+
+            if (moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic)
+            {
+                moveFormatter = new Chess.LongAlgebraicMoveFormatter(pgnPieceSymbolArray);
+            }
+            else
+            {
+                moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
+            }
+        }
+
+        private void updateMoveFormatter()
+        {
+            initMoveFormatter();
+            refreshText();
         }
 
         private InteractiveGame game;
@@ -143,8 +190,6 @@ namespace Sandra.UI.WF
                 }
             }
         }
-
-        private bool hasGameAndMoveFormatter => moveFormatter != null && game != null;
 
         internal void GameUpdated()
         {
@@ -197,7 +242,7 @@ namespace Sandra.UI.WF
 
         private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
         {
-            if (hasGameAndMoveFormatter)
+            if (game != null)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
@@ -280,7 +325,7 @@ namespace Sandra.UI.WF
                     ++agreeIndex;
                 }
 
-                if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
+                if (game == null || game.Game.IsFirstMove)
                 {
                     // If there's no active move, go to before the first move.
                     if (syntaxRenderer.Elements.Count > 0)
@@ -302,7 +347,7 @@ namespace Sandra.UI.WF
 
         private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
         {
-            if (hasGameAndMoveFormatter)
+            if (game != null)
             {
                 TextElement<PGNTerminalSymbol> activeElement = e.ElementBefore;
                 PGNPly pgnPly;

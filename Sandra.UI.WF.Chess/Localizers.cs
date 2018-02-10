@@ -40,11 +40,14 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
+        internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
+        internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
         internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
     }
 
@@ -93,11 +96,14 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "New game" },
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
+                { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
+                { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
+                { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
                 { LocalizedStringKeys.View, "View" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
@@ -156,11 +162,14 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "Nieuwe partij" },
                 { LocalizedStringKeys.NextLine, "Volgende variant" },
                 { LocalizedStringKeys.NextMove, "Volgende zet" },
+                { LocalizedStringKeys.PieceSymbols, "PLTDK" },
                 { LocalizedStringKeys.PreviousLine, "Vorige variant" },
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
                 { LocalizedStringKeys.SelectAll, "Alles selecteren" },
                 { LocalizedStringKeys.StartOfGame, "Naar begin partij" },
+                { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
+                { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },
                 { LocalizedStringKeys.View, "Weergave" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },

@@ -24,6 +24,53 @@ namespace Sandra.UI.WF
     {
         public const string MovesTextBoxUIActionPrefix = nameof(MovesTextBox) + ".";
 
+        public static readonly DefaultUIActionBinding UsePGNPieceSymbols = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
+            });
+
+        public UIActionState TryUsePGNPieceSymbols(bool perform)
+        {
+            if (perform)
+            {
+                moveFormattingOption
+                    = moveFormattingOption == MoveFormattingOption.UsePGN
+                    ? MoveFormattingOption.UseLocalizedShortAlgebraic
+                    : MoveFormattingOption.UsePGN;
+
+                updateMoveFormatter();
+            }
+
+            return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UsePGN);
+        }
+
+        public static readonly DefaultUIActionBinding UseLongAlgebraicNotation = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(UseLongAlgebraicNotation)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
+            });
+
+        public UIActionState TryUseLongAlgebraicNotation(bool perform)
+        {
+            if (perform)
+            {
+                moveFormattingOption
+                    = moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic
+                    ? MoveFormattingOption.UseLocalizedShortAlgebraic
+                    : MoveFormattingOption.UseLocalizedLongAlgebraic;
+
+                updateMoveFormatter();
+            }
+
+            return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic);
+        }
+
         public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(MovesTextBoxUIActionPrefix + nameof(CopySelectionToClipBoard)),
             new UIActionBinding()

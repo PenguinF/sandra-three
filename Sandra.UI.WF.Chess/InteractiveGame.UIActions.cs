@@ -156,7 +156,6 @@ namespace Sandra.UI.WF
                     {
                         Dock = DockStyle.Fill,
                         Game = this,
-                        MoveFormatter = new ShortAlgebraicMoveFormatter(OwnerForm.CurrentPieceSymbols),
                     };
 
                     movesTextBox.BindActions(new UIActionBindings
@@ -180,6 +179,9 @@ namespace Sandra.UI.WF
                         { DemoteActiveVariation, TryDemoteActiveVariation },
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
+
+                        { MovesTextBox.UsePGNPieceSymbols, movesTextBox.TryUsePGNPieceSymbols },
+                        { MovesTextBox.UseLongAlgebraicNotation, movesTextBox.TryUseLongAlgebraicNotation },
 
                         { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
                         { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },
