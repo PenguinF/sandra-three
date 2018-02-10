@@ -1131,7 +1131,9 @@ namespace Sandra.UI.WF
             if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
             g.ResetClip();
 
-            // Draw the background light and dark squares.
+            // Draw the background light and dark squares in a block pattern.
+            // Use SmoothingMode.None so crisp edges are drawn for the squares.
+            g.SmoothingMode = SmoothingMode.None;
             if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
             {
                 // Draw dark squares over the entire board.
@@ -1154,6 +1156,7 @@ namespace Sandra.UI.WF
                 g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
             }
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
             // Draw borders.
             if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
