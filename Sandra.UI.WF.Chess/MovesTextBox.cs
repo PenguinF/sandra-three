@@ -66,15 +66,7 @@ namespace Sandra.UI.WF
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
             applyDefaultStyle();
-
-            // Standard set of piece symbols.
-            EnumIndexedArray<Chess.Piece, string> englishPieceSymbols = EnumIndexedArray<Chess.Piece, string>.New();
-            englishPieceSymbols[Chess.Piece.Knight] = "N";
-            englishPieceSymbols[Chess.Piece.Bishop] = "B";
-            englishPieceSymbols[Chess.Piece.Rook] = "R";
-            englishPieceSymbols[Chess.Piece.Queen] = "Q";
-            englishPieceSymbols[Chess.Piece.King] = "K";
-            moveFormatter = new Chess.ShortAlgebraicMoveFormatter(englishPieceSymbols);
+            initMoveFormatter();
         }
 
         private void applyDefaultStyle()
@@ -118,6 +110,18 @@ namespace Sandra.UI.WF
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         private Chess.IMoveFormatter moveFormatter;
+
+        private void initMoveFormatter()
+        {
+            // Standard set of piece symbols.
+            EnumIndexedArray<Chess.Piece, string> englishPieceSymbols = EnumIndexedArray<Chess.Piece, string>.New();
+            englishPieceSymbols[Chess.Piece.Knight] = "N";
+            englishPieceSymbols[Chess.Piece.Bishop] = "B";
+            englishPieceSymbols[Chess.Piece.Rook] = "R";
+            englishPieceSymbols[Chess.Piece.Queen] = "Q";
+            englishPieceSymbols[Chess.Piece.King] = "K";
+            moveFormatter = new Chess.ShortAlgebraicMoveFormatter(englishPieceSymbols);
+        }
 
         private InteractiveGame game;
 
