@@ -46,8 +46,6 @@ namespace Sandra.UI.WF
 
             updateBackgroundBrush();
             updateBorderBrush();
-            updateDarkSquareBrush();
-            updateLightSquareBrush();
             updateSquareArrays();
 
             // Highlight by setting a gamma smaller than 1.
@@ -90,8 +88,6 @@ namespace Sandra.UI.WF
 
             { nameof(backgroundBrush), null },
             { nameof(borderBrush), null },
-            { nameof(darkSquareBrush), null },
-            { nameof(lightSquareBrush), null },
         };
 
 
@@ -231,7 +227,6 @@ namespace Sandra.UI.WF
                 {
                     if (DarkSquareImage == null)
                     {
-                        updateDarkSquareBrush();
                         Invalidate();
                     }
                 }
@@ -249,7 +244,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(DarkSquareImage), value))
                 {
-                    updateDarkSquareBrush();
                     Invalidate();
                 }
             }
@@ -359,7 +353,6 @@ namespace Sandra.UI.WF
                 {
                     if (LightSquareImage == null)
                     {
-                        updateLightSquareBrush();
                         Invalidate();
                     }
                 }
@@ -377,7 +370,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
-                    updateLightSquareBrush();
                     Invalidate();
                 }
             }
@@ -463,26 +455,6 @@ namespace Sandra.UI.WF
         }
 
         private void updateBorderBrush() => borderBrush = new SolidBrush(BorderColor);
-
-
-        private Brush darkSquareBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(darkSquareBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(darkSquareBrush), value); }
-        }
-
-        private void updateDarkSquareBrush() => darkSquareBrush = DarkSquareImage != null ? new TextureBrush(DarkSquareImage, WrapMode.Tile)
-                                                                : (Brush)new SolidBrush(DarkSquareColor);
-
-
-        private Brush lightSquareBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(lightSquareBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(lightSquareBrush), value); }
-        }
-
-        private void updateLightSquareBrush() => lightSquareBrush = LightSquareImage != null ? new TextureBrush(LightSquareImage, WrapMode.Tile)
-                                                                  : (Brush)new SolidBrush(LightSquareColor);
 
 
         private Image[] foregroundImages;
@@ -1164,6 +1136,14 @@ namespace Sandra.UI.WF
                 g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
+                    gdi.DarkSquareBrush = DarkSquareImage != null
+                                        ? new TextureBrush(DarkSquareImage, WrapMode.Tile)
+                                        : (Brush)new SolidBrush(DarkSquareColor);
+
+                    gdi.LightSquareBrush = LightSquareImage != null
+                                         ? new TextureBrush(LightSquareImage, WrapMode.Tile)
+                                         : (Brush)new SolidBrush(LightSquareColor);
+
                     int y = borderWidth;
                     bool startWithDarkSquare = false;
                     for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
@@ -1173,7 +1153,7 @@ namespace Sandra.UI.WF
                         for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
                         {
                             // Draw either a light or a dark square depending on its location.
-                            g.FillRectangle(drawDarkSquare ? darkSquareBrush : lightSquareBrush, x, y, squareSize, squareSize);
+                            g.FillRectangle(drawDarkSquare ? gdi.DarkSquareBrush : gdi.LightSquareBrush, x, y, squareSize, squareSize);
                             drawDarkSquare = !drawDarkSquare;
                             x += delta;
                         }
