@@ -44,10 +44,6 @@ namespace Sandra.UI.WF
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            updateBackgroundBrush();
-            updateBorderBrush();
-            updateDarkSquareBrush();
-            updateLightSquareBrush();
             updateSquareArrays();
 
             // Highlight by setting a gamma smaller than 1.
@@ -87,11 +83,6 @@ namespace Sandra.UI.WF
             { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
-
-            { nameof(backgroundBrush), null },
-            { nameof(borderBrush), null },
-            { nameof(darkSquareBrush), null },
-            { nameof(lightSquareBrush), null },
         };
 
 
@@ -177,7 +168,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(BorderColor), value))
                 {
-                    updateBorderBrush();
                     Invalidate();
                 }
             }
@@ -231,7 +221,6 @@ namespace Sandra.UI.WF
                 {
                     if (DarkSquareImage == null)
                     {
-                        updateDarkSquareBrush();
                         Invalidate();
                     }
                 }
@@ -249,7 +238,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(DarkSquareImage), value))
                 {
-                    updateDarkSquareBrush();
                     Invalidate();
                 }
             }
@@ -359,7 +347,6 @@ namespace Sandra.UI.WF
                 {
                     if (LightSquareImage == null)
                     {
-                        updateLightSquareBrush();
                         Invalidate();
                     }
                 }
@@ -377,7 +364,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(LightSquareImage), value))
                 {
-                    updateLightSquareBrush();
                     Invalidate();
                 }
             }
@@ -440,49 +426,11 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush backgroundBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(backgroundBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(backgroundBrush), value); }
-        }
-
-        private void updateBackgroundBrush() => backgroundBrush = new SolidBrush(BackColor);
-
         protected override void OnBackColorChanged(EventArgs e)
         {
-            updateBackgroundBrush();
             Invalidate();
             base.OnBackColorChanged(e);
         }
-
-
-        private Brush borderBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(borderBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(borderBrush), value); }
-        }
-
-        private void updateBorderBrush() => borderBrush = new SolidBrush(BorderColor);
-
-
-        private Brush darkSquareBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(darkSquareBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(darkSquareBrush), value); }
-        }
-
-        private void updateDarkSquareBrush() => darkSquareBrush = DarkSquareImage != null ? new TextureBrush(DarkSquareImage, WrapMode.Tile)
-                                                                : (Brush)new SolidBrush(DarkSquareColor);
-
-
-        private Brush lightSquareBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(lightSquareBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(lightSquareBrush), value); }
-        }
-
-        private void updateLightSquareBrush() => lightSquareBrush = LightSquareImage != null ? new TextureBrush(LightSquareImage, WrapMode.Tile)
-                                                                  : (Brush)new SolidBrush(LightSquareColor);
 
 
         private Image[] foregroundImages;
@@ -1106,6 +1054,38 @@ namespace Sandra.UI.WF
             base.OnMouseLeave(e);
         }
 
+        /// <summary>
+        /// Holds all GDI objects used during a single Paint event of this <see cref="PlayingBoard"/>.
+        /// </summary>
+        private sealed class GDIPaintResources : IDisposable
+        {
+            public Brush BackgroundBrush;
+            public Brush BorderBrush;
+
+            public Brush DarkSquareBrush;
+            public Brush LightSquareBrush;
+
+            private void releaseUnmanagedResources()
+            {
+                // Unmanaged resources: also dispose when finalizing.
+                if (BackgroundBrush != null) BackgroundBrush.Dispose();
+                if (BorderBrush != null) BorderBrush.Dispose();
+
+                if (DarkSquareBrush != null) DarkSquareBrush.Dispose();
+                if (LightSquareBrush != null) LightSquareBrush.Dispose();
+            }
+
+            public void Dispose()
+            {
+                releaseUnmanagedResources();
+                GC.SuppressFinalize(this);
+            }
+
+            ~GDIPaintResources()
+            {
+                releaseUnmanagedResources();
+            }
+        }
 
         protected override void OnPaint(PaintEventArgs pe)
         {
@@ -1126,110 +1106,149 @@ namespace Sandra.UI.WF
             Rectangle boardRectangle = new Rectangle(borderWidth, borderWidth, totalBoardWidth, totalBoardHeight);
             Rectangle boardWithBorderRectangle = new Rectangle(0, 0, borderWidth * 2 + totalBoardWidth, borderWidth * 2 + totalBoardHeight);
 
-            // Draw the background area not covered by the playing board.
-            g.ExcludeClip(boardWithBorderRectangle);
-            if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
-            g.ResetClip();
-
-            // Draw the background light and dark squares.
-            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
+            using (GDIPaintResources gdi = new GDIPaintResources())
             {
-                // Draw dark squares over the entire board.
-                g.FillRectangle(darkSquareBrush, boardRectangle);
-
-                // Draw light squares by excluding the dark squares, and then filling up what's left.
-                int doubleDelta = delta * 2;
-                int y = borderWidth;
-                for (int yIndex = boardHeight - 1; yIndex >= 0; --yIndex)
+                // Draw the background area not covered by the playing board.
+                g.ExcludeClip(boardWithBorderRectangle);
+                if (!g.IsVisibleClipEmpty)
                 {
-                    // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    int x = borderWidth + (yIndex & 1) * delta;
-                    for (int xIndex = (boardWidth - 1) / 2; xIndex >= 0; --xIndex)
-                    {
-                        g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                        x += doubleDelta;
-                    }
-                    y += delta;
+                    gdi.BackgroundBrush = new SolidBrush(BackColor);
+                    g.FillRectangle(gdi.BackgroundBrush, ClientRectangle);
                 }
-                g.FillRectangle(lightSquareBrush, boardRectangle);
                 g.ResetClip();
-            }
 
-            // Draw borders.
-            if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
-            {
-                // Clip to borders.
-                if (innerSpacing == 0)
+                // Draw the background light and dark squares in a block pattern.
+                // Use SmoothingMode.None so crisp edges are drawn for the squares.
+                g.SmoothingMode = SmoothingMode.None;
+                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    g.ExcludeClip(boardRectangle);
-                }
-                else
-                {
-                    // Exclude all squares one by one.
+                    Image darkSquareImage = DarkSquareImage;
+                    Image lightSquareImage = LightSquareImage;
+
+                    if (darkSquareImage == null) gdi.DarkSquareBrush = new SolidBrush(DarkSquareColor);
+                    if (lightSquareImage == null) gdi.LightSquareBrush = new SolidBrush(LightSquareColor);
+
                     int y = borderWidth;
-                    for (int j = 0; j < boardHeight; ++j)
+                    bool startWithDarkSquare = false;
+
+                    for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
                     {
+                        bool drawDarkSquare = startWithDarkSquare;
                         int x = borderWidth;
-                        for (int k = 0; k < boardWidth; ++k)
+
+                        for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
                         {
-                            g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                            x += delta;
-                        }
-                        y += delta;
-                    }
-                }
-
-                // And draw.
-                g.FillRectangle(borderBrush, boardWithBorderRectangle);
-                g.ResetClip();
-            }
-
-            if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
-            {
-                // Draw foreground images.
-                // Determine the image size and the amount of space around a foreground image within a square.
-                Rectangle imgRect = GetRelativeForegroundImageRectangle();
-                int sizeH = imgRect.Width,
-                    sizeV = imgRect.Height;
-
-                if (sizeH > 0 && sizeV > 0)
-                {
-                    int hOffset = borderWidth + imgRect.Left,
-                        vOffset = borderWidth + imgRect.Top;
-
-                    // Loop over foreground images and draw them.
-                    int y = vOffset;
-                    int index = 0;
-                    for (int j = 0; j < boardHeight; ++j)
-                    {
-                        int x = hOffset;
-                        for (int k = 0; k < boardWidth; ++k)
-                        {
-                            // Select picture.
-                            Image currentImg = foregroundImages[index];
-                            if (currentImg != null)
+                            // Draw either a light or a dark square depending on its location.
+                            if (drawDarkSquare)
                             {
-                                drawForegroundImage(g, currentImg,
-                                                    new Rectangle(x, y, sizeH, sizeV),
-                                                    foregroundImageAttributes[index]);
+                                if (darkSquareImage != null)
+                                {
+                                    g.DrawImage(darkSquareImage, x, y, squareSize, squareSize);
+                                }
+                                else
+                                {
+                                    g.FillRectangle(gdi.DarkSquareBrush, x, y, squareSize, squareSize);
+                                }
                             }
+                            else
+                            {
+                                if (lightSquareImage != null)
+                                {
+                                    g.DrawImage(lightSquareImage, x, y, squareSize, squareSize);
+                                }
+                                else
+                                {
+                                    g.FillRectangle(gdi.LightSquareBrush, x, y, squareSize, squareSize);
+                                }
+                            }
+
+                            drawDarkSquare = !drawDarkSquare;
                             x += delta;
-                            ++index;
                         }
+
+                        startWithDarkSquare = !startWithDarkSquare;
                         y += delta;
                     }
                 }
+                g.SmoothingMode = SmoothingMode.AntiAlias;
 
-                // Apply square highlights.
-                for (int index = 0; index < boardWidth * boardHeight; ++index)
+                // Draw borders.
+                if ((borderWidth > 0 || innerSpacing > 0) && clipRectangle.IntersectsWith(boardWithBorderRectangle))
                 {
-                    if (!squareOverlayColors[index].IsEmpty)
+                    // Clip to borders.
+                    if (innerSpacing == 0)
                     {
-                        Point offset = getLocationFromIndex(index);
-                        // Draw overlay color on the square, with the already drawn foreground image.
-                        using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                        g.ExcludeClip(boardRectangle);
+                    }
+                    else
+                    {
+                        // Exclude all squares one by one.
+                        int y = borderWidth;
+                        for (int j = 0; j < boardHeight; ++j)
                         {
-                            g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                            int x = borderWidth;
+                            for (int k = 0; k < boardWidth; ++k)
+                            {
+                                g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
+                                x += delta;
+                            }
+                            y += delta;
+                        }
+                    }
+
+                    // And draw.
+                    gdi.BorderBrush = new SolidBrush(BorderColor);
+                    g.FillRectangle(gdi.BorderBrush, boardWithBorderRectangle);
+                    g.ResetClip();
+                }
+
+                if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
+                {
+                    // Draw foreground images.
+                    // Determine the image size and the amount of space around a foreground image within a square.
+                    Rectangle imgRect = GetRelativeForegroundImageRectangle();
+                    int sizeH = imgRect.Width,
+                        sizeV = imgRect.Height;
+
+                    if (sizeH > 0 && sizeV > 0)
+                    {
+                        int hOffset = borderWidth + imgRect.Left,
+                            vOffset = borderWidth + imgRect.Top;
+
+                        // Loop over foreground images and draw them.
+                        int y = vOffset;
+                        int index = 0;
+                        for (int j = 0; j < boardHeight; ++j)
+                        {
+                            int x = hOffset;
+                            for (int k = 0; k < boardWidth; ++k)
+                            {
+                                // Select picture.
+                                Image currentImg = foregroundImages[index];
+                                if (currentImg != null)
+                                {
+                                    drawForegroundImage(g, currentImg,
+                                                        new Rectangle(x, y, sizeH, sizeV),
+                                                        foregroundImageAttributes[index]);
+                                }
+                                x += delta;
+                                ++index;
+                            }
+                            y += delta;
+                        }
+                    }
+
+                    // Apply square highlights.
+                    for (int index = 0; index < boardWidth * boardHeight; ++index)
+                    {
+                        if (!squareOverlayColors[index].IsEmpty)
+                        {
+                            Point offset = getLocationFromIndex(index);
+                            // Draw overlay color on the square, with the already drawn foreground image.
+                            using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
+                            {
+                                g.FillRectangle(overlayBrush, offset.X, offset.Y, squareSize, squareSize);
+                            }
                         }
                     }
                 }
@@ -1272,9 +1291,6 @@ namespace Sandra.UI.WF
             {
                 highlightImageAttributes.Dispose();
                 halfTransparentImageAttributes.Dispose();
-
-                // To dispose of stored disposable values such as brushes.
-                propertyStore.Dispose();
             }
             base.Dispose(disposing);
         }
