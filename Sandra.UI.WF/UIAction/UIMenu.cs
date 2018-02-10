@@ -249,13 +249,21 @@ namespace Sandra.UI.WF
         void initializeMenuItem(UIMenuNode node, ToolStripMenuItem menuItem)
         {
             // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-            menuItem.Text = Localizer.Current.Localize(node.CaptionKey).Replace("&", "&&");
+            if (node.CaptionKey != null)
+            {
+                menuItem.Text = Localizer.Current.Localize(node.CaptionKey).Replace("&", "&&");
+            }
+            else
+            {
+                menuItem.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            }
+            menuItem.ImageScaling = ToolStripItemImageScaling.None;
             menuItem.Image = node.Icon;
         }
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (element.CaptionKey == null) return null;
+            if (element.CaptionKey == null && element.Icon == null) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -284,7 +292,7 @@ namespace Sandra.UI.WF
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (container.CaptionKey == null) return null;
+            if (container.CaptionKey == null && container.Icon == null) return null;
 
             var menuItem = new ToolStripMenuItem();
             initializeMenuItem(container, menuItem);
