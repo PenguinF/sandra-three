@@ -73,7 +73,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = LocalizedStringKeys.NewGame,
+                MenuCaptionKey = LocalizedStringKeys.NewGame,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
             });
 
