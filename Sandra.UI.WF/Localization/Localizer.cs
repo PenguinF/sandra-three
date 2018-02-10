@@ -20,8 +20,14 @@ using System;
 
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Defines an abstract method to generate a localized string given a <see cref="LocalizedStringKey"/>.
+    /// </summary>
     public abstract class Localizer
     {
+        /// <summary>
+        /// Generates a localized string given a <see cref="LocalizedStringKey"/>.
+        /// </summary>
         public abstract string Localize(LocalizedStringKey localizedStringKey);
 
         private sealed class DefaultLocalizer : Localizer
@@ -36,6 +42,12 @@ namespace Sandra.UI.WF
 
         private static Localizer current;
 
+        /// <summary>
+        /// Gets or sets the current <see cref="Localizer"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// The provided new value for <see cref="Current"/> is null.
+        /// </exception>
         public static Localizer Current
         {
             get { return current; }
@@ -49,6 +61,10 @@ namespace Sandra.UI.WF
             }
         }
 
+        /// <summary>
+        /// Gets a reference to the default <see cref="Localizer"/>,
+        /// which provides a default localized string for each <see cref="LocalizedStringKey"/>.
+        /// </summary>
         public static readonly Localizer Default = new DefaultLocalizer();
 
         static Localizer()
