@@ -59,6 +59,8 @@ namespace Sandra.UI.WF
             {
                 // Null or disposed controls are invalid.
                 if (target == null) return true;
+                IWeakEventTarget weakEventTarget = target as IWeakEventTarget;
+                if (weakEventTarget != null && weakEventTarget.IsDisposed) return true;
                 Control targetControl = target as Control;
                 return targetControl != null && targetControl.IsDisposed;
             }
@@ -186,5 +188,14 @@ namespace Sandra.UI.WF
             // Fire the event.
             invocationList?.Invoke(sender, e);
         }
+    }
+
+    /// <summary>
+    /// Provides a means for a <see cref="WeakEvent{TSender, TEventArgs}"/>
+    /// to detect if a target can be purged before it is garbage collected.
+    /// </summary>
+    public interface IWeakEventTarget
+    {
+        bool IsDisposed { get; }
     }
 }

@@ -84,7 +84,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
     /// </summary>
-    public sealed class LocalizedString
+    public sealed class LocalizedString : IDisposable, IWeakEventTarget
     {
         /// <summary>
         /// Gets the key for this <see cref="LocalizedString"/>.
@@ -132,6 +132,13 @@ namespace Sandra.UI.WF
                 DisplayText = newDisplayText;
                 displayTextChanged?.Invoke(DisplayText);
             }
+        }
+
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
         }
     }
 }
