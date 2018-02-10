@@ -16,6 +16,43 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
+    public abstract class Localizer
+    {
+        public abstract string Localize(LocalizedStringKey localizedStringKey);
+
+        private sealed class DefaultLocalizer : Localizer
+        {
+            public override string Localize(LocalizedStringKey localizedStringKey)
+            {
+                if (localizedStringKey == null) return null;
+                return localizedStringKey.DisplayText;
+            }
+        }
+
+        private static Localizer current;
+
+        public static Localizer Current
+        {
+            get { return current; }
+            set
+            {
+                if (current != value)
+                {
+                    if (value == null) throw new ArgumentNullException(nameof(value));
+                    current = value;
+                }
+            }
+        }
+
+        public static readonly Localizer Default = new DefaultLocalizer();
+
+        static Localizer()
+        {
+            current = Default;
+        }
+    }
 }
