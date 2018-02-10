@@ -1111,9 +1111,14 @@ namespace Sandra.UI.WF
         /// </summary>
         private sealed class GDIPaintResources : IDisposable
         {
+            public Brush DarkSquareBrush;
+            public Brush LightSquareBrush;
+
             private void releaseUnmanagedResources()
             {
                 // Unmanaged resources: also dispose when finalizing.
+                if (DarkSquareBrush != null) DarkSquareBrush.Dispose();
+                if (LightSquareBrush != null) LightSquareBrush.Dispose();
             }
 
             public void Dispose()
