@@ -29,7 +29,8 @@ namespace Sandra.UI.WF
             public override string Localize(LocalizedStringKey localizedStringKey)
             {
                 if (localizedStringKey == null) return null;
-                return localizedStringKey.DisplayText;
+                if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
+                return "{" + localizedStringKey.Key + "}";
             }
         }
 

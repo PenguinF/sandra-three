@@ -249,7 +249,7 @@ namespace Sandra.UI.WF
         void initializeMenuItem(UIMenuNode node, ToolStripMenuItem menuItem)
         {
             // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-            menuItem.Text = node.Caption.DisplayText.Replace("&", "&&");
+            menuItem.Text = Localizer.Current.Localize(node.Caption).Replace("&", "&&");
             menuItem.Image = node.Icon;
         }
 
@@ -263,7 +263,7 @@ namespace Sandra.UI.WF
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
             initializeMenuItem(element, menuItem);
-            menuItem.ShortcutKeyDisplayString = string.Join("+", element.Shortcut.DisplayStringParts().Select(x => x.DisplayText));
+            menuItem.ShortcutKeyDisplayString = string.Join("+", element.Shortcut.DisplayStringParts().Select(x => Localizer.Current.Localize(x)));
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;

@@ -28,27 +28,28 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Creates a <see cref="LocalizedStringKey"/> that serves as a placeholder key for strings that cannot be localized.
         /// </summary>
-        public static LocalizedStringKey Unlocalizable(string displayText) => new LocalizedStringKey(displayText);
+        public static LocalizedStringKey Unlocalizable(string displayText) => new LocalizedStringKey(null, displayText);
 
         /// <summary>
         /// Gets the string representation of this <see cref="LocalizedStringKey"/>. 
         /// </summary>
         internal readonly string Key;
 
-        public readonly string DisplayText;
+        internal readonly string DisplayText;
+
+        private LocalizedStringKey(string key, string displayText)
+        {
+            Key = key;
+            DisplayText = displayText;
+        }
 
         /// <summary>
         /// Constructs a new instance of <see cref="LocalizedStringKey"/>.
         /// </summary>
-        public LocalizedStringKey(string key, string displayText) : this(displayText)
+        public LocalizedStringKey(string key)
         {
+            if (key == null) throw new ArgumentNullException(nameof(key));
             Key = key;
-        }
-
-        public LocalizedStringKey(string displayText)
-        {
-            if (displayText == null) throw new ArgumentNullException(nameof(displayText));
-            DisplayText = displayText;
         }
     }
 }
