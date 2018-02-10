@@ -96,12 +96,42 @@ namespace Sandra.UI.WF
         /// </summary>
         public string DisplayText { get; private set; }
 
+        private event Action<string> displayTextChanged;
+
+        /// <summary>
+        /// Occurs when the value of <see cref="DisplayText"/> changed.
+        /// </summary>
+        public event Action<string> DisplayTextChanged
+        {
+            add
+            {
+                displayTextChanged += value;
+                value(DisplayText);
+            }
+            remove
+            {
+                displayTextChanged -= value;
+            }
+        }
+
         public LocalizedString(LocalizedStringKey key)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
             Key = key;
             DisplayText = Localizer.Current.Localize(key);
+
+            Localizer.CurrentChanged += Localizer_CurrentChanged;
+        }
+
+        private void Localizer_CurrentChanged(object sender, EventArgs e)
+        {
+            string newDisplayText = Localizer.Current.Localize(Key);
+            if (DisplayText != newDisplayText)
+            {
+                DisplayText = newDisplayText;
+                displayTextChanged?.Invoke(DisplayText);
+            }
         }
     }
 }
