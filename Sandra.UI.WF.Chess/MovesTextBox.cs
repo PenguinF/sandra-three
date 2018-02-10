@@ -107,6 +107,7 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
+                localizedPieceSymbols.Dispose();
                 defaultStyle.Font.Dispose();
                 activeMoveStyle.Font.Dispose();
             }
