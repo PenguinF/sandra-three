@@ -44,8 +44,6 @@ namespace Sandra.UI.WF
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            updateBackgroundBrush();
-            updateBorderBrush();
             updateSquareArrays();
 
             // Highlight by setting a gamma smaller than 1.
@@ -85,9 +83,6 @@ namespace Sandra.UI.WF
             { nameof(LightSquareImage), null },
             { nameof(SizeToFit), DefaultSizeToFit },
             { nameof(SquareSize), DefaultSquareSize },
-
-            { nameof(backgroundBrush), null },
-            { nameof(borderBrush), null },
         };
 
 
@@ -173,7 +168,6 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(BorderColor), value))
                 {
-                    updateBorderBrush();
                     Invalidate();
                 }
             }
@@ -432,29 +426,11 @@ namespace Sandra.UI.WF
         }
 
 
-        private Brush backgroundBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(backgroundBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(backgroundBrush), value); }
-        }
-
-        private void updateBackgroundBrush() => backgroundBrush = new SolidBrush(BackColor);
-
         protected override void OnBackColorChanged(EventArgs e)
         {
-            updateBackgroundBrush();
             Invalidate();
             base.OnBackColorChanged(e);
         }
-
-
-        private Brush borderBrush
-        {
-            get { return propertyStore.GetOwnedDisposable<Brush>(nameof(borderBrush)); }
-            set { propertyStore.SetOwnedDisposable(nameof(borderBrush), value); }
-        }
-
-        private void updateBorderBrush() => borderBrush = new SolidBrush(BorderColor);
 
 
         private Image[] foregroundImages;
@@ -1083,12 +1059,18 @@ namespace Sandra.UI.WF
         /// </summary>
         private sealed class GDIPaintResources : IDisposable
         {
+            public Brush BackgroundBrush;
+            public Brush BorderBrush;
+
             public Brush DarkSquareBrush;
             public Brush LightSquareBrush;
 
             private void releaseUnmanagedResources()
             {
                 // Unmanaged resources: also dispose when finalizing.
+                if (BackgroundBrush != null) BackgroundBrush.Dispose();
+                if (BorderBrush != null) BorderBrush.Dispose();
+
                 if (DarkSquareBrush != null) DarkSquareBrush.Dispose();
                 if (LightSquareBrush != null) LightSquareBrush.Dispose();
             }
@@ -1128,7 +1110,11 @@ namespace Sandra.UI.WF
             {
                 // Draw the background area not covered by the playing board.
                 g.ExcludeClip(boardWithBorderRectangle);
-                if (!g.IsVisibleClipEmpty) g.FillRectangle(backgroundBrush, ClientRectangle);
+                if (!g.IsVisibleClipEmpty)
+                {
+                    gdi.BackgroundBrush = new SolidBrush(BackColor);
+                    g.FillRectangle(gdi.BackgroundBrush, ClientRectangle);
+                }
                 g.ResetClip();
 
                 // Draw the background light and dark squares in a block pattern.
@@ -1211,7 +1197,8 @@ namespace Sandra.UI.WF
                     }
 
                     // And draw.
-                    g.FillRectangle(borderBrush, boardWithBorderRectangle);
+                    gdi.BorderBrush = new SolidBrush(BorderColor);
+                    g.FillRectangle(gdi.BorderBrush, boardWithBorderRectangle);
                     g.ResetClip();
                 }
 
