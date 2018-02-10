@@ -1136,27 +1136,50 @@ namespace Sandra.UI.WF
                 g.SmoothingMode = SmoothingMode.None;
                 if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
                 {
-                    gdi.DarkSquareBrush = DarkSquareImage != null
-                                        ? new TextureBrush(DarkSquareImage, WrapMode.Tile)
-                                        : (Brush)new SolidBrush(DarkSquareColor);
+                    Image darkSquareImage = DarkSquareImage;
+                    Image lightSquareImage = LightSquareImage;
 
-                    gdi.LightSquareBrush = LightSquareImage != null
-                                         ? new TextureBrush(LightSquareImage, WrapMode.Tile)
-                                         : (Brush)new SolidBrush(LightSquareColor);
+                    if (darkSquareImage == null) gdi.DarkSquareBrush = new SolidBrush(DarkSquareColor);
+                    if (lightSquareImage == null) gdi.LightSquareBrush = new SolidBrush(LightSquareColor);
 
                     int y = borderWidth;
                     bool startWithDarkSquare = false;
+
                     for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
                     {
                         bool drawDarkSquare = startWithDarkSquare;
                         int x = borderWidth;
+
                         for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
                         {
                             // Draw either a light or a dark square depending on its location.
-                            g.FillRectangle(drawDarkSquare ? gdi.DarkSquareBrush : gdi.LightSquareBrush, x, y, squareSize, squareSize);
+                            if (drawDarkSquare)
+                            {
+                                if (darkSquareImage != null)
+                                {
+                                    g.DrawImage(darkSquareImage, x, y, squareSize, squareSize);
+                                }
+                                else
+                                {
+                                    g.FillRectangle(gdi.DarkSquareBrush, x, y, squareSize, squareSize);
+                                }
+                            }
+                            else
+                            {
+                                if (lightSquareImage != null)
+                                {
+                                    g.DrawImage(lightSquareImage, x, y, squareSize, squareSize);
+                                }
+                                else
+                                {
+                                    g.FillRectangle(gdi.LightSquareBrush, x, y, squareSize, squareSize);
+                                }
+                            }
+
                             drawDarkSquare = !drawDarkSquare;
                             x += delta;
                         }
+
                         startWithDarkSquare = !startWithDarkSquare;
                         y += delta;
                     }
