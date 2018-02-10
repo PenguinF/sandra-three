@@ -26,6 +26,11 @@ namespace Sandra.UI.WF
     public sealed class LocalizedStringKey
     {
         /// <summary>
+        /// Creates a <see cref="LocalizedStringKey"/> that serves as a placeholder key for strings that cannot be localized.
+        /// </summary>
+        public static LocalizedStringKey Unlocalizable(string displayText) => new LocalizedStringKey(displayText);
+
+        /// <summary>
         /// Gets the string representation of this <see cref="LocalizedStringKey"/>. 
         /// </summary>
         internal readonly string Key;
