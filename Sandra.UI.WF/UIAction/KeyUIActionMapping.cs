@@ -60,16 +60,54 @@ namespace Sandra.UI.WF
             if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt;
 
             if (Key >= ConsoleKey.D0 && Key <= ConsoleKey.D9) yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)Key - (int)ConsoleKey.D0));
-            else if (Key == ConsoleKey.Add) yield return LocalizedStringKey.Unlocalizable("+");
-            else if (Key == ConsoleKey.Subtract) yield return LocalizedStringKey.Unlocalizable("-");
-            else if (Key == ConsoleKey.Multiply) yield return LocalizedStringKey.Unlocalizable("*");
-            else if (Key == ConsoleKey.Divide) yield return LocalizedStringKey.Unlocalizable("/");
-            else if (Key == ConsoleKey.Delete) yield return LocalizedConsoleKeys.ConsoleKeyDelete;
-            else if (Key == ConsoleKey.LeftArrow) yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
-            else if (Key == ConsoleKey.RightArrow) yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
-            else if (Key == ConsoleKey.UpArrow) yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
-            else if (Key == ConsoleKey.DownArrow) yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
-            else yield return LocalizedStringKey.Unlocalizable(Key.ToString());
+            else
+            {
+                switch (Key)
+                {
+                    case ConsoleKey.Add:
+                        yield return LocalizedStringKey.Unlocalizable("+");
+                        break;
+                    case ConsoleKey.Subtract:
+                        yield return LocalizedStringKey.Unlocalizable("-");
+                        break;
+                    case ConsoleKey.Multiply:
+                        yield return LocalizedStringKey.Unlocalizable("*");
+                        break;
+                    case ConsoleKey.Divide:
+                        yield return LocalizedStringKey.Unlocalizable("/");
+                        break;
+                    case ConsoleKey.Delete:
+                        yield return LocalizedConsoleKeys.ConsoleKeyDelete;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
+                        break;
+                    case ConsoleKey.UpArrow:
+                        yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
+                        break;
+                    case ConsoleKey.Home:
+                        yield return LocalizedConsoleKeys.ConsoleKeyHome;
+                        break;
+                    case ConsoleKey.End:
+                        yield return LocalizedConsoleKeys.ConsoleKeyEnd;
+                        break;
+                    case ConsoleKey.PageUp:
+                        yield return LocalizedConsoleKeys.ConsoleKeyPageUp;
+                        break;
+                    case ConsoleKey.PageDown:
+                        yield return LocalizedConsoleKeys.ConsoleKeyPageDown;
+                        break;
+                    default:
+                        yield return LocalizedStringKey.Unlocalizable(Key.ToString());
+                        break;
+                }
+            }
         }
     }
 
@@ -79,7 +117,11 @@ namespace Sandra.UI.WF
         public static readonly LocalizedStringKey ConsoleKeyCtrl = new LocalizedStringKey(nameof(ConsoleKeyCtrl));
         public static readonly LocalizedStringKey ConsoleKeyDelete = new LocalizedStringKey(nameof(ConsoleKeyDelete));
         public static readonly LocalizedStringKey ConsoleKeyDownArrow = new LocalizedStringKey(nameof(ConsoleKeyDownArrow));
+        public static readonly LocalizedStringKey ConsoleKeyEnd = new LocalizedStringKey(nameof(ConsoleKeyEnd));
+        public static readonly LocalizedStringKey ConsoleKeyHome = new LocalizedStringKey(nameof(ConsoleKeyHome));
         public static readonly LocalizedStringKey ConsoleKeyLeftArrow = new LocalizedStringKey(nameof(ConsoleKeyLeftArrow));
+        public static readonly LocalizedStringKey ConsoleKeyPageDown = new LocalizedStringKey(nameof(ConsoleKeyPageDown));
+        public static readonly LocalizedStringKey ConsoleKeyPageUp = new LocalizedStringKey(nameof(ConsoleKeyPageUp));
         public static readonly LocalizedStringKey ConsoleKeyRightArrow = new LocalizedStringKey(nameof(ConsoleKeyRightArrow));
         public static readonly LocalizedStringKey ConsoleKeyShift = new LocalizedStringKey(nameof(ConsoleKeyShift));
         public static readonly LocalizedStringKey ConsoleKeyUpArrow = new LocalizedStringKey(nameof(ConsoleKeyUpArrow));

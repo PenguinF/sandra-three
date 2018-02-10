@@ -97,14 +97,21 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.View, "View" },
+
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
                 { LocalizedConsoleKeys.ConsoleKeyShift, "Shift" },
                 { LocalizedConsoleKeys.ConsoleKeyAlt, "Alt" },
-                { LocalizedConsoleKeys.ConsoleKeyDelete, "Del" },
+
                 { LocalizedConsoleKeys.ConsoleKeyLeftArrow, "Left Arrow" },
                 { LocalizedConsoleKeys.ConsoleKeyRightArrow, "Right Arrow" },
                 { LocalizedConsoleKeys.ConsoleKeyUpArrow, "Up Arrow" },
                 { LocalizedConsoleKeys.ConsoleKeyDownArrow, "Down Arrow" },
+
+                { LocalizedConsoleKeys.ConsoleKeyDelete, "Del" },
+                { LocalizedConsoleKeys.ConsoleKeyHome, "Home" },
+                { LocalizedConsoleKeys.ConsoleKeyEnd, "End" },
+                { LocalizedConsoleKeys.ConsoleKeyPageDown, "PageDown" },
+                { LocalizedConsoleKeys.ConsoleKeyPageUp, "PageUp" },
             };
         }
     }
