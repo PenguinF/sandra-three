@@ -51,28 +51,26 @@ namespace Sandra.UI.WF
 
         public bool IsEmpty => Key == 0;
 
-        IEnumerable<string> displayStringParts()
+        public IEnumerable<LocalizedStringKey> DisplayStringParts()
         {
             if (IsEmpty) yield break;
 
-            if (Modifiers.HasFlag(KeyModifiers.Control)) yield return "Ctrl";
-            if (Modifiers.HasFlag(KeyModifiers.Shift)) yield return "Shift";
-            if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return "Alt";
+            if (Modifiers.HasFlag(KeyModifiers.Control)) yield return new LocalizedStringKey("Ctrl");
+            if (Modifiers.HasFlag(KeyModifiers.Shift)) yield return new LocalizedStringKey("Shift");
+            if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return new LocalizedStringKey("Alt");
 
-            if (Key >= ConsoleKey.D0 && Key <= ConsoleKey.D9) yield return Convert.ToString((int)Key - (int)ConsoleKey.D0);
-            else if (Key == ConsoleKey.Add) yield return "+";
-            else if (Key == ConsoleKey.Subtract) yield return "-";
-            else if (Key == ConsoleKey.Multiply) yield return "*";
-            else if (Key == ConsoleKey.Divide) yield return "/";
-            else if (Key == ConsoleKey.Delete) yield return "Del";
-            else if (Key == ConsoleKey.LeftArrow) yield return "Left Arrow";
-            else if (Key == ConsoleKey.RightArrow) yield return "Right Arrow";
-            else if (Key == ConsoleKey.UpArrow) yield return "Up Arrow";
-            else if (Key == ConsoleKey.DownArrow) yield return "Down Arrow";
-            else yield return Key.ToString();
+            if (Key >= ConsoleKey.D0 && Key <= ConsoleKey.D9) yield return new LocalizedStringKey(Convert.ToString((int)Key - (int)ConsoleKey.D0));
+            else if (Key == ConsoleKey.Add) yield return new LocalizedStringKey("+");
+            else if (Key == ConsoleKey.Subtract) yield return new LocalizedStringKey("-");
+            else if (Key == ConsoleKey.Multiply) yield return new LocalizedStringKey("*");
+            else if (Key == ConsoleKey.Divide) yield return new LocalizedStringKey("/");
+            else if (Key == ConsoleKey.Delete) yield return new LocalizedStringKey("Del");
+            else if (Key == ConsoleKey.LeftArrow) yield return new LocalizedStringKey("Left Arrow");
+            else if (Key == ConsoleKey.RightArrow) yield return new LocalizedStringKey("Right Arrow");
+            else if (Key == ConsoleKey.UpArrow) yield return new LocalizedStringKey("Up Arrow");
+            else if (Key == ConsoleKey.DownArrow) yield return new LocalizedStringKey("Down Arrow");
+            else yield return new LocalizedStringKey(Key.ToString());
         }
-
-        public string DisplayString => string.Join("+", displayStringParts());
     }
 
     /// <summary>

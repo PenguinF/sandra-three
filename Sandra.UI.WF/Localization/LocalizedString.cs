@@ -16,6 +16,24 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Represents an immutable identifier for a <see cref="LocalizedString"/>.
+    /// </summary>
+    public sealed class LocalizedStringKey
+    {
+        public readonly string DisplayText;
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="LocalizedStringKey"/>.
+        /// </summary>
+        public LocalizedStringKey(string displayText)
+        {
+            if (displayText == null) throw new ArgumentNullException(nameof(displayText));
+            DisplayText = displayText;
+        }
+    }
 }

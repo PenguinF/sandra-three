@@ -73,7 +73,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "New game",
+                MenuCaption = new LocalizedStringKey("New game"),
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
             });
 
@@ -158,14 +158,14 @@ namespace Sandra.UI.WF
         {
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
-            UIMenuNode.Container gameMenu = new UIMenuNode.Container("Game");
+            UIMenuNode.Container gameMenu = new UIMenuNode.Container(new LocalizedStringKey("Game"));
             mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard);
 
-            UIMenuNode.Container goToMenu = new UIMenuNode.Container("Go to")
+            UIMenuNode.Container goToMenu = new UIMenuNode.Container(new LocalizedStringKey("Go to"))
             {
                 IsFirstInGroup = true,
             };
@@ -192,7 +192,7 @@ namespace Sandra.UI.WF
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
-            UIMenuNode.Container viewMenu = new UIMenuNode.Container("View");
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container(new LocalizedStringKey("View"));
             mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
 
             // Add these actions to the "View" dropdown list.

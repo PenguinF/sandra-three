@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
         /// </summary>
-        public readonly string Caption;
+        public readonly LocalizedStringKey Caption;
 
         /// <summary>
         /// Gets the icon to display for this node.
@@ -44,12 +44,12 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool IsFirstInGroup;
 
-        protected UIMenuNode(string caption)
+        protected UIMenuNode(LocalizedStringKey caption)
         {
             Caption = caption;
         }
 
-        protected UIMenuNode(string caption, Image icon) : this(caption)
+        protected UIMenuNode(LocalizedStringKey caption, Image icon) : this(caption)
         {
             Icon = icon;
         }
@@ -74,11 +74,11 @@ namespace Sandra.UI.WF
         {
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
 
-            public Container(string caption) : base(caption)
+            public Container(LocalizedStringKey caption) : base(caption)
             {
             }
 
-            public Container(string caption, Image icon) : base(caption, icon)
+            public Container(LocalizedStringKey caption, Image icon) : base(caption, icon)
             {
             }
 
@@ -249,13 +249,13 @@ namespace Sandra.UI.WF
         void initializeMenuItem(UIMenuNode node, ToolStripMenuItem menuItem)
         {
             // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-            menuItem.Text = node.Caption.Replace("&", "&&");
+            menuItem.Text = node.Caption.DisplayText.Replace("&", "&&");
             menuItem.Image = node.Icon;
         }
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (string.IsNullOrEmpty(element.Caption)) return null;
+            if (string.IsNullOrEmpty(element.Caption.DisplayText)) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -263,7 +263,7 @@ namespace Sandra.UI.WF
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
             initializeMenuItem(element, menuItem);
-            menuItem.ShortcutKeyDisplayString = element.Shortcut.DisplayString;
+            menuItem.ShortcutKeyDisplayString = string.Join("+", element.Shortcut.DisplayStringParts());
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;
@@ -284,7 +284,7 @@ namespace Sandra.UI.WF
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (string.IsNullOrEmpty(container.Caption)) return null;
+            if (string.IsNullOrEmpty(container.Caption.DisplayText)) return null;
 
             var menuItem = new ToolStripMenuItem();
             initializeMenuItem(container, menuItem);
