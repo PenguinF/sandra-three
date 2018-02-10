@@ -56,6 +56,40 @@ namespace Sandra.UI.WF
         public static readonly Localizer English = new EnglishLocalizer();
 
         public static readonly Localizer Dutch = new DutchLocalizer();
+
+        public static readonly LocalizedStringKey LangEnglish = LocalizedStringKey.Unlocalizable("English");
+
+        public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
+            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangEnglish)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LangEnglish,
+                MenuIcon = Program.LoadImage("flag-uk"),
+            });
+
+        public static UIActionState TrySwitchToLangEnglish(bool perform)
+        {
+            if (perform) Localizer.Current = English;
+            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
+        }
+
+        public static readonly LocalizedStringKey LangDutch = LocalizedStringKey.Unlocalizable("Nederlands");
+
+        public static readonly DefaultUIActionBinding SwitchToLangDutch = new DefaultUIActionBinding(
+            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangDutch)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LangDutch,
+                MenuIcon = Program.LoadImage("flag-nl"),
+            });
+
+        public static UIActionState TrySwitchToLangDutch(bool perform)
+        {
+            if (perform) Localizer.Current = Dutch;
+            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);
+        }
     }
 
     internal sealed class EnglishLocalizer : Localizer
