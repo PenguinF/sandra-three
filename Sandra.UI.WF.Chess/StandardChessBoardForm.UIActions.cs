@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = new LocalizedStringKey("Flip board"),
+                MenuCaption = LocalizedStringKeys.FlipBoard,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
             });
 
@@ -48,7 +48,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = new LocalizedStringKey("Copy diagram to clipboard"),
+                MenuCaption = LocalizedStringKeys.CopyDiagramToClipboard,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             });
 

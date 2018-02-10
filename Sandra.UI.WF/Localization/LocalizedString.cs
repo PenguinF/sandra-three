@@ -25,11 +25,21 @@ namespace Sandra.UI.WF
     /// </summary>
     public sealed class LocalizedStringKey
     {
+        /// <summary>
+        /// Gets the string representation of this <see cref="LocalizedStringKey"/>. 
+        /// </summary>
+        internal readonly string Key;
+
         public readonly string DisplayText;
 
         /// <summary>
         /// Constructs a new instance of <see cref="LocalizedStringKey"/>.
         /// </summary>
+        public LocalizedStringKey(string key, string displayText) : this(displayText)
+        {
+            Key = key;
+        }
+
         public LocalizedStringKey(string displayText)
         {
             if (displayText == null) throw new ArgumentNullException(nameof(displayText));

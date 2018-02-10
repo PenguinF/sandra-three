@@ -55,22 +55,34 @@ namespace Sandra.UI.WF
         {
             if (IsEmpty) yield break;
 
-            if (Modifiers.HasFlag(KeyModifiers.Control)) yield return new LocalizedStringKey("Ctrl");
-            if (Modifiers.HasFlag(KeyModifiers.Shift)) yield return new LocalizedStringKey("Shift");
-            if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return new LocalizedStringKey("Alt");
+            if (Modifiers.HasFlag(KeyModifiers.Control)) yield return LocalizedConsoleKeys.ConsoleKeyCtrl;
+            if (Modifiers.HasFlag(KeyModifiers.Shift)) yield return LocalizedConsoleKeys.ConsoleKeyShift;
+            if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt;
 
             if (Key >= ConsoleKey.D0 && Key <= ConsoleKey.D9) yield return new LocalizedStringKey(Convert.ToString((int)Key - (int)ConsoleKey.D0));
             else if (Key == ConsoleKey.Add) yield return new LocalizedStringKey("+");
             else if (Key == ConsoleKey.Subtract) yield return new LocalizedStringKey("-");
             else if (Key == ConsoleKey.Multiply) yield return new LocalizedStringKey("*");
             else if (Key == ConsoleKey.Divide) yield return new LocalizedStringKey("/");
-            else if (Key == ConsoleKey.Delete) yield return new LocalizedStringKey("Del");
-            else if (Key == ConsoleKey.LeftArrow) yield return new LocalizedStringKey("Left Arrow");
-            else if (Key == ConsoleKey.RightArrow) yield return new LocalizedStringKey("Right Arrow");
-            else if (Key == ConsoleKey.UpArrow) yield return new LocalizedStringKey("Up Arrow");
-            else if (Key == ConsoleKey.DownArrow) yield return new LocalizedStringKey("Down Arrow");
+            else if (Key == ConsoleKey.Delete) yield return LocalizedConsoleKeys.ConsoleKeyDelete;
+            else if (Key == ConsoleKey.LeftArrow) yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
+            else if (Key == ConsoleKey.RightArrow) yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
+            else if (Key == ConsoleKey.UpArrow) yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
+            else if (Key == ConsoleKey.DownArrow) yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
             else yield return new LocalizedStringKey(Key.ToString());
         }
+    }
+
+    public static class LocalizedConsoleKeys
+    {
+        public static readonly LocalizedStringKey ConsoleKeyAlt = new LocalizedStringKey(nameof(ConsoleKeyAlt), "Alt");
+        public static readonly LocalizedStringKey ConsoleKeyCtrl = new LocalizedStringKey(nameof(ConsoleKeyCtrl), "Ctrl");
+        public static readonly LocalizedStringKey ConsoleKeyDelete = new LocalizedStringKey(nameof(ConsoleKeyCtrl), "Del");
+        public static readonly LocalizedStringKey ConsoleKeyDownArrow = new LocalizedStringKey(nameof(ConsoleKeyDownArrow), "Down Arrow");
+        public static readonly LocalizedStringKey ConsoleKeyLeftArrow = new LocalizedStringKey(nameof(ConsoleKeyLeftArrow), "Left Arrow");
+        public static readonly LocalizedStringKey ConsoleKeyRightArrow = new LocalizedStringKey(nameof(ConsoleKeyRightArrow), "Right Arrow");
+        public static readonly LocalizedStringKey ConsoleKeyShift = new LocalizedStringKey(nameof(ConsoleKeyShift), "Shift");
+        public static readonly LocalizedStringKey ConsoleKeyUpArrow = new LocalizedStringKey(nameof(ConsoleKeyUpArrow), "Up Arrow");
     }
 
     /// <summary>
