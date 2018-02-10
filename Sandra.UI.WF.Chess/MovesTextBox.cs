@@ -109,18 +109,33 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
+        /// <summary>
+        /// Standardized PGN notation for pieces.
+        /// </summary>
+        private const string PGNPieceSymbols = "NBRQK";
+
         private Chess.IMoveFormatter moveFormatter;
 
         private void initMoveFormatter()
         {
-            // Standard set of piece symbols.
-            EnumIndexedArray<Chess.Piece, string> englishPieceSymbols = EnumIndexedArray<Chess.Piece, string>.New();
-            englishPieceSymbols[Chess.Piece.Knight] = "N";
-            englishPieceSymbols[Chess.Piece.Bishop] = "B";
-            englishPieceSymbols[Chess.Piece.Rook] = "R";
-            englishPieceSymbols[Chess.Piece.Queen] = "Q";
-            englishPieceSymbols[Chess.Piece.King] = "K";
-            moveFormatter = new Chess.ShortAlgebraicMoveFormatter(englishPieceSymbols);
+            string pieceSymbols = PGNPieceSymbols;
+
+            EnumIndexedArray<Chess.Piece, string> pgnPieceSymbolArray = EnumIndexedArray<Chess.Piece, string>.New();
+
+            int pieceIndex = 0;
+            if (pieceSymbols.Length == 6)
+            {
+                // Support for an optional pawn piece symbol.
+                pgnPieceSymbolArray[Chess.Piece.Pawn] = pieceSymbols[pieceIndex++].ToString();
+            }
+
+            pgnPieceSymbolArray[Chess.Piece.Knight] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Bishop] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Rook] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.Queen] = pieceSymbols[pieceIndex++].ToString();
+            pgnPieceSymbolArray[Chess.Piece.King] = pieceSymbols[pieceIndex++].ToString();
+
+            moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
         }
 
         private InteractiveGame game;
