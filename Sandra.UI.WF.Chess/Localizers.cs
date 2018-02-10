@@ -46,6 +46,8 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
+        internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
+        internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
         internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
     }
 
@@ -100,6 +102,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
+                { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
+                { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
                 { LocalizedStringKeys.View, "View" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
@@ -164,6 +168,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
                 { LocalizedStringKeys.SelectAll, "Alles selecteren" },
                 { LocalizedStringKeys.StartOfGame, "Naar begin partij" },
+                { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
+                { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },
                 { LocalizedStringKeys.View, "Weergave" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },

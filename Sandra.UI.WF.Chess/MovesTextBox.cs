@@ -167,6 +167,12 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void updateMoveFormatter()
+        {
+            initMoveFormatter();
+            refreshText();
+        }
+
         private InteractiveGame game;
 
         /// <summary>

@@ -187,6 +187,8 @@ namespace Sandra.UI.WF
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
                                         InteractiveGame.DeleteActiveVariation,
+                                        MovesTextBox.UsePGNPieceSymbols,
+                                        MovesTextBox.UseLongAlgebraicNotation,
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
