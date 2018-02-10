@@ -137,8 +137,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private bool hasGameAndMoveFormatter => moveFormatter != null && game != null;
-
         internal void GameUpdated()
         {
             if (!IsUpdating)
@@ -190,7 +188,7 @@ namespace Sandra.UI.WF
 
         private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
         {
-            if (hasGameAndMoveFormatter)
+            if (game != null)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
@@ -273,7 +271,7 @@ namespace Sandra.UI.WF
                     ++agreeIndex;
                 }
 
-                if (!hasGameAndMoveFormatter || game.Game.IsFirstMove)
+                if (game == null || game.Game.IsFirstMove)
                 {
                     // If there's no active move, go to before the first move.
                     if (syntaxRenderer.Elements.Count > 0)
@@ -295,7 +293,7 @@ namespace Sandra.UI.WF
 
         private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
         {
-            if (hasGameAndMoveFormatter)
+            if (game != null)
             {
                 TextElement<PGNTerminalSymbol> activeElement = e.ElementBefore;
                 PGNPly pgnPly;
