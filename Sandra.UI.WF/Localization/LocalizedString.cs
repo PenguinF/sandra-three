@@ -17,13 +17,15 @@
  * 
  *********************************************************************************/
 using System;
+using System.Diagnostics;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Represents an immutable identifier for a <see cref="LocalizedString"/>.
     /// </summary>
-    public sealed class LocalizedStringKey
+    [DebuggerDisplay("{Key}")]
+    public sealed class LocalizedStringKey : IEquatable<LocalizedStringKey>
     {
         /// <summary>
         /// Creates a <see cref="LocalizedStringKey"/> that serves as a placeholder key for strings that cannot be localized.
@@ -35,10 +37,14 @@ namespace Sandra.UI.WF
         /// </summary>
         internal readonly string Key;
 
+        /// <summary>
+        /// For untranslatable keys, returns the display text.
+        /// </summary>
         internal readonly string DisplayText;
 
         private LocalizedStringKey(string key, string displayText)
         {
+            if (displayText == null) throw new ArgumentNullException(nameof(displayText));
             Key = key;
             DisplayText = displayText;
         }
@@ -50,6 +56,28 @@ namespace Sandra.UI.WF
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
             Key = key;
+        }
+
+        public bool Equals(LocalizedStringKey other) => other != null
+                                                     && Key == other.Key
+                                                     && DisplayText == other.DisplayText;
+
+        public override bool Equals(object obj) => Equals(obj as LocalizedStringKey);
+
+        public override int GetHashCode() => Key != null ? Key.GetHashCode() : DisplayText.GetHashCode();
+
+        public static bool operator ==(LocalizedStringKey first, LocalizedStringKey second)
+        {
+            if (ReferenceEquals(null, first)) return ReferenceEquals(null, second);
+            if (ReferenceEquals(null, second)) return false;
+            return first.Key == second.Key && first.DisplayText == second.DisplayText;
+        }
+
+        public static bool operator !=(LocalizedStringKey first, LocalizedStringKey second)
+        {
+            if (ReferenceEquals(null, first)) return !ReferenceEquals(null, second);
+            if (ReferenceEquals(null, second)) return true;
+            return first.Key != second.Key || first.DisplayText != second.DisplayText;
         }
     }
 }
