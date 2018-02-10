@@ -114,6 +114,8 @@ namespace Sandra.UI.WF
         /// </summary>
         private const string PGNPieceSymbols = "NBRQK";
 
+        private readonly LocalizedString localizedPieceSymbols = new LocalizedString(LocalizedStringKeys.PieceSymbols);
+
         private enum MoveFormattingOption
         {
             UseLocalizedShortAlgebraic,
@@ -134,7 +136,7 @@ namespace Sandra.UI.WF
             }
             else
             {
-                pieceSymbols = Localizer.Current.Localize(LocalizedStringKeys.PieceSymbols);
+                pieceSymbols = localizedPieceSymbols.DisplayText;
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.
