@@ -20,9 +20,7 @@ using Sandra.Chess;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -329,33 +327,19 @@ namespace Sandra.UI.WF
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();
-            array[ColoredPiece.BlackPawn] = LoadImage("bp");
-            array[ColoredPiece.BlackKnight] = LoadImage("bn");
-            array[ColoredPiece.BlackBishop] = LoadImage("bb");
-            array[ColoredPiece.BlackRook] = LoadImage("br");
-            array[ColoredPiece.BlackQueen] = LoadImage("bq");
-            array[ColoredPiece.BlackKing] = LoadImage("bk");
-            array[ColoredPiece.WhitePawn] = LoadImage("wp");
-            array[ColoredPiece.WhiteKnight] = LoadImage("wn");
-            array[ColoredPiece.WhiteBishop] = LoadImage("wb");
-            array[ColoredPiece.WhiteRook] = LoadImage("wr");
-            array[ColoredPiece.WhiteQueen] = LoadImage("wq");
-            array[ColoredPiece.WhiteKing] = LoadImage("wk");
+            array[ColoredPiece.BlackPawn] = Program.LoadImage("bp");
+            array[ColoredPiece.BlackKnight] = Program.LoadImage("bn");
+            array[ColoredPiece.BlackBishop] = Program.LoadImage("bb");
+            array[ColoredPiece.BlackRook] = Program.LoadImage("br");
+            array[ColoredPiece.BlackQueen] = Program.LoadImage("bq");
+            array[ColoredPiece.BlackKing] = Program.LoadImage("bk");
+            array[ColoredPiece.WhitePawn] = Program.LoadImage("wp");
+            array[ColoredPiece.WhiteKnight] = Program.LoadImage("wn");
+            array[ColoredPiece.WhiteBishop] = Program.LoadImage("wb");
+            array[ColoredPiece.WhiteRook] = Program.LoadImage("wr");
+            array[ColoredPiece.WhiteQueen] = Program.LoadImage("wq");
+            array[ColoredPiece.WhiteKing] = Program.LoadImage("wk");
             return array;
-        }
-
-        internal static Image LoadImage(string imageFileKey)
-        {
-            try
-            {
-                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
-            }
-            catch (Exception exc)
-            {
-                exc.Trace();
-                return null;
-            }
         }
     }
 }

@@ -17,6 +17,9 @@
  * 
  *********************************************************************************/
 using System;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -34,6 +37,20 @@ namespace Sandra.UI.WF
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
+        }
+
+        internal static Image LoadImage(string imageFileKey)
+        {
+            try
+            {
+                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
+            }
+            catch (Exception exc)
+            {
+                exc.Trace();
+                return null;
+            }
         }
     }
 }
