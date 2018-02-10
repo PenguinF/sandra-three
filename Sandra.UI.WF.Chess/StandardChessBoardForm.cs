@@ -221,37 +221,75 @@ namespace Sandra.UI.WF
 
         private Chess.ColoredPiece getPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
         {
-            switch (promoteColor)
+            if (isBoardFlipped)
             {
-                case Chess.Color.White:
-                    switch (quadrant)
-                    {
-                        case SquareQuadrant.TopLeft:
-                            return Chess.ColoredPiece.WhiteRook;
-                        case SquareQuadrant.TopRight:
-                            return Chess.ColoredPiece.WhiteBishop;
-                        case SquareQuadrant.BottomRight:
-                            return Chess.ColoredPiece.WhiteKnight;
-                        case SquareQuadrant.BottomLeft:
-                        case SquareQuadrant.Indeterminate:
-                        default:
-                            return Chess.ColoredPiece.WhiteQueen;
-                    }
-                case Chess.Color.Black:
-                default:
-                    switch (quadrant)
-                    {
-                        case SquareQuadrant.BottomLeft:
-                            return Chess.ColoredPiece.BlackRook;
-                        case SquareQuadrant.BottomRight:
-                            return Chess.ColoredPiece.BlackBishop;
-                        case SquareQuadrant.TopRight:
-                            return Chess.ColoredPiece.BlackKnight;
-                        case SquareQuadrant.TopLeft:
-                        case SquareQuadrant.Indeterminate:
-                        default:
-                            return Chess.ColoredPiece.BlackQueen;
-                    }
+                switch (promoteColor)
+                {
+                    case Chess.Color.White:
+                        switch (quadrant)
+                        {
+                            case SquareQuadrant.BottomLeft:
+                                return Chess.ColoredPiece.WhiteRook;
+                            case SquareQuadrant.BottomRight:
+                                return Chess.ColoredPiece.WhiteBishop;
+                            case SquareQuadrant.TopRight:
+                                return Chess.ColoredPiece.WhiteKnight;
+                            case SquareQuadrant.TopLeft:
+                            case SquareQuadrant.Indeterminate:
+                            default:
+                                return Chess.ColoredPiece.WhiteQueen;
+                        }
+                    case Chess.Color.Black:
+                    default:
+                        switch (quadrant)
+                        {
+                            case SquareQuadrant.TopLeft:
+                                return Chess.ColoredPiece.BlackRook;
+                            case SquareQuadrant.TopRight:
+                                return Chess.ColoredPiece.BlackBishop;
+                            case SquareQuadrant.BottomRight:
+                                return Chess.ColoredPiece.BlackKnight;
+                            case SquareQuadrant.BottomLeft:
+                            case SquareQuadrant.Indeterminate:
+                            default:
+                                return Chess.ColoredPiece.BlackQueen;
+                        }
+                }
+            }
+            else
+            {
+                switch (promoteColor)
+                {
+                    case Chess.Color.White:
+                        switch (quadrant)
+                        {
+                            case SquareQuadrant.TopLeft:
+                                return Chess.ColoredPiece.WhiteRook;
+                            case SquareQuadrant.TopRight:
+                                return Chess.ColoredPiece.WhiteBishop;
+                            case SquareQuadrant.BottomRight:
+                                return Chess.ColoredPiece.WhiteKnight;
+                            case SquareQuadrant.BottomLeft:
+                            case SquareQuadrant.Indeterminate:
+                            default:
+                                return Chess.ColoredPiece.WhiteQueen;
+                        }
+                    case Chess.Color.Black:
+                    default:
+                        switch (quadrant)
+                        {
+                            case SquareQuadrant.BottomLeft:
+                                return Chess.ColoredPiece.BlackRook;
+                            case SquareQuadrant.BottomRight:
+                                return Chess.ColoredPiece.BlackBishop;
+                            case SquareQuadrant.TopRight:
+                                return Chess.ColoredPiece.BlackKnight;
+                            case SquareQuadrant.TopLeft:
+                            case SquareQuadrant.Indeterminate:
+                            default:
+                                return Chess.ColoredPiece.BlackQueen;
+                        }
+                }
             }
         }
 
