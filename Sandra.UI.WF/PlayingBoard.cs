@@ -1291,9 +1291,6 @@ namespace Sandra.UI.WF
             {
                 highlightImageAttributes.Dispose();
                 halfTransparentImageAttributes.Dispose();
-
-                // To dispose of stored disposable values such as brushes.
-                propertyStore.Dispose();
             }
             base.Dispose(disposing);
         }
