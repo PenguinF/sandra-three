@@ -57,8 +57,17 @@ namespace Sandra.UI.WF
                 {
                     if (value == null) throw new ArgumentNullException(nameof(value));
                     current = value;
+                    event_CurrentChanged.Raise(null, EventArgs.Empty);
                 }
             }
+        }
+
+        internal static readonly WeakEvent<object, EventArgs> event_CurrentChanged = new WeakEvent<object, EventArgs>();
+
+        internal static event Action<object, EventArgs> CurrentChanged
+        {
+            add { event_CurrentChanged.AddListener(value); }
+            remove { event_CurrentChanged.RemoveListener(value); }
         }
 
         /// <summary>

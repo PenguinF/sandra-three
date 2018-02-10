@@ -66,7 +66,16 @@ namespace Sandra.UI.WF
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
             applyDefaultStyle();
-            initMoveFormatter();
+
+            // DisplayTextChanged handlers are called immediately upon registration.
+            // This initializes moveFormatter.
+            localizedPieceSymbols.DisplayTextChanged += _ =>
+            {
+                if (moveFormatter == null || moveFormattingOption != MoveFormattingOption.UsePGN)
+                {
+                    updateMoveFormatter();
+                }
+            };
         }
 
         private void applyDefaultStyle()
@@ -98,6 +107,7 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
+                localizedPieceSymbols.Dispose();
                 defaultStyle.Font.Dispose();
                 activeMoveStyle.Font.Dispose();
             }
@@ -114,6 +124,8 @@ namespace Sandra.UI.WF
         /// </summary>
         private const string PGNPieceSymbols = "NBRQK";
 
+        private readonly LocalizedString localizedPieceSymbols = new LocalizedString(LocalizedStringKeys.PieceSymbols);
+
         private enum MoveFormattingOption
         {
             UseLocalizedShortAlgebraic,
@@ -125,7 +137,7 @@ namespace Sandra.UI.WF
 
         private Chess.IMoveFormatter moveFormatter;
 
-        private void initMoveFormatter()
+        private void updateMoveFormatter()
         {
             string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePGN)
@@ -134,7 +146,7 @@ namespace Sandra.UI.WF
             }
             else
             {
-                pieceSymbols = Localizer.Current.Localize(LocalizedStringKeys.PieceSymbols);
+                pieceSymbols = localizedPieceSymbols.DisplayText;
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.
@@ -165,11 +177,7 @@ namespace Sandra.UI.WF
             {
                 moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
             }
-        }
 
-        private void updateMoveFormatter()
-        {
-            initMoveFormatter();
             refreshText();
         }
 
@@ -257,11 +265,14 @@ namespace Sandra.UI.WF
 
         private void refreshText()
         {
-            // Clear and build the entire text anew by clearing the old element list.
-            using (var updateToken = BeginUpdate())
+            if (game != null)
             {
-                syntaxRenderer.Clear();
-                updateText();
+                // Clear and build the entire text anew by clearing the old element list.
+                using (var updateToken = BeginUpdate())
+                {
+                    syntaxRenderer.Clear();
+                    updateText();
+                }
             }
         }
 

@@ -80,4 +80,65 @@ namespace Sandra.UI.WF
             return first.Key != second.Key || first.DisplayText != second.DisplayText;
         }
     }
+
+    /// <summary>
+    /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
+    /// </summary>
+    public sealed class LocalizedString : IDisposable, IWeakEventTarget
+    {
+        /// <summary>
+        /// Gets the key for this <see cref="LocalizedString"/>.
+        /// </summary>
+        public readonly LocalizedStringKey Key;
+
+        /// <summary>
+        /// Gets the current localized display text.
+        /// </summary>
+        public string DisplayText { get; private set; }
+
+        private event Action<string> displayTextChanged;
+
+        /// <summary>
+        /// Occurs when the value of <see cref="DisplayText"/> changed.
+        /// </summary>
+        public event Action<string> DisplayTextChanged
+        {
+            add
+            {
+                displayTextChanged += value;
+                value(DisplayText);
+            }
+            remove
+            {
+                displayTextChanged -= value;
+            }
+        }
+
+        public LocalizedString(LocalizedStringKey key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            Key = key;
+            DisplayText = Localizer.Current.Localize(key);
+
+            Localizer.CurrentChanged += Localizer_CurrentChanged;
+        }
+
+        private void Localizer_CurrentChanged(object sender, EventArgs e)
+        {
+            string newDisplayText = Localizer.Current.Localize(Key);
+            if (DisplayText != newDisplayText)
+            {
+                DisplayText = newDisplayText;
+                displayTextChanged?.Invoke(DisplayText);
+            }
+        }
+
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
+    }
 }
