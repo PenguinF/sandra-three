@@ -80,4 +80,28 @@ namespace Sandra.UI.WF
             return first.Key != second.Key || first.DisplayText != second.DisplayText;
         }
     }
+
+    /// <summary>
+    /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
+    /// </summary>
+    public sealed class LocalizedString
+    {
+        /// <summary>
+        /// Gets the key for this <see cref="LocalizedString"/>.
+        /// </summary>
+        public readonly LocalizedStringKey Key;
+
+        /// <summary>
+        /// Gets the current localized display text.
+        /// </summary>
+        public string DisplayText { get; private set; }
+
+        public LocalizedString(LocalizedStringKey key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            Key = key;
+            DisplayText = Localizer.Current.Localize(key);
+        }
+    }
 }
