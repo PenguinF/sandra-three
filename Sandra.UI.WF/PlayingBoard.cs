@@ -1136,25 +1136,22 @@ namespace Sandra.UI.WF
             g.SmoothingMode = SmoothingMode.None;
             if (squareSize > 0 && clipRectangle.IntersectsWith(boardRectangle))
             {
-                // Draw dark squares over the entire board.
-                g.FillRectangle(darkSquareBrush, boardRectangle);
-
-                // Draw light squares by excluding the dark squares, and then filling up what's left.
-                int doubleDelta = delta * 2;
                 int y = borderWidth;
-                for (int yIndex = boardHeight - 1; yIndex >= 0; --yIndex)
+                bool startWithDarkSquare = false;
+                for (int yIndex = 0; yIndex < boardHeight; ++yIndex)
                 {
-                    // Create block pattern by starting at logical coordinate 0 or 1 depending on the y-index.
-                    int x = borderWidth + (yIndex & 1) * delta;
-                    for (int xIndex = (boardWidth - 1) / 2; xIndex >= 0; --xIndex)
+                    bool drawDarkSquare = startWithDarkSquare;
+                    int x = borderWidth;
+                    for (int xIndex = 0; xIndex < boardWidth; ++xIndex)
                     {
-                        g.ExcludeClip(new Rectangle(x, y, squareSize, squareSize));
-                        x += doubleDelta;
+                        // Draw either a light or a dark square depending on its location.
+                        g.FillRectangle(drawDarkSquare ? darkSquareBrush : lightSquareBrush, x, y, squareSize, squareSize);
+                        drawDarkSquare = !drawDarkSquare;
+                        x += delta;
                     }
+                    startWithDarkSquare = !startWithDarkSquare;
                     y += delta;
                 }
-                g.FillRectangle(lightSquareBrush, boardRectangle);
-                g.ResetClip();
             }
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
