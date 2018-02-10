@@ -40,6 +40,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
@@ -93,6 +94,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "New game" },
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
+                { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
@@ -156,6 +158,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "Nieuwe partij" },
                 { LocalizedStringKeys.NextLine, "Volgende variant" },
                 { LocalizedStringKeys.NextMove, "Volgende zet" },
+                { LocalizedStringKeys.PieceSymbols, "PLTDK" },
                 { LocalizedStringKeys.PreviousLine, "Vorige variant" },
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
