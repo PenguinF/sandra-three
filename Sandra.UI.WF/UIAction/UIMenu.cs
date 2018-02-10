@@ -255,7 +255,7 @@ namespace Sandra.UI.WF
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (string.IsNullOrEmpty(element.Caption.DisplayText)) return null;
+            if (element.Caption == null) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -263,7 +263,7 @@ namespace Sandra.UI.WF
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
             initializeMenuItem(element, menuItem);
-            menuItem.ShortcutKeyDisplayString = string.Join("+", element.Shortcut.DisplayStringParts());
+            menuItem.ShortcutKeyDisplayString = string.Join("+", element.Shortcut.DisplayStringParts().Select(x => x.DisplayText));
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;
@@ -284,7 +284,7 @@ namespace Sandra.UI.WF
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (string.IsNullOrEmpty(container.Caption.DisplayText)) return null;
+            if (container.Caption == null) return null;
 
             var menuItem = new ToolStripMenuItem();
             initializeMenuItem(container, menuItem);
