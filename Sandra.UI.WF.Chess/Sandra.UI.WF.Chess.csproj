@@ -50,6 +50,7 @@
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
+    <Compile Include="Localizers.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>
