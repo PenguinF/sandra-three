@@ -329,22 +329,22 @@ namespace Sandra.UI.WF
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();
-            array[ColoredPiece.BlackPawn] = loadImage("bp");
-            array[ColoredPiece.BlackKnight] = loadImage("bn");
-            array[ColoredPiece.BlackBishop] = loadImage("bb");
-            array[ColoredPiece.BlackRook] = loadImage("br");
-            array[ColoredPiece.BlackQueen] = loadImage("bq");
-            array[ColoredPiece.BlackKing] = loadImage("bk");
-            array[ColoredPiece.WhitePawn] = loadImage("wp");
-            array[ColoredPiece.WhiteKnight] = loadImage("wn");
-            array[ColoredPiece.WhiteBishop] = loadImage("wb");
-            array[ColoredPiece.WhiteRook] = loadImage("wr");
-            array[ColoredPiece.WhiteQueen] = loadImage("wq");
-            array[ColoredPiece.WhiteKing] = loadImage("wk");
+            array[ColoredPiece.BlackPawn] = LoadImage("bp");
+            array[ColoredPiece.BlackKnight] = LoadImage("bn");
+            array[ColoredPiece.BlackBishop] = LoadImage("bb");
+            array[ColoredPiece.BlackRook] = LoadImage("br");
+            array[ColoredPiece.BlackQueen] = LoadImage("bq");
+            array[ColoredPiece.BlackKing] = LoadImage("bk");
+            array[ColoredPiece.WhitePawn] = LoadImage("wp");
+            array[ColoredPiece.WhiteKnight] = LoadImage("wn");
+            array[ColoredPiece.WhiteBishop] = LoadImage("wb");
+            array[ColoredPiece.WhiteRook] = LoadImage("wr");
+            array[ColoredPiece.WhiteQueen] = LoadImage("wq");
+            array[ColoredPiece.WhiteKing] = LoadImage("wk");
             return array;
         }
 
-        static Image loadImage(string imageFileKey)
+        internal static Image LoadImage(string imageFileKey)
         {
             try
             {
