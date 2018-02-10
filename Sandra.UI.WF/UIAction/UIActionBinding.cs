@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// If <see cref="ShowInMenu"/> is true, defines the caption to display for the generated menu item.
         /// </summary>
-        public string MenuCaption;
+        public LocalizedStringKey MenuCaptionKey;
 
         /// <summary>
         /// If <see cref="ShowInMenu"/> is true, defines the image to display for the generated menu item.

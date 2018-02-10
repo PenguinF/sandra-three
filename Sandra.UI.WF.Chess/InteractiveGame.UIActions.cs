@@ -34,7 +34,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 IsFirstInGroup = true,
-                MenuCaption = "Chessboard",
+                MenuCaptionKey = LocalizedStringKeys.Chessboard,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
             });
 
@@ -120,7 +120,7 @@ namespace Sandra.UI.WF
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
             new UIActionBinding()
             {
-                MenuCaption = "Moves",
+                MenuCaptionKey = LocalizedStringKeys.Moves,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
             });
 
@@ -216,7 +216,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Start of game",
+                MenuCaptionKey = LocalizedStringKeys.StartOfGame,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
             });
 
@@ -237,7 +237,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "First move",
+                MenuCaptionKey = LocalizedStringKeys.FirstMove,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.Home), },
             });
 
@@ -264,7 +264,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Fast backward",
+                MenuCaptionKey = LocalizedStringKeys.FastBackward,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.PageUp),
@@ -289,7 +289,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Previous move",
+                MenuCaptionKey = LocalizedStringKeys.PreviousMove,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.LeftArrow),
@@ -314,7 +314,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Next move",
+                MenuCaptionKey = LocalizedStringKeys.NextMove,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.RightArrow),
@@ -351,7 +351,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Fast forward",
+                MenuCaptionKey = LocalizedStringKeys.FastForward,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.PageDown),
@@ -376,7 +376,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Last move",
+                MenuCaptionKey = LocalizedStringKeys.LastMove,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.End), },
             });
 
@@ -397,7 +397,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "End of game",
+                MenuCaptionKey = LocalizedStringKeys.EndOfGame,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
             });
 
@@ -425,7 +425,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Previous line",
+                MenuCaptionKey = LocalizedStringKeys.PreviousLine,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.UpArrow),
@@ -458,7 +458,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Next line",
+                MenuCaptionKey = LocalizedStringKeys.NextLine,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.DownArrow),
@@ -489,7 +489,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Promote line",
+                MenuCaptionKey = LocalizedStringKeys.PromoteLine,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.P),
@@ -522,7 +522,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Demote line",
+                MenuCaptionKey = LocalizedStringKeys.DemoteLine,
                 Shortcuts = new ShortcutKeys[]
                 {
                     new ShortcutKeys(ConsoleKey.D),
@@ -560,7 +560,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Break at current position",
+                MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(ConsoleKey.B), },
             });
 
@@ -582,7 +582,7 @@ namespace Sandra.UI.WF
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaption = "Delete line",
+                MenuCaptionKey = LocalizedStringKeys.DeleteLine,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
             });
 

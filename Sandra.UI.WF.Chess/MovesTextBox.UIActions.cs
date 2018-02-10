@@ -30,7 +30,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Copy",
+                MenuCaptionKey = LocalizedStringKeys.Copy,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             });
 
@@ -47,7 +47,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
-                MenuCaption = "Select All",
+                MenuCaptionKey = LocalizedStringKeys.SelectAll,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
             });
 

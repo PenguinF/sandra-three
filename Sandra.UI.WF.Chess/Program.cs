@@ -30,6 +30,7 @@ namespace Sandra.UI.WF
         static void Main()
         {
             Chess.Constants.ForceInitialize();
+            Localizer.Current = Localizers.English;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
