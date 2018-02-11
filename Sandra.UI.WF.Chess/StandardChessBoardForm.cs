@@ -182,16 +182,7 @@ namespace Sandra.UI.WF
         {
             if (game != null)
             {
-                if (e.Delta > 0)
-                {
-                    (e.Delta / 120).Times(game.Game.Forward);
-                    game.ActiveMoveTreeUpdated();
-                }
-                else if (e.Delta < 0)
-                {
-                    (-e.Delta / 120).Times(game.Game.Backward);
-                    game.ActiveMoveTreeUpdated();
-                }
+                game.HandleMouseWheelEvent(e.Delta);
             }
         }
 

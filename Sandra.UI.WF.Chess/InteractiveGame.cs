@@ -16,8 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Sandra.Chess;
-
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -44,6 +42,20 @@ namespace Sandra.UI.WF
             if (movesTextBox != null) movesTextBox.GameUpdated();
         }
 
+        public void HandleMouseWheelEvent(int delta)
+        {
+            if (delta > 0)
+            {
+                (delta / 120).Times(Game.Forward);
+                ActiveMoveTreeUpdated();
+            }
+            else if (delta < 0)
+            {
+                (-delta / 120).Times(Game.Backward);
+                ActiveMoveTreeUpdated();
+            }
+        }
+
         // Keep track of which types of forms are opened.
         StandardChessBoardForm chessBoardForm;
         SnappingMdiChildForm movesForm;
@@ -54,9 +66,9 @@ namespace Sandra.UI.WF
             return (MovesTextBox)movesForm.Controls[0];
         }
 
-        private static Variation getFirstMove(Variation variation)
+        private static Chess.Variation getFirstMove(Chess.Variation variation)
         {
-            Variation firstMoveInVariation = variation;
+            Chess.Variation firstMoveInVariation = variation;
             while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)
             {
                 firstMoveInVariation = firstMoveInVariation.ParentTree.ParentVariation;
