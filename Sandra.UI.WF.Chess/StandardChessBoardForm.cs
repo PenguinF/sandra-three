@@ -154,6 +154,7 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
+            PlayingBoard.MouseWheel += playingBoard_MouseWheel;
 
             PlayingBoard.MoveStart += playingBoard_MoveStart;
             PlayingBoard.MoveCancel += playingBoard_MoveCancel;
@@ -175,6 +176,14 @@ namespace Sandra.UI.WF
                 StartCap = LineCap.Round,
                 EndCap = LineCap.RoundAnchor,
             };
+        }
+
+        private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (game != null)
+            {
+                game.HandleMouseWheelEvent(e.Delta);
+            }
         }
 
         private Cursor dragCursor;

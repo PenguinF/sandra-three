@@ -414,5 +414,15 @@ namespace Sandra.UI.WF
                 }
             }
         }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            if (game != null)
+            {
+                game.HandleMouseWheelEvent(e.Delta);
+            }
+
+            base.OnMouseWheel(e);
+        }
     }
 }
