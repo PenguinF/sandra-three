@@ -602,7 +602,7 @@ namespace Sandra.UI.WF
             double arrow1Phi = phi - Math.PI / 6;
             double arrow2Phi = phi + Math.PI / 6;
 
-            const double targetLength = 12;
+            double targetLength = PlayingBoard.SquareSize / 4f;
             double arrow1EndX = endPointX + Math.Cos(arrow1Phi) * targetLength;
             double arrow1EndY = endPointY + Math.Sin(arrow1Phi) * targetLength;
             double arrow2EndX = endPointX + Math.Cos(arrow2Phi) * targetLength;
