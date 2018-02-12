@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -1318,6 +1319,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the location of a square on a <see cref="PlayingBoard"/>. 
     /// </summary>
+    [DebuggerDisplay("x = {X}, y = {Y}")]
     public sealed class SquareLocation
     {
         /// <summary>
