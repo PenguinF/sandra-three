@@ -516,10 +516,6 @@ namespace Sandra.UI.WF
                 moveStartSquare = e.Start;
                 dragStartPosition = e.MouseStartPosition;
             }
-            else
-            {
-                e.Cancel = true;
-            }
         }
 
         private void resetMoveEffects(MoveEventArgs e)

@@ -76,11 +76,6 @@ namespace Sandra.UI.WF
         public Point MouseStartPosition { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the event should be canceled.
-        /// </summary>
-        public bool Cancel { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="CancellableMoveEventArgs"/> class.
         /// </summary>
         /// <param name="start">
