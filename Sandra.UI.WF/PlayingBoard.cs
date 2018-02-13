@@ -747,7 +747,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveCancel"/> event. 
         /// </summary>
-        protected void RaiseMoveCancel(int squareIndex) => OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
+        protected void RaiseMoveCancel() => OnMoveCancel(new MoveEventArgs());
 
 
         /// <summary>
@@ -763,10 +763,8 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MoveCommit"/> event. 
         /// </summary>
-        protected void RaiseMoveCommit(int sourceSquareIndex,
-                                       int targetSquareIndex)
-            => OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
-                                                    getSquareLocation(targetSquareIndex)));
+        protected void RaiseMoveCommit(int targetSquareIndex)
+            => OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(targetSquareIndex)));
 
 
         /// <summary>
@@ -1008,11 +1006,11 @@ namespace Sandra.UI.WF
             {
                 if (hoveringSquareIndex >= 0)
                 {
-                    RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
+                    RaiseMoveCommit(hoveringSquareIndex);
                 }
                 else
                 {
-                    RaiseMoveCancel(moveStartSquareIndex);
+                    RaiseMoveCancel();
                 }
 
                 // End of move.

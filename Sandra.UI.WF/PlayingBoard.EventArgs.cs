@@ -55,7 +55,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
         /// </summary>
-        public MoveEventArgs(SquareLocation start)
+        public MoveEventArgs()
         {
         }
     }
@@ -100,7 +100,6 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
     /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
     public class MoveCommitEventArgs : MoveEventArgs
     {
         /// <summary>
@@ -111,13 +110,10 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
         /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
-        /// </param>
         /// <param name="target">
         /// The location of the square where the mouse cursor currently is.
         /// </param>
-        public MoveCommitEventArgs(SquareLocation start, SquareLocation target) : base(start)
+        public MoveCommitEventArgs(SquareLocation target)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
             Target = target;
