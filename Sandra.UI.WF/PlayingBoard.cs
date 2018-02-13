@@ -984,7 +984,6 @@ namespace Sandra.UI.WF
                     if (RaiseMoveStart(hit, e.Location))
                     {
                         moveStartSquareIndex = hit;
-                        Invalidate();
                     }
                 }
             }
