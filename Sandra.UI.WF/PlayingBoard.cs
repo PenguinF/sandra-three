@@ -901,13 +901,6 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        /// <summary>
-        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
-        /// </summary>
-        public Point DragStartPosition => dragStartPosition;
-
-        private Point dragStartPosition;
-
         private int moveStartSquareIndex = -1;
 
         private int getSquareIndexFromLocation(Point clientLocation)
@@ -990,7 +983,6 @@ namespace Sandra.UI.WF
                 {
                     if (RaiseMoveStart(hit, e.Location))
                     {
-                        dragStartPosition = e.Location;
                         moveStartSquareIndex = hit;
                         Invalidate();
                     }

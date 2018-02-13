@@ -188,6 +188,11 @@ namespace Sandra.UI.WF
             return false;
         }
 
+        /// <summary>
+        /// Gets the position of the mouse relative to the top left corner of the playing board when dragging started.
+        /// </summary>
+        private Point dragStartPosition;
+
         private Cursor dragCursor;
 
         private void updateDragImage(Image newImage, SquareLocation startSquare, Point dragStartPosition)
@@ -321,13 +326,13 @@ namespace Sandra.UI.WF
                 {
                     updateDragImage(moveStartSquare != null ? PlayingBoard.GetForegroundImage(moveStartSquare) : null,
                                     moveStartSquare,
-                                    PlayingBoard.DragStartPosition);
+                                    dragStartPosition);
                 }
                 else
                 {
                     updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
                                     moveStartSquare,
-                                    PlayingBoard.DragStartPosition);
+                                    dragStartPosition);
                 }
             }
         }
@@ -509,6 +514,7 @@ namespace Sandra.UI.WF
                 updateDragImage(PlayingBoard.GetForegroundImage(e.Start), e.Start, e.MouseStartPosition);
 
                 moveStartSquare = e.Start;
+                dragStartPosition = e.MouseStartPosition;
             }
             else
             {
