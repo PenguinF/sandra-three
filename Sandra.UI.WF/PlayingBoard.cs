@@ -658,12 +658,6 @@ namespace Sandra.UI.WF
         public SquareLocation HoverSquare => getSquareLocation(hoveringSquareIndex);
 
         /// <summary>
-        /// Gets if an image is currently being moved.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsMoving => moveStartSquareIndex >= 0;
-
-        /// <summary>
         /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
@@ -706,13 +700,6 @@ namespace Sandra.UI.WF
         /// The <see cref="SquareLocation"/> at the specified point, or null if there is none.
         /// </returns>
         public SquareLocation GetSquareLocation(Point point) => getSquareLocation(getSquareIndexFromLocation(point));
-
-        /// <summary>
-        /// Gets the location of the square where the current move started if <see cref="IsMoving"/> is true,
-        /// or null (Nothing in Visual Basic) if no move is currently being performed.
-        /// </summary>
-        [Browsable(false)]
-        public SquareLocation MoveStartSquare => getSquareLocation(moveStartSquareIndex);
 
 
         /// <summary>
