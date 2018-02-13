@@ -996,7 +996,7 @@ namespace Sandra.UI.WF
             int hit = hitTest(e.Location);
 
             // Start moving?
-            if (e.Button == MouseButtons.Left && !IsMoving)
+            if (e.Button == MouseButtons.Left)
             {
                 // Only start when a square is hit.
                 if (hit >= 0 && foregroundImages[hit] != null)
