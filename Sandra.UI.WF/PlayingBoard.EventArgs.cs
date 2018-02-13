@@ -50,31 +50,20 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
     /// </summary>
-    [DebuggerDisplay("From (x = {Start.X}, y = {Start.Y})")]
     public class MoveEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the location of the square where moving started.
-        /// </summary>
-        public SquareLocation Start { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
         /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
-        /// </param>
         public MoveEventArgs(SquareLocation start)
         {
-            if (start == null) throw new ArgumentNullException(nameof(start));
-            Start = start;
         }
     }
 
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
     /// </summary>
-    public class CancellableMoveEventArgs
+    public class CancellableMoveEventArgs : EventArgs
     {
         /// <summary>
         /// Gets the location of the square where moving started.
