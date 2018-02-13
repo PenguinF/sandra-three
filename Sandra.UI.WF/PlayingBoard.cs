@@ -999,7 +999,7 @@ namespace Sandra.UI.WF
             if (e.Button == MouseButtons.Left)
             {
                 // Only start when a square is hit.
-                if (hit >= 0 && foregroundImages[hit] != null)
+                if (hit >= 0)
                 {
                     if (RaiseMoveStart(hit, e.Location))
                     {
