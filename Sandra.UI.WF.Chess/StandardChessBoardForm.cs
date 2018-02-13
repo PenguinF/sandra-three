@@ -209,9 +209,15 @@ namespace Sandra.UI.WF
                 }
             }
 
-            if (dragCursor != null) dragCursor.Dispose();
-            dragCursor = newDragCursor;
-            Cursor.Current = newDragCursor ?? Cursors.Default;
+            Cursor oldDragCursor = dragCursor;
+
+            if (newDragCursor != null || oldDragCursor != null)
+            {
+                dragCursor = newDragCursor;
+                Cursor.Current = dragCursor ?? Cursors.Default;
+            }
+
+            if (oldDragCursor != null) oldDragCursor.Dispose();
         }
 
         /// <summary>
