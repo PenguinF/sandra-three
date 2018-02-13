@@ -735,22 +735,6 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image stops being moved, and is not dropped onto another square.
-        /// </summary>
-        public event Action<PlayingBoard, MoveEventArgs> MoveCancel;
-
-        /// <summary>
-        /// Raises the <see cref="MoveCancel"/> event. 
-        /// </summary>
-        protected virtual void OnMoveCancel(MoveEventArgs e) => MoveCancel?.Invoke(this, e);
-
-        /// <summary>
-        /// Raises the <see cref="MoveCancel"/> event. 
-        /// </summary>
-        protected void RaiseMoveCancel() => OnMoveCancel(new MoveEventArgs());
-
-
-        /// <summary>
         /// Occurs when an image is being moved and dropped onto another square.
         /// </summary>
         public event Action<PlayingBoard, MoveCommitEventArgs> MoveCommit;
@@ -996,14 +980,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (hoveringSquareIndex >= 0)
-            {
-                RaiseMoveCommit(hoveringSquareIndex);
-            }
-            else
-            {
-                RaiseMoveCancel();
-            }
+            RaiseMoveCommit(hoveringSquareIndex);
 
             base.OnMouseUp(e);
         }

@@ -48,19 +48,6 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
-    /// </summary>
-    public class MoveEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
-        /// </summary>
-        public MoveEventArgs()
-        {
-        }
-    }
-
-    /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
     /// </summary>
     public class CancellableMoveEventArgs : EventArgs
@@ -95,10 +82,11 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
     /// </summary>
-    public class MoveCommitEventArgs : MoveEventArgs
+    public class MoveCommitEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the location of the square where the mouse cursor currently is.
+        /// Gets the location of the square where the mouse cursor currently is,
+        /// or null if the mouse cursor is elsewhere.
         /// </summary>
         public SquareLocation Target { get; }
 
@@ -106,11 +94,11 @@ namespace Sandra.UI.WF
         /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
         /// </summary>
         /// <param name="target">
-        /// The location of the square where the mouse cursor currently is.
+        /// The location of the square where the mouse cursor currently is,
+        /// or null if the mouse cursor is elsewhere.
         /// </param>
         public MoveCommitEventArgs(SquareLocation target)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
             Target = target;
         }
     }
