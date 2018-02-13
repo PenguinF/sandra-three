@@ -899,8 +899,6 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private int moveStartSquareIndex = -1;
-
         private int getSquareIndexFromLocation(Point clientLocation)
         {
             int squareSize = SquareSize;
@@ -981,7 +979,6 @@ namespace Sandra.UI.WF
                 {
                     if (RaiseMoveStart(hit, e.Location))
                     {
-                        moveStartSquareIndex = hit;
                     }
                 }
             }
@@ -1009,12 +1006,6 @@ namespace Sandra.UI.WF
             else
             {
                 RaiseMoveCancel();
-            }
-
-            if (moveStartSquareIndex >= 0)
-            {
-                // End of move.
-                moveStartSquareIndex = -1;
             }
 
             base.OnMouseUp(e);
