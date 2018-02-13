@@ -538,44 +538,47 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MoveCommit(PlayingBoard sender, MoveCommitEventArgs e)
         {
-            // Move piece from source to destination.
-            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+            if (moveStartSquare != null)
             {
-                SourceSquare = toSquare(e.Start),
-                TargetSquare = toSquare(e.Target),
-            };
-
-            if (currentSquareWithEnPassantEffect != null)
-            {
-                // Must specify this MoveType to commit it.
-                moveInfo.MoveType = Chess.MoveType.EnPassant;
-            }
-            else if (rookSquareWithCastlingEffect != null)
-            {
-                if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
+                // Move piece from source to destination.
+                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
-                    // Rook moves to the right.
-                    moveInfo.MoveType = Chess.MoveType.CastleQueenside;
-                }
-                else
+                    SourceSquare = toSquare(moveStartSquare),
+                    TargetSquare = toSquare(e.Target),
+                };
+
+                if (currentSquareWithEnPassantEffect != null)
                 {
-                    moveInfo.MoveType = Chess.MoveType.CastleKingside;
+                    // Must specify this MoveType to commit it.
+                    moveInfo.MoveType = Chess.MoveType.EnPassant;
                 }
+                else if (rookSquareWithCastlingEffect != null)
+                {
+                    if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
+                    {
+                        // Rook moves to the right.
+                        moveInfo.MoveType = Chess.MoveType.CastleQueenside;
+                    }
+                    else
+                    {
+                        moveInfo.MoveType = Chess.MoveType.CastleKingside;
+                    }
+                }
+                else if (currentSquareWithPromoteEffect != null)
+                {
+                    moveInfo.MoveType = Chess.MoveType.Promotion;
+                    moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
+                }
+
+                resetMoveEffects(e);
+
+                game.Game.TryMakeMove(ref moveInfo, true);
+
+                game.ActiveMoveTreeUpdated();
+                PlayingBoard.ActionHandler.Invalidate();
+
+                moveStartSquare = null;
             }
-            else if (currentSquareWithPromoteEffect != null)
-            {
-                moveInfo.MoveType = Chess.MoveType.Promotion;
-                moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
-            }
-
-            resetMoveEffects(e);
-
-            game.Game.TryMakeMove(ref moveInfo, true);
-
-            game.ActiveMoveTreeUpdated();
-            PlayingBoard.ActionHandler.Invalidate();
-
-            moveStartSquare = null;
         }
 
         internal void GameUpdated()
