@@ -1002,17 +1002,17 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
+            if (hoveringSquareIndex >= 0)
+            {
+                RaiseMoveCommit(hoveringSquareIndex);
+            }
+            else
+            {
+                RaiseMoveCancel();
+            }
+
             if (moveStartSquareIndex >= 0)
             {
-                if (hoveringSquareIndex >= 0)
-                {
-                    RaiseMoveCommit(hoveringSquareIndex);
-                }
-                else
-                {
-                    RaiseMoveCancel();
-                }
-
                 // End of move.
                 moveStartSquareIndex = -1;
             }

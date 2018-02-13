@@ -588,8 +588,11 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MoveCancel(PlayingBoard sender, MoveEventArgs e)
         {
-            resetMoveEffects(e);
-            moveStartSquare = null;
+            if (moveStartSquare != null)
+            {
+                resetMoveEffects(e);
+                moveStartSquare = null;
+            }
         }
 
         Pen lastMoveArrowPen;
