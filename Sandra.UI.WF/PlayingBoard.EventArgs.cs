@@ -74,8 +74,13 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
     /// </summary>
-    public class CancellableMoveEventArgs : MoveEventArgs
+    public class CancellableMoveEventArgs
     {
+        /// <summary>
+        /// Gets the location of the square where moving started.
+        /// </summary>
+        public SquareLocation Start { get; }
+
         /// <summary>
         /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
         /// </summary>
@@ -95,8 +100,10 @@ namespace Sandra.UI.WF
         /// <param name="mouseStartPosition">
         /// The position of the mouse relative to the top left corner of the control when dragging started.
         /// </param>
-        public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition) : base(start)
+        public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition)
         {
+            if (start == null) throw new ArgumentNullException(nameof(start));
+            Start = start;
             MouseStartPosition = mouseStartPosition;
         }
     }
