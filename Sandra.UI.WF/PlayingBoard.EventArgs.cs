@@ -43,13 +43,13 @@ namespace Sandra.UI.WF
         /// </param>
         public SquareEventArgs(SquareLocation location)
         {
-            if (location == null) throw new ArgumentNullException(nameof(location));
             Location = location;
         }
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.SquareMouseDown"/> event.
+    /// Provides data for the <see cref="PlayingBoard.SquareMouseDown"/>
+    /// or <see cref="PlayingBoard.SquareMouseUp"/> event.
     /// </summary>
     public class SquareMouseEventArgs : SquareEventArgs
     {
@@ -79,30 +79,6 @@ namespace Sandra.UI.WF
         {
             Button = button;
             MouseLocation = mouseLocation;
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
-    /// </summary>
-    public class MoveCommitEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the location of the square where the mouse cursor currently is,
-        /// or null if the mouse cursor is elsewhere.
-        /// </summary>
-        public SquareLocation Target { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
-        /// </summary>
-        /// <param name="target">
-        /// The location of the square where the mouse cursor currently is,
-        /// or null if the mouse cursor is elsewhere.
-        /// </param>
-        public MoveCommitEventArgs(SquareLocation target)
-        {
-            Target = target;
         }
     }
 }

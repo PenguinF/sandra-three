@@ -735,20 +735,22 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image is being moved and dropped onto another square.
+        /// Occurs when the mouse is over this control and one of its buttons is released.
         /// </summary>
-        public event Action<PlayingBoard, MoveCommitEventArgs> MoveCommit;
+        public event Action<PlayingBoard, SquareMouseEventArgs> SquareMouseUp;
 
         /// <summary>
-        /// Raises the <see cref="MoveCommit"/> event. 
+        /// Raises the <see cref="SquareMouseUp"/> event. 
         /// </summary>
-        protected virtual void OnMoveCommit(MoveCommitEventArgs e) => MoveCommit?.Invoke(this, e);
+        protected virtual void OnSquareMouseUp(SquareMouseEventArgs e) => SquareMouseUp?.Invoke(this, e);
 
         /// <summary>
-        /// Raises the <see cref="MoveCommit"/> event. 
+        /// Raises the <see cref="SquareMouseUp"/> event. 
         /// </summary>
-        protected void RaiseMoveCommit(int targetSquareIndex)
-            => OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(targetSquareIndex)));
+        protected void RaiseSquareMouseUp(int squareIndex, MouseButtons button, Point mouseLocation)
+        {
+            OnSquareMouseUp(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
+        }
 
 
         /// <summary>
@@ -970,7 +972,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            RaiseMoveCommit(hoveringSquareIndex);
+            RaiseSquareMouseUp(hitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseUp(e);
         }

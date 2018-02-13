@@ -143,7 +143,7 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseWheel += playingBoard_MouseWheel;
 
             PlayingBoard.SquareMouseDown += playingBoard_SquareMouseDown;
-            PlayingBoard.MoveCommit += playingBoard_MoveCommit;
+            PlayingBoard.SquareMouseUp += playingBoard_SquareMouseUp;
 
             PlayingBoard.Paint += playingBoard_Paint;
 
@@ -533,17 +533,17 @@ namespace Sandra.UI.WF
             highlightHoverSquare();
         }
 
-        private void playingBoard_MoveCommit(PlayingBoard sender, MoveCommitEventArgs e)
+        private void playingBoard_SquareMouseUp(PlayingBoard sender, SquareMouseEventArgs e)
         {
             if (moveStartSquare != null)
             {
-                if (e.Target != null)
+                if (e.Location != null)
                 {
                     // Move piece from source to destination.
                     Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                     {
                         SourceSquare = toSquare(moveStartSquare),
-                        TargetSquare = toSquare(e.Target),
+                        TargetSquare = toSquare(e.Location),
                     };
 
                     if (currentSquareWithEnPassantEffect != null)
