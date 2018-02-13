@@ -53,7 +53,8 @@ namespace Sandra.UI.WF
     public class CancellableMoveEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the location of the square where moving started.
+        /// Gets the location of the square where the mouse cursor currently is,
+        /// or null if the mouse cursor is elsewhere.
         /// </summary>
         public SquareLocation Start { get; }
 
@@ -73,7 +74,6 @@ namespace Sandra.UI.WF
         /// </param>
         public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition)
         {
-            if (start == null) throw new ArgumentNullException(nameof(start));
             Start = start;
             MouseStartPosition = mouseStartPosition;
         }

@@ -766,8 +766,7 @@ namespace Sandra.UI.WF
         /// </summary>
         protected void RaiseMoveStart(int squareIndex, Point mouseStartPosition)
         {
-            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition);
-            OnMoveStart(e);
+            OnMoveStart(new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition));
         }
 
 
@@ -957,11 +956,7 @@ namespace Sandra.UI.WF
             // Start moving?
             if (e.Button == MouseButtons.Left)
             {
-                // Only start when a square is hit.
-                if (hit >= 0)
-                {
-                    RaiseMoveStart(hit, e.Location);
-                }
+                RaiseMoveStart(hit, e.Location);
             }
 
             base.OnMouseDown(e);

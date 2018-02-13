@@ -175,15 +175,17 @@ namespace Sandra.UI.WF
 
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
-            if (game == null) return false;
-
-            // Check if location is a member of all squares where a piece sits of the current color.
-            Chess.Square square = toSquare(squareLocation);
-            Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
-            if (coloredPiece != null)
+            if (game != null && squareLocation != null)
             {
-                return ((Chess.ColoredPiece)coloredPiece).GetColor() == game.Game.SideToMove;
+                // Check if location is a member of all squares where a piece sits of the current color.
+                Chess.Square square = toSquare(squareLocation);
+                Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
+                if (coloredPiece != null)
+                {
+                    return ((Chess.ColoredPiece)coloredPiece).GetColor() == game.Game.SideToMove;
+                }
             }
+
             return false;
         }
 
@@ -425,7 +427,7 @@ namespace Sandra.UI.WF
         private void highlightHoverSquare()
         {
             var hoverSquare = PlayingBoard.HoverSquare;
-            if (hoverSquare != null && canPieceBeMoved(hoverSquare))
+            if (canPieceBeMoved(hoverSquare))
             {
                 PlayingBoard.SetForegroundImageAttribute(hoverSquare, ForegroundImageAttribute.Highlight);
             }
