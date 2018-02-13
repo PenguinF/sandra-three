@@ -1015,8 +1015,6 @@ namespace Sandra.UI.WF
 
                 // End of move.
                 moveStartSquareIndex = -1;
-
-                Invalidate();
             }
 
             base.OnMouseUp(e);
