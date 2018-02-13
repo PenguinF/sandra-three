@@ -142,7 +142,7 @@ namespace Sandra.UI.WF
             PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
             PlayingBoard.MouseWheel += playingBoard_MouseWheel;
 
-            PlayingBoard.MoveStart += playingBoard_MoveStart;
+            PlayingBoard.SquareMouseDown += playingBoard_SquareMouseDown;
             PlayingBoard.MoveCommit += playingBoard_MoveCommit;
 
             PlayingBoard.Paint += playingBoard_Paint;
@@ -489,14 +489,14 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void playingBoard_MoveStart(PlayingBoard sender, CancellableMoveEventArgs e)
+        private void playingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
         {
-            if (canPieceBeMoved(e.Start))
+            if (e.Button == MouseButtons.Left && canPieceBeMoved(e.Location))
             {
                 // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
-                    SourceSquare = toSquare(e.Start),
+                    SourceSquare = toSquare(e.Location),
                 };
 
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
@@ -511,11 +511,11 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                PlayingBoard.SetForegroundImageAttribute(e.Start, ForegroundImageAttribute.HalfTransparent);
-                updateDragImage(PlayingBoard.GetForegroundImage(e.Start), e.Start, e.MouseStartPosition);
+                PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
+                updateDragImage(PlayingBoard.GetForegroundImage(e.Location), e.Location, e.MouseLocation);
 
-                moveStartSquare = e.Start;
-                dragStartPosition = e.MouseStartPosition;
+                moveStartSquare = e.Location;
+                dragStartPosition = e.MouseLocation;
             }
         }
 

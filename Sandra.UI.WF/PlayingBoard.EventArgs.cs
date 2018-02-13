@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -48,34 +49,36 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
+    /// Provides data for the <see cref="PlayingBoard.SquareMouseDown"/> event.
     /// </summary>
-    public class CancellableMoveEventArgs : EventArgs
+    public class SquareMouseEventArgs : SquareEventArgs
     {
         /// <summary>
-        /// Gets the location of the square where the mouse cursor currently is,
-        /// or null if the mouse cursor is elsewhere.
+        /// Gets which mouse button was pressed.
         /// </summary>
-        public SquareLocation Start { get; }
+        public MouseButtons Button { get; }
 
         /// <summary>
-        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
+        /// Gets the position of the mouse in pixels relative to the top left corner of the control.
         /// </summary>
-        public Point MouseStartPosition { get; }
+        public Point MouseLocation { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CancellableMoveEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="SquareMouseEventArgs"/> class.
         /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
+        /// <param name="location">
+        /// The location of the square.
         /// </param>
-        /// <param name="mouseStartPosition">
-        /// The position of the mouse relative to the top left corner of the control when dragging started.
+        /// <param name="button">
+        /// Which mouse button was pressed.
         /// </param>
-        public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition)
+        /// <param name="mouseLocation">
+        /// The position of the mouse in pixels relative to the top left corner of the control.
+        /// </param>
+        public SquareMouseEventArgs(SquareLocation location, MouseButtons button, Point mouseLocation) : base(location)
         {
-            Start = start;
-            MouseStartPosition = mouseStartPosition;
+            Button = button;
+            MouseLocation = mouseLocation;
         }
     }
 

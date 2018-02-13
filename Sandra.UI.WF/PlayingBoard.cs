@@ -752,21 +752,21 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image occupying a square starts being moved.
+        /// Occurs when the mouse is over this control and one of its buttons is pressed.
         /// </summary>
-        public event Action<PlayingBoard, CancellableMoveEventArgs> MoveStart;
+        public event Action<PlayingBoard, SquareMouseEventArgs> SquareMouseDown;
 
         /// <summary>
-        /// Raises the <see cref="MoveStart"/> event. 
+        /// Raises the <see cref="SquareMouseDown"/> event. 
         /// </summary>
-        protected virtual void OnMoveStart(CancellableMoveEventArgs e) => MoveStart?.Invoke(this, e);
+        protected virtual void OnSquareMouseDown(SquareMouseEventArgs e) => SquareMouseDown?.Invoke(this, e);
 
         /// <summary>
-        /// Raises the <see cref="MoveStart"/> event. 
+        /// Raises the <see cref="SquareMouseDown"/> event. 
         /// </summary>
-        protected void RaiseMoveStart(int squareIndex, Point mouseStartPosition)
+        protected void RaiseSquareMouseDown(int squareIndex, MouseButtons button, Point mouseLocation)
         {
-            OnMoveStart(new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition));
+            OnSquareMouseDown(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
         }
 
 
@@ -946,18 +946,13 @@ namespace Sandra.UI.WF
             {
                 hitTest(lastKnownMouseMovePoint);
             }
+
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            int hit = hitTest(e.Location);
-
-            // Start moving?
-            if (e.Button == MouseButtons.Left)
-            {
-                RaiseMoveStart(hit, e.Location);
-            }
+            RaiseSquareMouseDown(hitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseDown(e);
         }
