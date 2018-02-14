@@ -190,6 +190,8 @@ namespace Sandra.UI.WF
             return false;
         }
 
+        private bool isDragging;
+
         /// <summary>
         /// Gets the position of the mouse relative to the top left corner of the playing board when dragging started.
         /// </summary>
@@ -324,17 +326,25 @@ namespace Sandra.UI.WF
             if (hoverQuadrant != value)
             {
                 hoverQuadrant = value;
-                if (value == SquareQuadrant.Indeterminate)
+
+                if (isDragging)
                 {
-                    updateDragImage(moveStartSquare != null ? PlayingBoard.GetForegroundImage(moveStartSquare) : null,
-                                    moveStartSquare,
-                                    dragStartPosition);
+                    if (value == SquareQuadrant.Indeterminate)
+                    {
+                        updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare),
+                                        moveStartSquare,
+                                        dragStartPosition);
+                    }
+                    else
+                    {
+                        updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
+                                        moveStartSquare,
+                                        dragStartPosition);
+                    }
                 }
                 else
                 {
-                    updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
-                                    moveStartSquare,
-                                    dragStartPosition);
+                    updateDragImage(null, null, Point.Empty);
                 }
 
                 // Also invalidate the PlayingBoard so the promotion effect will be redrawn.
@@ -510,6 +520,7 @@ namespace Sandra.UI.WF
             stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
+
             if (moveStartSquare == null || e.Location != moveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
@@ -520,10 +531,14 @@ namespace Sandra.UI.WF
         {
             if (e.Button == MouseButtons.Left && canPieceBeMoved(e.Location))
             {
+                moveStartSquare = e.Location;
+                dragStartPosition = e.MouseLocation;
+                isDragging = true;
+
                 // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
-                    SourceSquare = toSquare(e.Location),
+                    SourceSquare = toSquare(moveStartSquare),
                 };
 
                 foreach (var square in EnumHelper<Chess.Square>.AllValues)
@@ -538,11 +553,8 @@ namespace Sandra.UI.WF
                     }
                 }
 
-                PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.HalfTransparent);
-                updateDragImage(PlayingBoard.GetForegroundImage(e.Location), e.Location, e.MouseLocation);
-
-                moveStartSquare = e.Location;
-                dragStartPosition = e.MouseLocation;
+                PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
+                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
             }
         }
 
@@ -595,7 +607,6 @@ namespace Sandra.UI.WF
                         moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
                     }
 
-                    updateDragImage(null, null, Point.Empty);
                     resetMoveEffects();
 
                     game.Game.TryMakeMove(ref moveInfo, true);
@@ -605,8 +616,13 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    updateDragImage(null, null, Point.Empty);
                     resetMoveEffects();
+                }
+
+                if (isDragging)
+                {
+                    updateDragImage(null, null, Point.Empty);
+                    isDragging = false;
                 }
 
                 moveStartSquare = null;
