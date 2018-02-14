@@ -50,7 +50,7 @@ namespace Sandra.UI.WF
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
             highlight.SetGamma(0.6f);
-            highlightImageAttributes = highlight;
+            HighlightImageAttributes = highlight;
 
             // Half-transparent foreground image at the source square, when moving.
             var halfTransparent = new ImageAttributes();
@@ -63,11 +63,18 @@ namespace Sandra.UI.WF
                 new float[] {0, 0, 0, 0, 0}
             });
             halfTransparent.SetColorMatrix(halfTransparentMatrix);
-            halfTransparentImageAttributes = halfTransparent;
+            HalfTransparentImageAttributes = halfTransparent;
         }
 
-        private readonly ImageAttributes highlightImageAttributes;
-        private readonly ImageAttributes halfTransparentImageAttributes;
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
+        /// </summary>
+        public ImageAttributes HighlightImageAttributes { get; }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
+        /// </summary>
+        public ImageAttributes HalfTransparentImageAttributes { get; }
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -1198,7 +1205,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            halfTransparentImageAttributes);
+                            HalfTransparentImageAttributes);
             }
             else if (imgAttribute == ForegroundImageAttribute.Highlight)
             {
@@ -1207,7 +1214,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            highlightImageAttributes);
+                            HighlightImageAttributes);
             }
             else
             {
@@ -1221,8 +1228,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                highlightImageAttributes.Dispose();
-                halfTransparentImageAttributes.Dispose();
+                HighlightImageAttributes.Dispose();
+                HalfTransparentImageAttributes.Dispose();
             }
             base.Dispose(disposing);
         }
