@@ -19,6 +19,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -693,14 +694,13 @@ namespace Sandra.UI.WF
                     Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
 
                     Chess.Color promoteColor = game.Game.SideToMove;
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft, promoteColor)],
-                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.TopLeft));
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight, promoteColor)],
-                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.TopRight));
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomLeft, promoteColor)],
-                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.BottomLeft));
-                    e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
-                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.BottomRight));
+
+                    SquareQuadrant[] allQuadrants = { SquareQuadrant.TopLeft, SquareQuadrant.TopRight, SquareQuadrant.BottomLeft, SquareQuadrant.BottomRight };
+                    allQuadrants.ForEach(quadrant =>
+                    {
+                        e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
+                                             getSquareQuadrantRectangle(ref rect, quadrant));
+                    });
                 }
             }
         }
