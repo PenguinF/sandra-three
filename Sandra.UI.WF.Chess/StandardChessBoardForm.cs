@@ -521,7 +521,7 @@ namespace Sandra.UI.WF
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
 
-            if (moveStartSquare == null || e.Location != moveStartSquare)
+            if (!isDragging || moveStartSquare == null || e.Location != moveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
             }
