@@ -527,7 +527,30 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void commitOrCancelMove(SquareLocation targetSquare)
+        private void beginMove(SquareLocation sourceSquare)
+        {
+            moveStartSquare = sourceSquare;
+
+            // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
+            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+            {
+                SourceSquare = toSquare(moveStartSquare),
+            };
+
+            foreach (var square in EnumHelper<Chess.Square>.AllValues)
+            {
+                moveInfo.TargetSquare = square;
+                game.Game.TryMakeMove(ref moveInfo, false);
+                var moveCheckResult = moveInfo.Result;
+                if (moveCheckResult.IsLegalMove())
+                {
+                    // Highlight each found square.
+                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
+                }
+            }
+        }
+
+        private bool commitOrCancelMove(SquareLocation targetSquare)
         {
             if (targetSquare != null)
             {
@@ -565,44 +588,38 @@ namespace Sandra.UI.WF
 
                 game.Game.TryMakeMove(ref moveInfo, true);
 
-                game.ActiveMoveTreeUpdated();
-                PlayingBoard.ActionHandler.Invalidate();
+                if (moveInfo.Result == Chess.MoveCheckResult.OK)
+                {
+                    game.ActiveMoveTreeUpdated();
+                    PlayingBoard.ActionHandler.Invalidate();
+                    moveStartSquare = null;
+                    return true;
+                }
             }
             else
             {
                 resetMoveEffects();
             }
+
+            moveStartSquare = null;
+            return false;
         }
 
         private void playingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (canPieceBeMoved(e.Location))
+                // Commit or cancel a started move first, before checking e.Location again.
+                bool moveMade = moveStartSquare != null && commitOrCancelMove(e.Location);
+
+                // Only recheck if no move was made.
+                if (!moveMade && canPieceBeMoved(e.Location))
                 {
-                    moveStartSquare = e.Location;
-                    dragStartPosition = e.MouseLocation;
-                    isDragging = true;
-
-                    // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
-                    Chess.MoveInfo moveInfo = new Chess.MoveInfo()
-                    {
-                        SourceSquare = toSquare(moveStartSquare),
-                    };
-
-                    foreach (var square in EnumHelper<Chess.Square>.AllValues)
-                    {
-                        moveInfo.TargetSquare = square;
-                        game.Game.TryMakeMove(ref moveInfo, false);
-                        var moveCheckResult = moveInfo.Result;
-                        if (moveCheckResult.IsLegalMove())
-                        {
-                            // Highlight each found square.
-                            PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
-                        }
-                    }
+                    beginMove(e.Location);
 
                     PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
+                    dragStartPosition = e.MouseLocation;
+                    isDragging = true;
                     updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
                 }
             }
@@ -632,7 +649,6 @@ namespace Sandra.UI.WF
                 if (moveStartSquare != e.Location)
                 {
                     commitOrCancelMove(e.Location);
-                    moveStartSquare = null;
                 }
 
                 updateDragImage(null, null, Point.Empty);
