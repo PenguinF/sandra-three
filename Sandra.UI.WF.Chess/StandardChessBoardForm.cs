@@ -529,32 +529,35 @@ namespace Sandra.UI.WF
 
         private void playingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && canPieceBeMoved(e.Location))
+            if (e.Button == MouseButtons.Left)
             {
-                moveStartSquare = e.Location;
-                dragStartPosition = e.MouseLocation;
-                isDragging = true;
-
-                // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
-                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+                if (canPieceBeMoved(e.Location))
                 {
-                    SourceSquare = toSquare(moveStartSquare),
-                };
+                    moveStartSquare = e.Location;
+                    dragStartPosition = e.MouseLocation;
+                    isDragging = true;
 
-                foreach (var square in EnumHelper<Chess.Square>.AllValues)
-                {
-                    moveInfo.TargetSquare = square;
-                    game.Game.TryMakeMove(ref moveInfo, false);
-                    var moveCheckResult = moveInfo.Result;
-                    if (moveCheckResult.IsLegalMove())
+                    // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
+                    Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                     {
-                        // Highlight each found square.
-                        PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
-                    }
-                }
+                        SourceSquare = toSquare(moveStartSquare),
+                    };
 
-                PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
-                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
+                    foreach (var square in EnumHelper<Chess.Square>.AllValues)
+                    {
+                        moveInfo.TargetSquare = square;
+                        game.Game.TryMakeMove(ref moveInfo, false);
+                        var moveCheckResult = moveInfo.Result;
+                        if (moveCheckResult.IsLegalMove())
+                        {
+                            // Highlight each found square.
+                            PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
+                        }
+                    }
+
+                    PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
+                    updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
+                }
             }
         }
 
