@@ -336,6 +336,9 @@ namespace Sandra.UI.WF
                                     moveStartSquare,
                                     dragStartPosition);
                 }
+
+                // Also invalidate the PlayingBoard so the promotion effect will be redrawn.
+                PlayingBoard.Invalidate();
             }
         }
 
@@ -698,8 +701,20 @@ namespace Sandra.UI.WF
                     SquareQuadrant[] allQuadrants = { SquareQuadrant.TopLeft, SquareQuadrant.TopRight, SquareQuadrant.BottomLeft, SquareQuadrant.BottomRight };
                     allQuadrants.ForEach(quadrant =>
                     {
-                        e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
-                                             getSquareQuadrantRectangle(ref rect, quadrant));
+                        if (quadrant == hoverQuadrant)
+                        {
+                            Image image = PieceImages[getPromoteToPiece(quadrant, promoteColor)];
+                            e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
+                                                 getSquareQuadrantRectangle(ref rect, quadrant),
+                                                 0, 0, image.Width, image.Height,
+                                                 GraphicsUnit.Pixel,
+                                                 PlayingBoard.HighlightImageAttributes);
+                        }
+                        else
+                        {
+                            e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
+                                                 getSquareQuadrantRectangle(ref rect, quadrant));
+                        }
                     });
                 }
             }
