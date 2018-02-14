@@ -459,6 +459,11 @@ namespace Sandra.UI.WF
                 }
                 updateHoverQuadrant(hitQuadrant, game.Game.SideToMove);
             }
+
+            if (isDragging && dragCursor == null)
+            {
+                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
+            }
         }
 
         private void highlightHoverSquare()
@@ -620,7 +625,6 @@ namespace Sandra.UI.WF
                     PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
                     dragStartPosition = e.MouseLocation;
                     isDragging = true;
-                    updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
                 }
             }
         }
