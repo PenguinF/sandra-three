@@ -338,6 +338,29 @@ namespace Sandra.UI.WF
             }
         }
 
+        private Rectangle getSquareQuadrantRectangle(ref Rectangle squareRectangle, SquareQuadrant squareQuadrant)
+        {
+            int squareSize = squareRectangle.Width;
+            int halfSquareSize = (squareSize + 1) / 2;
+            int otherHalfSquareSize = squareSize - halfSquareSize;
+            if (squareQuadrant == SquareQuadrant.TopLeft)
+            {
+                return new Rectangle(squareRectangle.X, squareRectangle.Y, halfSquareSize, halfSquareSize);
+            }
+            else if (squareQuadrant == SquareQuadrant.TopRight)
+            {
+                return new Rectangle(squareRectangle.X + halfSquareSize, squareRectangle.Y, otherHalfSquareSize, halfSquareSize);
+            }
+            else if (squareQuadrant == SquareQuadrant.BottomLeft)
+            {
+                return new Rectangle(squareRectangle.X, squareRectangle.Y + halfSquareSize, halfSquareSize, otherHalfSquareSize);
+            }
+            else  // squareQuadrant == SquareQuadrant.BottomRight
+            {
+                return new Rectangle(squareRectangle.X + halfSquareSize, squareRectangle.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
+            }
+        }
+
         private SquareLocation currentSquareWithPromoteEffect;
 
         private void displayPromoteEffect(Chess.Square promoteSquare)
@@ -668,18 +691,16 @@ namespace Sandra.UI.WF
                 if (squareSize >= 2)
                 {
                     Rectangle rect = PlayingBoard.GetSquareRectangle(currentSquareWithPromoteEffect);
-                    int halfSquareSize = (squareSize + 1) / 2;
-                    int otherHalfSquareSize = squareSize - halfSquareSize;
 
                     Chess.Color promoteColor = game.Game.SideToMove;
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopLeft, promoteColor)],
-                                         rect.X, rect.Y, halfSquareSize, halfSquareSize);
+                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.TopLeft));
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.TopRight, promoteColor)],
-                                         rect.X + halfSquareSize, rect.Y, otherHalfSquareSize, halfSquareSize);
+                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.TopRight));
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomLeft, promoteColor)],
-                                         rect.X, rect.Y + halfSquareSize, halfSquareSize, otherHalfSquareSize);
+                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.BottomLeft));
                     e.Graphics.DrawImage(PieceImages[getPromoteToPiece(SquareQuadrant.BottomRight, promoteColor)],
-                                         rect.X + halfSquareSize, rect.Y + halfSquareSize, otherHalfSquareSize, otherHalfSquareSize);
+                                         getSquareQuadrantRectangle(ref rect, SquareQuadrant.BottomRight));
                 }
             }
         }
