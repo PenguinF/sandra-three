@@ -527,6 +527,53 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void commitOrCancelMove(SquareLocation targetSquare)
+        {
+            if (targetSquare != null)
+            {
+                // Move piece from source to destination.
+                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+                {
+                    SourceSquare = toSquare(moveStartSquare),
+                    TargetSquare = toSquare(targetSquare),
+                };
+
+                if (currentSquareWithEnPassantEffect != null)
+                {
+                    // Must specify this MoveType to commit it.
+                    moveInfo.MoveType = Chess.MoveType.EnPassant;
+                }
+                else if (rookSquareWithCastlingEffect != null)
+                {
+                    if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
+                    {
+                        // Rook moves to the right.
+                        moveInfo.MoveType = Chess.MoveType.CastleQueenside;
+                    }
+                    else
+                    {
+                        moveInfo.MoveType = Chess.MoveType.CastleKingside;
+                    }
+                }
+                else if (currentSquareWithPromoteEffect != null)
+                {
+                    moveInfo.MoveType = Chess.MoveType.Promotion;
+                    moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
+                }
+
+                resetMoveEffects();
+
+                game.Game.TryMakeMove(ref moveInfo, true);
+
+                game.ActiveMoveTreeUpdated();
+                PlayingBoard.ActionHandler.Invalidate();
+            }
+            else
+            {
+                resetMoveEffects();
+            }
+        }
+
         private void playingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -576,59 +623,20 @@ namespace Sandra.UI.WF
 
         private void playingBoard_SquareMouseUp(PlayingBoard sender, SquareMouseEventArgs e)
         {
-            if (moveStartSquare != null)
+            if (isDragging && moveStartSquare != null)
             {
-                if (e.Location != null)
+                // Always reset the half-transparency.
+                PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.Default);
+
+                // Only commit or cancel a move if the piece was dropped onto a different square.
+                if (moveStartSquare != e.Location)
                 {
-                    // Move piece from source to destination.
-                    Chess.MoveInfo moveInfo = new Chess.MoveInfo()
-                    {
-                        SourceSquare = toSquare(moveStartSquare),
-                        TargetSquare = toSquare(e.Location),
-                    };
-
-                    if (currentSquareWithEnPassantEffect != null)
-                    {
-                        // Must specify this MoveType to commit it.
-                        moveInfo.MoveType = Chess.MoveType.EnPassant;
-                    }
-                    else if (rookSquareWithCastlingEffect != null)
-                    {
-                        if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
-                        {
-                            // Rook moves to the right.
-                            moveInfo.MoveType = Chess.MoveType.CastleQueenside;
-                        }
-                        else
-                        {
-                            moveInfo.MoveType = Chess.MoveType.CastleKingside;
-                        }
-                    }
-                    else if (currentSquareWithPromoteEffect != null)
-                    {
-                        moveInfo.MoveType = Chess.MoveType.Promotion;
-                        moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
-                    }
-
-                    resetMoveEffects();
-
-                    game.Game.TryMakeMove(ref moveInfo, true);
-
-                    game.ActiveMoveTreeUpdated();
-                    PlayingBoard.ActionHandler.Invalidate();
-                }
-                else
-                {
-                    resetMoveEffects();
+                    commitOrCancelMove(e.Location);
+                    moveStartSquare = null;
                 }
 
-                if (isDragging)
-                {
-                    updateDragImage(null, null, Point.Empty);
-                    isDragging = false;
-                }
-
-                moveStartSquare = null;
+                updateDragImage(null, null, Point.Empty);
+                isDragging = false;
             }
         }
 
