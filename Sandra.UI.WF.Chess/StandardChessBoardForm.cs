@@ -174,6 +174,8 @@ namespace Sandra.UI.WF
 
         private SquareLocation moveStartSquare;
 
+        private bool drawFocusMoveStartSquare;
+
         private bool canPieceBeMoved(SquareLocation squareLocation)
         {
             if (game != null && squareLocation != null)
@@ -613,6 +615,12 @@ namespace Sandra.UI.WF
         {
             if (e.Button == MouseButtons.Left)
             {
+                if (e.Location != moveStartSquare)
+                {
+                    drawFocusMoveStartSquare = false;
+                    PlayingBoard.Invalidate();
+                }
+
                 // Commit or cancel a started move first, before checking e.Location again.
                 bool moveMade = moveStartSquare != null && commitOrCancelMove(e.Location);
 
@@ -654,6 +662,11 @@ namespace Sandra.UI.WF
                 if (moveStartSquare != e.Location)
                 {
                     commitOrCancelMove(e.Location);
+                }
+                else
+                {
+                    drawFocusMoveStartSquare = true;
+                    PlayingBoard.Invalidate();
                 }
 
                 updateDragImage(null, null, Point.Empty);
@@ -765,6 +778,17 @@ namespace Sandra.UI.WF
                                                  getSquareQuadrantRectangle(ref rect, quadrant));
                         }
                     });
+                }
+            }
+
+            // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
+            if (moveStartSquare != null && drawFocusMoveStartSquare)
+            {
+                Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
+
+                using (Pen darkBluePen = new Pen(Color.Gray, 2f))
+                {
+                    e.Graphics.DrawRectangle(darkBluePen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
             }
         }
