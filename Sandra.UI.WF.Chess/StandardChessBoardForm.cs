@@ -548,7 +548,6 @@ namespace Sandra.UI.WF
 
         private void resetMoveEffects()
         {
-            updateDragImage(null, null, Point.Empty);
             stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
@@ -596,6 +595,7 @@ namespace Sandra.UI.WF
                         moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
                     }
 
+                    updateDragImage(null, null, Point.Empty);
                     resetMoveEffects();
 
                     game.Game.TryMakeMove(ref moveInfo, true);
@@ -605,6 +605,7 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
+                    updateDragImage(null, null, Point.Empty);
                     resetMoveEffects();
                 }
 
