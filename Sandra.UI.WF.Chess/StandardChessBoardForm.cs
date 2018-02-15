@@ -728,7 +728,7 @@ namespace Sandra.UI.WF
             lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
         }
 
-        private Color getDarkerGrayColor()
+        private Color getDarkerGrayColor(SquareLocation square)
         {
             return Color.Gray;
         }
@@ -753,7 +753,7 @@ namespace Sandra.UI.WF
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
 
-                using (var darkerGrayPen = new Pen(getDarkerGrayColor(), 1f))
+                using (var darkerGrayPen = new Pen(getDarkerGrayColor(hoverSquare), 1f))
                 {
                     e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
                 }
@@ -796,7 +796,7 @@ namespace Sandra.UI.WF
             {
                 Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
 
-                using (Pen darkerGrayPen = new Pen(getDarkerGrayColor(), 2f))
+                using (Pen darkerGrayPen = new Pen(getDarkerGrayColor(moveStartSquare), 2f))
                 {
                     e.Graphics.DrawRectangle(darkerGrayPen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
