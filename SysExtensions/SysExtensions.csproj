@@ -41,6 +41,8 @@
     <Compile Include="EnumIndexedArray.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxRenderer\SyntaxRenderer.cs" />
+    <Compile Include="SyntaxRenderer\TextElement.cs" />
     <Compile Include="UtilityExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

@@ -50,7 +50,7 @@ namespace Sandra.UI.WF
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             RenderTarget = renderTarget;
 
-            Elements = elements.AsReadOnly();
+            Elements = elements;
 
             renderTarget.RemoveText(0, int.MaxValue);
             renderTarget.CaretPositionChanged += tryInvokeCaretPositionChanged;
