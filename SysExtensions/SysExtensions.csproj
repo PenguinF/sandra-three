@@ -41,6 +41,7 @@
     <Compile Include="EnumIndexedArray.cs" />
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxRenderer\ISyntaxRenderTarget.cs" />
     <Compile Include="SyntaxRenderer\SyntaxRenderer.cs" />
     <Compile Include="SyntaxRenderer\TextElement.cs" />
     <Compile Include="UtilityExtensions.cs" />

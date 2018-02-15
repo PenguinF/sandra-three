@@ -23,14 +23,6 @@ using System.Linq;
 
 namespace SysExtensions.SyntaxRenderer
 {
-    public interface ISyntaxRenderTarget
-    {
-        void BringIntoView(int caretPosition);
-        event Action<int> CaretPositionChanged;
-        void InsertText(int textStart, string text);
-        void RemoveText(int textStart, int textLength);
-    }
-
     /// <summary>
     /// Changes the behavior of a <see cref="ISyntaxRenderTarget"/> so it shows a read-only list of formatted text elements.
     /// </summary>
