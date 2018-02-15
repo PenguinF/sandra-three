@@ -21,7 +21,7 @@ using System;
 namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
-    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
+    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer{TTerminal}"/>,
     /// which maps to exactly one terminal symbol.
     /// </summary>
     /// <typeparam name="TTerminal">

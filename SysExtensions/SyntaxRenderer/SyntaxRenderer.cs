@@ -32,7 +32,7 @@ namespace SysExtensions.SyntaxRenderer
     }
 
     /// <summary>
-    /// Changes the behavior of a <see cref="UpdatableRichTextBox"/> so it shows a read-only list of formatted text elements.
+    /// Changes the behavior of a <see cref="ISyntaxRenderTarget"/> so it shows a read-only list of formatted text elements.
     /// </summary>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbols to format.
@@ -52,6 +52,7 @@ namespace SysExtensions.SyntaxRenderer
 
             Elements = elements;
 
+            // Remove all text from the render target.
             renderTarget.RemoveText(0, int.MaxValue);
             renderTarget.CaretPositionChanged += tryInvokeCaretPositionChanged;
 
