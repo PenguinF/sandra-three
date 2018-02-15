@@ -138,18 +138,18 @@ namespace Sandra.UI.WF
             base.OnSelectionChanged(e);
         }
 
-        public void InsertText(int textStart, string text)
+        public void InsertText(int textPosition, string text)
         {
-            if (textStart < 0) textStart = 0;
-            if (textStart > TextLength) textStart = TextLength;
+            if (textPosition < 0) textPosition = 0;
+            if (textPosition > TextLength) textPosition = TextLength;
 
-            if (textStart == TextLength)
+            if (textPosition == TextLength)
             {
                 AppendText(text);
             }
             else
             {
-                Select(textStart, 0);
+                Select(textPosition, 0);
                 // This only works if not read-only, so temporarily turn it off.
                 ReadOnly = false;
                 SelectedText = text;
