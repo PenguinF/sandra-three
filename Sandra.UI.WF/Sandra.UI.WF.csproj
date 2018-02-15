@@ -73,9 +73,9 @@
     <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sandra\Sandra.csproj">
+    <ProjectReference Include="..\SysExtensions\SysExtensions.csproj">
       <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
-      <Name>Sandra</Name>
+      <Name>SysExtensions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
