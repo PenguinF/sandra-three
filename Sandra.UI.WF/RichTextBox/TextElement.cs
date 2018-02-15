@@ -82,8 +82,7 @@ namespace Sandra.UI.WF
         public void BringIntoViewBefore()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.Select(Start, 0);
-            renderer.RenderTarget.ScrollToCaret();
+            renderer.RenderTarget.BringIntoView(Start);
         }
 
         /// <summary>
@@ -95,8 +94,7 @@ namespace Sandra.UI.WF
         public void BringIntoViewAfter()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.Select(Start + Length, 0);
-            renderer.RenderTarget.ScrollToCaret();
+            renderer.RenderTarget.BringIntoView(Start + Length);
         }
 
         internal void Detach()

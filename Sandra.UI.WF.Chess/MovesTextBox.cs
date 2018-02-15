@@ -64,8 +64,11 @@ namespace Sandra.UI.WF
         public MovesTextBox()
         {
             BorderStyle = BorderStyle.None;
+            ReadOnly = true;
+
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
+
             applyDefaultStyle();
 
             // DisplayTextChanged handlers are called immediately upon registration.

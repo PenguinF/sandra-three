@@ -115,5 +115,66 @@ namespace Sandra.UI.WF
                 Invalidate();
             }
         }
+
+        public void BringIntoView(int caretPosition)
+        {
+            Select(caretPosition, 0);
+            ScrollToCaret();
+        }
+
+        public event Action<int> CaretPositionChanged;
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!IsUpdating && SelectionLength == 0)
+            {
+                CaretPositionChanged?.Invoke(SelectionStart);
+            }
+
+            base.OnSelectionChanged(e);
+        }
+
+        public void InsertText(int textStart, string text)
+        {
+            if (textStart < 0) textStart = 0;
+            if (textStart > TextLength) textStart = TextLength;
+
+            if (textStart == TextLength)
+            {
+                AppendText(text);
+            }
+            else
+            {
+                Select(textStart, 0);
+                // This only works if not read-only, so temporarily turn it off.
+                ReadOnly = false;
+                SelectedText = text;
+                ReadOnly = true;
+            }
+        }
+
+        public void RemoveText(int textStart, int textLength)
+        {
+            if (textStart >= TextLength || textLength <= 0) return;
+
+            if (textStart < 0) textStart = 0;
+            if (textLength > TextLength) textLength = TextLength;
+
+            if (textStart == 0 && textLength == TextLength)
+            {
+                Clear();
+            }
+            else
+            {
+                Select(textStart, textLength);
+                // This only works if not read-only, so temporarily turn it off.
+                ReadOnly = false;
+                SelectedText = string.Empty;
+                ReadOnly = true;
+            }
+        }
     }
 }
