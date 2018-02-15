@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using Sandra.PGN;
+using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

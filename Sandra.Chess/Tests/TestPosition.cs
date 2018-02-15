@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SysExtensions;
 
 namespace Sandra.Chess.Tests
 {
