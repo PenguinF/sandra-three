@@ -25,7 +25,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Standard Windows <see cref="RichTextBox"/> with a <see cref="BeginUpdate"/> method to suspend repainting of the <see cref="RichTextBox"/>. 
     /// </summary>
-    public class UpdatableRichTextBox : RichTextBox
+    public class UpdatableRichTextBox : RichTextBox, ISyntaxRenderTarget
     {
         /// <summary>
         /// Represents a unique update token returned from <see cref="BeginUpdate"/>().

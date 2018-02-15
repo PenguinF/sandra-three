@@ -23,6 +23,14 @@ using System.Linq;
 
 namespace Sandra.UI.WF
 {
+    public interface ISyntaxRenderTarget
+    {
+        void BringIntoView(int caretPosition);
+        event Action<int> CaretPositionChanged;
+        void InsertText(int textStart, string text);
+        void RemoveText(int textStart, int textLength);
+    }
+
     /// <summary>
     /// Changes the behavior of a <see cref="UpdatableRichTextBox"/> so it shows a read-only list of formatted text elements.
     /// </summary>
@@ -35,9 +43,9 @@ namespace Sandra.UI.WF
     /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
-        public static SyntaxRenderer<TTerminal> AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
+        public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
 
-        private SyntaxRenderer(UpdatableRichTextBox renderTarget)
+        private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             RenderTarget = renderTarget;
@@ -50,7 +58,7 @@ namespace Sandra.UI.WF
             assertInvariants();
         }
 
-        internal readonly UpdatableRichTextBox RenderTarget;
+        internal readonly ISyntaxRenderTarget RenderTarget;
 
         private readonly List<int> elementIndexes = new List<int>();
 
