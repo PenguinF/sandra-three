@@ -19,6 +19,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -42,89 +43,42 @@ namespace Sandra.UI.WF
         /// </param>
         public SquareEventArgs(SquareLocation location)
         {
-            if (location == null) throw new ArgumentNullException(nameof(location));
             Location = location;
         }
     }
 
     /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCancel"/> event.
+    /// Provides data for the <see cref="PlayingBoard.SquareMouseDown"/>
+    /// or <see cref="PlayingBoard.SquareMouseUp"/> event.
     /// </summary>
-    [DebuggerDisplay("From (x = {Start.X}, y = {Start.Y})")]
-    public class MoveEventArgs : EventArgs
+    public class SquareMouseEventArgs : SquareEventArgs
     {
         /// <summary>
-        /// Gets the location of the square where moving started.
+        /// Gets which mouse button was pressed.
         /// </summary>
-        public SquareLocation Start { get; }
+        public MouseButtons Button { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MoveEventArgs"/> class.
+        /// Gets the position of the mouse in pixels relative to the top left corner of the control.
         /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
+        public Point MouseLocation { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SquareMouseEventArgs"/> class.
+        /// </summary>
+        /// <param name="location">
+        /// The location of the square.
         /// </param>
-        public MoveEventArgs(SquareLocation start)
+        /// <param name="button">
+        /// Which mouse button was pressed.
+        /// </param>
+        /// <param name="mouseLocation">
+        /// The position of the mouse in pixels relative to the top left corner of the control.
+        /// </param>
+        public SquareMouseEventArgs(SquareLocation location, MouseButtons button, Point mouseLocation) : base(location)
         {
-            if (start == null) throw new ArgumentNullException(nameof(start));
-            Start = start;
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveStart"/> event.
-    /// </summary>
-    public class CancellableMoveEventArgs : MoveEventArgs
-    {
-        /// <summary>
-        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
-        /// </summary>
-        public Point MouseStartPosition { get; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the event should be canceled.
-        /// </summary>
-        public bool Cancel { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CancellableMoveEventArgs"/> class.
-        /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
-        /// </param>
-        /// <param name="mouseStartPosition">
-        /// The position of the mouse relative to the top left corner of the control when dragging started.
-        /// </param>
-        public CancellableMoveEventArgs(SquareLocation start, Point mouseStartPosition) : base(start)
-        {
-            MouseStartPosition = mouseStartPosition;
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="PlayingBoard.MoveCommit"/> event.
-    /// </summary>
-    [DebuggerDisplay("From (x = {StartX}, y = {StartY}) to (x = {TargetX}, y = {TargetY})")]
-    public class MoveCommitEventArgs : MoveEventArgs
-    {
-        /// <summary>
-        /// Gets the location of the square where the mouse cursor currently is.
-        /// </summary>
-        public SquareLocation Target { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MoveCommitEventArgs"/> class.
-        /// </summary>
-        /// <param name="start">
-        /// The location of the square where moving started.
-        /// </param>
-        /// <param name="target">
-        /// The location of the square where the mouse cursor currently is.
-        /// </param>
-        public MoveCommitEventArgs(SquareLocation start, SquareLocation target) : base(start)
-        {
-            if (target == null) throw new ArgumentNullException(nameof(target));
-            Target = target;
+            Button = button;
+            MouseLocation = mouseLocation;
         }
     }
 }

@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -49,7 +50,7 @@ namespace Sandra.UI.WF
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
             highlight.SetGamma(0.6f);
-            highlightImageAttributes = highlight;
+            HighlightImageAttributes = highlight;
 
             // Half-transparent foreground image at the source square, when moving.
             var halfTransparent = new ImageAttributes();
@@ -62,11 +63,18 @@ namespace Sandra.UI.WF
                 new float[] {0, 0, 0, 0, 0}
             });
             halfTransparent.SetColorMatrix(halfTransparentMatrix);
-            halfTransparentImageAttributes = halfTransparent;
+            HalfTransparentImageAttributes = halfTransparent;
         }
 
-        private readonly ImageAttributes highlightImageAttributes;
-        private readonly ImageAttributes halfTransparentImageAttributes;
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.Highlight"/> effect.
+        /// </summary>
+        public ImageAttributes HighlightImageAttributes { get; }
+
+        /// <summary>
+        /// Gets a reference to the <see cref="ImageAttributes"/> used for the <see cref="ForegroundImageAttribute.HalfTransparent"/> effect.
+        /// </summary>
+        public ImageAttributes HalfTransparentImageAttributes { get; }
 
         private readonly PropertyStore propertyStore = new PropertyStore
         {
@@ -657,12 +665,6 @@ namespace Sandra.UI.WF
         public SquareLocation HoverSquare => getSquareLocation(hoveringSquareIndex);
 
         /// <summary>
-        /// Gets if an image is currently being moved.
-        /// </summary>
-        [Browsable(false)]
-        public bool IsMoving => moveStartSquareIndex >= 0;
-
-        /// <summary>
         /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
         /// </summary>
         /// <exception cref="IndexOutOfRangeException">
@@ -706,13 +708,6 @@ namespace Sandra.UI.WF
         /// </returns>
         public SquareLocation GetSquareLocation(Point point) => getSquareLocation(getSquareIndexFromLocation(point));
 
-        /// <summary>
-        /// Gets the location of the square where the current move started if <see cref="IsMoving"/> is true,
-        /// or null (Nothing in Visual Basic) if no move is currently being performed.
-        /// </summary>
-        [Browsable(false)]
-        public SquareLocation MoveStartSquare => getSquareLocation(moveStartSquareIndex);
-
 
         /// <summary>
         /// Occurs when the mouse pointer enters a square.
@@ -747,58 +742,40 @@ namespace Sandra.UI.WF
 
 
         /// <summary>
-        /// Occurs when an image stops being moved, and is not dropped onto another square.
+        /// Occurs when the mouse is over this control and one of its buttons is released.
         /// </summary>
-        public event Action<PlayingBoard, MoveEventArgs> MoveCancel;
+        public event Action<PlayingBoard, SquareMouseEventArgs> SquareMouseUp;
 
         /// <summary>
-        /// Raises the <see cref="MoveCancel"/> event. 
+        /// Raises the <see cref="SquareMouseUp"/> event. 
         /// </summary>
-        protected virtual void OnMoveCancel(MoveEventArgs e) => MoveCancel?.Invoke(this, e);
+        protected virtual void OnSquareMouseUp(SquareMouseEventArgs e) => SquareMouseUp?.Invoke(this, e);
 
         /// <summary>
-        /// Raises the <see cref="MoveCancel"/> event. 
+        /// Raises the <see cref="SquareMouseUp"/> event. 
         /// </summary>
-        protected void RaiseMoveCancel(int squareIndex) => OnMoveCancel(new MoveEventArgs(getSquareLocation(squareIndex)));
-
-
-        /// <summary>
-        /// Occurs when an image is being moved and dropped onto another square.
-        /// </summary>
-        public event Action<PlayingBoard, MoveCommitEventArgs> MoveCommit;
-
-        /// <summary>
-        /// Raises the <see cref="MoveCommit"/> event. 
-        /// </summary>
-        protected virtual void OnMoveCommit(MoveCommitEventArgs e) => MoveCommit?.Invoke(this, e);
-
-        /// <summary>
-        /// Raises the <see cref="MoveCommit"/> event. 
-        /// </summary>
-        protected void RaiseMoveCommit(int sourceSquareIndex,
-                                       int targetSquareIndex)
-            => OnMoveCommit(new MoveCommitEventArgs(getSquareLocation(sourceSquareIndex),
-                                                    getSquareLocation(targetSquareIndex)));
-
-
-        /// <summary>
-        /// Occurs when an image occupying a square starts being moved.
-        /// </summary>
-        public event Action<PlayingBoard, CancellableMoveEventArgs> MoveStart;
-
-        /// <summary>
-        /// Raises the <see cref="MoveStart"/> event. 
-        /// </summary>
-        protected virtual void OnMoveStart(CancellableMoveEventArgs e) => MoveStart?.Invoke(this, e);
-
-        /// <summary>
-        /// Raises the <see cref="MoveStart"/> event. 
-        /// </summary>
-        protected bool RaiseMoveStart(int squareIndex, Point mouseStartPosition)
+        protected void RaiseSquareMouseUp(int squareIndex, MouseButtons button, Point mouseLocation)
         {
-            var e = new CancellableMoveEventArgs(getSquareLocation(squareIndex), mouseStartPosition);
-            OnMoveStart(e);
-            return !e.Cancel;
+            OnSquareMouseUp(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
+        }
+
+
+        /// <summary>
+        /// Occurs when the mouse is over this control and one of its buttons is pressed.
+        /// </summary>
+        public event Action<PlayingBoard, SquareMouseEventArgs> SquareMouseDown;
+
+        /// <summary>
+        /// Raises the <see cref="SquareMouseDown"/> event. 
+        /// </summary>
+        protected virtual void OnSquareMouseDown(SquareMouseEventArgs e) => SquareMouseDown?.Invoke(this, e);
+
+        /// <summary>
+        /// Raises the <see cref="SquareMouseDown"/> event. 
+        /// </summary>
+        protected void RaiseSquareMouseDown(int squareIndex, MouseButtons button, Point mouseLocation)
+        {
+            OnSquareMouseDown(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
         }
 
 
@@ -913,15 +890,6 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        /// <summary>
-        /// Gets the position of the mouse relative to the top left corner of the control when dragging started.
-        /// </summary>
-        public Point DragStartPosition => dragStartPosition;
-
-        private Point dragStartPosition;
-
-        private int moveStartSquareIndex = -1;
-
         private int getSquareIndexFromLocation(Point clientLocation)
         {
             int squareSize = SquareSize;
@@ -987,27 +955,13 @@ namespace Sandra.UI.WF
             {
                 hitTest(lastKnownMouseMovePoint);
             }
+
             base.OnMouseEnter(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            int hit = hitTest(e.Location);
-
-            // Start moving?
-            if (e.Button == MouseButtons.Left && !IsMoving)
-            {
-                // Only start when a square is hit.
-                if (hit >= 0 && foregroundImages[hit] != null)
-                {
-                    if (RaiseMoveStart(hit, e.Location))
-                    {
-                        dragStartPosition = e.Location;
-                        moveStartSquareIndex = hit;
-                        Invalidate();
-                    }
-                }
-            }
+            RaiseSquareMouseDown(hitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseDown(e);
         }
@@ -1025,22 +979,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (moveStartSquareIndex >= 0)
-            {
-                if (hoveringSquareIndex >= 0)
-                {
-                    RaiseMoveCommit(moveStartSquareIndex, hoveringSquareIndex);
-                }
-                else
-                {
-                    RaiseMoveCancel(moveStartSquareIndex);
-                }
-
-                // End of move.
-                moveStartSquareIndex = -1;
-
-                Invalidate();
-            }
+            RaiseSquareMouseUp(hitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseUp(e);
         }
@@ -1266,7 +1205,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            halfTransparentImageAttributes);
+                            HalfTransparentImageAttributes);
             }
             else if (imgAttribute == ForegroundImageAttribute.Highlight)
             {
@@ -1275,7 +1214,7 @@ namespace Sandra.UI.WF
                             destinationRectangle,
                             0, 0, image.Width, image.Height,
                             GraphicsUnit.Pixel,
-                            highlightImageAttributes);
+                            HighlightImageAttributes);
             }
             else
             {
@@ -1289,8 +1228,8 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
-                highlightImageAttributes.Dispose();
-                halfTransparentImageAttributes.Dispose();
+                HighlightImageAttributes.Dispose();
+                HalfTransparentImageAttributes.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -1318,6 +1257,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the location of a square on a <see cref="PlayingBoard"/>. 
     /// </summary>
+    [DebuggerDisplay("x = {X}, y = {Y}")]
     public sealed class SquareLocation
     {
         /// <summary>
