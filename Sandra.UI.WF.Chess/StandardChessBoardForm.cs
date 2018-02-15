@@ -728,6 +728,17 @@ namespace Sandra.UI.WF
             lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
         }
 
+        private Color getDarkerGrayColor(SquareLocation square)
+        {
+            Color baseColor = ((square.X + square.Y) % 2) == 0
+                            ? PlayingBoard.LightSquareColor
+                            : PlayingBoard.DarkSquareColor;
+
+            // Convert to grayscale, halve brightness. Convert.ToInt32() rounds.
+            int targetBrightness = Convert.ToInt32(baseColor.GetBrightness() * 128);
+            return Color.FromArgb(targetBrightness, targetBrightness, targetBrightness);
+        }
+
         private void playingBoard_Paint(object sender, PaintEventArgs e)
         {
             // Draw a dotted line between the centers of the squares of the last move.
@@ -747,7 +758,12 @@ namespace Sandra.UI.WF
                 Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
-                e.Graphics.DrawRectangle(Pens.Gray, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+
+                using (var darkerGrayPen = new Pen(getDarkerGrayColor(hoverSquare), 1f))
+                {
+                    e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
+                }
+
                 e.Graphics.ResetClip();
             }
 
@@ -786,9 +802,9 @@ namespace Sandra.UI.WF
             {
                 Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
 
-                using (Pen darkBluePen = new Pen(Color.Gray, 2f))
+                using (Pen darkerGrayPen = new Pen(getDarkerGrayColor(moveStartSquare), 2f))
                 {
-                    e.Graphics.DrawRectangle(darkBluePen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
+                    e.Graphics.DrawRectangle(darkerGrayPen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
             }
         }
