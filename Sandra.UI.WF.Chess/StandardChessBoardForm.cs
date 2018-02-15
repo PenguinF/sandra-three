@@ -730,7 +730,13 @@ namespace Sandra.UI.WF
 
         private Color getDarkerGrayColor(SquareLocation square)
         {
-            return Color.Gray;
+            Color baseColor = ((square.X + square.Y) % 2) == 0
+                            ? PlayingBoard.LightSquareColor
+                            : PlayingBoard.DarkSquareColor;
+
+            // Convert to grayscale, halve brightness. Convert.ToInt32() rounds.
+            int targetBrightness = Convert.ToInt32(baseColor.GetBrightness() * 128);
+            return Color.FromArgb(targetBrightness, targetBrightness, targetBrightness);
         }
 
         private void playingBoard_Paint(object sender, PaintEventArgs e)
