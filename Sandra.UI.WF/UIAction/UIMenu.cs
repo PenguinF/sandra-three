@@ -261,7 +261,7 @@ namespace Sandra.UI.WF
             if (node.CaptionKey != null)
             {
                 menuItem.LocalizedText = new LocalizedString(node.CaptionKey);
-                menuItem.LocalizedText.DisplayTextChanged += displayText => menuItem.Text = displayText.Replace("&", "&&");
+                menuItem.LocalizedText.DisplayText.ValueChanged += displayText => menuItem.Text = displayText.Replace("&", "&&");
                 menuItem.Disposed += (_, __) => menuItem.LocalizedText.Dispose();
             }
             else
@@ -286,7 +286,7 @@ namespace Sandra.UI.WF
 
             menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
             menuItem.ShortcutKeyDisplayStringParts.ForEach(
-                x => x.DisplayTextChanged += __ =>
+                x => x.DisplayText.ValueChanged += __ =>
                 menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText)));
             menuItem.Disposed += (_, __) => menuItem.ShortcutKeyDisplayStringParts.ForEach(x => x.Dispose());
             menuItem.Update(currentActionState);

@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
 using System;
 using System.Diagnostics;
 
@@ -94,44 +95,21 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public string DisplayText { get; private set; }
-
-        private event Action<string> displayTextChanged;
-
-        /// <summary>
-        /// Occurs when the value of <see cref="DisplayText"/> changed.
-        /// </summary>
-        public event Action<string> DisplayTextChanged
-        {
-            add
-            {
-                displayTextChanged += value;
-                value(DisplayText);
-            }
-            remove
-            {
-                displayTextChanged -= value;
-            }
-        }
+        public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
 
         public LocalizedString(LocalizedStringKey key)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
 
             Key = key;
-            DisplayText = Localizer.Current.Localize(key);
+            DisplayText.Value = Localizer.Current.Localize(Key);
 
             Localizer.CurrentChanged += Localizer_CurrentChanged;
         }
 
         private void Localizer_CurrentChanged(object sender, EventArgs e)
         {
-            string newDisplayText = Localizer.Current.Localize(Key);
-            if (DisplayText != newDisplayText)
-            {
-                DisplayText = newDisplayText;
-                displayTextChanged?.Invoke(DisplayText);
-            }
+            DisplayText.Value = Localizer.Current.Localize(Key);
         }
 
         public bool IsDisposed { get; private set; }
