@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions.SyntaxRenderer;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;

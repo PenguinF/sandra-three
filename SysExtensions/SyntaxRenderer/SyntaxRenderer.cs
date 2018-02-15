@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Sandra.UI.WF
+namespace SysExtensions.SyntaxRenderer
 {
     public interface ISyntaxRenderTarget
     {

@@ -18,7 +18,7 @@
  *********************************************************************************/
 using System;
 
-namespace Sandra.UI.WF
+namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
     /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
