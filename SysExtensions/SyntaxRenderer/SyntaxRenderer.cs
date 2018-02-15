@@ -46,7 +46,7 @@ namespace SysExtensions.SyntaxRenderer
 
             // Remove all text from the render target.
             renderTarget.RemoveText(0, int.MaxValue);
-            renderTarget.CaretPositionChanged += tryInvokeCaretPositionChanged;
+            renderTarget.CaretPosition.ValueChanged += tryInvokeCaretPositionChanged;
 
             assertInvariants();
         }

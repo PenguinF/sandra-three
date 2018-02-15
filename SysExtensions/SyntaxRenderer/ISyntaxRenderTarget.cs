@@ -16,8 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System;
-
 namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
@@ -48,16 +46,9 @@ namespace SysExtensions.SyntaxRenderer
         void RemoveText(int textStart, int textLength);
 
         /// <summary>
-        /// Called by text elements to request being brought into view.
+        /// Contains the current position of the caret in the render target.
+        /// Updates to the caret position must bring it into view.
         /// </summary>
-        /// <param name="caretPosition">
-        /// The position of the caret in the text to bring into view.
-        /// </param>
-        void BringIntoView(int caretPosition);
-
-        /// <summary>
-        /// Occurs when the position of the caret in the text has updated.
-        /// </summary>
-        event Action<int> CaretPositionChanged;
+        ObservableValue<int> CaretPosition { get; }
     }
 }

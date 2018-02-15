@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
 using SysExtensions.SyntaxRenderer;
 using System;
 using System.Runtime.InteropServices;
@@ -117,13 +118,16 @@ namespace Sandra.UI.WF
             }
         }
 
+        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
+
         public void BringIntoView(int caretPosition)
         {
-            Select(caretPosition, 0);
-            ScrollToCaret();
+            if (SelectionStart != caretPosition)
+            {
+                Select(caretPosition, 0);
+                ScrollToCaret();
+            }
         }
-
-        public event Action<int> CaretPositionChanged;
 
         protected override void OnSelectionChanged(EventArgs e)
         {
@@ -132,7 +136,7 @@ namespace Sandra.UI.WF
             // Also check SelectionLength so the event is not raised for non-empty selections.
             if (!IsUpdating && SelectionLength == 0)
             {
-                CaretPositionChanged?.Invoke(SelectionStart);
+                CaretPosition.Value = SelectionStart;
             }
 
             base.OnSelectionChanged(e);
@@ -176,6 +180,11 @@ namespace Sandra.UI.WF
                 SelectedText = string.Empty;
                 ReadOnly = true;
             }
+        }
+
+        public UpdatableRichTextBox()
+        {
+            CaretPosition.ValueChanged += BringIntoView;
         }
     }
 }

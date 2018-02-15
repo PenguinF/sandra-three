@@ -82,7 +82,7 @@ namespace SysExtensions.SyntaxRenderer
         public void BringIntoViewBefore()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.BringIntoView(Start);
+            renderer.RenderTarget.CaretPosition.Value = Start;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace SysExtensions.SyntaxRenderer
         public void BringIntoViewAfter()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.BringIntoView(Start + Length);
+            renderer.RenderTarget.CaretPosition.Value = Start + Length;
         }
 
         internal void Detach()
