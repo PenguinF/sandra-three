@@ -287,7 +287,7 @@ namespace Sandra.UI.WF
             menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
             menuItem.ShortcutKeyDisplayStringParts.ForEach(
                 x => x.DisplayText.ValueChanged += __ =>
-                menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText)));
+                menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText.Value)));
             menuItem.Disposed += (_, __) => menuItem.ShortcutKeyDisplayStringParts.ForEach(x => x.Dispose());
             menuItem.Update(currentActionState);
 
