@@ -566,7 +566,10 @@ namespace Sandra.UI.WF
         private void highlightHoverSquare()
         {
             var hoverSquare = PlayingBoard.HoverSquare;
-            if (canPieceBeMoved(hoverSquare) && (moveStatus == MoveStatus.None || toSquare(hoverSquare) != moveStartSquare))
+
+            if (moveStatus != MoveStatus.Dragging
+                && canPieceBeMoved(hoverSquare)
+                && (moveStatus == MoveStatus.None || toSquare(hoverSquare) != moveStartSquare))
             {
                 PlayingBoard.SetForegroundImageAttribute(hoverSquare, ForegroundImageAttribute.Highlight);
             }
@@ -622,7 +625,9 @@ namespace Sandra.UI.WF
             stopDisplayCastlingEffect();
             stopDisplayCaptureEffect();
 
-            if (canPieceBeMoved(location) && (moveStatus == MoveStatus.None || toSquare(location) != moveStartSquare))
+            if (moveStatus != MoveStatus.Dragging
+                && canPieceBeMoved(location)
+                && (moveStatus == MoveStatus.None || toSquare(location) != moveStartSquare))
             {
                 PlayingBoard.SetForegroundImageAttribute(location, ForegroundImageAttribute.Default);
             }
