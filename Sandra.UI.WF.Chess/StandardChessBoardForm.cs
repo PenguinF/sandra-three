@@ -180,7 +180,7 @@ namespace Sandra.UI.WF
 
         private MoveStatus moveStatus;
 
-        private SquareLocation moveStartSquare;
+        private Chess.Square moveStartSquare;
 
         private bool drawFocusMoveStartSquare;
 
@@ -337,16 +337,17 @@ namespace Sandra.UI.WF
 
                 if (moveStatus == MoveStatus.Dragging)
                 {
+                    SquareLocation moveStartSquareLocation = toSquareLocation(moveStartSquare);
                     if (value == SquareQuadrant.Indeterminate)
                     {
-                        updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare),
-                                        moveStartSquare,
+                        updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquareLocation),
+                                        moveStartSquareLocation,
                                         dragStartPosition);
                     }
                     else
                     {
                         updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
-                                        moveStartSquare,
+                                        moveStartSquareLocation,
                                         dragStartPosition);
                     }
                 }
@@ -470,8 +471,9 @@ namespace Sandra.UI.WF
 
             if (moveStatus == MoveStatus.Dragging && dragCursor == null)
             {
-                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
-                PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
+                SquareLocation moveStartSquareLocation = toSquareLocation(moveStartSquare);
+                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquareLocation), moveStartSquareLocation, dragStartPosition);
+                PlayingBoard.SetForegroundImageAttribute(moveStartSquareLocation, ForegroundImageAttribute.HalfTransparent);
             }
         }
 
@@ -492,7 +494,7 @@ namespace Sandra.UI.WF
                 // Also display additional effects for special moves, detectable by the returned MoveCheckResult.
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
-                    SourceSquare = toSquare(moveStartSquare),
+                    SourceSquare = moveStartSquare,
                     TargetSquare = toSquare(e.Location),
                 };
 
@@ -533,20 +535,20 @@ namespace Sandra.UI.WF
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
 
-            if (moveStatus == MoveStatus.None || e.Location != moveStartSquare)
+            if (moveStatus == MoveStatus.None || toSquare(e.Location) != moveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
             }
         }
 
-        private void beginMove(SquareLocation sourceSquare)
+        private void beginMove(Chess.Square sourceSquare)
         {
             moveStartSquare = sourceSquare;
 
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
             Chess.MoveInfo moveInfo = new Chess.MoveInfo()
             {
-                SourceSquare = toSquare(moveStartSquare),
+                SourceSquare = moveStartSquare,
             };
 
             foreach (var square in EnumHelper<Chess.Square>.AllValues)
@@ -569,7 +571,7 @@ namespace Sandra.UI.WF
                 // Move piece from source to destination.
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
-                    SourceSquare = toSquare(moveStartSquare),
+                    SourceSquare = moveStartSquare,
                     TargetSquare = toSquare(targetSquare),
                 };
 
@@ -604,7 +606,6 @@ namespace Sandra.UI.WF
                 {
                     game.ActiveMoveTreeUpdated();
                     PlayingBoard.ActionHandler.Invalidate();
-                    moveStartSquare = null;
                     moveStatus = MoveStatus.None;
                     return true;
                 }
@@ -614,7 +615,6 @@ namespace Sandra.UI.WF
                 resetMoveEffects();
             }
 
-            moveStartSquare = null;
             moveStatus = MoveStatus.None;
             return false;
         }
@@ -623,10 +623,16 @@ namespace Sandra.UI.WF
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (e.Location != moveStartSquare)
+                if (moveStatus == MoveStatus.None || e.Location == null || toSquare(e.Location) != moveStartSquare)
                 {
-                    drawFocusMoveStartSquare = false;
-                    PlayingBoard.Invalidate();
+                    if (drawFocusMoveStartSquare)
+                    {
+                        drawFocusMoveStartSquare = false;
+                        if (moveStatus != MoveStatus.None)
+                        {
+                            PlayingBoard.Invalidate();
+                        }
+                    }
                 }
 
                 // Commit or cancel a started move first, before checking e.Location again.
@@ -636,10 +642,10 @@ namespace Sandra.UI.WF
                 if (!moveMade && canPieceBeMoved(e.Location))
                 {
                     moveStatus = MoveStatus.Dragging;
-                    beginMove(e.Location);
+                    beginMove(toSquare(e.Location));
 
                     // Immediately remove the highlight.
-                    PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.Default);
+                    PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
 
                     dragStartPosition = e.MouseLocation;
                 }
@@ -664,10 +670,10 @@ namespace Sandra.UI.WF
             if (moveStatus == MoveStatus.Dragging)
             {
                 // Always reset the half-transparency.
-                PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.Default);
+                PlayingBoard.SetForegroundImageAttribute(toSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
 
                 // Only commit or cancel a move if the piece was dropped onto a different square.
-                if (moveStartSquare != e.Location)
+                if (e.Location == null || moveStartSquare != toSquare(e.Location))
                 {
                     commitOrCancelMove(e.Location);
                 }
@@ -736,9 +742,9 @@ namespace Sandra.UI.WF
             lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
         }
 
-        private Color getDarkerGrayColor(SquareLocation square)
+        private Color getDarkerGrayColor(Chess.Square square)
         {
-            Color baseColor = ((square.X + square.Y) % 2) == 0
+            Color baseColor = ((square.X() + square.Y()) % 2) == 0
                             ? PlayingBoard.LightSquareColor
                             : PlayingBoard.DarkSquareColor;
 
@@ -767,7 +773,7 @@ namespace Sandra.UI.WF
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
 
-                using (var darkerGrayPen = new Pen(getDarkerGrayColor(hoverSquare), 1f))
+                using (var darkerGrayPen = new Pen(getDarkerGrayColor(toSquare(hoverSquare)), 1f))
                 {
                     e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
                 }
@@ -808,7 +814,7 @@ namespace Sandra.UI.WF
             // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
             if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
             {
-                Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
+                Rectangle activeRect = PlayingBoard.GetSquareRectangle(toSquareLocation(moveStartSquare));
 
                 using (Pen darkerGrayPen = new Pen(getDarkerGrayColor(moveStartSquare), 2f))
                 {
