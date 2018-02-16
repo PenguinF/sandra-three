@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess", "Sandra.Ches
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.Chess.Tests", "Sandra.Chess\Tests\Sandra.Chess.Tests.csproj", "{9DDB6AD7-4822-4732-9E18-309405917032}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra", "Sandra\Sandra.csproj", "{32BEB911-9502-4ADD-8E4D-B44D268A9477}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysExtensions", "SysExtensions\SysExtensions.csproj", "{32BEB911-9502-4ADD-8E4D-B44D268A9477}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF.Chess", "Sandra.UI.WF.Chess\Sandra.UI.WF.Chess.csproj", "{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}"
 EndProject

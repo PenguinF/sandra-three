@@ -19,7 +19,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Sandra
+namespace SysExtensions
 {
     /// <summary>
     /// Contains utility extension methods.

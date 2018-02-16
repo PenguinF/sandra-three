@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
+using SysExtensions.SyntaxRenderer;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -25,7 +27,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Standard Windows <see cref="RichTextBox"/> with a <see cref="BeginUpdate"/> method to suspend repainting of the <see cref="RichTextBox"/>. 
     /// </summary>
-    public class UpdatableRichTextBox : RichTextBox
+    public class UpdatableRichTextBox : RichTextBox, ISyntaxRenderTarget
     {
         /// <summary>
         /// Represents a unique update token returned from <see cref="BeginUpdate"/>().
@@ -114,6 +116,75 @@ namespace Sandra.UI.WF
                 WinAPI.ShowCaret(new HandleRef(this, Handle));
                 Invalidate();
             }
+        }
+
+        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
+
+        public void BringIntoView(int caretPosition)
+        {
+            if (SelectionStart != caretPosition)
+            {
+                Select(caretPosition, 0);
+                ScrollToCaret();
+            }
+        }
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!IsUpdating && SelectionLength == 0)
+            {
+                CaretPosition.Value = SelectionStart;
+            }
+
+            base.OnSelectionChanged(e);
+        }
+
+        public void InsertText(int textPosition, string text)
+        {
+            if (textPosition < 0) textPosition = 0;
+            if (textPosition > TextLength) textPosition = TextLength;
+
+            if (textPosition == TextLength)
+            {
+                AppendText(text);
+            }
+            else
+            {
+                Select(textPosition, 0);
+                // This only works if not read-only, so temporarily turn it off.
+                ReadOnly = false;
+                SelectedText = text;
+                ReadOnly = true;
+            }
+        }
+
+        public void RemoveText(int textStart, int textLength)
+        {
+            if (textStart >= TextLength || textLength <= 0) return;
+
+            if (textStart < 0) textStart = 0;
+            if (textLength > TextLength) textLength = TextLength;
+
+            if (textStart == 0 && textLength == TextLength)
+            {
+                Clear();
+            }
+            else
+            {
+                Select(textStart, textLength);
+                // This only works if not read-only, so temporarily turn it off.
+                ReadOnly = false;
+                SelectedText = string.Empty;
+                ReadOnly = true;
+            }
+        }
+
+        public UpdatableRichTextBox()
+        {
+            CaretPosition.ValueChanged += BringIntoView;
         }
     }
 }

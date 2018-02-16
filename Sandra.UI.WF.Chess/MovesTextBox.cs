@@ -17,6 +17,8 @@
  * 
  *********************************************************************************/
 using Sandra.PGN;
+using SysExtensions;
+using SysExtensions.SyntaxRenderer;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -63,13 +65,16 @@ namespace Sandra.UI.WF
         public MovesTextBox()
         {
             BorderStyle = BorderStyle.None;
+            ReadOnly = true;
+
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
+
             applyDefaultStyle();
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
-            localizedPieceSymbols.DisplayTextChanged += _ =>
+            localizedPieceSymbols.DisplayText.ValueChanged += _ =>
             {
                 if (moveFormatter == null || moveFormattingOption != MoveFormattingOption.UsePGN)
                 {
@@ -146,7 +151,7 @@ namespace Sandra.UI.WF
             }
             else
             {
-                pieceSymbols = localizedPieceSymbols.DisplayText;
+                pieceSymbols = localizedPieceSymbols.DisplayText.Value;
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.

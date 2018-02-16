@@ -18,10 +18,10 @@
  *********************************************************************************/
 using System;
 
-namespace Sandra.UI.WF
+namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
-    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer"/>,
+    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer{TTerminal}"/>,
     /// which maps to exactly one terminal symbol.
     /// </summary>
     /// <typeparam name="TTerminal">
@@ -82,8 +82,7 @@ namespace Sandra.UI.WF
         public void BringIntoViewBefore()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.Select(Start, 0);
-            renderer.RenderTarget.ScrollToCaret();
+            renderer.RenderTarget.CaretPosition.Value = Start;
         }
 
         /// <summary>
@@ -95,8 +94,7 @@ namespace Sandra.UI.WF
         public void BringIntoViewAfter()
         {
             throwIfNoRenderer();
-            renderer.RenderTarget.Select(Start + Length, 0);
-            renderer.RenderTarget.ScrollToCaret();
+            renderer.RenderTarget.CaretPosition.Value = Start + Length;
         }
 
         internal void Detach()

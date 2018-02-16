@@ -19,7 +19,7 @@
 using System;
 using System.Linq;
 
-namespace Sandra
+namespace SysExtensions
 {
     /// <summary>
     /// Contains an array which is indexed by an enumeration.

@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;

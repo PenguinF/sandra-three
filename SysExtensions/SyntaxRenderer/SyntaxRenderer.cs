@@ -21,10 +21,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Sandra.UI.WF
+namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
-    /// Changes the behavior of a <see cref="UpdatableRichTextBox"/> so it shows a read-only list of formatted text elements.
+    /// Changes the behavior of a <see cref="ISyntaxRenderTarget"/> so it shows a read-only list of formatted text elements.
     /// </summary>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbols to format.
@@ -35,23 +35,23 @@ namespace Sandra.UI.WF
     /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
-        public static SyntaxRenderer<TTerminal> AttachTo(UpdatableRichTextBox renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
+        public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
 
-        private SyntaxRenderer(UpdatableRichTextBox renderTarget)
+        private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             RenderTarget = renderTarget;
 
-            Elements = elements.AsReadOnly();
+            Elements = elements;
 
-            renderTarget.ReadOnly = true;
-            renderTarget.Clear();
-            renderTarget.SelectionChanged += (_, __) => tryInvokeCaretPositionChanged();
+            // Remove all text from the render target.
+            renderTarget.RemoveText(0, int.MaxValue);
+            renderTarget.CaretPosition.ValueChanged += tryInvokeCaretPositionChanged;
 
             assertInvariants();
         }
 
-        internal readonly UpdatableRichTextBox RenderTarget;
+        internal readonly ISyntaxRenderTarget RenderTarget;
 
         private readonly List<int> elementIndexes = new List<int>();
 
@@ -64,7 +64,6 @@ namespace Sandra.UI.WF
         {
             // Assert invariants about lengths being equal.
             int textLength = elementIndexes.Count;
-            Debug.Assert(RenderTarget.TextLength == textLength);
             if (textLength == 0)
             {
                 Debug.Assert(elements.Count == 0);
@@ -86,8 +85,8 @@ namespace Sandra.UI.WF
             int length = text.Length;
             if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
 
-            int start = RenderTarget.TextLength;
-            RenderTarget.AppendText(text);
+            int start = elementIndexes.Count;
+            RenderTarget.InsertText(start, text);
             elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
 
             var textElement = new TextElement<TTerminal>(this)
@@ -107,23 +106,20 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Clear()
         {
+            RenderTarget.RemoveText(0, elementIndexes.Count);
+
             elementIndexes.Clear();
             elements.ForEach(e => e.Detach());
             elements.Clear();
-            RenderTarget.Clear();
             assertInvariants();
         }
 
         public void RemoveFrom(int index)
         {
             int textStart = elements[index].Start;
-            int textLength = RenderTarget.TextLength - textStart;
+            int textLength = elementIndexes.Count - textStart;
 
-            RenderTarget.Select(textStart, textLength);
-            // This only works if not read-only, so temporarily turn it off.
-            RenderTarget.ReadOnly = false;
-            RenderTarget.SelectedText = string.Empty;
-            RenderTarget.ReadOnly = true;
+            RenderTarget.RemoveText(textStart, textLength);
 
             elementIndexes.RemoveRange(textStart, textLength);
             elements.Skip(index).ForEach(e => e.Detach());
@@ -160,24 +156,16 @@ namespace Sandra.UI.WF
         /// </summary>
         public event Action<SyntaxRenderer<TTerminal>, CaretPositionChangedEventArgs<TTerminal>> CaretPositionChanged;
 
-        private void tryInvokeCaretPositionChanged()
+        private void tryInvokeCaretPositionChanged(int selectionStart)
         {
-            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
-            // This is only to detect caret updates by interacting with the control.
-            // Also check SelectionLength so the event is not raised for non-empty selections.
-            if (!RenderTarget.IsUpdating && RenderTarget.SelectionLength == 0)
-            {
-                int selectionStart = RenderTarget.SelectionStart;
+            TextElement<TTerminal> elementBefore = GetElementBefore(selectionStart);
+            TextElement<TTerminal> elementAfter = GetElementAfter(selectionStart);
+            int relativeCaretIndex = elementAfter == null ? 0 : selectionStart - elementAfter.Start;
 
-                TextElement<TTerminal> elementBefore = GetElementBefore(selectionStart);
-                TextElement<TTerminal> elementAfter = GetElementAfter(selectionStart);
-                int relativeCaretIndex = elementAfter == null ? 0 : selectionStart - elementAfter.Start;
-
-                var eventArgs = new CaretPositionChangedEventArgs<TTerminal>(elementBefore,
-                                                                             elementAfter,
-                                                                             relativeCaretIndex);
-                CaretPositionChanged?.Invoke(this, eventArgs);
-            }
+            var eventArgs = new CaretPositionChangedEventArgs<TTerminal>(elementBefore,
+                                                                         elementAfter,
+                                                                         relativeCaretIndex);
+            CaretPositionChanged?.Invoke(this, eventArgs);
         }
     }
 

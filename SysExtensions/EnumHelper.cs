@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sandra
+namespace SysExtensions
 {
     /// <summary>
     /// Contains general helper methods for enumerations.

@@ -35,9 +35,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <ProjectReference Include="..\Sandra\Sandra.csproj">
+    <ProjectReference Include="..\SysExtensions\SysExtensions.csproj">
       <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
-      <Name>Sandra</Name>
+      <Name>SysExtensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
