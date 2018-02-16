@@ -422,7 +422,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            if (game != null)
+            if (!ModifierKeys.HasFlag(Keys.Control) && game != null)
             {
                 game.HandleMouseWheelEvent(e.Delta);
             }

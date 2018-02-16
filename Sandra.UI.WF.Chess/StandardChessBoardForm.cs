@@ -189,7 +189,13 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
         {
-            if (game != null)
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                // Zoom in or out.
+                int delta = (e.Delta / 120) * 16;
+                ClientSize = new Size(ClientSize.Width + delta, ClientSize.Height + delta);
+            }
+            else if (game != null)
             {
                 game.HandleMouseWheelEvent(e.Delta);
             }
