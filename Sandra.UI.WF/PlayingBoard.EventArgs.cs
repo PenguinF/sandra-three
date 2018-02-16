@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
     public class SquareEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the location of the square.
+        /// Gets the location of the square, or null for nouse events which happened outside of a square.
         /// </summary>
         public SquareLocation Location { get; }
 
