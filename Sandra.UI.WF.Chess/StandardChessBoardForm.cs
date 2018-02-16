@@ -178,10 +178,7 @@ namespace Sandra.UI.WF
             None, Moving, Dragging
         }
 
-        private MoveStatus moveStatus => isDragging ? MoveStatus.Dragging : isMoving ? MoveStatus.Moving : MoveStatus.None;
-
-        private bool isMoving => moveStartSquare != null;
-        private bool isDragging;
+        private MoveStatus moveStatus;
 
         private SquareLocation moveStartSquare;
 
@@ -489,7 +486,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseEnterSquare(PlayingBoard sender, SquareEventArgs e)
         {
-            if (isMoving)
+            if (moveStatus != MoveStatus.None)
             {
                 // If a legal move, display any piece about to be captured with a half-transparent effect.
                 // Also display additional effects for special moves, detectable by the returned MoveCheckResult.
@@ -608,6 +605,7 @@ namespace Sandra.UI.WF
                     game.ActiveMoveTreeUpdated();
                     PlayingBoard.ActionHandler.Invalidate();
                     moveStartSquare = null;
+                    moveStatus = MoveStatus.None;
                     return true;
                 }
             }
@@ -617,6 +615,7 @@ namespace Sandra.UI.WF
             }
 
             moveStartSquare = null;
+            moveStatus = MoveStatus.None;
             return false;
         }
 
@@ -631,18 +630,18 @@ namespace Sandra.UI.WF
                 }
 
                 // Commit or cancel a started move first, before checking e.Location again.
-                bool moveMade = isMoving && commitOrCancelMove(e.Location);
+                bool moveMade = moveStatus != MoveStatus.None && commitOrCancelMove(e.Location);
 
                 // Only recheck if no move was made.
                 if (!moveMade && canPieceBeMoved(e.Location))
                 {
+                    moveStatus = MoveStatus.Dragging;
                     beginMove(e.Location);
 
                     // Immediately remove the highlight.
                     PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.Default);
 
                     dragStartPosition = e.MouseLocation;
-                    isDragging = true;
                 }
             }
         }
@@ -676,10 +675,10 @@ namespace Sandra.UI.WF
                 {
                     drawFocusMoveStartSquare = true;
                     PlayingBoard.Invalidate();
+                    moveStatus = MoveStatus.Moving;
                 }
 
                 updateDragImage(null, null, Point.Empty);
-                isDragging = false;
             }
         }
 
@@ -762,7 +761,7 @@ namespace Sandra.UI.WF
             // Draw subtle corners just inside the edges of a legal target square.
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            if (hoverSquare != null && isMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
+            if (hoverSquare != null && moveStatus != MoveStatus.None && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
             {
                 Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
@@ -807,7 +806,7 @@ namespace Sandra.UI.WF
             }
 
             // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
-            if (isMoving && drawFocusMoveStartSquare)
+            if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
             {
                 Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
 
