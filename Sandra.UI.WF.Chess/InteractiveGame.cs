@@ -48,12 +48,12 @@ namespace Sandra.UI.WF
         {
             if (delta > 0)
             {
-                (delta / 120).Times(Game.Forward);
+                (delta / 120).Times(Game.Backward);
                 ActiveMoveTreeUpdated();
             }
             else if (delta < 0)
             {
-                (-delta / 120).Times(Game.Backward);
+                (-delta / 120).Times(Game.Forward);
                 ActiveMoveTreeUpdated();
             }
         }
