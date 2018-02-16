@@ -81,8 +81,30 @@ namespace Sandra.UI.WF
             {
                 if (isBoardFlipped != value)
                 {
+                    if (moveStatus != MoveStatus.None)
+                    {
+                        stopDisplayLegalTargetSquaresEffect();
+                        PlayingBoard.SetForegroundImageAttribute(toSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
+                    }
+                    if (PlayingBoard.HoverSquare != null)
+                    {
+                        leaveSquareEffects(PlayingBoard.HoverSquare);
+                    }
+
                     isBoardFlipped = value;
                     copyPositionToBoard();
+
+                    if (moveStatus != MoveStatus.None)
+                    {
+                        displayLegalTargetSquaresEffect();
+                        updateMoveStartSquareEffect();
+                    }
+                    if (PlayingBoard.HoverSquare != null)
+                    {
+                        enterSquareEffects(PlayingBoard.HoverSquare);
+                    }
+
+                    mouseMoveEffects(PointToClient(MousePosition));
                 }
             }
         }
