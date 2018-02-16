@@ -173,6 +173,16 @@ namespace Sandra.UI.WF
             }
         }
 
+        private enum MoveStatus
+        {
+            None, Moving, Dragging
+        }
+
+        private MoveStatus moveStatus => isDragging ? MoveStatus.Dragging : isMoving ? MoveStatus.Moving : MoveStatus.None;
+
+        private bool isMoving => moveStartSquare != null;
+        private bool isDragging;
+
         private SquareLocation moveStartSquare;
 
         private bool drawFocusMoveStartSquare;
@@ -192,8 +202,6 @@ namespace Sandra.UI.WF
 
             return false;
         }
-
-        private bool isDragging;
 
         /// <summary>
         /// Gets the position of the mouse relative to the top left corner of the playing board when dragging started.
@@ -330,7 +338,7 @@ namespace Sandra.UI.WF
             {
                 hoverQuadrant = value;
 
-                if (isDragging)
+                if (moveStatus == MoveStatus.Dragging)
                 {
                     if (value == SquareQuadrant.Indeterminate)
                     {
@@ -463,7 +471,7 @@ namespace Sandra.UI.WF
                 updateHoverQuadrant(hitQuadrant, game.Game.SideToMove);
             }
 
-            if (isDragging && dragCursor == null)
+            if (moveStatus == MoveStatus.Dragging && dragCursor == null)
             {
                 updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquare), moveStartSquare, dragStartPosition);
                 PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.HalfTransparent);
@@ -481,7 +489,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_MouseEnterSquare(PlayingBoard sender, SquareEventArgs e)
         {
-            if (moveStartSquare != null)
+            if (isMoving)
             {
                 // If a legal move, display any piece about to be captured with a half-transparent effect.
                 // Also display additional effects for special moves, detectable by the returned MoveCheckResult.
@@ -528,7 +536,7 @@ namespace Sandra.UI.WF
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
 
-            if (!isDragging || moveStartSquare == null || e.Location != moveStartSquare)
+            if (moveStatus == MoveStatus.None || e.Location != moveStartSquare)
             {
                 PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
             }
@@ -623,7 +631,7 @@ namespace Sandra.UI.WF
                 }
 
                 // Commit or cancel a started move first, before checking e.Location again.
-                bool moveMade = moveStartSquare != null && commitOrCancelMove(e.Location);
+                bool moveMade = isMoving && commitOrCancelMove(e.Location);
 
                 // Only recheck if no move was made.
                 if (!moveMade && canPieceBeMoved(e.Location))
@@ -654,7 +662,7 @@ namespace Sandra.UI.WF
 
         private void playingBoard_SquareMouseUp(PlayingBoard sender, SquareMouseEventArgs e)
         {
-            if (isDragging && moveStartSquare != null)
+            if (moveStatus == MoveStatus.Dragging)
             {
                 // Always reset the half-transparency.
                 PlayingBoard.SetForegroundImageAttribute(moveStartSquare, ForegroundImageAttribute.Default);
@@ -754,7 +762,7 @@ namespace Sandra.UI.WF
             // Draw subtle corners just inside the edges of a legal target square.
             var hoverSquare = PlayingBoard.HoverSquare;
 
-            if (hoverSquare != null && moveStartSquare != null && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
+            if (hoverSquare != null && isMoving && !PlayingBoard.GetSquareOverlayColor(hoverSquare).IsEmpty)
             {
                 Rectangle hoverRect = PlayingBoard.GetSquareRectangle(hoverSquare);
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
@@ -799,7 +807,7 @@ namespace Sandra.UI.WF
             }
 
             // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
-            if (moveStartSquare != null && drawFocusMoveStartSquare)
+            if (isMoving && drawFocusMoveStartSquare)
             {
                 Rectangle activeRect = PlayingBoard.GetSquareRectangle(moveStartSquare);
 
