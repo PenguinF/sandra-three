@@ -440,6 +440,35 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void displayLegalTargetSquaresEffect()
+        {
+            // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
+            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+            {
+                SourceSquare = moveStartSquare,
+            };
+
+            foreach (var square in EnumHelper<Chess.Square>.AllValues)
+            {
+                moveInfo.TargetSquare = square;
+                game.Game.TryMakeMove(ref moveInfo, false);
+                var moveCheckResult = moveInfo.Result;
+                if (moveCheckResult.IsLegalMove())
+                {
+                    // Highlight each found square.
+                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
+                }
+            }
+        }
+
+        private void stopDisplayLegalTargetSquaresEffect()
+        {
+            foreach (var squareLocation in PlayingBoard.AllSquareLocations)
+            {
+                PlayingBoard.SetSquareOverlayColor(squareLocation, Color.Empty);
+            }
+        }
+
         private void playingBoard_MouseMove(object sender, MouseEventArgs e)
         {
             if (currentSquareWithPromoteEffect != null)
@@ -541,29 +570,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void beginMove(Chess.Square sourceSquare)
-        {
-            moveStartSquare = sourceSquare;
-
-            // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
-            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
-            {
-                SourceSquare = moveStartSquare,
-            };
-
-            foreach (var square in EnumHelper<Chess.Square>.AllValues)
-            {
-                moveInfo.TargetSquare = square;
-                game.Game.TryMakeMove(ref moveInfo, false);
-                var moveCheckResult = moveInfo.Result;
-                if (moveCheckResult.IsLegalMove())
-                {
-                    // Highlight each found square.
-                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
-                }
-            }
-        }
-
         private bool commitOrCancelMove(SquareLocation targetSquare)
         {
             if (targetSquare != null)
@@ -642,7 +648,8 @@ namespace Sandra.UI.WF
                 if (!moveMade && canPieceBeMoved(e.Location))
                 {
                     moveStatus = MoveStatus.Dragging;
-                    beginMove(toSquare(e.Location));
+                    moveStartSquare = toSquare(e.Location);
+                    displayLegalTargetSquaresEffect();
 
                     // Immediately remove the highlight.
                     PlayingBoard.SetForegroundImageAttribute(e.Location, ForegroundImageAttribute.Default);
@@ -657,11 +664,13 @@ namespace Sandra.UI.WF
             stopDisplayPromoteEffect();
             stopDisplayEnPassantEffect();
             stopDisplayCastlingEffect();
+            stopDisplayLegalTargetSquaresEffect();
+
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
                 PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Default);
-                PlayingBoard.SetSquareOverlayColor(squareLocation, new Color());
             }
+
             highlightHoverSquare();
         }
 
