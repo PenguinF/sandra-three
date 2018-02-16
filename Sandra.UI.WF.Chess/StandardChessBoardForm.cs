@@ -575,7 +575,7 @@ namespace Sandra.UI.WF
                 }
                 else if (rookSquareWithCastlingEffect != null)
                 {
-                    if (rookTargetSquareWithCastlingEffect.X > rookSquareWithCastlingEffect.X)
+                    if (toSquare(rookTargetSquareWithCastlingEffect).X() > toSquare(rookSquareWithCastlingEffect).X())
                     {
                         // Rook moves to the right.
                         moveInfo.MoveType = Chess.MoveType.CastleQueenside;
