@@ -239,23 +239,23 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Gets the position of the mouse relative to the top left corner of the playing board when dragging started.
+        /// Gets the position of the mouse relative to the top left corner of the move start square when dragging started.
         /// </summary>
         private Point dragStartPosition;
 
         private Cursor dragCursor;
 
-        private void updateDragImage(Image newImage, SquareLocation startSquare, Point dragStartPosition)
+        private void updateDragCursor(Image newImage, Point dragStartPosition)
         {
             Cursor newDragCursor = null;
-            if (newImage != null && startSquare != null)
+
+            if (newImage != null)
             {
                 Rectangle imageRectangle = PlayingBoard.GetRelativeForegroundImageRectangle();
                 if (imageRectangle.Width > 0 && imageRectangle.Height > 0)
                 {
-                    Point dragStartSquareLocation = PlayingBoard.GetSquareRectangle(startSquare).Location;
-                    int hotSpotX = dragStartPosition.X - dragStartSquareLocation.X - imageRectangle.X;
-                    int hotSpotY = dragStartPosition.Y - dragStartSquareLocation.Y - imageRectangle.Y;
+                    int hotSpotX = dragStartPosition.X - imageRectangle.X;
+                    int hotSpotY = dragStartPosition.Y - imageRectangle.Y;
 
                     newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
                                                                         imageRectangle.Size,
@@ -264,6 +264,11 @@ namespace Sandra.UI.WF
                 }
             }
 
+            updateDragCursor(newDragCursor);
+        }
+
+        private void updateDragCursor(Cursor newDragCursor)
+        {
             Cursor oldDragCursor = dragCursor;
 
             if (newDragCursor != null || oldDragCursor != null)
@@ -375,23 +380,18 @@ namespace Sandra.UI.WF
 
                 if (moveStatus == MoveStatus.Dragging)
                 {
-                    SquareLocation moveStartSquareLocation = toSquareLocation(moveStartSquare);
                     if (value == SquareQuadrant.Indeterminate)
                     {
-                        updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquareLocation),
-                                        moveStartSquareLocation,
-                                        dragStartPosition);
+                        updateDragCursor(PlayingBoard.GetForegroundImage(toSquareLocation(moveStartSquare)), dragStartPosition);
                     }
                     else
                     {
-                        updateDragImage(PieceImages[getPromoteToPiece(value, promoteColor)],
-                                        moveStartSquareLocation,
-                                        dragStartPosition);
+                        updateDragCursor(PieceImages[getPromoteToPiece(value, promoteColor)], dragStartPosition);
                     }
                 }
                 else
                 {
-                    updateDragImage(null, null, Point.Empty);
+                    updateDragCursor(null);
                 }
 
                 // Also invalidate the PlayingBoard so the promotion effect will be redrawn.
@@ -555,8 +555,7 @@ namespace Sandra.UI.WF
 
             if (moveStatus == MoveStatus.Dragging && dragCursor == null)
             {
-                SquareLocation moveStartSquareLocation = toSquareLocation(moveStartSquare);
-                updateDragImage(PlayingBoard.GetForegroundImage(moveStartSquareLocation), moveStartSquareLocation, dragStartPosition);
+                updateDragCursor(PlayingBoard.GetForegroundImage(toSquareLocation(moveStartSquare)), dragStartPosition);
             }
 
             updateMoveStartSquareEffect();
@@ -717,7 +716,12 @@ namespace Sandra.UI.WF
                     // Immediately remove the highlight.
                     updateMoveStartSquareEffect();
 
-                    dragStartPosition = e.MouseLocation;
+                    Point dragStartSquareLocation = PlayingBoard.GetSquareRectangle(e.Location).Location;
+                    dragStartPosition = new Point
+                    {
+                        X = e.MouseLocation.X - dragStartSquareLocation.X,
+                        Y = e.MouseLocation.Y - dragStartSquareLocation.Y
+                    };
                 }
             }
         }
@@ -758,7 +762,7 @@ namespace Sandra.UI.WF
                 }
 
                 updateMoveStartSquareEffect();
-                updateDragImage(null, null, Point.Empty);
+                updateDragCursor(null);
             }
         }
 
