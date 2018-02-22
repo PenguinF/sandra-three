@@ -454,27 +454,23 @@ namespace Sandra.Chess
                             // All squares between the king and rook must be empty.
                             if ((rookDelta & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)) == rookDelta)
                             {
-                                if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
-                                {
-                                    // Not allowed to castle out of a check.
-                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
-                                }
-
                                 if (isKingSide)
                                 {
                                     move.MoveType = MoveType.CastleKingside;
-                                    if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
                                     {
-                                        // Not allowed to castle over a check.
+                                        // Not allowed to castle out of or over a check.
                                         moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                                     }
                                 }
                                 else
                                 {
                                     move.MoveType = MoveType.CastleQueenside;
-                                    if (IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
                                     {
-                                        // Not allowed to castle over a check.
+                                        // Not allowed to castle out of or over a check.
                                         moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                                     }
                                 }
