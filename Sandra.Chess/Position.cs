@@ -448,12 +448,15 @@ namespace Sandra.Chess
 
                         if (castlingTargets.Test(targetVector))
                         {
+                            bool isKingSide = Constants.KingsideCastlingTargetSquares.Test(targetVector);
+
                             if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
                             {
                                 // Not allowed to castle out of a check.
                                 moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                             }
-                            if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
+
+                            if (isKingSide)
                             {
                                 move.MoveType = MoveType.CastleKingside;
                                 if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
@@ -473,6 +476,7 @@ namespace Sandra.Chess
                             }
                             break;
                         }
+
                         moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
