@@ -471,11 +471,9 @@ namespace Sandra.Chess
                                     moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                                 }
                             }
+                            break;
                         }
-                        else
-                        {
-                            moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
-                        }
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
             }
