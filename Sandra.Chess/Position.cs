@@ -440,42 +440,47 @@ namespace Sandra.Chess
                     if (!Constants.Neighbours[move.SourceSquare].Test(targetVector))
                     {
                         // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
-                        // This means a simple bitwise AND can be done with the empty squares and destination squares reachable by straight rays.
                         ulong castlingTargets = castlingRightsVector
-                                              & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8)
-                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)
-                                              & ~occupied;  // Necessary because captures are not allowed.
+                                              & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8);
 
                         if (castlingTargets.Test(targetVector))
                         {
-                            if (IsSquareUnderAttack(move.SourceSquare, sideToMove))
+                            bool isKingSide = Constants.KingsideCastlingTargetSquares.Test(targetVector);
+
+                            var rookDelta = isKingSide
+                                          ? Constants.CastleKingsideRookDelta[sideToMove]
+                                          : Constants.CastleQueensideRookDelta[sideToMove];
+
+                            // All squares between the king and rook must be empty.
+                            if ((rookDelta & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)) == rookDelta)
                             {
-                                // Not allowed to castle out of a check.
-                                moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
-                            }
-                            if (Constants.KingsideCastlingTargetSquares.Test(targetVector))
-                            {
-                                move.MoveType = MoveType.CastleKingside;
-                                if (IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                if (isKingSide)
                                 {
-                                    // Not allowed to castle over a check.
-                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    move.MoveType = MoveType.CastleKingside;
+                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                    {
+                                        // Not allowed to castle out of or over a check.
+                                        moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    }
                                 }
-                            }
-                            else
-                            {
-                                move.MoveType = MoveType.CastleQueenside;
-                                if (IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                else
                                 {
-                                    // Not allowed to castle over a check.
-                                    moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    move.MoveType = MoveType.CastleQueenside;
+                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                    {
+                                        // Not allowed to castle out of or over a check.
+                                        moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
+                                    }
                                 }
+
+                                // Not an illegal target square, so break here already.
+                                break;
                             }
                         }
-                        else
-                        {
-                            moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
-                        }
+
+                        moveInfo.Result |= MoveCheckResult.IllegalTargetSquare;
                     }
                     break;
             }
