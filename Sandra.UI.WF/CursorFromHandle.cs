@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -27,6 +28,10 @@ namespace Sandra.UI.WF
     /// </summary>
     public sealed class CursorFromHandle : IDisposable
     {
+        // Keep a reference to the handle which created the cursor.
+        // To not leak GDI objects, it needs to be explicitly released when the cursor is disposed.
+        private readonly IntPtr cursorIconHandle;
+
         /// <summary>
         /// Gets a reference to the generated <see cref="System.Windows.Forms.Cursor"/>.
         /// </summary>
@@ -43,6 +48,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public CursorFromHandle(IntPtr cursorIconHandle)
         {
+            this.cursorIconHandle = cursorIconHandle;
             Cursor = new Cursor(cursorIconHandle);
         }
 
@@ -52,6 +58,17 @@ namespace Sandra.UI.WF
         public void Dispose()
         {
             Cursor.Dispose();
+            WinAPI.DestroyIcon(new HandleRef(null, cursorIconHandle));
+            GC.SuppressFinalize(this);
+        }
+
+        ~CursorFromHandle()
+        {
+            // Release cursorIconHandle, which is an unmanaged resource.
+            if (cursorIconHandle != IntPtr.Zero)
+            {
+                WinAPI.DestroyIcon(new HandleRef(null, cursorIconHandle));
+            }
         }
     }
 }
