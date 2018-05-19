@@ -87,7 +87,7 @@ namespace Sandra.UI.WF
                     iconInfo.yHotspot = hotSpot.Y;
 
                     IntPtr cursorIconHandle = WinAPI.CreateIconIndirect(ref iconInfo);
-                    return new Cursor(cursorIconHandle);
+                    return cursorIconHandle != IntPtr.Zero ? new Cursor(cursorIconHandle) : null;
                 }
                 finally
                 {
