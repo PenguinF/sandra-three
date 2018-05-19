@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Resizes an image, overlays it with an existing <see cref="Cursor"/>, and creates a new <see cref="Cursor"/> from the result.
         /// </summary>
-        public static Cursor CreateDragCursorFromImage(Image image, Size imageSize, Cursor overlayCursor, Point hotSpot)
+        public static CursorFromHandle CreateDragCursorFromImage(Image image, Size imageSize, Cursor overlayCursor, Point hotSpot)
         {
             if (image == null) throw new ArgumentNullException(nameof(image));
             if (overlayCursor == null) throw new ArgumentNullException(nameof(overlayCursor));
@@ -87,7 +87,7 @@ namespace Sandra.UI.WF
                     iconInfo.yHotspot = hotSpot.Y;
 
                     IntPtr cursorIconHandle = WinAPI.CreateIconIndirect(ref iconInfo);
-                    return cursorIconHandle != IntPtr.Zero ? new Cursor(cursorIconHandle) : null;
+                    return cursorIconHandle != IntPtr.Zero ? new CursorFromHandle(cursorIconHandle) : null;
                 }
                 finally
                 {

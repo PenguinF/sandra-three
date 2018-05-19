@@ -249,11 +249,11 @@ namespace Sandra.UI.WF
         /// </summary>
         private Point dragStartPosition;
 
-        private Cursor dragCursor;
+        private CursorFromHandle dragCursor;
 
         private void updateDragCursor(Image newImage, Point dragStartPosition)
         {
-            Cursor newDragCursor = null;
+            CursorFromHandle newDragCursor = null;
 
             if (newImage != null)
             {
@@ -282,14 +282,14 @@ namespace Sandra.UI.WF
             updateDragCursor(newDragCursor);
         }
 
-        private void updateDragCursor(Cursor newDragCursor)
+        private void updateDragCursor(CursorFromHandle newDragCursor)
         {
-            Cursor oldDragCursor = dragCursor;
+            CursorFromHandle oldDragCursor = dragCursor;
 
             if (newDragCursor != null || oldDragCursor != null)
             {
                 dragCursor = newDragCursor;
-                Cursor.Current = dragCursor ?? Cursors.Default;
+                Cursor.Current = dragCursor != null ? dragCursor.Cursor : Cursors.Default;
             }
 
             if (oldDragCursor != null) oldDragCursor.Dispose();
