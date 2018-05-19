@@ -24,7 +24,7 @@ namespace Sandra.UI.WF
 {
     /// <summary>
     /// Creates a <see cref="System.Windows.Forms.Cursor"/> from a Windows handle.
-    /// Ensures that both the cursor and its unmanaged handle are cleaned up after use/
+    /// Ensures that both the cursor and its unmanaged handle are cleaned up after use.
     /// </summary>
     public sealed class CursorFromHandle : IDisposable
     {
