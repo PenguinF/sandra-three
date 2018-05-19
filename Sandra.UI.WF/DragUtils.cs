@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Resizes an image, overlays it with an existing <see cref="Cursor"/>, and creates a new <see cref="Cursor"/> from the result.
         /// </summary>
-        public static Cursor CreateDragCursorFromImage(Image image, Size imageSize, Cursor overlayCursor, Point hotSpot)
+        public static CursorFromHandle CreateDragCursorFromImage(Image image, Size imageSize, Cursor overlayCursor, Point hotSpot)
         {
             if (image == null) throw new ArgumentNullException(nameof(image));
             if (overlayCursor == null) throw new ArgumentNullException(nameof(overlayCursor));
@@ -81,17 +81,19 @@ namespace Sandra.UI.WF
                 try
                 {
                     // Obtain icon-like info using the Windows API, and create a new icon from it to change its hot spot.
-                    WinAPI.GetIconInfo(new HandleRef(image, iconHandle), ref iconInfo);
+                    WinAPI.GetIconInfo(new HandleRef(copy, iconHandle), ref iconInfo);
                     iconInfo.fIcon = false;
                     iconInfo.xHotspot = hotSpot.X;
                     iconInfo.yHotspot = hotSpot.Y;
-                    return new Cursor(WinAPI.CreateIconIndirect(ref iconInfo));
+
+                    IntPtr cursorIconHandle = WinAPI.CreateIconIndirect(ref iconInfo);
+                    return cursorIconHandle != IntPtr.Zero ? new CursorFromHandle(cursorIconHandle) : null;
                 }
                 finally
                 {
-                    if (iconInfo.hbmColor != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(image, iconInfo.hbmColor));
-                    if (iconInfo.hbmMask != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(image, iconInfo.hbmMask));
-                    if (iconHandle != IntPtr.Zero) WinAPI.DestroyIcon(new HandleRef(image, iconHandle));
+                    if (iconInfo.hbmColor != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmColor));
+                    if (iconInfo.hbmMask != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmMask));
+                    if (iconHandle != IntPtr.Zero) WinAPI.DestroyIcon(new HandleRef(copy, iconHandle));
                 }
             }
         }

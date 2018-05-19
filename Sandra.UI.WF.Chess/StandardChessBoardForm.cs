@@ -249,11 +249,11 @@ namespace Sandra.UI.WF
         /// </summary>
         private Point dragStartPosition;
 
-        private Cursor dragCursor;
+        private CursorFromHandle dragCursor;
 
         private void updateDragCursor(Image newImage, Point dragStartPosition)
         {
-            Cursor newDragCursor = null;
+            CursorFromHandle newDragCursor = null;
 
             if (newImage != null)
             {
@@ -263,24 +263,33 @@ namespace Sandra.UI.WF
                     int hotSpotX = dragStartPosition.X - imageRectangle.X;
                     int hotSpotY = dragStartPosition.Y - imageRectangle.Y;
 
-                    newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
-                                                                        imageRectangle.Size,
-                                                                        Cursors.Default,
-                                                                        new Point(hotSpotX, hotSpotY));
+                    try
+                    {
+                        newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
+                                                                            imageRectangle.Size,
+                                                                            Cursors.Default,
+                                                                            new Point(hotSpotX, hotSpotY));
+                    }
+                    catch (Exception exc)
+                    {
+                        // Creating a HIcon may fail in exceptional circumstances.
+                        // Can still use the normal cursor, but do trace the exception.
+                        exc.Trace();
+                    }
                 }
             }
 
             updateDragCursor(newDragCursor);
         }
 
-        private void updateDragCursor(Cursor newDragCursor)
+        private void updateDragCursor(CursorFromHandle newDragCursor)
         {
-            Cursor oldDragCursor = dragCursor;
+            CursorFromHandle oldDragCursor = dragCursor;
 
             if (newDragCursor != null || oldDragCursor != null)
             {
                 dragCursor = newDragCursor;
-                Cursor.Current = dragCursor ?? Cursors.Default;
+                Cursor.Current = dragCursor != null ? dragCursor.Cursor : Cursors.Default;
             }
 
             if (oldDragCursor != null) oldDragCursor.Dispose();
