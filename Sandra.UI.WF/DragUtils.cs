@@ -81,7 +81,7 @@ namespace Sandra.UI.WF
                 try
                 {
                     // Obtain icon-like info using the Windows API, and create a new icon from it to change its hot spot.
-                    WinAPI.GetIconInfo(new HandleRef(image, iconHandle), ref iconInfo);
+                    WinAPI.GetIconInfo(new HandleRef(copy, iconHandle), ref iconInfo);
                     iconInfo.fIcon = false;
                     iconInfo.xHotspot = hotSpot.X;
                     iconInfo.yHotspot = hotSpot.Y;
@@ -89,9 +89,9 @@ namespace Sandra.UI.WF
                 }
                 finally
                 {
-                    if (iconInfo.hbmColor != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(image, iconInfo.hbmColor));
-                    if (iconInfo.hbmMask != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(image, iconInfo.hbmMask));
-                    if (iconHandle != IntPtr.Zero) WinAPI.DestroyIcon(new HandleRef(image, iconHandle));
+                    if (iconInfo.hbmColor != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmColor));
+                    if (iconInfo.hbmMask != IntPtr.Zero) WinAPI.DeleteObject(new HandleRef(null, iconInfo.hbmMask));
+                    if (iconHandle != IntPtr.Zero) WinAPI.DestroyIcon(new HandleRef(copy, iconHandle));
                 }
             }
         }
