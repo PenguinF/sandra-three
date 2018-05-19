@@ -263,10 +263,19 @@ namespace Sandra.UI.WF
                     int hotSpotX = dragStartPosition.X - imageRectangle.X;
                     int hotSpotY = dragStartPosition.Y - imageRectangle.Y;
 
-                    newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
-                                                                        imageRectangle.Size,
-                                                                        Cursors.Default,
-                                                                        new Point(hotSpotX, hotSpotY));
+                    try
+                    {
+                        newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
+                                                                            imageRectangle.Size,
+                                                                            Cursors.Default,
+                                                                            new Point(hotSpotX, hotSpotY));
+                    }
+                    catch (Exception exc)
+                    {
+                        // Creating a HIcon may fail in exceptional circumstances.
+                        // Can still use the normal cursor, but do trace the exception.
+                        exc.Trace();
+                    }
                 }
             }
 
