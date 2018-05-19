@@ -1,0 +1,15 @@
+* text=auto
+
+.gitignore     text merge=union
+.gitattributes text merge=union
+
+*.csproj text merge=union
+*.sln    text eol=crlf merge=union
+
+*.config text
+*.cs     text diff=csharp
+*.resx   text
+*.md     text
+
+*.ico    binary
+*.png    binary
