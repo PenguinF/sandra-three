@@ -335,6 +335,46 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
+        private void autoSaveFormState()
+        {
+            const string MaximizedKey = "maximized";
+            const string LeftKey = "x";
+            const string TopKey = "y";
+            const string WidthKey = "width";
+            const string HeightKey = "height";
+
+            // Don't auto-save anything if the form is minimized.
+            // If the application is then closed and reopened, it will restore to the state before it was minimized.
+            if (WindowState == FormWindowState.Maximized)
+            {
+                Program.AutoSave.CreateUpdate()
+                    .AddOrReplace(MaximizedKey, true)
+                    .Persist();
+            }
+            else if (WindowState == FormWindowState.Normal)
+            {
+                Program.AutoSave.CreateUpdate()
+                    .AddOrReplace(MaximizedKey, false)
+                    .AddOrReplace(LeftKey, Left)
+                    .AddOrReplace(TopKey, Top)
+                    .AddOrReplace(WidthKey, Width)
+                    .AddOrReplace(HeightKey, Height)
+                    .Persist();
+            }
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+            autoSaveFormState();
+        }
+
+        protected override void OnLocationChanged(EventArgs e)
+        {
+            base.OnLocationChanged(e);
+            autoSaveFormState();
+        }
+
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();

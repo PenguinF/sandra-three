@@ -104,5 +104,13 @@ namespace Sandra.UI.WF
                 initAutoSaveException.Trace();
             }
         }
+
+        /// <summary>
+        /// Creates and returns an update operation for the auto-save file.
+        /// </summary>
+        public SettingUpdateOperation CreateUpdate()
+        {
+            return new SettingUpdateOperation();
+        }
     }
 }
