@@ -16,8 +16,10 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -37,7 +39,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// The value associated with the specified key.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
@@ -69,7 +71,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         public bool ContainsKey(SettingKey key) => Mapping.ContainsKey(key);
@@ -93,7 +95,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         public bool TryGetValue(SettingKey key, out ISettingValue value) => Mapping.TryGetValue(key, out value);
@@ -106,6 +108,32 @@ namespace Sandra.UI.WF
             var copy = new SettingCopy();
             copy.Revert(this);
             return copy;
+        }
+
+        /// <summary>
+        /// Compares this <see cref="SettingObject"/> with another and returns if they are equal.
+        /// </summary>
+        /// <param name="other">
+        /// The <see cref="SettingObject"/> to compare with.
+        /// </param>
+        /// <returns>
+        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="other"/> is null.
+        /// </exception>
+        public bool EqualTo(SettingObject other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            // Compare Count properties for a fast exit if they are different.
+            if (Mapping.Count != other.Mapping.Count) return false;
+
+            // Both key sets need to match exactly, but if Counts are equal a unidirectional check is sufficient.
+            SettingValueEqualityComparer eq = SettingValueEqualityComparer.Instance;
+            ISettingValue otherValue;
+            return Mapping.All(kv => other.Mapping.TryGetValue(kv.Key, out otherValue)
+                                  && eq.AreEqual(kv.Value, otherValue));
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

@@ -85,7 +85,7 @@ namespace Sandra.UI.WF
 
         private SettingValueEqualityComparer() { }
 
-        public static bool AreEqual(ISettingValue x, ISettingValue y)
+        public bool AreEqual(ISettingValue x, ISettingValue y)
         {
             // Equality of null values.
             if (x == null) return y == null;
@@ -94,7 +94,7 @@ namespace Sandra.UI.WF
             if (y == null || x.GetType() != y.GetType()) return false;
 
             // Only call init/visit after knowing that both types are exactly the same.
-            return Instance.init(y).Visit(x);
+            return init(y).Visit(x);
         }
 
         private ISettingValue compareValue;
