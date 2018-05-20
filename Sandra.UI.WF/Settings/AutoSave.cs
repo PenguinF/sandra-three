@@ -24,5 +24,14 @@ namespace Sandra.UI.WF
     /// </summary>
     public sealed class AutoSave
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="AutoSave"/>.
+        /// </summary>
+        /// <param name="appSubFolderName">
+        /// The name of the subfolder to use in <see cref="System.Environment.SpecialFolder.LocalApplicationData"/>.
+        /// </param>
+        public AutoSave(string appSubFolderName)
+        {
+        }
     }
 }

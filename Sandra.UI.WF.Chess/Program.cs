@@ -27,14 +27,20 @@ namespace Sandra.UI.WF
 {
     static class Program
     {
+        internal const string AppName = "SandraChess";
+
+        internal static AutoSave AutoSave { get; private set; }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+            AutoSave = new AutoSave(AppName);
             Chess.Constants.ForceInitialize();
             Localizer.Current = Localizers.English;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
