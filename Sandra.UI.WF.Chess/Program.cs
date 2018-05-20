@@ -37,7 +37,7 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
-            SettingObject initialSettings = new SettingObject();
+            SettingCopy initialSettings = new SettingCopy();
 
             AutoSave = new AutoSave(AppName, initialSettings);
             Chess.Constants.ForceInitialize();

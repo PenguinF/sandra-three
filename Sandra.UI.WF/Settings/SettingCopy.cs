@@ -32,6 +32,13 @@ namespace Sandra.UI.WF
         public Dictionary<SettingKey, ISettingValue> KeyValueMapping => Mapping;
 
         /// <summary>
+        /// Initializes a new instance of <see cref="SettingCopy"/>.
+        /// </summary>
+        public SettingCopy() : base()
+        {
+        }
+
+        /// <summary>
         /// Reverts to the state of a <see cref="SettingObject"/>.
         /// </summary>
         /// <param name="settingObject">
@@ -53,5 +60,10 @@ namespace Sandra.UI.WF
                 KeyValueMapping.Add(kv.Key, kv.Value);
             }
         }
+
+        /// <summary>
+        /// Commits this working <see cref="SettingCopy"/> to a new <see cref="SettingObject"/>.
+        /// </summary>
+        public SettingObject Commit() => new SettingObject(this);
     }
 }

@@ -83,7 +83,7 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName, SettingObject initialSettings)
+        public AutoSave(string appSubFolderName, SettingCopy initialSettings)
         {
             // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName == null)
@@ -102,8 +102,8 @@ namespace Sandra.UI.WF
             }
 
             // Until the autosave file has been successfully opened, assume both settings are the same.
-            localSettings = initialSettings;
-            remoteSettings = initialSettings;
+            localSettings = initialSettings.Commit();
+            remoteSettings = initialSettings.Commit();
 
             // If creation of the auto-save file fails, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use default initial settings.
@@ -166,15 +166,21 @@ namespace Sandra.UI.WF
 
         internal void Persist(SettingCopy workingCopy)
         {
-            // Nullcheck on the last initialized field, to make sure everything else was initialized as well.
-            if (encodedBuffer != null)
+            if (!workingCopy.EqualTo(localSettings))
             {
-                using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
+                // Commit to localSettings.
+                localSettings = workingCopy.Commit();
+
+                // Nullcheck on the last initialized field, to make sure everything else was initialized as well.
+                if (encodedBuffer != null)
                 {
-                    foreach (var kv in workingCopy)
+                    using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
                     {
-                        writer.WriteKey(kv.Key);
-                        writer.Visit(kv.Value);
+                        foreach (var kv in localSettings)
+                        {
+                            writer.WriteKey(kv.Key);
+                            writer.Visit(kv.Value);
+                        }
                     }
                 }
             }

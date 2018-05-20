@@ -28,7 +28,28 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingObject : IReadOnlyDictionary<SettingKey, ISettingValue>
     {
-        protected readonly Dictionary<SettingKey, ISettingValue> Mapping = new Dictionary<SettingKey, ISettingValue>();
+        protected readonly Dictionary<SettingKey, ISettingValue> Mapping;
+
+        /// <summary>
+        /// This constructor is for internal use only.
+        /// </summary>
+        protected SettingObject()
+        {
+            Mapping = new Dictionary<SettingKey, ISettingValue>();
+        }
+
+        /// <summary>
+        /// Constructs a new <see cref="SettingObject"/> from a working copy.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="workingCopy"/> is null.
+        /// </exception>
+        public SettingObject(SettingCopy workingCopy)
+        {
+            if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
+
+            Mapping = new Dictionary<SettingKey, ISettingValue>(workingCopy.KeyValueMapping);
+        }
 
         /// <summary>
         /// Gets the value associated with the specified key.
