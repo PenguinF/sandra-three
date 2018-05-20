@@ -31,6 +31,10 @@ namespace Sandra.UI.WF
     /// </summary>
     public sealed class AutoSave
     {
+        // These values seem to be recommended.
+        private const int CharBufferSize = 1024;
+        private const int FileStreamBufferSize = 4096;
+
         /// <summary>
         /// Gets the name of the auto save file.
         /// </summary>
@@ -39,6 +43,16 @@ namespace Sandra.UI.WF
         private readonly FileStream autoSaveFileStream;
         private readonly Encoding encoding;
         private readonly Encoder encoder;
+
+        /// <summary>
+        /// Serves as input for the encoder.
+        /// </summary>
+        private readonly char[] buffer;
+
+        /// <summary>
+        /// Serves as output for the encoder.
+        /// </summary>
+        private readonly byte[] encodedBuffer;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -84,7 +98,7 @@ namespace Sandra.UI.WF
                                                     FileMode.OpenOrCreate,
                                                     FileAccess.ReadWrite,
                                                     FileShare.Read,
-                                                    4096,
+                                                    FileStreamBufferSize,
                                                     FileOptions.Asynchronous);
 
                 // Assert capabilities of the file stream.
@@ -93,8 +107,11 @@ namespace Sandra.UI.WF
                     && autoSaveFileStream.CanWrite
                     && !autoSaveFileStream.CanTimeout);
 
+                // Initialize encoders and buffers.
                 encoding = new UTF8Encoding();
                 encoder = encoding.GetEncoder();
+                buffer = new char[CharBufferSize];
+                encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
             }
             catch (ArgumentException)
             {
