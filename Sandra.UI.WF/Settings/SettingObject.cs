@@ -28,7 +28,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingObject : IReadOnlyDictionary<SettingKey, ISettingValue>
     {
-        internal readonly Dictionary<SettingKey, ISettingValue> Mapping = new Dictionary<SettingKey, ISettingValue>();
+        protected readonly Dictionary<SettingKey, ISettingValue> Mapping = new Dictionary<SettingKey, ISettingValue>();
 
         /// <summary>
         /// Gets the value associated with the specified key.

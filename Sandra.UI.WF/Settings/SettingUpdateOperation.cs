@@ -38,7 +38,7 @@ namespace Sandra.UI.WF
 
         private SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
         {
-            WorkingCopy.Mapping[settingKey] = value;
+            WorkingCopy.KeyValueMapping[settingKey] = value;
             return this;
         }
 

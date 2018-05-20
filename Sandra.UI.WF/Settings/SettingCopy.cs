@@ -45,12 +45,12 @@ namespace Sandra.UI.WF
             if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
 
             // Clear out the mapping before copying key-value pairs.
-            Mapping.Clear();
+            KeyValueMapping.Clear();
 
             // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in settingObject.Mapping)
+            foreach (var kv in settingObject)
             {
-                Mapping.Add(kv.Key, kv.Value);
+                KeyValueMapping.Add(kv.Key, kv.Value);
             }
         }
     }
