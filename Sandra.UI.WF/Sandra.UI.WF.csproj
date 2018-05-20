@@ -59,6 +59,7 @@
     <Compile Include="RichTextBox\UpdatableRichTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Settings\AutoSave.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>
