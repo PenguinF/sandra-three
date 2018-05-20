@@ -30,28 +30,16 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Dictionary of settings to update.
         /// </summary>
-        internal readonly Dictionary<string, ISettingValue> Updates = new Dictionary<string, ISettingValue>();
+        internal readonly Dictionary<SettingKey, ISettingValue> Updates = new Dictionary<SettingKey, ISettingValue>();
 
         internal SettingUpdateOperation(AutoSave owner)
         {
             this.owner = owner;
         }
 
-        /// <summary>
-        /// Registers that the value for a setting key must be added or replaced.
-        /// </summary>
-        /// <param name="settingKey">
-        /// The key of the setting to add or replace.
-        /// </param>
-        /// <param name="value">
-        /// The new value of the setting to add or replace.
-        /// </param>
-        /// <returns>
-        /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
-        /// </returns>
-        public SettingUpdateOperation AddOrReplace(string settingKey, bool value)
+        private SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
         {
-            Updates[settingKey] = new BooleanSettingValue() { Value = value };
+            Updates[settingKey] = value;
             return this;
         }
 
@@ -67,11 +55,35 @@ namespace Sandra.UI.WF
         /// <returns>
         /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        /// <paramref name="settingKey"/> is <see cref="string.Empty"/>, or contains a double quote character (").
+        /// </exception>
+        public SettingUpdateOperation AddOrReplace(string settingKey, bool value)
+            => AddOrReplace(new SettingKey(settingKey), new BooleanSettingValue() { Value = value });
+
+        /// <summary>
+        /// Registers that the value for a setting key must be added or replaced.
+        /// </summary>
+        /// <param name="settingKey">
+        /// The key of the setting to add or replace.
+        /// </param>
+        /// <param name="value">
+        /// The new value of the setting to add or replace.
+        /// </param>
+        /// <returns>
+        /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        /// <paramref name="settingKey"/> is <see cref="string.Empty"/>, or contains a double quote character (").
+        /// </exception>
         public SettingUpdateOperation AddOrReplace(string settingKey, int value)
-        {
-            Updates[settingKey] = new Int32SettingValue() { Value = value };
-            return this;
-        }
+            => AddOrReplace(new SettingKey(settingKey), new Int32SettingValue() { Value = value });
 
         /// <summary>
         /// Commits and persists the update operation.

@@ -60,6 +60,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings\AutoSave.cs" />
+    <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingUpdateOperation.cs" />
     <Compile Include="Settings\SettingValue.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
