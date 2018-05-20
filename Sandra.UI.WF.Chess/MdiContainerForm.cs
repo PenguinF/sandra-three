@@ -312,6 +312,9 @@ namespace Sandra.UI.WF
             game.TryGotoChessBoardForm(true);
         }
 
+        // Keeps track if the bounds of this form have been initialized in OnLoad().
+        private bool formBoundsInitialized;
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -324,6 +327,7 @@ namespace Sandra.UI.WF
             workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
 
             // Update the bounds of the form.
+            formBoundsInitialized = true;
             SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
 
             // Load chess piece images from a fixed path.
@@ -343,23 +347,27 @@ namespace Sandra.UI.WF
             const string WidthKey = "width";
             const string HeightKey = "height";
 
-            // Don't auto-save anything if the form is minimized.
-            // If the application is then closed and reopened, it will restore to the state before it was minimized.
-            if (WindowState == FormWindowState.Maximized)
+            // Don't auto-save if the form isn't loaded yet.
+            if (formBoundsInitialized)
             {
-                Program.AutoSave.CreateUpdate()
-                    .AddOrReplace(MaximizedKey, true)
-                    .Persist();
-            }
-            else if (WindowState == FormWindowState.Normal)
-            {
-                Program.AutoSave.CreateUpdate()
-                    .AddOrReplace(MaximizedKey, false)
-                    .AddOrReplace(LeftKey, Left)
-                    .AddOrReplace(TopKey, Top)
-                    .AddOrReplace(WidthKey, Width)
-                    .AddOrReplace(HeightKey, Height)
-                    .Persist();
+                // Don't auto-save anything if the form is minimized.
+                // If the application is then closed and reopened, it will restore to the state before it was minimized.
+                if (WindowState == FormWindowState.Maximized)
+                {
+                    Program.AutoSave.CreateUpdate()
+                        .AddOrReplace(MaximizedKey, true)
+                        .Persist();
+                }
+                else if (WindowState == FormWindowState.Normal)
+                {
+                    Program.AutoSave.CreateUpdate()
+                        .AddOrReplace(MaximizedKey, false)
+                        .AddOrReplace(LeftKey, Left)
+                        .AddOrReplace(TopKey, Top)
+                        .AddOrReplace(WidthKey, Width)
+                        .AddOrReplace(HeightKey, Height)
+                        .Persist();
+                }
             }
         }
 
