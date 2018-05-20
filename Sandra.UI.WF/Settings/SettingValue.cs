@@ -75,4 +75,40 @@ namespace Sandra.UI.WF
         public void Accept(SettingValueVisitor visitor) => visitor.VisitInt32(this);
         public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitInt32(this);
     }
+
+    /// <summary>
+    /// Determines equality of two <see cref="ISettingValue"/>s.
+    /// </summary>
+    public sealed class SettingValueEqualityComparer : SettingValueVisitor<bool>
+    {
+        public static readonly SettingValueEqualityComparer Instance = new SettingValueEqualityComparer();
+
+        private SettingValueEqualityComparer() { }
+
+        public static bool AreEqual(ISettingValue x, ISettingValue y)
+        {
+            // Equality of null values.
+            if (x == null) return y == null;
+
+            // If not null, types must match exactly.
+            if (y == null || x.GetType() != y.GetType()) return false;
+
+            // Only call init/visit after knowing that both types are exactly the same.
+            return Instance.init(y).Visit(x);
+        }
+
+        private ISettingValue compareValue;
+
+        private SettingValueEqualityComparer init(ISettingValue compareValue)
+        {
+            this.compareValue = compareValue;
+            return this;
+        }
+
+        public override bool VisitBoolean(BooleanSettingValue value)
+            => value.Value == ((BooleanSettingValue)compareValue).Value;
+
+        public override bool VisitInt32(Int32SettingValue value)
+            => value.Value == ((Int32SettingValue)compareValue).Value;
+    }
 }
