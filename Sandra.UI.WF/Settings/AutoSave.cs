@@ -20,11 +20,13 @@ using SysExtensions;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Manages an auto-save file local to every non-roaming user.
+    /// This class is assumed to have a lifetime equal to the application.
     /// See also: <seealso cref="Environment.SpecialFolder.LocalApplicationData"/>
     /// </summary>
     public sealed class AutoSave
@@ -34,7 +36,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public static readonly string AutoSaveFileName = ".autosave";
 
-        private FileStream autoSaveFileStream;
+        private readonly FileStream autoSaveFileStream;
+        private readonly Encoding encoding;
+        private readonly Encoder encoder;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -88,6 +92,9 @@ namespace Sandra.UI.WF
                     && autoSaveFileStream.CanRead
                     && autoSaveFileStream.CanWrite
                     && !autoSaveFileStream.CanTimeout);
+
+                encoding = new UTF8Encoding();
+                encoder = encoding.GetEncoder();
             }
             catch (ArgumentException)
             {
