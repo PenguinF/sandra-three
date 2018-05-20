@@ -18,6 +18,7 @@
  *********************************************************************************/
 using SysExtensions;
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Sandra.UI.WF
@@ -81,6 +82,12 @@ namespace Sandra.UI.WF
                                                     FileShare.Read,
                                                     4096,
                                                     FileOptions.Asynchronous);
+
+                // Assert capabilities of the file stream.
+                Debug.Assert(autoSaveFileStream.CanSeek
+                    && autoSaveFileStream.CanRead
+                    && autoSaveFileStream.CanWrite
+                    && !autoSaveFileStream.CanTimeout);
             }
             catch (ArgumentException)
             {
