@@ -164,14 +164,14 @@ namespace Sandra.UI.WF
             return new SettingUpdateOperation(this);
         }
 
-        internal void Persist(SettingUpdateOperation settingUpdateOperation)
+        internal void Persist(SettingCopy workingCopy)
         {
             // Nullcheck on the last initialized field, to make sure everything else was initialized as well.
             if (encodedBuffer != null)
             {
                 using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
                 {
-                    foreach (var kv in settingUpdateOperation.WorkingCopy)
+                    foreach (var kv in workingCopy)
                     {
                         writer.WriteKey(kv.Key);
                         writer.Visit(kv.Value);

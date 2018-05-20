@@ -89,7 +89,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Persist()
         {
-            owner.Persist(this);
+            owner.Persist(WorkingCopy);
         }
     }
 }
