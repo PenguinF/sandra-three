@@ -110,7 +110,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public SettingUpdateOperation CreateUpdate()
         {
-            return new SettingUpdateOperation();
+            return new SettingUpdateOperation(this);
+        }
+
+        internal void Persist(SettingUpdateOperation settingUpdateOperation)
+        {
         }
     }
 }

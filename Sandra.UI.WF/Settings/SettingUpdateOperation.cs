@@ -25,10 +25,17 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingUpdateOperation
     {
+        private readonly AutoSave owner;
+
         /// <summary>
         /// Dictionary of settings to update.
         /// </summary>
-        private readonly Dictionary<string, ISettingValue> updates = new Dictionary<string, ISettingValue>();
+        internal readonly Dictionary<string, ISettingValue> Updates = new Dictionary<string, ISettingValue>();
+
+        internal SettingUpdateOperation(AutoSave owner)
+        {
+            this.owner = owner;
+        }
 
         /// <summary>
         /// Registers that the value for a setting key must be added or replaced.
@@ -44,7 +51,7 @@ namespace Sandra.UI.WF
         /// </returns>
         public SettingUpdateOperation AddOrReplace(string settingKey, bool value)
         {
-            updates[settingKey] = new BooleanSettingValue() { Value = value };
+            Updates[settingKey] = new BooleanSettingValue() { Value = value };
             return this;
         }
 
@@ -62,7 +69,7 @@ namespace Sandra.UI.WF
         /// </returns>
         public SettingUpdateOperation AddOrReplace(string settingKey, int value)
         {
-            updates[settingKey] = new Int32SettingValue() { Value = value };
+            Updates[settingKey] = new Int32SettingValue() { Value = value };
             return this;
         }
 
@@ -71,6 +78,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Persist()
         {
+            owner.Persist(this);
         }
     }
 }
