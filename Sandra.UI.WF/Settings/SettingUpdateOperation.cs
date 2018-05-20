@@ -16,12 +16,10 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
-
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents an update operation to a setting object.
+    /// Represents an update operation to a persisted <see cref="SettingObject"/>.
     /// </summary>
     public class SettingUpdateOperation
     {
@@ -30,16 +28,17 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Dictionary of settings to update.
         /// </summary>
-        internal readonly Dictionary<SettingKey, ISettingValue> Updates = new Dictionary<SettingKey, ISettingValue>();
+        internal readonly SettingCopy WorkingCopy;
 
         internal SettingUpdateOperation(AutoSave owner)
         {
             this.owner = owner;
+            WorkingCopy = owner.CurrentSettings.CreateWorkingCopy();
         }
 
         private SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
         {
-            Updates[settingKey] = value;
+            WorkingCopy.Mapping[settingKey] = value;
             return this;
         }
 

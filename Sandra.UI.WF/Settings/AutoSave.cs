@@ -152,6 +152,11 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
+        /// </summary>
+        public SettingObject CurrentSettings => localSettings;
+
+        /// <summary>
         /// Creates and returns an update operation for the auto-save file.
         /// </summary>
         public SettingUpdateOperation CreateUpdate()
@@ -166,7 +171,7 @@ namespace Sandra.UI.WF
             {
                 using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
                 {
-                    foreach (var kv in settingUpdateOperation.Updates)
+                    foreach (var kv in settingUpdateOperation.WorkingCopy)
                     {
                         writer.WriteKey(kv.Key);
                         writer.Visit(kv.Value);
