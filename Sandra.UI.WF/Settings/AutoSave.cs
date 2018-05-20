@@ -32,8 +32,8 @@ namespace Sandra.UI.WF
     public sealed class AutoSave
     {
         // These values seem to be recommended.
-        private const int CharBufferSize = 1024;
-        private const int FileStreamBufferSize = 4096;
+        internal const int CharBufferSize = 1024;
+        internal const int FileStreamBufferSize = 4096;
 
         /// <summary>
         /// Gets the name of the auto save file.
@@ -139,6 +139,121 @@ namespace Sandra.UI.WF
 
         internal void Persist(SettingUpdateOperation settingUpdateOperation)
         {
+            // Nullcheck on the last initialized field, to make sure everything else was initialized as well.
+            if (encodedBuffer != null)
+            {
+                using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
+                {
+                    foreach (var kv in settingUpdateOperation.Updates)
+                    {
+                        writer.WriteKey(kv.Key);
+                        writer.Visit(kv.Value);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Represents a single iteration of writing settings to a file.
+    /// </summary>
+    internal class SettingWriter : SettingValueVisitor, IDisposable
+    {
+        // Lowercase values, unlike bool.TrueString and bool.FalseString.
+        private static readonly string TrueString = "true";
+        private static readonly string FalseString = "false";
+        private static readonly string KeyValueSeparator = ": ";
+
+        private readonly FileStream outputStream;
+        private readonly Encoder encoder;
+        private readonly char[] buffer;
+        private readonly byte[] encodedBuffer;
+
+        // Fill up the character buffer before doing any writing.
+        private int currentCharPosition;
+
+        public SettingWriter(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
+        {
+            this.outputStream = outputStream;
+            this.encoder = encoder;
+            this.buffer = buffer;
+            this.encodedBuffer = encodedBuffer;
+
+            outputStream.Seek(0, SeekOrigin.Begin);
+        }
+
+        private void encodeAndWrite(string value)
+        {
+            // How much of the given string still needs to be written.
+            // Takes into account that the character buffer may overrun.
+            int remainingLength = value.Length;
+
+            // Number of characters already written from value. Loop invariant therefore is:
+            // charactersCopied + remainingLength == value.Length.
+            int charactersCopied = 0;
+
+            while (remainingLength > 0)
+            {
+                // Determine number of characters to write.
+                // AutoSave.CharBufferSize is known to be equal to buffer.Length.
+                int charWriteCount = AutoSave.CharBufferSize - currentCharPosition;
+
+                // Remember if this fill up the entire buffer.
+                bool bufferFull = charWriteCount <= remainingLength;
+                if (!bufferFull) charWriteCount = remainingLength;
+
+                // Now copy to the character buffer after checking its range.
+                value.CopyTo(charactersCopied, buffer, currentCharPosition, charWriteCount);
+
+                // Update loop variables.
+                charactersCopied += charWriteCount;
+                remainingLength -= charWriteCount;
+
+                // If the buffer is full, call the encoder to convert it into bytes.
+                if (bufferFull)
+                {
+                    int bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
+                    outputStream.Write(encodedBuffer, 0, bytes);
+                    currentCharPosition = 0;
+                }
+                else
+                {
+                    currentCharPosition += charWriteCount;
+                }
+            }
+        }
+
+        public void WriteKey(SettingKey key)
+        {
+            encodeAndWrite(key.Key);
+            encodeAndWrite(KeyValueSeparator);
+        }
+
+        public override void VisitBoolean(BooleanSettingValue value)
+        {
+            encodeAndWrite(value.Value ? TrueString : FalseString);
+            encodeAndWrite(Environment.NewLine);
+        }
+
+        public override void VisitInt32(Int32SettingValue value)
+        {
+            // Assumed here is that int conversion is culture independent, even though it's implicitly used.
+            encodeAndWrite(Convert.ToString(value.Value));
+            encodeAndWrite(Environment.NewLine);
+        }
+
+        public void Dispose()
+        {
+            // Process remaining characters in the buffer and what's left in the Encoder.
+            int bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
+            if (bytes > 0)
+            {
+                outputStream.Write(encodedBuffer, 0, bytes);
+            }
+
+            // Truncate and flush.
+            outputStream.SetLength(outputStream.Position);
+            outputStream.Flush();
         }
     }
 }

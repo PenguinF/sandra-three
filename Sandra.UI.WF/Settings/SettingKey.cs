@@ -27,7 +27,7 @@ namespace Sandra.UI.WF
     [DebuggerDisplay("{Key}")]
     public sealed class SettingKey : IEquatable<SettingKey>
     {
-        private readonly string Key;
+        internal readonly string Key;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingKey"/>.
