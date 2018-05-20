@@ -788,6 +788,11 @@ namespace Sandra.UI.WF
 
         internal void GameUpdated()
         {
+            // Cancel any pending moves.
+            resetMoveEffects();
+            moveStatus = MoveStatus.None;
+
+            // Then copy the position.
             copyPositionToBoard();
         }
 
