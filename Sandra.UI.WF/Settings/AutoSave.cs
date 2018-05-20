@@ -55,13 +55,26 @@ namespace Sandra.UI.WF
         private readonly byte[] encodedBuffer;
 
         /// <summary>
+        /// Settings as they are stored locally.
+        /// </summary>
+        private SettingObject localSettings;
+
+        /// <summary>
+        /// Settings representing how they are currently stored in the autosave file.
+        /// </summary>
+        private SettingObject remoteSettings;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
         /// </summary>
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
+        /// <param name="initialSettings">
+        /// The initial default settings to use, in case e.g. the autosave file could not be opened.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> is null.
+        /// <paramref name="appSubFolderName"/> or <paramref name="initialSettings"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
@@ -70,7 +83,7 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName)
+        public AutoSave(string appSubFolderName, SettingObject initialSettings)
         {
             // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName == null)
@@ -78,10 +91,19 @@ namespace Sandra.UI.WF
                 throw new ArgumentNullException(nameof(appSubFolderName));
             }
 
+            if (initialSettings == null)
+            {
+                throw new ArgumentNullException(nameof(initialSettings));
+            }
+
             if (appSubFolderName.Length == 0)
             {
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
+
+            // Until the autosave file has been successfully opened, assume both settings are the same.
+            localSettings = initialSettings;
+            remoteSettings = initialSettings;
 
             // If creation of the auto-save file fails, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use default initial settings.

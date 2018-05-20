@@ -37,7 +37,9 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
-            AutoSave = new AutoSave(AppName);
+            SettingObject initialSettings = new SettingObject();
+
+            AutoSave = new AutoSave(AppName, initialSettings);
             Chess.Constants.ForceInitialize();
             Localizer.Current = Localizers.English;
 
