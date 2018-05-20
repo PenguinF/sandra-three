@@ -98,6 +98,16 @@ namespace Sandra.UI.WF
         /// </exception>
         public bool TryGetValue(SettingKey key, out ISettingValue value) => Mapping.TryGetValue(key, out value);
 
+        /// <summary>
+        /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
+        /// </summary>
+        public SettingCopy CreateWorkingCopy()
+        {
+            var copy = new SettingCopy();
+            copy.Revert(this);
+            return copy;
+        }
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
