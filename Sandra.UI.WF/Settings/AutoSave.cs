@@ -275,17 +275,26 @@ namespace Sandra.UI.WF
 
         private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
-            var workingCopy = new SettingCopy();
+            // Reuse one string builder to build keys and values.
+            StringBuilder sb = new StringBuilder();
 
             // Loop until the entire file is read.
             for (;;)
             {
                 int bytes = autoSaveFileStream.Read(inputBuffer, 0, CharBufferSize);
-                if (bytes == 0)
+                if (bytes == 0) break;
+
+                int chars = decoder.GetChars(inputBuffer, 0, bytes, decodedBuffer, 0);
+                if (chars > 0)
                 {
-                    return workingCopy.Commit();
+                    sb.Append(decodedBuffer, 0, chars);
                 }
             }
+
+            // Load into an empty working copy.
+            var workingCopy = new SettingCopy();
+
+            return workingCopy.Commit();
         }
     }
 
