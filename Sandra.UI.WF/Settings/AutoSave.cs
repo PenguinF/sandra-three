@@ -157,7 +157,7 @@ namespace Sandra.UI.WF
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
                 // Load remote settings.
-                remoteSettings = new SettingCopy().Commit();
+                remoteSettings = Load(encoding.GetDecoder());
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
@@ -262,6 +262,11 @@ namespace Sandra.UI.WF
                 }
             }
         }
+
+        private SettingObject Load(Decoder decoder)
+        {
+            return new SettingCopy().Commit();
+        }
     }
 
     /// <summary>
@@ -270,9 +275,9 @@ namespace Sandra.UI.WF
     internal class SettingWriter : SettingValueVisitor, IDisposable
     {
         // Lowercase values, unlike bool.TrueString and bool.FalseString.
-        private static readonly string TrueString = "true";
-        private static readonly string FalseString = "false";
-        private static readonly string KeyValueSeparator = ": ";
+        internal static readonly string TrueString = "true";
+        internal static readonly string FalseString = "false";
+        internal static readonly string KeyValueSeparator = ": ";
 
         private readonly FileStream outputStream;
         private readonly Encoder encoder;
