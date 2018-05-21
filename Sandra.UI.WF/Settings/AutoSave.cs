@@ -294,6 +294,48 @@ namespace Sandra.UI.WF
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
 
+            // Optimistically parse.
+            // Research if parser can be replaced by 3rd-party library or if a compact representation in binary is necessary.
+            string text = sb.ToString();
+            int startIndex = 0;
+
+            for (;;)
+            {
+                int keyIndex = text.IndexOf(SettingWriter.KeyValueSeparator, startIndex);
+                if (keyIndex < startIndex) break;
+
+                SettingKey key = new SettingKey(text.Substring(startIndex, keyIndex - startIndex));
+                startIndex = keyIndex + SettingWriter.KeyValueSeparator.Length;
+
+                int valueIndex = text.IndexOf(Environment.NewLine, startIndex);
+                if (valueIndex < startIndex) break;
+
+                string valueAsString = text.Substring(startIndex, valueIndex - startIndex);
+                startIndex = valueIndex + Environment.NewLine.Length;
+
+                ISettingValue value;
+                int intValue;
+                if (valueAsString == SettingWriter.TrueString)
+                {
+                    value = new BooleanSettingValue() { Value = true };
+                }
+                else if (valueAsString == SettingWriter.FalseString)
+                {
+                    value = new BooleanSettingValue() { Value = false };
+                }
+                else if (int.TryParse(valueAsString, out intValue))
+                {
+                    value = new Int32SettingValue() { Value = intValue };
+                }
+                else
+                {
+                    // Corrupt value, break.
+                    break;
+                }
+
+                workingCopy.KeyValueMapping[key] = value;
+            }
+
             return workingCopy.Commit();
         }
     }
