@@ -317,6 +317,7 @@ namespace Sandra.UI.WF
                 int valueIndex = text.IndexOf(Environment.NewLine, startIndex);
                 if (valueIndex < startIndex) break;
 
+                // TODO: this does not work for string values that contain newlines.
                 string valueAsString = text.Substring(startIndex, valueIndex - startIndex);
                 startIndex = valueIndex + Environment.NewLine.Length;
 
@@ -333,6 +334,10 @@ namespace Sandra.UI.WF
                 else if (int.TryParse(valueAsString, out intValue))
                 {
                     value = new Int32SettingValue(intValue);
+                }
+                else if (valueAsString.Length >= 2 && valueAsString.StartsWith("\"") && valueAsString.EndsWith("\""))
+                {
+                    value = new StringSettingValue(valueAsString.Substring(1, valueAsString.Length - 2).Replace("\"\"", "\""));
                 }
                 else
                 {
