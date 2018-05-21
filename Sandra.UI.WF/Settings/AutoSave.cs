@@ -156,8 +156,18 @@ namespace Sandra.UI.WF
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
+                // Initialize input buffers small enough so that they don't end up on the large object heap.
+                // buffer and encodedBuffer cannot be reused for this, because the character buffer would not have enough space:
+                //
+                // Encoding.UTF8.GetMaxByteCount(1024) => 3075
+                // Encoding.UTF8.GetMaxCharCount(3075) => 3076
+                //
+                // ...and buffer cannot hold 3076 characters.
+                byte[] inputBuffer = new byte[CharBufferSize];
+                char[] decodedBuffer = new char[encoding.GetMaxCharCount(CharBufferSize)];
+
                 // Load remote settings.
-                remoteSettings = Load(encoding.GetDecoder());
+                remoteSettings = Load(encoding.GetDecoder(), inputBuffer, decodedBuffer);
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
@@ -263,7 +273,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private SettingObject Load(Decoder decoder)
+        private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             return new SettingCopy().Commit();
         }
