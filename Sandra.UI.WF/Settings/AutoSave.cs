@@ -142,7 +142,7 @@ namespace Sandra.UI.WF
                                                     FileAccess.ReadWrite,
                                                     FileShare.Read,
                                                     FileStreamBufferSize,
-                                                    FileOptions.Asynchronous);
+                                                    FileOptions.SequentialScan);
 
                 // Assert capabilities of the file stream.
                 Debug.Assert(autoSaveFileStream.CanSeek
@@ -155,7 +155,7 @@ namespace Sandra.UI.WF
                 encoder = encoding.GetEncoder();
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
-                
+
                 // Load remote settings.
                 remoteSettings = new SettingCopy().Commit();
 
