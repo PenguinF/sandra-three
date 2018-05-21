@@ -35,16 +35,8 @@ namespace Sandra.UI.WF
             Mapping = new Dictionary<SettingKey, ISettingValue>();
         }
 
-        /// <summary>
-        /// Constructs a new <see cref="SettingObject"/> from a working copy.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="workingCopy"/> is null.
-        /// </exception>
-        public SettingObject(SettingCopy workingCopy)
+        internal SettingObject(SettingCopy workingCopy)
         {
-            if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
-
             Mapping = new Dictionary<SettingKey, ISettingValue>(workingCopy.KeyValueMapping);
         }
 
