@@ -386,6 +386,13 @@ namespace Sandra.UI.WF
                 formBoundsInitialized = true;
             }
 
+            // Remove any stale/unknown settings.
+            var update = Program.AutoSave.CreateUpdate();
+            Program.AutoSave.CurrentSettings.Keys
+                .Where(key => !SettingKeys.All.Contains(key))
+                .ForEach(key => update.Remove(key));
+            update.Persist();
+
             // Restore maximized setting.
             if (maximized.HasValue && maximized.Value)
             {

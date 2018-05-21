@@ -43,7 +43,7 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Registers that the value for a setting key must be added or replaced.
+        /// Adds or replaces a value for a setting key.
         /// </summary>
         /// <param name="settingKey">
         /// The key of the setting to add or replace.
@@ -61,7 +61,7 @@ namespace Sandra.UI.WF
             => AddOrReplace(settingKey, new BooleanSettingValue() { Value = value });
 
         /// <summary>
-        /// Registers that the value for a setting key must be added or replaced.
+        /// Adds or replaces a value for a setting key.
         /// </summary>
         /// <param name="settingKey">
         /// The key of the setting to add or replace.
@@ -77,6 +77,24 @@ namespace Sandra.UI.WF
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, int value)
             => AddOrReplace(settingKey, new Int32SettingValue() { Value = value });
+
+        /// <summary>
+        /// Removes a key and its associated value.
+        /// </summary>
+        /// <param name="settingKey">
+        /// The key of the setting to remove.
+        /// </param>
+        /// <returns>
+        /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        public SettingUpdateOperation Remove(SettingKey settingKey)
+        {
+            WorkingCopy.KeyValueMapping.Remove(settingKey);
+            return this;
+        }
 
         /// <summary>
         /// Commits and persists the update operation.
