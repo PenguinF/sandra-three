@@ -28,12 +28,9 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingObject : IReadOnlyDictionary<SettingKey, ISettingValue>
     {
-        protected readonly Dictionary<SettingKey, ISettingValue> Mapping;
+        internal readonly Dictionary<SettingKey, ISettingValue> Mapping;
 
-        /// <summary>
-        /// This constructor is for internal use only.
-        /// </summary>
-        protected SettingObject()
+        internal SettingObject()
         {
             Mapping = new Dictionary<SettingKey, ISettingValue>();
         }
