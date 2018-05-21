@@ -57,9 +57,6 @@ namespace Sandra.UI.WF
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
         /// </exception>
-        /// <exception cref="System.ArgumentException">
-        /// <paramref name="settingKey"/> is <see cref="string.Empty"/>, or contains a double quote character (").
-        /// </exception>
         public SettingUpdateOperation AddOrReplace(string settingKey, bool value)
             => AddOrReplace(new SettingKey(settingKey), new BooleanSettingValue() { Value = value });
 
@@ -77,9 +74,6 @@ namespace Sandra.UI.WF
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
-        /// </exception>
-        /// <exception cref="System.ArgumentException">
-        /// <paramref name="settingKey"/> is <see cref="string.Empty"/>, or contains a double quote character (").
         /// </exception>
         public SettingUpdateOperation AddOrReplace(string settingKey, int value)
             => AddOrReplace(new SettingKey(settingKey), new Int32SettingValue() { Value = value });

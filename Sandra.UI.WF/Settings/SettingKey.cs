@@ -35,26 +35,9 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="key"/> is <see cref="string.Empty"/>, or contains a double quote character (").
-        /// </exception>
         public SettingKey(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            if (key.Length == 0)
-            {
-                throw new ArgumentException($"{nameof(key)} is string.Empty.", nameof(key));
-            }
-
-            if (key.Contains("\""))
-            {
-                throw new ArgumentException($"{nameof(key)} contains a double quote character (\").", nameof(key));
-            }
-
+            if (key == null) throw new ArgumentNullException(nameof(key));
             Key = key;
         }
 
