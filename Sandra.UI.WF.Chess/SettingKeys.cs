@@ -22,6 +22,7 @@ namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
+        internal static readonly SettingKey Lang = new SettingKey(nameof(Lang).ToLowerInvariant());
         internal static readonly SettingKey Maximized = new SettingKey(nameof(Maximized).ToLowerInvariant());
         internal static readonly SettingKey Left = new SettingKey(nameof(Left).ToLowerInvariant());
         internal static readonly SettingKey Top = new SettingKey(nameof(Top).ToLowerInvariant());
@@ -34,6 +35,7 @@ namespace Sandra.UI.WF
         {
             All = new HashSet<SettingKey>(new SettingKey[]
             {
+                Lang,
                 Maximized,
                 Left,
                 Top,
