@@ -336,13 +336,6 @@ namespace Sandra.UI.WF
             if (settings.TryGetValue(SettingKeys.Width, out intValue)) width = intValue;
             if (settings.TryGetValue(SettingKeys.Height, out intValue)) height = intValue;
 
-            // Remove any stale/unknown settings.
-            var update = Program.AutoSave.CreateUpdate();
-            Program.AutoSave.CurrentSettings.Keys
-                .Where(key => !SettingKeys.All.Contains(key))
-                .ForEach(key => update.Remove(key));
-            update.Persist();
-
             if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
             {
                 // If all bounds are known initialize from those.

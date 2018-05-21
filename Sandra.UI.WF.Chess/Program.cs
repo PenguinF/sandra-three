@@ -20,6 +20,7 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -37,9 +38,15 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
-            SettingCopy initialSettings = new SettingCopy();
+            AutoSave = new AutoSave(AppName, new SettingCopy());
 
-            AutoSave = new AutoSave(AppName, initialSettings);
+            // Remove any stale/unknown settings.
+            var update = AutoSave.CreateUpdate();
+            AutoSave.CurrentSettings.Keys
+                .Where(key => !SettingKeys.All.Contains(key))
+                .ForEach(key => update.Remove(key));
+            update.Persist();
+
             Chess.Constants.ForceInitialize();
 
             Localizer.Current = Localizers.English;
