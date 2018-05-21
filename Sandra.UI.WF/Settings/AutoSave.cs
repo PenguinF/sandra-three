@@ -123,9 +123,8 @@ namespace Sandra.UI.WF
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
-            // Until the autosave file has been successfully opened, assume both settings are the same.
+            // Commit to local settings.
             localSettings = initialSettings.Commit();
-            remoteSettings = initialSettings.Commit();
 
             // If creation of the auto-save file fails, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use default initial settings.
@@ -156,6 +155,9 @@ namespace Sandra.UI.WF
                 encoder = encoding.GetEncoder();
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
+                
+                // Load remote settings.
+                remoteSettings = new SettingCopy().Commit();
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
