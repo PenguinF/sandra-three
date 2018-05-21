@@ -315,12 +315,6 @@ namespace Sandra.UI.WF
         // Keeps track if the bounds of this form have been initialized in OnLoad().
         private bool formBoundsInitialized;
 
-        static readonly SettingKey MaximizedKey = new SettingKey("maximized");
-        static readonly SettingKey LeftKey = new SettingKey("x");
-        static readonly SettingKey TopKey = new SettingKey("y");
-        static readonly SettingKey WidthKey = new SettingKey("width");
-        static readonly SettingKey HeightKey = new SettingKey("height");
-
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -336,27 +330,27 @@ namespace Sandra.UI.WF
             int? left, top, width, height;
             left = top = width = height = null;
 
-            if (settings.TryGetValue(MaximizedKey, out settingValue) && settingValue is BooleanSettingValue)
+            if (settings.TryGetValue(SettingKeys.Maximized, out settingValue) && settingValue is BooleanSettingValue)
             {
                 maximized = ((BooleanSettingValue)settingValue).Value;
             }
 
-            if (settings.TryGetValue(LeftKey, out settingValue) && settingValue is Int32SettingValue)
+            if (settings.TryGetValue(SettingKeys.Left, out settingValue) && settingValue is Int32SettingValue)
             {
                 left = ((Int32SettingValue)settingValue).Value;
             }
 
-            if (settings.TryGetValue(TopKey, out settingValue) && settingValue is Int32SettingValue)
+            if (settings.TryGetValue(SettingKeys.Top, out settingValue) && settingValue is Int32SettingValue)
             {
                 top = ((Int32SettingValue)settingValue).Value;
             }
 
-            if (settings.TryGetValue(WidthKey, out settingValue) && settingValue is Int32SettingValue)
+            if (settings.TryGetValue(SettingKeys.Width, out settingValue) && settingValue is Int32SettingValue)
             {
                 width = ((Int32SettingValue)settingValue).Value;
             }
 
-            if (settings.TryGetValue(HeightKey, out settingValue) && settingValue is Int32SettingValue)
+            if (settings.TryGetValue(SettingKeys.Height, out settingValue) && settingValue is Int32SettingValue)
             {
                 height = ((Int32SettingValue)settingValue).Value;
             }
@@ -417,17 +411,17 @@ namespace Sandra.UI.WF
                 if (WindowState == FormWindowState.Maximized)
                 {
                     Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(MaximizedKey, true)
+                        .AddOrReplace(SettingKeys.Maximized, true)
                         .Persist();
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
                     Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(MaximizedKey, false)
-                        .AddOrReplace(LeftKey, Left)
-                        .AddOrReplace(TopKey, Top)
-                        .AddOrReplace(WidthKey, Width)
-                        .AddOrReplace(HeightKey, Height)
+                        .AddOrReplace(SettingKeys.Maximized, false)
+                        .AddOrReplace(SettingKeys.Left, Left)
+                        .AddOrReplace(SettingKeys.Top, Top)
+                        .AddOrReplace(SettingKeys.Width, Width)
+                        .AddOrReplace(SettingKeys.Height, Height)
                         .Persist();
                 }
             }
