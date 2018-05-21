@@ -324,15 +324,15 @@ namespace Sandra.UI.WF
                 int intValue;
                 if (valueAsString == SettingWriter.TrueString)
                 {
-                    value = new BooleanSettingValue() { Value = true };
+                    value = new BooleanSettingValue(true);
                 }
                 else if (valueAsString == SettingWriter.FalseString)
                 {
-                    value = new BooleanSettingValue() { Value = false };
+                    value = new BooleanSettingValue(false);
                 }
                 else if (int.TryParse(valueAsString, out intValue))
                 {
-                    value = new Int32SettingValue() { Value = intValue };
+                    value = new Int32SettingValue(intValue);
                 }
                 else
                 {

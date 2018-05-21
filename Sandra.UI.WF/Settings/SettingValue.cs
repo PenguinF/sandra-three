@@ -63,6 +63,8 @@ namespace Sandra.UI.WF
     {
         public bool Value;
 
+        public BooleanSettingValue(bool value) { Value = value; }
+
         public void Accept(SettingValueVisitor visitor) => visitor.VisitBoolean(this);
         public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitBoolean(this);
     }
@@ -74,6 +76,8 @@ namespace Sandra.UI.WF
     {
         public int Value;
 
+        public Int32SettingValue(int value) { Value = value; }
+
         public void Accept(SettingValueVisitor visitor) => visitor.VisitInt32(this);
         public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitInt32(this);
     }
@@ -84,6 +88,8 @@ namespace Sandra.UI.WF
     public struct StringSettingValue : ISettingValue
     {
         public string Value;
+
+        public StringSettingValue(string value) { Value = value; }
 
         public void Accept(SettingValueVisitor visitor) => visitor.VisitString(this);
         public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitString(this);
