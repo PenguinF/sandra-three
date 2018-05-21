@@ -61,6 +61,7 @@
     </Compile>
     <Compile Include="Settings\AutoSave.cs" />
     <Compile Include="Settings\SettingCopy.cs" />
+    <Compile Include="Settings\SettingHelper.cs" />
     <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingObject.cs" />
     <Compile Include="Settings\SettingUpdateOperation.cs" />
