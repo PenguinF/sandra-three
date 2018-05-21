@@ -315,20 +315,73 @@ namespace Sandra.UI.WF
         // Keeps track if the bounds of this form have been initialized in OnLoad().
         private bool formBoundsInitialized;
 
+        static readonly SettingKey MaximizedKey = new SettingKey("maximized");
+        static readonly SettingKey LeftKey = new SettingKey("x");
+        static readonly SettingKey TopKey = new SettingKey("y");
+        static readonly SettingKey WidthKey = new SettingKey("width");
+        static readonly SettingKey HeightKey = new SettingKey("height");
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            // Show in the center of the monitor where the mouse currently is.
-            var activeScreen = Screen.FromPoint(MousePosition);
-            Rectangle workingArea = activeScreen.WorkingArea;
+            // Initialize from settings if available.
+            var settings = Program.AutoSave.CurrentSettings;
+            ISettingValue settingValue;
 
-            // Two thirds the size of the active monitor's working area.
-            workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+            bool? maximized = null;
+            int? left, top, width, height;
+            left = top = width = height = null;
 
-            // Update the bounds of the form.
+            if (settings.TryGetValue(MaximizedKey, out settingValue) && settingValue is BooleanSettingValue)
+            {
+                maximized = ((BooleanSettingValue)settingValue).Value;
+            }
+
+            if (settings.TryGetValue(LeftKey, out settingValue) && settingValue is Int32SettingValue)
+            {
+                left = ((Int32SettingValue)settingValue).Value;
+            }
+
+            if (settings.TryGetValue(TopKey, out settingValue) && settingValue is Int32SettingValue)
+            {
+                top = ((Int32SettingValue)settingValue).Value;
+            }
+
+            if (settings.TryGetValue(WidthKey, out settingValue) && settingValue is Int32SettingValue)
+            {
+                width = ((Int32SettingValue)settingValue).Value;
+            }
+
+            if (settings.TryGetValue(HeightKey, out settingValue) && settingValue is Int32SettingValue)
+            {
+                height = ((Int32SettingValue)settingValue).Value;
+            }
+
             formBoundsInitialized = true;
-            SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+            if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
+            {
+                // If all bounds are known initialize from those.
+                SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+            }
+            else
+            {
+                // Show in the center of the monitor where the mouse currently is.
+                var activeScreen = Screen.FromPoint(MousePosition);
+                Rectangle workingArea = activeScreen.WorkingArea;
+
+                // Two thirds the size of the active monitor's working area.
+                workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+                // Update the bounds of the form.
+                SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+            }
+
+            // Restore maximized setting.
+            if (maximized.HasValue && maximized.Value)
+            {
+                WindowState = FormWindowState.Maximized;
+            }
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
@@ -338,12 +391,6 @@ namespace Sandra.UI.WF
 
             NewPlayingBoard();
         }
-
-        static readonly SettingKey MaximizedKey = new SettingKey("maximized");
-        static readonly SettingKey LeftKey = new SettingKey("x");
-        static readonly SettingKey TopKey = new SettingKey("y");
-        static readonly SettingKey WidthKey = new SettingKey("width");
-        static readonly SettingKey HeightKey = new SettingKey("height");
 
         private void autoSaveFormState()
         {
