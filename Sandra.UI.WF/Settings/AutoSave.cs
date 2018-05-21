@@ -152,7 +152,7 @@ namespace Sandra.UI.WF
                     && !autoSaveFileStream.CanTimeout);
 
                 // Initialize encoders and buffers.
-                Encoding encoding = new UTF8Encoding();
+                Encoding encoding = Encoding.UTF8;
                 encoder = encoding.GetEncoder();
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
