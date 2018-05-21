@@ -41,7 +41,21 @@ namespace Sandra.UI.WF
 
             AutoSave = new AutoSave(AppName, initialSettings);
             Chess.Constants.ForceInitialize();
+
             Localizer.Current = Localizers.English;
+            ISettingValue settingValue;
+            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
+            {
+                if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, Localizers.EnglishSettingValue))
+                {
+                    // Technically not necessary since it's the default value.
+                    Localizer.Current = Localizers.English;
+                }
+                else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, Localizers.DutchSettingValue))
+                {
+                    Localizer.Current = Localizers.Dutch;
+                }
+            }
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
