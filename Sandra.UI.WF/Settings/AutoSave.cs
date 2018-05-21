@@ -123,7 +123,7 @@ namespace Sandra.UI.WF
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
-            // Commit to local settings.
+            // Commit to local settings. This will be used in case initialization of remoteSettings somehow failed.
             localSettings = initialSettings.Commit();
 
             // If creation of the auto-save file fails, because e.g. an instance is already running,
@@ -168,6 +168,13 @@ namespace Sandra.UI.WF
 
                 // Load remote settings.
                 remoteSettings = Load(encoding.GetDecoder(), inputBuffer, decodedBuffer);
+
+                // If non-empty, override localSettings with it.
+                if (remoteSettings.Count > 0)
+                {
+                    // Can share the instance, using copy-on-write semantics.
+                    localSettings = remoteSettings;
+                }
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
