@@ -28,6 +28,7 @@ namespace Sandra.UI.WF
         internal static readonly SettingKey Top = new SettingKey(nameof(Top).ToLowerInvariant());
         internal static readonly SettingKey Width = new SettingKey(nameof(Width).ToLowerInvariant());
         internal static readonly SettingKey Height = new SettingKey(nameof(Height).ToLowerInvariant());
+        internal static readonly SettingKey Notation = new SettingKey(nameof(Notation).ToLowerInvariant());
 
         internal static readonly HashSet<SettingKey> All;
 
@@ -41,6 +42,7 @@ namespace Sandra.UI.WF
                 Top,
                 Width,
                 Height,
+                Notation,
             });
         }
     }

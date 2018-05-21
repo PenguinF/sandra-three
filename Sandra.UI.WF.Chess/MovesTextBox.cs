@@ -138,12 +138,37 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
+        private static readonly StringSettingValue SANSettingValue = new StringSettingValue("san");
+        private static readonly StringSettingValue PGNSettingValue = new StringSettingValue("pgn");
+        private static readonly StringSettingValue LANSettingValue = new StringSettingValue("lan");
+
         private MoveFormattingOption moveFormattingOption;
 
         private Chess.IMoveFormatter moveFormatter;
 
         private void updateMoveFormatter()
         {
+            if (moveFormatter != null)
+            {
+                // Update setting if the formatter was already initialized.
+                ISettingValue settingValue;
+                switch (moveFormattingOption)
+                {
+                    default:
+                    case MoveFormattingOption.UseLocalizedShortAlgebraic:
+                        settingValue = SANSettingValue;
+                        break;
+                    case MoveFormattingOption.UsePGN:
+                        settingValue = PGNSettingValue;
+                        break;
+                    case MoveFormattingOption.UseLocalizedLongAlgebraic:
+                        settingValue = LANSettingValue;
+                        break;
+                }
+
+                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Notation, settingValue).Persist();
+            }
+
             string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePGN)
             {
