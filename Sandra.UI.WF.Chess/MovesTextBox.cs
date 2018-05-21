@@ -148,7 +148,27 @@ namespace Sandra.UI.WF
 
         private void updateMoveFormatter()
         {
-            if (moveFormatter != null)
+            if (moveFormatter == null)
+            {
+                // Initialize moveFormattingOption from settings.
+                ISettingValue settingValue;
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
+                {
+                    if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, SANSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UseLocalizedShortAlgebraic;
+                    }
+                    else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, PGNSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UsePGN;
+                    }
+                    else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, LANSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UseLocalizedLongAlgebraic;
+                    }
+                }
+            }
+            else
             {
                 // Update setting if the formatter was already initialized.
                 ISettingValue settingValue;
