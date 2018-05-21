@@ -46,12 +46,12 @@ namespace Sandra.UI.WF
             ISettingValue settingValue;
             if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
             {
-                if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, Localizers.EnglishSettingValue))
+                if (SettingHelper.AreEqual(settingValue, Localizers.EnglishSettingValue))
                 {
                     // Technically not necessary since it's the default value.
                     Localizer.Current = Localizers.English;
                 }
-                else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, Localizers.DutchSettingValue))
+                else if (SettingHelper.AreEqual(settingValue, Localizers.DutchSettingValue))
                 {
                     Localizer.Current = Localizers.Dutch;
                 }

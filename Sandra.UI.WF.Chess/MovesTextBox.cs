@@ -154,15 +154,15 @@ namespace Sandra.UI.WF
                 ISettingValue settingValue;
                 if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
                 {
-                    if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, SANSettingValue))
+                    if (SettingHelper.AreEqual(settingValue, SANSettingValue))
                     {
                         moveFormattingOption = MoveFormattingOption.UseLocalizedShortAlgebraic;
                     }
-                    else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, PGNSettingValue))
+                    else if (SettingHelper.AreEqual(settingValue, PGNSettingValue))
                     {
                         moveFormattingOption = MoveFormattingOption.UsePGN;
                     }
-                    else if (SettingValueEqualityComparer.Instance.AreEqual(settingValue, LANSettingValue))
+                    else if (SettingHelper.AreEqual(settingValue, LANSettingValue))
                     {
                         moveFormattingOption = MoveFormattingOption.UseLocalizedLongAlgebraic;
                     }

@@ -101,6 +101,18 @@ namespace Sandra.UI.WF
 
         private SettingValueEqualityComparer() { }
 
+        /// <summary>
+        /// Returns if two <see cref="ISettingValue"/>s are equal.
+        /// </summary>
+        /// <param name="x">
+        /// The first <see cref="ISettingValue"/>.
+        /// </param>
+        /// <param name="y">
+        /// The second <see cref="ISettingValue"/>.
+        /// </param>
+        /// <returns>
+        /// Whether or not both <see cref="ISettingValue"/>s are equal.
+        /// </returns>
         public bool AreEqual(ISettingValue x, ISettingValue y)
         {
             // Equality of null values.
