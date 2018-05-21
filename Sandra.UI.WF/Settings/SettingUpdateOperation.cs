@@ -57,8 +57,8 @@ namespace Sandra.UI.WF
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
         /// </exception>
-        public SettingUpdateOperation AddOrReplace(string settingKey, bool value)
-            => AddOrReplace(new SettingKey(settingKey), new BooleanSettingValue() { Value = value });
+        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, bool value)
+            => AddOrReplace(settingKey, new BooleanSettingValue() { Value = value });
 
         /// <summary>
         /// Registers that the value for a setting key must be added or replaced.
@@ -75,8 +75,8 @@ namespace Sandra.UI.WF
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
         /// </exception>
-        public SettingUpdateOperation AddOrReplace(string settingKey, int value)
-            => AddOrReplace(new SettingKey(settingKey), new Int32SettingValue() { Value = value });
+        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, int value)
+            => AddOrReplace(settingKey, new Int32SettingValue() { Value = value });
 
         /// <summary>
         /// Commits and persists the update operation.

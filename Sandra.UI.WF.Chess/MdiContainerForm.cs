@@ -339,14 +339,14 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
+        static readonly SettingKey MaximizedKey = new SettingKey("maximized");
+        static readonly SettingKey LeftKey = new SettingKey("x");
+        static readonly SettingKey TopKey = new SettingKey("y");
+        static readonly SettingKey WidthKey = new SettingKey("width");
+        static readonly SettingKey HeightKey = new SettingKey("height");
+
         private void autoSaveFormState()
         {
-            const string MaximizedKey = "maximized";
-            const string LeftKey = "x";
-            const string TopKey = "y";
-            const string WidthKey = "width";
-            const string HeightKey = "height";
-
             // Don't auto-save if the form isn't loaded yet.
             if (formBoundsInitialized)
             {
