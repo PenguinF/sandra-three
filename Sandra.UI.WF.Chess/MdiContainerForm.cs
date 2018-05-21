@@ -349,10 +349,7 @@ namespace Sandra.UI.WF
                 Rectangle targetBounds = new Rectangle(left.Value, top.Value, width.Value, height.Value);
 
                 // Do make sure it ends up on a visible working area.
-                // This also takes care of negative values for width and height.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
-
-                // Compare with MinimumSize.
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
                     SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
