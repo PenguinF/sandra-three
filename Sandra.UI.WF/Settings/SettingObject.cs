@@ -132,6 +132,16 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="other"/> is null.
         /// </exception>
+        /// <remarks>
+        /// This is not the same as complete equality, in particular this method returns true from the following expression:
+        /// <code>
+        /// workingCopy.Commit().EqualTo(workingCopy)
+        /// </code>
+        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
+        /// <code>
+        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
+        /// </code>
+        /// </remarks>
         public bool EqualTo(SettingObject other)
         {
             if (other == null) throw new ArgumentNullException(nameof(other));
