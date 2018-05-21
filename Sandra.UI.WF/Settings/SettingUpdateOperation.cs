@@ -24,16 +24,12 @@ namespace Sandra.UI.WF
     public class SettingUpdateOperation
     {
         private readonly AutoSave owner;
-
-        /// <summary>
-        /// Dictionary of settings to update.
-        /// </summary>
-        internal readonly SettingCopy WorkingCopy;
+        private readonly SettingCopy workingCopy;
 
         internal SettingUpdateOperation(AutoSave owner)
         {
             this.owner = owner;
-            WorkingCopy = owner.CurrentSettings.CreateWorkingCopy();
+            workingCopy = owner.CurrentSettings.CreateWorkingCopy();
         }
 
         /// <summary>
@@ -53,7 +49,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
         {
-            WorkingCopy.KeyValueMapping[settingKey] = value;
+            workingCopy.KeyValueMapping[settingKey] = value;
             return this;
         }
 
@@ -125,7 +121,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public SettingUpdateOperation Remove(SettingKey settingKey)
         {
-            WorkingCopy.KeyValueMapping.Remove(settingKey);
+            workingCopy.KeyValueMapping.Remove(settingKey);
             return this;
         }
 
@@ -134,7 +130,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Persist()
         {
-            owner.Persist(WorkingCopy);
+            owner.Persist(workingCopy);
         }
     }
 }
