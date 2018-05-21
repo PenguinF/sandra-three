@@ -287,7 +287,8 @@ namespace Sandra.UI.WF
             this.buffer = buffer;
             this.encodedBuffer = encodedBuffer;
 
-            outputStream.Seek(0, SeekOrigin.Begin);
+            // Truncate and append.
+            outputStream.SetLength(0);
         }
 
         private void encodeAndWrite(string value)
@@ -359,8 +360,7 @@ namespace Sandra.UI.WF
                 outputStream.Write(encodedBuffer, 0, bytes);
             }
 
-            // Truncate and flush.
-            outputStream.SetLength(outputStream.Position);
+            // Make sure everything is Written to the file.
             outputStream.Flush();
         }
     }
