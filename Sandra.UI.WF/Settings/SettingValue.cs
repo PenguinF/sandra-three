@@ -40,6 +40,7 @@ namespace Sandra.UI.WF
         public virtual void Visit(ISettingValue value) { if (value != null) value.Accept(this); }
         public virtual void VisitBoolean(BooleanSettingValue value) => DefaultVisit(value);
         public virtual void VisitInt32(Int32SettingValue value) => DefaultVisit(value);
+        public virtual void VisitString(StringSettingValue value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -52,6 +53,7 @@ namespace Sandra.UI.WF
         public virtual TResult Visit(ISettingValue value) => value == null ? default(TResult) : value.Accept(this);
         public virtual TResult VisitBoolean(BooleanSettingValue value) => DefaultVisit(value);
         public virtual TResult VisitInt32(Int32SettingValue value) => DefaultVisit(value);
+        public virtual TResult VisitString(StringSettingValue value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -74,6 +76,17 @@ namespace Sandra.UI.WF
 
         public void Accept(SettingValueVisitor visitor) => visitor.VisitInt32(this);
         public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitInt32(this);
+    }
+
+    /// <summary>
+    /// Represents a <see cref="string"/> setting value.
+    /// </summary>
+    public struct StringSettingValue : ISettingValue
+    {
+        public string Value;
+
+        public void Accept(SettingValueVisitor visitor) => visitor.VisitString(this);
+        public TResult Accept<TResult>(SettingValueVisitor<TResult> visitor) => visitor.VisitString(this);
     }
 
     /// <summary>
@@ -110,5 +123,8 @@ namespace Sandra.UI.WF
 
         public override bool VisitInt32(Int32SettingValue value)
             => value.Value == ((Int32SettingValue)compareValue).Value;
+
+        public override bool VisitString(StringSettingValue value)
+            => value.Value == ((StringSettingValue)compareValue).Value;
     }
 }

@@ -436,6 +436,13 @@ namespace Sandra.UI.WF
             encodeAndWrite(Environment.NewLine);
         }
 
+        public override void VisitString(StringSettingValue value)
+        {
+            // For now replace with double quotes, to avoid backslash parsing code.
+            encodeAndWrite("\"" + value.Value.Replace("\"", "\"\"") + "\"");
+            encodeAndWrite(Environment.NewLine);
+        }
+
         public void Dispose()
         {
             // Process remaining characters in the buffer and what's left in the Encoder.
