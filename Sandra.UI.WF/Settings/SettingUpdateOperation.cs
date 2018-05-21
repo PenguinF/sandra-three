@@ -36,7 +36,22 @@ namespace Sandra.UI.WF
             WorkingCopy = owner.CurrentSettings.CreateWorkingCopy();
         }
 
-        private SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
+        /// <summary>
+        /// Adds or replaces a value for a setting key.
+        /// </summary>
+        /// <param name="settingKey">
+        /// The key of the setting to add or replace.
+        /// </param>
+        /// <param name="value">
+        /// The new value of the setting to add or replace.
+        /// </param>
+        /// <returns>
+        /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
         {
             WorkingCopy.KeyValueMapping[settingKey] = value;
             return this;
@@ -77,6 +92,24 @@ namespace Sandra.UI.WF
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, int value)
             => AddOrReplace(settingKey, new Int32SettingValue(value));
+
+        /// <summary>
+        /// Adds or replaces a value for a setting key.
+        /// </summary>
+        /// <param name="settingKey">
+        /// The key of the setting to add or replace.
+        /// </param>
+        /// <param name="value">
+        /// The new value of the setting to add or replace.
+        /// </param>
+        /// <returns>
+        /// This instance. See also: https://en.wikipedia.org/wiki/Builder_pattern
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, string value)
+            => AddOrReplace(settingKey, new StringSettingValue(value));
 
         /// <summary>
         /// Removes a key and its associated value.
