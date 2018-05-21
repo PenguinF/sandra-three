@@ -21,9 +21,6 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Base interface for all types of values which are allowed in settings.
     /// </summary>
-    /// <remarks>
-    /// Not using <see cref="object"/> because this impacts change tracking.
-    /// </remarks>
     public interface ISettingValue
     {
         void Accept(SettingValueVisitor visitor);
