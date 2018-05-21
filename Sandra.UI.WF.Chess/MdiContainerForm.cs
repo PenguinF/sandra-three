@@ -325,6 +325,9 @@ namespace Sandra.UI.WF
         {
             base.OnLoad(e);
 
+            // Determine minimum size before restoring from settings: always show title bar and menu.
+            MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
+
             // Initialize from settings if available.
             var settings = Program.AutoSave.CurrentSettings;
             ISettingValue settingValue;
@@ -358,13 +361,24 @@ namespace Sandra.UI.WF
                 height = ((Int32SettingValue)settingValue).Value;
             }
 
-            formBoundsInitialized = true;
             if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
             {
                 // If all bounds are known initialize from those.
-                SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+                Rectangle targetBounds = new Rectangle(left.Value, top.Value, width.Value, height.Value);
+
+                // Do make sure it ends up on a visible working area.
+                // This also takes care of negative values for width and height.
+                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+
+                // Compare with MinimumSize.
+                if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
+                {
+                    SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+                    formBoundsInitialized = true;
+                }
             }
-            else
+
+            if (!formBoundsInitialized)
             {
                 // Show in the center of the monitor where the mouse currently is.
                 var activeScreen = Screen.FromPoint(MousePosition);
@@ -375,6 +389,7 @@ namespace Sandra.UI.WF
 
                 // Update the bounds of the form.
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+                formBoundsInitialized = true;
             }
 
             // Restore maximized setting.
