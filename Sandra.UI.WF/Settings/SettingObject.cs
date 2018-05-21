@@ -99,7 +99,7 @@ namespace Sandra.UI.WF
         /// </param>
         /// <param name="value">
         /// When this method returns, contains the value associated with the specified key, if the key is found;
-        /// otherwise, the default value for the type of the value parameter.
+        /// otherwise, the default <see cref="ISettingValue"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
@@ -109,6 +109,99 @@ namespace Sandra.UI.WF
         /// <paramref name="key"/> is null.
         /// </exception>
         public bool TryGetValue(SettingKey key, out ISettingValue value) => Mapping.TryGetValue(key, out value);
+
+        /// <summary>
+        /// Gets the value that is associated with the specified key if it is a <see cref="bool"/>.
+        /// </summary>
+        /// <param name="key">
+        /// The key to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified key, if the key is found
+        /// and the value associated with it is a <see cref="bool"/>; otherwise, the default <see cref="bool"/> value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// true if this <see cref="SettingObject"/> contains a value with the specified key
+        /// and the value associated with it is a <see cref="bool"/>; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public bool TryGetValue(SettingKey key, out bool value)
+        {
+            ISettingValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is BooleanSettingValue)
+            {
+                value = ((BooleanSettingValue)settingValue).Value;
+                return true;
+            }
+
+            value = default(bool);
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the value that is associated with the specified key if it's an <see cref="int"/>.
+        /// </summary>
+        /// <param name="key">
+        /// The key to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified key, if the key is found
+        /// and the value associated with it is an <see cref="int"/>; otherwise, the default <see cref="int"/> value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// true if this <see cref="SettingObject"/> contains a value with the specified key
+        /// and the value associated with it is a <see cref="int"/>; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public bool TryGetValue(SettingKey key, out int value)
+        {
+            ISettingValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is Int32SettingValue)
+            {
+                value = ((Int32SettingValue)settingValue).Value;
+                return true;
+            }
+
+            value = default(int);
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the value that is associated with the specified key if it is a <see cref="string"/>.
+        /// </summary>
+        /// <param name="key">
+        /// The key to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified key, if the key is found
+        /// and the value associated with it is a <see cref="string"/>; otherwise, the default <see cref="string"/> value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// true if this <see cref="SettingObject"/> contains a value with the specified key
+        /// and the value associated with it is a <see cref="string"/>; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public bool TryGetValue(SettingKey key, out string value)
+        {
+            ISettingValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is StringSettingValue)
+            {
+                value = ((StringSettingValue)settingValue).Value;
+                return true;
+            }
+
+            value = default(string);
+            return false;
+        }
 
         /// <summary>
         /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
