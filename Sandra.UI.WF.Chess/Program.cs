@@ -46,6 +46,9 @@ namespace Sandra.UI.WF
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
+
+            // Wait until the auto-save background task has finished.
+            AutoSave.Close();
         }
 
         internal static Image LoadImage(string imageFileKey)

@@ -18,9 +18,12 @@
  *********************************************************************************/
 using SysExtensions;
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sandra.UI.WF
 {
@@ -36,12 +39,16 @@ namespace Sandra.UI.WF
         internal const int FileStreamBufferSize = 4096;
 
         /// <summary>
+        /// Minimal delay in milliseconds between two auto save operations.
+        /// </summary>
+        public const int AutoSaveDelay = 500;
+
+        /// <summary>
         /// Gets the name of the auto save file.
         /// </summary>
         public static readonly string AutoSaveFileName = ".autosave";
 
         private readonly FileStream autoSaveFileStream;
-        private readonly Encoding encoding;
         private readonly Encoder encoder;
 
         /// <summary>
@@ -63,6 +70,21 @@ namespace Sandra.UI.WF
         /// Settings representing how they are currently stored in the autosave file.
         /// </summary>
         private SettingObject remoteSettings;
+
+        /// <summary>
+        /// Contains scheduled updates to the remote settings.
+        /// </summary>
+        private readonly ConcurrentQueue<SettingCopy> updateQueue;
+
+        /// <summary>
+        /// Camcels the long running auto-save background task.
+        /// </summary>
+        private readonly CancellationTokenSource cts;
+
+        /// <summary>
+        /// Long running auto-save background task.
+        /// </summary>
+        private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -130,10 +152,15 @@ namespace Sandra.UI.WF
                     && !autoSaveFileStream.CanTimeout);
 
                 // Initialize encoders and buffers.
-                encoding = new UTF8Encoding();
+                Encoding encoding = new UTF8Encoding();
                 encoder = encoding.GetEncoder();
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
+
+                // Set up long running task to keep auto-saving remoteSettings.
+                updateQueue = new ConcurrentQueue<SettingCopy>();
+                cts = new CancellationTokenSource();
+                autoSaveBackgroundTask = autoSaveLoop(cts.Token);
             }
             catch (ArgumentException)
             {
@@ -171,17 +198,65 @@ namespace Sandra.UI.WF
                 // Commit to localSettings.
                 localSettings = workingCopy.Commit();
 
-                // Nullcheck on the last initialized field, to make sure everything else was initialized as well.
-                if (encodedBuffer != null)
+                if (updateQueue != null)
                 {
-                    using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
+                    // Enqueue a copy so its values are not shared with other threads.
+                    updateQueue.Enqueue(localSettings.CreateWorkingCopy());
+                }
+            }
+        }
+
+        private async Task autoSaveLoop(CancellationToken ct)
+        {
+            // Only return if the queue is empty and saved.
+            while (!ct.IsCancellationRequested)
+            {
+                await Task.Delay(AutoSaveDelay);
+
+                // Empty the queue, take the latest update from it.
+                SettingCopy latestUpdate = null;
+
+                SettingCopy update;
+                while (updateQueue.TryDequeue(out update)) latestUpdate = update;
+
+                if (latestUpdate != null && !latestUpdate.EqualTo(remoteSettings))
+                {
+                    remoteSettings = latestUpdate.Commit();
+
+                    try
                     {
-                        foreach (var kv in localSettings)
+                        using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
                         {
-                            writer.WriteKey(kv.Key);
-                            writer.Visit(kv.Value);
+                            foreach (var kv in remoteSettings)
+                            {
+                                writer.WriteKey(kv.Key);
+                                writer.Visit(kv.Value);
+                            }
                         }
                     }
+                    catch (Exception writeException)
+                    {
+                        writeException.Trace();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Waits for the long running auto-saver Task to finish.
+        /// </summary>
+        public void Close()
+        {
+            if (cts != null)
+            {
+                cts.Cancel();
+                try
+                {
+                    autoSaveBackgroundTask.Wait();
+                }
+                catch
+                {
+                    // Have to catch cancelled exceptions.
                 }
             }
         }
