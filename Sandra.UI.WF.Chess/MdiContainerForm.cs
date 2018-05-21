@@ -312,19 +312,63 @@ namespace Sandra.UI.WF
             game.TryGotoChessBoardForm(true);
         }
 
+        // Keeps track if the bounds of this form have been initialized in OnLoad().
+        private bool formBoundsInitialized;
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            // Show in the center of the monitor where the mouse currently is.
-            var activeScreen = Screen.FromPoint(MousePosition);
-            Rectangle workingArea = activeScreen.WorkingArea;
+            // Determine minimum size before restoring from settings: always show title bar and menu.
+            MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
-            // Two thirds the size of the active monitor's working area.
-            workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+            // Initialize from settings if available.
+            var settings = Program.AutoSave.CurrentSettings;
+            bool boolValue;
+            int intValue;
+            bool? maximized = null;
+            int? left, top, width, height;
+            left = top = width = height = null;
 
-            // Update the bounds of the form.
-            SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+            if (settings.TryGetValue(SettingKeys.Maximized, out boolValue)) maximized = boolValue;
+            if (settings.TryGetValue(SettingKeys.Left, out intValue)) left = intValue;
+            if (settings.TryGetValue(SettingKeys.Top, out intValue)) top = intValue;
+            if (settings.TryGetValue(SettingKeys.Width, out intValue)) width = intValue;
+            if (settings.TryGetValue(SettingKeys.Height, out intValue)) height = intValue;
+
+            if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
+            {
+                // If all bounds are known initialize from those.
+                Rectangle targetBounds = new Rectangle(left.Value, top.Value, width.Value, height.Value);
+
+                // Do make sure it ends up on a visible working area.
+                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+                if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
+                {
+                    SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+                    formBoundsInitialized = true;
+                }
+            }
+
+            if (!formBoundsInitialized)
+            {
+                // Show in the center of the monitor where the mouse currently is.
+                var activeScreen = Screen.FromPoint(MousePosition);
+                Rectangle workingArea = activeScreen.WorkingArea;
+
+                // Two thirds the size of the active monitor's working area.
+                workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
+
+                // Update the bounds of the form.
+                SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+                formBoundsInitialized = true;
+            }
+
+            // Restore maximized setting.
+            if (maximized.HasValue && maximized.Value)
+            {
+                WindowState = FormWindowState.Maximized;
+            }
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
@@ -333,6 +377,44 @@ namespace Sandra.UI.WF
             FastNavigationPlyCount = 10;
 
             NewPlayingBoard();
+        }
+
+        private void autoSaveFormState()
+        {
+            // Don't auto-save if the form isn't loaded yet.
+            if (formBoundsInitialized)
+            {
+                // Don't auto-save anything if the form is minimized.
+                // If the application is then closed and reopened, it will restore to the state before it was minimized.
+                if (WindowState == FormWindowState.Maximized)
+                {
+                    Program.AutoSave.CreateUpdate()
+                        .AddOrReplace(SettingKeys.Maximized, true)
+                        .Persist();
+                }
+                else if (WindowState == FormWindowState.Normal)
+                {
+                    Program.AutoSave.CreateUpdate()
+                        .AddOrReplace(SettingKeys.Maximized, false)
+                        .AddOrReplace(SettingKeys.Left, Left)
+                        .AddOrReplace(SettingKeys.Top, Top)
+                        .AddOrReplace(SettingKeys.Width, Width)
+                        .AddOrReplace(SettingKeys.Height, Height)
+                        .Persist();
+                }
+            }
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+            autoSaveFormState();
+        }
+
+        protected override void OnLocationChanged(EventArgs e)
+        {
+            base.OnLocationChanged(e);
+            autoSaveFormState();
         }
 
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()

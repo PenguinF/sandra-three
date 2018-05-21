@@ -138,12 +138,57 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
+        private static readonly StringSettingValue SANSettingValue = new StringSettingValue("san");
+        private static readonly StringSettingValue PGNSettingValue = new StringSettingValue("pgn");
+        private static readonly StringSettingValue LANSettingValue = new StringSettingValue("lan");
+
         private MoveFormattingOption moveFormattingOption;
 
         private Chess.IMoveFormatter moveFormatter;
 
         private void updateMoveFormatter()
         {
+            if (moveFormatter == null)
+            {
+                // Initialize moveFormattingOption from settings.
+                ISettingValue settingValue;
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
+                {
+                    if (SettingHelper.AreEqual(settingValue, SANSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UseLocalizedShortAlgebraic;
+                    }
+                    else if (SettingHelper.AreEqual(settingValue, PGNSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UsePGN;
+                    }
+                    else if (SettingHelper.AreEqual(settingValue, LANSettingValue))
+                    {
+                        moveFormattingOption = MoveFormattingOption.UseLocalizedLongAlgebraic;
+                    }
+                }
+            }
+            else
+            {
+                // Update setting if the formatter was already initialized.
+                ISettingValue settingValue;
+                switch (moveFormattingOption)
+                {
+                    default:
+                    case MoveFormattingOption.UseLocalizedShortAlgebraic:
+                        settingValue = SANSettingValue;
+                        break;
+                    case MoveFormattingOption.UsePGN:
+                        settingValue = PGNSettingValue;
+                        break;
+                    case MoveFormattingOption.UseLocalizedLongAlgebraic:
+                        settingValue = LANSettingValue;
+                        break;
+                }
+
+                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Notation, settingValue).Persist();
+            }
+
             string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePGN)
             {

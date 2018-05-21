@@ -20,6 +20,7 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -27,17 +28,48 @@ namespace Sandra.UI.WF
 {
     static class Program
     {
+        internal const string AppName = "SandraChess";
+
+        internal static AutoSave AutoSave { get; private set; }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+            AutoSave = new AutoSave(AppName, new SettingCopy());
+
+            // Remove any stale/unknown settings.
+            var update = AutoSave.CreateUpdate();
+            AutoSave.CurrentSettings.Keys
+                .Where(key => !SettingKeys.All.Contains(key))
+                .ForEach(key => update.Remove(key));
+            update.Persist();
+
             Chess.Constants.ForceInitialize();
+
             Localizer.Current = Localizers.English;
+            ISettingValue settingValue;
+            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
+            {
+                if (SettingHelper.AreEqual(settingValue, Localizers.EnglishSettingValue))
+                {
+                    // Technically not necessary since it's the default value.
+                    Localizer.Current = Localizers.English;
+                }
+                else if (SettingHelper.AreEqual(settingValue, Localizers.DutchSettingValue))
+                {
+                    Localizer.Current = Localizers.Dutch;
+                }
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MdiContainerForm());
+
+            // Wait until the auto-save background task has finished.
+            AutoSave.Close();
         }
 
         internal static Image LoadImage(string imageFileKey)

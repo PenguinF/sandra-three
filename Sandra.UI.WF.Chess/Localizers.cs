@@ -57,6 +57,10 @@ namespace Sandra.UI.WF
 
         public static readonly Localizer Dutch = new DutchLocalizer();
 
+        public static readonly StringSettingValue EnglishSettingValue = new StringSettingValue("en");
+
+        public static readonly StringSettingValue DutchSettingValue = new StringSettingValue("nl");
+
         public static readonly LocalizedStringKey LangEnglish = LocalizedStringKey.Unlocalizable("English");
 
         public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
@@ -70,7 +74,12 @@ namespace Sandra.UI.WF
 
         public static UIActionState TrySwitchToLangEnglish(bool perform)
         {
-            if (perform) Localizer.Current = English;
+            if (perform)
+            {
+                Localizer.Current = English;
+                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, EnglishSettingValue).Persist();
+            }
+
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
         }
 
@@ -87,7 +96,12 @@ namespace Sandra.UI.WF
 
         public static UIActionState TrySwitchToLangDutch(bool perform)
         {
-            if (perform) Localizer.Current = Dutch;
+            if (perform)
+            {
+                Localizer.Current = Dutch;
+                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, DutchSettingValue).Persist();
+            }
+
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);
         }
     }
