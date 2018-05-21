@@ -324,36 +324,24 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             var settings = Program.AutoSave.CurrentSettings;
-            ISettingValue settingValue;
-
+            bool boolValue;
+            int intValue;
             bool? maximized = null;
             int? left, top, width, height;
             left = top = width = height = null;
 
-            if (settings.TryGetValue(SettingKeys.Maximized, out settingValue) && settingValue is BooleanSettingValue)
-            {
-                maximized = ((BooleanSettingValue)settingValue).Value;
-            }
+            if (settings.TryGetValue(SettingKeys.Maximized, out boolValue)) maximized = boolValue;
+            if (settings.TryGetValue(SettingKeys.Left, out intValue)) left = intValue;
+            if (settings.TryGetValue(SettingKeys.Top, out intValue)) top = intValue;
+            if (settings.TryGetValue(SettingKeys.Width, out intValue)) width = intValue;
+            if (settings.TryGetValue(SettingKeys.Height, out intValue)) height = intValue;
 
-            if (settings.TryGetValue(SettingKeys.Left, out settingValue) && settingValue is Int32SettingValue)
-            {
-                left = ((Int32SettingValue)settingValue).Value;
-            }
-
-            if (settings.TryGetValue(SettingKeys.Top, out settingValue) && settingValue is Int32SettingValue)
-            {
-                top = ((Int32SettingValue)settingValue).Value;
-            }
-
-            if (settings.TryGetValue(SettingKeys.Width, out settingValue) && settingValue is Int32SettingValue)
-            {
-                width = ((Int32SettingValue)settingValue).Value;
-            }
-
-            if (settings.TryGetValue(SettingKeys.Height, out settingValue) && settingValue is Int32SettingValue)
-            {
-                height = ((Int32SettingValue)settingValue).Value;
-            }
+            // Remove any stale/unknown settings.
+            var update = Program.AutoSave.CreateUpdate();
+            Program.AutoSave.CurrentSettings.Keys
+                .Where(key => !SettingKeys.All.Contains(key))
+                .ForEach(key => update.Remove(key));
+            update.Persist();
 
             if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
             {
@@ -385,13 +373,6 @@ namespace Sandra.UI.WF
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 formBoundsInitialized = true;
             }
-
-            // Remove any stale/unknown settings.
-            var update = Program.AutoSave.CreateUpdate();
-            Program.AutoSave.CurrentSettings.Keys
-                .Where(key => !SettingKeys.All.Contains(key))
-                .ForEach(key => update.Remove(key));
-            update.Persist();
 
             // Restore maximized setting.
             if (maximized.HasValue && maximized.Value)
