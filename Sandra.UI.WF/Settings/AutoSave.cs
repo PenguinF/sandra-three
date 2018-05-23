@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -39,12 +40,12 @@ namespace Sandra.UI.WF
         internal const int FileStreamBufferSize = 4096;
 
         /// <summary>
-        /// Minimal delay in milliseconds between two auto save operations.
+        /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
         public const int AutoSaveDelay = 500;
 
         /// <summary>
-        /// Gets the name of the auto save file.
+        /// Gets the name of the auto-save file.
         /// </summary>
         public static readonly string AutoSaveFileName = ".autosave";
 
@@ -67,7 +68,7 @@ namespace Sandra.UI.WF
         private SettingObject localSettings;
 
         /// <summary>
-        /// Settings representing how they are currently stored in the autosave file.
+        /// Settings representing how they are currently stored in the auto-save file.
         /// </summary>
         private SettingObject remoteSettings;
 
@@ -93,7 +94,7 @@ namespace Sandra.UI.WF
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
         /// <param name="initialSettings">
-        /// The initial default settings to use, in case e.g. the autosave file could not be opened.
+        /// The initial default settings to use, in case e.g. the auto-save file could not be opened.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="appSubFolderName"/> or <paramref name="initialSettings"/> is null.
@@ -107,7 +108,6 @@ namespace Sandra.UI.WF
         /// </exception>
         public AutoSave(string appSubFolderName, SettingCopy initialSettings)
         {
-            // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
@@ -118,16 +118,16 @@ namespace Sandra.UI.WF
                 throw new ArgumentNullException(nameof(initialSettings));
             }
 
+            // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName.Length == 0)
             {
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
-            // Commit to local settings. This will be used in case initialization of remoteSettings somehow failed.
+            // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
+            // don't throw but just disable auto-saving and use default initial settings.
             localSettings = initialSettings.Commit();
 
-            // If creation of the auto-save file fails, because e.g. an instance is already running,
-            // don't throw but just disable auto-saving and use default initial settings.
             try
             {
                 var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -172,7 +172,6 @@ namespace Sandra.UI.WF
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
                 {
-                    // Can share the instance, using copy-on-write semantics.
                     localSettings = remoteSettings;
                 }
 
@@ -227,10 +226,13 @@ namespace Sandra.UI.WF
 
         private async Task autoSaveLoop(CancellationToken ct)
         {
-            // Only return if the queue is empty and saved.
-            while (!ct.IsCancellationRequested)
+            for (;;)
             {
-                await Task.Delay(AutoSaveDelay);
+                // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
+                if (!ct.IsCancellationRequested)
+                {
+                    await Task.Delay(AutoSaveDelay);
+                }
 
                 // Empty the queue, take the latest update from it.
                 SettingCopy latestUpdate = null;
@@ -238,20 +240,25 @@ namespace Sandra.UI.WF
                 SettingCopy update;
                 while (updateQueue.TryDequeue(out update)) latestUpdate = update;
 
+                // Only return if the queue is empty and saved.
+                if (latestUpdate == null && ct.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 if (latestUpdate != null && !latestUpdate.EqualTo(remoteSettings))
                 {
                     remoteSettings = latestUpdate.Commit();
 
                     try
                     {
-                        using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
+                        var writer = new SettingWriter();
+                        foreach (var kv in remoteSettings)
                         {
-                            foreach (var kv in remoteSettings)
-                            {
-                                writer.WriteKey(kv.Key);
-                                writer.Visit(kv.Value);
-                            }
+                            writer.WriteKey(kv.Key);
+                            writer.Visit(kv.Value);
                         }
+                        writer.WriteToFile(autoSaveFileStream, encoder, buffer, encodedBuffer);
                     }
                     catch (Exception writeException)
                     {
@@ -280,6 +287,15 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void readAssert(bool condition, string assertionFailMessage)
+        {
+            Debug.Assert(condition, assertionFailMessage);
+            if (!condition)
+            {
+                throw new JsonReaderException(assertionFailMessage);
+            }
+        }
+
         private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             // Reuse one string builder to build keys and values.
@@ -301,51 +317,45 @@ namespace Sandra.UI.WF
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
 
-            // Optimistically parse.
-            // Research if parser can be replaced by 3rd-party library or if a compact representation in binary is necessary.
-            string text = sb.ToString();
-            int startIndex = 0;
+            // Optimistically parse as json.
+            JsonTextReader jsonTextReader = new JsonTextReader(new StringReader(sb.ToString()));
 
-            for (;;)
+            // Make assertions about the format in which the auto-save file was written.
+            readAssert(jsonTextReader.TokenType == JsonToken.None, "Token None expected");
+
+            if (jsonTextReader.Read())
             {
-                int keyIndex = text.IndexOf(SettingWriter.KeyValueSeparator, startIndex);
-                if (keyIndex < startIndex) break;
+                readAssert(jsonTextReader.TokenType == JsonToken.StartObject, "'{' expected");
 
-                SettingKey key = new SettingKey(text.Substring(startIndex, keyIndex - startIndex));
-                startIndex = keyIndex + SettingWriter.KeyValueSeparator.Length;
+                for (;;)
+                {
+                    jsonTextReader.Read();
+                    if (jsonTextReader.TokenType == JsonToken.EndObject) break;
+                    readAssert(jsonTextReader.TokenType == JsonToken.PropertyName, "PropertyName or EndObject '}' expected");
 
-                int valueIndex = text.IndexOf(Environment.NewLine, startIndex);
-                if (valueIndex < startIndex) break;
+                    SettingKey key = new SettingKey((string)jsonTextReader.Value);
+                    jsonTextReader.Read();
 
-                // TODO: this does not work for string values that contain newlines.
-                string valueAsString = text.Substring(startIndex, valueIndex - startIndex);
-                startIndex = valueIndex + Environment.NewLine.Length;
+                    ISettingValue value;
+                    switch (jsonTextReader.TokenType)
+                    {
+                        case JsonToken.Boolean:
+                            value = new BooleanSettingValue((bool)jsonTextReader.Value);
+                            break;
+                        case JsonToken.Integer:
+                            value = new Int32SettingValue(Convert.ToInt32(jsonTextReader.Value));
+                            break;
+                        case JsonToken.String:
+                            value = new StringSettingValue((string)jsonTextReader.Value);
+                            break;
+                        default:
+                            readAssert(false, "Boolean, Integer or String expected");
+                            // Above call is guaranteed to throw, make compiler aware here.
+                            throw new InvalidProgramException();
+                    }
 
-                ISettingValue value;
-                int intValue;
-                if (valueAsString == SettingWriter.TrueString)
-                {
-                    value = new BooleanSettingValue(true);
+                    workingCopy.KeyValueMapping[key] = value;
                 }
-                else if (valueAsString == SettingWriter.FalseString)
-                {
-                    value = new BooleanSettingValue(false);
-                }
-                else if (int.TryParse(valueAsString, out intValue))
-                {
-                    value = new Int32SettingValue(intValue);
-                }
-                else if (valueAsString.Length >= 2 && valueAsString.StartsWith("\"") && valueAsString.EndsWith("\""))
-                {
-                    value = new StringSettingValue(valueAsString.Substring(1, valueAsString.Length - 2).Replace("\"\"", "\""));
-                }
-                else
-                {
-                    // Corrupt value, break.
-                    break;
-                }
-
-                workingCopy.KeyValueMapping[key] = value;
             }
 
             return workingCopy.Commit();
@@ -355,110 +365,93 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a single iteration of writing settings to a file.
     /// </summary>
-    internal class SettingWriter : SettingValueVisitor, IDisposable
+    internal class SettingWriter : SettingValueVisitor
     {
-        // Lowercase values, unlike bool.TrueString and bool.FalseString.
-        internal static readonly string TrueString = "true";
-        internal static readonly string FalseString = "false";
-        internal static readonly string KeyValueSeparator = ": ";
+        private readonly StringBuilder outputBuilder;
+        private readonly JsonTextWriter jsonTextWriter;
 
-        private readonly FileStream outputStream;
-        private readonly Encoder encoder;
-        private readonly char[] buffer;
-        private readonly byte[] encodedBuffer;
-
-        // Fill up the character buffer before doing any writing.
-        private int currentCharPosition;
-
-        public SettingWriter(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
+        public SettingWriter()
         {
-            this.outputStream = outputStream;
-            this.encoder = encoder;
-            this.buffer = buffer;
-            this.encodedBuffer = encodedBuffer;
-
-            // Truncate and append.
-            outputStream.SetLength(0);
+            outputBuilder = new StringBuilder();
+            jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
+            jsonTextWriter.WriteStartObject();
         }
 
-        private void encodeAndWrite(string value)
+        public void WriteKey(SettingKey key)
         {
-            // How much of the given string still needs to be written.
-            // Takes into account that the character buffer may overrun.
-            int remainingLength = value.Length;
+            jsonTextWriter.WritePropertyName(key.Key);
+        }
 
-            // Number of characters already written from value. Loop invariant therefore is:
-            // charactersCopied + remainingLength == value.Length.
+        public override void VisitBoolean(BooleanSettingValue value)
+        {
+            jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public override void VisitInt32(Int32SettingValue value)
+        {
+            jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public override void VisitString(StringSettingValue value)
+        {
+            jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
+        {
+            jsonTextWriter.WriteEndObject();
+            jsonTextWriter.Close();
+            string output = outputBuilder.ToString();
+
+            // How much of the output still needs to be written.
+            int remainingLength = output.Length;
+
+            // Number of characters already written from output. Loop invariant therefore is:
+            // charactersCopied + remainingLength == output.Length.
             int charactersCopied = 0;
 
-            while (remainingLength > 0)
+            // Truncate and append. Spend as little time as possible writing to outputStream.
+            outputStream.SetLength(0);
+
+            // Fill up the character buffer before doing any writing.
+            for (;;)
             {
                 // Determine number of characters to write.
                 // AutoSave.CharBufferSize is known to be equal to buffer.Length.
-                int charWriteCount = AutoSave.CharBufferSize - currentCharPosition;
+                int charWriteCount = AutoSave.CharBufferSize;
 
                 // Remember if this fill up the entire buffer.
                 bool bufferFull = charWriteCount <= remainingLength;
                 if (!bufferFull) charWriteCount = remainingLength;
 
                 // Now copy to the character buffer after checking its range.
-                value.CopyTo(charactersCopied, buffer, currentCharPosition, charWriteCount);
-
-                // Update loop variables.
-                charactersCopied += charWriteCount;
-                remainingLength -= charWriteCount;
+                output.CopyTo(charactersCopied, buffer, 0, charWriteCount);
 
                 // If the buffer is full, call the encoder to convert it into bytes.
                 if (bufferFull)
                 {
                     int bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
                     outputStream.Write(encodedBuffer, 0, bytes);
-                    currentCharPosition = 0;
                 }
-                else
+
+                // Update loop variables.
+                charactersCopied += charWriteCount;
+                remainingLength -= charWriteCount;
+
+                if (remainingLength == 0)
                 {
-                    currentCharPosition += charWriteCount;
+                    // Process what's left in the buffer and Encoder.
+                    int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
+                    if (bytes > 0)
+                    {
+                        outputStream.Write(encodedBuffer, 0, bytes);
+                    }
+
+                    // Make sure everything is written to the file.
+                    outputStream.Flush();
+                    return;
                 }
             }
-        }
-
-        public void WriteKey(SettingKey key)
-        {
-            encodeAndWrite(key.Key);
-            encodeAndWrite(KeyValueSeparator);
-        }
-
-        public override void VisitBoolean(BooleanSettingValue value)
-        {
-            encodeAndWrite(value.Value ? TrueString : FalseString);
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public override void VisitInt32(Int32SettingValue value)
-        {
-            // Assumed here is that int conversion is culture independent, even though it's implicitly used.
-            encodeAndWrite(Convert.ToString(value.Value));
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public override void VisitString(StringSettingValue value)
-        {
-            // For now replace with double quotes, to avoid backslash parsing code.
-            encodeAndWrite("\"" + value.Value.Replace("\"", "\"\"") + "\"");
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public void Dispose()
-        {
-            // Process remaining characters in the buffer and what's left in the Encoder.
-            int bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
-            if (bytes > 0)
-            {
-                outputStream.Write(encodedBuffer, 0, bytes);
-            }
-
-            // Make sure everything is Written to the file.
-            outputStream.Flush();
         }
     }
 }
