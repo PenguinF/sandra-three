@@ -104,5 +104,44 @@ namespace Sandra.UI.WF
             if (perform) SelectAll();
             return UIActionVisibility.Enabled;
         }
+
+        public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(ZoomIn)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.ZoomIn,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+            });
+
+        public UIActionState TryZoomIn(bool perform)
+        {
+            if (ZoomFactor >= 63.9f) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                ZoomFactor += 0.1f;
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(ZoomOut)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.ZoomOut,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+            });
+
+        public UIActionState TryZoomOut(bool perform)
+        {
+            if (ZoomFactor <= 0.1) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                ZoomFactor -= 0.1f;
+            }
+            return UIActionVisibility.Enabled;
+        }
     }
 }
