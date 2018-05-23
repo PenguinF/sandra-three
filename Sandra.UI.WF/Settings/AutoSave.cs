@@ -225,16 +225,25 @@ namespace Sandra.UI.WF
 
         private async Task autoSaveLoop(CancellationToken ct)
         {
-            // Only return if the queue is empty and saved.
-            while (!ct.IsCancellationRequested)
+            for (;;)
             {
-                await Task.Delay(AutoSaveDelay);
+                // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
+                if (!ct.IsCancellationRequested)
+                {
+                    await Task.Delay(AutoSaveDelay);
+                }
 
                 // Empty the queue, take the latest update from it.
                 SettingCopy latestUpdate = null;
 
                 SettingCopy update;
                 while (updateQueue.TryDequeue(out update)) latestUpdate = update;
+
+                // Only return if the queue is empty and saved.
+                if (latestUpdate == null && ct.IsCancellationRequested)
+                {
+                    break;
+                }
 
                 if (latestUpdate != null && !latestUpdate.EqualTo(remoteSettings))
                 {
