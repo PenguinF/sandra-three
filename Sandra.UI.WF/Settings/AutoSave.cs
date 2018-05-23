@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -369,57 +370,57 @@ namespace Sandra.UI.WF
         internal static readonly string KeyValueSeparator = ": ";
 
         private readonly StringBuilder outputBuilder;
+        private readonly JsonTextWriter jsonTextWriter;
 
         public SettingWriter()
         {
             outputBuilder = new StringBuilder();
+            jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
+            jsonTextWriter.WriteStartObject();
         }
 
         public void WriteKey(SettingKey key)
         {
-            outputBuilder.Append(key.Key);
-            outputBuilder.Append(KeyValueSeparator);
+            jsonTextWriter.WritePropertyName(key.Key);
         }
 
         public override void VisitBoolean(BooleanSettingValue value)
         {
-            outputBuilder.Append(value.Value ? TrueString : FalseString);
-            outputBuilder.Append(Environment.NewLine);
+            jsonTextWriter.WriteValue(value.Value);
         }
 
         public override void VisitInt32(Int32SettingValue value)
         {
-            // Assumed here is that int conversion is culture independent, even though it's implicitly used.
-            outputBuilder.Append(Convert.ToString(value.Value));
-            outputBuilder.Append(Environment.NewLine);
+            jsonTextWriter.WriteValue(value.Value);
         }
 
         public override void VisitString(StringSettingValue value)
         {
-            // For now replace with double quotes, to avoid backslash parsing code.
-            outputBuilder.Append("\"" + value.Value.Replace("\"", "\"\"") + "\"");
-            outputBuilder.Append(Environment.NewLine);
+            jsonTextWriter.WriteValue(value.Value);
         }
 
         public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
         {
             // Return value of GetBytes().
             int bytes;
-            string value = outputBuilder.ToString();
+
+            jsonTextWriter.WriteEndObject();
+            jsonTextWriter.Close();
+            string output = outputBuilder.ToString();
 
             // How much of the given string still needs to be written.
             // Takes into account that the character buffer may overrun.
-            int remainingLength = value.Length;
+            int remainingLength = output.Length;
 
             // Number of characters already written from value. Loop invariant therefore is:
             // charactersCopied + remainingLength == value.Length.
             int charactersCopied = 0;
 
-            // Truncate and append. Spend as little time as possible writing to outputStream.
-            outputStream.SetLength(0);
-
             // Fill up the character buffer before doing any writing.
             int currentCharPosition = 0;
+
+            // Truncate and append. Spend as little time as possible writing to outputStream.
+            outputStream.SetLength(0);
 
             while (remainingLength > 0)
             {
@@ -432,7 +433,7 @@ namespace Sandra.UI.WF
                 if (!bufferFull) charWriteCount = remainingLength;
 
                 // Now copy to the character buffer after checking its range.
-                value.CopyTo(charactersCopied, buffer, currentCharPosition, charWriteCount);
+                output.CopyTo(charactersCopied, buffer, currentCharPosition, charWriteCount);
 
                 // Update loop variables.
                 charactersCopied += charWriteCount;
