@@ -184,6 +184,9 @@ namespace Sandra.UI.WF
                         { MovesTextBox.UsePGNPieceSymbols, movesTextBox.TryUsePGNPieceSymbols },
                         { MovesTextBox.UseLongAlgebraicNotation, movesTextBox.TryUseLongAlgebraicNotation },
 
+                        { MovesTextBox.ZoomIn, movesTextBox.TryZoomIn },
+                        { MovesTextBox.ZoomOut, movesTextBox.TryZoomOut },
+
                         { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
                         { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },
                     });
