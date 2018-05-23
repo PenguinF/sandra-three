@@ -39,12 +39,12 @@ namespace Sandra.UI.WF
         internal const int FileStreamBufferSize = 4096;
 
         /// <summary>
-        /// Minimal delay in milliseconds between two auto save operations.
+        /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
         public const int AutoSaveDelay = 500;
 
         /// <summary>
-        /// Gets the name of the auto save file.
+        /// Gets the name of the auto-save file.
         /// </summary>
         public static readonly string AutoSaveFileName = ".autosave";
 
@@ -67,7 +67,7 @@ namespace Sandra.UI.WF
         private SettingObject localSettings;
 
         /// <summary>
-        /// Settings representing how they are currently stored in the autosave file.
+        /// Settings representing how they are currently stored in the auto-save file.
         /// </summary>
         private SettingObject remoteSettings;
 
@@ -93,7 +93,7 @@ namespace Sandra.UI.WF
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
         /// <param name="initialSettings">
-        /// The initial default settings to use, in case e.g. the autosave file could not be opened.
+        /// The initial default settings to use, in case e.g. the auto-save file could not be opened.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="appSubFolderName"/> or <paramref name="initialSettings"/> is null.
@@ -107,7 +107,6 @@ namespace Sandra.UI.WF
         /// </exception>
         public AutoSave(string appSubFolderName, SettingCopy initialSettings)
         {
-            // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
@@ -118,16 +117,16 @@ namespace Sandra.UI.WF
                 throw new ArgumentNullException(nameof(initialSettings));
             }
 
+            // Have to check for string.Empty because Path.Combine will not.
             if (appSubFolderName.Length == 0)
             {
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
-            // Commit to local settings. This will be used in case initialization of remoteSettings somehow failed.
+            // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
+            // don't throw but just disable auto-saving and use default initial settings.
             localSettings = initialSettings.Commit();
 
-            // If creation of the auto-save file fails, because e.g. an instance is already running,
-            // don't throw but just disable auto-saving and use default initial settings.
             try
             {
                 var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -172,7 +171,6 @@ namespace Sandra.UI.WF
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
                 {
-                    // Can share the instance, using copy-on-write semantics.
                     localSettings = remoteSettings;
                 }
 
@@ -457,7 +455,7 @@ namespace Sandra.UI.WF
                 outputStream.Write(encodedBuffer, 0, bytes);
             }
 
-            // Make sure everything is Written to the file.
+            // Make sure everything is written to the file.
             outputStream.Flush();
         }
     }
