@@ -242,14 +242,13 @@ namespace Sandra.UI.WF
 
                     try
                     {
-                        using (var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer))
+                        var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer);
+                        foreach (var kv in remoteSettings)
                         {
-                            foreach (var kv in remoteSettings)
-                            {
-                                writer.WriteKey(kv.Key);
-                                writer.Visit(kv.Value);
-                            }
+                            writer.WriteKey(kv.Key);
+                            writer.Visit(kv.Value);
                         }
+                        writer.WriteToFile();
                     }
                     catch (Exception writeException)
                     {
@@ -353,7 +352,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a single iteration of writing settings to a file.
     /// </summary>
-    internal class SettingWriter : SettingValueVisitor, IDisposable
+    internal class SettingWriter : SettingValueVisitor
     {
         // Lowercase values, unlike bool.TrueString and bool.FalseString.
         internal static readonly string TrueString = "true";
@@ -446,7 +445,7 @@ namespace Sandra.UI.WF
             encodeAndWrite(Environment.NewLine);
         }
 
-        public void Dispose()
+        public void WriteToFile()
         {
             // Process remaining characters in the buffer and what's left in the Encoder.
             int bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
