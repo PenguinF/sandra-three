@@ -242,13 +242,13 @@ namespace Sandra.UI.WF
 
                     try
                     {
-                        var writer = new SettingWriter(autoSaveFileStream, encoder, buffer, encodedBuffer);
+                        var writer = new SettingWriter();
                         foreach (var kv in remoteSettings)
                         {
                             writer.WriteKey(kv.Key);
                             writer.Visit(kv.Value);
                         }
-                        writer.WriteToFile();
+                        writer.WriteToFile(autoSaveFileStream, encoder, buffer, encodedBuffer);
                     }
                     catch (Exception writeException)
                     {
@@ -359,27 +359,45 @@ namespace Sandra.UI.WF
         internal static readonly string FalseString = "false";
         internal static readonly string KeyValueSeparator = ": ";
 
-        private readonly FileStream outputStream;
-        private readonly Encoder encoder;
-        private readonly char[] buffer;
-        private readonly byte[] encodedBuffer;
+        private readonly StringBuilder outputBuilder;
 
-        // Fill up the character buffer before doing any writing.
-        private int currentCharPosition;
-
-        public SettingWriter(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
+        public SettingWriter()
         {
-            this.outputStream = outputStream;
-            this.encoder = encoder;
-            this.buffer = buffer;
-            this.encodedBuffer = encodedBuffer;
-
-            // Truncate and append.
-            outputStream.SetLength(0);
+            outputBuilder = new StringBuilder();
         }
 
-        private void encodeAndWrite(string value)
+        public void WriteKey(SettingKey key)
         {
+            outputBuilder.Append(key.Key);
+            outputBuilder.Append(KeyValueSeparator);
+        }
+
+        public override void VisitBoolean(BooleanSettingValue value)
+        {
+            outputBuilder.Append(value.Value ? TrueString : FalseString);
+            outputBuilder.Append(Environment.NewLine);
+        }
+
+        public override void VisitInt32(Int32SettingValue value)
+        {
+            // Assumed here is that int conversion is culture independent, even though it's implicitly used.
+            outputBuilder.Append(Convert.ToString(value.Value));
+            outputBuilder.Append(Environment.NewLine);
+        }
+
+        public override void VisitString(StringSettingValue value)
+        {
+            // For now replace with double quotes, to avoid backslash parsing code.
+            outputBuilder.Append("\"" + value.Value.Replace("\"", "\"\"") + "\"");
+            outputBuilder.Append(Environment.NewLine);
+        }
+
+        public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
+        {
+            // Return value of GetBytes().
+            int bytes;
+            string value = outputBuilder.ToString();
+
             // How much of the given string still needs to be written.
             // Takes into account that the character buffer may overrun.
             int remainingLength = value.Length;
@@ -387,6 +405,12 @@ namespace Sandra.UI.WF
             // Number of characters already written from value. Loop invariant therefore is:
             // charactersCopied + remainingLength == value.Length.
             int charactersCopied = 0;
+
+            // Truncate and append. Spend as little time as possible writing to outputStream.
+            outputStream.SetLength(0);
+
+            // Fill up the character buffer before doing any writing.
+            int currentCharPosition = 0;
 
             while (remainingLength > 0)
             {
@@ -408,7 +432,7 @@ namespace Sandra.UI.WF
                 // If the buffer is full, call the encoder to convert it into bytes.
                 if (bufferFull)
                 {
-                    int bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
+                    bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
                     outputStream.Write(encodedBuffer, 0, bytes);
                     currentCharPosition = 0;
                 }
@@ -417,38 +441,9 @@ namespace Sandra.UI.WF
                     currentCharPosition += charWriteCount;
                 }
             }
-        }
 
-        public void WriteKey(SettingKey key)
-        {
-            encodeAndWrite(key.Key);
-            encodeAndWrite(KeyValueSeparator);
-        }
-
-        public override void VisitBoolean(BooleanSettingValue value)
-        {
-            encodeAndWrite(value.Value ? TrueString : FalseString);
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public override void VisitInt32(Int32SettingValue value)
-        {
-            // Assumed here is that int conversion is culture independent, even though it's implicitly used.
-            encodeAndWrite(Convert.ToString(value.Value));
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public override void VisitString(StringSettingValue value)
-        {
-            // For now replace with double quotes, to avoid backslash parsing code.
-            encodeAndWrite("\"" + value.Value.Replace("\"", "\"\"") + "\"");
-            encodeAndWrite(Environment.NewLine);
-        }
-
-        public void WriteToFile()
-        {
             // Process remaining characters in the buffer and what's left in the Encoder.
-            int bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
+            bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
             if (bytes > 0)
             {
                 outputStream.Write(encodedBuffer, 0, bytes);
