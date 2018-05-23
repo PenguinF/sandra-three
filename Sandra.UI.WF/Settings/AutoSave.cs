@@ -287,6 +287,15 @@ namespace Sandra.UI.WF
             }
         }
 
+        private void readAssert(bool condition, string assertionFailMessage)
+        {
+            Debug.Assert(condition, assertionFailMessage);
+            if (!condition)
+            {
+                throw new JsonReaderException(assertionFailMessage);
+            }
+        }
+
         private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             // Reuse one string builder to build keys and values.
@@ -308,51 +317,45 @@ namespace Sandra.UI.WF
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
 
-            // Optimistically parse.
-            // Research if parser can be replaced by 3rd-party library or if a compact representation in binary is necessary.
-            string text = sb.ToString();
-            int startIndex = 0;
+            // Optimistically parse as json.
+            JsonTextReader jsonTextReader = new JsonTextReader(new StringReader(sb.ToString()));
 
-            for (;;)
+            // Make assertions about the format in which the auto-save file was written.
+            readAssert(jsonTextReader.TokenType == JsonToken.None, "Token None expected");
+
+            if (jsonTextReader.Read())
             {
-                int keyIndex = text.IndexOf(SettingWriter.KeyValueSeparator, startIndex);
-                if (keyIndex < startIndex) break;
+                readAssert(jsonTextReader.TokenType == JsonToken.StartObject, "'{' expected");
 
-                SettingKey key = new SettingKey(text.Substring(startIndex, keyIndex - startIndex));
-                startIndex = keyIndex + SettingWriter.KeyValueSeparator.Length;
+                for (;;)
+                {
+                    jsonTextReader.Read();
+                    if (jsonTextReader.TokenType == JsonToken.EndObject) break;
+                    readAssert(jsonTextReader.TokenType == JsonToken.PropertyName, "PropertyName or EndObject '}' expected");
 
-                int valueIndex = text.IndexOf(Environment.NewLine, startIndex);
-                if (valueIndex < startIndex) break;
+                    SettingKey key = new SettingKey((string)jsonTextReader.Value);
+                    jsonTextReader.Read();
 
-                // TODO: this does not work for string values that contain newlines.
-                string valueAsString = text.Substring(startIndex, valueIndex - startIndex);
-                startIndex = valueIndex + Environment.NewLine.Length;
+                    ISettingValue value;
+                    switch (jsonTextReader.TokenType)
+                    {
+                        case JsonToken.Boolean:
+                            value = new BooleanSettingValue((bool)jsonTextReader.Value);
+                            break;
+                        case JsonToken.Integer:
+                            value = new Int32SettingValue(Convert.ToInt32(jsonTextReader.Value));
+                            break;
+                        case JsonToken.String:
+                            value = new StringSettingValue((string)jsonTextReader.Value);
+                            break;
+                        default:
+                            readAssert(false, "Boolean, Integer or String expected");
+                            // Above call is guaranteed to throw, make compiler aware here.
+                            throw new InvalidProgramException();
+                    }
 
-                ISettingValue value;
-                int intValue;
-                if (valueAsString == SettingWriter.TrueString)
-                {
-                    value = new BooleanSettingValue(true);
+                    workingCopy.KeyValueMapping[key] = value;
                 }
-                else if (valueAsString == SettingWriter.FalseString)
-                {
-                    value = new BooleanSettingValue(false);
-                }
-                else if (int.TryParse(valueAsString, out intValue))
-                {
-                    value = new Int32SettingValue(intValue);
-                }
-                else if (valueAsString.Length >= 2 && valueAsString.StartsWith("\"") && valueAsString.EndsWith("\""))
-                {
-                    value = new StringSettingValue(valueAsString.Substring(1, valueAsString.Length - 2).Replace("\"\"", "\""));
-                }
-                else
-                {
-                    // Corrupt value, break.
-                    break;
-                }
-
-                workingCopy.KeyValueMapping[key] = value;
             }
 
             return workingCopy.Commit();
