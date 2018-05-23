@@ -367,11 +367,6 @@ namespace Sandra.UI.WF
     /// </summary>
     internal class SettingWriter : SettingValueVisitor
     {
-        // Lowercase values, unlike bool.TrueString and bool.FalseString.
-        internal static readonly string TrueString = "true";
-        internal static readonly string FalseString = "false";
-        internal static readonly string KeyValueSeparator = ": ";
-
         private readonly StringBuilder outputBuilder;
         private readonly JsonTextWriter jsonTextWriter;
 
@@ -411,11 +406,10 @@ namespace Sandra.UI.WF
             jsonTextWriter.Close();
             string output = outputBuilder.ToString();
 
-            // How much of the given string still needs to be written.
-            // Takes into account that the character buffer may overrun.
+            // How much of the output still needs to be written.
             int remainingLength = output.Length;
 
-            // Number of characters already written from value. Loop invariant therefore is:
+            // Number of characters already written from output. Loop invariant therefore is:
             // charactersCopied + remainingLength == value.Length.
             int charactersCopied = 0;
 
