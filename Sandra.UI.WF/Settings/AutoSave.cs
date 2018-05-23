@@ -399,9 +399,6 @@ namespace Sandra.UI.WF
 
         public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
         {
-            // Return value of GetBytes().
-            int bytes;
-
             jsonTextWriter.WriteEndObject();
             jsonTextWriter.Close();
             string output = outputBuilder.ToString();
@@ -410,54 +407,51 @@ namespace Sandra.UI.WF
             int remainingLength = output.Length;
 
             // Number of characters already written from output. Loop invariant therefore is:
-            // charactersCopied + remainingLength == value.Length.
+            // charactersCopied + remainingLength == output.Length.
             int charactersCopied = 0;
-
-            // Fill up the character buffer before doing any writing.
-            int currentCharPosition = 0;
 
             // Truncate and append. Spend as little time as possible writing to outputStream.
             outputStream.SetLength(0);
 
-            while (remainingLength > 0)
+            // Fill up the character buffer before doing any writing.
+            for (;;)
             {
                 // Determine number of characters to write.
                 // AutoSave.CharBufferSize is known to be equal to buffer.Length.
-                int charWriteCount = AutoSave.CharBufferSize - currentCharPosition;
+                int charWriteCount = AutoSave.CharBufferSize;
 
                 // Remember if this fill up the entire buffer.
                 bool bufferFull = charWriteCount <= remainingLength;
                 if (!bufferFull) charWriteCount = remainingLength;
 
                 // Now copy to the character buffer after checking its range.
-                output.CopyTo(charactersCopied, buffer, currentCharPosition, charWriteCount);
+                output.CopyTo(charactersCopied, buffer, 0, charWriteCount);
+
+                // If the buffer is full, call the encoder to convert it into bytes.
+                if (bufferFull)
+                {
+                    int bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
+                    outputStream.Write(encodedBuffer, 0, bytes);
+                }
 
                 // Update loop variables.
                 charactersCopied += charWriteCount;
                 remainingLength -= charWriteCount;
 
-                // If the buffer is full, call the encoder to convert it into bytes.
-                if (bufferFull)
+                if (remainingLength == 0)
                 {
-                    bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
-                    outputStream.Write(encodedBuffer, 0, bytes);
-                    currentCharPosition = 0;
-                }
-                else
-                {
-                    currentCharPosition += charWriteCount;
+                    // Process what's left in the buffer and Encoder.
+                    int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
+                    if (bytes > 0)
+                    {
+                        outputStream.Write(encodedBuffer, 0, bytes);
+                    }
+
+                    // Make sure everything is written to the file.
+                    outputStream.Flush();
+                    return;
                 }
             }
-
-            // Process remaining characters in the buffer and what's left in the Encoder.
-            bytes = encoder.GetBytes(buffer, 0, currentCharPosition, encodedBuffer, 0, true);
-            if (bytes > 0)
-            {
-                outputStream.Write(encodedBuffer, 0, bytes);
-            }
-
-            // Make sure everything is written to the file.
-            outputStream.Flush();
         }
     }
 }
