@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
                         newChessBoardForm.ClientSize = new Size(400, 400);
                     }
 
-                    newChessBoardForm.PerformAutoFit();
+                    newChessBoardForm.PerformAutoFit(null);
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
