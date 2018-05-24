@@ -192,8 +192,7 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // Zoom in or out.
-                int delta = (e.Delta / 120) * 16;
-                ClientSize = new Size(ClientSize.Width + delta, ClientSize.Height + delta);
+                PerformAutoFit(PlayingBoard.SquareSize + e.Delta / 120);
             }
             else if (game != null)
             {
