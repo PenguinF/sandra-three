@@ -49,6 +49,8 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
         internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
+        internal static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
+        internal static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
     }
 
     internal static class Localizers
@@ -153,6 +155,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
                 { LocalizedStringKeys.View, "View" },
+                { LocalizedStringKeys.ZoomIn, "Zoom in" },
+                { LocalizedStringKeys.ZoomOut, "Zoom out" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
                 { LocalizedConsoleKeys.ConsoleKeyShift, "Shift" },
@@ -219,6 +223,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },
                 { LocalizedStringKeys.View, "Weergave" },
+                { LocalizedStringKeys.ZoomIn, "Inzoomen" },
+                { LocalizedStringKeys.ZoomOut, "Uitzoomen" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
                 { LocalizedConsoleKeys.ConsoleKeyShift, "Shift" },

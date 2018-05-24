@@ -192,8 +192,7 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // Zoom in or out.
-                int delta = (e.Delta / 120) * 16;
-                ClientSize = new Size(ClientSize.Width + delta, ClientSize.Height + delta);
+                PerformAutoFit(PlayingBoard.SquareSize + e.Delta / 120);
             }
             else if (game != null)
             {
@@ -929,19 +928,40 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Manually updates the size of the form to a value which it would have snapped to had it been resized by WM_SIZING messages.
         /// </summary>
-        public void PerformAutoFit()
+        /// <param name="targetSquareSize">
+        /// IF not-null and greater than 0, will resize the form so the playing board will have the desired square size.
+        /// </param>
+        public void PerformAutoFit(int? targetSquareSize)
         {
             startResize();
 
             // Simulate OnResizing event.
             // No need to create a RECT with coordinates relative to the screen, since only the size may be affected.
-            RECT windowRect = new RECT()
+            RECT windowRect;
+            if (targetSquareSize == null || targetSquareSize.Value <= 0)
             {
-                Left = Left,
-                Right = Right,
-                Top = Top,
-                Bottom = Bottom,
-            };
+                windowRect = new RECT()
+                {
+                    Left = Left,
+                    Right = Right,
+                    Top = Top,
+                    Bottom = Bottom,
+                };
+            }
+            else
+            {
+                Size targetSize = PlayingBoard.GetExactAutoFitSize(targetSquareSize.Value);
+                targetSize.Width += widthDifference;
+                targetSize.Height += heightDifference;
+
+                windowRect = new RECT()
+                {
+                    Left = Left,
+                    Right = Left + targetSize.Width,
+                    Top = Top,
+                    Bottom = Top + targetSize.Height,
+                };
+            }
 
             performAutoFit(ref windowRect, ResizeMode.BottomRight);
 

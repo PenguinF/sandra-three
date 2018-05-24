@@ -104,5 +104,31 @@ namespace Sandra.UI.WF
             if (perform) SelectAll();
             return UIActionVisibility.Enabled;
         }
+
+        public UIActionState TryZoomIn(bool perform)
+        {
+            int zoomFactor = toDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor >= 649) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                zoomFactor++;
+                ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                autoSaveZoomFactor(zoomFactor);
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryZoomOut(bool perform)
+        {
+            int zoomFactor = toDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor <= -9) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                zoomFactor--;
+                ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                autoSaveZoomFactor(zoomFactor);
+            }
+            return UIActionVisibility.Enabled;
+        }
     }
 }

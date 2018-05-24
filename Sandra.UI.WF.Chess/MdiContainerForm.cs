@@ -207,7 +207,9 @@ namespace Sandra.UI.WF
             // Add these actions to the "View" dropdown list.
             bindFocusDependentUIActions(viewMenu,
                                         InteractiveGame.GotoChessBoardForm,
-                                        InteractiveGame.GotoMovesForm);
+                                        InteractiveGame.GotoMovesForm,
+                                        SharedUIAction.ZoomIn,
+                                        SharedUIAction.ZoomOut);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;

@@ -65,7 +65,7 @@ namespace Sandra.UI.WF
                         newChessBoardForm.ClientSize = new Size(400, 400);
                     }
 
-                    newChessBoardForm.PerformAutoFit();
+                    newChessBoardForm.PerformAutoFit(null);
 
                     newChessBoardForm.PlayingBoard.BindActions(new UIActionBindings
                     {
@@ -91,6 +91,9 @@ namespace Sandra.UI.WF
 
                         { StandardChessBoardForm.FlipBoard, newChessBoardForm.TryFlipBoard },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+
+                        { SharedUIAction.ZoomIn, newChessBoardForm.TryZoomIn },
+                        { SharedUIAction.ZoomOut, newChessBoardForm.TryZoomOut },
                     });
 
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);
@@ -183,6 +186,9 @@ namespace Sandra.UI.WF
 
                         { MovesTextBox.UsePGNPieceSymbols, movesTextBox.TryUsePGNPieceSymbols },
                         { MovesTextBox.UseLongAlgebraicNotation, movesTextBox.TryUseLongAlgebraicNotation },
+
+                        { SharedUIAction.ZoomIn, movesTextBox.TryZoomIn },
+                        { SharedUIAction.ZoomOut, movesTextBox.TryZoomOut },
 
                         { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
                         { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },

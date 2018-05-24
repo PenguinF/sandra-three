@@ -72,6 +72,17 @@ namespace Sandra.UI.WF
 
             applyDefaultStyle();
 
+            int zoomFactor;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
+            {
+                // Reverse of calculation done in autoSaveZoomFactor().
+                // Check range first. (Mapped from 1/64 < ZoomFactor < 64)
+                if (-10 < zoomFactor && zoomFactor < 650)
+                {
+                    ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                }
+            }
+
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
             localizedPieceSymbols.DisplayText.ValueChanged += _ =>
@@ -473,6 +484,25 @@ namespace Sandra.UI.WF
             }
 
             base.OnMouseWheel(e);
+
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                // ZoomFactor isn't updated yet, so predict here what it's going to be.
+                autoSaveZoomFactor(toDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
+            }
         }
+
+        private void autoSaveZoomFactor(int zoomFactor)
+        {
+            Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Zoom, zoomFactor).Persist();
+        }
+
+        private int toDiscreteZoomFactor(float zoomFactor)
+            // Assume discrete deltas of 0.1f.
+            // Set 0 to be the default, so 1.0f should map to 0.
+            => (int)Math.Round(zoomFactor * 10f) - 10;
+
+        private float fromDiscreteZoomFactor(int zoomFactor)
+            => (zoomFactor + 10) / 10f;
     }
 }
