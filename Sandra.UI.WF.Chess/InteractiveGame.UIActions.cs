@@ -91,6 +91,9 @@ namespace Sandra.UI.WF
 
                         { StandardChessBoardForm.FlipBoard, newChessBoardForm.TryFlipBoard },
                         { StandardChessBoardForm.TakeScreenshot, newChessBoardForm.TryTakeScreenshot },
+
+                        { SharedUIAction.ZoomIn, newChessBoardForm.TryZoomIn },
+                        { SharedUIAction.ZoomOut, newChessBoardForm.TryZoomOut },
                     });
 
                     UIMenu.AddTo(newChessBoardForm.PlayingBoard);

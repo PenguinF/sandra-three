@@ -65,5 +65,18 @@ namespace Sandra.UI.WF
             }
             return UIActionVisibility.Enabled;
         }
+
+        public UIActionState TryZoomIn(bool perform)
+        {
+            if (perform) PerformAutoFit(PlayingBoard.SquareSize + 1);
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryZoomOut(bool perform)
+        {
+            if (PlayingBoard.SquareSize <= 1) return UIActionVisibility.Disabled;
+            if (perform) PerformAutoFit(PlayingBoard.SquareSize - 1);
+            return UIActionVisibility.Enabled;
+        }
     }
 }
