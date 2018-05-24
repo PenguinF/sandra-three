@@ -208,8 +208,8 @@ namespace Sandra.UI.WF
             bindFocusDependentUIActions(viewMenu,
                                         InteractiveGame.GotoChessBoardForm,
                                         InteractiveGame.GotoMovesForm,
-                                        MovesTextBox.ZoomIn,
-                                        MovesTextBox.ZoomOut);
+                                        SharedUIAction.ZoomIn,
+                                        SharedUIAction.ZoomOut);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;

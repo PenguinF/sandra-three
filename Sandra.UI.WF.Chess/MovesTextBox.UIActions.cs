@@ -105,16 +105,6 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
-            new UIAction(MovesTextBoxUIActionPrefix + nameof(ZoomIn)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.ZoomIn,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
-            });
-
         public UIActionState TryZoomIn(bool perform)
         {
             int zoomFactor = toDiscreteZoomFactor(ZoomFactor);
@@ -127,15 +117,6 @@ namespace Sandra.UI.WF
             }
             return UIActionVisibility.Enabled;
         }
-
-        public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
-            new UIAction(MovesTextBoxUIActionPrefix + nameof(ZoomOut)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.ZoomOut,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
-            });
 
         public UIActionState TryZoomOut(bool perform)
         {

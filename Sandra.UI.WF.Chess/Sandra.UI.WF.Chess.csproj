@@ -69,6 +69,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SettingKeys.cs" />
+    <Compile Include="SharedUIAction.cs" />
     <Compile Include="StandardChessBoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
