@@ -22,7 +22,7 @@ namespace Sandra.UI.WF
 {
     internal static class SharedUIAction
     {
-        public const string SharedUIActionPrefix = nameof(MovesTextBox) + ".";
+        public const string SharedUIActionPrefix = nameof(SharedUIAction) + ".";
 
         public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
