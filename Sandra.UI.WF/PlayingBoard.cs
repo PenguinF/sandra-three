@@ -876,10 +876,13 @@ namespace Sandra.UI.WF
         /// Returns the size closest to the given size which will allow the board to fit exactly.
         /// </summary>
         public Size GetClosestAutoFitSize(Size maxBounds)
-        {
-            int squareSize = maxSquareSize(maxBounds);
+            => GetExactAutoFitSize(maxSquareSize(maxBounds));
 
-            // Go back to a client size by inverting squareSizeFromClientSize().
+        /// <summary>
+        /// Given a square size, returns the <see cref="Size"/> which will allow the board to fit exactly.
+        /// </summary>
+        public Size GetExactAutoFitSize(int squareSize)
+        {
             int targetWidth = squareSize * BoardWidth + InnerSpacing * (BoardWidth - 1) + BorderWidth * 2;
             int targetHeight = squareSize * BoardHeight + InnerSpacing * (BoardHeight - 1) + BorderWidth * 2;
             return new Size(targetWidth, targetHeight);
