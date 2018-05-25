@@ -308,11 +308,28 @@ namespace Sandra.UI.WF
                         }
 
                         // Alterate between both auto-save files.
-                        FileStream writefileStream
-                            = lastWrittenToFileStream == autoSaveFileStream1
-                            ? autoSaveFileStream2
-                            : autoSaveFileStream1;
+                        // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
+                        FileStream writefileStream;
+                        autoSaveFileStream.Seek(0, SeekOrigin.Begin);
+                        if (lastWrittenToFileStream == autoSaveFileStream1)
+                        {
+                            writefileStream = autoSaveFileStream2;
+                            // Truncate and append.
+                            writefileStream.SetLength(0);
+                            // Exactly now signal that autoSaveFileStream2 is the latest.
+                            autoSaveFileStream.WriteByte(2);
+                        }
+                        else
+                        {
+                            writefileStream = autoSaveFileStream1;
+                            // Truncate and append.
+                            writefileStream.SetLength(0);
+                            // Exactly now signal that autoSaveFileStream1 is the latest.
+                            autoSaveFileStream.WriteByte(1);
+                        }
+                        autoSaveFileStream.Flush();
 
+                        // Spend as little time as possible writing to writefileStream.
                         writer.WriteToFile(writefileStream, encoder, buffer, encodedBuffer);
 
                         // Only save when completely successful, to maximize chances that at least
@@ -474,9 +491,6 @@ namespace Sandra.UI.WF
             // Number of characters already written from output. Loop invariant therefore is:
             // charactersCopied + remainingLength == output.Length.
             int charactersCopied = 0;
-
-            // Truncate and append. Spend as little time as possible writing to outputStream.
-            outputStream.SetLength(0);
 
             // Fill up the character buffer before doing any writing.
             for (;;)
