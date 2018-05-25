@@ -298,6 +298,11 @@ namespace Sandra.UI.WF
                 {
                     // Have to catch cancelled exceptions.
                 }
+
+                // Dispose in opposite order of acquiring the lock on the file,
+                // so that autoSaveFileStream2 can only be locked if autoSaveFileStream1 is locked too.
+                autoSaveFileStream2.Dispose();
+                autoSaveFileStream1.Dispose();
             }
         }
 
