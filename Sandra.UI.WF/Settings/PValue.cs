@@ -39,6 +39,7 @@ namespace Sandra.UI.WF
         public virtual void Visit(PValue value) { if (value != null) value.Accept(this); }
         public virtual void VisitBoolean(PBoolean value) => DefaultVisit(value);
         public virtual void VisitInteger(PInteger value) => DefaultVisit(value);
+        public virtual void VisitMap(PMap value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
     }
 
@@ -52,6 +53,7 @@ namespace Sandra.UI.WF
         public virtual TResult Visit(PValue value) => value == null ? default(TResult) : value.Accept(this);
         public virtual TResult VisitBoolean(PBoolean value) => DefaultVisit(value);
         public virtual TResult VisitInteger(PInteger value) => DefaultVisit(value);
+        public virtual TResult VisitMap(PMap value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
     }
 
@@ -64,8 +66,8 @@ namespace Sandra.UI.WF
 
         public PBoolean(bool value) { Value = value; }
 
-        public void Accept(PValueVisitor visitor) => visitor.VisitBoolean(this);
-        public TResult Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitBoolean(this);
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitBoolean(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitBoolean(this);
     }
 
     /// <summary>
@@ -77,8 +79,8 @@ namespace Sandra.UI.WF
 
         public PInteger(BigInteger value) { Value = value; }
 
-        public void Accept(PValueVisitor visitor) => visitor.VisitInteger(this);
-        public TResult Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInteger(this);
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitInteger(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInteger(this);
     }
 
     /// <summary>
@@ -90,8 +92,8 @@ namespace Sandra.UI.WF
 
         public PString(string value) { Value = value; }
 
-        public void Accept(PValueVisitor visitor) => visitor.VisitString(this);
-        public TResult Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitString(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
     }
 
     /// <summary>

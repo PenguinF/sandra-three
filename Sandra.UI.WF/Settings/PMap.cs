@@ -24,7 +24,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only map of string keys onto <see cref="PValue"/>s.
     /// </summary>
-    public class PMap : IReadOnlyDictionary<string, PValue>
+    public class PMap : IReadOnlyDictionary<string, PValue>, PValue
     {
         // Prevent repeated allocations of empty dictionaries.
         private static readonly Dictionary<string, PValue> emptyMap = new Dictionary<string, PValue>();
@@ -123,5 +123,8 @@ namespace Sandra.UI.WF
         public bool TryGetValue(string key, out PValue value) => map.TryGetValue(key, out value);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitMap(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitMap(this);
     }
 }
