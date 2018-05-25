@@ -45,9 +45,14 @@ namespace Sandra.UI.WF
         public const int AutoSaveDelay = 500;
 
         /// <summary>
-        /// Gets the name of the auto-save file.
+        /// Gets the name of the first auto-save file.
         /// </summary>
-        public static readonly string AutoSaveFileName = ".autosave";
+        public static readonly string AutoSaveFileName1 = ".autosave1";
+
+        /// <summary>
+        /// Gets the name of the second auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName2 = ".autosave2";
 
         private readonly FileStream autoSaveFileStream;
         private readonly Encoder encoder;
@@ -137,7 +142,7 @@ namespace Sandra.UI.WF
                 // a) Create if it doesn't exist, open if it already exists.
                 // b) Only this process can access it. Protects the folder from deletion as well.
                 // It gets automatically closed when the application exits, i.e. no need for IDisposable.
-                autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, AutoSaveFileName),
+                autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, AutoSaveFileName1),
                                                     FileMode.OpenOrCreate,
                                                     FileAccess.ReadWrite,
                                                     FileShare.Read,
