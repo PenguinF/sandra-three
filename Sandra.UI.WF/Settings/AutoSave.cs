@@ -23,6 +23,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading;
@@ -387,6 +388,13 @@ namespace Sandra.UI.WF
         public override void VisitInteger(PInteger value)
         {
             jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public override void VisitList(PList value)
+        {
+            jsonTextWriter.WriteStartArray();
+            value.ForEach(Visit);
+            jsonTextWriter.WriteEndArray();
         }
 
         public override void VisitMap(PMap value)

@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// The <see cref="PValue"/> at the specified index.
         /// </returns>
-        /// <exception cref="System.IndexOutOfRangeException">
+        /// <exception cref="IndexOutOfRangeException">
         /// <paramref name="index"/> is lower than 0, or greater than or equal to <see cref="Count"/>.
         /// </exception>
         public PValue this[int index] => array[index];
@@ -80,6 +81,32 @@ namespace Sandra.UI.WF
             // Below syntax with 'var' is possible but somehow PValue[] doesn't expose a typed GetEnumerator() method.
             // Hoping the compiler will flag this as optimizable.
             foreach (var pValue in array) yield return pValue;
+        }
+
+        /// <summary>
+        /// Compares this <see cref="PList"/> with another and returns if they are equal.
+        /// </summary>
+        /// <param name="other">
+        /// The <see cref="PList"/> to compare with.
+        /// </param>
+        /// <returns>
+        /// true if both <see cref="PList"/> instances are equal; otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="other"/> is null.
+        /// </exception>
+        public bool EqualTo(PList other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            if (array.Length != other.array.Length) return false;
+
+            PValueEqualityComparer eq = PValueEqualityComparer.Instance;
+            for (int i = 0; i < array.Length; ++i)
+            {
+                if (!eq.AreEqual(array[i], other.array[i])) return false;
+            }
+            return true;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
