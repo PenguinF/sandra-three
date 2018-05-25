@@ -65,6 +65,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings\AutoSave.cs" />
+    <Compile Include="Settings\PList.cs" />
+    <Compile Include="Settings\PMap.cs" />
     <Compile Include="Settings\PValue.cs" />
     <Compile Include="Settings\SettingCopy.cs" />
     <Compile Include="Settings\SettingHelper.cs" />
