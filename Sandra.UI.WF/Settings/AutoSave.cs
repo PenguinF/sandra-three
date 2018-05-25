@@ -54,7 +54,8 @@ namespace Sandra.UI.WF
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
 
-        private readonly FileStream autoSaveFileStream;
+        private readonly FileStream autoSaveFileStream1;
+        private readonly FileStream autoSaveFileStream2;
         private readonly Encoder encoder;
 
         /// <summary>
@@ -138,22 +139,8 @@ namespace Sandra.UI.WF
                 var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 var baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
 
-                // Create fileStream in such a way that:
-                // a) Create if it doesn't exist, open if it already exists.
-                // b) Only this process can access it. Protects the folder from deletion as well.
-                // It gets automatically closed when the application exits, i.e. no need for IDisposable.
-                autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, AutoSaveFileName1),
-                                                    FileMode.OpenOrCreate,
-                                                    FileAccess.ReadWrite,
-                                                    FileShare.Read,
-                                                    FileStreamBufferSize,
-                                                    FileOptions.SequentialScan);
-
-                // Assert capabilities of the file stream.
-                Debug.Assert(autoSaveFileStream.CanSeek
-                    && autoSaveFileStream.CanRead
-                    && autoSaveFileStream.CanWrite
-                    && !autoSaveFileStream.CanTimeout);
+                autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
+                autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
 
                 // Initialize encoders and buffers.
                 Encoding encoding = Encoding.UTF8;
@@ -199,6 +186,28 @@ namespace Sandra.UI.WF
                 // Trace the rest. (IOException, PlatformNotSupportedException, UnauthorizedAccessException, ...)
                 initAutoSaveException.Trace();
             }
+        }
+
+        private static FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
+        {
+            // Create fileStream in such a way that:
+            // a) Create if it doesn't exist, open if it already exists.
+            // b) Only this process can access it. Protects the folder from deletion as well.
+            // It gets automatically closed when the application exits, i.e. no need for IDisposable.
+            var autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
+                                                    FileMode.OpenOrCreate,
+                                                    FileAccess.ReadWrite,
+                                                    FileShare.Read,
+                                                    FileStreamBufferSize,
+                                                    FileOptions.SequentialScan);
+
+            // Assert capabilities of the file stream.
+            Debug.Assert(autoSaveFileStream.CanSeek
+                && autoSaveFileStream.CanRead
+                && autoSaveFileStream.CanWrite
+                && !autoSaveFileStream.CanTimeout);
+
+            return autoSaveFileStream;
         }
 
         /// <summary>
@@ -263,7 +272,7 @@ namespace Sandra.UI.WF
                             writer.WriteKey(kv.Key);
                             writer.Visit(kv.Value);
                         }
-                        writer.WriteToFile(autoSaveFileStream, encoder, buffer, encodedBuffer);
+                        writer.WriteToFile(autoSaveFileStream1, encoder, buffer, encodedBuffer);
                     }
                     catch (Exception writeException)
                     {
@@ -309,7 +318,7 @@ namespace Sandra.UI.WF
             // Loop until the entire file is read.
             for (;;)
             {
-                int bytes = autoSaveFileStream.Read(inputBuffer, 0, CharBufferSize);
+                int bytes = autoSaveFileStream1.Read(inputBuffer, 0, CharBufferSize);
                 if (bytes == 0) break;
 
                 int chars = decoder.GetChars(inputBuffer, 0, bytes, decodedBuffer, 0);
