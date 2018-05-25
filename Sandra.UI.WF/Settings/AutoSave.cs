@@ -206,7 +206,22 @@ namespace Sandra.UI.WF
                     : autoSaveFileStream1;
 
                 // Load remote settings.
-                remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                try
+                {
+                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                }
+                catch (Exception loadException)
+                {
+                    // Trace and try the other auto-save file as a backup.
+                    // Also use a new decoder.
+                    loadException.Trace();
+                    latestAutoSaveFileStream
+                        = latestAutoSaveFileStream == autoSaveFileStream1
+                        ? autoSaveFileStream2
+                        : autoSaveFileStream1;
+
+                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                }
 
                 // Make sure to save to the other file stream first.
                 lastWrittenToFileStream = latestAutoSaveFileStream;
