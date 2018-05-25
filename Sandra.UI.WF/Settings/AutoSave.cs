@@ -140,7 +140,17 @@ namespace Sandra.UI.WF
                 var baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
 
                 autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
-                autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
+
+                try
+                {
+                    autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
+                }
+                catch
+                {
+                    autoSaveFileStream1.Dispose();
+                    autoSaveFileStream1 = null;
+                    throw;
+                }
 
                 // Initialize encoders and buffers.
                 Encoding encoding = Encoding.UTF8;
