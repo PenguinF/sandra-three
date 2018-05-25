@@ -94,6 +94,11 @@ namespace Sandra.UI.WF
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
+        /// Either <see cref="autoSaveFileStream1"/> or <see cref="autoSaveFileStream2"/>, whichever was last written to.
+        /// </summary>
+        private FileStream lastWrittenToFileStream;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
         /// </summary>
         /// <param name="appSubFolderName">
@@ -170,6 +175,9 @@ namespace Sandra.UI.WF
 
                 // Load remote settings.
                 remoteSettings = Load(autoSaveFileStream1, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+
+                // Make sure to save to the other file stream first.
+                lastWrittenToFileStream = autoSaveFileStream1;
 
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
@@ -282,7 +290,18 @@ namespace Sandra.UI.WF
                             writer.WriteKey(kv.Key);
                             writer.Visit(kv.Value);
                         }
-                        writer.WriteToFile(autoSaveFileStream1, encoder, buffer, encodedBuffer);
+
+                        // Alterate between both auto-save files.
+                        FileStream writefileStream
+                            = lastWrittenToFileStream == autoSaveFileStream1
+                            ? autoSaveFileStream2
+                            : autoSaveFileStream1;
+
+                        writer.WriteToFile(writefileStream, encoder, buffer, encodedBuffer);
+
+                        // Only save when completely successful, to maximize chances that at least
+                        // one of both auto-save files is in a completely correct format.
+                        lastWrittenToFileStream = writefileStream;
                     }
                     catch (Exception writeException)
                     {
