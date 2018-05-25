@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Sandra.UI.WF
 {
@@ -162,10 +163,14 @@ namespace Sandra.UI.WF
         public bool TryGetValue(SettingKey key, out int value)
         {
             PValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PInt32)
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PInteger)
             {
-                value = ((PInt32)settingValue).Value;
-                return true;
+                BigInteger bigInteger = ((PInteger)settingValue).Value;
+                if (int.MinValue <= bigInteger && bigInteger <= int.MaxValue)
+                {
+                    value = (int)bigInteger;
+                    return true;
+                }
             }
 
             value = default(int);

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -343,7 +344,9 @@ namespace Sandra.UI.WF
                             value = new PBoolean((bool)jsonTextReader.Value);
                             break;
                         case JsonToken.Integer:
-                            value = new PInt32(Convert.ToInt32(jsonTextReader.Value));
+                            value = jsonTextReader.Value is BigInteger
+                                ? new PInteger((BigInteger)jsonTextReader.Value)
+                                : new PInteger((long)jsonTextReader.Value);
                             break;
                         case JsonToken.String:
                             value = new PString((string)jsonTextReader.Value);
@@ -387,7 +390,7 @@ namespace Sandra.UI.WF
             jsonTextWriter.WriteValue(value.Value);
         }
 
-        public override void VisitInt32(PInt32 value)
+        public override void VisitInteger(PInteger value)
         {
             jsonTextWriter.WriteValue(value.Value);
         }

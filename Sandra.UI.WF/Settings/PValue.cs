@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Numerics;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -36,7 +38,7 @@ namespace Sandra.UI.WF
         public virtual void DefaultVisit(PValue value) { }
         public virtual void Visit(PValue value) { if (value != null) value.Accept(this); }
         public virtual void VisitBoolean(PBoolean value) => DefaultVisit(value);
-        public virtual void VisitInt32(PInt32 value) => DefaultVisit(value);
+        public virtual void VisitInteger(PInteger value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
     }
 
@@ -49,7 +51,7 @@ namespace Sandra.UI.WF
         public virtual TResult DefaultVisit(PValue value) => default(TResult);
         public virtual TResult Visit(PValue value) => value == null ? default(TResult) : value.Accept(this);
         public virtual TResult VisitBoolean(PBoolean value) => DefaultVisit(value);
-        public virtual TResult VisitInt32(PInt32 value) => DefaultVisit(value);
+        public virtual TResult VisitInteger(PInteger value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
     }
 
@@ -67,16 +69,16 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents a <see cref="int"/> setting value.
+    /// Represents a <see cref="BigInteger"/> setting value.
     /// </summary>
-    public struct PInt32 : PValue
+    public struct PInteger : PValue
     {
-        public int Value;
+        public BigInteger Value;
 
-        public PInt32(int value) { Value = value; }
+        public PInteger(BigInteger value) { Value = value; }
 
-        public void Accept(PValueVisitor visitor) => visitor.VisitInt32(this);
-        public TResult Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInt32(this);
+        public void Accept(PValueVisitor visitor) => visitor.VisitInteger(this);
+        public TResult Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInteger(this);
     }
 
     /// <summary>
@@ -136,8 +138,8 @@ namespace Sandra.UI.WF
         public override bool VisitBoolean(PBoolean value)
             => value.Value == ((PBoolean)compareValue).Value;
 
-        public override bool VisitInt32(PInt32 value)
-            => value.Value == ((PInt32)compareValue).Value;
+        public override bool VisitInteger(PInteger value)
+            => value.Value == ((PInteger)compareValue).Value;
 
         public override bool VisitString(PString value)
             => value.Value == ((PString)compareValue).Value;

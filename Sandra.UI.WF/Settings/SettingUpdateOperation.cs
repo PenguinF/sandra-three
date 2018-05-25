@@ -87,7 +87,7 @@ namespace Sandra.UI.WF
         /// <paramref name="settingKey"/> is null.
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, int value)
-            => AddOrReplace(settingKey, new PInt32(value));
+            => AddOrReplace(settingKey, new PInteger(value));
 
         /// <summary>
         /// Adds or replaces a value for a setting key.
