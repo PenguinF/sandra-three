@@ -48,11 +48,30 @@ namespace Sandra.UI.WF
         public const int AutoSaveDelay = 500;
 
         /// <summary>
-        /// Gets the name of the auto-save file.
+        /// Gets the name of the file which indicates which of both auto-save files contains the latest data.
         /// </summary>
+        /// <remarks>
+        /// FileInfo.LastWriteTimeUtc would be the alternative but it turns out not to be precise enough
+        /// to select the right auto-save file.
+        /// </remarks>
         public static readonly string AutoSaveFileName = ".autosave";
 
+        /// <summary>
+        /// Gets the name of the first auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName1 = ".autosave1";
+
+        /// <summary>
+        /// Gets the name of the second auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName2 = ".autosave2";
+
+        private const byte LastWriteToFileStream1 = 1;
+        private const byte LastWriteToFileStream2 = 2;
+
         private readonly FileStream autoSaveFileStream;
+        private readonly FileStream autoSaveFileStream1;
+        private readonly FileStream autoSaveFileStream2;
         private readonly Encoder encoder;
 
         /// <summary>
@@ -89,6 +108,11 @@ namespace Sandra.UI.WF
         /// Long running auto-save background task.
         /// </summary>
         private readonly Task autoSaveBackgroundTask;
+
+        /// <summary>
+        /// Either <see cref="autoSaveFileStream1"/> or <see cref="autoSaveFileStream2"/>, whichever was last written to.
+        /// </summary>
+        private FileStream lastWrittenToFileStream;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -136,22 +160,24 @@ namespace Sandra.UI.WF
                 var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 var baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
 
-                // Create fileStream in such a way that:
-                // a) Create if it doesn't exist, open if it already exists.
-                // b) Only this process can access it. Protects the folder from deletion as well.
-                // It gets automatically closed when the application exits, i.e. no need for IDisposable.
-                autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, AutoSaveFileName),
-                                                    FileMode.OpenOrCreate,
-                                                    FileAccess.ReadWrite,
-                                                    FileShare.Read,
-                                                    FileStreamBufferSize,
-                                                    FileOptions.SequentialScan);
+                autoSaveFileStream = CreateAutoSaveFileStream(baseDir, AutoSaveFileName);
 
-                // Assert capabilities of the file stream.
-                Debug.Assert(autoSaveFileStream.CanSeek
-                    && autoSaveFileStream.CanRead
-                    && autoSaveFileStream.CanWrite
-                    && !autoSaveFileStream.CanTimeout);
+                try
+                {
+                    autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
+                    autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
+                }
+                catch
+                {
+                    autoSaveFileStream.Dispose();
+                    autoSaveFileStream = null;
+                    if (autoSaveFileStream1 != null)
+                    {
+                        autoSaveFileStream1.Dispose();
+                        autoSaveFileStream1 = null;
+                    }
+                    throw;
+                }
 
                 // Initialize encoders and buffers.
                 Encoding encoding = Encoding.UTF8;
@@ -169,8 +195,21 @@ namespace Sandra.UI.WF
                 byte[] inputBuffer = new byte[CharBufferSize];
                 char[] decodedBuffer = new char[encoding.GetMaxCharCount(CharBufferSize)];
 
+                // Choose auto-save file to load from.
+                int flag = LastWriteToFileStream1;
+                if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
+
+                FileStream latestAutoSaveFileStream
+                    = autoSaveFileStream2.Length == 0 ? autoSaveFileStream1
+                    : autoSaveFileStream1.Length == 0 ? autoSaveFileStream2
+                    : flag == LastWriteToFileStream2 ? autoSaveFileStream2
+                    : autoSaveFileStream1;
+
                 // Load remote settings.
-                remoteSettings = Load(encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+
+                // Make sure to save to the other file stream first.
+                lastWrittenToFileStream = latestAutoSaveFileStream;
 
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
@@ -197,6 +236,28 @@ namespace Sandra.UI.WF
                 // Trace the rest. (IOException, PlatformNotSupportedException, UnauthorizedAccessException, ...)
                 initAutoSaveException.Trace();
             }
+        }
+
+        private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
+        {
+            // Create fileStream in such a way that:
+            // a) Create if it doesn't exist, open if it already exists.
+            // b) Only this process can access it. Protects the folder from deletion as well.
+            // It gets automatically closed when the application exits, i.e. no need for IDisposable.
+            var autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
+                                                    FileMode.OpenOrCreate,
+                                                    FileAccess.ReadWrite,
+                                                    FileShare.Read,
+                                                    FileStreamBufferSize,
+                                                    FileOptions.SequentialScan);
+
+            // Assert capabilities of the file stream.
+            Debug.Assert(autoSaveFileStream.CanSeek
+                && autoSaveFileStream.CanRead
+                && autoSaveFileStream.CanWrite
+                && !autoSaveFileStream.CanTimeout);
+
+            return autoSaveFileStream;
         }
 
         /// <summary>
@@ -260,7 +321,35 @@ namespace Sandra.UI.WF
                         PMap map = new PMap(temp);
                         var writer = new SettingWriter();
                         writer.Visit(map);
-                        writer.WriteToFile(autoSaveFileStream, encoder, buffer, encodedBuffer);
+
+                        // Alterate between both auto-save files.
+                        // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
+                        FileStream writefileStream;
+                        autoSaveFileStream.Seek(0, SeekOrigin.Begin);
+                        if (lastWrittenToFileStream == autoSaveFileStream1)
+                        {
+                            writefileStream = autoSaveFileStream2;
+                            // Truncate and append.
+                            writefileStream.SetLength(0);
+                            // Exactly now signal that autoSaveFileStream2 is the latest.
+                            autoSaveFileStream.WriteByte(LastWriteToFileStream2);
+                        }
+                        else
+                        {
+                            writefileStream = autoSaveFileStream1;
+                            // Truncate and append.
+                            writefileStream.SetLength(0);
+                            // Exactly now signal that autoSaveFileStream1 is the latest.
+                            autoSaveFileStream.WriteByte(LastWriteToFileStream1);
+                        }
+                        autoSaveFileStream.Flush();
+
+                        // Spend as little time as possible writing to writefileStream.
+                        writer.WriteToFile(writefileStream, encoder, buffer, encodedBuffer);
+
+                        // Only save when completely successful, to maximize chances that at least
+                        // one of both auto-save files is in a completely correct format.
+                        lastWrittenToFileStream = writefileStream;
                     }
                     catch (Exception writeException)
                     {
@@ -286,6 +375,12 @@ namespace Sandra.UI.WF
                 {
                     // Have to catch cancelled exceptions.
                 }
+
+                // Dispose in opposite order of acquiring the lock on the files,
+                // so that inner files can only be locked if outer files are locked too.
+                autoSaveFileStream2.Dispose();
+                autoSaveFileStream1.Dispose();
+                autoSaveFileStream.Dispose();
             }
         }
 
@@ -298,7 +393,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
+        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             // Reuse one string builder to build keys and values.
             StringBuilder sb = new StringBuilder();
@@ -424,9 +519,6 @@ namespace Sandra.UI.WF
             // Number of characters already written from output. Loop invariant therefore is:
             // charactersCopied + remainingLength == output.Length.
             int charactersCopied = 0;
-
-            // Truncate and append. Spend as little time as possible writing to outputStream.
-            outputStream.SetLength(0);
 
             // Fill up the character buffer before doing any writing.
             for (;;)
