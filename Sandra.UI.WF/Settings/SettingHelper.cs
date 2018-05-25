@@ -24,18 +24,18 @@ namespace Sandra.UI.WF
     public static class SettingHelper
     {
         /// <summary>
-        /// Returns if two <see cref="ISettingValue"/>s are equal.
+        /// Returns if two <see cref="PValue"/>s are equal.
         /// </summary>
         /// <param name="x">
-        /// The first <see cref="ISettingValue"/>.
+        /// The first <see cref="PValue"/>.
         /// </param>
         /// <param name="y">
-        /// The second <see cref="ISettingValue"/>.
+        /// The second <see cref="PValue"/>.
         /// </param>
         /// <returns>
-        /// Whether or not both <see cref="ISettingValue"/>s are equal.
+        /// Whether or not both <see cref="PValue"/>s are equal.
         /// </returns>
-        public static bool AreEqual(ISettingValue x, ISettingValue y)
-            => SettingValueEqualityComparer.Instance.AreEqual(x, y);
+        public static bool AreEqual(PValue x, PValue y)
+            => PValueEqualityComparer.Instance.AreEqual(x, y);
     }
 }

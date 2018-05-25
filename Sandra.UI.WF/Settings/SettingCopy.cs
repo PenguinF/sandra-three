@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        public Dictionary<SettingKey, ISettingValue> KeyValueMapping => Mapping;
+        public Dictionary<SettingKey, PValue> KeyValueMapping => Mapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.

@@ -149,9 +149,9 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
-        private static readonly StringSettingValue SANSettingValue = new StringSettingValue("san");
-        private static readonly StringSettingValue PGNSettingValue = new StringSettingValue("pgn");
-        private static readonly StringSettingValue LANSettingValue = new StringSettingValue("lan");
+        private static readonly PString SANSettingValue = new PString("san");
+        private static readonly PString PGNSettingValue = new PString("pgn");
+        private static readonly PString LANSettingValue = new PString("lan");
 
         private MoveFormattingOption moveFormattingOption;
 
@@ -162,7 +162,7 @@ namespace Sandra.UI.WF
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                ISettingValue settingValue;
+                PValue settingValue;
                 if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
                 {
                     if (SettingHelper.AreEqual(settingValue, SANSettingValue))
@@ -182,7 +182,7 @@ namespace Sandra.UI.WF
             else
             {
                 // Update setting if the formatter was already initialized.
-                ISettingValue settingValue;
+                PValue settingValue;
                 switch (moveFormattingOption)
                 {
                     default:

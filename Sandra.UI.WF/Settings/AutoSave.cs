@@ -336,17 +336,17 @@ namespace Sandra.UI.WF
                     SettingKey key = new SettingKey((string)jsonTextReader.Value);
                     jsonTextReader.Read();
 
-                    ISettingValue value;
+                    PValue value;
                     switch (jsonTextReader.TokenType)
                     {
                         case JsonToken.Boolean:
-                            value = new BooleanSettingValue((bool)jsonTextReader.Value);
+                            value = new PBoolean((bool)jsonTextReader.Value);
                             break;
                         case JsonToken.Integer:
-                            value = new Int32SettingValue(Convert.ToInt32(jsonTextReader.Value));
+                            value = new PInt32(Convert.ToInt32(jsonTextReader.Value));
                             break;
                         case JsonToken.String:
-                            value = new StringSettingValue((string)jsonTextReader.Value);
+                            value = new PString((string)jsonTextReader.Value);
                             break;
                         default:
                             readAssert(false, "Boolean, Integer or String expected");
@@ -365,7 +365,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a single iteration of writing settings to a file.
     /// </summary>
-    internal class SettingWriter : SettingValueVisitor
+    internal class SettingWriter : PValueVisitor
     {
         private readonly StringBuilder outputBuilder;
         private readonly JsonTextWriter jsonTextWriter;
@@ -382,17 +382,17 @@ namespace Sandra.UI.WF
             jsonTextWriter.WritePropertyName(key.Key);
         }
 
-        public override void VisitBoolean(BooleanSettingValue value)
+        public override void VisitBoolean(PBoolean value)
         {
             jsonTextWriter.WriteValue(value.Value);
         }
 
-        public override void VisitInt32(Int32SettingValue value)
+        public override void VisitInt32(PInt32 value)
         {
             jsonTextWriter.WriteValue(value.Value);
         }
 
-        public override void VisitString(StringSettingValue value)
+        public override void VisitString(PString value)
         {
             jsonTextWriter.WriteValue(value.Value);
         }
