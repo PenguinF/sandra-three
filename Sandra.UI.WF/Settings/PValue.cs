@@ -39,6 +39,7 @@ namespace Sandra.UI.WF
         public virtual void Visit(PValue value) { if (value != null) value.Accept(this); }
         public virtual void VisitBoolean(PBoolean value) => DefaultVisit(value);
         public virtual void VisitInteger(PInteger value) => DefaultVisit(value);
+        public virtual void VisitList(PList value) => DefaultVisit(value);
         public virtual void VisitMap(PMap value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
     }
@@ -53,6 +54,7 @@ namespace Sandra.UI.WF
         public virtual TResult Visit(PValue value) => value == null ? default(TResult) : value.Accept(this);
         public virtual TResult VisitBoolean(PBoolean value) => DefaultVisit(value);
         public virtual TResult VisitInteger(PInteger value) => DefaultVisit(value);
+        public virtual TResult VisitList(PList value) => DefaultVisit(value);
         public virtual TResult VisitMap(PMap value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
     }
