@@ -127,17 +127,12 @@ namespace Sandra.UI.WF
             // If not null, types must match exactly.
             if (y == null || x.GetType() != y.GetType()) return false;
 
-            // Only call init/visit after knowing that both types are exactly the same.
-            return init(y).Visit(x);
+            // Only call visit after knowing that both types are exactly the same.
+            compareValue = y;
+            return Visit(x);
         }
 
         private PValue compareValue;
-
-        private PValueEqualityComparer init(PValue compareValue)
-        {
-            this.compareValue = compareValue;
-            return this;
-        }
 
         public override bool VisitBoolean(PBoolean value)
             => value.Value == ((PBoolean)compareValue).Value;
