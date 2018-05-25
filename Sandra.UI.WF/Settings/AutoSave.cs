@@ -159,7 +159,7 @@ namespace Sandra.UI.WF
                 char[] decodedBuffer = new char[encoding.GetMaxCharCount(CharBufferSize)];
 
                 // Load remote settings.
-                remoteSettings = Load(encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                remoteSettings = Load(autoSaveFileStream1, encoding.GetDecoder(), inputBuffer, decodedBuffer);
 
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
@@ -188,7 +188,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private static FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
+        private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
         {
             // Create fileStream in such a way that:
             // a) Create if it doesn't exist, open if it already exists.
@@ -315,7 +315,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private SettingObject Load(Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
+        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             // Reuse one string builder to build keys and values.
             StringBuilder sb = new StringBuilder();
@@ -323,7 +323,7 @@ namespace Sandra.UI.WF
             // Loop until the entire file is read.
             for (;;)
             {
-                int bytes = autoSaveFileStream1.Read(inputBuffer, 0, CharBufferSize);
+                int bytes = autoSaveFileStream.Read(inputBuffer, 0, CharBufferSize);
                 if (bytes == 0) break;
 
                 int chars = decoder.GetChars(inputBuffer, 0, bytes, decodedBuffer, 0);
