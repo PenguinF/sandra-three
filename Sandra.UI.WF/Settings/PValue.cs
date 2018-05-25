@@ -56,7 +56,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents a <see cref="bool"/> setting value.
+    /// Represents a <see cref="bool"/> persistent value.
     /// </summary>
     public struct PBoolean : PValue
     {
@@ -69,7 +69,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents a <see cref="BigInteger"/> setting value.
+    /// Represents a <see cref="BigInteger"/> persistent value.
     /// </summary>
     public struct PInteger : PValue
     {
@@ -82,7 +82,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Represents a <see cref="string"/> setting value.
+    /// Represents a <see cref="string"/> persistent value.
     /// </summary>
     public struct PString : PValue
     {
