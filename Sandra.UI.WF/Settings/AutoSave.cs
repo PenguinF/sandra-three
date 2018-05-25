@@ -63,6 +63,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
 
+        private const byte LastWriteToFileStream1 = 1;
+        private const byte LastWriteToFileStream2 = 2;
+
         private readonly FileStream autoSaveFileStream;
         private readonly FileStream autoSaveFileStream1;
         private readonly FileStream autoSaveFileStream2;
@@ -189,11 +192,21 @@ namespace Sandra.UI.WF
                 byte[] inputBuffer = new byte[CharBufferSize];
                 char[] decodedBuffer = new char[encoding.GetMaxCharCount(CharBufferSize)];
 
+                // Choose auto-save file to load from.
+                int flag = LastWriteToFileStream1;
+                if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
+
+                FileStream latestAutoSaveFileStream
+                    = autoSaveFileStream2.Length == 0 ? autoSaveFileStream1
+                    : autoSaveFileStream1.Length == 0 ? autoSaveFileStream2
+                    : flag == LastWriteToFileStream2 ? autoSaveFileStream2
+                    : autoSaveFileStream1;
+
                 // Load remote settings.
-                remoteSettings = Load(autoSaveFileStream1, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
 
                 // Make sure to save to the other file stream first.
-                lastWrittenToFileStream = autoSaveFileStream1;
+                lastWrittenToFileStream = latestAutoSaveFileStream;
 
                 // If non-empty, override localSettings with it.
                 if (remoteSettings.Count > 0)
@@ -317,7 +330,7 @@ namespace Sandra.UI.WF
                             // Truncate and append.
                             writefileStream.SetLength(0);
                             // Exactly now signal that autoSaveFileStream2 is the latest.
-                            autoSaveFileStream.WriteByte(2);
+                            autoSaveFileStream.WriteByte(LastWriteToFileStream2);
                         }
                         else
                         {
@@ -325,7 +338,7 @@ namespace Sandra.UI.WF
                             // Truncate and append.
                             writefileStream.SetLength(0);
                             // Exactly now signal that autoSaveFileStream1 is the latest.
-                            autoSaveFileStream.WriteByte(1);
+                            autoSaveFileStream.WriteByte(LastWriteToFileStream1);
                         }
                         autoSaveFileStream.Flush();
 
