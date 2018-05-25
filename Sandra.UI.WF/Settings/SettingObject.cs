@@ -19,7 +19,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace Sandra.UI.WF
@@ -244,14 +243,15 @@ namespace Sandra.UI.WF
         {
             if (other == null) throw new ArgumentNullException(nameof(other));
 
-            // Compare Count properties for a fast exit if they are different.
-            if (Mapping.Count != other.Mapping.Count) return false;
+            Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
+            foreach (var kv in this) temp1.Add(kv.Key.Key, kv.Value);
+            PMap map1 = new PMap(temp1);
 
-            // Both key sets need to match exactly, but if Counts are equal a unidirectional check is sufficient.
-            PValueEqualityComparer eq = PValueEqualityComparer.Instance;
-            PValue otherValue;
-            return Mapping.All(kv => other.Mapping.TryGetValue(kv.Key, out otherValue)
-                                  && eq.AreEqual(kv.Value, otherValue));
+            Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
+            foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
+            PMap map2 = new PMap(temp2);
+
+            return map1.EqualTo(map2);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

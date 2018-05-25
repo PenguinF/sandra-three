@@ -16,8 +16,10 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -42,7 +44,7 @@ namespace Sandra.UI.WF
         /// <param name="map">
         /// The map which contains the key-value pairs to construct this <see cref="PMap"/> with.
         /// </param>
-        /// <exception cref="System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="map"/> contains one or more duplicate keys.
         /// </exception>
         public PMap(IDictionary<string, PValue> map)
@@ -61,7 +63,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// The value associated with the specified key.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         /// <exception cref="KeyNotFoundException">
@@ -93,7 +95,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// true if this <see cref="PMap"/> contains a <see cref="PValue"/> with the specified key; otherwise, false.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         public bool ContainsKey(string key) => map.ContainsKey(key);
@@ -117,10 +119,36 @@ namespace Sandra.UI.WF
         /// <returns>
         /// true if this <see cref="PMap"/> contains a <see cref="PValue"/> with the specified key; otherwise, false.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         public bool TryGetValue(string key, out PValue value) => map.TryGetValue(key, out value);
+
+        /// <summary>
+        /// Compares this <see cref="PMap"/> with another and returns if they are equal.
+        /// </summary>
+        /// <param name="other">
+        /// The <see cref="PMap"/> to compare with.
+        /// </param>
+        /// <returns>
+        /// true if both <see cref="PMap"/> instances are equal; otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="other"/> is null.
+        /// </exception>
+        public bool EqualTo(PMap other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            // Compare Count properties for a fast exit if they are different.
+            if (map.Count != other.map.Count) return false;
+
+            // Both key sets need to match exactly, but if Counts are equal a unidirectional check is sufficient.
+            PValueEqualityComparer eq = PValueEqualityComparer.Instance;
+            PValue otherValue;
+            return map.All(kv => other.map.TryGetValue(kv.Key, out otherValue)
+                              && eq.AreEqual(kv.Value, otherValue));
+        }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

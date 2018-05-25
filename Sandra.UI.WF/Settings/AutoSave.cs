@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
@@ -253,12 +254,11 @@ namespace Sandra.UI.WF
 
                     try
                     {
+                        Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
+                        foreach (var kv in remoteSettings) temp.Add(kv.Key.Key, kv.Value);
+                        PMap map = new PMap(temp);
                         var writer = new SettingWriter();
-                        foreach (var kv in remoteSettings)
-                        {
-                            writer.WriteKey(kv.Key);
-                            writer.Visit(kv.Value);
-                        }
+                        writer.Visit(map);
                         writer.WriteToFile(autoSaveFileStream, encoder, buffer, encodedBuffer);
                     }
                     catch (Exception writeException)
@@ -377,12 +377,6 @@ namespace Sandra.UI.WF
         {
             outputBuilder = new StringBuilder();
             jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
-            jsonTextWriter.WriteStartObject();
-        }
-
-        public void WriteKey(SettingKey key)
-        {
-            jsonTextWriter.WritePropertyName(key.Key);
         }
 
         public override void VisitBoolean(PBoolean value)
@@ -395,6 +389,17 @@ namespace Sandra.UI.WF
             jsonTextWriter.WriteValue(value.Value);
         }
 
+        public override void VisitMap(PMap value)
+        {
+            jsonTextWriter.WriteStartObject();
+            foreach (var kv in value)
+            {
+                jsonTextWriter.WritePropertyName(kv.Key);
+                Visit(kv.Value);
+            }
+            jsonTextWriter.WriteEndObject();
+        }
+
         public override void VisitString(PString value)
         {
             jsonTextWriter.WriteValue(value.Value);
@@ -402,7 +407,6 @@ namespace Sandra.UI.WF
 
         public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
         {
-            jsonTextWriter.WriteEndObject();
             jsonTextWriter.Close();
             string output = outputBuilder.ToString();
 

@@ -143,6 +143,9 @@ namespace Sandra.UI.WF
         public override bool VisitInteger(PInteger value)
             => value.Value == ((PInteger)compareValue).Value;
 
+        public override bool VisitMap(PMap value)
+            => value.EqualTo((PMap)compareValue);
+
         public override bool VisitString(PString value)
             => value.Value == ((PString)compareValue).Value;
     }
