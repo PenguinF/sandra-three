@@ -40,6 +40,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -64,12 +65,14 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings\AutoSave.cs" />
+    <Compile Include="Settings\PList.cs" />
+    <Compile Include="Settings\PMap.cs" />
+    <Compile Include="Settings\PValue.cs" />
     <Compile Include="Settings\SettingCopy.cs" />
     <Compile Include="Settings\SettingHelper.cs" />
     <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingObject.cs" />
     <Compile Include="Settings\SettingUpdateOperation.cs" />
-    <Compile Include="Settings\SettingValue.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>

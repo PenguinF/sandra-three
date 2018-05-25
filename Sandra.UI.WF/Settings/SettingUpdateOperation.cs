@@ -47,7 +47,7 @@ namespace Sandra.UI.WF
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="settingKey"/> is null.
         /// </exception>
-        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, ISettingValue value)
+        public SettingUpdateOperation AddOrReplace(SettingKey settingKey, PValue value)
         {
             workingCopy.KeyValueMapping[settingKey] = value;
             return this;
@@ -69,7 +69,7 @@ namespace Sandra.UI.WF
         /// <paramref name="settingKey"/> is null.
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, bool value)
-            => AddOrReplace(settingKey, new BooleanSettingValue(value));
+            => AddOrReplace(settingKey, new PBoolean(value));
 
         /// <summary>
         /// Adds or replaces a value for a setting key.
@@ -87,7 +87,7 @@ namespace Sandra.UI.WF
         /// <paramref name="settingKey"/> is null.
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, int value)
-            => AddOrReplace(settingKey, new Int32SettingValue(value));
+            => AddOrReplace(settingKey, new PInteger(value));
 
         /// <summary>
         /// Adds or replaces a value for a setting key.
@@ -105,7 +105,7 @@ namespace Sandra.UI.WF
         /// <paramref name="settingKey"/> is null.
         /// </exception>
         public SettingUpdateOperation AddOrReplace(SettingKey settingKey, string value)
-            => AddOrReplace(settingKey, new StringSettingValue(value));
+            => AddOrReplace(settingKey, new PString(value));
 
         /// <summary>
         /// Removes a key and its associated value.

@@ -20,8 +20,11 @@ using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -313,12 +316,11 @@ namespace Sandra.UI.WF
 
                     try
                     {
+                        Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
+                        foreach (var kv in remoteSettings) temp.Add(kv.Key.Key, kv.Value);
+                        PMap map = new PMap(temp);
                         var writer = new SettingWriter();
-                        foreach (var kv in remoteSettings)
-                        {
-                            writer.WriteKey(kv.Key);
-                            writer.Visit(kv.Value);
-                        }
+                        writer.Visit(map);
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
@@ -431,17 +433,19 @@ namespace Sandra.UI.WF
                     SettingKey key = new SettingKey((string)jsonTextReader.Value);
                     jsonTextReader.Read();
 
-                    ISettingValue value;
+                    PValue value;
                     switch (jsonTextReader.TokenType)
                     {
                         case JsonToken.Boolean:
-                            value = new BooleanSettingValue((bool)jsonTextReader.Value);
+                            value = new PBoolean((bool)jsonTextReader.Value);
                             break;
                         case JsonToken.Integer:
-                            value = new Int32SettingValue(Convert.ToInt32(jsonTextReader.Value));
+                            value = jsonTextReader.Value is BigInteger
+                                ? new PInteger((BigInteger)jsonTextReader.Value)
+                                : new PInteger((long)jsonTextReader.Value);
                             break;
                         case JsonToken.String:
-                            value = new StringSettingValue((string)jsonTextReader.Value);
+                            value = new PString((string)jsonTextReader.Value);
                             break;
                         default:
                             readAssert(false, "Boolean, Integer or String expected");
@@ -460,7 +464,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a single iteration of writing settings to a file.
     /// </summary>
-    internal class SettingWriter : SettingValueVisitor
+    internal class SettingWriter : PValueVisitor
     {
         private readonly StringBuilder outputBuilder;
         private readonly JsonTextWriter jsonTextWriter;
@@ -469,32 +473,43 @@ namespace Sandra.UI.WF
         {
             outputBuilder = new StringBuilder();
             jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
+        }
+
+        public override void VisitBoolean(PBoolean value)
+        {
+            jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public override void VisitInteger(PInteger value)
+        {
+            jsonTextWriter.WriteValue(value.Value);
+        }
+
+        public override void VisitList(PList value)
+        {
+            jsonTextWriter.WriteStartArray();
+            value.ForEach(Visit);
+            jsonTextWriter.WriteEndArray();
+        }
+
+        public override void VisitMap(PMap value)
+        {
             jsonTextWriter.WriteStartObject();
+            foreach (var kv in value)
+            {
+                jsonTextWriter.WritePropertyName(kv.Key);
+                Visit(kv.Value);
+            }
+            jsonTextWriter.WriteEndObject();
         }
 
-        public void WriteKey(SettingKey key)
-        {
-            jsonTextWriter.WritePropertyName(key.Key);
-        }
-
-        public override void VisitBoolean(BooleanSettingValue value)
-        {
-            jsonTextWriter.WriteValue(value.Value);
-        }
-
-        public override void VisitInt32(Int32SettingValue value)
-        {
-            jsonTextWriter.WriteValue(value.Value);
-        }
-
-        public override void VisitString(StringSettingValue value)
+        public override void VisitString(PString value)
         {
             jsonTextWriter.WriteValue(value.Value);
         }
 
         public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
         {
-            jsonTextWriter.WriteEndObject();
             jsonTextWriter.Close();
             string output = outputBuilder.ToString();
 

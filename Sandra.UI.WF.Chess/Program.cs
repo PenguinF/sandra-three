@@ -50,7 +50,7 @@ namespace Sandra.UI.WF
             Chess.Constants.ForceInitialize();
 
             Localizer.Current = Localizers.English;
-            ISettingValue settingValue;
+            PValue settingValue;
             if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
             {
                 if (SettingHelper.AreEqual(settingValue, Localizers.EnglishSettingValue))

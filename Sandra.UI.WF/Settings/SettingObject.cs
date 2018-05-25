@@ -19,25 +19,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a read-only collection of setting values (<see cref="ISettingValue"/>) indexed by <see cref="SettingKey"/>.
+    /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
     /// </summary>
-    public class SettingObject : IReadOnlyDictionary<SettingKey, ISettingValue>
+    public class SettingObject : IReadOnlyDictionary<SettingKey, PValue>
     {
-        internal readonly Dictionary<SettingKey, ISettingValue> Mapping;
+        internal readonly Dictionary<SettingKey, PValue> Mapping;
 
         internal SettingObject()
         {
-            Mapping = new Dictionary<SettingKey, ISettingValue>();
+            Mapping = new Dictionary<SettingKey, PValue>();
         }
 
         internal SettingObject(SettingCopy workingCopy)
         {
-            Mapping = new Dictionary<SettingKey, ISettingValue>(workingCopy.KeyValueMapping);
+            Mapping = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Sandra.UI.WF
         /// <exception cref="KeyNotFoundException">
         /// The key does not exist.
         /// </exception>
-        public ISettingValue this[SettingKey key] => Mapping[key];
+        public PValue this[SettingKey key] => Mapping[key];
 
         /// <summary>
         /// Gets the number of key-value pairs in this <see cref="SettingObject"/>.
@@ -70,7 +70,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Enumerates all values in this <see cref="SettingObject"/>.
         /// </summary>
-        public IEnumerable<ISettingValue> Values => Mapping.Values;
+        public IEnumerable<PValue> Values => Mapping.Values;
 
         /// <summary>
         /// Determines whether this <see cref="SettingObject"/> contains a value with the specified key.
@@ -89,7 +89,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Enumerates all key-value pairs in this <see cref="SettingObject"/>.
         /// </summary>
-        public IEnumerator<KeyValuePair<SettingKey, ISettingValue>> GetEnumerator() => Mapping.GetEnumerator();
+        public IEnumerator<KeyValuePair<SettingKey, PValue>> GetEnumerator() => Mapping.GetEnumerator();
 
         /// <summary>
         /// Gets the value that is associated with the specified key.
@@ -99,7 +99,7 @@ namespace Sandra.UI.WF
         /// </param>
         /// <param name="value">
         /// When this method returns, contains the value associated with the specified key, if the key is found;
-        /// otherwise, the default <see cref="ISettingValue"/> value.
+        /// otherwise, the default <see cref="PValue"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
@@ -108,7 +108,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public bool TryGetValue(SettingKey key, out ISettingValue value) => Mapping.TryGetValue(key, out value);
+        public bool TryGetValue(SettingKey key, out PValue value) => Mapping.TryGetValue(key, out value);
 
         /// <summary>
         /// Gets the value that is associated with the specified key if it is a <see cref="bool"/>.
@@ -130,10 +130,10 @@ namespace Sandra.UI.WF
         /// </exception>
         public bool TryGetValue(SettingKey key, out bool value)
         {
-            ISettingValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is BooleanSettingValue)
+            PValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PBoolean)
             {
-                value = ((BooleanSettingValue)settingValue).Value;
+                value = ((PBoolean)settingValue).Value;
                 return true;
             }
 
@@ -161,11 +161,15 @@ namespace Sandra.UI.WF
         /// </exception>
         public bool TryGetValue(SettingKey key, out int value)
         {
-            ISettingValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is Int32SettingValue)
+            PValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PInteger)
             {
-                value = ((Int32SettingValue)settingValue).Value;
-                return true;
+                BigInteger bigInteger = ((PInteger)settingValue).Value;
+                if (int.MinValue <= bigInteger && bigInteger <= int.MaxValue)
+                {
+                    value = (int)bigInteger;
+                    return true;
+                }
             }
 
             value = default(int);
@@ -192,10 +196,10 @@ namespace Sandra.UI.WF
         /// </exception>
         public bool TryGetValue(SettingKey key, out string value)
         {
-            ISettingValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is StringSettingValue)
+            PValue settingValue;
+            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PString)
             {
-                value = ((StringSettingValue)settingValue).Value;
+                value = ((PString)settingValue).Value;
                 return true;
             }
 
@@ -239,14 +243,15 @@ namespace Sandra.UI.WF
         {
             if (other == null) throw new ArgumentNullException(nameof(other));
 
-            // Compare Count properties for a fast exit if they are different.
-            if (Mapping.Count != other.Mapping.Count) return false;
+            Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
+            foreach (var kv in this) temp1.Add(kv.Key.Key, kv.Value);
+            PMap map1 = new PMap(temp1);
 
-            // Both key sets need to match exactly, but if Counts are equal a unidirectional check is sufficient.
-            SettingValueEqualityComparer eq = SettingValueEqualityComparer.Instance;
-            ISettingValue otherValue;
-            return Mapping.All(kv => other.Mapping.TryGetValue(kv.Key, out otherValue)
-                                  && eq.AreEqual(kv.Value, otherValue));
+            Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
+            foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
+            PMap map2 = new PMap(temp2);
+
+            return map1.EqualTo(map2);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

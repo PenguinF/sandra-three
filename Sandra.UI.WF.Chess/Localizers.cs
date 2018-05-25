@@ -59,9 +59,9 @@ namespace Sandra.UI.WF
 
         public static readonly Localizer Dutch = new DutchLocalizer();
 
-        public static readonly StringSettingValue EnglishSettingValue = new StringSettingValue("en");
+        public static readonly PString EnglishSettingValue = new PString("en");
 
-        public static readonly StringSettingValue DutchSettingValue = new StringSettingValue("nl");
+        public static readonly PString DutchSettingValue = new PString("nl");
 
         public static readonly LocalizedStringKey LangEnglish = LocalizedStringKey.Unlocalizable("English");
 
