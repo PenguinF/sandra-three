@@ -45,6 +45,15 @@ namespace Sandra.UI.WF
         public const int AutoSaveDelay = 500;
 
         /// <summary>
+        /// Gets the name of the file which indicates which of both auto-save files contains the latest data.
+        /// </summary>
+        /// <remarks>
+        /// FileInfo.LastWriteTimeUtc would be the alternative but it turns out not to be precise enough
+        /// to select the right auto-save file.
+        /// </remarks>
+        public static readonly string AutoSaveFileName = ".autosave";
+
+        /// <summary>
         /// Gets the name of the first auto-save file.
         /// </summary>
         public static readonly string AutoSaveFileName1 = ".autosave1";
@@ -54,6 +63,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
 
+        private readonly FileStream autoSaveFileStream;
         private readonly FileStream autoSaveFileStream1;
         private readonly FileStream autoSaveFileStream2;
         private readonly Encoder encoder;
@@ -144,16 +154,22 @@ namespace Sandra.UI.WF
                 var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 var baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
 
-                autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
+                autoSaveFileStream = CreateAutoSaveFileStream(baseDir, AutoSaveFileName);
 
                 try
                 {
+                    autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
                 }
                 catch
                 {
-                    autoSaveFileStream1.Dispose();
-                    autoSaveFileStream1 = null;
+                    autoSaveFileStream.Dispose();
+                    autoSaveFileStream = null;
+                    if (autoSaveFileStream1 != null)
+                    {
+                        autoSaveFileStream1.Dispose();
+                        autoSaveFileStream1 = null;
+                    }
                     throw;
                 }
 
@@ -328,10 +344,11 @@ namespace Sandra.UI.WF
                     // Have to catch cancelled exceptions.
                 }
 
-                // Dispose in opposite order of acquiring the lock on the file,
-                // so that autoSaveFileStream2 can only be locked if autoSaveFileStream1 is locked too.
+                // Dispose in opposite order of acquiring the lock on the files,
+                // so that inner files can only be locked if outer files are locked too.
                 autoSaveFileStream2.Dispose();
                 autoSaveFileStream1.Dispose();
+                autoSaveFileStream.Dispose();
             }
         }
 
