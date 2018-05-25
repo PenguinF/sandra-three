@@ -168,18 +168,12 @@ namespace Sandra.UI.WF
             if (textStart < 0) textStart = 0;
             if (textLength > TextLength) textLength = TextLength;
 
-            if (textStart == 0 && textLength == TextLength)
-            {
-                Clear();
-            }
-            else
-            {
-                Select(textStart, textLength);
-                // This only works if not read-only, so temporarily turn it off.
-                ReadOnly = false;
-                SelectedText = string.Empty;
-                ReadOnly = true;
-            }
+            Select(textStart, textLength);
+
+            // This only works if not read-only, so temporarily turn it off.
+            ReadOnly = false;
+            SelectedText = string.Empty;
+            ReadOnly = true;
         }
 
         public UpdatableRichTextBox()
