@@ -467,19 +467,25 @@ namespace Sandra.UI.WF
         private Exception TokenTypeNotSupported(JsonToken jsonToken)
             => new JsonReaderException($"Token type {jsonToken} is not supported for settings.");
 
+        private JsonToken ReadSkipComments()
+        {
+            // Skip comments until encountering something meaningful.
+            do jsonTextReader.Read(); while (jsonTextReader.TokenType == JsonToken.Comment);
+            return jsonTextReader.TokenType;
+        }
+
         public bool TryParseValue(out PValue value)
         {
-            jsonTextReader.Read();
-            if (jsonTextReader.TokenType == JsonToken.None)
+            var tokenType = ReadSkipComments();
+            if (tokenType == JsonToken.None)
             {
                 value = default(PValue);
                 return false;
             }
 
-            value = ParseValue();
+            value = ParseValue(tokenType);
 
-            jsonTextReader.Read();
-            if (jsonTextReader.TokenType != JsonToken.None)
+            if (ReadSkipComments() != JsonToken.None)
             {
                 throw new JsonReaderException("End of file expected");
             }
@@ -493,19 +499,18 @@ namespace Sandra.UI.WF
 
             for (;;)
             {
-                jsonTextReader.Read();
-                if (jsonTextReader.TokenType == JsonToken.EndObject)
+                var tokenType = ReadSkipComments();
+                if (tokenType == JsonToken.EndObject)
                 {
                     return new PMap(mapBuilder);
                 }
 
-                if (jsonTextReader.TokenType != JsonToken.PropertyName)
+                if (tokenType != JsonToken.PropertyName)
                 {
                     throw new JsonReaderException("PropertyName or EndObject '}' expected");
                 }
 
                 string key = (string)jsonTextReader.Value;
-                jsonTextReader.Read();
 
                 // Expect unique keys.
                 if (mapBuilder.ContainsKey(key))
@@ -513,7 +518,7 @@ namespace Sandra.UI.WF
                     throw new JsonReaderException($"Non-unique key in object: {key}");
                 }
 
-                mapBuilder.Add(key, ParseValue());
+                mapBuilder.Add(key, ParseValue(ReadSkipComments()));
             }
         }
 
@@ -523,19 +528,19 @@ namespace Sandra.UI.WF
 
             for (;;)
             {
-                jsonTextReader.Read();
-                if (jsonTextReader.TokenType == JsonToken.EndArray)
+                var tokenType = ReadSkipComments();
+                if (tokenType == JsonToken.EndArray)
                 {
                     return new PList(listBuilder);
                 }
 
-                listBuilder.Add(ParseValue());
+                listBuilder.Add(ParseValue(tokenType));
             }
         }
 
-        private PValue ParseValue()
+        private PValue ParseValue(JsonToken currentTokenType)
         {
-            switch (jsonTextReader.TokenType)
+            switch (currentTokenType)
             {
                 case JsonToken.Boolean:
                     return new PBoolean((bool)jsonTextReader.Value);
@@ -572,7 +577,7 @@ namespace Sandra.UI.WF
                 case JsonToken.StartConstructor:
                 case JsonToken.Undefined:
                 default:
-                    throw TokenTypeNotSupported(jsonTextReader.TokenType);
+                    throw TokenTypeNotSupported(currentTokenType);
             }
         }
     }
