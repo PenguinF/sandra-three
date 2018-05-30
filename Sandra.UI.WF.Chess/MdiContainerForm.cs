@@ -396,8 +396,8 @@ namespace Sandra.UI.WF
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
+                    Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Maximized, false).Persist();
                     Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(SettingKeys.Maximized, false)
                         .AddOrReplace(SettingKeys.Left, Left)
                         .AddOrReplace(SettingKeys.Top, Top)
                         .AddOrReplace(SettingKeys.Width, Width)
