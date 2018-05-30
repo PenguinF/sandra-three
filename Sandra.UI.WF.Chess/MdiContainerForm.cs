@@ -317,6 +317,22 @@ namespace Sandra.UI.WF
         // Keeps track if the bounds of this form have been initialized in OnLoad().
         private bool formBoundsInitialized;
 
+        private bool tryGetIntegerValue(PValue value, out int intValue)
+        {
+            if (value is PInteger)
+            {
+                PInteger pInteger = (PInteger)value;
+                if (int.MinValue <= pInteger.Value
+                    && pInteger.Value <= int.MaxValue)
+                {
+                    intValue = (int)pInteger.Value;
+                    return true;
+                }
+            }
+            intValue = default(int);
+            return false;
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -326,28 +342,27 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             var settings = Program.AutoSave.CurrentSettings;
-            bool boolValue;
-            int intValue;
-            bool? maximized = null;
-            int? left, top, width, height;
-            left = top = width = height = null;
 
-            if (settings.TryGetValue(SettingKeys.Maximized, out boolValue)) maximized = boolValue;
-            if (settings.TryGetValue(SettingKeys.Left, out intValue)) left = intValue;
-            if (settings.TryGetValue(SettingKeys.Top, out intValue)) top = intValue;
-            if (settings.TryGetValue(SettingKeys.Width, out intValue)) width = intValue;
-            if (settings.TryGetValue(SettingKeys.Height, out intValue)) height = intValue;
+            PValue windowValue;
+            PList windowBoundsList;
+            int left, top, width, height;
 
-            if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
+            if (settings.TryGetValue(SettingKeys.Window, out windowValue)
+                && (windowBoundsList = windowValue as PList) != null
+                && windowBoundsList.Count == 4
+                && tryGetIntegerValue(windowBoundsList[0], out left)
+                && tryGetIntegerValue(windowBoundsList[1], out top)
+                && tryGetIntegerValue(windowBoundsList[2], out width)
+                && tryGetIntegerValue(windowBoundsList[3], out height))
             {
                 // If all bounds are known initialize from those.
-                Rectangle targetBounds = new Rectangle(left.Value, top.Value, width.Value, height.Value);
+                Rectangle targetBounds = new Rectangle(left, top, width, height);
 
                 // Do make sure it ends up on a visible working area.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
-                    SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+                    SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
                     formBoundsInitialized = true;
                 }
             }
@@ -367,7 +382,8 @@ namespace Sandra.UI.WF
             }
 
             // Restore maximized setting.
-            if (maximized.HasValue && maximized.Value)
+            bool maximized;
+            if (settings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
             {
                 WindowState = FormWindowState.Maximized;
             }
@@ -397,12 +413,13 @@ namespace Sandra.UI.WF
                 else if (WindowState == FormWindowState.Normal)
                 {
                     Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Maximized, false).Persist();
-                    Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(SettingKeys.Left, Left)
-                        .AddOrReplace(SettingKeys.Top, Top)
-                        .AddOrReplace(SettingKeys.Width, Width)
-                        .AddOrReplace(SettingKeys.Height, Height)
-                        .Persist();
+                    Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Window, new PList(new List<PValue>
+                    {
+                        new PInteger(Left),
+                        new PInteger(Top),
+                        new PInteger(Width),
+                        new PInteger(Height),
+                    })).Persist();
                 }
             }
         }

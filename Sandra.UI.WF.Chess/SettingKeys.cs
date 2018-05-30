@@ -24,10 +24,7 @@ namespace Sandra.UI.WF
     {
         internal static readonly SettingKey Lang = new SettingKey(nameof(Lang).ToLowerInvariant());
         internal static readonly SettingKey Maximized = new SettingKey(nameof(Maximized).ToLowerInvariant());
-        internal static readonly SettingKey Left = new SettingKey(nameof(Left).ToLowerInvariant());
-        internal static readonly SettingKey Top = new SettingKey(nameof(Top).ToLowerInvariant());
-        internal static readonly SettingKey Width = new SettingKey(nameof(Width).ToLowerInvariant());
-        internal static readonly SettingKey Height = new SettingKey(nameof(Height).ToLowerInvariant());
+        internal static readonly SettingKey Window = new SettingKey(nameof(Window).ToLowerInvariant());
         internal static readonly SettingKey Notation = new SettingKey(nameof(Notation).ToLowerInvariant());
         internal static readonly SettingKey Zoom = new SettingKey(nameof(Zoom).ToLowerInvariant());
     }
