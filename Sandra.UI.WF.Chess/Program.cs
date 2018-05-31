@@ -44,10 +44,8 @@ namespace Sandra.UI.WF
 
             Localizer.Current = Localizers.English;
 
-            PValue settingValue;
             OptionValue<_void, _void> optionValue;
-            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang.Name, out settingValue)
-                && SettingKeys.Lang.PType.TryGetValidValue(settingValue, out optionValue))
+            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out optionValue))
             {
                 Localizer.Current = optionValue.Case(
                     whenOption1: x => Localizers.English,

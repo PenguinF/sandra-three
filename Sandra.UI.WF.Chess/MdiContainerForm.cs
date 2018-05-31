@@ -325,10 +325,8 @@ namespace Sandra.UI.WF
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
             // Initialize from settings if available.
-            PValue windowValue;
             Rectangle targetBounds;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window.Name, out windowValue)
-                && SettingKeys.Window.PType.TryGetValidValue(windowValue, out targetBounds))
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out targetBounds))
             {
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
@@ -355,11 +353,8 @@ namespace Sandra.UI.WF
             }
 
             // Restore maximized setting.
-            PValue maximizedValue;
             bool maximized;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized.Name, out maximizedValue)
-                && SettingKeys.Maximized.PType.TryGetValidValue(maximizedValue, out maximized)
-                && maximized)
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
             {
                 WindowState = FormWindowState.Maximized;
             }

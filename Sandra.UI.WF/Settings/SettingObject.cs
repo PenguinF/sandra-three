@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -31,23 +33,37 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Gets the value that is associated with the specified key.
+        /// Gets the value that is associated with the specified property.
         /// </summary>
-        /// <param name="key">
-        /// The key to locate.
+        /// <param name="property">
+        /// The property to locate.
         /// </param>
         /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key, if the key is found;
+        /// When this method returns, contains the value associated with the specified property,
+        /// if the property is found and its value is of the correct <see cref="PType"/>;
         /// otherwise, the default <see cref="PValue"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
+        /// true if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
+        /// for the specified property; otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
+        /// <paramref name="property"/> is null.
         /// </exception>
-        public bool TryGetValue(SettingKey key, out PValue value) => Map.TryGetValue(key.Key, out value);
+        public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            PValue pValue;
+            if (Map.TryGetValue(property.Name.Key, out pValue)
+                && property.PType.TryGetValidValue(pValue, out value))
+            {
+                return true;
+            }
+            value = default(TValue);
+            return false;
+        }
 
         /// <summary>
         /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.

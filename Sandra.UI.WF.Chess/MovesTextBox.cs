@@ -72,10 +72,8 @@ namespace Sandra.UI.WF
 
             applyDefaultStyle();
 
-            PValue zoomFactorValue;
             int zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom.Name, out zoomFactorValue)
-                && SettingKeys.Zoom.PType.TryGetValidValue(zoomFactorValue, out zoomFactor))
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
@@ -159,10 +157,8 @@ namespace Sandra.UI.WF
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                PValue settingValue;
                 OptionValue<_void, _void, _void> optionValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation.Name, out settingValue)
-                    && SettingKeys.Notation.PType.TryGetValidValue(settingValue, out optionValue))
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out optionValue))
                 {
                     moveFormattingOption = optionValue.Case(
                         whenOption1: _ => MoveFormattingOption.UseLocalizedShortAlgebraic,
