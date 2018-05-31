@@ -33,11 +33,6 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Enumerates all key-value pairs in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerator<KeyValuePair<SettingKey, PValue>> GetEnumerator() => Map.GetEnumerator();
-
-        /// <summary>
         /// Gets the value that is associated with the specified key.
         /// </summary>
         /// <param name="key">

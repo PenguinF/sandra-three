@@ -56,7 +56,7 @@ namespace Sandra.UI.WF
             KeyValueMapping.Clear();
 
             // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in settingObject)
+            foreach (var kv in settingObject.Map)
             {
                 KeyValueMapping.Add(kv.Key, kv.Value);
             }
@@ -94,7 +94,7 @@ namespace Sandra.UI.WF
             if (other == null) throw new ArgumentNullException(nameof(other));
 
             Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
-            foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
+            foreach (var kv in other.Map) temp2.Add(kv.Key.Key, kv.Value);
             PMap map2 = new PMap(temp2);
 
             return ToPMap().EqualTo(map2);
