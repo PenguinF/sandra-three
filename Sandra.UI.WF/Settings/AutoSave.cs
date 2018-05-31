@@ -340,7 +340,7 @@ namespace Sandra.UI.WF
                     try
                     {
                         Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
-                        foreach (var kv in remoteSettings.Map) temp.Add(kv.Key.Key, kv.Value);
+                        foreach (var kv in remoteSettings.Map) temp.Add(kv.Key, kv.Value);
                         PMap map = new PMap(temp);
                         var writer = new SettingWriter();
                         writer.Visit(map);

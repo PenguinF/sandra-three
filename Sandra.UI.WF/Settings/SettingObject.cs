@@ -16,8 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
-
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -25,11 +23,11 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingObject
     {
-        internal readonly Dictionary<SettingKey, PValue> Map;
+        internal readonly PMap Map;
 
         internal SettingObject(SettingCopy workingCopy)
         {
-            Map = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
+            Map = workingCopy.ToPMap();
         }
 
         /// <summary>
@@ -49,7 +47,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public bool TryGetValue(SettingKey key, out PValue value) => Map.TryGetValue(key, out value);
+        public bool TryGetValue(SettingKey key, out PValue value) => Map.TryGetValue(key.Key, out value);
 
         /// <summary>
         /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
