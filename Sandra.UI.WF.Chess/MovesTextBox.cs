@@ -197,7 +197,7 @@ namespace Sandra.UI.WF
                         break;
                 }
 
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Notation, settingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Notation, settingValue);
             }
 
             string pieceSymbols;
@@ -494,7 +494,7 @@ namespace Sandra.UI.WF
 
         private void autoSaveZoomFactor(int zoomFactor)
         {
-            Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Zoom, new PInteger(zoomFactor)).Persist();
+            Program.AutoSave.Persist(SettingKeys.Zoom, new PInteger(zoomFactor));
         }
 
         private int toDiscreteZoomFactor(float zoomFactor)

@@ -79,7 +79,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Localizer.Current = English;
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, EnglishSettingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Lang, EnglishSettingValue);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
@@ -101,7 +101,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Localizer.Current = Dutch;
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, DutchSettingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Lang, DutchSettingValue);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);

@@ -293,9 +293,9 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Creates and returns an update operation for the auto-save file.
         /// </summary>
-        public SettingUpdateOperation CreateUpdate()
+        public void Persist(SettingKey settingKey, PValue value)
         {
-            return new SettingUpdateOperation(this);
+            new SettingUpdateOperation(this).AddOrReplace(settingKey, value).Persist();
         }
 
         internal void Persist(SettingCopy workingCopy)
