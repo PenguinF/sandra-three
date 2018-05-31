@@ -382,12 +382,12 @@ namespace Sandra.UI.WF
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
                 if (WindowState == FormWindowState.Maximized)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized.Name, SettingKeys.Maximized.PType.GetPValue(true));
+                    Program.AutoSave.Persist(SettingKeys.Maximized, true);
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized.Name, SettingKeys.Maximized.PType.GetPValue(false));
-                    Program.AutoSave.Persist(SettingKeys.Window.Name, SettingKeys.Window.PType.GetPValue(Bounds));
+                    Program.AutoSave.Persist(SettingKeys.Maximized, false);
+                    Program.AutoSave.Persist(SettingKeys.Window, Bounds);
                 }
             }
         }

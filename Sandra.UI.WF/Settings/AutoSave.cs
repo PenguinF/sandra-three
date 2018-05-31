@@ -293,10 +293,10 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Creates and returns an update operation for the auto-save file.
         /// </summary>
-        public void Persist(SettingKey settingKey, PValue value)
+        public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
             SettingCopy workingCopy = localSettings.CreateWorkingCopy();
-            workingCopy.KeyValueMapping[settingKey] = value;
+            workingCopy.KeyValueMapping[property.Name] = property.PType.GetPValue(value);
 
             if (!workingCopy.EqualTo(localSettings))
             {
