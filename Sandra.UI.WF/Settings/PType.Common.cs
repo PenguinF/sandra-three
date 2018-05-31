@@ -22,7 +22,7 @@ namespace Sandra.UI.WF
 {
     public static partial class PType
     {
-        public sealed class RichTextZoomFactor
+        public sealed class RichTextZoomFactor : PType<int>
         {
             /// <summary>
             /// Returns the minimum discrete integer value which when converted with
@@ -47,6 +47,28 @@ namespace Sandra.UI.WF
                 // Assume discrete deltas of 0.1f.
                 // Set 0 to be the default, so 1.0f should map to 0.
                 => (int)Math.Round(zoomFactor * 10f) - 10;
+
+            public static readonly RichTextZoomFactor Instance = new RichTextZoomFactor();
+
+            private RichTextZoomFactor() { }
+
+            public override bool TryGetValidValue(PValue value, out int targetValue)
+            {
+                if (value is PInteger)
+                {
+                    PInteger integer = (PInteger)value;
+                    if (MinDiscreteValue <= integer.Value && integer.Value <= MaxDiscreteValue)
+                    {
+                        targetValue = (int)integer.Value;
+                        return true;
+                    }
+                }
+
+                targetValue = default(int);
+                return false;
+            }
+
+            public override PValue GetPValue(int value) => new PInteger(value);
         }
     }
 }

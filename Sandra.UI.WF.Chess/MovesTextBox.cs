@@ -73,15 +73,11 @@ namespace Sandra.UI.WF
             applyDefaultStyle();
 
             PValue zoomFactorValue;
-            PInteger zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactorValue) && zoomFactorValue is PInteger)
+            int zoomFactor;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactorValue)
+                && PType.RichTextZoomFactor.Instance.TryGetValidValue(zoomFactorValue, out zoomFactor))
             {
-                zoomFactor = (PInteger)zoomFactorValue;
-
-                if (PType.RichTextZoomFactor.MinDiscreteValue <= zoomFactor.Value && zoomFactor.Value <= PType.RichTextZoomFactor.MaxDiscreteValue)
-                {
-                    ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor((int)zoomFactor.Value);
-                }
+                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
 
             // DisplayTextChanged handlers are called immediately upon registration.
@@ -495,7 +491,7 @@ namespace Sandra.UI.WF
 
         private void autoSaveZoomFactor(int zoomFactor)
         {
-            Program.AutoSave.Persist(SettingKeys.Zoom, new PInteger(zoomFactor));
+            Program.AutoSave.Persist(SettingKeys.Zoom, PType.RichTextZoomFactor.Instance.GetPValue(zoomFactor));
         }
     }
 }
