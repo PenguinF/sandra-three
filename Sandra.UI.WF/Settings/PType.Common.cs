@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -152,6 +153,89 @@ namespace Sandra.UI.WF
                     Int32.Instance.GetPValue(value.Width),
                     Int32.Instance.GetPValue(value.Height),
                 });
+        }
+
+        public sealed class TwoConstants : PType<OptionValue<_void, _void>>
+        {
+            private readonly PValue Constant1;
+            private readonly PValue Constant2;
+
+            public TwoConstants(PValue constant1, PValue constant2)
+            {
+                if (constant1 == null) throw new ArgumentNullException(nameof(constant1));
+                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
+
+                Constant1 = constant1;
+                Constant2 = constant2;
+            }
+
+            public override bool TryGetValidValue(PValue value, out OptionValue<_void, _void> targetValue)
+            {
+                if (SettingHelper.AreEqual(Constant1, value))
+                {
+                    targetValue = OptionValue<_void, _void>.Option1(_void._);
+                    return true;
+                }
+                else if (SettingHelper.AreEqual(Constant2, value))
+                {
+                    targetValue = OptionValue<_void, _void>.Option2(_void._);
+                    return true;
+                }
+
+                targetValue = default(OptionValue<_void, _void>);
+                return false;
+            }
+
+            public override PValue GetPValue(OptionValue<_void, _void> value)
+                => value.Case(
+                    whenOption1: _ => Constant1,
+                    whenOption2: _ => Constant2);
+        }
+
+        public sealed class ThreeConstants : PType<OptionValue<_void, _void, _void>>
+        {
+            private readonly PValue Constant1;
+            private readonly PValue Constant2;
+            private readonly PValue Constant3;
+
+            public ThreeConstants(PValue constant1, PValue constant2, PValue constant3)
+            {
+                if (constant1 == null) throw new ArgumentNullException(nameof(constant1));
+                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
+                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
+
+                Constant1 = constant1;
+                Constant2 = constant2;
+                Constant3 = constant3;
+            }
+
+            public override bool TryGetValidValue(PValue value, out OptionValue<_void, _void, _void> targetValue)
+            {
+                if (SettingHelper.AreEqual(Constant1, value))
+                {
+                    targetValue = OptionValue<_void, _void, _void>.Option1(_void._);
+                    return true;
+                }
+                else if (SettingHelper.AreEqual(Constant2, value))
+                {
+                    targetValue = OptionValue<_void, _void, _void>.Option2(_void._);
+                    return true;
+                }
+                else if (SettingHelper.AreEqual(Constant3, value))
+                {
+                    targetValue = OptionValue<_void, _void, _void>.Option3(_void._);
+                    return true;
+                }
+
+                targetValue = default(OptionValue<_void, _void, _void>);
+                return false;
+            }
+
+            public override PValue GetPValue(OptionValue<_void, _void, _void> value)
+                => value.Case(
+                    whenOption1: _ => Constant1,
+                    whenOption2: _ => Constant2,
+                    whenOption3: _ => Constant3);
         }
     }
 }

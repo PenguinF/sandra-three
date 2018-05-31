@@ -43,18 +43,15 @@ namespace Sandra.UI.WF
             Chess.Constants.ForceInitialize();
 
             Localizer.Current = Localizers.English;
+
             PValue settingValue;
-            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
+            OptionValue<_void, _void> optionValue;
+            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue)
+                && Localizers.LangType.TryGetValidValue(settingValue, out optionValue))
             {
-                if (SettingHelper.AreEqual(settingValue, Localizers.EnglishSettingValue))
-                {
-                    // Technically not necessary since it's the default value.
-                    Localizer.Current = Localizers.English;
-                }
-                else if (SettingHelper.AreEqual(settingValue, Localizers.DutchSettingValue))
-                {
-                    Localizer.Current = Localizers.Dutch;
-                }
+                Localizer.Current = optionValue.Case(
+                    whenOption1: x => Localizers.English,
+                    whenOption2: x => Localizers.Dutch);
             }
 
             Application.EnableVisualStyles();

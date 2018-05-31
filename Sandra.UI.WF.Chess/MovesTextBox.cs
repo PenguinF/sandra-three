@@ -150,6 +150,11 @@ namespace Sandra.UI.WF
         private static readonly PString PGNSettingValue = new PString("pgn");
         private static readonly PString LANSettingValue = new PString("lan");
 
+        private static readonly PType.ThreeConstants NotationType = new PType.ThreeConstants(
+            SANSettingValue,
+            PGNSettingValue,
+            LANSettingValue);
+
         private MoveFormattingOption moveFormattingOption;
 
         private Chess.IMoveFormatter moveFormatter;
@@ -160,41 +165,35 @@ namespace Sandra.UI.WF
             {
                 // Initialize moveFormattingOption from settings.
                 PValue settingValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
+                OptionValue<_void, _void, _void> optionValue;
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue)
+                    && NotationType.TryGetValidValue(settingValue, out optionValue))
                 {
-                    if (SettingHelper.AreEqual(settingValue, SANSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UseLocalizedShortAlgebraic;
-                    }
-                    else if (SettingHelper.AreEqual(settingValue, PGNSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UsePGN;
-                    }
-                    else if (SettingHelper.AreEqual(settingValue, LANSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UseLocalizedLongAlgebraic;
-                    }
+                    moveFormattingOption = optionValue.Case(
+                        whenOption1: _ => MoveFormattingOption.UseLocalizedShortAlgebraic,
+                        whenOption2: _ => MoveFormattingOption.UsePGN,
+                        whenOption3: _ => MoveFormattingOption.UseLocalizedLongAlgebraic);
                 }
             }
             else
             {
                 // Update setting if the formatter was already initialized.
-                PValue settingValue;
+                OptionValue<_void, _void, _void> optionValue;
                 switch (moveFormattingOption)
                 {
                     default:
                     case MoveFormattingOption.UseLocalizedShortAlgebraic:
-                        settingValue = SANSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option1(_void._);
                         break;
                     case MoveFormattingOption.UsePGN:
-                        settingValue = PGNSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option2(_void._);
                         break;
                     case MoveFormattingOption.UseLocalizedLongAlgebraic:
-                        settingValue = LANSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option3(_void._);
                         break;
                 }
 
-                Program.AutoSave.Persist(SettingKeys.Notation, settingValue);
+                Program.AutoSave.Persist(SettingKeys.Notation, NotationType.GetPValue(optionValue));
             }
 
             string pieceSymbols;
