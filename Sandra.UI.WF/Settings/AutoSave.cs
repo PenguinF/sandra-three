@@ -237,7 +237,7 @@ namespace Sandra.UI.WF
                 lastWrittenToFileStream = latestAutoSaveFileStream;
 
                 // If non-empty, override localSettings with it.
-                if (remoteSettings.Count > 0)
+                if (remoteSettings.Map.Any())
                 {
                     localSettings = remoteSettings;
                 }
