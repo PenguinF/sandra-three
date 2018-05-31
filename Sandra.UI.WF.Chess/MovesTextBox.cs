@@ -78,11 +78,9 @@ namespace Sandra.UI.WF
             {
                 zoomFactor = (PInteger)zoomFactorValue;
 
-                // Reverse of calculation done in autoSaveZoomFactor().
-                // Check range first. (Mapped from 1/64 < ZoomFactor < 64)
-                if (-10 < zoomFactor.Value && zoomFactor.Value < 650)
+                if (PType.RichTextZoomFactor.MinDiscreteValue <= zoomFactor.Value && zoomFactor.Value <= PType.RichTextZoomFactor.MaxDiscreteValue)
                 {
-                    ZoomFactor = fromDiscreteZoomFactor((int)zoomFactor.Value);
+                    ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor((int)zoomFactor.Value);
                 }
             }
 
@@ -491,7 +489,7 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                autoSaveZoomFactor(toDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
+                autoSaveZoomFactor(PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
             }
         }
 
@@ -499,13 +497,5 @@ namespace Sandra.UI.WF
         {
             Program.AutoSave.Persist(SettingKeys.Zoom, new PInteger(zoomFactor));
         }
-
-        private int toDiscreteZoomFactor(float zoomFactor)
-            // Assume discrete deltas of 0.1f.
-            // Set 0 to be the default, so 1.0f should map to 0.
-            => (int)Math.Round(zoomFactor * 10f) - 10;
-
-        private float fromDiscreteZoomFactor(int zoomFactor)
-            => (zoomFactor + 10) / 10f;
     }
 }

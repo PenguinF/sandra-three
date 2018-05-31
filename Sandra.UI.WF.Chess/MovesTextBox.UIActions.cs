@@ -107,12 +107,12 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomIn(bool perform)
         {
-            int zoomFactor = toDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor >= 649) return UIActionVisibility.Disabled;
+            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor++;
-                ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
                 autoSaveZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
@@ -120,12 +120,12 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomOut(bool perform)
         {
-            int zoomFactor = toDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor <= -9) return UIActionVisibility.Disabled;
+            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor--;
-                ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
                 autoSaveZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
