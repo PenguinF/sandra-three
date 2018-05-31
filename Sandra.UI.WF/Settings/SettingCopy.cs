@@ -93,15 +93,18 @@ namespace Sandra.UI.WF
         {
             if (other == null) throw new ArgumentNullException(nameof(other));
 
-            Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
-            foreach (var kv in KeyValueMapping) temp1.Add(kv.Key.Key, kv.Value);
-            PMap map1 = new PMap(temp1);
-
             Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
             foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
             PMap map2 = new PMap(temp2);
 
-            return map1.EqualTo(map2);
+            return ToPMap().EqualTo(map2);
+        }
+
+        public PMap ToPMap()
+        {
+            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+            foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
+            return new PMap(mapBuilder);
         }
     }
 }
