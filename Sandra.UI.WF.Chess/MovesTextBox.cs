@@ -72,14 +72,17 @@ namespace Sandra.UI.WF
 
             applyDefaultStyle();
 
-            int zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
+            PValue zoomFactorValue;
+            PInteger zoomFactor;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactorValue) && zoomFactorValue is PInteger)
             {
+                zoomFactor = (PInteger)zoomFactorValue;
+
                 // Reverse of calculation done in autoSaveZoomFactor().
                 // Check range first. (Mapped from 1/64 < ZoomFactor < 64)
-                if (-10 < zoomFactor && zoomFactor < 650)
+                if (-10 < zoomFactor.Value && zoomFactor.Value < 650)
                 {
-                    ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
+                    ZoomFactor = fromDiscreteZoomFactor((int)zoomFactor.Value);
                 }
             }
 

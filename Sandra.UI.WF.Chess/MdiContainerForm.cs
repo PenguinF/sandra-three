@@ -382,10 +382,15 @@ namespace Sandra.UI.WF
             }
 
             // Restore maximized setting.
-            bool maximized;
-            if (settings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
+            PValue maximizedValue;
+            PBoolean maximized;
+            if (settings.TryGetValue(SettingKeys.Maximized, out maximizedValue) && maximizedValue is PBoolean)
             {
-                WindowState = FormWindowState.Maximized;
+                maximized = (PBoolean)maximizedValue;
+                if (maximized.Value)
+                {
+                    WindowState = FormWindowState.Maximized;
+                }
             }
 
             // Load chess piece images from a fixed path.
