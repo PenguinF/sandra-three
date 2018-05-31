@@ -325,13 +325,11 @@ namespace Sandra.UI.WF
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
             // Initialize from settings if available.
-            var settings = Program.AutoSave.CurrentSettings;
-
             PValue windowValue;
             PList windowBoundsList;
             int left, top, width, height;
 
-            if (settings.TryGetValue(SettingKeys.Window, out windowValue)
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out windowValue)
                 && (windowBoundsList = windowValue as PList) != null
                 && windowBoundsList.Count == 4
                 && PType.Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
@@ -367,14 +365,12 @@ namespace Sandra.UI.WF
 
             // Restore maximized setting.
             PValue maximizedValue;
-            PBoolean maximized;
-            if (settings.TryGetValue(SettingKeys.Maximized, out maximizedValue) && maximizedValue is PBoolean)
+            bool maximized;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximizedValue)
+                && PType.Boolean.Instance.TryGetValidValue(maximizedValue, out maximized)
+                && maximized)
             {
-                maximized = (PBoolean)maximizedValue;
-                if (maximized.Value)
-                {
-                    WindowState = FormWindowState.Maximized;
-                }
+                WindowState = FormWindowState.Maximized;
             }
 
             // Load chess piece images from a fixed path.
@@ -395,11 +391,11 @@ namespace Sandra.UI.WF
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
                 if (WindowState == FormWindowState.Maximized)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, new PBoolean(true));
+                    Program.AutoSave.Persist(SettingKeys.Maximized, PType.Boolean.Instance.GetPValue(true));
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, new PBoolean(false));
+                    Program.AutoSave.Persist(SettingKeys.Maximized, PType.Boolean.Instance.GetPValue(false));
                     Program.AutoSave.Persist(SettingKeys.Window, new PList(new List<PValue>
                     {
                         PType.Int32.Instance.GetPValue(Left),

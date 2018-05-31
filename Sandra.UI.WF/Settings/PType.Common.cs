@@ -22,6 +22,27 @@ namespace Sandra.UI.WF
 {
     public static partial class PType
     {
+        public sealed class Boolean : PType<bool>
+        {
+            public static readonly Boolean Instance = new Boolean();
+
+            private Boolean() { }
+
+            public override bool TryGetValidValue(PValue value, out bool targetValue)
+            {
+                if (value is PBoolean)
+                {
+                    targetValue = ((PBoolean)value).Value;
+                    return true;
+                }
+
+                targetValue = default(bool);
+                return false;
+            }
+
+            public override PValue GetPValue(bool value) => new PBoolean(value);
+        }
+
         public sealed class Int32 : PType<int>
         {
             public static readonly Int32 Instance = new Int32();
