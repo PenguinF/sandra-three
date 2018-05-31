@@ -16,16 +16,31 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
+using SysExtensions;
+using System.Drawing;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingKey Lang = new SettingKey(nameof(Lang).ToLowerInvariant());
-        internal static readonly SettingKey Maximized = new SettingKey(nameof(Maximized).ToLowerInvariant());
-        internal static readonly SettingKey Window = new SettingKey(nameof(Window).ToLowerInvariant());
-        internal static readonly SettingKey Notation = new SettingKey(nameof(Notation).ToLowerInvariant());
-        internal static readonly SettingKey Zoom = new SettingKey(nameof(Zoom).ToLowerInvariant());
+        internal static readonly SettingProperty<OptionValue<_void, _void>> Lang = new SettingProperty<OptionValue<_void, _void>>(
+            new SettingKey(nameof(Lang).ToLowerInvariant()),
+            new PType.TwoConstants(Localizers.EnglishSettingValue, Localizers.DutchSettingValue));
+
+        internal static readonly SettingProperty<bool> Maximized = new SettingProperty<bool>(
+            new SettingKey(nameof(Maximized).ToLowerInvariant()),
+            PType.Boolean.Instance);
+
+        internal static readonly SettingProperty<Rectangle> Window = new SettingProperty<Rectangle>(
+            new SettingKey(nameof(Window).ToLowerInvariant()),
+            PType.WindowRectangle.Instance);
+
+        internal static readonly SettingProperty<OptionValue<_void, _void, _void>> Notation = new SettingProperty<OptionValue<_void, _void, _void>>(
+            new SettingKey(nameof(Notation).ToLowerInvariant()),
+            new PType.ThreeConstants(MovesTextBox.SANSettingValue, MovesTextBox.PGNSettingValue, MovesTextBox.LANSettingValue));
+
+        internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
+            new SettingKey(nameof(Zoom).ToLowerInvariant()),
+            PType.RichTextZoomFactor.Instance);
     }
 }

@@ -327,8 +327,8 @@ namespace Sandra.UI.WF
             // Initialize from settings if available.
             PValue windowValue;
             Rectangle targetBounds;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out windowValue)
-                && PType.WindowRectangle.Instance.TryGetValidValue(windowValue, out targetBounds))
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window.Name, out windowValue)
+                && SettingKeys.Window.PType.TryGetValidValue(windowValue, out targetBounds))
             {
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
@@ -357,8 +357,8 @@ namespace Sandra.UI.WF
             // Restore maximized setting.
             PValue maximizedValue;
             bool maximized;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximizedValue)
-                && PType.Boolean.Instance.TryGetValidValue(maximizedValue, out maximized)
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized.Name, out maximizedValue)
+                && SettingKeys.Maximized.PType.TryGetValidValue(maximizedValue, out maximized)
                 && maximized)
             {
                 WindowState = FormWindowState.Maximized;
@@ -382,12 +382,12 @@ namespace Sandra.UI.WF
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
                 if (WindowState == FormWindowState.Maximized)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, PType.Boolean.Instance.GetPValue(true));
+                    Program.AutoSave.Persist(SettingKeys.Maximized.Name, SettingKeys.Maximized.PType.GetPValue(true));
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, PType.Boolean.Instance.GetPValue(false));
-                    Program.AutoSave.Persist(SettingKeys.Window, PType.WindowRectangle.Instance.GetPValue(Bounds));
+                    Program.AutoSave.Persist(SettingKeys.Maximized.Name, SettingKeys.Maximized.PType.GetPValue(false));
+                    Program.AutoSave.Persist(SettingKeys.Window.Name, SettingKeys.Window.PType.GetPValue(Bounds));
                 }
             }
         }

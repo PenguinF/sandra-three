@@ -74,6 +74,7 @@
     <Compile Include="Settings\SettingHelper.cs" />
     <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingObject.cs" />
+    <Compile Include="Settings\SettingProperty.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>

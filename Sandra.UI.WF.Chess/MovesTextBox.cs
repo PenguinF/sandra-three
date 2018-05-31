@@ -74,8 +74,8 @@ namespace Sandra.UI.WF
 
             PValue zoomFactorValue;
             int zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactorValue)
-                && PType.RichTextZoomFactor.Instance.TryGetValidValue(zoomFactorValue, out zoomFactor))
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom.Name, out zoomFactorValue)
+                && SettingKeys.Zoom.PType.TryGetValidValue(zoomFactorValue, out zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
@@ -146,14 +146,9 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
-        private static readonly PString SANSettingValue = new PString("san");
-        private static readonly PString PGNSettingValue = new PString("pgn");
-        private static readonly PString LANSettingValue = new PString("lan");
-
-        private static readonly PType.ThreeConstants NotationType = new PType.ThreeConstants(
-            SANSettingValue,
-            PGNSettingValue,
-            LANSettingValue);
+        public static readonly PString SANSettingValue = new PString("san");
+        public static readonly PString PGNSettingValue = new PString("pgn");
+        public static readonly PString LANSettingValue = new PString("lan");
 
         private MoveFormattingOption moveFormattingOption;
 
@@ -166,8 +161,8 @@ namespace Sandra.UI.WF
                 // Initialize moveFormattingOption from settings.
                 PValue settingValue;
                 OptionValue<_void, _void, _void> optionValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue)
-                    && NotationType.TryGetValidValue(settingValue, out optionValue))
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation.Name, out settingValue)
+                    && SettingKeys.Notation.PType.TryGetValidValue(settingValue, out optionValue))
                 {
                     moveFormattingOption = optionValue.Case(
                         whenOption1: _ => MoveFormattingOption.UseLocalizedShortAlgebraic,
@@ -193,7 +188,7 @@ namespace Sandra.UI.WF
                         break;
                 }
 
-                Program.AutoSave.Persist(SettingKeys.Notation, NotationType.GetPValue(optionValue));
+                Program.AutoSave.Persist(SettingKeys.Notation.Name, SettingKeys.Notation.PType.GetPValue(optionValue));
             }
 
             string pieceSymbols;
@@ -490,7 +485,7 @@ namespace Sandra.UI.WF
 
         private void autoSaveZoomFactor(int zoomFactor)
         {
-            Program.AutoSave.Persist(SettingKeys.Zoom, PType.RichTextZoomFactor.Instance.GetPValue(zoomFactor));
+            Program.AutoSave.Persist(SettingKeys.Zoom.Name, SettingKeys.Zoom.PType.GetPValue(zoomFactor));
         }
     }
 }
