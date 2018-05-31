@@ -26,11 +26,11 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingObject : IReadOnlyDictionary<SettingKey, PValue>
     {
-        internal readonly Dictionary<SettingKey, PValue> Mapping;
+        internal readonly Dictionary<SettingKey, PValue> Map;
 
         internal SettingObject(SettingCopy workingCopy)
         {
-            Mapping = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
+            Map = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
         }
 
         /// <summary>
@@ -48,22 +48,22 @@ namespace Sandra.UI.WF
         /// <exception cref="KeyNotFoundException">
         /// The key does not exist.
         /// </exception>
-        public PValue this[SettingKey key] => Mapping[key];
+        public PValue this[SettingKey key] => Map[key];
 
         /// <summary>
         /// Gets the number of key-value pairs in this <see cref="SettingObject"/>.
         /// </summary>
-        public int Count => Mapping.Count;
+        public int Count => Map.Count;
 
         /// <summary>
         /// Enumerates all keys in this <see cref="SettingObject"/>.
         /// </summary>
-        public IEnumerable<SettingKey> Keys => Mapping.Keys;
+        public IEnumerable<SettingKey> Keys => Map.Keys;
 
         /// <summary>
         /// Enumerates all values in this <see cref="SettingObject"/>.
         /// </summary>
-        public IEnumerable<PValue> Values => Mapping.Values;
+        public IEnumerable<PValue> Values => Map.Values;
 
         /// <summary>
         /// Determines whether this <see cref="SettingObject"/> contains a value with the specified key.
@@ -77,12 +77,12 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public bool ContainsKey(SettingKey key) => Mapping.ContainsKey(key);
+        public bool ContainsKey(SettingKey key) => Map.ContainsKey(key);
 
         /// <summary>
         /// Enumerates all key-value pairs in this <see cref="SettingObject"/>.
         /// </summary>
-        public IEnumerator<KeyValuePair<SettingKey, PValue>> GetEnumerator() => Mapping.GetEnumerator();
+        public IEnumerator<KeyValuePair<SettingKey, PValue>> GetEnumerator() => Map.GetEnumerator();
 
         /// <summary>
         /// Gets the value that is associated with the specified key.
@@ -101,7 +101,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public bool TryGetValue(SettingKey key, out PValue value) => Mapping.TryGetValue(key, out value);
+        public bool TryGetValue(SettingKey key, out PValue value) => Map.TryGetValue(key, out value);
 
         /// <summary>
         /// Creates a working <see cref="SettingCopy"/> based on this <see cref="SettingObject"/>.
