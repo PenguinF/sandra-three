@@ -407,12 +407,12 @@ namespace Sandra.UI.WF
                 if (WindowState == FormWindowState.Maximized)
                 {
                     Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(SettingKeys.Maximized, true)
+                        .AddOrReplace(SettingKeys.Maximized, new PBoolean(true))
                         .Persist();
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Maximized, false).Persist();
+                    Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Maximized, new PBoolean(false)).Persist();
                     Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Window, new PList(new List<PValue>
                     {
                         new PInteger(Left),

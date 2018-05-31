@@ -494,7 +494,7 @@ namespace Sandra.UI.WF
 
         private void autoSaveZoomFactor(int zoomFactor)
         {
-            Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Zoom, zoomFactor).Persist();
+            Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Zoom, new PInteger(zoomFactor)).Persist();
         }
 
         private int toDiscreteZoomFactor(float zoomFactor)
