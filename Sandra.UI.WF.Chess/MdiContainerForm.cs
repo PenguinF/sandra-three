@@ -317,22 +317,6 @@ namespace Sandra.UI.WF
         // Keeps track if the bounds of this form have been initialized in OnLoad().
         private bool formBoundsInitialized;
 
-        private bool tryGetIntegerValue(PValue value, out int intValue)
-        {
-            if (value is PInteger)
-            {
-                PInteger pInteger = (PInteger)value;
-                if (int.MinValue <= pInteger.Value
-                    && pInteger.Value <= int.MaxValue)
-                {
-                    intValue = (int)pInteger.Value;
-                    return true;
-                }
-            }
-            intValue = default(int);
-            return false;
-        }
-
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -350,10 +334,10 @@ namespace Sandra.UI.WF
             if (settings.TryGetValue(SettingKeys.Window, out windowValue)
                 && (windowBoundsList = windowValue as PList) != null
                 && windowBoundsList.Count == 4
-                && tryGetIntegerValue(windowBoundsList[0], out left)
-                && tryGetIntegerValue(windowBoundsList[1], out top)
-                && tryGetIntegerValue(windowBoundsList[2], out width)
-                && tryGetIntegerValue(windowBoundsList[3], out height))
+                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
+                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out top)
+                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
+                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
             {
                 // If all bounds are known initialize from those.
                 Rectangle targetBounds = new Rectangle(left, top, width, height);
@@ -418,10 +402,10 @@ namespace Sandra.UI.WF
                     Program.AutoSave.Persist(SettingKeys.Maximized, new PBoolean(false));
                     Program.AutoSave.Persist(SettingKeys.Window, new PList(new List<PValue>
                     {
-                        new PInteger(Left),
-                        new PInteger(Top),
-                        new PInteger(Width),
-                        new PInteger(Height),
+                        PType.Int32.Instance.GetPValue(Left),
+                        PType.Int32.Instance.GetPValue(Top),
+                        PType.Int32.Instance.GetPValue(Width),
+                        PType.Int32.Instance.GetPValue(Height),
                     }));
                 }
             }

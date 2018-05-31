@@ -22,6 +22,31 @@ namespace Sandra.UI.WF
 {
     public static partial class PType
     {
+        public sealed class Int32 : PType<int>
+        {
+            public static readonly Int32 Instance = new Int32();
+
+            private Int32() { }
+
+            public override bool TryGetValidValue(PValue value, out int targetValue)
+            {
+                if (value is PInteger)
+                {
+                    PInteger integer = (PInteger)value;
+                    if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
+                    {
+                        targetValue = (int)integer.Value;
+                        return true;
+                    }
+                }
+
+                targetValue = default(int);
+                return false;
+            }
+
+            public override PValue GetPValue(int value) => new PInteger(value);
+        }
+
         public sealed class RichTextZoomFactor : PType<int>
         {
             /// <summary>
