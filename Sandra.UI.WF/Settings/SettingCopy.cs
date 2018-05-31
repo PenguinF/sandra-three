@@ -65,5 +65,42 @@ namespace Sandra.UI.WF
         /// Commits this working <see cref="SettingCopy"/> to a new <see cref="SettingObject"/>.
         /// </summary>
         public SettingObject Commit() => new SettingObject(this);
+
+        /// <summary>
+        /// Compares this <see cref="SettingCopy"/> with a <see cref="SettingObject"/> and returns if they are equal.
+        /// </summary>
+        /// <param name="other">
+        /// The <see cref="SettingObject"/> to compare with.
+        /// </param>
+        /// <returns>
+        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="other"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// This is not the same as complete equality, in particular this method returns true from the following expression:
+        /// <code>
+        /// workingCopy.Commit().EqualTo(workingCopy)
+        /// </code>
+        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
+        /// <code>
+        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
+        /// </code>
+        /// </remarks>
+        public bool EqualTo(SettingObject other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
+            foreach (var kv in this) temp1.Add(kv.Key.Key, kv.Value);
+            PMap map1 = new PMap(temp1);
+
+            Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
+            foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
+            PMap map2 = new PMap(temp2);
+
+            return map1.EqualTo(map2);
+        }
     }
 }
