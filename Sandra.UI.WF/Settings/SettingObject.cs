@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Sandra.UI.WF
@@ -24,7 +23,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
     /// </summary>
-    public class SettingObject : IReadOnlyDictionary<SettingKey, PValue>
+    public class SettingObject
     {
         internal readonly Dictionary<SettingKey, PValue> Map;
 
@@ -32,52 +31,6 @@ namespace Sandra.UI.WF
         {
             Map = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
         }
-
-        /// <summary>
-        /// Gets the value associated with the specified key.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <returns>
-        /// The value associated with the specified key.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        /// The key does not exist.
-        /// </exception>
-        public PValue this[SettingKey key] => Map[key];
-
-        /// <summary>
-        /// Gets the number of key-value pairs in this <see cref="SettingObject"/>.
-        /// </summary>
-        public int Count => Map.Count;
-
-        /// <summary>
-        /// Enumerates all keys in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerable<SettingKey> Keys => Map.Keys;
-
-        /// <summary>
-        /// Enumerates all values in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerable<PValue> Values => Map.Values;
-
-        /// <summary>
-        /// Determines whether this <see cref="SettingObject"/> contains a value with the specified key.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        public bool ContainsKey(SettingKey key) => Map.ContainsKey(key);
 
         /// <summary>
         /// Enumerates all key-value pairs in this <see cref="SettingObject"/>.
@@ -112,7 +65,5 @@ namespace Sandra.UI.WF
             copy.Revert(this);
             return copy;
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
