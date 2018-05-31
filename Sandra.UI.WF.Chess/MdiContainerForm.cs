@@ -326,20 +326,11 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             PValue windowValue;
-            PList windowBoundsList;
-            int left, top, width, height;
-
+            Rectangle targetBounds;
             if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out windowValue)
-                && (windowBoundsList = windowValue as PList) != null
-                && windowBoundsList.Count == 4
-                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
-                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out top)
-                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
-                && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
+                && PType.WindowRectangle.Instance.TryGetValidValue(windowValue, out targetBounds))
             {
                 // If all bounds are known initialize from those.
-                Rectangle targetBounds = new Rectangle(left, top, width, height);
-
                 // Do make sure it ends up on a visible working area.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
@@ -396,13 +387,7 @@ namespace Sandra.UI.WF
                 else if (WindowState == FormWindowState.Normal)
                 {
                     Program.AutoSave.Persist(SettingKeys.Maximized, PType.Boolean.Instance.GetPValue(false));
-                    Program.AutoSave.Persist(SettingKeys.Window, new PList(new List<PValue>
-                    {
-                        PType.Int32.Instance.GetPValue(Left),
-                        PType.Int32.Instance.GetPValue(Top),
-                        PType.Int32.Instance.GetPValue(Width),
-                        PType.Int32.Instance.GetPValue(Height),
-                    }));
+                    Program.AutoSave.Persist(SettingKeys.Window, PType.WindowRectangle.Instance.GetPValue(Bounds));
                 }
             }
         }
