@@ -295,11 +295,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public void Persist(SettingKey settingKey, PValue value)
         {
-            new SettingUpdateOperation(this).AddOrReplace(settingKey, value).Persist();
-        }
+            SettingCopy workingCopy = localSettings.CreateWorkingCopy();
+            workingCopy.KeyValueMapping[settingKey] = value;
 
-        internal void Persist(SettingCopy workingCopy)
-        {
             if (!workingCopy.EqualTo(localSettings))
             {
                 // Commit to localSettings.
