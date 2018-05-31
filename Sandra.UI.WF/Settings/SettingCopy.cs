@@ -24,18 +24,19 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the mutable working copy of a <see cref="SettingObject"/>.
     /// </summary>
-    public class SettingCopy : SettingObject
+    public class SettingCopy
     {
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        public Dictionary<SettingKey, PValue> KeyValueMapping => Mapping;
+        public readonly Dictionary<SettingKey, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
         /// </summary>
-        public SettingCopy() : base()
+        public SettingCopy()
         {
+            KeyValueMapping = new Dictionary<SettingKey, PValue>();
         }
 
         /// <summary>
@@ -93,7 +94,7 @@ namespace Sandra.UI.WF
             if (other == null) throw new ArgumentNullException(nameof(other));
 
             Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
-            foreach (var kv in this) temp1.Add(kv.Key.Key, kv.Value);
+            foreach (var kv in KeyValueMapping) temp1.Add(kv.Key.Key, kv.Value);
             PMap map1 = new PMap(temp1);
 
             Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();

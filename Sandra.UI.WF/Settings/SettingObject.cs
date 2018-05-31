@@ -28,11 +28,6 @@ namespace Sandra.UI.WF
     {
         internal readonly Dictionary<SettingKey, PValue> Mapping;
 
-        internal SettingObject()
-        {
-            Mapping = new Dictionary<SettingKey, PValue>();
-        }
-
         internal SettingObject(SettingCopy workingCopy)
         {
             Mapping = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
