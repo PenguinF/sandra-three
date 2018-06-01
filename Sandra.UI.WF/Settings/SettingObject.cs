@@ -17,193 +17,51 @@
  * 
  *********************************************************************************/
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Numerics;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
     /// </summary>
-    public class SettingObject : IReadOnlyDictionary<SettingKey, PValue>
+    public class SettingObject
     {
-        internal readonly Dictionary<SettingKey, PValue> Mapping;
-
-        internal SettingObject()
-        {
-            Mapping = new Dictionary<SettingKey, PValue>();
-        }
+        internal readonly PMap Map;
 
         internal SettingObject(SettingCopy workingCopy)
         {
-            Mapping = new Dictionary<SettingKey, PValue>(workingCopy.KeyValueMapping);
+            Map = workingCopy.ToPMap();
         }
 
         /// <summary>
-        /// Gets the value associated with the specified key.
+        /// Gets the value that is associated with the specified property.
         /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <returns>
-        /// The value associated with the specified key.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        /// <exception cref="KeyNotFoundException">
-        /// The key does not exist.
-        /// </exception>
-        public PValue this[SettingKey key] => Mapping[key];
-
-        /// <summary>
-        /// Gets the number of key-value pairs in this <see cref="SettingObject"/>.
-        /// </summary>
-        public int Count => Mapping.Count;
-
-        /// <summary>
-        /// Enumerates all keys in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerable<SettingKey> Keys => Mapping.Keys;
-
-        /// <summary>
-        /// Enumerates all values in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerable<PValue> Values => Mapping.Values;
-
-        /// <summary>
-        /// Determines whether this <see cref="SettingObject"/> contains a value with the specified key.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        public bool ContainsKey(SettingKey key) => Mapping.ContainsKey(key);
-
-        /// <summary>
-        /// Enumerates all key-value pairs in this <see cref="SettingObject"/>.
-        /// </summary>
-        public IEnumerator<KeyValuePair<SettingKey, PValue>> GetEnumerator() => Mapping.GetEnumerator();
-
-        /// <summary>
-        /// Gets the value that is associated with the specified key.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
+        /// <param name="property">
+        /// The property to locate.
         /// </param>
         /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key, if the key is found;
+        /// When this method returns, contains the value associated with the specified property,
+        /// if the property is found and its value is of the correct <see cref="PType"/>;
         /// otherwise, the default <see cref="PValue"/> value.
         /// This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key; otherwise, false.
+        /// true if this <see cref="SettingObject"/> contains a value of the correct <see cref="PType"/>
+        /// for the specified property; otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
+        /// <paramref name="property"/> is null.
         /// </exception>
-        public bool TryGetValue(SettingKey key, out PValue value) => Mapping.TryGetValue(key, out value);
-
-        /// <summary>
-        /// Gets the value that is associated with the specified key if it is a <see cref="bool"/>.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key, if the key is found
-        /// and the value associated with it is a <see cref="bool"/>; otherwise, the default <see cref="bool"/> value.
-        /// This parameter is passed uninitialized.
-        /// </param>
-        /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key
-        /// and the value associated with it is a <see cref="bool"/>; otherwise, false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        public bool TryGetValue(SettingKey key, out bool value)
+        public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            PValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PBoolean)
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            PValue pValue;
+            if (Map.TryGetValue(property.Name.Key, out pValue)
+                && property.PType.TryGetValidValue(pValue, out value))
             {
-                value = ((PBoolean)settingValue).Value;
                 return true;
             }
-
-            value = default(bool);
-            return false;
-        }
-
-        /// <summary>
-        /// Gets the value that is associated with the specified key if it's an <see cref="int"/>.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key, if the key is found
-        /// and the value associated with it is an <see cref="int"/>; otherwise, the default <see cref="int"/> value.
-        /// This parameter is passed uninitialized.
-        /// </param>
-        /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key
-        /// and the value associated with it is a <see cref="int"/>; otherwise, false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        public bool TryGetValue(SettingKey key, out int value)
-        {
-            PValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PInteger)
-            {
-                BigInteger bigInteger = ((PInteger)settingValue).Value;
-                if (int.MinValue <= bigInteger && bigInteger <= int.MaxValue)
-                {
-                    value = (int)bigInteger;
-                    return true;
-                }
-            }
-
-            value = default(int);
-            return false;
-        }
-
-        /// <summary>
-        /// Gets the value that is associated with the specified key if it is a <see cref="string"/>.
-        /// </summary>
-        /// <param name="key">
-        /// The key to locate.
-        /// </param>
-        /// <param name="value">
-        /// When this method returns, contains the value associated with the specified key, if the key is found
-        /// and the value associated with it is a <see cref="string"/>; otherwise, the default <see cref="string"/> value.
-        /// This parameter is passed uninitialized.
-        /// </param>
-        /// <returns>
-        /// true if this <see cref="SettingObject"/> contains a value with the specified key
-        /// and the value associated with it is a <see cref="string"/>; otherwise, false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        public bool TryGetValue(SettingKey key, out string value)
-        {
-            PValue settingValue;
-            if (Mapping.TryGetValue(key, out settingValue) && settingValue is PString)
-            {
-                value = ((PString)settingValue).Value;
-                return true;
-            }
-
-            value = default(string);
+            value = default(TValue);
             return false;
         }
 
@@ -216,44 +74,5 @@ namespace Sandra.UI.WF
             copy.Revert(this);
             return copy;
         }
-
-        /// <summary>
-        /// Compares this <see cref="SettingObject"/> with another and returns if they are equal.
-        /// </summary>
-        /// <param name="other">
-        /// The <see cref="SettingObject"/> to compare with.
-        /// </param>
-        /// <returns>
-        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
-        /// <remarks>
-        /// This is not the same as complete equality, in particular this method returns true from the following expression:
-        /// <code>
-        /// workingCopy.Commit().EqualTo(workingCopy)
-        /// </code>
-        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
-        /// <code>
-        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
-        /// </code>
-        /// </remarks>
-        public bool EqualTo(SettingObject other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            Dictionary<string, PValue> temp1 = new Dictionary<string, PValue>();
-            foreach (var kv in this) temp1.Add(kv.Key.Key, kv.Value);
-            PMap map1 = new PMap(temp1);
-
-            Dictionary<string, PValue> temp2 = new Dictionary<string, PValue>();
-            foreach (var kv in other) temp2.Add(kv.Key.Key, kv.Value);
-            PMap map2 = new PMap(temp2);
-
-            return map1.EqualTo(map2);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

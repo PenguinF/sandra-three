@@ -24,18 +24,19 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the mutable working copy of a <see cref="SettingObject"/>.
     /// </summary>
-    public class SettingCopy : SettingObject
+    public class SettingCopy
     {
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        public Dictionary<SettingKey, PValue> KeyValueMapping => Mapping;
+        public readonly Dictionary<SettingKey, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
         /// </summary>
-        public SettingCopy() : base()
+        public SettingCopy()
         {
+            KeyValueMapping = new Dictionary<SettingKey, PValue>();
         }
 
         /// <summary>
@@ -55,9 +56,9 @@ namespace Sandra.UI.WF
             KeyValueMapping.Clear();
 
             // No need to copy values if they can be assumed read-only or are structs.
-            foreach (var kv in settingObject)
+            foreach (var kv in settingObject.Map)
             {
-                KeyValueMapping.Add(kv.Key, kv.Value);
+                KeyValueMapping.Add(new SettingKey(kv.Key), kv.Value);
             }
         }
 
@@ -65,5 +66,41 @@ namespace Sandra.UI.WF
         /// Commits this working <see cref="SettingCopy"/> to a new <see cref="SettingObject"/>.
         /// </summary>
         public SettingObject Commit() => new SettingObject(this);
+
+        /// <summary>
+        /// Compares this <see cref="SettingCopy"/> with a <see cref="SettingObject"/> and returns if they are equal.
+        /// </summary>
+        /// <param name="other">
+        /// The <see cref="SettingObject"/> to compare with.
+        /// </param>
+        /// <returns>
+        /// true if both <see cref="SettingObject"/> instances are equal; otherwise false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="other"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// This is not the same as complete equality, in particular this method returns true from the following expression:
+        /// <code>
+        /// workingCopy.Commit().EqualTo(workingCopy)
+        /// </code>
+        /// where workingCopy is a <see cref="SettingCopy"/>. Or even:
+        /// <code>
+        /// workingCopy.Commit().CreateWorkingCopy().EqualTo(workingCopy)
+        /// </code>
+        /// </remarks>
+        public bool EqualTo(SettingObject other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            return ToPMap().EqualTo(other.Map);
+        }
+
+        public PMap ToPMap()
+        {
+            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+            foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
+            return new PMap(mapBuilder);
+        }
     }
 }

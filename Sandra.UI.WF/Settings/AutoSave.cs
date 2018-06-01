@@ -237,7 +237,7 @@ namespace Sandra.UI.WF
                 lastWrittenToFileStream = latestAutoSaveFileStream;
 
                 // If non-empty, override localSettings with it.
-                if (remoteSettings.Count > 0)
+                if (remoteSettings.Map.Any())
                 {
                     localSettings = remoteSettings;
                 }
@@ -293,13 +293,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Creates and returns an update operation for the auto-save file.
         /// </summary>
-        public SettingUpdateOperation CreateUpdate()
+        public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            return new SettingUpdateOperation(this);
-        }
+            SettingCopy workingCopy = localSettings.CreateWorkingCopy();
+            workingCopy.KeyValueMapping[property.Name] = property.PType.GetPValue(value);
 
-        internal void Persist(SettingCopy workingCopy)
-        {
             if (!workingCopy.EqualTo(localSettings))
             {
                 // Commit to localSettings.
@@ -342,7 +340,7 @@ namespace Sandra.UI.WF
                     try
                     {
                         Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
-                        foreach (var kv in remoteSettings) temp.Add(kv.Key.Key, kv.Value);
+                        foreach (var kv in remoteSettings.Map) temp.Add(kv.Key, kv.Value);
                         PMap map = new PMap(temp);
                         var writer = new SettingWriter();
                         writer.Visit(map);
@@ -409,15 +407,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void readAssert(bool condition, string assertionFailMessage)
-        {
-            Debug.Assert(condition, assertionFailMessage);
-            if (!condition)
-            {
-                throw new JsonReaderException(assertionFailMessage);
-            }
-        }
-
         private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
         {
             // Reuse one string builder to build keys and values.
@@ -436,53 +425,158 @@ namespace Sandra.UI.WF
                 }
             }
 
+            SettingReader settingReader = new SettingReader(new StringReader(sb.ToString()));
+
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
 
-            // Optimistically parse as json.
-            JsonTextReader jsonTextReader = new JsonTextReader(new StringReader(sb.ToString()));
-
-            // Make assertions about the format in which the auto-save file was written.
-            readAssert(jsonTextReader.TokenType == JsonToken.None, "Token None expected");
-
-            if (jsonTextReader.Read())
+            PValue rootValue;
+            if (settingReader.TryParseValue(out rootValue))
             {
-                readAssert(jsonTextReader.TokenType == JsonToken.StartObject, "'{' expected");
-
-                for (;;)
+                if (!(rootValue is PMap))
                 {
-                    jsonTextReader.Read();
-                    if (jsonTextReader.TokenType == JsonToken.EndObject) break;
-                    readAssert(jsonTextReader.TokenType == JsonToken.PropertyName, "PropertyName or EndObject '}' expected");
+                    throw new JsonReaderException("Expected json object at root");
+                }
 
-                    SettingKey key = new SettingKey((string)jsonTextReader.Value);
-                    jsonTextReader.Read();
-
-                    PValue value;
-                    switch (jsonTextReader.TokenType)
-                    {
-                        case JsonToken.Boolean:
-                            value = new PBoolean((bool)jsonTextReader.Value);
-                            break;
-                        case JsonToken.Integer:
-                            value = jsonTextReader.Value is BigInteger
-                                ? new PInteger((BigInteger)jsonTextReader.Value)
-                                : new PInteger((long)jsonTextReader.Value);
-                            break;
-                        case JsonToken.String:
-                            value = new PString((string)jsonTextReader.Value);
-                            break;
-                        default:
-                            readAssert(false, "Boolean, Integer or String expected");
-                            // Above call is guaranteed to throw, make compiler aware here.
-                            throw new InvalidProgramException();
-                    }
-
-                    workingCopy.KeyValueMapping[key] = value;
+                PMap map = (PMap)rootValue;
+                foreach (var kv in map)
+                {
+                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
                 }
             }
 
             return workingCopy.Commit();
+        }
+    }
+
+    /// <summary>
+    /// Represents a single iteration of loading settings from a file.
+    /// </summary>
+    internal class SettingReader
+    {
+        private readonly JsonTextReader jsonTextReader;
+
+        public SettingReader(TextReader inputReader)
+        {
+            if (inputReader == null) throw new ArgumentNullException(nameof(inputReader));
+            jsonTextReader = new JsonTextReader(inputReader);
+        }
+
+        private Exception TokenTypeNotSupported(JsonToken jsonToken)
+            => new JsonReaderException($"Token type {jsonToken} is not supported for settings.");
+
+        private JsonToken ReadSkipComments()
+        {
+            // Skip comments until encountering something meaningful.
+            do jsonTextReader.Read(); while (jsonTextReader.TokenType == JsonToken.Comment);
+            return jsonTextReader.TokenType;
+        }
+
+        public bool TryParseValue(out PValue value)
+        {
+            var tokenType = ReadSkipComments();
+            if (tokenType == JsonToken.None)
+            {
+                value = default(PValue);
+                return false;
+            }
+
+            value = ParseValue(tokenType);
+
+            if (ReadSkipComments() != JsonToken.None)
+            {
+                throw new JsonReaderException("End of file expected");
+            }
+
+            return true;
+        }
+
+        private PMap ParseMap()
+        {
+            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+
+            for (;;)
+            {
+                var tokenType = ReadSkipComments();
+                if (tokenType == JsonToken.EndObject)
+                {
+                    return new PMap(mapBuilder);
+                }
+
+                if (tokenType != JsonToken.PropertyName)
+                {
+                    throw new JsonReaderException("PropertyName or EndObject '}' expected");
+                }
+
+                string key = (string)jsonTextReader.Value;
+
+                // Expect unique keys.
+                if (mapBuilder.ContainsKey(key))
+                {
+                    throw new JsonReaderException($"Non-unique key in object: {key}");
+                }
+
+                mapBuilder.Add(key, ParseValue(ReadSkipComments()));
+            }
+        }
+
+        private PList ParseList()
+        {
+            List<PValue> listBuilder = new List<PValue>();
+
+            for (;;)
+            {
+                var tokenType = ReadSkipComments();
+                if (tokenType == JsonToken.EndArray)
+                {
+                    return new PList(listBuilder);
+                }
+
+                listBuilder.Add(ParseValue(tokenType));
+            }
+        }
+
+        private PValue ParseValue(JsonToken currentTokenType)
+        {
+            switch (currentTokenType)
+            {
+                case JsonToken.Boolean:
+                    return new PBoolean((bool)jsonTextReader.Value);
+
+                case JsonToken.Integer:
+                    return jsonTextReader.Value is BigInteger
+                        ? new PInteger((BigInteger)jsonTextReader.Value)
+                        : new PInteger((long)jsonTextReader.Value); ;
+
+                case JsonToken.String:
+                    return new PString((string)jsonTextReader.Value);
+
+                case JsonToken.StartObject:
+                    return ParseMap();
+
+                case JsonToken.StartArray:
+                    return ParseList();
+
+                case JsonToken.None:
+                    throw new JsonReaderException("Unexpected end of file");
+
+                case JsonToken.Comment:
+                case JsonToken.EndArray:
+                case JsonToken.EndObject:
+                case JsonToken.PropertyName:
+                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
+
+                case JsonToken.Bytes:
+                case JsonToken.Date:
+                case JsonToken.EndConstructor:
+                case JsonToken.Float:
+                case JsonToken.Null:
+                case JsonToken.Raw:
+                case JsonToken.StartConstructor:
+                case JsonToken.Undefined:
+                default:
+                    throw TokenTypeNotSupported(currentTokenType);
+            }
         }
     }
 

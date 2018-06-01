@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using SysExtensions;
 using System.Collections.Generic;
 
 namespace Sandra.UI.WF
@@ -79,7 +80,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Localizer.Current = English;
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, EnglishSettingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option1(_void._));
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
@@ -101,7 +102,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Localizer.Current = Dutch;
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Lang, DutchSettingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option2(_void._));
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);

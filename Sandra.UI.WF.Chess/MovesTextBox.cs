@@ -75,12 +75,7 @@ namespace Sandra.UI.WF
             int zoomFactor;
             if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
             {
-                // Reverse of calculation done in autoSaveZoomFactor().
-                // Check range first. (Mapped from 1/64 < ZoomFactor < 64)
-                if (-10 < zoomFactor && zoomFactor < 650)
-                {
-                    ZoomFactor = fromDiscreteZoomFactor(zoomFactor);
-                }
+                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
 
             // DisplayTextChanged handlers are called immediately upon registration.
@@ -149,9 +144,9 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
-        private static readonly PString SANSettingValue = new PString("san");
-        private static readonly PString PGNSettingValue = new PString("pgn");
-        private static readonly PString LANSettingValue = new PString("lan");
+        public static readonly PString SANSettingValue = new PString("san");
+        public static readonly PString PGNSettingValue = new PString("pgn");
+        public static readonly PString LANSettingValue = new PString("lan");
 
         private MoveFormattingOption moveFormattingOption;
 
@@ -162,42 +157,34 @@ namespace Sandra.UI.WF
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                PValue settingValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out settingValue))
+                OptionValue<_void, _void, _void> optionValue;
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out optionValue))
                 {
-                    if (SettingHelper.AreEqual(settingValue, SANSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UseLocalizedShortAlgebraic;
-                    }
-                    else if (SettingHelper.AreEqual(settingValue, PGNSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UsePGN;
-                    }
-                    else if (SettingHelper.AreEqual(settingValue, LANSettingValue))
-                    {
-                        moveFormattingOption = MoveFormattingOption.UseLocalizedLongAlgebraic;
-                    }
+                    moveFormattingOption = optionValue.Case(
+                        whenOption1: _ => MoveFormattingOption.UseLocalizedShortAlgebraic,
+                        whenOption2: _ => MoveFormattingOption.UsePGN,
+                        whenOption3: _ => MoveFormattingOption.UseLocalizedLongAlgebraic);
                 }
             }
             else
             {
                 // Update setting if the formatter was already initialized.
-                PValue settingValue;
+                OptionValue<_void, _void, _void> optionValue;
                 switch (moveFormattingOption)
                 {
                     default:
                     case MoveFormattingOption.UseLocalizedShortAlgebraic:
-                        settingValue = SANSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option1(_void._);
                         break;
                     case MoveFormattingOption.UsePGN:
-                        settingValue = PGNSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option2(_void._);
                         break;
                     case MoveFormattingOption.UseLocalizedLongAlgebraic:
-                        settingValue = LANSettingValue;
+                        optionValue = OptionValue<_void, _void, _void>.Option3(_void._);
                         break;
                 }
 
-                Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Notation, settingValue).Persist();
+                Program.AutoSave.Persist(SettingKeys.Notation, optionValue);
             }
 
             string pieceSymbols;
@@ -488,21 +475,13 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                autoSaveZoomFactor(toDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
+                autoSaveZoomFactor(PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
             }
         }
 
         private void autoSaveZoomFactor(int zoomFactor)
         {
-            Program.AutoSave.CreateUpdate().AddOrReplace(SettingKeys.Zoom, zoomFactor).Persist();
+            Program.AutoSave.Persist(SettingKeys.Zoom, zoomFactor);
         }
-
-        private int toDiscreteZoomFactor(float zoomFactor)
-            // Assume discrete deltas of 0.1f.
-            // Set 0 to be the default, so 1.0f should map to 0.
-            => (int)Math.Round(zoomFactor * 10f) - 10;
-
-        private float fromDiscreteZoomFactor(int zoomFactor)
-            => (zoomFactor + 10) / 10f;
     }
 }

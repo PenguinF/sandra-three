@@ -325,29 +325,15 @@ namespace Sandra.UI.WF
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
             // Initialize from settings if available.
-            var settings = Program.AutoSave.CurrentSettings;
-            bool boolValue;
-            int intValue;
-            bool? maximized = null;
-            int? left, top, width, height;
-            left = top = width = height = null;
-
-            if (settings.TryGetValue(SettingKeys.Maximized, out boolValue)) maximized = boolValue;
-            if (settings.TryGetValue(SettingKeys.Left, out intValue)) left = intValue;
-            if (settings.TryGetValue(SettingKeys.Top, out intValue)) top = intValue;
-            if (settings.TryGetValue(SettingKeys.Width, out intValue)) width = intValue;
-            if (settings.TryGetValue(SettingKeys.Height, out intValue)) height = intValue;
-
-            if (left.HasValue && top.HasValue && width.HasValue && height.HasValue)
+            Rectangle targetBounds;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out targetBounds))
             {
                 // If all bounds are known initialize from those.
-                Rectangle targetBounds = new Rectangle(left.Value, top.Value, width.Value, height.Value);
-
                 // Do make sure it ends up on a visible working area.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
-                    SetBounds(left.Value, top.Value, width.Value, height.Value, BoundsSpecified.All);
+                    SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
                     formBoundsInitialized = true;
                 }
             }
@@ -367,7 +353,8 @@ namespace Sandra.UI.WF
             }
 
             // Restore maximized setting.
-            if (maximized.HasValue && maximized.Value)
+            bool maximized;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
             {
                 WindowState = FormWindowState.Maximized;
             }
@@ -390,19 +377,12 @@ namespace Sandra.UI.WF
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
                 if (WindowState == FormWindowState.Maximized)
                 {
-                    Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(SettingKeys.Maximized, true)
-                        .Persist();
+                    Program.AutoSave.Persist(SettingKeys.Maximized, true);
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    Program.AutoSave.CreateUpdate()
-                        .AddOrReplace(SettingKeys.Maximized, false)
-                        .AddOrReplace(SettingKeys.Left, Left)
-                        .AddOrReplace(SettingKeys.Top, Top)
-                        .AddOrReplace(SettingKeys.Width, Width)
-                        .AddOrReplace(SettingKeys.Height, Height)
-                        .Persist();
+                    Program.AutoSave.Persist(SettingKeys.Maximized, false);
+                    Program.AutoSave.Persist(SettingKeys.Window, Bounds);
                 }
             }
         }

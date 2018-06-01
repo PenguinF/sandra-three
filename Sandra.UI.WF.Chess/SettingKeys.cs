@@ -16,36 +16,31 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System.Collections.Generic;
+using SysExtensions;
+using System.Drawing;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingKey Lang = new SettingKey(nameof(Lang).ToLowerInvariant());
-        internal static readonly SettingKey Maximized = new SettingKey(nameof(Maximized).ToLowerInvariant());
-        internal static readonly SettingKey Left = new SettingKey(nameof(Left).ToLowerInvariant());
-        internal static readonly SettingKey Top = new SettingKey(nameof(Top).ToLowerInvariant());
-        internal static readonly SettingKey Width = new SettingKey(nameof(Width).ToLowerInvariant());
-        internal static readonly SettingKey Height = new SettingKey(nameof(Height).ToLowerInvariant());
-        internal static readonly SettingKey Notation = new SettingKey(nameof(Notation).ToLowerInvariant());
-        internal static readonly SettingKey Zoom = new SettingKey(nameof(Zoom).ToLowerInvariant());
+        internal static readonly SettingProperty<OptionValue<_void, _void>> Lang = new SettingProperty<OptionValue<_void, _void>>(
+            new SettingKey(nameof(Lang).ToLowerInvariant()),
+            new PType.TwoConstants(Localizers.EnglishSettingValue, Localizers.DutchSettingValue));
 
-        internal static readonly HashSet<SettingKey> All;
+        internal static readonly SettingProperty<bool> Maximized = new SettingProperty<bool>(
+            new SettingKey(nameof(Maximized).ToLowerInvariant()),
+            PType.Boolean.Instance);
 
-        static SettingKeys()
-        {
-            All = new HashSet<SettingKey>(new SettingKey[]
-            {
-                Lang,
-                Maximized,
-                Left,
-                Top,
-                Width,
-                Height,
-                Notation,
-                Zoom,
-            });
-        }
+        internal static readonly SettingProperty<Rectangle> Window = new SettingProperty<Rectangle>(
+            new SettingKey(nameof(Window).ToLowerInvariant()),
+            PType.WindowRectangle.Instance);
+
+        internal static readonly SettingProperty<OptionValue<_void, _void, _void>> Notation = new SettingProperty<OptionValue<_void, _void, _void>>(
+            new SettingKey(nameof(Notation).ToLowerInvariant()),
+            new PType.ThreeConstants(MovesTextBox.SANSettingValue, MovesTextBox.PGNSettingValue, MovesTextBox.LANSettingValue));
+
+        internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
+            new SettingKey(nameof(Zoom).ToLowerInvariant()),
+            PType.RichTextZoomFactor.Instance);
     }
 }

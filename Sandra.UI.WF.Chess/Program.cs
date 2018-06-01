@@ -20,7 +20,6 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -38,30 +37,19 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            // TODO: remove unknown keys from the settings after loading it from the file.
             AutoSave = new AutoSave(AppName, new SettingCopy());
-
-            // Remove any stale/unknown settings.
-            var update = AutoSave.CreateUpdate();
-            AutoSave.CurrentSettings.Keys
-                .Where(key => !SettingKeys.All.Contains(key))
-                .ForEach(key => update.Remove(key));
-            update.Persist();
 
             Chess.Constants.ForceInitialize();
 
             Localizer.Current = Localizers.English;
-            PValue settingValue;
-            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out settingValue))
+
+            OptionValue<_void, _void> optionValue;
+            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out optionValue))
             {
-                if (SettingHelper.AreEqual(settingValue, Localizers.EnglishSettingValue))
-                {
-                    // Technically not necessary since it's the default value.
-                    Localizer.Current = Localizers.English;
-                }
-                else if (SettingHelper.AreEqual(settingValue, Localizers.DutchSettingValue))
-                {
-                    Localizer.Current = Localizers.Dutch;
-                }
+                Localizer.Current = optionValue.Case(
+                    whenOption1: x => Localizers.English,
+                    whenOption2: x => Localizers.Dutch);
             }
 
             Application.EnableVisualStyles();
