@@ -19,7 +19,6 @@
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -337,11 +336,8 @@ namespace Sandra.UI.WF
 
                     try
                     {
-                        Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
-                        foreach (var kv in remoteSettings.Map) temp.Add(kv.Key, kv.Value);
-                        PMap map = new PMap(temp);
                         var writer = new SettingWriter(indented: false);
-                        writer.Visit(map);
+                        writer.Visit(remoteSettings.Map);
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
