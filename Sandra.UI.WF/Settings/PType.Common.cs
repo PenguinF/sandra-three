@@ -69,6 +69,27 @@ namespace Sandra.UI.WF
             public override PValue GetPValue(int value) => new PInteger(value);
         }
 
+        public sealed class String : PType<string>
+        {
+            public static readonly String Instance = new String();
+
+            private String() { }
+
+            public override bool TryGetValidValue(PValue value, out string targetValue)
+            {
+                if (value is PString)
+                {
+                    targetValue = ((PString)value).Value;
+                    return true;
+                }
+
+                targetValue = default(string);
+                return false;
+            }
+
+            public override PValue GetPValue(string value) => new PString(value);
+        }
+
         public sealed class RichTextZoomFactor : PType<int>
         {
             /// <summary>
