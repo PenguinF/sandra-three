@@ -17,7 +17,6 @@
  * 
  *********************************************************************************/
 using SysExtensions;
-using System.Drawing;
 
 namespace Sandra.UI.WF
 {
@@ -27,7 +26,7 @@ namespace Sandra.UI.WF
             new SettingKey(nameof(Maximized).ToLowerInvariant()),
             PType.Boolean.Instance);
 
-        internal static readonly SettingProperty<Rectangle> Window = new SettingProperty<Rectangle>(
+        internal static readonly SettingProperty<FormState> Window = new SettingProperty<FormState>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
             FormState.Type);
 

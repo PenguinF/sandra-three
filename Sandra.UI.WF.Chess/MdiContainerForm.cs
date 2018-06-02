@@ -328,9 +328,11 @@ namespace Sandra.UI.WF
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
             // Initialize from settings if available.
-            Rectangle targetBounds;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out targetBounds))
+            FormState formState;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
             {
+                Rectangle targetBounds = formState.Bounds;
+
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
@@ -385,7 +387,7 @@ namespace Sandra.UI.WF
                 else if (WindowState == FormWindowState.Normal)
                 {
                     Program.AutoSave.Persist(SettingKeys.Maximized, false);
-                    Program.AutoSave.Persist(SettingKeys.Window, Bounds);
+                    Program.AutoSave.Persist(SettingKeys.Window, new FormState(Bounds));
                 }
             }
         }

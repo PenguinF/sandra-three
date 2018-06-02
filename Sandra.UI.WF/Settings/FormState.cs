@@ -31,11 +31,11 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the <see cref="PType"/> of a <see cref="FormState"/>.
         /// </summary>
-        public static readonly PType<Rectangle> Type = new FormStatePType();
+        public static readonly PType<FormState> Type = new FormStatePType();
 
-        private sealed class FormStatePType : PType<Rectangle>
+        private sealed class FormStatePType : PType<FormState>
         {
-            public override bool TryGetValidValue(PValue value, out Rectangle targetValue)
+            public override bool TryGetValidValue(PValue value, out FormState targetValue)
             {
                 PList windowBoundsList = value as PList;
                 int left, top, width, height;
@@ -46,22 +46,29 @@ namespace Sandra.UI.WF
                     && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
                     && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
                 {
-                    targetValue = new Rectangle(left, top, width, height);
+                    targetValue = new FormState(new Rectangle(left, top, width, height));
                     return true;
                 }
 
-                targetValue = default(Rectangle);
+                targetValue = default(FormState);
                 return false;
             }
 
-            public override PValue GetPValue(Rectangle value)
+            public override PValue GetPValue(FormState value)
                 => new PList(new List<PValue>
                 {
-                    PType.Int32.Instance.GetPValue(value.Left),
-                    PType.Int32.Instance.GetPValue(value.Top),
-                    PType.Int32.Instance.GetPValue(value.Width),
-                    PType.Int32.Instance.GetPValue(value.Height),
+                    PType.Int32.Instance.GetPValue(value.Bounds.Left),
+                    PType.Int32.Instance.GetPValue(value.Bounds.Top),
+                    PType.Int32.Instance.GetPValue(value.Bounds.Width),
+                    PType.Int32.Instance.GetPValue(value.Bounds.Height),
                 });
+        }
+
+        public readonly Rectangle Bounds;
+
+        public FormState(Rectangle bounds)
+        {
+            Bounds = bounds;
         }
     }
 }
