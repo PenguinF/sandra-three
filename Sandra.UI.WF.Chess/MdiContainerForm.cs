@@ -38,6 +38,8 @@ namespace Sandra.UI.WF
         /// </summary>
         public int FastNavigationPlyCount { get; private set; }
 
+        private PersistableFormState formState;
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -79,8 +81,6 @@ namespace Sandra.UI.WF
             if (perform) NewPlayingBoard();
             return UIActionVisibility.Enabled;
         }
-
-
 
         class FocusDependentUIActionState
         {
@@ -305,7 +305,6 @@ namespace Sandra.UI.WF
             }
         }
 
-
         public void NewPlayingBoard()
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
@@ -317,31 +316,34 @@ namespace Sandra.UI.WF
             game.TryGotoChessBoardForm(true);
         }
 
-        // Keeps track if the bounds of this form have been initialized in OnLoad().
-        private bool formBoundsInitialized;
-
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
+            base.OnLoad(e);
+
             // Initialize from settings if available.
-            Rectangle targetBounds;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out targetBounds))
+            bool boundsInitialized = false;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
             {
+                Rectangle targetBounds = formState.Bounds;
+
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
                 targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
                     SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    formBoundsInitialized = true;
+                    boundsInitialized = true;
                 }
             }
+            else
+            {
+                formState = new PersistableFormState(false, Rectangle.Empty);
+            }
 
-            if (!formBoundsInitialized)
+            if (!boundsInitialized)
             {
                 // Show in the center of the monitor where the mouse currently is.
                 var activeScreen = Screen.FromPoint(MousePosition);
@@ -352,15 +354,14 @@ namespace Sandra.UI.WF
 
                 // Update the bounds of the form.
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                formBoundsInitialized = true;
             }
 
-            // Restore maximized setting.
-            bool maximized;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
-            {
-                WindowState = FormWindowState.Maximized;
-            }
+            // Restore maximized setting after setting the Bounds.
+            if (formState.Maximized) WindowState = FormWindowState.Maximized;
+
+            // Attach only after restoring from settings.
+            formState.AttachTo(this);
+            formState.Changed += FormState_Changed;
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
@@ -371,35 +372,9 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
-        private void autoSaveFormState()
+        private void FormState_Changed(object sender, EventArgs e)
         {
-            // Don't auto-save if the form isn't loaded yet.
-            if (formBoundsInitialized)
-            {
-                // Don't auto-save anything if the form is minimized.
-                // If the application is then closed and reopened, it will restore to the state before it was minimized.
-                if (WindowState == FormWindowState.Maximized)
-                {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, true);
-                }
-                else if (WindowState == FormWindowState.Normal)
-                {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, false);
-                    Program.AutoSave.Persist(SettingKeys.Window, Bounds);
-                }
-            }
-        }
-
-        protected override void OnResizeEnd(EventArgs e)
-        {
-            base.OnResizeEnd(e);
-            autoSaveFormState();
-        }
-
-        protected override void OnLocationChanged(EventArgs e)
-        {
-            base.OnLocationChanged(e);
-            autoSaveFormState();
+            Program.AutoSave.Persist(SettingKeys.Window, formState);
         }
 
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()

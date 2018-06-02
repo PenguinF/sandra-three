@@ -17,19 +17,14 @@
  * 
  *********************************************************************************/
 using SysExtensions;
-using System.Drawing;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingProperty<bool> Maximized = new SettingProperty<bool>(
-            new SettingKey(nameof(Maximized).ToLowerInvariant()),
-            PType.Boolean.Instance);
-
-        internal static readonly SettingProperty<Rectangle> Window = new SettingProperty<Rectangle>(
+        internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
-            PType.WindowRectangle.Instance);
+            PersistableFormState.Type);
 
         internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(nameof(Notation).ToLowerInvariant()),
