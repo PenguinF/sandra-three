@@ -419,9 +419,10 @@ namespace Sandra.UI.WF
                 }
             }
 
-            SettingReader settingReader = new SettingReader(new StringReader(sb.ToString()));
-
-            return settingReader.ReadWorkingCopy().Commit();
+            // Load into an empty working copy.
+            var workingCopy = new SettingCopy();
+            workingCopy.LoadFromText(new StringReader(sb.ToString()));
+            return workingCopy.Commit();
         }
     }
 }

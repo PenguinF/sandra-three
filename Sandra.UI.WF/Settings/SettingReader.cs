@@ -135,11 +135,8 @@ namespace Sandra.UI.WF
             }
         }
 
-        public SettingCopy ReadWorkingCopy()
+        public SettingCopy ReadWorkingCopy(SettingCopy workingCopy)
         {
-            // Load into an empty working copy.
-            var workingCopy = new SettingCopy();
-
             var tokenType = ReadSkipComments();
             if (tokenType != JsonToken.None)
             {

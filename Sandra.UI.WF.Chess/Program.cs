@@ -20,13 +20,18 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Security;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     static class Program
     {
+        internal const string DefaultSettingsFileName = "Default.settings";
+
         internal static string ExecutableFolder { get; private set; }
+
+        internal static SettingObject DefaultSettings { get; private set; }
 
         internal const string AppName = "SandraChess";
 
@@ -39,6 +44,38 @@ namespace Sandra.UI.WF
         static void Main()
         {
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
+            // Attempt to load default settings from given file name.
+            string fullDefaultSettingsFileName = Path.Combine(ExecutableFolder, DefaultSettingsFileName);
+
+            string fileText = null;
+            try
+            {
+                fileText = File.ReadAllText(fullDefaultSettingsFileName);
+            }
+            catch (Exception exception)
+            {
+                if (exception is IOException ||
+                    exception is UnauthorizedAccessException ||
+                    exception is FileNotFoundException ||
+                    exception is SecurityException)
+                {
+                    // 'Expected' exceptions can be traced.
+                    exception.Trace();
+                }
+                else
+                {
+                    // Other exceptions are developer errors.
+                    throw;
+                }
+            }
+
+            SettingCopy workingCopy = new SettingCopy();
+            if (fileText != null)
+            {
+                workingCopy.LoadFromText(new StringReader(fileText));
+            }
+            DefaultSettings = workingCopy.Commit();
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 

@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Sandra.UI.WF
 {
@@ -101,6 +102,12 @@ namespace Sandra.UI.WF
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
             return new PMap(mapBuilder);
+        }
+
+        public void LoadFromText(TextReader textReader)
+        {
+            SettingReader settingReader = new SettingReader(textReader);
+            settingReader.ReadWorkingCopy(this);
         }
     }
 }
