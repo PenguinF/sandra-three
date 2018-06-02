@@ -362,7 +362,7 @@ namespace Sandra.UI.WF
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        writer.WriteToFile(writefileStream, encoder, buffer, encodedBuffer);
+                        WriteToFile(writer.Output(), writefileStream);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.
@@ -423,6 +423,56 @@ namespace Sandra.UI.WF
             var workingCopy = new SettingCopy();
             workingCopy.LoadFromText(new StringReader(sb.ToString()));
             return workingCopy.Commit();
+        }
+
+        private void WriteToFile(string output, FileStream outputStream)
+        {
+            // How much of the output still needs to be written.
+            int remainingLength = output.Length;
+
+            // Number of characters already written from output. Loop invariant therefore is:
+            // charactersCopied + remainingLength == output.Length.
+            int charactersCopied = 0;
+
+            // Fill up the character buffer before doing any writing.
+            for (;;)
+            {
+                // Determine number of characters to write.
+                // AutoSave.CharBufferSize is known to be equal to buffer.Length.
+                int charWriteCount = CharBufferSize;
+
+                // Remember if this fill up the entire buffer.
+                bool bufferFull = charWriteCount <= remainingLength;
+                if (!bufferFull) charWriteCount = remainingLength;
+
+                // Now copy to the character buffer after checking its range.
+                output.CopyTo(charactersCopied, buffer, 0, charWriteCount);
+
+                // If the buffer is full, call the encoder to convert it into bytes.
+                if (bufferFull)
+                {
+                    int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
+                    outputStream.Write(encodedBuffer, 0, bytes);
+                }
+
+                // Update loop variables.
+                charactersCopied += charWriteCount;
+                remainingLength -= charWriteCount;
+
+                if (remainingLength == 0)
+                {
+                    // Process what's left in the buffer and Encoder.
+                    int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
+                    if (bytes > 0)
+                    {
+                        outputStream.Write(encodedBuffer, 0, bytes);
+                    }
+
+                    // Make sure everything is written to the file.
+                    outputStream.Flush();
+                    return;
+                }
+            }
         }
     }
 }
