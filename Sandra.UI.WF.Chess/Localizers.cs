@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -57,9 +58,9 @@ namespace Sandra.UI.WF
     {
         public static readonly string SettingKey = "lang";
 
-        public static KeyedLocalizer English { get; private set; }
+        private static KeyedLocalizer[] registered;
 
-        public static KeyedLocalizer Dutch { get; private set; }
+        public static IEnumerable<KeyedLocalizer> Registered => registered.Enumerate();
 
         /// <summary>
         /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
@@ -68,18 +69,17 @@ namespace Sandra.UI.WF
 
         public static void Setup()
         {
-            English = new EnglishLocalizer();
-            Dutch = new DutchLocalizer();
+            registered = new KeyedLocalizer[]
+            {
+                new EnglishLocalizer(),
+                new DutchLocalizer(),
+            };
 
             LangSetting = new SettingProperty<Localizer>(
                 new SettingKey(SettingKey),
-                new PType.KeyedSet<Localizer>(new KeyValuePair<string, Localizer>[]
-                {
-                    new KeyValuePair<string, Localizer>(English.AutoSaveSettingValue, English),
-                    new KeyValuePair<string, Localizer>(Dutch.AutoSaveSettingValue, Dutch),
-                }));
+                new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
 
-            Localizer.Current = English;
+            Localizer.Current = Registered.First();
         }
     }
 
