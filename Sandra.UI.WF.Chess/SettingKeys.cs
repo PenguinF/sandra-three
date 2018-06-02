@@ -22,10 +22,6 @@ namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingProperty<bool> Maximized = new SettingProperty<bool>(
-            new SettingKey(nameof(Maximized).ToLowerInvariant()),
-            PType.Boolean.Instance);
-
         internal static readonly SettingProperty<FormState> Window = new SettingProperty<FormState>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
             FormState.Type);

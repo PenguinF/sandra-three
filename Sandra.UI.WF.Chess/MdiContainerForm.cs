@@ -328,8 +328,10 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             bool boundsInitialized = false;
+            bool maximized = false;
             if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
             {
+                maximized = formState.Maximized;
                 Rectangle targetBounds = formState.Bounds;
 
                 // If all bounds are known initialize from those.
@@ -340,6 +342,10 @@ namespace Sandra.UI.WF
                     SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
                     boundsInitialized = true;
                 }
+            }
+            else
+            {
+                formState = new FormState(false, Rectangle.Empty);
             }
 
             if (!boundsInitialized)
@@ -353,17 +359,13 @@ namespace Sandra.UI.WF
 
                 // Update the bounds of the form.
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-
-                if (formState == null) formState = new FormState(Bounds);
-                else formState.Update(this);
             }
 
-            // Restore maximized setting.
-            bool maximized;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Maximized, out maximized) && maximized)
-            {
-                WindowState = FormWindowState.Maximized;
-            }
+            // Restore maximized setting after setting the Bounds.
+            if (maximized) WindowState = FormWindowState.Maximized;
+
+            // Update only after setting the WindowState or the Maximized setting would be reset.
+            formState.Update(this);
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
@@ -380,13 +382,8 @@ namespace Sandra.UI.WF
             if (formState != null)
             {
                 formState.Update(this);
-                if (WindowState == FormWindowState.Maximized)
+                if (WindowState != FormWindowState.Minimized)
                 {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, formState.Maximized);
-                }
-                else if (WindowState == FormWindowState.Normal)
-                {
-                    Program.AutoSave.Persist(SettingKeys.Maximized, formState.Maximized);
                     Program.AutoSave.Persist(SettingKeys.Window, formState);
                 }
             }

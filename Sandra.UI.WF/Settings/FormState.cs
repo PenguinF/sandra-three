@@ -38,15 +38,17 @@ namespace Sandra.UI.WF
             public override bool TryGetValidValue(PValue value, out FormState targetValue)
             {
                 PList windowBoundsList = value as PList;
+                bool maximized;
                 int left, top, width, height;
                 if (windowBoundsList != null
-                    && windowBoundsList.Count == 4
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out top)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
+                    && windowBoundsList.Count == 5
+                    && PType.Boolean.Instance.TryGetValidValue(windowBoundsList[0], out maximized)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out left)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out top)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out width)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[4], out height))
                 {
-                    targetValue = new FormState(new Rectangle(left, top, width, height));
+                    targetValue = new FormState(maximized, new Rectangle(left, top, width, height));
                     return true;
                 }
 
@@ -54,9 +56,10 @@ namespace Sandra.UI.WF
                 return false;
             }
 
-            public override PValue GetPValue(FormState value)
-                => new PList(new List<PValue>
+            public override PValue GetPValue(FormState value) => new PList(
+                new List<PValue>
                 {
+                    PType.Boolean.Instance.GetPValue(value.Maximized),
                     PType.Int32.Instance.GetPValue(value.Bounds.Left),
                     PType.Int32.Instance.GetPValue(value.Bounds.Top),
                     PType.Int32.Instance.GetPValue(value.Bounds.Width),
@@ -68,8 +71,9 @@ namespace Sandra.UI.WF
 
         private Rectangle bounds;
 
-        public FormState(Rectangle bounds)
+        public FormState(bool maximized, Rectangle bounds)
         {
+            this.maximized = maximized;
             this.bounds = bounds;
         }
 
