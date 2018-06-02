@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -155,87 +154,78 @@ namespace Sandra.UI.WF
                 });
         }
 
-        public sealed class TwoConstants : PType<OptionValue<_void, _void>>
+        public sealed class Enumeration<TEnum> : PType<TEnum> where TEnum : struct
         {
-            private readonly PValue Constant1;
-            private readonly PValue Constant2;
+            private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
+            private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
 
-            public TwoConstants(PValue constant1, PValue constant2)
+            public Enumeration(IEnumerable<TEnum> enumValues)
             {
-                if (constant1 == null) throw new ArgumentNullException(nameof(constant1));
-                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
-
-                Constant1 = constant1;
-                Constant2 = constant2;
+                Type enumType = typeof(TEnum);
+                foreach (var enumValue in enumValues)
+                {
+                    string name = Enum.GetName(enumType, enumValue);
+                    enumToString.Add(enumValue, name);
+                    stringToEnum.Add(name, enumValue);
+                }
             }
 
-            public override bool TryGetValidValue(PValue value, out OptionValue<_void, _void> targetValue)
+            public override bool TryGetValidValue(PValue value, out TEnum targetValue)
             {
-                if (SettingHelper.AreEqual(Constant1, value))
+                PString stringValue;
+                if (value is PString)
                 {
-                    targetValue = OptionValue<_void, _void>.Option1(_void._);
-                    return true;
-                }
-                else if (SettingHelper.AreEqual(Constant2, value))
-                {
-                    targetValue = OptionValue<_void, _void>.Option2(_void._);
-                    return true;
+                    stringValue = (PString)value;
+                    if (stringToEnum.TryGetValue(stringValue.Value, out targetValue))
+                    {
+                        return true;
+                    }
                 }
 
-                targetValue = default(OptionValue<_void, _void>);
+                targetValue = default(TEnum);
                 return false;
             }
 
-            public override PValue GetPValue(OptionValue<_void, _void> value)
-                => value.Case(
-                    whenOption1: _ => Constant1,
-                    whenOption2: _ => Constant2);
+            public override PValue GetPValue(TEnum value) => new PString(enumToString[value]);
         }
 
-        public sealed class ThreeConstants : PType<OptionValue<_void, _void, _void>>
+        public sealed class KeyedSet<T> : PType<T> where T : class
         {
-            private readonly PValue Constant1;
-            private readonly PValue Constant2;
-            private readonly PValue Constant3;
+            private readonly Dictionary<string, T> stringToTarget = new Dictionary<string, T>();
 
-            public ThreeConstants(PValue constant1, PValue constant2, PValue constant3)
+            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues)
             {
-                if (constant1 == null) throw new ArgumentNullException(nameof(constant1));
-                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
-                if (constant2 == null) throw new ArgumentNullException(nameof(constant2));
-
-                Constant1 = constant1;
-                Constant2 = constant2;
-                Constant3 = constant3;
+                foreach (var keyedValue in keyedValues)
+                {
+                    stringToTarget.Add(keyedValue.Key, keyedValue.Value);
+                }
             }
 
-            public override bool TryGetValidValue(PValue value, out OptionValue<_void, _void, _void> targetValue)
+            public override bool TryGetValidValue(PValue value, out T targetValue)
             {
-                if (SettingHelper.AreEqual(Constant1, value))
+                PString stringValue;
+                if (value is PString)
                 {
-                    targetValue = OptionValue<_void, _void, _void>.Option1(_void._);
-                    return true;
-                }
-                else if (SettingHelper.AreEqual(Constant2, value))
-                {
-                    targetValue = OptionValue<_void, _void, _void>.Option2(_void._);
-                    return true;
-                }
-                else if (SettingHelper.AreEqual(Constant3, value))
-                {
-                    targetValue = OptionValue<_void, _void, _void>.Option3(_void._);
-                    return true;
+                    stringValue = (PString)value;
+                    if (stringToTarget.TryGetValue(stringValue.Value, out targetValue))
+                    {
+                        return true;
+                    }
                 }
 
-                targetValue = default(OptionValue<_void, _void, _void>);
+                targetValue = default(T);
                 return false;
             }
 
-            public override PValue GetPValue(OptionValue<_void, _void, _void> value)
-                => value.Case(
-                    whenOption1: _ => Constant1,
-                    whenOption2: _ => Constant2,
-                    whenOption3: _ => Constant3);
+            public override PValue GetPValue(T value)
+            {
+                foreach (var kv in stringToTarget)
+                {
+                    if (kv.Value == value) return new PString(kv.Key);
+                }
+
+                throw new ArgumentException("Target value not found.");
+            }
         }
     }
 }

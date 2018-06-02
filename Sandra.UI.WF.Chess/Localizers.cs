@@ -16,8 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using SysExtensions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF
 {
@@ -56,62 +56,94 @@ namespace Sandra.UI.WF
 
     internal static class Localizers
     {
-        public static readonly Localizer English = new EnglishLocalizer();
+        public static readonly string SettingKey = "lang";
 
-        public static readonly Localizer Dutch = new DutchLocalizer();
+        private static KeyedLocalizer[] registered;
 
-        public static readonly PString EnglishSettingValue = new PString("en");
+        public static IEnumerable<KeyedLocalizer> Registered => registered.Enumerate();
 
-        public static readonly PString DutchSettingValue = new PString("nl");
+        /// <summary>
+        /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
+        /// </summary>
+        public static SettingProperty<Localizer> LangSetting { get; private set; }
 
-        public static readonly LocalizedStringKey LangEnglish = LocalizedStringKey.Unlocalizable("English");
-
-        public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
-            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangEnglish)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LangEnglish,
-                MenuIcon = Program.LoadImage("flag-uk"),
-            });
-
-        public static UIActionState TrySwitchToLangEnglish(bool perform)
+        /// <summary>
+        /// Registers a set of localizers. The first localizer will be set as the current localizer.
+        /// </summary>
+        public static void Register(params KeyedLocalizer[] localizers)
         {
-            if (perform)
+            if (localizers == null || localizers.Length == 0)
             {
-                Localizer.Current = English;
-                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option1(_void._));
+                // Use built-in localizer if none is provided.
+                localizers = new KeyedLocalizer[] { new EnglishLocalizer() };
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
-        }
+            registered = localizers;
 
-        public static readonly LocalizedStringKey LangDutch = LocalizedStringKey.Unlocalizable("Nederlands");
+            LangSetting = new SettingProperty<Localizer>(
+                new SettingKey(SettingKey),
+                new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
 
-        public static readonly DefaultUIActionBinding SwitchToLangDutch = new DefaultUIActionBinding(
-            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangDutch)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LangDutch,
-                MenuIcon = Program.LoadImage("flag-nl"),
-            });
-
-        public static UIActionState TrySwitchToLangDutch(bool perform)
-        {
-            if (perform)
-            {
-                Localizer.Current = Dutch;
-                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option2(_void._));
-            }
-
-            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);
+            Localizer.Current = Registered.First();
         }
     }
 
-    internal sealed class EnglishLocalizer : Localizer
+    /// <summary>
+    /// Apart from being a <see cref="Localizer"/>, contains abstract properties
+    /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
+    /// </summary>
+    public abstract class KeyedLocalizer : Localizer
+    {
+        /// <summary>
+        /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
+        /// </summary>
+        public abstract string LanguageName { get; }
+
+        /// <summary>
+        /// Gets the value of the <see cref="Localizers.LangSetting"/> in the auto-save file.
+        /// </summary>
+        public abstract string AutoSaveSettingValue { get; }
+
+        /// <summary>
+        /// Gets the file name without extension of the flag icon.
+        /// </summary>
+        public abstract string FlagIconFileName { get; }
+
+        public readonly DefaultUIActionBinding SwitchToLangUIActionBinding;
+
+        protected KeyedLocalizer()
+        {
+            SwitchToLangUIActionBinding = new DefaultUIActionBinding(
+                new UIAction(nameof(Localizers) + "." + LanguageName),
+                new UIActionBinding()
+                {
+                    ShowInMenu = true,
+                    MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                    MenuIcon = Program.LoadImage(FlagIconFileName),
+                });
+        }
+
+        public UIActionState TrySwitchToLang(bool perform)
+        {
+            if (perform)
+            {
+                Current = this;
+                Program.AutoSave.Persist(Localizers.LangSetting, this);
+            }
+
+            return new UIActionState(UIActionVisibility.Enabled, Current == this);
+        }
+    }
+
+    internal sealed class EnglishLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
+
+        public override string LanguageName => "English";
+
+        public override string AutoSaveSettingValue => "en";
+
+        public override string FlagIconFileName => "flag-uk";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
@@ -177,9 +209,15 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class DutchLocalizer : Localizer
+    internal sealed class DutchLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> dutchDictionary;
+
+        public override string LanguageName => "Nederlands";
+
+        public override string AutoSaveSettingValue => "nl";
+
+        public override string FlagIconFileName => "flag-nl";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {

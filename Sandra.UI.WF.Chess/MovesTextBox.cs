@@ -144,9 +144,13 @@ namespace Sandra.UI.WF
             UseLocalizedLongAlgebraic,
         }
 
-        public static readonly PString SANSettingValue = new PString("san");
-        public static readonly PString PGNSettingValue = new PString("pgn");
-        public static readonly PString LANSettingValue = new PString("lan");
+        /// <summary>
+        /// Contains shorthand values for <see cref="MoveFormattingOption"/> which are stored in settings files as a string.
+        /// </summary>
+        internal enum MFOSettingValue
+        {
+            san, pgn, lan
+        }
 
         private MoveFormattingOption moveFormattingOption;
 
@@ -157,34 +161,16 @@ namespace Sandra.UI.WF
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                OptionValue<_void, _void, _void> optionValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out optionValue))
+                MFOSettingValue mfoSettingValue;
+                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out mfoSettingValue))
                 {
-                    moveFormattingOption = optionValue.Case(
-                        whenOption1: _ => MoveFormattingOption.UseLocalizedShortAlgebraic,
-                        whenOption2: _ => MoveFormattingOption.UsePGN,
-                        whenOption3: _ => MoveFormattingOption.UseLocalizedLongAlgebraic);
+                    moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }
             }
             else
             {
                 // Update setting if the formatter was already initialized.
-                OptionValue<_void, _void, _void> optionValue;
-                switch (moveFormattingOption)
-                {
-                    default:
-                    case MoveFormattingOption.UseLocalizedShortAlgebraic:
-                        optionValue = OptionValue<_void, _void, _void>.Option1(_void._);
-                        break;
-                    case MoveFormattingOption.UsePGN:
-                        optionValue = OptionValue<_void, _void, _void>.Option2(_void._);
-                        break;
-                    case MoveFormattingOption.UseLocalizedLongAlgebraic:
-                        optionValue = OptionValue<_void, _void, _void>.Option3(_void._);
-                        break;
-                }
-
-                Program.AutoSave.Persist(SettingKeys.Notation, optionValue);
+                Program.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
             }
 
             string pieceSymbols;
