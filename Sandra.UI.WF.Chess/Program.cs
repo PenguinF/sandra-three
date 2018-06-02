@@ -20,13 +20,14 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     static class Program
     {
+        internal static string ExecutableFolder { get; private set; }
+
         internal const string AppName = "SandraChess";
 
         internal static AutoSave AutoSave { get; private set; }
@@ -37,6 +38,8 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
             // TODO: remove unknown keys from the settings after loading it from the file.
@@ -62,8 +65,7 @@ namespace Sandra.UI.WF
         {
             try
             {
-                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
+                return Image.FromFile(Path.Combine(ExecutableFolder, "Images", imageFileKey + ".png"));
             }
             catch (Exception exc)
             {
