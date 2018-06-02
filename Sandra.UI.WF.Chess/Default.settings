@@ -1,0 +1,5 @@
+{
+	// Subfolder of %APPDATA%\\Local which should be used to store persistent data.
+	// This includes the auto-save file, or e.g. a preferences file.
+	"app_data_sub_folder_name": "SandraChess"
+}
