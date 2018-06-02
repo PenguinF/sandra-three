@@ -44,9 +44,6 @@ namespace Sandra.UI.WF
         /// or if the settings file is corrupt, an empty <see cref="SettingsFile"/>
         /// object is returned.
         /// </param>
-        /// <param name="workingCopy">
-        /// The optional <see cref="SettingCopy"/> to load the settings into.
-        /// </param>
         /// <returns>
         /// The created <see cref="SettingsFile"/>.
         /// </returns>
@@ -65,10 +62,8 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
-        public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
+        public static SettingsFile Create(string absoluteFilePath)
         {
-            if (workingCopy == null) workingCopy = new SettingCopy();
-
             string fileText = null;
             try
             {
@@ -79,6 +74,8 @@ namespace Sandra.UI.WF
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
+
+            var workingCopy = new SettingCopy();
 
             if (fileText != null)
             {

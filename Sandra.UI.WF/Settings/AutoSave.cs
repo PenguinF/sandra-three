@@ -117,11 +117,8 @@ namespace Sandra.UI.WF
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
-        /// <param name="initialSettings">
-        /// The initial default settings to use, in case e.g. the auto-save file could not be opened.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> or <paramref name="initialSettings"/> is null.
+        /// <paramref name="appSubFolderName"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
@@ -130,16 +127,11 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName, SettingCopy initialSettings)
+        public AutoSave(string appSubFolderName)
         {
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
-            }
-
-            if (initialSettings == null)
-            {
-                throw new ArgumentNullException(nameof(initialSettings));
             }
 
             // Have to check for string.Empty because Path.Combine will not.
@@ -149,8 +141,8 @@ namespace Sandra.UI.WF
             }
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
-            // don't throw but just disable auto-saving and use default initial settings.
-            localSettings = initialSettings.Commit();
+            // don't throw but just disable auto-saving and use initial empty settings.
+            localSettings = new SettingCopy().Commit();
 
             try
             {

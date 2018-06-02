@@ -30,6 +30,8 @@ namespace Sandra.UI.WF
 
         internal static string ExecutableFolder { get; private set; }
 
+        internal static SettingObject StandardDefaultSettings { get; private set; }
+
         internal static SettingsFile DefaultSettings { get; private set; }
 
         internal static AutoSave AutoSave { get; private set; }
@@ -46,17 +48,20 @@ namespace Sandra.UI.WF
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
             // Attempt to load default settings from constant file name.
-            SettingObject defaults = Settings.CreateDefault();
-            SettingCopy workingCopy = defaults.CreateWorkingCopy();
-            DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName), workingCopy);
+            StandardDefaultSettings = Settings.CreateDefault();
+            DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName));
 
             // Uncomment when making releases to generate Default.settings in the Bin directory.
             //DefaultSettings.WriteToFile();
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
-            string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
-            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy());
+            string appDataSubFolderName;
+            if (!DefaultSettings.Settings.TryGetValue(SettingKeys.AppDataSubFolderName, out appDataSubFolderName))
+            {
+                appDataSubFolderName = StandardDefaultSettings.GetValue(SettingKeys.AppDataSubFolderName);
+            }
+            AutoSave = new AutoSave(appDataSubFolderName);
 
             Chess.Constants.ForceInitialize();
 
