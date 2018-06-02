@@ -64,11 +64,21 @@ namespace Sandra.UI.WF
                 });
         }
 
-        public readonly Rectangle Bounds;
+        private Rectangle bounds;
 
         public FormState(Rectangle bounds)
         {
-            Bounds = bounds;
+            this.bounds = bounds;
+        }
+
+        /// <summary>
+        /// Gets the current location of the <see cref="Form"/>.
+        /// </summary>
+        public Rectangle Bounds => bounds;
+
+        public void Update(Form form)
+        {
+            bounds = form.Bounds;
         }
     }
 }

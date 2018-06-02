@@ -385,8 +385,9 @@ namespace Sandra.UI.WF
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
+                    formState.Update(this);
                     Program.AutoSave.Persist(SettingKeys.Maximized, false);
-                    Program.AutoSave.Persist(SettingKeys.Window, new FormState(Bounds));
+                    Program.AutoSave.Persist(SettingKeys.Window, formState);
                 }
             }
         }
