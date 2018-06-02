@@ -145,7 +145,7 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Contains shorthand values for <see cref="MoveFormattingOption"/> for storing in settings files.
+        /// Contains shorthand values for <see cref="MoveFormattingOption"/> which are stored in settings files as a string.
         /// </summary>
         internal enum MFOSettingValue
         {
