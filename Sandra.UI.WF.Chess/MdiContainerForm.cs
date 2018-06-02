@@ -328,10 +328,8 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             bool boundsInitialized = false;
-            bool maximized = false;
             if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
             {
-                maximized = formState.Maximized;
                 Rectangle targetBounds = formState.Bounds;
 
                 // If all bounds are known initialize from those.
@@ -362,10 +360,11 @@ namespace Sandra.UI.WF
             }
 
             // Restore maximized setting after setting the Bounds.
-            if (maximized) WindowState = FormWindowState.Maximized;
+            if (formState.Maximized) WindowState = FormWindowState.Maximized;
 
-            // Update only after setting the WindowState or the Maximized setting would be reset.
-            formState.Update(this);
+            // Attach only after restoring from settings.
+            formState.AttachTo(this);
+            formState.Changed += FormState_Changed;
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
@@ -376,29 +375,9 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
-        private void autoSaveFormState()
+        private void FormState_Changed(object sender, EventArgs e)
         {
-            // Don't auto-save if the form isn't loaded yet.
-            if (formState != null)
-            {
-                formState.Update(this);
-                if (WindowState != FormWindowState.Minimized)
-                {
-                    Program.AutoSave.Persist(SettingKeys.Window, formState);
-                }
-            }
-        }
-
-        protected override void OnResizeEnd(EventArgs e)
-        {
-            base.OnResizeEnd(e);
-            autoSaveFormState();
-        }
-
-        protected override void OnLocationChanged(EventArgs e)
-        {
-            base.OnLocationChanged(e);
-            autoSaveFormState();
+            Program.AutoSave.Persist(SettingKeys.Window, formState);
         }
 
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
