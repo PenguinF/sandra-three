@@ -16,6 +16,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
     public static partial class PType
@@ -51,6 +53,80 @@ namespace Sandra.UI.WF
             }
 
             public override PValue GetPValue(TValue value) => value;
+        }
+
+        /// <summary>
+        /// Abstract base class for all types which depend on a base <see cref="PType{TBase}"/>
+        /// and then apply a further restriction or conversion.
+        /// </summary>
+        /// <typeparam name="TBase">
+        /// The .NET target <see cref="Type"/> of the base <see cref="PType{TBase}"/>.
+        /// </typeparam>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to convert to and from.
+        /// </typeparam>
+        public abstract class Derived<TBase, T> : PType<T>
+        {
+            /// <summary>
+            /// Gets the base <see cref="PType{TBase}"/>.
+            /// </summary>
+            public PType<TBase> BaseType { get; }
+
+            /// <summary>
+            /// Initializes a new instance of <see cref="Derived{TBase, T}"/> with a base <see cref="PType{TBase}"/>.
+            /// </summary>
+            /// <param name="baseType">
+            /// The base <see cref="PType{TBase}"/> to depend on.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// <paramref name="baseType"/> is null.
+            /// </exception>
+            protected Derived(PType<TBase> baseType)
+            {
+                if (baseType == null) throw new ArgumentNullException(nameof(baseType));
+                BaseType = baseType;
+            }
+
+            public override sealed bool TryGetValidValue(PValue value, out T targetValue)
+            {
+                TBase baseValue;
+                if (BaseType.TryGetValidValue(value, out baseValue)
+                    && TryGetTargetValue(baseValue, out targetValue))
+                {
+                    return true;
+                }
+
+                targetValue = default(T);
+                return false;
+            }
+
+            public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
+
+            /// <summary>
+            /// Attempts to convert a <see cref="TBase"/> value to the target .NET type <typeparamref name="T"/>.
+            /// </summary>
+            /// <param name="value">
+            /// The value to convert from.
+            /// </param>
+            /// <param name="targetValue">
+            /// The target value to convert to, if conversion succeeds.
+            /// </param>
+            /// <returns>
+            /// Whether or not conversion succeeded.
+            /// </returns>
+            public abstract bool TryGetTargetValue(TBase value, out T targetValue);
+
+            /// <summary>
+            /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="TBase"/> value.
+            /// Assumed is that this is the reverse operation of <see cref="GetTargetValue(TBase)"/>.
+            /// </summary>
+            /// <param name="value">
+            /// The value to convert from.
+            /// </param>
+            /// <returns>
+            /// The converted base value.
+            /// </returns>
+            public abstract TBase GetBaseValue(T value);
         }
     }
 }
