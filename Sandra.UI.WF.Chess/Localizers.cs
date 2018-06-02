@@ -70,7 +70,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKey.Unlocalizable(English.LanguageName),
-                MenuIcon = Program.LoadImage("flag-uk"),
+                MenuIcon = Program.LoadImage(English.FlagIconFileName),
             });
 
         public static UIActionState TrySwitchToLangEnglish(bool perform)
@@ -90,7 +90,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKey.Unlocalizable(Dutch.LanguageName),
-                MenuIcon = Program.LoadImage("flag-nl"),
+                MenuIcon = Program.LoadImage(Dutch.FlagIconFileName),
             });
 
         public static UIActionState TrySwitchToLangDutch(bool perform)
@@ -120,6 +120,11 @@ namespace Sandra.UI.WF
         /// Gets the value of the <see cref="SettingKeys.Lang"/> in the auto-save file.
         /// </summary>
         public abstract string AutoSaveSettingValue { get; }
+
+        /// <summary>
+        /// Gets the file name without extension of the flag icon.
+        /// </summary>
+        public abstract string FlagIconFileName { get; }
     }
 
     internal sealed class EnglishLocalizer : KeyedLocalizer
@@ -129,6 +134,8 @@ namespace Sandra.UI.WF
         public override string LanguageName => "English";
 
         public override string AutoSaveSettingValue => "en";
+
+        public override string FlagIconFileName => "flag-uk";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
@@ -201,6 +208,8 @@ namespace Sandra.UI.WF
         public override string LanguageName => "Nederlands";
 
         public override string AutoSaveSettingValue => "nl";
+
+        public override string FlagIconFileName => "flag-nl";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
