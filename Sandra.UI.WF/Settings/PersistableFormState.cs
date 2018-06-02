@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * FormState.cs
+ * PersistableFormState.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -27,16 +27,16 @@ namespace Sandra.UI.WF
     /// Captures the state of a <see cref="Form"/> for an auto-save file.
     /// This is a combination of its last location and whether or not it was maximized.
     /// </summary>
-    public class FormState
+    public class PersistableFormState
     {
         /// <summary>
-        /// Gets the <see cref="PType"/> of a <see cref="FormState"/>.
+        /// Gets the <see cref="PType"/> of a <see cref="PersistableFormState"/>.
         /// </summary>
-        public static readonly PType<FormState> Type = new FormStatePType();
+        public static readonly PType<PersistableFormState> Type = new FormStatePType();
 
-        private sealed class FormStatePType : PType<FormState>
+        private sealed class FormStatePType : PType<PersistableFormState>
         {
-            public override bool TryGetValidValue(PValue value, out FormState targetValue)
+            public override bool TryGetValidValue(PValue value, out PersistableFormState targetValue)
             {
                 PList windowBoundsList = value as PList;
                 bool maximized;
@@ -49,15 +49,15 @@ namespace Sandra.UI.WF
                     && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out width)
                     && PType.Int32.Instance.TryGetValidValue(windowBoundsList[4], out height))
                 {
-                    targetValue = new FormState(maximized, new Rectangle(left, top, width, height));
+                    targetValue = new PersistableFormState(maximized, new Rectangle(left, top, width, height));
                     return true;
                 }
 
-                targetValue = default(FormState);
+                targetValue = default(PersistableFormState);
                 return false;
             }
 
-            public override PValue GetPValue(FormState value) => new PList(
+            public override PValue GetPValue(PersistableFormState value) => new PList(
                 new List<PValue>
                 {
                     PType.Boolean.Instance.GetPValue(value.Maximized),
@@ -74,7 +74,7 @@ namespace Sandra.UI.WF
 
         private Rectangle bounds;
 
-        public FormState(bool maximized, Rectangle bounds)
+        public PersistableFormState(bool maximized, Rectangle bounds)
         {
             this.maximized = maximized;
             this.bounds = bounds;

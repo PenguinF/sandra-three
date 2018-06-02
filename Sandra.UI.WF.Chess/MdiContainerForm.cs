@@ -317,7 +317,7 @@ namespace Sandra.UI.WF
             game.TryGotoChessBoardForm(true);
         }
 
-        private FormState formState;
+        private PersistableFormState formState;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -343,7 +343,7 @@ namespace Sandra.UI.WF
             }
             else
             {
-                formState = new FormState(false, Rectangle.Empty);
+                formState = new PersistableFormState(false, Rectangle.Empty);
             }
 
             if (!boundsInitialized)

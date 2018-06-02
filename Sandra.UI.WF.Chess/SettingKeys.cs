@@ -22,9 +22,9 @@ namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingProperty<FormState> Window = new SettingProperty<FormState>(
+        internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
-            FormState.Type);
+            PersistableFormState.Type);
 
         internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(nameof(Notation).ToLowerInvariant()),
