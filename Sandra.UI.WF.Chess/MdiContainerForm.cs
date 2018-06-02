@@ -317,8 +317,7 @@ namespace Sandra.UI.WF
             game.TryGotoChessBoardForm(true);
         }
 
-        // Keeps track if the bounds of this form have been initialized in OnLoad().
-        private bool formBoundsInitialized;
+        private FormState formState;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -328,10 +327,10 @@ namespace Sandra.UI.WF
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            FormState formState;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
+            FormState candidateFormState;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out candidateFormState))
             {
-                Rectangle targetBounds = formState.Bounds;
+                Rectangle targetBounds = candidateFormState.Bounds;
 
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
@@ -339,11 +338,11 @@ namespace Sandra.UI.WF
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
                     SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    formBoundsInitialized = true;
+                    formState = candidateFormState;
                 }
             }
 
-            if (!formBoundsInitialized)
+            if (formState == null)
             {
                 // Show in the center of the monitor where the mouse currently is.
                 var activeScreen = Screen.FromPoint(MousePosition);
@@ -354,7 +353,7 @@ namespace Sandra.UI.WF
 
                 // Update the bounds of the form.
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                formBoundsInitialized = true;
+                formState = new FormState(Bounds);
             }
 
             // Restore maximized setting.
@@ -376,7 +375,7 @@ namespace Sandra.UI.WF
         private void autoSaveFormState()
         {
             // Don't auto-save if the form isn't loaded yet.
-            if (formBoundsInitialized)
+            if (formState != null)
             {
                 // Don't auto-save anything if the form is minimized.
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
