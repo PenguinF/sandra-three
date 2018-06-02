@@ -20,7 +20,6 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Security;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -31,7 +30,7 @@ namespace Sandra.UI.WF
 
         internal static string ExecutableFolder { get; private set; }
 
-        internal static SettingObject DefaultSettings { get; private set; }
+        internal static SettingsFile DefaultSettings { get; private set; }
 
         internal const string AppName = "SandraChess";
 
@@ -43,39 +42,12 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            // Store executable folder location for later use.
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
-            // Attempt to load default settings from given file name.
-            string fullDefaultSettingsFileName = Path.Combine(ExecutableFolder, DefaultSettingsFileName);
-
-            string fileText = null;
-            try
-            {
-                fileText = File.ReadAllText(fullDefaultSettingsFileName);
-            }
-            catch (Exception exception)
-            {
-                if (exception is IOException ||
-                    exception is UnauthorizedAccessException ||
-                    exception is FileNotFoundException ||
-                    exception is SecurityException)
-                {
-                    // 'Expected' exceptions can be traced.
-                    exception.Trace();
-                }
-                else
-                {
-                    // Other exceptions are developer errors.
-                    throw;
-                }
-            }
-
+            // Attempt to load default settings from constant file name.
             SettingCopy workingCopy = new SettingCopy();
-            if (fileText != null)
-            {
-                workingCopy.LoadFromText(new StringReader(fileText));
-            }
-            DefaultSettings = workingCopy.Commit();
+            DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName), workingCopy);
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
