@@ -153,15 +153,15 @@ namespace Sandra.UI.WF
 
         void initializeUIActions()
         {
-            this.BindAction(Localizers.SwitchToLangEnglish, Localizers.TrySwitchToLangEnglish);
-            this.BindAction(Localizers.SwitchToLangDutch, Localizers.TrySwitchToLangDutch);
+            this.BindAction(Localizers.English.SwitchToLangUIActionBinding, Localizers.TrySwitchToLangEnglish);
+            this.BindAction(Localizers.Dutch.SwitchToLangUIActionBinding, Localizers.TrySwitchToLangDutch);
 
             UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Program.LoadImage("globe"));
             mainMenuActionHandler.RootMenuNode.Nodes.Add(langMenu);
 
             bindFocusDependentUIActions(langMenu,
-                                        Localizers.SwitchToLangEnglish,
-                                        Localizers.SwitchToLangDutch);
+                                        Localizers.English.SwitchToLangUIActionBinding,
+                                        Localizers.Dutch.SwitchToLangUIActionBinding);
 
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 

@@ -64,15 +64,6 @@ namespace Sandra.UI.WF
 
         public static readonly PString DutchSettingValue = new PString(Dutch.AutoSaveSettingValue);
 
-        public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
-            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangEnglish)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKey.Unlocalizable(English.LanguageName),
-                MenuIcon = Program.LoadImage(English.FlagIconFileName),
-            });
-
         public static UIActionState TrySwitchToLangEnglish(bool perform)
         {
             if (perform)
@@ -83,15 +74,6 @@ namespace Sandra.UI.WF
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
         }
-
-        public static readonly DefaultUIActionBinding SwitchToLangDutch = new DefaultUIActionBinding(
-            new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangDutch)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKey.Unlocalizable(Dutch.LanguageName),
-                MenuIcon = Program.LoadImage(Dutch.FlagIconFileName),
-            });
 
         public static UIActionState TrySwitchToLangDutch(bool perform)
         {
@@ -125,6 +107,20 @@ namespace Sandra.UI.WF
         /// Gets the file name without extension of the flag icon.
         /// </summary>
         public abstract string FlagIconFileName { get; }
+
+        public readonly DefaultUIActionBinding SwitchToLangUIActionBinding;
+
+        protected KeyedLocalizer()
+        {
+            SwitchToLangUIActionBinding = new DefaultUIActionBinding(
+                new UIAction(nameof(Localizers) + "." + LanguageName),
+                new UIActionBinding()
+                {
+                    ShowInMenu = true,
+                    MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                    MenuIcon = Program.LoadImage(FlagIconFileName),
+                });
+        }
     }
 
     internal sealed class EnglishLocalizer : KeyedLocalizer
