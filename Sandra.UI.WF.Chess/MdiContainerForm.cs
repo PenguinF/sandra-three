@@ -379,13 +379,13 @@ namespace Sandra.UI.WF
             {
                 // Don't auto-save anything if the form is minimized.
                 // If the application is then closed and reopened, it will restore to the state before it was minimized.
+                formState.Update(this);
                 if (WindowState == FormWindowState.Maximized)
                 {
                     Program.AutoSave.Persist(SettingKeys.Maximized, true);
                 }
                 else if (WindowState == FormWindowState.Normal)
                 {
-                    formState.Update(this);
                     Program.AutoSave.Persist(SettingKeys.Maximized, false);
                     Program.AutoSave.Persist(SettingKeys.Window, formState);
                 }

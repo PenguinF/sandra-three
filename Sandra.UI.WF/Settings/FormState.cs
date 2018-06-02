@@ -78,7 +78,10 @@ namespace Sandra.UI.WF
 
         public void Update(Form form)
         {
-            bounds = form.Bounds;
+            if (form.WindowState != FormWindowState.Maximized)
+            {
+                bounds = form.Bounds;
+            }
         }
     }
 }
