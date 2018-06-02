@@ -64,6 +64,8 @@ namespace Sandra.UI.WF
                 });
         }
 
+        private bool maximized;
+
         private Rectangle bounds;
 
         public FormState(Rectangle bounds)
@@ -72,14 +74,27 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Gets the current location of the <see cref="Form"/>.
+        /// Gets if the <see cref="Form"/> is currently maximized.
+        /// </summary>
+        public bool Maximized => maximized;
+
+        /// <summary>
+        /// Gets the current location of the <see cref="Form"/>,
+        /// or the location of the <see cref="Form"/> before it was maximized.
         /// </summary>
         public Rectangle Bounds => bounds;
 
         public void Update(Form form)
         {
-            if (form.WindowState != FormWindowState.Maximized)
+            // Don't store anything if the form is minimized.
+            // If the application is then closed and reopened, it will restore to the state before it was minimized.
+            if (form.WindowState == FormWindowState.Maximized)
             {
+                maximized = true;
+            }
+            else if (form.WindowState == FormWindowState.Normal)
+            {
+                maximized = false;
                 bounds = form.Bounds;
             }
         }
