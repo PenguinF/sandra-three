@@ -327,10 +327,10 @@ namespace Sandra.UI.WF
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            FormState candidateFormState;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out candidateFormState))
+            bool boundsInitialized = false;
+            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
             {
-                Rectangle targetBounds = candidateFormState.Bounds;
+                Rectangle targetBounds = formState.Bounds;
 
                 // If all bounds are known initialize from those.
                 // Do make sure it ends up on a visible working area.
@@ -338,11 +338,11 @@ namespace Sandra.UI.WF
                 if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
                 {
                     SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    formState = candidateFormState;
+                    boundsInitialized = true;
                 }
             }
 
-            if (formState == null)
+            if (!boundsInitialized)
             {
                 // Show in the center of the monitor where the mouse currently is.
                 var activeScreen = Screen.FromPoint(MousePosition);
@@ -353,7 +353,9 @@ namespace Sandra.UI.WF
 
                 // Update the bounds of the form.
                 SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-                formState = new FormState(Bounds);
+
+                if (formState == null) formState = new FormState(Bounds);
+                else formState.Update(this);
             }
 
             // Restore maximized setting.
