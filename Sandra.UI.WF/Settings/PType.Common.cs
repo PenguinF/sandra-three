@@ -47,18 +47,12 @@ namespace Sandra.UI.WF
 
             private sealed class _Int32CLRType : Derived<PInteger, int>
             {
-                public _Int32CLRType() : base(Integer) { }
+                public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
 
                 public override bool TryGetTargetValue(PInteger integer, out int targetValue)
                 {
-                    if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
-                    {
-                        targetValue = (int)integer.Value;
-                        return true;
-                    }
-
-                    targetValue = default(int);
-                    return false;
+                    targetValue = (int)integer.Value;
+                    return true;
                 }
 
                 public override PInteger GetBaseValue(int value) => new PInteger(value);
@@ -106,18 +100,12 @@ namespace Sandra.UI.WF
 
             public static readonly RichTextZoomFactor Instance = new RichTextZoomFactor();
 
-            private RichTextZoomFactor() : base(Integer) { }
+            private RichTextZoomFactor() : base(new RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
 
             public override bool TryGetTargetValue(PInteger integer, out int targetValue)
             {
-                if (MinDiscreteValue <= integer.Value && integer.Value <= MaxDiscreteValue)
-                {
-                    targetValue = (int)integer.Value;
-                    return true;
-                }
-
-                targetValue = default(int);
-                return false;
+                targetValue = (int)integer.Value;
+                return true;
             }
 
             public override PInteger GetBaseValue(int value) => new PInteger(value);

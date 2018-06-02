@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Numerics;
 
 namespace Sandra.UI.WF
 {
@@ -127,6 +128,63 @@ namespace Sandra.UI.WF
             /// The converted base value.
             /// </returns>
             public abstract TBase GetBaseValue(T value);
+        }
+
+        public sealed class RangedInteger : Derived<PInteger, PInteger>
+        {
+            /// <summary>
+            /// Gets the minimum value which is allowed for values of this type.
+            /// </summary>
+            public BigInteger MinValue { get; }
+
+            /// <summary>
+            /// Gets the maximum value which is allowed for values of this type.
+            /// </summary>
+            public BigInteger MaxValue { get; }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RangedInteger"/> type.
+            /// </summary>
+            /// <param name="minValue">
+            /// The minimum allowed value.
+            /// </param>
+            /// <param name="maxValue">
+            /// The maximum allowed value.
+            /// </param>
+            public RangedInteger(BigInteger minValue, BigInteger maxValue) : base(Integer)
+            {
+                MinValue = minValue;
+                MaxValue = maxValue;
+            }
+
+            public bool InRange(PInteger pInteger)
+                => MinValue <= pInteger.Value
+                && pInteger.Value <= MaxValue;
+
+            public override bool TryGetTargetValue(PInteger candidateValue, out PInteger targetValue)
+            {
+                if (InRange(candidateValue))
+                {
+                    targetValue = candidateValue;
+                    return true;
+                }
+
+                targetValue = default(PInteger);
+                return false;
+            }
+
+            public override PInteger GetBaseValue(PInteger value)
+            {
+                if (!InRange(value))
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        value.Value,
+                        $"Value was not between {MinValue} and {MaxValue}.");
+                }
+
+                return value;
+            }
         }
     }
 }
