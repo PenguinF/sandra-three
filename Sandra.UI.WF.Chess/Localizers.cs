@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using SysExtensions;
 using System.Collections.Generic;
 
 namespace Sandra.UI.WF
@@ -60,16 +59,12 @@ namespace Sandra.UI.WF
 
         public static readonly KeyedLocalizer Dutch = new DutchLocalizer();
 
-        public static readonly PString EnglishSettingValue = new PString(English.AutoSaveSettingValue);
-
-        public static readonly PString DutchSettingValue = new PString(Dutch.AutoSaveSettingValue);
-
         public static UIActionState TrySwitchToLangEnglish(bool perform)
         {
             if (perform)
             {
                 Localizer.Current = English;
-                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option1(_void._));
+                Program.AutoSave.Persist(SettingKeys.Lang, English);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
@@ -80,7 +75,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Localizer.Current = Dutch;
-                Program.AutoSave.Persist(SettingKeys.Lang, OptionValue<_void, _void>.Option2(_void._));
+                Program.AutoSave.Persist(SettingKeys.Lang, Dutch);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);

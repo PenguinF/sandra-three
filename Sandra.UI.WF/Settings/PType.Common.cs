@@ -272,5 +272,44 @@ namespace Sandra.UI.WF
 
             public override PValue GetPValue(TEnum value) => new PString(enumToString[value]);
         }
+
+        public sealed class KeyedSet<T> : PType<T> where T : class
+        {
+            private readonly Dictionary<string, T> stringToTarget = new Dictionary<string, T>();
+
+            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues)
+            {
+                foreach (var keyedValue in keyedValues)
+                {
+                    stringToTarget.Add(keyedValue.Key, keyedValue.Value);
+                }
+            }
+
+            public override bool TryGetValidValue(PValue value, out T targetValue)
+            {
+                PString stringValue;
+                if (value is PString)
+                {
+                    stringValue = (PString)value;
+                    if (stringToTarget.TryGetValue(stringValue.Value, out targetValue))
+                    {
+                        return true;
+                    }
+                }
+
+                targetValue = default(T);
+                return false;
+            }
+
+            public override PValue GetPValue(T value)
+            {
+                foreach (var kv in stringToTarget)
+                {
+                    if (kv.Value == value) return new PString(kv.Key);
+                }
+
+                throw new ArgumentException("Target value not found.");
+            }
+        }
     }
 }
