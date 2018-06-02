@@ -18,7 +18,6 @@
  *********************************************************************************/
 using SysExtensions;
 using System.Collections.Generic;
-using System;
 
 namespace Sandra.UI.WF
 {
@@ -61,9 +60,9 @@ namespace Sandra.UI.WF
 
         public static readonly KeyedLocalizer Dutch = new DutchLocalizer();
 
-        public static readonly PString EnglishSettingValue = new PString("en");
+        public static readonly PString EnglishSettingValue = new PString(English.AutoSaveSettingValue);
 
-        public static readonly PString DutchSettingValue = new PString("nl");
+        public static readonly PString DutchSettingValue = new PString(Dutch.AutoSaveSettingValue);
 
         public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
             new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangEnglish)),
@@ -116,6 +115,11 @@ namespace Sandra.UI.WF
         /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
         /// </summary>
         public abstract string LanguageName { get; }
+
+        /// <summary>
+        /// Gets the value of the <see cref="SettingKeys.Lang"/> in the auto-save file.
+        /// </summary>
+        public abstract string AutoSaveSettingValue { get; }
     }
 
     internal sealed class EnglishLocalizer : KeyedLocalizer
@@ -123,6 +127,8 @@ namespace Sandra.UI.WF
         private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
 
         public override string LanguageName => "English";
+
+        public override string AutoSaveSettingValue => "en";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
@@ -193,6 +199,8 @@ namespace Sandra.UI.WF
         private readonly Dictionary<LocalizedStringKey, string> dutchDictionary;
 
         public override string LanguageName => "Nederlands";
+
+        public override string AutoSaveSettingValue => "nl";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
