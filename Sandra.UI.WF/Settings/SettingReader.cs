@@ -47,25 +47,6 @@ namespace Sandra.UI.WF
             return jsonTextReader.TokenType;
         }
 
-        public bool TryParseValue(out PValue value)
-        {
-            var tokenType = ReadSkipComments();
-            if (tokenType == JsonToken.None)
-            {
-                value = default(PValue);
-                return false;
-            }
-
-            value = ParseValue(tokenType);
-
-            if (ReadSkipComments() != JsonToken.None)
-            {
-                throw new JsonReaderException("End of file expected");
-            }
-
-            return true;
-        }
-
         private PMap ParseMap()
         {
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
@@ -159,9 +140,16 @@ namespace Sandra.UI.WF
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
 
-            PValue rootValue;
-            if (TryParseValue(out rootValue))
+            var tokenType = ReadSkipComments();
+            if (tokenType != JsonToken.None)
             {
+                PValue rootValue = ParseValue(tokenType);
+
+                if (ReadSkipComments() != JsonToken.None)
+                {
+                    throw new JsonReaderException("End of file expected");
+                }
+
                 if (!(rootValue is PMap))
                 {
                     throw new JsonReaderException("Expected json object at root");
