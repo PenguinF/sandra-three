@@ -36,9 +36,10 @@ namespace Sandra.UI.WF
             {
                 public override bool TryGetValidValue(PValue value, out bool targetValue)
                 {
-                    if (value is PBoolean)
+                    PBoolean boolean;
+                    if (PType.Boolean.TryGetValidValue(value, out boolean))
                     {
-                        targetValue = ((PBoolean)value).Value;
+                        targetValue = boolean.Value;
                         return true;
                     }
 
@@ -46,37 +47,36 @@ namespace Sandra.UI.WF
                     return false;
                 }
 
-                public override PValue GetPValue(bool value) => new PBoolean(value);
+                public override PValue GetPValue(bool value) => PType.Boolean.GetPValue(new PBoolean(value));
             }
 
             private sealed class _Int32CLRType : PType<int>
             {
                 public override bool TryGetValidValue(PValue value, out int targetValue)
                 {
-                    if (value is PInteger)
+                    PInteger integer;
+                    if (PType.Integer.TryGetValidValue(value, out integer)
+                        && int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
                     {
-                        PInteger integer = (PInteger)value;
-                        if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
-                        {
-                            targetValue = (int)integer.Value;
-                            return true;
-                        }
+                        targetValue = (int)integer.Value;
+                        return true;
                     }
 
                     targetValue = default(int);
                     return false;
                 }
 
-                public override PValue GetPValue(int value) => new PInteger(value);
+                public override PValue GetPValue(int value) => PType.Integer.GetPValue(new PInteger(value));
             }
 
             private sealed class _StringCLRType : PType<string>
             {
                 public override bool TryGetValidValue(PValue value, out string targetValue)
                 {
-                    if (value is PString)
+                    PString stringValue;
+                    if (PType.String.TryGetValidValue(value, out stringValue))
                     {
-                        targetValue = ((PString)value).Value;
+                        targetValue = stringValue.Value;
                         return true;
                     }
 
@@ -84,7 +84,7 @@ namespace Sandra.UI.WF
                     return false;
                 }
 
-                public override PValue GetPValue(string value) => new PString(value);
+                public override PValue GetPValue(string value) => PType.String.GetPValue(new PString(value));
             }
         }
 
@@ -120,21 +120,19 @@ namespace Sandra.UI.WF
 
             public override bool TryGetValidValue(PValue value, out int targetValue)
             {
-                if (value is PInteger)
+                PInteger integer;
+                if (PType.Integer.TryGetValidValue(value, out integer)
+                    && MinDiscreteValue <= integer.Value && integer.Value <= MaxDiscreteValue)
                 {
-                    PInteger integer = (PInteger)value;
-                    if (MinDiscreteValue <= integer.Value && integer.Value <= MaxDiscreteValue)
-                    {
-                        targetValue = (int)integer.Value;
-                        return true;
-                    }
+                    targetValue = (int)integer.Value;
+                    return true;
                 }
 
                 targetValue = default(int);
                 return false;
             }
 
-            public override PValue GetPValue(int value) => new PInteger(value);
+            public override PValue GetPValue(int value) => PType.Integer.GetPValue(new PInteger(value));
         }
 
         public sealed class Enumeration<TEnum> : PType<TEnum> where TEnum : struct
@@ -155,21 +153,18 @@ namespace Sandra.UI.WF
 
             public override bool TryGetValidValue(PValue value, out TEnum targetValue)
             {
-                PString stringValue;
-                if (value is PString)
+                string stringValue;
+                if (PType.CLR.String.TryGetValidValue(value, out stringValue)
+                    && stringToEnum.TryGetValue(stringValue, out targetValue))
                 {
-                    stringValue = (PString)value;
-                    if (stringToEnum.TryGetValue(stringValue.Value, out targetValue))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
                 targetValue = default(TEnum);
                 return false;
             }
 
-            public override PValue GetPValue(TEnum value) => new PString(enumToString[value]);
+            public override PValue GetPValue(TEnum value) => PType.CLR.String.GetPValue(enumToString[value]);
         }
 
         public sealed class KeyedSet<T> : PType<T> where T : class
@@ -186,14 +181,11 @@ namespace Sandra.UI.WF
 
             public override bool TryGetValidValue(PValue value, out T targetValue)
             {
-                PString stringValue;
-                if (value is PString)
+                string stringValue;
+                if (PType.CLR.String.TryGetValidValue(value, out stringValue)
+                    && stringToTarget.TryGetValue(stringValue, out targetValue))
                 {
-                    stringValue = (PString)value;
-                    if (stringToTarget.TryGetValue(stringValue.Value, out targetValue))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
                 targetValue = default(T);
@@ -204,7 +196,7 @@ namespace Sandra.UI.WF
             {
                 foreach (var kv in stringToTarget)
                 {
-                    if (kv.Value == value) return new PString(kv.Key);
+                    if (kv.Value == value) return PType.CLR.String.GetPValue(kv.Key);
                 }
 
                 throw new ArgumentException("Target value not found.");
