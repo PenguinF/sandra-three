@@ -38,6 +38,8 @@ namespace Sandra.UI.WF
         /// </summary>
         public int FastNavigationPlyCount { get; private set; }
 
+        private PersistableFormState formState;
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -79,8 +81,6 @@ namespace Sandra.UI.WF
             if (perform) NewPlayingBoard();
             return UIActionVisibility.Enabled;
         }
-
-
 
         class FocusDependentUIActionState
         {
@@ -305,7 +305,6 @@ namespace Sandra.UI.WF
             }
         }
 
-
         public void NewPlayingBoard()
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
@@ -316,8 +315,6 @@ namespace Sandra.UI.WF
             // Focus back on the chessboard form.
             game.TryGotoChessBoardForm(true);
         }
-
-        private PersistableFormState formState;
 
         protected override void OnLoad(EventArgs e)
         {
