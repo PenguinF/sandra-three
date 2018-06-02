@@ -47,7 +47,7 @@ namespace Sandra.UI.WF
 
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
-            PType.CLR.String);
+            SubFolderNameType.Instance);
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToSnakeCase()),
