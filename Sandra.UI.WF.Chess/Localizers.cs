@@ -58,28 +58,6 @@ namespace Sandra.UI.WF
         public static readonly KeyedLocalizer English = new EnglishLocalizer();
 
         public static readonly KeyedLocalizer Dutch = new DutchLocalizer();
-
-        public static UIActionState TrySwitchToLangEnglish(bool perform)
-        {
-            if (perform)
-            {
-                Localizer.Current = English;
-                Program.AutoSave.Persist(SettingKeys.Lang, English);
-            }
-
-            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
-        }
-
-        public static UIActionState TrySwitchToLangDutch(bool perform)
-        {
-            if (perform)
-            {
-                Localizer.Current = Dutch;
-                Program.AutoSave.Persist(SettingKeys.Lang, Dutch);
-            }
-
-            return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == Dutch);
-        }
     }
 
     /// <summary>
@@ -115,6 +93,17 @@ namespace Sandra.UI.WF
                     MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
                     MenuIcon = Program.LoadImage(FlagIconFileName),
                 });
+        }
+
+        public UIActionState TrySwitchToLang(bool perform)
+        {
+            if (perform)
+            {
+                Current = this;
+                Program.AutoSave.Persist(SettingKeys.Lang, this);
+            }
+
+            return new UIActionState(UIActionVisibility.Enabled, Current == this);
         }
     }
 
