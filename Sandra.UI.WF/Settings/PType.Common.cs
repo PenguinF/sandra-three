@@ -23,71 +23,69 @@ namespace Sandra.UI.WF
 {
     public static partial class PType
     {
-        public sealed class Boolean : PType<bool>
+        /// <summary>
+        /// Contains <see cref="PType"/>s which convert to and from common .NET data types.
+        /// </summary>
+        public static class CLR
         {
-            public static readonly Boolean Instance = new Boolean();
+            public static readonly PType<bool> Boolean = new _BooleanCLRType();
+            public static readonly PType<int> Int32 = new _Int32CLRType();
+            public static readonly PType<string> String = new _StringCLRType();
 
-            private Boolean() { }
-
-            public override bool TryGetValidValue(PValue value, out bool targetValue)
+            private sealed class _BooleanCLRType : PType<bool>
             {
-                if (value is PBoolean)
+                public override bool TryGetValidValue(PValue value, out bool targetValue)
                 {
-                    targetValue = ((PBoolean)value).Value;
-                    return true;
-                }
-
-                targetValue = default(bool);
-                return false;
-            }
-
-            public override PValue GetPValue(bool value) => new PBoolean(value);
-        }
-
-        public sealed class Int32 : PType<int>
-        {
-            public static readonly Int32 Instance = new Int32();
-
-            private Int32() { }
-
-            public override bool TryGetValidValue(PValue value, out int targetValue)
-            {
-                if (value is PInteger)
-                {
-                    PInteger integer = (PInteger)value;
-                    if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
+                    if (value is PBoolean)
                     {
-                        targetValue = (int)integer.Value;
+                        targetValue = ((PBoolean)value).Value;
                         return true;
                     }
+
+                    targetValue = default(bool);
+                    return false;
                 }
 
-                targetValue = default(int);
-                return false;
+                public override PValue GetPValue(bool value) => new PBoolean(value);
             }
 
-            public override PValue GetPValue(int value) => new PInteger(value);
-        }
-
-        public sealed class String : PType<string>
-        {
-            public static readonly String Instance = new String();
-
-            private String() { }
-
-            public override bool TryGetValidValue(PValue value, out string targetValue)
+            private sealed class _Int32CLRType : PType<int>
             {
-                if (value is PString)
+                public override bool TryGetValidValue(PValue value, out int targetValue)
                 {
-                    targetValue = ((PString)value).Value;
-                    return true;
+                    if (value is PInteger)
+                    {
+                        PInteger integer = (PInteger)value;
+                        if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
+                        {
+                            targetValue = (int)integer.Value;
+                            return true;
+                        }
+                    }
+
+                    targetValue = default(int);
+                    return false;
                 }
 
-                targetValue = default(string);
-                return false;
+                public override PValue GetPValue(int value) => new PInteger(value);
             }
 
-            public override PValue GetPValue(string value) => new PString(value);
+            private sealed class _StringCLRType : PType<string>
+            {
+                public override bool TryGetValidValue(PValue value, out string targetValue)
+                {
+                    if (value is PString)
+                    {
+                        targetValue = ((PString)value).Value;
+                        return true;
+                    }
+
+                    targetValue = default(string);
+                    return false;
+                }
+
+                public override PValue GetPValue(string value) => new PString(value);
+            }
         }
 
         public sealed class RichTextZoomFactor : PType<int>
