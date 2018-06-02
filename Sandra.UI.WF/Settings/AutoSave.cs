@@ -16,7 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -426,25 +425,7 @@ namespace Sandra.UI.WF
 
             SettingReader settingReader = new SettingReader(new StringReader(sb.ToString()));
 
-            // Load into an empty working copy.
-            var workingCopy = new SettingCopy();
-
-            PValue rootValue;
-            if (settingReader.TryParseValue(out rootValue))
-            {
-                if (!(rootValue is PMap))
-                {
-                    throw new JsonReaderException("Expected json object at root");
-                }
-
-                PMap map = (PMap)rootValue;
-                foreach (var kv in map)
-                {
-                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
-                }
-            }
-
-            return workingCopy.Commit();
+            return settingReader.ReadWorkingCopy().Commit();
         }
     }
 }

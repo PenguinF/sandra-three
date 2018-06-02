@@ -153,5 +153,28 @@ namespace Sandra.UI.WF
                     throw TokenTypeNotSupported(currentTokenType);
             }
         }
+
+        public SettingCopy ReadWorkingCopy()
+        {
+            // Load into an empty working copy.
+            var workingCopy = new SettingCopy();
+
+            PValue rootValue;
+            if (TryParseValue(out rootValue))
+            {
+                if (!(rootValue is PMap))
+                {
+                    throw new JsonReaderException("Expected json object at root");
+                }
+
+                PMap map = (PMap)rootValue;
+                foreach (var kv in map)
+                {
+                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
+                }
+            }
+
+            return workingCopy;
+        }
     }
 }
