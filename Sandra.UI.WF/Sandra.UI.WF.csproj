@@ -68,6 +68,7 @@
     <Compile Include="Settings\PersistableFormState.cs" />
     <Compile Include="Settings\PList.cs" />
     <Compile Include="Settings\PMap.cs" />
+    <Compile Include="Settings\PType.Base.cs" />
     <Compile Include="Settings\PType.Common.cs" />
     <Compile Include="Settings\PType.cs" />
     <Compile Include="Settings\PValue.cs" />
