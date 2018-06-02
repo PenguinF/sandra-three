@@ -122,7 +122,8 @@ namespace Sandra.UI.WF
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
-        /// or contains one or more of the invalid characters defined in <see cref="Path.GetInvalidPathChars"/>.
+        /// or contains one or more of the invalid characters defined in <see cref="Path.GetInvalidPathChars"/>,
+        /// or targets a folder which is not a subfolder of <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
@@ -138,6 +139,11 @@ namespace Sandra.UI.WF
             if (appSubFolderName.Length == 0)
             {
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
+            }
+
+            if (!SubFolderNameType.Instance.IsValidSubFolderPath(appSubFolderName))
+            {
+                throw new ArgumentException($"{nameof(appSubFolderName)} targets AppData\\Local itself or is not a subfolder.", nameof(appSubFolderName));
             }
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
