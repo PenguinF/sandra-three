@@ -17,25 +17,48 @@
  * 
  *********************************************************************************/
 using SysExtensions;
+using System.Text;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
+        /// <summary>
+        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
+        /// </summary>
+        private static string ToSnakeCase(this string pascalCaseIdentifier)
+        {
+            // Start with converting to lower case.
+            StringBuilder snakeCase = new StringBuilder(pascalCaseIdentifier.ToLowerInvariant());
+
+            // Start at the end so the loop index doesn't need an update after insertion of an underscore.
+            // Stop at index 1, to prevent underscore before the first letter.
+            for (int i = pascalCaseIdentifier.Length - 1; i > 0; --i)
+            {
+                // Insert underscores before letters that have changed case.
+                if (pascalCaseIdentifier[i] != snakeCase[i])
+                {
+                    snakeCase.Insert(i, '_');
+                }
+            }
+
+            return snakeCase.ToString();
+        }
+
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(nameof(AppDataSubFolderName).ToLowerInvariant()),
+            new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
             PType.String.Instance);
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
-            new SettingKey(nameof(Window).ToLowerInvariant()),
+            new SettingKey(nameof(Window).ToSnakeCase()),
             PersistableFormState.Type);
 
         internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
-            new SettingKey(nameof(Notation).ToLowerInvariant()),
+            new SettingKey(nameof(Notation).ToSnakeCase()),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
-            new SettingKey(nameof(Zoom).ToLowerInvariant()),
+            new SettingKey(nameof(Zoom).ToSnakeCase()),
             PType.RichTextZoomFactor.Instance);
     }
 
