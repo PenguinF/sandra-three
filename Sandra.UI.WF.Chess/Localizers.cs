@@ -72,6 +72,12 @@ namespace Sandra.UI.WF
         /// </summary>
         public static void Register(params KeyedLocalizer[] localizers)
         {
+            if (localizers == null || localizers.Length == 0)
+            {
+                // Use built-in localizer if none is provided.
+                localizers = new KeyedLocalizer[] { new EnglishLocalizer() };
+            }
+
             registered = localizers;
 
             LangSetting = new SettingProperty<Localizer>(
