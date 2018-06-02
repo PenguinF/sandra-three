@@ -56,9 +56,9 @@ namespace Sandra.UI.WF
 
     internal static class Localizers
     {
-        public static readonly Localizer English = new EnglishLocalizer();
+        public static readonly KeyedLocalizer English = new EnglishLocalizer();
 
-        public static readonly Localizer Dutch = new DutchLocalizer();
+        public static readonly KeyedLocalizer Dutch = new DutchLocalizer();
 
         public static readonly PString EnglishSettingValue = new PString("en");
 
@@ -109,7 +109,15 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class EnglishLocalizer : Localizer
+    /// <summary>
+    /// Apart from being a <see cref="Localizer"/>, contains abstract properties
+    /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
+    /// </summary>
+    public abstract class KeyedLocalizer : Localizer
+    {
+    }
+
+    internal sealed class EnglishLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
 
@@ -177,7 +185,7 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class DutchLocalizer : Localizer
+    internal sealed class DutchLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> dutchDictionary;
 
