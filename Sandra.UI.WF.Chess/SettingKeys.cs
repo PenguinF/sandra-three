@@ -17,21 +17,12 @@
  * 
  *********************************************************************************/
 using SysExtensions;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal static readonly SettingProperty<Localizer> Lang = new SettingProperty<Localizer>(
-            new SettingKey(nameof(Lang).ToLowerInvariant()),
-            new PType.KeyedSet<Localizer>(new KeyValuePair<string, Localizer>[]
-            {
-                new KeyValuePair<string, Localizer>(Localizers.English.AutoSaveSettingValue, Localizers.English),
-                new KeyValuePair<string, Localizer>(Localizers.Dutch.AutoSaveSettingValue, Localizers.Dutch),
-            }));
-
         internal static readonly SettingProperty<bool> Maximized = new SettingProperty<bool>(
             new SettingKey(nameof(Maximized).ToLowerInvariant()),
             PType.Boolean.Instance);

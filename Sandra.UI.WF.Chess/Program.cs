@@ -37,15 +37,15 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            Localizers.Setup();
+
             // TODO: remove unknown keys from the settings after loading it from the file.
             AutoSave = new AutoSave(AppName, new SettingCopy());
 
             Chess.Constants.ForceInitialize();
 
-            Localizer.Current = Localizers.English;
-
             Localizer localizer;
-            if (AutoSave.CurrentSettings.TryGetValue(SettingKeys.Lang, out localizer))
+            if (AutoSave.CurrentSettings.TryGetValue(Localizers.LangSetting, out localizer))
             {
                 Localizer.Current = localizer;
             }

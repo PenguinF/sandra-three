@@ -55,9 +55,32 @@ namespace Sandra.UI.WF
 
     internal static class Localizers
     {
-        public static readonly KeyedLocalizer English = new EnglishLocalizer();
+        public static readonly string SettingKey = "lang";
 
-        public static readonly KeyedLocalizer Dutch = new DutchLocalizer();
+        public static KeyedLocalizer English { get; private set; }
+
+        public static KeyedLocalizer Dutch { get; private set; }
+
+        /// <summary>
+        /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
+        /// </summary>
+        public static SettingProperty<Localizer> LangSetting { get; private set; }
+
+        public static void Setup()
+        {
+            English = new EnglishLocalizer();
+            Dutch = new DutchLocalizer();
+
+            LangSetting = new SettingProperty<Localizer>(
+                new SettingKey(SettingKey),
+                new PType.KeyedSet<Localizer>(new KeyValuePair<string, Localizer>[]
+                {
+                    new KeyValuePair<string, Localizer>(English.AutoSaveSettingValue, English),
+                    new KeyValuePair<string, Localizer>(Dutch.AutoSaveSettingValue, Dutch),
+                }));
+
+            Localizer.Current = English;
+        }
     }
 
     /// <summary>
@@ -72,7 +95,7 @@ namespace Sandra.UI.WF
         public abstract string LanguageName { get; }
 
         /// <summary>
-        /// Gets the value of the <see cref="SettingKeys.Lang"/> in the auto-save file.
+        /// Gets the value of the <see cref="Localizers.LangSetting"/> in the auto-save file.
         /// </summary>
         public abstract string AutoSaveSettingValue { get; }
 
@@ -100,7 +123,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 Current = this;
-                Program.AutoSave.Persist(SettingKeys.Lang, this);
+                Program.AutoSave.Persist(Localizers.LangSetting, this);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Current == this);
