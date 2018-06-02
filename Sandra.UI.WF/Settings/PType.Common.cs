@@ -237,5 +237,40 @@ namespace Sandra.UI.WF
                     whenOption2: _ => Constant2,
                     whenOption3: _ => Constant3);
         }
+
+        public sealed class Enumeration<TEnum> : PType<TEnum> where TEnum : struct
+        {
+            private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
+            private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
+
+            public Enumeration(IEnumerable<TEnum> enumValues)
+            {
+                Type enumType = typeof(TEnum);
+                foreach (var enumValue in enumValues)
+                {
+                    string name = Enum.GetName(enumType, enumValue);
+                    enumToString.Add(enumValue, name);
+                    stringToEnum.Add(name, enumValue);
+                }
+            }
+
+            public override bool TryGetValidValue(PValue value, out TEnum targetValue)
+            {
+                PString stringValue;
+                if (value is PString)
+                {
+                    stringValue = (PString)value;
+                    if (stringToEnum.TryGetValue(stringValue.Value, out targetValue))
+                    {
+                        return true;
+                    }
+                }
+
+                targetValue = default(TEnum);
+                return false;
+            }
+
+            public override PValue GetPValue(TEnum value) => new PString(enumToString[value]);
+        }
     }
 }

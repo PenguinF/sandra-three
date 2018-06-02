@@ -35,9 +35,9 @@ namespace Sandra.UI.WF
             new SettingKey(nameof(Window).ToLowerInvariant()),
             PType.WindowRectangle.Instance);
 
-        internal static readonly SettingProperty<OptionValue<_void, _void, _void>> Notation = new SettingProperty<OptionValue<_void, _void, _void>>(
+        internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(nameof(Notation).ToLowerInvariant()),
-            new PType.ThreeConstants(MovesTextBox.SANSettingValue, MovesTextBox.PGNSettingValue, MovesTextBox.LANSettingValue));
+            new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(nameof(Zoom).ToLowerInvariant()),
