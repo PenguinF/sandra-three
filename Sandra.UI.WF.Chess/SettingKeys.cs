@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
 
         internal static readonly SettingProperty<Rectangle> Window = new SettingProperty<Rectangle>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
-            PType.WindowRectangle.Instance);
+            FormState.Type);
 
         internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(nameof(Notation).ToLowerInvariant()),

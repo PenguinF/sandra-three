@@ -18,7 +18,6 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Sandra.UI.WF
 {
@@ -117,41 +116,6 @@ namespace Sandra.UI.WF
             }
 
             public override PValue GetPValue(int value) => new PInteger(value);
-        }
-
-        public sealed class WindowRectangle : PType<Rectangle>
-        {
-            public static readonly WindowRectangle Instance = new WindowRectangle();
-
-            private WindowRectangle() { }
-
-            public override bool TryGetValidValue(PValue value, out Rectangle targetValue)
-            {
-                PList windowBoundsList = value as PList;
-                int left, top, width, height;
-                if (windowBoundsList != null
-                    && windowBoundsList.Count == 4
-                    && Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
-                    && Int32.Instance.TryGetValidValue(windowBoundsList[1], out top)
-                    && Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
-                    && Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
-                {
-                    targetValue = new Rectangle(left, top, width, height);
-                    return true;
-                }
-
-                targetValue = default(Rectangle);
-                return false;
-            }
-
-            public override PValue GetPValue(Rectangle value)
-                => new PList(new List<PValue>
-                {
-                    Int32.Instance.GetPValue(value.Left),
-                    Int32.Instance.GetPValue(value.Top),
-                    Int32.Instance.GetPValue(value.Width),
-                    Int32.Instance.GetPValue(value.Height),
-                });
         }
 
         public sealed class Enumeration<TEnum> : PType<TEnum> where TEnum : struct

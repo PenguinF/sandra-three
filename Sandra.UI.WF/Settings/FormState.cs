@@ -16,8 +16,10 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
- 
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -26,5 +28,40 @@ namespace Sandra.UI.WF
     /// </summary>
     public class FormState
     {
+        /// <summary>
+        /// Gets the <see cref="PType"/> of a <see cref="FormState"/>.
+        /// </summary>
+        public static readonly PType<Rectangle> Type = new FormStatePType();
+
+        private sealed class FormStatePType : PType<Rectangle>
+        {
+            public override bool TryGetValidValue(PValue value, out Rectangle targetValue)
+            {
+                PList windowBoundsList = value as PList;
+                int left, top, width, height;
+                if (windowBoundsList != null
+                    && windowBoundsList.Count == 4
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[0], out left)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out top)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out width)
+                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out height))
+                {
+                    targetValue = new Rectangle(left, top, width, height);
+                    return true;
+                }
+
+                targetValue = default(Rectangle);
+                return false;
+            }
+
+            public override PValue GetPValue(Rectangle value)
+                => new PList(new List<PValue>
+                {
+                    PType.Int32.Instance.GetPValue(value.Left),
+                    PType.Int32.Instance.GetPValue(value.Top),
+                    PType.Int32.Instance.GetPValue(value.Width),
+                    PType.Int32.Instance.GetPValue(value.Height),
+                });
+        }
     }
 }
