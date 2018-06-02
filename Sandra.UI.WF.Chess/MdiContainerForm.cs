@@ -322,10 +322,10 @@ namespace Sandra.UI.WF
 
         protected override void OnLoad(EventArgs e)
         {
-            base.OnLoad(e);
-
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
+
+            base.OnLoad(e);
 
             // Initialize from settings if available.
             FormState formState;
