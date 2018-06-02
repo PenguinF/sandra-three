@@ -37,7 +37,7 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
-            Localizers.Setup();
+            Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
             // TODO: remove unknown keys from the settings after loading it from the file.
             AutoSave = new AutoSave(AppName, new SettingCopy());

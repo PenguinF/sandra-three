@@ -67,13 +67,12 @@ namespace Sandra.UI.WF
         /// </summary>
         public static SettingProperty<Localizer> LangSetting { get; private set; }
 
-        public static void Setup()
+        /// <summary>
+        /// Registers a set of localizers. The first localizer will be set as the current localizer.
+        /// </summary>
+        public static void Register(params KeyedLocalizer[] localizers)
         {
-            registered = new KeyedLocalizer[]
-            {
-                new EnglishLocalizer(),
-                new DutchLocalizer(),
-            };
+            registered = localizers;
 
             LangSetting = new SettingProperty<Localizer>(
                 new SettingKey(SettingKey),
