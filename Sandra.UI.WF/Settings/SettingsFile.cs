@@ -28,6 +28,13 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingsFile
     {
+        private static bool IsExternalCauseFileException(Exception exception) =>
+            exception is IOException ||
+            exception is UnauthorizedAccessException ||
+            exception is FileNotFoundException ||
+            exception is DirectoryNotFoundException ||
+            exception is SecurityException;
+
         /// <summary>
         /// Creates a <see cref="SettingsFile"/> given a valid file path.
         /// </summary>
@@ -69,20 +76,8 @@ namespace Sandra.UI.WF
             }
             catch (Exception exception)
             {
-                if (exception is IOException ||
-                    exception is UnauthorizedAccessException ||
-                    exception is FileNotFoundException ||
-                    exception is DirectoryNotFoundException ||
-                    exception is SecurityException)
-                {
-                    // 'Expected' exceptions can be traced.
-                    exception.Trace();
-                }
-                else
-                {
-                    // Other exceptions are developer errors.
-                    throw;
-                }
+                // 'Expected' exceptions can be traced, but rethrow developer errors.
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
             if (fileText != null)
@@ -101,6 +96,29 @@ namespace Sandra.UI.WF
         {
             this.absoluteFilePath = absoluteFilePath;
             Settings = settings;
+        }
+
+        /// <summary>
+        /// Attempts to overwrite the setting file with the current values in <see cref="Settings"/>.
+        /// </summary>
+        /// <returns>
+        /// Null if the operation was successful;
+        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
+        /// </returns>
+        public Exception WriteToFile()
+        {
+            SettingWriter writer = new SettingWriter(indented: true);
+            writer.Visit(Settings.Map);
+            try
+            {
+                File.WriteAllText(absoluteFilePath, writer.Output());
+                return null;
+            }
+            catch (Exception exception)
+            {
+                if (!IsExternalCauseFileException(exception)) throw;
+                return exception;
+            }
         }
     }
 }

@@ -50,6 +50,9 @@ namespace Sandra.UI.WF
             SettingCopy workingCopy = defaults.CreateWorkingCopy();
             DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName), workingCopy);
 
+            // Uncomment when making releases to generate Default.settings in the Bin directory.
+            //DefaultSettings.WriteToFile();
+
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
             string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
