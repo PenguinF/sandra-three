@@ -31,10 +31,17 @@ namespace Sandra.UI.WF
         private readonly StringBuilder outputBuilder;
         private readonly JsonTextWriter jsonTextWriter;
 
-        public SettingWriter()
+        public SettingWriter(bool indented)
         {
             outputBuilder = new StringBuilder();
             jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
+
+            if (indented)
+            {
+                jsonTextWriter.Formatting = Formatting.Indented;
+                jsonTextWriter.Indentation = 1;
+                jsonTextWriter.IndentChar = '\t';
+            }
         }
 
         public override void VisitBoolean(PBoolean value)

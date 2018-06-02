@@ -340,7 +340,7 @@ namespace Sandra.UI.WF
                         Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
                         foreach (var kv in remoteSettings.Map) temp.Add(kv.Key, kv.Value);
                         PMap map = new PMap(temp);
-                        var writer = new SettingWriter();
+                        var writer = new SettingWriter(indented: false);
                         writer.Visit(map);
 
                         // Alterate between both auto-save files.
