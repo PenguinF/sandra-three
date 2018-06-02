@@ -24,7 +24,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Specialized PType that only accepts a certain class of subfolder names.
     /// </summary>
-    internal sealed class SubFolderNameType : PType.Derived<string, string>
+    public sealed class SubFolderNameType : PType.Derived<string, string>
     {
         public static SubFolderNameType Instance = new SubFolderNameType();
 

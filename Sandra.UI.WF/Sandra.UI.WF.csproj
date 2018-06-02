@@ -80,6 +80,7 @@
     <Compile Include="Settings\SettingReader.cs" />
     <Compile Include="Settings\SettingsFile.cs" />
     <Compile Include="Settings\SettingWriter.cs" />
+    <Compile Include="Settings\SubFolderNameType.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>
