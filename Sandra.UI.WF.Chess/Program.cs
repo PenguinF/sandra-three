@@ -32,8 +32,6 @@ namespace Sandra.UI.WF
 
         internal static SettingsFile DefaultSettings { get; private set; }
 
-        internal const string AppName = "SandraChess";
-
         internal static AutoSave AutoSave { get; private set; }
 
         /// <summary>
@@ -42,17 +40,20 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            // TODO: remove unknown keys from settings after loading it from the file.
+
             // Store executable folder location for later use.
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
             // Attempt to load default settings from constant file name.
-            SettingCopy workingCopy = new SettingCopy();
+            SettingObject defaults = Settings.CreateDefault();
+            SettingCopy workingCopy = defaults.CreateWorkingCopy();
             DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName), workingCopy);
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
-            // TODO: remove unknown keys from the settings after loading it from the file.
-            AutoSave = new AutoSave(AppName, new SettingCopy());
+            string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
+            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy());
 
             Chess.Constants.ForceInitialize();
 

@@ -22,6 +22,10 @@ namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
+        internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
+            new SettingKey(nameof(AppDataSubFolderName).ToLowerInvariant()),
+            PType.String.Instance);
+
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToLowerInvariant()),
             PersistableFormState.Type);
@@ -33,5 +37,17 @@ namespace Sandra.UI.WF
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(nameof(Zoom).ToLowerInvariant()),
             PType.RichTextZoomFactor.Instance);
+    }
+
+    internal static class Settings
+    {
+        public static SettingObject CreateDefault()
+        {
+            SettingCopy defaultSettings = new SettingCopy();
+
+            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
+
+            return defaultSettings.Commit();
+        }
     }
 }
