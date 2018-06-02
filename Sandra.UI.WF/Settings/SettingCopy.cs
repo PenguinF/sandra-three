@@ -41,6 +41,20 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Adds or replaces a value associated with a property.
+        /// </summary>
+        /// <param name="property">
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the property.
+        /// </param>
+        public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
+        {
+            KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+        }
+
+        /// <summary>
         /// Reverts to the state of a <see cref="SettingObject"/>.
         /// </summary>
         /// <param name="settingObject">

@@ -293,7 +293,7 @@ namespace Sandra.UI.WF
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
             SettingCopy workingCopy = localSettings.CreateWorkingCopy();
-            workingCopy.KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            workingCopy.AddOrReplace(property, value);
 
             if (!workingCopy.EqualTo(localSettings))
             {
