@@ -18,6 +18,7 @@
  *********************************************************************************/
 using SysExtensions;
 using System.Collections.Generic;
+using System;
 
 namespace Sandra.UI.WF
 {
@@ -64,14 +65,12 @@ namespace Sandra.UI.WF
 
         public static readonly PString DutchSettingValue = new PString("nl");
 
-        public static readonly LocalizedStringKey LangEnglish = LocalizedStringKey.Unlocalizable("English");
-
         public static readonly DefaultUIActionBinding SwitchToLangEnglish = new DefaultUIActionBinding(
             new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangEnglish)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaptionKey = LangEnglish,
+                MenuCaptionKey = LocalizedStringKey.Unlocalizable(English.LanguageName),
                 MenuIcon = Program.LoadImage("flag-uk"),
             });
 
@@ -86,14 +85,12 @@ namespace Sandra.UI.WF
             return new UIActionState(UIActionVisibility.Enabled, Localizer.Current == English);
         }
 
-        public static readonly LocalizedStringKey LangDutch = LocalizedStringKey.Unlocalizable("Nederlands");
-
         public static readonly DefaultUIActionBinding SwitchToLangDutch = new DefaultUIActionBinding(
             new UIAction(nameof(Localizers) + "." + nameof(SwitchToLangDutch)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                MenuCaptionKey = LangDutch,
+                MenuCaptionKey = LocalizedStringKey.Unlocalizable(Dutch.LanguageName),
                 MenuIcon = Program.LoadImage("flag-nl"),
             });
 
@@ -115,11 +112,17 @@ namespace Sandra.UI.WF
     /// </summary>
     public abstract class KeyedLocalizer : Localizer
     {
+        /// <summary>
+        /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
+        /// </summary>
+        public abstract string LanguageName { get; }
     }
 
     internal sealed class EnglishLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
+
+        public override string LanguageName => "English";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
@@ -188,6 +191,8 @@ namespace Sandra.UI.WF
     internal sealed class DutchLocalizer : KeyedLocalizer
     {
         private readonly Dictionary<LocalizedStringKey, string> dutchDictionary;
+
+        public override string LanguageName => "Nederlands";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
         {
