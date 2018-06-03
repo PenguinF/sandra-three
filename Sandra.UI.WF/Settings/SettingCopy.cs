@@ -28,6 +28,11 @@ namespace Sandra.UI.WF
     public class SettingCopy
     {
         /// <summary>
+        /// Gets the schema for this <see cref="SettingCopy"/>.
+        /// </summary>
+        public readonly SettingSchema Schema;
+
+        /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
         public readonly Dictionary<SettingKey, PValue> KeyValueMapping;
@@ -35,8 +40,17 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
         /// </summary>
-        public SettingCopy()
+        /// <param name="schema">
+        /// The schema to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> is null.
+        /// </exception>
+        public SettingCopy(SettingSchema schema)
         {
+            if (schema == null) throw new ArgumentNullException(nameof(schema));
+
+            Schema = schema;
             KeyValueMapping = new Dictionary<SettingKey, PValue>();
         }
 
@@ -63,9 +77,13 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingObject"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settingObject"/> does not have the same schema.
+        /// </exception>
         public void Revert(SettingObject settingObject)
         {
             if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
+            if (settingObject.Schema != Schema) throw new ArgumentException($"Cannot revert to a {nameof(SettingObject)} with a different schema.");
 
             // Clear out the mapping before copying key-value pairs.
             KeyValueMapping.Clear();

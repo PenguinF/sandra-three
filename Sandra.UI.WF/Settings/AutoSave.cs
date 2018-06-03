@@ -148,7 +148,7 @@ namespace Sandra.UI.WF
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            localSettings = new SettingCopy().Commit();
+            localSettings = new SettingCopy(SettingSchema.Empty).Commit();
 
             try
             {
@@ -418,7 +418,7 @@ namespace Sandra.UI.WF
             }
 
             // Load into an empty working copy.
-            var workingCopy = new SettingCopy();
+            var workingCopy = new SettingCopy(SettingSchema.Empty);
             workingCopy.LoadFromText(new StringReader(sb.ToString()));
             return workingCopy.Commit();
         }

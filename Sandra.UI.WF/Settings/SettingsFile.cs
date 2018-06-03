@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public static SettingsFile Create(string absoluteFilePath)
         {
-            var workingCopy = new SettingCopy();
+            var workingCopy = new SettingCopy(SettingSchema.Empty);
 
             try
             {

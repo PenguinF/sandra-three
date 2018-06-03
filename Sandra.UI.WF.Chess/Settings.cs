@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
     {
         public static SettingObject CreateBuiltIn()
         {
-            SettingCopy defaultSettings = new SettingCopy();
+            SettingCopy defaultSettings = new SettingCopy(SettingSchema.Empty);
 
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
 
