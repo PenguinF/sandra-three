@@ -70,12 +70,16 @@ namespace Sandra.UI.WF
 
         private static SettingSchema CreateAutoSaveSchema()
         {
-            return SettingSchema.Empty;
+            return new SettingSchema(
+                SettingKeys.Window,
+                SettingKeys.Notation,
+                SettingKeys.Zoom);
         }
 
         private static SettingSchema CreateDefaultSettingsSchema()
         {
-            return SettingSchema.Empty;
+            return new SettingSchema(
+                SettingKeys.AppDataSubFolderName);
         }
 
         public static SettingObject CreateBuiltIn()

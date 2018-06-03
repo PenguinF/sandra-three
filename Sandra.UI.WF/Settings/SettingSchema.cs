@@ -42,6 +42,19 @@ namespace Sandra.UI.WF
         /// <exception cref="System.ArgumentException">
         /// Two or more properties have the same key.
         /// </exception>
+        public SettingSchema(params SettingProperty[] properties) : this((IEnumerable<SettingProperty>)properties)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of a <see cref="SettingSchema"/>.
+        /// </summary>
+        /// <param name="properties">
+        /// The set of properties with unique keys to support.
+        /// </param>
+        /// <exception cref="System.ArgumentException">
+        /// Two or more properties have the same key.
+        /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties)
         {
             this.properties = properties != null && properties.Any()
