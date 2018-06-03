@@ -113,6 +113,7 @@ namespace Sandra.UI.WF
 #else
         public Exception WriteToFile()
         {
+            string absoluteFilePath = AbsoluteFilePath;
 #endif
             SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
             writer.Visit(Settings.Map);
