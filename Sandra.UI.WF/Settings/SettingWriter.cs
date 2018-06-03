@@ -132,6 +132,19 @@ namespace Sandra.UI.WF
                 Formatting = Formatting.Indented;
                 Indentation = 2;
                 IndentChar = ' ';
+
+                // Write schema description, if any.
+                var commentLines = GetCommentLines(schema.Description, 0);
+                foreach (string commentLine in commentLines)
+                {
+                    // The base WriteComment wraps comments in /*-*/ delimiters,
+                    // so generate raw comments starting with // instead.
+                    WriteRaw(startComment);
+                    WriteRaw(commentLine);
+
+                    // Do this at the end to generate a line-break.
+                    WriteIndent();
+                }
             }
 
             protected override void WriteValueDelimiter()
