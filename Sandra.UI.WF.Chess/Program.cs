@@ -49,7 +49,9 @@ namespace Sandra.UI.WF
 
             // Attempt to load default settings.
             BuiltInSettings = Settings.CreateBuiltIn();
-            DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName));
+            DefaultSettings = SettingsFile.Create(
+                Path.Combine(ExecutableFolder, DefaultSettingsFileName),
+                BuiltInSettings.Schema);
 
             // Uncomment to generate Default.settings in the Bin directory.
             //DefaultSettings.WriteToFile();
