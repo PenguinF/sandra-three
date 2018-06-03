@@ -78,6 +78,7 @@
     <Compile Include="Settings\SettingObject.cs" />
     <Compile Include="Settings\SettingProperty.cs" />
     <Compile Include="Settings\SettingReader.cs" />
+    <Compile Include="Settings\SettingSchema.cs" />
     <Compile Include="Settings\SettingsFile.cs" />
     <Compile Include="Settings\SettingWriter.cs" />
     <Compile Include="Settings\SubFolderNameType.cs" />
