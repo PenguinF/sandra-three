@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * RichTextBoxBase.cs
+ * RichTextBoxBase.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -18,18 +18,7 @@
  *********************************************************************************/
 namespace Sandra.UI.WF
 {
-    /// <summary>
-    /// Represents a read-only Windows rich text box which displays a json settings file.
-    /// </summary>
-    public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
+    public partial class RichTextBoxBase
     {
-        public RichTextBoxBase()
-        {
-        }
-
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
     }
 }

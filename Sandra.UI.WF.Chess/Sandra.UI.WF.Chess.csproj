@@ -76,6 +76,10 @@
     <Compile Include="RichTextBoxBase.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="RichTextBoxBase.UIActions.cs">
+      <DependentUpon>RichTextBoxBase.cs</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsTextBox.cs">
       <SubType>Component</SubType>
