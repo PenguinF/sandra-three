@@ -82,13 +82,13 @@ namespace Sandra.UI.WF
                 SettingKeys.AppDataSubFolderName);
         }
 
-        public static SettingObject CreateBuiltIn()
+        public static SettingCopy CreateBuiltIn()
         {
             SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
 
-            return defaultSettings.Commit();
+            return defaultSettings;
         }
     }
 }
