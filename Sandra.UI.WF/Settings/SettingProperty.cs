@@ -31,6 +31,11 @@ namespace Sandra.UI.WF
         public SettingKey Name { get; }
 
         /// <summary>
+        /// Gets the built-in description of the property in a settings file.
+        /// </summary>
+        public string Description { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SettingProperty"/>.
         /// </summary>
         /// <param name="name">
@@ -39,10 +44,12 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> is null.
         /// </exception>
-        public SettingProperty(SettingKey name)
+        public SettingProperty(SettingKey name, string description)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
+
             Name = name;
+            Description = description;
         }
 
         /// <summary>
@@ -65,11 +72,6 @@ namespace Sandra.UI.WF
     /// </typeparam>
     public class SettingProperty<T> : SettingProperty
     {
-        /// <summary>
-        /// Gets the built-in description of the property in a settings file.
-        /// </summary>
-        public string Description { get; }
-
         /// <summary>
         /// Gets the type of value that it contains.
         /// </summary>
@@ -106,12 +108,10 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
         /// </exception>
-        public SettingProperty(SettingKey name, PType<T> pType, string description) : base(name)
+        public SettingProperty(SettingKey name, PType<T> pType, string description) : base(name, description)
         {
             if (pType == null) throw new ArgumentNullException(nameof(pType));
-
             PType = pType;
-            Description = description;
         }
 
         /// <summary>
