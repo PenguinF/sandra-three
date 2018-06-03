@@ -56,13 +56,15 @@ namespace Sandra.UI.WF
 
             private static List<string> GetCommentLines(string commentText, int indent)
             {
+                List<string> lines = new List<string>();
+                if (commentText == null) return lines;
+
                 // Cut up the description in pieces.
                 // Available length depends on the current indent level.
                 int availableLength = maxLineLength - indent - startComment.Length;
                 int totalLength = commentText.Length;
                 int remainingLength = totalLength;
                 int currentPos = 0;
-                List<string> lines = new List<string>();
 
                 // Use a StringBuilder for substring generation.
                 StringBuilder text = new StringBuilder(commentText);
@@ -141,28 +143,31 @@ namespace Sandra.UI.WF
             public override void WriteSettingPropertyName(string name, bool isFirst)
             {
                 SettingProperty property;
-                if (schema.TryGetProperty(new SettingKey(name), out property)
-                    && property.Description != null)
+                if (schema.TryGetProperty(new SettingKey(name), out property))
                 {
-                    // Prepare by doing a manual auto-completion of a previous value.
-                    if (!isFirst)
-                    {
-                        // Write the value delimiter here already, and suppress it the next time it's called.
-                        // This happens in WritePropertyName().
-                        WriteValueDelimiter();
-                        suppressNextValueDelimiter = true;
-                        WriteIndent();
-                    }
+                    var commentLines = GetCommentLines(property.Description, Top * Indentation);
 
-                    List<string> lines = GetCommentLines(property.Description, Top * Indentation);
-
-                    foreach (string line in lines)
+                    // Only do the custom formatting when there are comments to write.
+                    if (commentLines.Any())
                     {
-                        WriteIndent();
-                        // The base WriteComment wraps comments in /*-*/ delimiters,
-                        // so generate raw comments starting with // instead.
-                        WriteRaw(startComment);
-                        WriteRaw(line);
+                        // Prepare by doing a manual auto-completion of a previous value.
+                        if (!isFirst)
+                        {
+                            // Write the value delimiter here already, and suppress it the next time it's called.
+                            // This happens in WritePropertyName().
+                            WriteValueDelimiter();
+                            suppressNextValueDelimiter = true;
+                            WriteIndent();
+                        }
+
+                        foreach (string commentLine in commentLines)
+                        {
+                            WriteIndent();
+                            // The base WriteComment wraps comments in /*-*/ delimiters,
+                            // so generate raw comments starting with // instead.
+                            WriteRaw(startComment);
+                            WriteRaw(commentLine);
+                        }
                     }
                 }
 
