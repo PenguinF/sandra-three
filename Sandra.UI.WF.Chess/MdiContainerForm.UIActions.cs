@@ -54,24 +54,72 @@ namespace Sandra.UI.WF
                 MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
             });
 
+        private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
+        {
+            var settingsTextBox = new SettingsTextBox()
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                BackColor = Color.White,
+                ForeColor = Color.Black,
+                Font = new Font("Consolas", 10),
+                Text = File.ReadAllText(settingsFile.AbsoluteFilePath),
+                ReadOnly = isReadOnly,
+                WordWrap = false,
+                ScrollBars = RichTextBoxScrollBars.Both,
+            };
+
+            settingsTextBox.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
+                { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
+
+                { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
+                { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
+            });
+
+            UIMenu.AddTo(settingsTextBox);
+
+            var settingsForm = new UIActionForm()
+            {
+                Owner = this,
+                ClientSize = new Size(600, 600),
+                ShowIcon = false,
+                ShowInTaskbar = false,
+                StartPosition = FormStartPosition.CenterScreen,
+                Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
+            };
+
+            settingsForm.Controls.Add(settingsTextBox);
+
+            return settingsForm;
+        }
+
         public UIActionState TryEditPreferencesFile(bool perform)
         {
             if (perform)
             {
-                // Before opening the possibly non-existent file, write to it.
-                // This pretty-prints it too.
-                Exception exception = Program.LocalSettings.WriteToFile();
-                if (exception != null)
+                if (openLocalSettingsForm == null)
                 {
-                    MessageBox.Show(exception.Message);
+                    // Before opening the possibly non-existent file, write to it.
+                    // This pretty-prints it too.
+                    Exception exception = Program.LocalSettings.WriteToFile();
+                    if (exception != null)
+                    {
+                        MessageBox.Show(exception.Message);
+                    }
+                    else
+                    {
+                        // Rely on exception handler in call stack, so no try-catch here.
+                        openLocalSettingsForm = CreateSettingsForm(false, Program.LocalSettings);
+                        openLocalSettingsForm.FormClosed += (_, __) => openLocalSettingsForm = null;
+                    }
                 }
-                else
+
+                if (openLocalSettingsForm != null && !openLocalSettingsForm.ContainsFocus)
                 {
-                    // Immediately dispose handle after creation.
-                    var process = System.Diagnostics.Process.Start(
-                        "notepad.exe",
-                        Program.LocalSettings.AbsoluteFilePath);
-                    process.Dispose();
+                    openLocalSettingsForm.Visible = true;
+                    openLocalSettingsForm.Activate();
                 }
             }
 
@@ -97,41 +145,7 @@ namespace Sandra.UI.WF
                     Program.DefaultSettings.WriteToFile();
 
                     // Rely on exception handler in call stack, so no try-catch here.
-                    var settingsTextBox = new SettingsTextBox()
-                    {
-                        Dock = DockStyle.Fill,
-                        BorderStyle = BorderStyle.None,
-                        BackColor = Color.White,
-                        ForeColor = Color.Black,
-                        Font = new Font("Consolas", 10),
-                        Text = File.ReadAllText(Program.DefaultSettings.AbsoluteFilePath),
-                        ReadOnly = true,
-                        WordWrap = false,
-                        ScrollBars = RichTextBoxScrollBars.Both,
-                    };
-
-                    settingsTextBox.BindActions(new UIActionBindings
-                    {
-                        { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
-                        { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
-
-                        { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
-                        { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
-                    });
-
-                    UIMenu.AddTo(settingsTextBox);
-
-                    openDefaultSettingsForm = new UIActionForm()
-                    {
-                        Owner = this,
-                        ClientSize = new Size(600, 600),
-                        ShowIcon = false,
-                        ShowInTaskbar = false,
-                        StartPosition = FormStartPosition.CenterScreen,
-                        Text = Path.GetFileName(Program.DefaultSettings.AbsoluteFilePath),
-                    };
-
-                    openDefaultSettingsForm.Controls.Add(settingsTextBox);
+                    openDefaultSettingsForm = CreateSettingsForm(true, Program.DefaultSettings);
                     openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
                 }
 

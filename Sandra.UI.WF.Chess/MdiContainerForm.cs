@@ -35,6 +35,7 @@ namespace Sandra.UI.WF
 
         private PersistableFormState formState;
 
+        private Form openLocalSettingsForm;
         private Form openDefaultSettingsForm;
 
         public MdiContainerForm()
