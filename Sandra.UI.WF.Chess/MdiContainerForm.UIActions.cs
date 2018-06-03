@@ -53,6 +53,16 @@ namespace Sandra.UI.WF
 
         public UIActionState TryEditPreferencesFile(bool perform)
         {
+            if (perform)
+            {
+                // Before opening the possibly non-existent file, write to it.
+                // This pretty-prints it too.
+                Program.LocalSettings.WriteToFile();
+                using (var process = System.Diagnostics.Process.Start(
+                    "notepad.exe",
+                    Program.LocalSettings.AbsoluteFilePath)) ;
+            }
+
             return UIActionVisibility.Enabled;
         }
 

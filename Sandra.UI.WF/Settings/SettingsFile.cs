@@ -86,13 +86,16 @@ namespace Sandra.UI.WF
             return new SettingsFile(absoluteFilePath, workingCopy.Commit());
         }
 
-        private readonly string absoluteFilePath;
+        /// <summary>
+        /// Returns the full path to the settings file.
+        /// </summary>
+        public string AbsoluteFilePath { get; }
 
         public SettingObject Settings { get; }
 
         private SettingsFile(string absoluteFilePath, SettingObject settings)
         {
-            this.absoluteFilePath = absoluteFilePath;
+            AbsoluteFilePath = absoluteFilePath;
             Settings = settings;
         }
 
@@ -106,7 +109,7 @@ namespace Sandra.UI.WF
 #if DEBUG
         public Exception WriteToFile(string absoluteFilePath = null)
         {
-            absoluteFilePath = absoluteFilePath ?? this.absoluteFilePath;
+            absoluteFilePath = absoluteFilePath ?? this.AbsoluteFilePath;
 #else
         public Exception WriteToFile()
         {
