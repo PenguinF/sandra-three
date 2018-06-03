@@ -30,9 +30,14 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Represents the empty <see cref="SettingSchema"/>, which contains no properties.
         /// </summary>
-        public static readonly SettingSchema Empty = new SettingSchema(null);
+        public static readonly SettingSchema Empty = new SettingSchema((string)null);
 
         private readonly Dictionary<string, SettingProperty> properties;
+
+        /// <summary>
+        /// Gets the built-in description of the schema in a settings file.
+        /// </summary>
+        public string Description { get; }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingSchema"/>.
@@ -43,7 +48,25 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentException">
         /// Two or more properties have the same key.
         /// </exception>
-        public SettingSchema(params SettingProperty[] properties) : this((IEnumerable<SettingProperty>)properties)
+        public SettingSchema(params SettingProperty[] properties)
+            : this((IEnumerable<SettingProperty>)properties)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of a <see cref="SettingSchema"/>.
+        /// </summary>
+        /// <param name="description">
+        /// The built-in description of the schema in a settings file.
+        /// </param>
+        /// <param name="properties">
+        /// The set of properties with unique keys to support.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Two or more properties have the same key.
+        /// </exception>
+        public SettingSchema(string description, params SettingProperty[] properties)
+            : this(properties, description)
         {
         }
 
@@ -53,10 +76,13 @@ namespace Sandra.UI.WF
         /// <param name="properties">
         /// The set of properties with unique keys to support.
         /// </param>
+        /// <param name="description">
+        /// The built-in description of the schema in a settings file.
+        /// </param>
         /// <exception cref="ArgumentException">
         /// Two or more properties have the same key; or one of the properties is null.
         /// </exception>
-        public SettingSchema(IEnumerable<SettingProperty> properties)
+        public SettingSchema(IEnumerable<SettingProperty> properties, string description = null)
         {
             this.properties = properties != null && properties.Any()
                 ? new Dictionary<string, SettingProperty>()
@@ -70,6 +96,8 @@ namespace Sandra.UI.WF
                     this.properties.Add(property.Name.Key, property);
                 }
             }
+
+            Description = description;
         }
 
         /// <summary>
