@@ -42,7 +42,7 @@ namespace Sandra.UI.WF
             if (indented)
             {
                 jsonTextWriter.Formatting = Formatting.Indented;
-                jsonTextWriter.Indentation = 4;
+                jsonTextWriter.Indentation = 2;
                 jsonTextWriter.IndentChar = ' ';
             }
         }
