@@ -30,7 +30,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
+    public partial class MovesTextBox : RichTextBoxBase
     {
         private sealed class TextElementStyle
         {
@@ -124,11 +124,6 @@ namespace Sandra.UI.WF
             }
             base.Dispose(disposing);
         }
-
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         /// <summary>
         /// Standardized PGN notation for pieces.
