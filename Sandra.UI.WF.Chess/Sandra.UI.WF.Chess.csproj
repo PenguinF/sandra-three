@@ -84,6 +84,10 @@
     <Compile Include="SettingsTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="SettingsTextBox.UIActions.cs">
+      <DependentUpon>SettingsTextBox.cs</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="SharedUIAction.cs" />
     <Compile Include="StandardChessBoardForm.cs">
       <SubType>Form</SubType>

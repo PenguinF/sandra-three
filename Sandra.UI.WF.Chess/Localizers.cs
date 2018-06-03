@@ -28,7 +28,6 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
         internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
-        internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
@@ -46,10 +45,12 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
+        internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
@@ -194,6 +195,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
+                { LocalizedStringKeys.Save, "Save" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
@@ -274,6 +276,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PreviousLine, "Vorige variant" },
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
+                { LocalizedStringKeys.Save, "Opslaan" },
                 { LocalizedStringKeys.SelectAll, "Alles selecteren" },
                 { LocalizedStringKeys.ShowDefaultSettingsFile, "Standaard instellingen tonen" },
                 { LocalizedStringKeys.StartOfGame, "Naar begin partij" },

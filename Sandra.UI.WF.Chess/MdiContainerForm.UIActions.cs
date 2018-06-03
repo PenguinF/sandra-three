@@ -71,6 +71,8 @@ namespace Sandra.UI.WF
 
             settingsTextBox.BindActions(new UIActionBindings
             {
+                { SettingsTextBox.SaveToFile, settingsTextBox.TrySaveToFile },
+
                 { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
                 { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
 

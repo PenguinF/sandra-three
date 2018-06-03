@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * SettingsTextBox.cs
+ * SettingsTextBox.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -16,12 +16,28 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
-    /// <summary>
-    /// Represents a read-only Windows rich text box which displays a json settings file.
-    /// </summary>
-    public partial class SettingsTextBox : RichTextBoxBase
+    public partial class SettingsTextBox
     {
+        public const string SettingsTextBoxUIActionPrefix = nameof(RichTextBoxBase) + ".";
+
+        public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
+            new UIAction(SettingsTextBoxUIActionPrefix + nameof(SaveToFile)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Save,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
+            });
+
+        public UIActionState TrySaveToFile(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            return UIActionVisibility.Enabled;
+        }
     }
 }
