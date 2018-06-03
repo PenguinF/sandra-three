@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,9 @@ namespace Sandra.UI.WF
         public SettingWriter(bool indented)
         {
             outputBuilder = new StringBuilder();
-            jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
+            var stringWriter = new StringWriter(outputBuilder);
+            stringWriter.NewLine = Environment.NewLine;
+            jsonTextWriter = new JsonTextWriter(stringWriter);
 
             if (indented)
             {
@@ -85,6 +88,12 @@ namespace Sandra.UI.WF
         /// </returns>
         public string Output()
         {
+            // If pretty printing, end files with a newline character.
+            if (jsonTextWriter.Formatting == Formatting.Indented)
+            {
+                jsonTextWriter.WriteWhitespace(Environment.NewLine);
+            }
+
             jsonTextWriter.Close();
             return outputBuilder.ToString();
         }
