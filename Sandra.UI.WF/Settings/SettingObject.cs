@@ -58,7 +58,7 @@ namespace Sandra.UI.WF
 
             PValue pValue;
             if (Map.TryGetValue(property.Name.Key, out pValue)
-                && property.PType.TryGetValidValue(pValue, out value))
+                && property.TryGetValidValue(pValue, out value))
             {
                 return true;
             }

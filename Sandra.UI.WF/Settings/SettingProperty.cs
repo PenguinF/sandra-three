@@ -76,5 +76,20 @@ namespace Sandra.UI.WF
             if (pType == null) throw new ArgumentNullException(nameof(pType));
             PType = pType;
         }
+
+        /// <summary>
+        /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The value to convert from.
+        /// </param>
+        /// <param name="targetValue">
+        /// The target value to convert to, if conversion succeeds.
+        /// </param>
+        /// <returns>
+        /// Whether or not conversion succeeded.
+        /// </returns>
+        public bool TryGetValidValue(PValue value, out T targetValue)
+            => PType.TryGetValidValue(value, out targetValue);
     }
 }
