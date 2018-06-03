@@ -146,5 +146,10 @@ namespace Sandra.UI.WF
             return properties.TryGetValue(property.Name.Key, out propertyInDictionary)
                 && property == propertyInDictionary;
         }
+
+        /// <summary>
+        /// Enumerates all properties in this schema.
+        /// </summary>
+        public IEnumerable<SettingProperty> AllProperties => properties.Values;
     }
 }
