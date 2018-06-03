@@ -24,13 +24,13 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Specialized PType that only accepts a certain class of subfolder names.
     /// </summary>
-    public sealed class SubFolderNameType : PType.Derived<string, string>
+    public sealed class SubFolderNameType : PType.Filter<string>
     {
         public static SubFolderNameType Instance = new SubFolderNameType();
 
         private SubFolderNameType() : base(PType.CLR.String) { }
 
-        public bool IsValidSubFolderPath(string folderPath)
+        public override bool IsValid(string folderPath)
         {
             if (!string.IsNullOrEmpty(folderPath)
                 && folderPath.IndexOfAny(Path.GetInvalidPathChars()) < 0
@@ -47,19 +47,5 @@ namespace Sandra.UI.WF
             }
             return false;
         }
-
-        public override bool TryGetTargetValue(string folderPath, out string targetValue)
-        {
-            if (IsValidSubFolderPath(folderPath))
-            {
-                targetValue = folderPath;
-                return true;
-            }
-
-            targetValue = default(string);
-            return false;
-        }
-
-        public override string GetBaseValue(string value) => value;
     }
 }

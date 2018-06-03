@@ -141,7 +141,7 @@ namespace Sandra.UI.WF
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
-            if (!SubFolderNameType.Instance.IsValidSubFolderPath(appSubFolderName))
+            if (!SubFolderNameType.Instance.IsValid(appSubFolderName))
             {
                 throw new ArgumentException($"{nameof(appSubFolderName)} targets AppData\\Local itself or is not a subfolder.", nameof(appSubFolderName));
             }
