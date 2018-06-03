@@ -17,6 +17,9 @@
  * 
  *********************************************************************************/
 using System;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -57,10 +60,73 @@ namespace Sandra.UI.WF
             {
                 // Before opening the possibly non-existent file, write to it.
                 // This pretty-prints it too.
-                Program.LocalSettings.WriteToFile();
-                using (var process = System.Diagnostics.Process.Start(
-                    "notepad.exe",
-                    Program.LocalSettings.AbsoluteFilePath)) ;
+                Exception exception = Program.LocalSettings.WriteToFile();
+                if (exception != null)
+                {
+                    MessageBox.Show(exception.Message);
+                }
+                else
+                {
+                    // Immediately dispose handle after creation.
+                    var process = System.Diagnostics.Process.Start(
+                        "notepad.exe",
+                        Program.LocalSettings.AbsoluteFilePath);
+                    process.Dispose();
+                }
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(ShowDefaultSettingsFile)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
+            });
+
+        public UIActionState TryShowDefaultSettingsFile(bool perform)
+        {
+            if (perform)
+            {
+                if (openDefaultSettingsForm == null)
+                {
+                    // Before opening the possibly non-existent file, write to it.
+                    // Ignore exceptions, may be caused by insufficient access rights.
+                    Program.DefaultSettings.WriteToFile();
+
+                    // Rely on exception handler in call stack, so no try-catch here.
+                    var settingsTextBox = new SettingsTextBox()
+                    {
+                        Dock = DockStyle.Fill,
+                        BorderStyle = BorderStyle.None,
+                        BackColor = Color.White,
+                        ForeColor = Color.Black,
+                        Font = new Font("Consolas", 10),
+                        Text = File.ReadAllText(Program.DefaultSettings.AbsoluteFilePath),
+                        ReadOnly = true,
+                    };
+
+                    openDefaultSettingsForm = new Form()
+                    {
+                        Owner = this,
+                        ClientSize = new Size(600, 600),
+                        ShowIcon = false,
+                        ShowInTaskbar = false,
+                        StartPosition = FormStartPosition.CenterScreen,
+                        Text = Path.GetFileName(Program.DefaultSettings.AbsoluteFilePath),
+                    };
+
+                    openDefaultSettingsForm.Controls.Add(settingsTextBox);
+                    openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
+                }
+
+                if (!openDefaultSettingsForm.ContainsFocus)
+                {
+                    openDefaultSettingsForm.Visible = true;
+                    openDefaultSettingsForm.Activate();
+                }
             }
 
             return UIActionVisibility.Enabled;

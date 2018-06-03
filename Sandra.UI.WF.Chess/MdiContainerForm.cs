@@ -35,6 +35,8 @@ namespace Sandra.UI.WF
 
         private PersistableFormState formState;
 
+        private Form openDefaultSettingsForm;
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -146,6 +148,7 @@ namespace Sandra.UI.WF
 
             // Actions which have their handler in this instance.
             this.BindAction(EditPreferencesFile, TryEditPreferencesFile);
+            this.BindAction(ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
@@ -155,6 +158,7 @@ namespace Sandra.UI.WF
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(fileMenu,
                                         EditPreferencesFile,
+                                        ShowDefaultSettingsFile,
                                         Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);

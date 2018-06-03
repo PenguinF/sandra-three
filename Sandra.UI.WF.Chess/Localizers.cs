@@ -49,6 +49,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
+        internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
@@ -190,6 +191,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
+                { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
@@ -267,6 +269,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
                 { LocalizedStringKeys.SelectAll, "Alles selecteren" },
+                { LocalizedStringKeys.ShowDefaultSettingsFile, "Standaard instellingen tonen" },
                 { LocalizedStringKeys.StartOfGame, "Naar begin partij" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },
