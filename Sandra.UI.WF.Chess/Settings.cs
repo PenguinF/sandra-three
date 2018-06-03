@@ -45,9 +45,15 @@ namespace Sandra.UI.WF
             return snakeCase.ToString();
         }
 
+        private const string AppDataSubFolderNameDescription
+            = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
+            + "This includes the auto-save file, or e.g. a preferences file. "
+            + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
+
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
-            SubFolderNameType.Instance);
+            SubFolderNameType.Instance,
+            AppDataSubFolderNameDescription);
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToSnakeCase()),
@@ -61,9 +67,14 @@ namespace Sandra.UI.WF
             new SettingKey(nameof(Zoom).ToSnakeCase()),
             PType.RichTextZoomFactor.Instance);
 
+        private const string FastNavigationPlyCountDescription
+            = "The number of plies (=half moves) to move forward of backward in a game for "
+            + "fast navigation. This value must be between 2 and 40.";
+
         internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
             new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
-            FastNavigationPlyCountRange.Instance);
+            FastNavigationPlyCountRange.Instance,
+            FastNavigationPlyCountDescription);
 
         private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
         {
