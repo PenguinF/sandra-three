@@ -130,7 +130,48 @@ namespace Sandra.UI.WF
             public abstract TBase GetBaseValue(T value);
         }
 
-        public sealed class RangedInteger : Derived<PInteger, PInteger>
+        /// <summary>
+        /// <see cref="Derived{T, T}"/> type which filters values of the target type.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The .NET target <see cref="Type"/> to filter.
+        /// </typeparam>
+        public abstract class Filter<T> : Derived<T, T>
+        {
+            protected Filter(PType<T> baseType) : base(baseType) { }
+
+            /// <summary>
+            /// Returns if a value of the target type is a member of this <see cref="PType"/>.
+            /// </summary>
+            public abstract bool IsValid(T candidateValue);
+
+            public override sealed bool TryGetTargetValue(T candidateValue, out T targetValue)
+            {
+                if (IsValid(candidateValue))
+                {
+                    targetValue = candidateValue;
+                    return true;
+                }
+
+                targetValue = default(T);
+                return false;
+            }
+
+            public override sealed T GetBaseValue(T value)
+            {
+                if (!IsValid(value))
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        value,
+                        $"Value is not a member of {ToString()}.");
+                }
+
+                return value;
+            }
+        }
+
+        public sealed class RangedInteger : Filter<PInteger>
         {
             /// <summary>
             /// Gets the minimum value which is allowed for values of this type.
@@ -157,34 +198,12 @@ namespace Sandra.UI.WF
                 MaxValue = maxValue;
             }
 
-            public bool InRange(PInteger pInteger)
-                => MinValue <= pInteger.Value
-                && pInteger.Value <= MaxValue;
+            public override bool IsValid(PInteger candidateValue)
+                => MinValue <= candidateValue.Value
+                && candidateValue.Value <= MaxValue;
 
-            public override bool TryGetTargetValue(PInteger candidateValue, out PInteger targetValue)
-            {
-                if (InRange(candidateValue))
-                {
-                    targetValue = candidateValue;
-                    return true;
-                }
-
-                targetValue = default(PInteger);
-                return false;
-            }
-
-            public override PInteger GetBaseValue(PInteger value)
-            {
-                if (!InRange(value))
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        value.Value,
-                        $"Value was not between {MinValue} and {MaxValue}.");
-                }
-
-                return value;
-            }
+            public override string ToString()
+                => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";
         }
     }
 }
