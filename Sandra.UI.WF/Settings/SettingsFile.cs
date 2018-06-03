@@ -103,8 +103,14 @@ namespace Sandra.UI.WF
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
+#if DEBUG
+        public Exception WriteToFile(string absoluteFilePath = null)
+        {
+            absoluteFilePath = absoluteFilePath ?? this.absoluteFilePath;
+#else
         public Exception WriteToFile()
         {
+#endif
             SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
             writer.Visit(Settings.Map);
             try
