@@ -43,11 +43,11 @@ namespace Sandra.UI.WF
                 int left, top, width, height;
                 if (windowBoundsList != null
                     && windowBoundsList.Count == 5
-                    && PType.Boolean.Instance.TryGetValidValue(windowBoundsList[0], out maximized)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[1], out left)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[2], out top)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[3], out width)
-                    && PType.Int32.Instance.TryGetValidValue(windowBoundsList[4], out height))
+                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0], out maximized)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1], out left)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2], out top)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3], out width)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4], out height))
                 {
                     targetValue = new PersistableFormState(maximized, new Rectangle(left, top, width, height));
                     return true;
@@ -60,11 +60,11 @@ namespace Sandra.UI.WF
             public override PValue GetPValue(PersistableFormState value) => new PList(
                 new List<PValue>
                 {
-                    PType.Boolean.Instance.GetPValue(value.Maximized),
-                    PType.Int32.Instance.GetPValue(value.Bounds.Left),
-                    PType.Int32.Instance.GetPValue(value.Bounds.Top),
-                    PType.Int32.Instance.GetPValue(value.Bounds.Width),
-                    PType.Int32.Instance.GetPValue(value.Bounds.Height),
+                    PType.CLR.Boolean.GetPValue(value.Maximized),
+                    PType.CLR.Int32.GetPValue(value.Bounds.Left),
+                    PType.CLR.Int32.GetPValue(value.Bounds.Top),
+                    PType.CLR.Int32.GetPValue(value.Bounds.Width),
+                    PType.CLR.Int32.GetPValue(value.Bounds.Height),
                 });
         }
 

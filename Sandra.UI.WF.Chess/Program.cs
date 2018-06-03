@@ -20,14 +20,19 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     static class Program
     {
-        internal const string AppName = "SandraChess";
+        internal const string DefaultSettingsFileName = "Default.settings";
+
+        internal static string ExecutableFolder { get; private set; }
+
+        internal static SettingObject BuiltInSettings { get; private set; }
+
+        internal static SettingsFile DefaultSettings { get; private set; }
 
         internal static AutoSave AutoSave { get; private set; }
 
@@ -37,10 +42,26 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
+            // TODO: remove unknown keys from settings after loading from a file.
+
+            // Store executable folder location for later use.
+            ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
+            // Attempt to load default settings.
+            BuiltInSettings = Settings.CreateBuiltIn();
+            DefaultSettings = SettingsFile.Create(Path.Combine(ExecutableFolder, DefaultSettingsFileName));
+
+            // Uncomment to generate Default.settings in the Bin directory.
+            //DefaultSettings.WriteToFile();
+
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
-            // TODO: remove unknown keys from the settings after loading it from the file.
-            AutoSave = new AutoSave(AppName, new SettingCopy());
+            string appDataSubFolderName;
+            if (!DefaultSettings.Settings.TryGetValue(SettingKeys.AppDataSubFolderName, out appDataSubFolderName))
+            {
+                appDataSubFolderName = BuiltInSettings.GetValue(SettingKeys.AppDataSubFolderName);
+            }
+            AutoSave = new AutoSave(appDataSubFolderName);
 
             Chess.Constants.ForceInitialize();
 
@@ -62,8 +83,7 @@ namespace Sandra.UI.WF
         {
             try
             {
-                string basePath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-                return Image.FromFile(Path.Combine(basePath, "Images", imageFileKey + ".png"));
+                return Image.FromFile(Path.Combine(ExecutableFolder, "Images", imageFileKey + ".png"));
             }
             catch (Exception exc)
             {

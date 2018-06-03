@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.UI.WF
 {
@@ -63,6 +64,31 @@ namespace Sandra.UI.WF
             }
             value = default(TValue);
             return false;
+        }
+
+        /// <summary>
+        /// Gets the value that is associated with the specified property.
+        /// </summary>
+        /// <param name="property">
+        /// The property to locate.
+        /// </param>
+        /// <returns>
+        /// The value associated with the specified property.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is null.
+        /// </exception>
+        /// <exception cref="KeyNotFoundException">
+        /// The property does not exist.
+        /// </exception>
+        public TValue GetValue<TValue>(SettingProperty<TValue> property)
+        {
+            TValue value;
+            if (!TryGetValue(property, out value))
+            {
+                throw new KeyNotFoundException($"Key {property.Name} does not exist in the {nameof(SettingObject)}.");
+            }
+            return value;
         }
 
         /// <summary>

@@ -68,6 +68,7 @@
     <Compile Include="Settings\PersistableFormState.cs" />
     <Compile Include="Settings\PList.cs" />
     <Compile Include="Settings\PMap.cs" />
+    <Compile Include="Settings\PType.Base.cs" />
     <Compile Include="Settings\PType.Common.cs" />
     <Compile Include="Settings\PType.cs" />
     <Compile Include="Settings\PValue.cs" />
@@ -76,6 +77,10 @@
     <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingObject.cs" />
     <Compile Include="Settings\SettingProperty.cs" />
+    <Compile Include="Settings\SettingReader.cs" />
+    <Compile Include="Settings\SettingsFile.cs" />
+    <Compile Include="Settings\SettingWriter.cs" />
+    <Compile Include="Settings\SubFolderNameType.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>

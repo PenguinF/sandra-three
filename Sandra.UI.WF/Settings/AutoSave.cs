@@ -16,15 +16,12 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,29 +117,22 @@ namespace Sandra.UI.WF
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
-        /// <param name="initialSettings">
-        /// The initial default settings to use, in case e.g. the auto-save file could not be opened.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> or <paramref name="initialSettings"/> is null.
+        /// <paramref name="appSubFolderName"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
-        /// or contains one or more of the invalid characters defined in <see cref="Path.GetInvalidPathChars"/>.
+        /// or contains one or more of the invalid characters defined in <see cref="Path.GetInvalidPathChars"/>,
+        /// or targets a folder which is not a subfolder of <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName, SettingCopy initialSettings)
+        public AutoSave(string appSubFolderName)
         {
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
-            }
-
-            if (initialSettings == null)
-            {
-                throw new ArgumentNullException(nameof(initialSettings));
             }
 
             // Have to check for string.Empty because Path.Combine will not.
@@ -151,9 +141,14 @@ namespace Sandra.UI.WF
                 throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
             }
 
+            if (!SubFolderNameType.Instance.IsValid(appSubFolderName))
+            {
+                throw new ArgumentException($"{nameof(appSubFolderName)} targets AppData\\Local itself or is not a subfolder.", nameof(appSubFolderName));
+            }
+
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
-            // don't throw but just disable auto-saving and use default initial settings.
-            localSettings = initialSettings.Commit();
+            // don't throw but just disable auto-saving and use initial empty settings.
+            localSettings = new SettingCopy().Commit();
 
             try
             {
@@ -296,7 +291,7 @@ namespace Sandra.UI.WF
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
             SettingCopy workingCopy = localSettings.CreateWorkingCopy();
-            workingCopy.KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            workingCopy.AddOrReplace(property, value);
 
             if (!workingCopy.EqualTo(localSettings))
             {
@@ -339,11 +334,8 @@ namespace Sandra.UI.WF
 
                     try
                     {
-                        Dictionary<string, PValue> temp = new Dictionary<string, PValue>();
-                        foreach (var kv in remoteSettings.Map) temp.Add(kv.Key, kv.Value);
-                        PMap map = new PMap(temp);
-                        var writer = new SettingWriter();
-                        writer.Visit(map);
+                        var writer = new SettingWriter(indented: false);
+                        writer.Visit(remoteSettings.Map);
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
@@ -368,7 +360,7 @@ namespace Sandra.UI.WF
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        writer.WriteToFile(writefileStream, encoder, buffer, encodedBuffer);
+                        WriteToFile(writer.Output(), writefileStream);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.
@@ -425,213 +417,14 @@ namespace Sandra.UI.WF
                 }
             }
 
-            SettingReader settingReader = new SettingReader(new StringReader(sb.ToString()));
-
             // Load into an empty working copy.
             var workingCopy = new SettingCopy();
-
-            PValue rootValue;
-            if (settingReader.TryParseValue(out rootValue))
-            {
-                if (!(rootValue is PMap))
-                {
-                    throw new JsonReaderException("Expected json object at root");
-                }
-
-                PMap map = (PMap)rootValue;
-                foreach (var kv in map)
-                {
-                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
-                }
-            }
-
+            workingCopy.LoadFromText(new StringReader(sb.ToString()));
             return workingCopy.Commit();
         }
-    }
 
-    /// <summary>
-    /// Represents a single iteration of loading settings from a file.
-    /// </summary>
-    internal class SettingReader
-    {
-        private readonly JsonTextReader jsonTextReader;
-
-        public SettingReader(TextReader inputReader)
+        private void WriteToFile(string output, FileStream outputStream)
         {
-            if (inputReader == null) throw new ArgumentNullException(nameof(inputReader));
-            jsonTextReader = new JsonTextReader(inputReader);
-        }
-
-        private Exception TokenTypeNotSupported(JsonToken jsonToken)
-            => new JsonReaderException($"Token type {jsonToken} is not supported for settings.");
-
-        private JsonToken ReadSkipComments()
-        {
-            // Skip comments until encountering something meaningful.
-            do jsonTextReader.Read(); while (jsonTextReader.TokenType == JsonToken.Comment);
-            return jsonTextReader.TokenType;
-        }
-
-        public bool TryParseValue(out PValue value)
-        {
-            var tokenType = ReadSkipComments();
-            if (tokenType == JsonToken.None)
-            {
-                value = default(PValue);
-                return false;
-            }
-
-            value = ParseValue(tokenType);
-
-            if (ReadSkipComments() != JsonToken.None)
-            {
-                throw new JsonReaderException("End of file expected");
-            }
-
-            return true;
-        }
-
-        private PMap ParseMap()
-        {
-            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-
-            for (;;)
-            {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndObject)
-                {
-                    return new PMap(mapBuilder);
-                }
-
-                if (tokenType != JsonToken.PropertyName)
-                {
-                    throw new JsonReaderException("PropertyName or EndObject '}' expected");
-                }
-
-                string key = (string)jsonTextReader.Value;
-
-                // Expect unique keys.
-                if (mapBuilder.ContainsKey(key))
-                {
-                    throw new JsonReaderException($"Non-unique key in object: {key}");
-                }
-
-                mapBuilder.Add(key, ParseValue(ReadSkipComments()));
-            }
-        }
-
-        private PList ParseList()
-        {
-            List<PValue> listBuilder = new List<PValue>();
-
-            for (;;)
-            {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndArray)
-                {
-                    return new PList(listBuilder);
-                }
-
-                listBuilder.Add(ParseValue(tokenType));
-            }
-        }
-
-        private PValue ParseValue(JsonToken currentTokenType)
-        {
-            switch (currentTokenType)
-            {
-                case JsonToken.Boolean:
-                    return new PBoolean((bool)jsonTextReader.Value);
-
-                case JsonToken.Integer:
-                    return jsonTextReader.Value is BigInteger
-                        ? new PInteger((BigInteger)jsonTextReader.Value)
-                        : new PInteger((long)jsonTextReader.Value); ;
-
-                case JsonToken.String:
-                    return new PString((string)jsonTextReader.Value);
-
-                case JsonToken.StartObject:
-                    return ParseMap();
-
-                case JsonToken.StartArray:
-                    return ParseList();
-
-                case JsonToken.None:
-                    throw new JsonReaderException("Unexpected end of file");
-
-                case JsonToken.Comment:
-                case JsonToken.EndArray:
-                case JsonToken.EndObject:
-                case JsonToken.PropertyName:
-                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
-
-                case JsonToken.Bytes:
-                case JsonToken.Date:
-                case JsonToken.EndConstructor:
-                case JsonToken.Float:
-                case JsonToken.Null:
-                case JsonToken.Raw:
-                case JsonToken.StartConstructor:
-                case JsonToken.Undefined:
-                default:
-                    throw TokenTypeNotSupported(currentTokenType);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Represents a single iteration of writing settings to a file.
-    /// </summary>
-    internal class SettingWriter : PValueVisitor
-    {
-        private readonly StringBuilder outputBuilder;
-        private readonly JsonTextWriter jsonTextWriter;
-
-        public SettingWriter()
-        {
-            outputBuilder = new StringBuilder();
-            jsonTextWriter = new JsonTextWriter(new StringWriter(outputBuilder));
-        }
-
-        public override void VisitBoolean(PBoolean value)
-        {
-            jsonTextWriter.WriteValue(value.Value);
-        }
-
-        public override void VisitInteger(PInteger value)
-        {
-            jsonTextWriter.WriteValue(value.Value);
-        }
-
-        public override void VisitList(PList value)
-        {
-            jsonTextWriter.WriteStartArray();
-            value.ForEach(Visit);
-            jsonTextWriter.WriteEndArray();
-        }
-
-        public override void VisitMap(PMap value)
-        {
-            jsonTextWriter.WriteStartObject();
-            foreach (var kv in value)
-            {
-                jsonTextWriter.WritePropertyName(kv.Key);
-                Visit(kv.Value);
-            }
-            jsonTextWriter.WriteEndObject();
-        }
-
-        public override void VisitString(PString value)
-        {
-            jsonTextWriter.WriteValue(value.Value);
-        }
-
-        public void WriteToFile(FileStream outputStream, Encoder encoder, char[] buffer, byte[] encodedBuffer)
-        {
-            jsonTextWriter.Close();
-            string output = outputBuilder.ToString();
-
             // How much of the output still needs to be written.
             int remainingLength = output.Length;
 
@@ -644,7 +437,7 @@ namespace Sandra.UI.WF
             {
                 // Determine number of characters to write.
                 // AutoSave.CharBufferSize is known to be equal to buffer.Length.
-                int charWriteCount = AutoSave.CharBufferSize;
+                int charWriteCount = CharBufferSize;
 
                 // Remember if this fill up the entire buffer.
                 bool bufferFull = charWriteCount <= remainingLength;
@@ -656,7 +449,7 @@ namespace Sandra.UI.WF
                 // If the buffer is full, call the encoder to convert it into bytes.
                 if (bufferFull)
                 {
-                    int bytes = encoder.GetBytes(buffer, 0, AutoSave.CharBufferSize, encodedBuffer, 0, false);
+                    int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
                     outputStream.Write(encodedBuffer, 0, bytes);
                 }
 

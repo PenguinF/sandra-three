@@ -23,53 +23,56 @@ namespace Sandra.UI.WF
 {
     public static partial class PType
     {
-        public sealed class Boolean : PType<bool>
+        /// <summary>
+        /// Contains <see cref="PType"/>s which convert to and from common .NET data types.
+        /// </summary>
+        public static class CLR
         {
-            public static readonly Boolean Instance = new Boolean();
+            public static readonly PType<bool> Boolean = new _BooleanCLRType();
+            public static readonly PType<int> Int32 = new _Int32CLRType();
+            public static readonly PType<string> String = new _StringCLRType();
 
-            private Boolean() { }
-
-            public override bool TryGetValidValue(PValue value, out bool targetValue)
+            private sealed class _BooleanCLRType : Derived<PBoolean, bool>
             {
-                if (value is PBoolean)
+                public _BooleanCLRType() : base(PType.Boolean) { }
+
+                public override bool TryGetTargetValue(PBoolean boolean, out bool targetValue)
                 {
-                    targetValue = ((PBoolean)value).Value;
+                    targetValue = boolean.Value;
                     return true;
                 }
 
-                targetValue = default(bool);
-                return false;
+                public override PBoolean GetBaseValue(bool value) => new PBoolean(value);
             }
 
-            public override PValue GetPValue(bool value) => new PBoolean(value);
-        }
-
-        public sealed class Int32 : PType<int>
-        {
-            public static readonly Int32 Instance = new Int32();
-
-            private Int32() { }
-
-            public override bool TryGetValidValue(PValue value, out int targetValue)
+            private sealed class _Int32CLRType : Derived<PInteger, int>
             {
-                if (value is PInteger)
+                public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
+
+                public override bool TryGetTargetValue(PInteger integer, out int targetValue)
                 {
-                    PInteger integer = (PInteger)value;
-                    if (int.MinValue <= integer.Value && integer.Value <= int.MaxValue)
-                    {
-                        targetValue = (int)integer.Value;
-                        return true;
-                    }
+                    targetValue = (int)integer.Value;
+                    return true;
                 }
 
-                targetValue = default(int);
-                return false;
+                public override PInteger GetBaseValue(int value) => new PInteger(value);
             }
 
-            public override PValue GetPValue(int value) => new PInteger(value);
+            private sealed class _StringCLRType : Derived<PString, string>
+            {
+                public _StringCLRType() : base(PType.String) { }
+
+                public override bool TryGetTargetValue(PString stringValue, out string targetValue)
+                {
+                    targetValue = stringValue.Value;
+                    return true;
+                }
+
+                public override PString GetBaseValue(string value) => new PString(value);
+            }
         }
 
-        public sealed class RichTextZoomFactor : PType<int>
+        public sealed class RichTextZoomFactor : Derived<PInteger, int>
         {
             /// <summary>
             /// Returns the minimum discrete integer value which when converted with
@@ -97,33 +100,23 @@ namespace Sandra.UI.WF
 
             public static readonly RichTextZoomFactor Instance = new RichTextZoomFactor();
 
-            private RichTextZoomFactor() { }
+            private RichTextZoomFactor() : base(new RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
 
-            public override bool TryGetValidValue(PValue value, out int targetValue)
+            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
             {
-                if (value is PInteger)
-                {
-                    PInteger integer = (PInteger)value;
-                    if (MinDiscreteValue <= integer.Value && integer.Value <= MaxDiscreteValue)
-                    {
-                        targetValue = (int)integer.Value;
-                        return true;
-                    }
-                }
-
-                targetValue = default(int);
-                return false;
+                targetValue = (int)integer.Value;
+                return true;
             }
 
-            public override PValue GetPValue(int value) => new PInteger(value);
+            public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        public sealed class Enumeration<TEnum> : PType<TEnum> where TEnum : struct
+        public sealed class Enumeration<TEnum> : Derived<string, TEnum> where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
 
-            public Enumeration(IEnumerable<TEnum> enumValues)
+            public Enumeration(IEnumerable<TEnum> enumValues) : base(CLR.String)
             {
                 Type enumType = typeof(TEnum);
                 foreach (var enumValue in enumValues)
@@ -134,30 +127,17 @@ namespace Sandra.UI.WF
                 }
             }
 
-            public override bool TryGetValidValue(PValue value, out TEnum targetValue)
-            {
-                PString stringValue;
-                if (value is PString)
-                {
-                    stringValue = (PString)value;
-                    if (stringToEnum.TryGetValue(stringValue.Value, out targetValue))
-                    {
-                        return true;
-                    }
-                }
+            public override bool TryGetTargetValue(string stringValue, out TEnum targetValue)
+                => stringToEnum.TryGetValue(stringValue, out targetValue);
 
-                targetValue = default(TEnum);
-                return false;
-            }
-
-            public override PValue GetPValue(TEnum value) => new PString(enumToString[value]);
+            public override string GetBaseValue(TEnum value) => enumToString[value];
         }
 
-        public sealed class KeyedSet<T> : PType<T> where T : class
+        public sealed class KeyedSet<T> : Derived<string, T> where T : class
         {
             private readonly Dictionary<string, T> stringToTarget = new Dictionary<string, T>();
 
-            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues)
+            public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
             {
                 foreach (var keyedValue in keyedValues)
                 {
@@ -165,27 +145,14 @@ namespace Sandra.UI.WF
                 }
             }
 
-            public override bool TryGetValidValue(PValue value, out T targetValue)
-            {
-                PString stringValue;
-                if (value is PString)
-                {
-                    stringValue = (PString)value;
-                    if (stringToTarget.TryGetValue(stringValue.Value, out targetValue))
-                    {
-                        return true;
-                    }
-                }
+            public override bool TryGetTargetValue(string stringValue, out T targetValue)
+                => stringToTarget.TryGetValue(stringValue, out targetValue);
 
-                targetValue = default(T);
-                return false;
-            }
-
-            public override PValue GetPValue(T value)
+            public override string GetBaseValue(T value)
             {
                 foreach (var kv in stringToTarget)
                 {
-                    if (kv.Value == value) return new PString(kv.Key);
+                    if (kv.Value == value) return kv.Key;
                 }
 
                 throw new ArgumentException("Target value not found.");

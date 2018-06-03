@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Sandra.UI.WF
 {
@@ -37,6 +38,20 @@ namespace Sandra.UI.WF
         public SettingCopy()
         {
             KeyValueMapping = new Dictionary<SettingKey, PValue>();
+        }
+
+        /// <summary>
+        /// Adds or replaces a value associated with a property.
+        /// </summary>
+        /// <param name="property">
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="value">
+        /// The new value to associate with the property.
+        /// </param>
+        public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
+        {
+            KeyValueMapping[property.Name] = property.PType.GetPValue(value);
         }
 
         /// <summary>
@@ -101,6 +116,12 @@ namespace Sandra.UI.WF
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
             return new PMap(mapBuilder);
+        }
+
+        public void LoadFromText(TextReader textReader)
+        {
+            SettingReader settingReader = new SettingReader(textReader);
+            settingReader.ReadWorkingCopy(this);
         }
     }
 }
