@@ -155,7 +155,13 @@ namespace Sandra.UI.WF
                 PMap map = (PMap)rootValue;
                 foreach (var kv in map)
                 {
-                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
+                    SettingKey candidateKey = new SettingKey(kv.Key);
+                    SettingProperty property;
+                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property)
+                        && property.IsValidValue(kv.Value))
+                    {
+                        workingCopy.KeyValueMapping[candidateKey] = kv.Value;
+                    }
                 }
             }
 

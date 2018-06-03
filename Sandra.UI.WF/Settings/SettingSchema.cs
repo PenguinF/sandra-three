@@ -72,6 +72,32 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the <see cref="SettingProperty"/> that is associated with the specified key.
+        /// </summary>
+        /// <param name="settingKey">
+        /// The key to locate.
+        /// </param>
+        /// <param name="property">
+        /// When this method returns, contains the <see cref="SettingProperty"/> associated with the specified key, if the key is found;
+        /// otherwise, the default <see cref="SettingProperty"/> value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// true if this <see cref="SettingSchema"/> contains a <see cref="SettingProperty"/> with the specified key; otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settingKey"/> is null.
+        /// </exception>
+        public bool TryGetProperty(SettingKey settingKey, out SettingProperty property)
+        {
+            if (settingKey == null) throw new ArgumentNullException(nameof(settingKey));
+
+            if (properties.TryGetValue(settingKey.Key, out property)) return true;
+            property = default(SettingProperty);
+            return false;
+        }
+
+        /// <summary>
         /// Gets if a <see cref="SettingProperty"/> is contained in this schema.
         /// </summary>
         /// <param name="property">
