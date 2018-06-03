@@ -17,12 +17,16 @@
  * 
  *********************************************************************************/
 using SysExtensions;
+using System;
+using System.IO;
 using System.Text;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
+        internal const string DefaultAppDataSubFolderName = "SandraChess";
+
         /// <summary>
         /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
         /// </summary>
@@ -44,6 +48,21 @@ namespace Sandra.UI.WF
 
             return snakeCase.ToString();
         }
+
+        private static string localApplicationDataPath(bool isLocalSchema)
+            => !isLocalSchema ? string.Empty :
+            $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
+
+        internal static string DefaultSettingsSchemaDescription(bool isLocalSchema)
+            => "There are generally two copies of this file, one in the directory where "
+            + Path.GetFileName(typeof(Program).Assembly.Location)
+            + " is located ("
+            + Program.DefaultSettingsFileName
+            + "), and one that lives in the local application data folder"
+            + localApplicationDataPath(isLocalSchema)
+            + ". Preferences in the latter file override those that are specified in the default. "
+            + "In the majority of cases, only the latter file is changed, while the default "
+            + "settings serve as a template.";
 
         private const string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
@@ -112,6 +131,7 @@ namespace Sandra.UI.WF
         private static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
+                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.FastNavigationPlyCount);
         }
@@ -120,7 +140,7 @@ namespace Sandra.UI.WF
         {
             SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
-            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
+            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
 
             // 10 plies == 5 moves.
             defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
