@@ -74,7 +74,9 @@ namespace Sandra.UI.WF
                 { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
                 { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
 
+                { RichTextBoxBase.CutSelectionToClipBoard, settingsTextBox.TryCutSelectionToClipBoard },
                 { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
+                { RichTextBoxBase.PasteSelectionFromClipBoard, settingsTextBox.TryPasteSelectionFromClipBoard },
                 { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
             });
 

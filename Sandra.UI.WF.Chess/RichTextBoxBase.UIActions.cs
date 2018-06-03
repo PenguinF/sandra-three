@@ -24,12 +24,29 @@ namespace Sandra.UI.WF
     {
         public const string RichTextBoxBaseUIActionPrefix = nameof(RichTextBoxBase) + ".";
 
+        public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
+            new UIAction(RichTextBoxBaseUIActionPrefix + nameof(CutSelectionToClipBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Cut,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
+            });
+
+        public UIActionState TryCutSelectionToClipBoard(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (SelectionLength == 0) return UIActionVisibility.Disabled;
+            if (perform) Cut();
+            return UIActionVisibility.Enabled;
+        }
+
         public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(RichTextBoxBaseUIActionPrefix + nameof(CopySelectionToClipBoard)),
             new UIActionBinding()
             {
                 ShowInMenu = true,
-                IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.Copy,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             });
@@ -38,6 +55,22 @@ namespace Sandra.UI.WF
         {
             if (SelectionLength == 0) return UIActionVisibility.Disabled;
             if (perform) Copy();
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
+            new UIAction(RichTextBoxBaseUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.Paste,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
+            });
+
+        public UIActionState TryPasteSelectionFromClipBoard(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (perform) Paste();
             return UIActionVisibility.Enabled;
         }
 

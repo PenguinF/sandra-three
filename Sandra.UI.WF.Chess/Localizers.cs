@@ -27,6 +27,8 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
         internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
+        internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
+        internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
@@ -169,6 +171,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Chessboard, "Chessboard" },
                 { LocalizedStringKeys.Copy, "Copy" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Copy diagram to clipboard" },
+                { LocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
@@ -186,6 +189,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "New game" },
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
+                { LocalizedStringKeys.Paste, "Paste" },
                 { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
@@ -247,6 +251,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Chessboard, "Schaakbord" },
                 { LocalizedStringKeys.Copy, "Kopiëren" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
+                { LocalizedStringKeys.Cut, "Knippen" },
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
                 { LocalizedStringKeys.EditPreferencesFile, "Wijzig voorkeuren" },
@@ -264,6 +269,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "Nieuwe partij" },
                 { LocalizedStringKeys.NextLine, "Volgende variant" },
                 { LocalizedStringKeys.NextMove, "Volgende zet" },
+                { LocalizedStringKeys.Paste, "Plakken" },
                 { LocalizedStringKeys.PieceSymbols, "PLTDK" },
                 { LocalizedStringKeys.PreviousLine, "Vorige variant" },
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
