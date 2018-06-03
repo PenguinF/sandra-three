@@ -18,6 +18,7 @@
  *********************************************************************************/
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -29,36 +30,157 @@ namespace Sandra.UI.WF
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
-        private class JsonPrettyPrinter : JsonTextWriter
+        private abstract class CustomJsonTextWriter : JsonTextWriter
         {
+            public CustomJsonTextWriter(TextWriter writer) : base(writer)
+            {
+            }
+
+            public abstract void WriteSettingPropertyName(string name, bool isFirst);
+        }
+
+        private class JsonCompactWriter : CustomJsonTextWriter
+        {
+            public JsonCompactWriter(TextWriter writer) : base(writer)
+            {
+            }
+
+            public override void WriteSettingPropertyName(string name, bool isFirst)
+                => WritePropertyName(name);
+        }
+
+        private class JsonPrettyPrinter : CustomJsonTextWriter
+        {
+            private const int maxLineLength = 80;
+            private const string startComment = "// ";
+
             private readonly SettingSchema schema;
+            private readonly string newLine;
+
+            private bool suppressNextValueDelimiter;
 
             public JsonPrettyPrinter(TextWriter writer, SettingSchema schema) : base(writer)
             {
                 this.schema = schema;
+                newLine = writer.NewLine;
                 Formatting = Formatting.Indented;
                 Indentation = 2;
                 IndentChar = ' ';
             }
 
+            protected override void WriteValueDelimiter()
+            {
+                if (suppressNextValueDelimiter) suppressNextValueDelimiter = false;
+                else base.WriteValueDelimiter();
+            }
+
+            public override void WriteSettingPropertyName(string name, bool isFirst)
+            {
+                SettingProperty property;
+                if (schema.TryGetProperty(new SettingKey(name), out property)
+                    && property.Description != null)
+                {
+                    // Prepare by doing a manual auto-completion of a previous value.
+                    if (!isFirst)
+                    {
+                        // Write the value delimiter here already, and suppress it the next time it's called.
+                        // This happens in WritePropertyName().
+                        WriteValueDelimiter();
+                        suppressNextValueDelimiter = true;
+                        WriteIndent();
+                    }
+
+                    // Cut up the description in pieces.
+                    // Available length depends on the current indent level.
+                    int availableLength = maxLineLength - Top * Indentation - startComment.Length;
+                    int totalLength = property.Description.Length;
+                    int remainingLength = totalLength;
+                    int currentPos = 0;
+                    List<string> lines = new List<string>();
+
+                    // Use a StringBuilder for substring generation.
+                    StringBuilder text = new StringBuilder(property.Description);
+
+                    // Set currentPos to first non-whitespace character.
+                    while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
+                    {
+                        currentPos++;
+                        remainingLength--;
+                    }
+
+                    // Invariants:
+                    // 1) currentPos is between 0 and totalLength.
+                    // 2) currentPos is at a non-whitespace character, or equal to totalLength.
+                    // 3) currentPos + remainingLength == totalLength.
+                    while (remainingLength > availableLength)
+                    {
+                        // Search for the first whitespace character before the maximum break position.
+                        int breakPos = currentPos + availableLength;
+                        while (breakPos > currentPos && !char.IsWhiteSpace(text[breakPos])) breakPos--;
+
+                        if (breakPos == currentPos)
+                        {
+                            // Word longer than availableLength, just snip it up midway.
+                            breakPos = currentPos + availableLength;
+                        }
+                        else
+                        {
+                            // Find last non-whitespace character before the found whitespace.
+                            while (breakPos > currentPos && char.IsWhiteSpace(text[breakPos])) breakPos--;
+                            // Increase by 1 again to end up on the first whitespace character after the last word.
+                            breakPos++;
+                        }
+
+                        // Add line which neither starts nor ends with a whitespace character.
+                        lines.Add(text.ToString(currentPos, breakPos - currentPos));
+                        currentPos = breakPos;
+                        remainingLength = totalLength - currentPos;
+
+                        // Set currentPos to first non-whitespace character again.
+                        while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
+                        {
+                            currentPos++;
+                            remainingLength--;
+                        }
+                    }
+
+                    if (remainingLength > 0)
+                    {
+                        lines.Add(text.ToString(currentPos, remainingLength));
+                    }
+
+                    foreach (string line in lines)
+                    {
+                        WriteIndent();
+                        // The base WriteComment wraps comments in /*-*/ delimiters,
+                        // so generate raw comments starting with // instead.
+                        WriteRaw(startComment);
+                        WriteRaw(line);
+                    }
+
+                    WritePropertyName(name);
+                }
+            }
+
             public override void Close()
             {
-                // If pretty printing, end files with a newline character.
-                WriteWhitespace(Environment.NewLine);
+                // End files with a newline character.
+                WriteWhitespace(newLine);
                 base.Close();
             }
         }
 
         private readonly StringBuilder outputBuilder;
-        private readonly JsonTextWriter jsonTextWriter;
+        private readonly CustomJsonTextWriter jsonTextWriter;
 
         public SettingWriter(bool compact, SettingSchema schema)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
-            jsonTextWriter = compact ? new JsonTextWriter(stringWriter)
-                                     : new JsonPrettyPrinter(stringWriter, schema);
+
+            if (compact) jsonTextWriter = new JsonCompactWriter(stringWriter);
+            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema);
         }
 
         public override void VisitBoolean(PBoolean value)
@@ -81,9 +203,11 @@ namespace Sandra.UI.WF
         public override void VisitMap(PMap value)
         {
             jsonTextWriter.WriteStartObject();
+            bool first = true;
             foreach (var kv in value)
             {
-                jsonTextWriter.WritePropertyName(kv.Key);
+                jsonTextWriter.WriteSettingPropertyName(kv.Key, first);
+                first = false;
                 Visit(kv.Value);
             }
             jsonTextWriter.WriteEndObject();
