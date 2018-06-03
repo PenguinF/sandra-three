@@ -55,6 +55,10 @@
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MdiContainerForm.UIActions.cs">
+      <DependentUpon>MdiContainerForm.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MovesTextBox.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public class MdiContainerForm : Form, IUIActionHandlerProvider
+    public partial class MdiContainerForm : Form, IUIActionHandlerProvider
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
@@ -59,23 +59,6 @@ namespace Sandra.UI.WF
 
         // Separate action handler for building the MainMenuStrip.
         readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
-
-        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
-
-        public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.NewGame,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
-            });
-
-        public UIActionState TryOpenNewPlayingBoard(bool perform)
-        {
-            if (perform) NewPlayingBoard();
-            return UIActionVisibility.Enabled;
-        }
 
         class FocusDependentUIActionState
         {
