@@ -286,7 +286,7 @@ namespace Sandra.UI.WF
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                Program.GetDefaultSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Backward);
+                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Backward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
@@ -373,7 +373,7 @@ namespace Sandra.UI.WF
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                Program.GetDefaultSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Forward);
+                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Forward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;

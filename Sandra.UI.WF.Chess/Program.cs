@@ -102,6 +102,9 @@ namespace Sandra.UI.WF
         internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
             => DefaultSettings.Settings.GetValue(property);
 
+        internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
+            => LocalSettings.Settings.GetValue(property);
+
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
 
