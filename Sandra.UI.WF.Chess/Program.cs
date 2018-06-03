@@ -40,8 +40,6 @@ namespace Sandra.UI.WF
         [STAThread]
         static void Main()
         {
-            // TODO: remove unknown keys from settings after loading from a file.
-
             // Store executable folder location for later use.
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
