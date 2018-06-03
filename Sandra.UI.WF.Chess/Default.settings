@@ -1,5 +1,7 @@
 {
-    // Subfolder of %APPDATA%\\Local which should be used to store persistent data.
+    // Subfolder of %APPDATA%/Local which should be used to store persistent data.
     // This includes the auto-save file, or e.g. a preferences file.
+    // Use forward slashes to separate directories, an unrecognized escape
+    // sequence such as in "Test\Test" renders the whole file unusable.
     "app_data_sub_folder_name": "SandraChess"
 }
