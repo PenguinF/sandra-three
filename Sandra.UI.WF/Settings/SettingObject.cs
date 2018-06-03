@@ -63,7 +63,8 @@ namespace Sandra.UI.WF
             if (property == null) throw new ArgumentNullException(nameof(property));
 
             PValue pValue;
-            if (Map.TryGetValue(property.Name.Key, out pValue)
+            if (Schema.ContainsProperty(property)
+                && Map.TryGetValue(property.Name.Key, out pValue)
                 && property.TryGetValidValue(pValue, out value))
             {
                 return true;

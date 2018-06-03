@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,7 +40,7 @@ namespace Sandra.UI.WF
         /// <param name="properties">
         /// The set of properties with unique keys to support.
         /// </param>
-        /// <exception cref="System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// Two or more properties have the same key.
         /// </exception>
         public SettingSchema(params SettingProperty[] properties) : this((IEnumerable<SettingProperty>)properties)
@@ -52,7 +53,7 @@ namespace Sandra.UI.WF
         /// <param name="properties">
         /// The set of properties with unique keys to support.
         /// </param>
-        /// <exception cref="System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// Two or more properties have the same key.
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties)
@@ -68,6 +69,27 @@ namespace Sandra.UI.WF
                     this.properties.Add(property.Name.Key, property);
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets if a <see cref="SettingProperty"/> is contained in this schema.
+        /// </summary>
+        /// <param name="property">
+        /// The <see cref="SettingProperty"/> to locate.
+        /// </param>
+        /// <returns>
+        /// Whether or not the property is contained in this schema.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is null.
+        /// </exception>
+        public bool ContainsProperty(SettingProperty property)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            SettingProperty propertyInDictionary;
+            return properties.TryGetValue(property.Name.Key, out propertyInDictionary)
+                && property == propertyInDictionary;
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        public readonly Dictionary<SettingKey, PValue> KeyValueMapping;
+        internal readonly Dictionary<SettingKey, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
@@ -65,7 +65,10 @@ namespace Sandra.UI.WF
         /// </param>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            if (Schema.ContainsProperty(property))
+            {
+                KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            }
         }
 
         /// <summary>
@@ -129,7 +132,7 @@ namespace Sandra.UI.WF
             return ToPMap().EqualTo(other.Map);
         }
 
-        public PMap ToPMap()
+        internal PMap ToPMap()
         {
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
