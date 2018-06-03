@@ -59,7 +59,7 @@ namespace Sandra.UI.WF
             Chess.Constants.ForceInitialize();
 
             Localizer localizer;
-            if (AutoSave.CurrentSettings.TryGetValue(Localizers.LangSetting, out localizer))
+            if (TryGetAutoSaveValue(Localizers.LangSetting, out localizer))
             {
                 Localizer.Current = localizer;
             }
@@ -74,6 +74,9 @@ namespace Sandra.UI.WF
 
         internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
             => DefaultSettings.Settings.GetValue(property);
+
+        internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
+            => AutoSave.CurrentSettings.TryGetValue(property, out value);
 
         internal static Image LoadImage(string imageFileKey)
         {

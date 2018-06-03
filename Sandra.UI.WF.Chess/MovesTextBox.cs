@@ -73,7 +73,7 @@ namespace Sandra.UI.WF
             applyDefaultStyle();
 
             int zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
+            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
@@ -162,7 +162,7 @@ namespace Sandra.UI.WF
             {
                 // Initialize moveFormattingOption from settings.
                 MFOSettingValue mfoSettingValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out mfoSettingValue))
+                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out mfoSettingValue))
                 {
                     moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }

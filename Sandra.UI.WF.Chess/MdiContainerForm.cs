@@ -320,7 +320,7 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             bool boundsInitialized = false;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
+            if (Program.TryGetAutoSaveValue(SettingKeys.Window, out formState))
             {
                 Rectangle targetBounds = formState.Bounds;
 
