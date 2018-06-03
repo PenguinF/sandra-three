@@ -109,7 +109,7 @@ namespace Sandra.UI.WF
 #if DEBUG
         public Exception WriteToFile(string absoluteFilePath = null)
         {
-            absoluteFilePath = absoluteFilePath ?? this.AbsoluteFilePath;
+            absoluteFilePath = absoluteFilePath ?? AbsoluteFilePath;
 #else
         public Exception WriteToFile()
         {
