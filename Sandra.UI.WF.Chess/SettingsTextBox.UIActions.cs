@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.IO;
 
 namespace Sandra.UI.WF
 {
@@ -37,6 +38,7 @@ namespace Sandra.UI.WF
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
+            if (perform) File.WriteAllText(settingsFile.AbsoluteFilePath, Text);
             return UIActionVisibility.Enabled;
         }
     }
