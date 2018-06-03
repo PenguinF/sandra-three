@@ -144,7 +144,16 @@ namespace Sandra.UI.WF
                 bindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
+            // Actions which have their handler in this instance.
+            this.BindAction(EditPreferencesFile, TryEditPreferencesFile);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
+
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
+
+            // Add these actions to the "Game" dropdown list.
+            bindFocusDependentUIActions(fileMenu,
+                                        EditPreferencesFile);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);

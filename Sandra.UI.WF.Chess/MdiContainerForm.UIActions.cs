@@ -27,6 +27,19 @@ namespace Sandra.UI.WF
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
+        public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(EditPreferencesFile)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
+            });
+
+        public UIActionState TryEditPreferencesFile(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
         public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
             new UIActionBinding()

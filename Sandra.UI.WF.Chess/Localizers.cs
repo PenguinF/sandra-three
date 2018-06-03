@@ -29,9 +29,11 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
+        internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
         internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
+        internal static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
         internal static readonly LocalizedStringKey FirstMove = new LocalizedStringKey(nameof(FirstMove));
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
         internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
@@ -168,8 +170,10 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
+                { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },
+                { LocalizedStringKeys.File, "File" },
                 { LocalizedStringKeys.FirstMove, "First move" },
                 { LocalizedStringKeys.FlipBoard, "Flip board" },
                 { LocalizedStringKeys.Game, "Game" },
@@ -241,9 +245,11 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
+                { LocalizedStringKeys.EditPreferencesFile, "Wijzig voorkeuren" },
                 { LocalizedStringKeys.EndOfGame, "Naar einde partij" },
                 { LocalizedStringKeys.FastBackward, "Snel achterwaarts" },
                 { LocalizedStringKeys.FastForward, "Snel voorwaarts" },
+                { LocalizedStringKeys.File, "Bestand" },
                 { LocalizedStringKeys.FirstMove, "Eerste zet" },
                 { LocalizedStringKeys.FlipBoard, "Bord omkeren" },
                 { LocalizedStringKeys.Game, "Partij" },
