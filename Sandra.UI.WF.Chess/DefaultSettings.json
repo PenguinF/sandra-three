@@ -11,11 +11,11 @@
   // slashes to separate directories, an unrecognized escape sequence such as in
   // "Test\Test" renders the whole file unusable.
   "app_data_sub_folder_name": "SandraChess",
-  
+
   // File name in the %APPDATA%/Local subfolder which contains the user-specific
   // preferences.
   "local_preferences_file_name": "Preferences.settings",
-  
+
   // The number of plies (=half moves) to move forward of backward in a game for
   // fast navigation. This value must be between 2 and 40.
   "fast_navigation_ply_count": 10

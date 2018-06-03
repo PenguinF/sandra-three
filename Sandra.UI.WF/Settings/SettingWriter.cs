@@ -185,7 +185,7 @@ namespace Sandra.UI.WF
                             // This happens in WritePropertyName().
                             WriteValueDelimiter();
                             suppressNextValueDelimiter = true;
-                            WriteIndent();
+                            WriteWhitespace(newLine);
                         }
 
                         foreach (string commentLine in commentLines)
