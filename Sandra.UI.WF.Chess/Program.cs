@@ -18,8 +18,10 @@
  *********************************************************************************/
 using SysExtensions;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -48,8 +50,8 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
-            // Uncomment to generate Default.settings in the Bin directory.
-            //DefaultSettings.WriteToFile();
+            // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
+            WriteToSourceDefaultSettingFile();
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
@@ -89,6 +91,17 @@ namespace Sandra.UI.WF
                 exc.Trace();
                 return null;
             }
+        }
+
+        [Conditional("DEBUG")]
+        private static void WriteToSourceDefaultSettingFile()
+        {
+            DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
+            DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
+
+#if DEBUG
+            DefaultSettings.WriteToFile(Path.Combine(devDir.FullName, "DefaultSettings.json"));
+#endif
         }
     }
 }
