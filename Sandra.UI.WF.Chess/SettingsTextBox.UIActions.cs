@@ -23,7 +23,7 @@ namespace Sandra.UI.WF
 {
     public partial class SettingsTextBox
     {
-        public const string SettingsTextBoxUIActionPrefix = nameof(RichTextBoxBase) + ".";
+        public const string SettingsTextBoxUIActionPrefix = nameof(SettingsTextBox) + ".";
 
         public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
             new UIAction(SettingsTextBoxUIActionPrefix + nameof(SaveToFile)),
