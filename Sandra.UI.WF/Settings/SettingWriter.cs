@@ -29,15 +29,22 @@ namespace Sandra.UI.WF
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
+        private class CustomJsonTextWriter : JsonTextWriter
+        {
+            public CustomJsonTextWriter(TextWriter writer) : base(writer)
+            {
+            }
+        }
+
         private readonly StringBuilder outputBuilder;
-        private readonly JsonTextWriter jsonTextWriter;
+        private readonly CustomJsonTextWriter jsonTextWriter;
 
         public SettingWriter(bool indented)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
-            jsonTextWriter = new JsonTextWriter(stringWriter);
+            jsonTextWriter = new CustomJsonTextWriter(stringWriter);
 
             if (indented)
             {
