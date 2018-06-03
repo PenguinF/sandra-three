@@ -41,6 +41,9 @@ namespace Sandra.UI.WF
         /// <param name="name">
         /// The name of the property.
         /// </param>
+        /// <param name="description">
+        /// The built-in description of the property in a settings file.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> is null.
         /// </exception>
