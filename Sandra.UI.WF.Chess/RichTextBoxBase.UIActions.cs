@@ -16,9 +16,46 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+
 namespace Sandra.UI.WF
 {
     public partial class RichTextBoxBase
     {
+        public const string RichTextBoxBaseUIActionPrefix = nameof(RichTextBoxBase) + ".";
+
+        public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
+            new UIAction(RichTextBoxBaseUIActionPrefix + nameof(CopySelectionToClipBoard)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Copy,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+            });
+
+        public UIActionState TryCopySelectionToClipBoard(bool perform)
+        {
+            if (SelectionLength == 0) return UIActionVisibility.Disabled;
+            if (perform) Copy();
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
+            new UIAction(RichTextBoxBaseUIActionPrefix + nameof(SelectAllText)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.SelectAll,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
+            });
+
+        public UIActionState TrySelectAllText(bool perform)
+        {
+            if (TextLength == 0) return UIActionVisibility.Disabled;
+            if (perform) SelectAll();
+            return UIActionVisibility.Enabled;
+        }
     }
 }

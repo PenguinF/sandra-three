@@ -108,6 +108,14 @@ namespace Sandra.UI.WF
                         ReadOnly = true,
                     };
 
+                    settingsTextBox.BindActions(new UIActionBindings
+                    {
+                        { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
+                        { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
+                    });
+
+                    UIMenu.AddTo(settingsTextBox);
+
                     openDefaultSettingsForm = new Form()
                     {
                         Owner = this,
