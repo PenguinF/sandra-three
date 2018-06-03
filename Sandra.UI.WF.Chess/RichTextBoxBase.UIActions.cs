@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -70,6 +71,7 @@ namespace Sandra.UI.WF
         public UIActionState TryPasteSelectionFromClipBoard(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!Clipboard.ContainsText()) return UIActionVisibility.Disabled;
             if (perform) Paste();
             return UIActionVisibility.Enabled;
         }
