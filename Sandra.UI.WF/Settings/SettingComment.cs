@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.UI.WF
 {
@@ -25,7 +26,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SettingComment
     {
-        public string Text { get; }
+        public IEnumerable<string> Paragraphs { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingComment"/>.
@@ -36,7 +37,31 @@ namespace Sandra.UI.WF
         public SettingComment(string text)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-            Text = text;
+            Paragraphs = new string[] { text };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SettingComment"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="paragraphs"/> is null.
+        /// </exception>
+        public SettingComment(params string[] paragraphs)
+        {
+            if (paragraphs == null) throw new ArgumentNullException(nameof(paragraphs));
+            Paragraphs = paragraphs;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SettingComment"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="paragraphs"/> is null.
+        /// </exception>
+        public SettingComment(IEnumerable<string> paragraphs)
+        {
+            if (paragraphs == null) throw new ArgumentNullException(nameof(paragraphs));
+            Paragraphs = paragraphs;
         }
     }
 }

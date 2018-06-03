@@ -54,11 +54,10 @@ namespace Sandra.UI.WF
             private const int maxLineLength = 80;
             private const string startComment = "// ";
 
-            private static List<string> GetCommentLines(SettingComment comment, int indent)
+            private static IEnumerable<string> GetCommentLines(string commentText, int indent)
             {
                 List<string> lines = new List<string>();
-                if (comment == null) return lines;
-                string commentText = comment.Text;
+                if (commentText == null) return lines;
 
                 // Cut up the description in pieces.
                 // Available length depends on the current indent level.
@@ -121,6 +120,22 @@ namespace Sandra.UI.WF
                 return lines;
             }
 
+            private static List<string> GetCommentLines(SettingComment comment, int indent)
+            {
+                List<string> lines = new List<string>();
+                if (comment != null)
+                {
+                    bool first = true;
+                    foreach (var paragraph in comment.Paragraphs)
+                    {
+                        if (!first) lines.Add(string.Empty);
+                        first = false;
+                        lines.AddRange(GetCommentLines(paragraph, indent));
+                    }
+                }
+                return lines;
+            }
+
             private readonly SettingSchema schema;
             private readonly string newLine;
 
@@ -135,8 +150,7 @@ namespace Sandra.UI.WF
                 IndentChar = ' ';
 
                 // Write schema description, if any.
-                var commentLines = GetCommentLines(schema.Description, 0);
-                foreach (string commentLine in commentLines)
+                foreach (string commentLine in GetCommentLines(schema.Description, 0))
                 {
                     // The base WriteComment wraps comments in /*-*/ delimiters,
                     // so generate raw comments starting with // instead.
