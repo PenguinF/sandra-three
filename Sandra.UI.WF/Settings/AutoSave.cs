@@ -21,7 +21,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,8 +116,11 @@ namespace Sandra.UI.WF
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
+        /// <param name="workingCopy">
+        /// The schema to use.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> is null.
+        /// <paramref name="appSubFolderName"/> and/or <paramref name="workingCopy"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
@@ -128,11 +130,16 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName)
+        public AutoSave(string appSubFolderName, SettingCopy workingCopy)
         {
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
+            }
+
+            if (workingCopy == null)
+            {
+                throw new ArgumentNullException(nameof(workingCopy));
             }
 
             // Have to check for string.Empty because Path.Combine will not.
@@ -148,7 +155,7 @@ namespace Sandra.UI.WF
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            localSettings = new SettingCopy().Commit();
+            localSettings = workingCopy.Commit();
 
             try
             {
@@ -231,11 +238,8 @@ namespace Sandra.UI.WF
                 // Make sure to save to the other file stream first.
                 lastWrittenToFileStream = latestAutoSaveFileStream;
 
-                // If non-empty, override localSettings with it.
-                if (remoteSettings.Map.Any())
-                {
-                    localSettings = remoteSettings;
-                }
+                // Override localSettings with remoteSettings.
+                if (remoteSettings != null) localSettings = remoteSettings;
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
@@ -417,8 +421,8 @@ namespace Sandra.UI.WF
                 }
             }
 
-            // Load into an empty working copy.
-            var workingCopy = new SettingCopy();
+            // Load into a copy of localSettings, preserving defaults.
+            var workingCopy = localSettings.CreateWorkingCopy();
             workingCopy.LoadFromText(new StringReader(sb.ToString()));
             return workingCopy.Commit();
         }

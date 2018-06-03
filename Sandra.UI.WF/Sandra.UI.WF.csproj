@@ -73,11 +73,11 @@
     <Compile Include="Settings\PType.cs" />
     <Compile Include="Settings\PValue.cs" />
     <Compile Include="Settings\SettingCopy.cs" />
-    <Compile Include="Settings\SettingHelper.cs" />
     <Compile Include="Settings\SettingKey.cs" />
     <Compile Include="Settings\SettingObject.cs" />
     <Compile Include="Settings\SettingProperty.cs" />
     <Compile Include="Settings\SettingReader.cs" />
+    <Compile Include="Settings\SettingSchema.cs" />
     <Compile Include="Settings\SettingsFile.cs" />
     <Compile Include="Settings\SettingWriter.cs" />
     <Compile Include="Settings\SubFolderNameType.cs" />

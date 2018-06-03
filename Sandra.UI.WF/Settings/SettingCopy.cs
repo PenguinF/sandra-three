@@ -28,15 +28,29 @@ namespace Sandra.UI.WF
     public class SettingCopy
     {
         /// <summary>
+        /// Gets the schema for this <see cref="SettingCopy"/>.
+        /// </summary>
+        public readonly SettingSchema Schema;
+
+        /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        public readonly Dictionary<SettingKey, PValue> KeyValueMapping;
+        internal readonly Dictionary<SettingKey, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
         /// </summary>
-        public SettingCopy()
+        /// <param name="schema">
+        /// The schema to use.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="schema"/> is null.
+        /// </exception>
+        public SettingCopy(SettingSchema schema)
         {
+            if (schema == null) throw new ArgumentNullException(nameof(schema));
+
+            Schema = schema;
             KeyValueMapping = new Dictionary<SettingKey, PValue>();
         }
 
@@ -49,9 +63,17 @@ namespace Sandra.UI.WF
         /// <param name="value">
         /// The new value to associate with the property.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="value"/> is null.
+        /// </exception>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            if (Schema.ContainsProperty(property))
+            {
+                KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            }
         }
 
         /// <summary>
@@ -63,9 +85,13 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingObject"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settingObject"/> does not have the same schema.
+        /// </exception>
         public void Revert(SettingObject settingObject)
         {
             if (settingObject == null) throw new ArgumentNullException(nameof(settingObject));
+            if (settingObject.Schema != Schema) throw new ArgumentException($"Cannot revert to a {nameof(SettingObject)} with a different schema.");
 
             // Clear out the mapping before copying key-value pairs.
             KeyValueMapping.Clear();
@@ -111,14 +137,14 @@ namespace Sandra.UI.WF
             return ToPMap().EqualTo(other.Map);
         }
 
-        public PMap ToPMap()
+        internal PMap ToPMap()
         {
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
             return new PMap(mapBuilder);
         }
 
-        public void LoadFromText(TextReader textReader)
+        internal void LoadFromText(TextReader textReader)
         {
             SettingReader settingReader = new SettingReader(textReader);
             settingReader.ReadWorkingCopy(this);

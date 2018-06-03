@@ -33,7 +33,6 @@ namespace Sandra.UI.WF
 
         public SettingReader(TextReader inputReader)
         {
-            if (inputReader == null) throw new ArgumentNullException(nameof(inputReader));
             jsonTextReader = new JsonTextReader(inputReader);
         }
 
@@ -147,15 +146,21 @@ namespace Sandra.UI.WF
                     throw new JsonReaderException("End of file expected");
                 }
 
-                if (!(rootValue is PMap))
+                PMap map;
+                if (!PType.Map.TryGetValidValue(rootValue, out map))
                 {
                     throw new JsonReaderException("Expected json object at root");
                 }
 
-                PMap map = (PMap)rootValue;
                 foreach (var kv in map)
                 {
-                    workingCopy.KeyValueMapping[new SettingKey(kv.Key)] = kv.Value;
+                    SettingKey candidateKey = new SettingKey(kv.Key);
+                    SettingProperty property;
+                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property)
+                        && property.IsValidValue(kv.Value))
+                    {
+                        workingCopy.KeyValueMapping[candidateKey] = kv.Value;
+                    }
                 }
             }
 

@@ -21,18 +21,50 @@ using System;
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Contains the declaration of a setting property, i.e. its name and the type of value that it takes.
+    /// Contains the declaration of a setting property, but doesn't specify its type.
     /// </summary>
-    /// <typeparam name="T">
-    /// The .NET target <see cref="Type"/> to convert to and from.
-    /// </typeparam>
-    public class SettingProperty<T>
+    public abstract class SettingProperty
     {
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
         public SettingKey Name { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="SettingProperty"/>.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the property.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="name"/> is null.
+        /// </exception>
+        public SettingProperty(SettingKey name)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            Name = name;
+        }
+
+        /// <summary>
+        /// Returns if a raw <see cref="PValue"/> can be converted to the target .NET type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The value to convert from.
+        /// </param>
+        /// <returns>
+        /// Whether or not conversion will succeed.
+        /// </returns>
+        public abstract bool IsValidValue(PValue value);
+    }
+
+    /// <summary>
+    /// Contains the declaration of a setting property, i.e. its name and the type of value that it takes.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The .NET target <see cref="Type"/> to convert to and from.
+    /// </typeparam>
+    public class SettingProperty<T> : SettingProperty
+    {
         /// <summary>
         /// Gets the type of value that it contains.
         /// </summary>
@@ -50,13 +82,31 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
         /// </exception>
-        public SettingProperty(SettingKey name, PType<T> pType)
+        public SettingProperty(SettingKey name, PType<T> pType) : base(name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
             if (pType == null) throw new ArgumentNullException(nameof(pType));
-
-            Name = name;
             PType = pType;
+        }
+
+        /// <summary>
+        /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The value to convert from.
+        /// </param>
+        /// <param name="targetValue">
+        /// The target value to convert to, if conversion succeeds.
+        /// </param>
+        /// <returns>
+        /// Whether or not conversion succeeded.
+        /// </returns>
+        public bool TryGetValidValue(PValue value, out T targetValue)
+            => PType.TryGetValidValue(value, out targetValue);
+
+        public override bool IsValidValue(PValue value)
+        {
+            T targetValue;
+            return TryGetValidValue(value, out targetValue);
         }
     }
 }

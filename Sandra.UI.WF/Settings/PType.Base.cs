@@ -34,6 +34,11 @@ namespace Sandra.UI.WF
         public static readonly PType<PInteger> Integer = new BaseType<PInteger>();
 
         /// <summary>
+        /// Gets the standard <see cref="PType"/> for <see cref="PMap"/> values.
+        /// </summary>
+        public static readonly PType<PMap> Map = new BaseType<PMap>();
+
+        /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
         public static readonly PType<PString> String = new BaseType<PString>();

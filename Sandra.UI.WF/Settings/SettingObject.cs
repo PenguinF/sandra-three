@@ -24,12 +24,18 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.
     /// </summary>
-    public class SettingObject
+    public sealed class SettingObject
     {
+        /// <summary>
+        /// Gets the schema for this <see cref="SettingObject"/>.
+        /// </summary>
+        public readonly SettingSchema Schema;
+
         internal readonly PMap Map;
 
         internal SettingObject(SettingCopy workingCopy)
         {
+            Schema = workingCopy.Schema;
             Map = workingCopy.ToPMap();
         }
 
@@ -57,8 +63,9 @@ namespace Sandra.UI.WF
             if (property == null) throw new ArgumentNullException(nameof(property));
 
             PValue pValue;
-            if (Map.TryGetValue(property.Name.Key, out pValue)
-                && property.PType.TryGetValidValue(pValue, out value))
+            if (Schema.ContainsProperty(property)
+                && Map.TryGetValue(property.Name.Key, out pValue)
+                && property.TryGetValidValue(pValue, out value))
             {
                 return true;
             }
@@ -83,6 +90,8 @@ namespace Sandra.UI.WF
         /// </exception>
         public TValue GetValue<TValue>(SettingProperty<TValue> property)
         {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
             TValue value;
             if (!TryGetValue(property, out value))
             {
@@ -96,7 +105,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public SettingCopy CreateWorkingCopy()
         {
-            var copy = new SettingCopy();
+            var copy = new SettingCopy(Schema);
             copy.Revert(this);
             return copy;
         }

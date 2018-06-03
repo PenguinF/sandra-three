@@ -64,13 +64,31 @@ namespace Sandra.UI.WF
 
     internal static class Settings
     {
-        public static SettingObject CreateBuiltIn()
+        public static readonly SettingSchema AutoSaveSchema = CreateAutoSaveSchema();
+
+        public static readonly SettingSchema DefaultSettingsSchema = CreateDefaultSettingsSchema();
+
+        private static SettingSchema CreateAutoSaveSchema()
         {
-            SettingCopy defaultSettings = new SettingCopy();
+            return new SettingSchema(
+                SettingKeys.Window,
+                SettingKeys.Notation,
+                SettingKeys.Zoom);
+        }
+
+        private static SettingSchema CreateDefaultSettingsSchema()
+        {
+            return new SettingSchema(
+                SettingKeys.AppDataSubFolderName);
+        }
+
+        public static SettingCopy CreateBuiltIn()
+        {
+            SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
 
-            return defaultSettings.Commit();
+            return defaultSettings;
         }
     }
 }
