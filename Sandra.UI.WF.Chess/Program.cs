@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
-            string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
+            string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.AutoSaveSchema));
 
             Chess.Constants.ForceInitialize();
@@ -71,6 +71,9 @@ namespace Sandra.UI.WF
             // Wait until the auto-save background task has finished.
             AutoSave.Close();
         }
+
+        internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
+            => DefaultSettings.Settings.GetValue(property);
 
         internal static Image LoadImage(string imageFileKey)
         {
