@@ -54,7 +54,7 @@ namespace Sandra.UI.WF
         /// The set of properties with unique keys to support.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Two or more properties have the same key.
+        /// Two or more properties have the same key; or one of the properties is null.
         /// </exception>
         public SettingSchema(IEnumerable<SettingProperty> properties)
         {
@@ -66,6 +66,7 @@ namespace Sandra.UI.WF
             {
                 foreach (var property in properties)
                 {
+                    if (property == null) throw new ArgumentException("One of the properties is null.", nameof(properties));
                     this.properties.Add(property.Name.Key, property);
                 }
             }

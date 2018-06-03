@@ -90,6 +90,8 @@ namespace Sandra.UI.WF
         /// </exception>
         public TValue GetValue<TValue>(SettingProperty<TValue> property)
         {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
             TValue value;
             if (!TryGetValue(property, out value))
             {

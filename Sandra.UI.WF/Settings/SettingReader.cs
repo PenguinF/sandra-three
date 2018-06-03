@@ -33,7 +33,6 @@ namespace Sandra.UI.WF
 
         public SettingReader(TextReader inputReader)
         {
-            if (inputReader == null) throw new ArgumentNullException(nameof(inputReader));
             jsonTextReader = new JsonTextReader(inputReader);
         }
 

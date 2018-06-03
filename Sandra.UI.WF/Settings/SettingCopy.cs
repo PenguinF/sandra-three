@@ -63,8 +63,13 @@ namespace Sandra.UI.WF
         /// <param name="value">
         /// The new value to associate with the property.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="value"/> is null.
+        /// </exception>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
             if (Schema.ContainsProperty(property))
             {
                 KeyValueMapping[property.Name] = property.PType.GetPValue(value);
@@ -139,7 +144,7 @@ namespace Sandra.UI.WF
             return new PMap(mapBuilder);
         }
 
-        public void LoadFromText(TextReader textReader)
+        internal void LoadFromText(TextReader textReader)
         {
             SettingReader settingReader = new SettingReader(textReader);
             settingReader.ReadWorkingCopy(this);
