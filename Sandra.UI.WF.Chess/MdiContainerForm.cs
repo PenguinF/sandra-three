@@ -29,16 +29,14 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public class MdiContainerForm : Form, IUIActionHandlerProvider
+    public partial class MdiContainerForm : UIActionForm
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        /// <summary>
-        /// Contains the number of plies to move forward of backward in a game for fast navigation.
-        /// </summary>
-        public int FastNavigationPlyCount { get; private set; }
-
         private PersistableFormState formState;
+
+        private Form openLocalSettingsForm;
+        private Form openDefaultSettingsForm;
 
         public MdiContainerForm()
         {
@@ -57,30 +55,8 @@ namespace Sandra.UI.WF
             indexFocusDependentUIActions(MainMenuStrip.Items);
         }
 
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
-
         // Separate action handler for building the MainMenuStrip.
         readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
-
-        public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
-
-        public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.NewGame,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
-            });
-
-        public UIActionState TryOpenNewPlayingBoard(bool perform)
-        {
-            if (perform) NewPlayingBoard();
-            return UIActionVisibility.Enabled;
-        }
 
         class FocusDependentUIActionState
         {
@@ -166,7 +142,20 @@ namespace Sandra.UI.WF
                 bindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
+            // Actions which have their handler in this instance.
+            this.BindAction(EditPreferencesFile, TryEditPreferencesFile);
+            this.BindAction(ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
+            this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
+
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
+
+            // Add these actions to the "Game" dropdown list.
+            bindFocusDependentUIActions(fileMenu,
+                                        EditPreferencesFile,
+                                        ShowDefaultSettingsFile,
+                                        Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
@@ -291,20 +280,6 @@ namespace Sandra.UI.WF
             updateFocusDependentMenuItems();
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            try
-            {
-                // This code makes shortcuts work for all UIActionHandlers.
-                return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-                return true;
-            }
-        }
-
         public void NewPlayingBoard()
         {
             InteractiveGame game = new InteractiveGame(this, Position.GetInitialPosition());
@@ -325,7 +300,7 @@ namespace Sandra.UI.WF
 
             // Initialize from settings if available.
             bool boundsInitialized = false;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Window, out formState))
+            if (Program.TryGetAutoSaveValue(SettingKeys.Window, out formState))
             {
                 Rectangle targetBounds = formState.Bounds;
 
@@ -365,9 +340,6 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
-
-            // 10 plies == 5 moves.
-            FastNavigationPlyCount = 10;
 
             NewPlayingBoard();
         }

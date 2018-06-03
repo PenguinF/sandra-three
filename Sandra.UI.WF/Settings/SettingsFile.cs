@@ -86,13 +86,16 @@ namespace Sandra.UI.WF
             return new SettingsFile(absoluteFilePath, workingCopy.Commit());
         }
 
-        private readonly string absoluteFilePath;
+        /// <summary>
+        /// Returns the full path to the settings file.
+        /// </summary>
+        public string AbsoluteFilePath { get; }
 
         public SettingObject Settings { get; }
 
         private SettingsFile(string absoluteFilePath, SettingObject settings)
         {
-            this.absoluteFilePath = absoluteFilePath;
+            AbsoluteFilePath = absoluteFilePath;
             Settings = settings;
         }
 
@@ -103,9 +106,15 @@ namespace Sandra.UI.WF
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
+#if DEBUG
+        public Exception WriteToFile(string absoluteFilePath = null)
+        {
+            absoluteFilePath = absoluteFilePath ?? AbsoluteFilePath;
+#else
         public Exception WriteToFile()
         {
-            SettingWriter writer = new SettingWriter(indented: true);
+#endif
+            SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
             writer.Visit(Settings.Map);
             try
             {

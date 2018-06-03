@@ -18,8 +18,10 @@
  *********************************************************************************/
 using SysExtensions;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -31,6 +33,8 @@ namespace Sandra.UI.WF
         internal static string ExecutableFolder { get; private set; }
 
         internal static SettingsFile DefaultSettings { get; private set; }
+
+        internal static SettingsFile LocalSettings { get; private set; }
 
         internal static AutoSave AutoSave { get; private set; }
 
@@ -48,18 +52,41 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
-            // Uncomment to generate Default.settings in the Bin directory.
-            //DefaultSettings.WriteToFile();
+            // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
+            WriteToSourceDefaultSettingFile();
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
-            string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
+            string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.AutoSaveSchema));
+
+            // After creating the auto-save file, look for a local preferences file.
+            // Create a working copy with correct schema first.
+            SettingCopy localSettingsCopy = new SettingCopy(Settings.LocalSettingsSchema);
+
+            // Copy from default settings.
+            var defaultSettingsObject = DefaultSettings.Settings;
+            foreach (var property in localSettingsCopy.Schema.AllProperties)
+            {
+                SettingProperty defaultSettingProperty;
+                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty))
+                {
+                    localSettingsCopy.AddOrReplace(property, defaultSettingsObject, defaultSettingProperty);
+                }
+            }
+
+            // And then create the local settings file which can overwrite values in default settings.
+            LocalSettings = SettingsFile.Create(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    appDataSubFolderName,
+                    GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                localSettingsCopy);
 
             Chess.Constants.ForceInitialize();
 
             Localizer localizer;
-            if (AutoSave.CurrentSettings.TryGetValue(Localizers.LangSetting, out localizer))
+            if (TryGetAutoSaveValue(Localizers.LangSetting, out localizer))
             {
                 Localizer.Current = localizer;
             }
@@ -72,6 +99,15 @@ namespace Sandra.UI.WF
             AutoSave.Close();
         }
 
+        internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
+            => DefaultSettings.Settings.GetValue(property);
+
+        internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
+            => LocalSettings.Settings.GetValue(property);
+
+        internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
+            => AutoSave.CurrentSettings.TryGetValue(property, out value);
+
         internal static Image LoadImage(string imageFileKey)
         {
             try
@@ -83,6 +119,17 @@ namespace Sandra.UI.WF
                 exc.Trace();
                 return null;
             }
+        }
+
+        [Conditional("DEBUG")]
+        private static void WriteToSourceDefaultSettingFile()
+        {
+            DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
+            DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
+
+#if DEBUG
+            DefaultSettings.WriteToFile(Path.Combine(devDir.FullName, "DefaultSettings.json"));
+#endif
         }
     }
 }

@@ -190,8 +190,10 @@ namespace Sandra.UI.WF
                         { SharedUIAction.ZoomIn, movesTextBox.TryZoomIn },
                         { SharedUIAction.ZoomOut, movesTextBox.TryZoomOut },
 
-                        { MovesTextBox.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
-                        { MovesTextBox.SelectAllText, movesTextBox.TrySelectAllText },
+                        { RichTextBoxBase.CutSelectionToClipBoard, movesTextBox.TryCutSelectionToClipBoard },
+                        { RichTextBoxBase.CopySelectionToClipBoard, movesTextBox.TryCopySelectionToClipBoard },
+                        { RichTextBoxBase.PasteSelectionFromClipBoard, movesTextBox.TryPasteSelectionFromClipBoard },
+                        { RichTextBoxBase.SelectAllText, movesTextBox.TrySelectAllText },
                     });
 
                     UIMenu.AddTo(movesTextBox);
@@ -286,7 +288,7 @@ namespace Sandra.UI.WF
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                OwnerForm.FastNavigationPlyCount.Times(Game.Backward);
+                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Backward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
@@ -373,7 +375,7 @@ namespace Sandra.UI.WF
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                OwnerForm.FastNavigationPlyCount.Times(Game.Forward);
+                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Forward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;

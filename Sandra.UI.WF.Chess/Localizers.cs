@@ -27,11 +27,15 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
         internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
+        internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
+        internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
+        internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
+        internal static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
         internal static readonly LocalizedStringKey FirstMove = new LocalizedStringKey(nameof(FirstMove));
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
         internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
@@ -41,11 +45,14 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
+        internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
+        internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
@@ -165,11 +172,15 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Chessboard, "Chessboard" },
                 { LocalizedStringKeys.Copy, "Copy" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Copy diagram to clipboard" },
+                { LocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
+                { LocalizedStringKeys.Exit, "Exit" },
+                { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },
+                { LocalizedStringKeys.File, "File" },
                 { LocalizedStringKeys.FirstMove, "First move" },
                 { LocalizedStringKeys.FlipBoard, "Flip board" },
                 { LocalizedStringKeys.Game, "Game" },
@@ -179,11 +190,14 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "New game" },
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
+                { LocalizedStringKeys.Paste, "Paste" },
                 { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
+                { LocalizedStringKeys.Save, "Save" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
+                { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
@@ -239,11 +253,15 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Chessboard, "Schaakbord" },
                 { LocalizedStringKeys.Copy, "Kopiëren" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
+                { LocalizedStringKeys.Cut, "Knippen" },
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
+                { LocalizedStringKeys.EditPreferencesFile, "Wijzig voorkeuren" },
+                { LocalizedStringKeys.Exit, "Afsluiten" },
                 { LocalizedStringKeys.EndOfGame, "Naar einde partij" },
                 { LocalizedStringKeys.FastBackward, "Snel achterwaarts" },
                 { LocalizedStringKeys.FastForward, "Snel voorwaarts" },
+                { LocalizedStringKeys.File, "Bestand" },
                 { LocalizedStringKeys.FirstMove, "Eerste zet" },
                 { LocalizedStringKeys.FlipBoard, "Bord omkeren" },
                 { LocalizedStringKeys.Game, "Partij" },
@@ -253,11 +271,14 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "Nieuwe partij" },
                 { LocalizedStringKeys.NextLine, "Volgende variant" },
                 { LocalizedStringKeys.NextMove, "Volgende zet" },
+                { LocalizedStringKeys.Paste, "Plakken" },
                 { LocalizedStringKeys.PieceSymbols, "PLTDK" },
                 { LocalizedStringKeys.PreviousLine, "Vorige variant" },
                 { LocalizedStringKeys.PreviousMove, "Vorige zet" },
                 { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
+                { LocalizedStringKeys.Save, "Opslaan" },
                 { LocalizedStringKeys.SelectAll, "Alles selecteren" },
+                { LocalizedStringKeys.ShowDefaultSettingsFile, "Standaard instellingen tonen" },
                 { LocalizedStringKeys.StartOfGame, "Naar begin partij" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },

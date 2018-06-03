@@ -30,7 +30,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : UpdatableRichTextBox, IUIActionHandlerProvider
+    public partial class MovesTextBox : RichTextBoxBase
     {
         private sealed class TextElementStyle
         {
@@ -71,12 +71,6 @@ namespace Sandra.UI.WF
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
 
             applyDefaultStyle();
-
-            int zoomFactor;
-            if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Zoom, out zoomFactor))
-            {
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-            }
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
@@ -126,11 +120,6 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
-
-        /// <summary>
         /// Standardized PGN notation for pieces.
         /// </summary>
         private const string PGNPieceSymbols = "NBRQK";
@@ -162,7 +151,7 @@ namespace Sandra.UI.WF
             {
                 // Initialize moveFormattingOption from settings.
                 MFOSettingValue mfoSettingValue;
-                if (Program.AutoSave.CurrentSettings.TryGetValue(SettingKeys.Notation, out mfoSettingValue))
+                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out mfoSettingValue))
                 {
                     moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }
@@ -457,17 +446,6 @@ namespace Sandra.UI.WF
             }
 
             base.OnMouseWheel(e);
-
-            if (ModifierKeys.HasFlag(Keys.Control))
-            {
-                // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                autoSaveZoomFactor(PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
-            }
-        }
-
-        private void autoSaveZoomFactor(int zoomFactor)
-        {
-            Program.AutoSave.Persist(SettingKeys.Zoom, zoomFactor);
         }
     }
 }

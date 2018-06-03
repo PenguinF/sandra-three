@@ -16,8 +16,6 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using System;
-
 namespace Sandra.UI.WF
 {
     public partial class MovesTextBox
@@ -69,66 +67,6 @@ namespace Sandra.UI.WF
             }
 
             return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic);
-        }
-
-        public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
-            new UIAction(MovesTextBoxUIActionPrefix + nameof(CopySelectionToClipBoard)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Copy,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-            });
-
-        public UIActionState TryCopySelectionToClipBoard(bool perform)
-        {
-            if (SelectionLength == 0) return UIActionVisibility.Disabled;
-            if (perform) Copy();
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
-            new UIAction(MovesTextBoxUIActionPrefix + nameof(SelectAllText)),
-            new UIActionBinding()
-            {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.SelectAll,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
-            });
-
-        public UIActionState TrySelectAllText(bool perform)
-        {
-            if (TextLength == 0) return UIActionVisibility.Disabled;
-            if (perform) SelectAll();
-            return UIActionVisibility.Enabled;
-        }
-
-        public UIActionState TryZoomIn(bool perform)
-        {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                zoomFactor++;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
-            }
-            return UIActionVisibility.Enabled;
-        }
-
-        public UIActionState TryZoomOut(bool perform)
-        {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                zoomFactor--;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
-            }
-            return UIActionVisibility.Enabled;
         }
     }
 }

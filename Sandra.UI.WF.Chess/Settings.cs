@@ -17,12 +17,18 @@
  * 
  *********************************************************************************/
 using SysExtensions;
+using System;
+using System.IO;
 using System.Text;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
+        internal const string DefaultAppDataSubFolderName = "SandraChess";
+
+        internal const string DefaultLocalPreferencesFileName = "Preferences.settings";
+
         /// <summary>
         /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
         /// </summary>
@@ -45,9 +51,39 @@ namespace Sandra.UI.WF
             return snakeCase.ToString();
         }
 
+        private static string localApplicationDataPath(bool isLocalSchema)
+            => !isLocalSchema ? string.Empty :
+            $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
+
+        internal static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
+            "There are generally two copies of this file, one in the directory where "
+            + Path.GetFileName(typeof(Program).Assembly.Location)
+            + " is located ("
+            + Program.DefaultSettingsFileName
+            + "), and one that lives in the local application data folder"
+            + localApplicationDataPath(isLocalSchema)
+            + ".",
+            "Preferences in the latter file override those that are specified in the default. "
+            + "In the majority of cases, only the latter file is changed, while the default "
+            + "settings serve as a template.");
+
+        private const string AppDataSubFolderNameDescription
+            = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
+            + "This includes the auto-save file, or e.g. a preferences file. "
+            + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
+
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
-            SubFolderNameType.Instance);
+            SubFolderNameType.Instance,
+            new SettingComment(AppDataSubFolderNameDescription));
+
+        private const string LocalPreferencesFileNameDescription
+            = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
+
+        internal static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
+            new SettingKey(nameof(LocalPreferencesFileName).ToSnakeCase()),
+            FileNameType.Instance,
+            new SettingComment(LocalPreferencesFileNameDescription));
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToSnakeCase()),
@@ -60,6 +96,33 @@ namespace Sandra.UI.WF
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(nameof(Zoom).ToSnakeCase()),
             PType.RichTextZoomFactor.Instance);
+
+        private const string FastNavigationPlyCountDescription
+            = "The number of plies (=half moves) to move forward of backward in a game for "
+            + "fast navigation. This value must be between 2 and 40.";
+
+        internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
+            new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
+            FastNavigationPlyCountRange.Instance,
+            new SettingComment(FastNavigationPlyCountDescription));
+
+        private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
+        {
+            public static readonly int MinPlyCount = 2;
+            public static readonly int MaxPlyCount = 40;
+
+            public static readonly FastNavigationPlyCountRange Instance = new FastNavigationPlyCountRange();
+
+            private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
+
+            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
+            {
+                targetValue = (int)integer.Value;
+                return true;
+            }
+
+            public override PInteger GetBaseValue(int value) => new PInteger(value);
+        }
     }
 
     internal static class Settings
@@ -67,6 +130,8 @@ namespace Sandra.UI.WF
         public static readonly SettingSchema AutoSaveSchema = CreateAutoSaveSchema();
 
         public static readonly SettingSchema DefaultSettingsSchema = CreateDefaultSettingsSchema();
+
+        public static readonly SettingSchema LocalSettingsSchema = CreateLocalSettingsSchema();
 
         private static SettingSchema CreateAutoSaveSchema()
         {
@@ -79,14 +144,28 @@ namespace Sandra.UI.WF
         private static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
-                SettingKeys.AppDataSubFolderName);
+                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                SettingKeys.AppDataSubFolderName,
+                SettingKeys.LocalPreferencesFileName,
+                SettingKeys.FastNavigationPlyCount);
+        }
+
+        private static SettingSchema CreateLocalSettingsSchema()
+        {
+            return new SettingSchema(
+                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
+                SettingKeys.FastNavigationPlyCount);
         }
 
         public static SettingCopy CreateBuiltIn()
         {
             SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
-            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
+            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
+
+            // 10 plies == 5 moves.
+            defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings;
         }
