@@ -53,16 +53,17 @@ namespace Sandra.UI.WF
             => !isLocalSchema ? string.Empty :
             $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
 
-        internal static string DefaultSettingsSchemaDescription(bool isLocalSchema)
-            => "There are generally two copies of this file, one in the directory where "
+        internal static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
+            "There are generally two copies of this file, one in the directory where "
             + Path.GetFileName(typeof(Program).Assembly.Location)
             + " is located ("
             + Program.DefaultSettingsFileName
             + "), and one that lives in the local application data folder"
             + localApplicationDataPath(isLocalSchema)
-            + ". Preferences in the latter file override those that are specified in the default. "
+            + ".",
+            "Preferences in the latter file override those that are specified in the default. "
             + "In the majority of cases, only the latter file is changed, while the default "
-            + "settings serve as a template.";
+            + "settings serve as a template.");
 
         private const string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
@@ -131,7 +132,7 @@ namespace Sandra.UI.WF
         private static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
-                new SettingComment(SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false)),
+                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.FastNavigationPlyCount);
         }
