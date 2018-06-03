@@ -63,7 +63,7 @@ namespace Sandra.UI.WF
             {
                 appDataSubFolderName = BuiltInSettings.GetValue(SettingKeys.AppDataSubFolderName);
             }
-            AutoSave = new AutoSave(appDataSubFolderName);
+            AutoSave = new AutoSave(appDataSubFolderName, Settings.AutoSaveSchema);
 
             Chess.Constants.ForceInitialize();
 

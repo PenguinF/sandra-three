@@ -117,8 +117,11 @@ namespace Sandra.UI.WF
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
         /// </param>
+        /// <param name="schema">
+        /// The schema to use.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> is null.
+        /// <paramref name="appSubFolderName"/> and/or <paramref name="schema"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
@@ -128,11 +131,16 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName)
+        public AutoSave(string appSubFolderName, SettingSchema schema)
         {
             if (appSubFolderName == null)
             {
                 throw new ArgumentNullException(nameof(appSubFolderName));
+            }
+
+            if (schema == null)
+            {
+                throw new ArgumentNullException(nameof(schema));
             }
 
             // Have to check for string.Empty because Path.Combine will not.
@@ -148,7 +156,7 @@ namespace Sandra.UI.WF
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            localSettings = new SettingCopy(SettingSchema.Empty).Commit();
+            localSettings = new SettingCopy(schema).Commit();
 
             try
             {
@@ -418,7 +426,7 @@ namespace Sandra.UI.WF
             }
 
             // Load into an empty working copy.
-            var workingCopy = new SettingCopy(SettingSchema.Empty);
+            var workingCopy = new SettingCopy(localSettings.Schema);
             workingCopy.LoadFromText(new StringReader(sb.ToString()));
             return workingCopy.Commit();
         }
