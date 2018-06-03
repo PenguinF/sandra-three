@@ -72,7 +72,7 @@ namespace Sandra.UI.WF
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
             SubFolderNameType.Instance,
-            AppDataSubFolderNameDescription);
+            new SettingComment(AppDataSubFolderNameDescription));
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(nameof(Window).ToSnakeCase()),
@@ -93,7 +93,7 @@ namespace Sandra.UI.WF
         internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
             new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
             FastNavigationPlyCountRange.Instance,
-            FastNavigationPlyCountDescription);
+            new SettingComment(FastNavigationPlyCountDescription));
 
         private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
         {
@@ -131,7 +131,7 @@ namespace Sandra.UI.WF
         private static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
-                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                new SettingComment(SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false)),
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.FastNavigationPlyCount);
         }

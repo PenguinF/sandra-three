@@ -54,10 +54,11 @@ namespace Sandra.UI.WF
             private const int maxLineLength = 80;
             private const string startComment = "// ";
 
-            private static List<string> GetCommentLines(string commentText, int indent)
+            private static List<string> GetCommentLines(SettingComment comment, int indent)
             {
                 List<string> lines = new List<string>();
-                if (commentText == null) return lines;
+                if (comment == null) return lines;
+                string commentText = comment.Text;
 
                 // Cut up the description in pieces.
                 // Available length depends on the current indent level.

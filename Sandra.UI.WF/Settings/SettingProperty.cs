@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the built-in description of the property in a settings file.
         /// </summary>
-        public string Description { get; }
+        public SettingComment Description { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingProperty"/>.
@@ -47,7 +47,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> is null.
         /// </exception>
-        public SettingProperty(SettingKey name, string description)
+        public SettingProperty(SettingKey name, SettingComment description)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
 
@@ -111,7 +111,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> and/or <paramref name="pType"/> are null.
         /// </exception>
-        public SettingProperty(SettingKey name, PType<T> pType, string description) : base(name, description)
+        public SettingProperty(SettingKey name, PType<T> pType, SettingComment description) : base(name, description)
         {
             if (pType == null) throw new ArgumentNullException(nameof(pType));
             PType = pType;
