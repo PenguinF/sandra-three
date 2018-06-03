@@ -27,6 +27,22 @@ namespace Sandra.UI.WF
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
+        public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Exit,
+                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+            });
+
+        public UIActionState TryExit(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
+        }
+
         public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(EditPreferencesFile)),
             new UIActionBinding()

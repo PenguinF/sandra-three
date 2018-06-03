@@ -31,6 +31,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
+        internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
         internal static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
@@ -170,6 +171,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
+                { LocalizedStringKeys.Exit, "Exit" },
                 { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },
@@ -246,6 +248,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
                 { LocalizedStringKeys.EditPreferencesFile, "Wijzig voorkeuren" },
+                { LocalizedStringKeys.Exit, "Afsluiten" },
                 { LocalizedStringKeys.EndOfGame, "Naar einde partij" },
                 { LocalizedStringKeys.FastBackward, "Snel achterwaarts" },
                 { LocalizedStringKeys.FastForward, "Snel voorwaarts" },

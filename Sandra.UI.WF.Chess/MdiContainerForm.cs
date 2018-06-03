@@ -146,6 +146,7 @@ namespace Sandra.UI.WF
 
             // Actions which have their handler in this instance.
             this.BindAction(EditPreferencesFile, TryEditPreferencesFile);
+            this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
@@ -153,7 +154,8 @@ namespace Sandra.UI.WF
 
             // Add these actions to the "Game" dropdown list.
             bindFocusDependentUIActions(fileMenu,
-                                        EditPreferencesFile);
+                                        EditPreferencesFile,
+                                        Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
