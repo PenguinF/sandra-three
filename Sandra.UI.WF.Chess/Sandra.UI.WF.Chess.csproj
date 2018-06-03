@@ -92,6 +92,9 @@
       <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UIActionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">

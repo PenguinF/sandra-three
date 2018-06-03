@@ -121,7 +121,7 @@ namespace Sandra.UI.WF
 
                     UIMenu.AddTo(settingsTextBox);
 
-                    openDefaultSettingsForm = new Form()
+                    openDefaultSettingsForm = new UIActionForm()
                     {
                         Owner = this,
                         ClientSize = new Size(600, 600),

@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : Form, IUIActionHandlerProvider
+    public partial class MdiContainerForm : UIActionForm
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
@@ -53,11 +53,6 @@ namespace Sandra.UI.WF
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
             indexFocusDependentUIActions(MainMenuStrip.Items);
         }
-
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         // Separate action handler for building the MainMenuStrip.
         readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
@@ -282,20 +277,6 @@ namespace Sandra.UI.WF
             }
 
             updateFocusDependentMenuItems();
-        }
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            try
-            {
-                // This code makes shortcuts work for all UIActionHandlers.
-                return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-                return true;
-            }
         }
 
         public void NewPlayingBoard()
