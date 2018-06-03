@@ -31,8 +31,11 @@ namespace Sandra.UI.WF
     {
         private class JsonPrettyPrinter : JsonTextWriter
         {
-            public JsonPrettyPrinter(TextWriter writer) : base(writer)
+            private readonly SettingSchema schema;
+
+            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema) : base(writer)
             {
+                this.schema = schema;
                 Formatting = Formatting.Indented;
                 Indentation = 2;
                 IndentChar = ' ';
@@ -49,12 +52,13 @@ namespace Sandra.UI.WF
         private readonly StringBuilder outputBuilder;
         private readonly JsonTextWriter jsonTextWriter;
 
-        public SettingWriter(bool compact)
+        public SettingWriter(bool compact, SettingSchema schema)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
-            jsonTextWriter = compact ? new JsonTextWriter(stringWriter) : new JsonPrettyPrinter(stringWriter);
+            jsonTextWriter = compact ? new JsonTextWriter(stringWriter)
+                                     : new JsonPrettyPrinter(stringWriter, schema);
         }
 
         public override void VisitBoolean(PBoolean value)

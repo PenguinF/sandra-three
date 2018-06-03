@@ -105,7 +105,7 @@ namespace Sandra.UI.WF
         /// </returns>
         public Exception WriteToFile()
         {
-            SettingWriter writer = new SettingWriter(compact: false);
+            SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
             writer.Visit(Settings.Map);
             try
             {
