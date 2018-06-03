@@ -22,7 +22,7 @@ using System.IO;
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a read-only Windows rich text box which displays a json settings file.
+    /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
     public partial class SettingsTextBox : RichTextBoxBase
     {

@@ -22,7 +22,8 @@ using System.Windows.Forms;
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a read-only Windows rich text box which displays a json settings file.
+    /// Represents a Windows rich text box with a number of applicatio-wide features
+    /// such as <see cref="UIAction"/> hooks and a mouse-wheel event handler.
     /// </summary>
     public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
     {
