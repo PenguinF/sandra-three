@@ -106,6 +106,8 @@ namespace Sandra.UI.WF
                         Font = new Font("Consolas", 10),
                         Text = File.ReadAllText(Program.DefaultSettings.AbsoluteFilePath),
                         ReadOnly = true,
+                        WordWrap = false,
+                        ScrollBars = RichTextBoxScrollBars.Both,
                     };
 
                     settingsTextBox.BindActions(new UIActionBindings
