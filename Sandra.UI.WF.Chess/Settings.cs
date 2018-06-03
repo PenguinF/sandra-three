@@ -60,6 +60,28 @@ namespace Sandra.UI.WF
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(nameof(Zoom).ToSnakeCase()),
             PType.RichTextZoomFactor.Instance);
+
+        internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
+            new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
+            FastNavigationPlyCountRange.Instance);
+
+        private sealed class FastNavigationPlyCountRange : PType.Derived<PInteger, int>
+        {
+            public static readonly int MinPlyCount = 2;
+            public static readonly int MaxPlyCount = 40;
+
+            public static readonly FastNavigationPlyCountRange Instance = new FastNavigationPlyCountRange();
+
+            private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
+
+            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
+            {
+                targetValue = (int)integer.Value;
+                return true;
+            }
+
+            public override PInteger GetBaseValue(int value) => new PInteger(value);
+        }
     }
 
     internal static class Settings
@@ -79,7 +101,8 @@ namespace Sandra.UI.WF
         private static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
-                SettingKeys.AppDataSubFolderName);
+                SettingKeys.AppDataSubFolderName,
+                SettingKeys.FastNavigationPlyCount);
         }
 
         public static SettingCopy CreateBuiltIn()
@@ -87,6 +110,9 @@ namespace Sandra.UI.WF
             SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, "SandraChess");
+
+            // 10 plies == 5 moves.
+            defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings;
         }

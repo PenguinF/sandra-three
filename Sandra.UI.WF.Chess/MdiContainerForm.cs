@@ -33,11 +33,6 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        /// <summary>
-        /// Contains the number of plies to move forward of backward in a game for fast navigation.
-        /// </summary>
-        public int FastNavigationPlyCount { get; private set; }
-
         private PersistableFormState formState;
 
         public MdiContainerForm()
@@ -365,9 +360,6 @@ namespace Sandra.UI.WF
 
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
-
-            // 10 plies == 5 moves.
-            FastNavigationPlyCount = 10;
 
             NewPlayingBoard();
         }
