@@ -34,6 +34,8 @@ namespace Sandra.UI.WF
 
         internal static SettingsFile DefaultSettings { get; private set; }
 
+        internal static SettingsFile LocalSettings { get; private set; }
+
         internal static AutoSave AutoSave { get; private set; }
 
         /// <summary>
@@ -57,6 +59,29 @@ namespace Sandra.UI.WF
 
             string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.AutoSaveSchema));
+
+            // After creating the auto-save file, look for a local preferences file.
+            // Create a working copy with correct schema first.
+            SettingCopy localSettingsCopy = new SettingCopy(Settings.LocalSettingsSchema);
+
+            // Copy from default settings.
+            var defaultSettingsObject = DefaultSettings.Settings;
+            foreach (var property in localSettingsCopy.Schema.AllProperties)
+            {
+                SettingProperty defaultSettingProperty;
+                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty))
+                {
+                    localSettingsCopy.AddOrReplace(property, defaultSettingsObject, defaultSettingProperty);
+                }
+            }
+
+            // And then create the local settings file which can overwrite values in default settings.
+            LocalSettings = SettingsFile.Create(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    appDataSubFolderName,
+                    GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                localSettingsCopy);
 
             Chess.Constants.ForceInitialize();
 

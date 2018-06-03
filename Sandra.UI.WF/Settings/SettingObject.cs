@@ -40,6 +40,37 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
+        /// Gets the <see cref="PValue"/> that is associated with the specified property.
+        /// </summary>
+        /// <param name="property">
+        /// The property to locate.
+        /// </param>
+        /// <param name="value">
+        /// When this method returns, contains the value associated with the specified property,
+        /// if the property is found; otherwise, the default <see cref="PValue"/> value.
+        /// This parameter is passed uninitialized.
+        /// </param>
+        /// <returns>
+        /// true if this <see cref="SettingObject"/> contains a value for the specified property;
+        /// otherwise, false.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is null.
+        /// </exception>
+        public bool TryGetPValue(SettingProperty property, out PValue value)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            if (Schema.ContainsProperty(property)
+                && Map.TryGetValue(property.Name.Key, out value))
+            {
+                return true;
+            }
+            value = default(PValue);
+            return false;
+        }
+
+        /// <summary>
         /// Gets the value that is associated with the specified property.
         /// </summary>
         /// <param name="property">
@@ -60,11 +91,8 @@ namespace Sandra.UI.WF
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            if (property == null) throw new ArgumentNullException(nameof(property));
-
             PValue pValue;
-            if (Schema.ContainsProperty(property)
-                && Map.TryGetValue(property.Name.Key, out pValue)
+            if (TryGetPValue(property, out pValue)
                 && property.TryGetValidValue(pValue, out value))
             {
                 return true;

@@ -64,7 +64,7 @@ namespace Sandra.UI.WF
         /// The new value to associate with the property.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
         /// </exception>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
@@ -73,6 +73,36 @@ namespace Sandra.UI.WF
             if (Schema.ContainsProperty(property))
             {
                 KeyValueMapping[property.Name] = property.PType.GetPValue(value);
+            }
+        }
+
+        /// <summary>
+        /// Adds or replaces a value from a source <see cref="SettingObject"/> with a different schema.
+        /// </summary>
+        /// <param name="property">
+        /// The property for which to add or replace the value.
+        /// </param>
+        /// <param name="source">
+        /// The source <see cref="SettingObject"/> to take the value from.
+        /// </param>
+        /// <param name="sourceProperty">
+        /// The source <see cref="SettingProperty"/> to take the value from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="source"/> and/or <paramref name="sourceProperty"/> are null.
+        /// </exception>
+        public void AddOrReplace(SettingProperty property, SettingObject source, SettingProperty sourceProperty)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (sourceProperty == null) throw new ArgumentNullException(nameof(sourceProperty));
+
+            PValue sourceValue;
+            if (Schema.ContainsProperty(property)
+                && source.TryGetPValue(sourceProperty, out sourceValue)
+                && property.IsValidValue(sourceValue))
+            {
+                KeyValueMapping[property.Name] = sourceValue;
             }
         }
 
