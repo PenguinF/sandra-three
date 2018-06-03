@@ -112,6 +112,9 @@ namespace Sandra.UI.WF
 
                     settingsTextBox.BindActions(new UIActionBindings
                     {
+                        { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
+                        { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
+
                         { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
                         { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
                     });

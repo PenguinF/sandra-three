@@ -16,6 +16,9 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+using System.Windows.Forms;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -25,11 +28,32 @@ namespace Sandra.UI.WF
     {
         public RichTextBoxBase()
         {
+            int zoomFactor;
+            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
+            {
+                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+            }
         }
 
         /// <summary>
         /// Gets the action handler for this control.
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                // ZoomFactor isn't updated yet, so predict here what it's going to be.
+                autoSaveZoomFactor(PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
+            }
+        }
+
+        private void autoSaveZoomFactor(int zoomFactor)
+        {
+            Program.AutoSave.Persist(SettingKeys.Zoom, zoomFactor);
+        }
     }
 }

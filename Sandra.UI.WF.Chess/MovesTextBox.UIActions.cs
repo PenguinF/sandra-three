@@ -68,31 +68,5 @@ namespace Sandra.UI.WF
 
             return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic);
         }
-
-        public UIActionState TryZoomIn(bool perform)
-        {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                zoomFactor++;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
-            }
-            return UIActionVisibility.Enabled;
-        }
-
-        public UIActionState TryZoomOut(bool perform)
-        {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
-            if (perform)
-            {
-                zoomFactor--;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
-            }
-            return UIActionVisibility.Enabled;
-        }
     }
 }
