@@ -56,14 +56,13 @@ namespace Sandra.UI.WF
 
         private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
         {
-            var settingsTextBox = new SettingsTextBox()
+            var settingsTextBox = new SettingsTextBox(settingsFile)
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
                 BackColor = Color.White,
                 ForeColor = Color.Black,
                 Font = new Font("Consolas", 10),
-                Text = File.ReadAllText(settingsFile.AbsoluteFilePath),
                 ReadOnly = isReadOnly,
                 WordWrap = false,
                 ScrollBars = RichTextBoxScrollBars.Both,

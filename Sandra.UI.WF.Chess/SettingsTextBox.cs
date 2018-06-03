@@ -16,6 +16,9 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using System;
+using System.IO;
+
 namespace Sandra.UI.WF
 {
     /// <summary>
@@ -23,5 +26,22 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class SettingsTextBox : RichTextBoxBase
     {
+        private readonly SettingsFile settingsFile;
+
+        /// <summary>
+        /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
+        /// </summary>
+        /// <param name="settingsFile">
+        /// The settings file to show and/or edit.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settingsFile"/> is null.
+        /// </exception>
+        public SettingsTextBox(SettingsFile settingsFile)
+        {
+            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
+            this.settingsFile = settingsFile;
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+        }
     }
 }
