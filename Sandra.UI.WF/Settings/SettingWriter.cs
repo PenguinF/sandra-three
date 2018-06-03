@@ -54,6 +54,70 @@ namespace Sandra.UI.WF
             private const int maxLineLength = 80;
             private const string startComment = "// ";
 
+            private static List<string> GetCommentLines(string commentText, int indent)
+            {
+                // Cut up the description in pieces.
+                // Available length depends on the current indent level.
+                int availableLength = maxLineLength - indent - startComment.Length;
+                int totalLength = commentText.Length;
+                int remainingLength = totalLength;
+                int currentPos = 0;
+                List<string> lines = new List<string>();
+
+                // Use a StringBuilder for substring generation.
+                StringBuilder text = new StringBuilder(commentText);
+
+                // Set currentPos to first non-whitespace character.
+                while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
+                {
+                    currentPos++;
+                    remainingLength--;
+                }
+
+                // Invariants:
+                // 1) currentPos is between 0 and totalLength.
+                // 2) currentPos is at a non-whitespace character, or equal to totalLength.
+                // 3) currentPos + remainingLength == totalLength.
+                while (remainingLength > availableLength)
+                {
+                    // Search for the first whitespace character before the maximum break position.
+                    int breakPos = currentPos + availableLength;
+                    while (breakPos > currentPos && !char.IsWhiteSpace(text[breakPos])) breakPos--;
+
+                    if (breakPos == currentPos)
+                    {
+                        // Word longer than availableLength, just snip it up midway.
+                        breakPos = currentPos + availableLength;
+                    }
+                    else
+                    {
+                        // Find last non-whitespace character before the found whitespace.
+                        while (breakPos > currentPos && char.IsWhiteSpace(text[breakPos])) breakPos--;
+                        // Increase by 1 again to end up on the first whitespace character after the last word.
+                        breakPos++;
+                    }
+
+                    // Add line which neither starts nor ends with a whitespace character.
+                    lines.Add(text.ToString(currentPos, breakPos - currentPos));
+                    currentPos = breakPos;
+                    remainingLength = totalLength - currentPos;
+
+                    // Set currentPos to first non-whitespace character again.
+                    while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
+                    {
+                        currentPos++;
+                        remainingLength--;
+                    }
+                }
+
+                if (remainingLength > 0)
+                {
+                    lines.Add(text.ToString(currentPos, remainingLength));
+                }
+
+                return lines;
+            }
+
             private readonly SettingSchema schema;
             private readonly string newLine;
 
@@ -90,64 +154,7 @@ namespace Sandra.UI.WF
                         WriteIndent();
                     }
 
-                    // Cut up the description in pieces.
-                    // Available length depends on the current indent level.
-                    int availableLength = maxLineLength - Top * Indentation - startComment.Length;
-                    int totalLength = property.Description.Length;
-                    int remainingLength = totalLength;
-                    int currentPos = 0;
-                    List<string> lines = new List<string>();
-
-                    // Use a StringBuilder for substring generation.
-                    StringBuilder text = new StringBuilder(property.Description);
-
-                    // Set currentPos to first non-whitespace character.
-                    while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
-                    {
-                        currentPos++;
-                        remainingLength--;
-                    }
-
-                    // Invariants:
-                    // 1) currentPos is between 0 and totalLength.
-                    // 2) currentPos is at a non-whitespace character, or equal to totalLength.
-                    // 3) currentPos + remainingLength == totalLength.
-                    while (remainingLength > availableLength)
-                    {
-                        // Search for the first whitespace character before the maximum break position.
-                        int breakPos = currentPos + availableLength;
-                        while (breakPos > currentPos && !char.IsWhiteSpace(text[breakPos])) breakPos--;
-
-                        if (breakPos == currentPos)
-                        {
-                            // Word longer than availableLength, just snip it up midway.
-                            breakPos = currentPos + availableLength;
-                        }
-                        else
-                        {
-                            // Find last non-whitespace character before the found whitespace.
-                            while (breakPos > currentPos && char.IsWhiteSpace(text[breakPos])) breakPos--;
-                            // Increase by 1 again to end up on the first whitespace character after the last word.
-                            breakPos++;
-                        }
-
-                        // Add line which neither starts nor ends with a whitespace character.
-                        lines.Add(text.ToString(currentPos, breakPos - currentPos));
-                        currentPos = breakPos;
-                        remainingLength = totalLength - currentPos;
-
-                        // Set currentPos to first non-whitespace character again.
-                        while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
-                        {
-                            currentPos++;
-                            remainingLength--;
-                        }
-                    }
-
-                    if (remainingLength > 0)
-                    {
-                        lines.Add(text.ToString(currentPos, remainingLength));
-                    }
+                    List<string> lines = GetCommentLines(property.Description, Top * Indentation);
 
                     foreach (string line in lines)
                     {
@@ -157,9 +164,9 @@ namespace Sandra.UI.WF
                         WriteRaw(startComment);
                         WriteRaw(line);
                     }
-
-                    WritePropertyName(name);
                 }
+
+                WritePropertyName(name);
             }
 
             public override void Close()
