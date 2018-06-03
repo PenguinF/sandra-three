@@ -46,8 +46,8 @@ namespace Sandra.UI.WF
         /// or if the settings file is corrupt, an empty <see cref="SettingsFile"/>
         /// object is returned.
         /// </param>
-        /// <param name="schema">
-        /// The schema to use.
+        /// <param name="workingCopy">
+        /// The <see cref="SettingCopy"/> in which the values are stored.
         /// </param>
         /// <returns>
         /// The created <see cref="SettingsFile"/>.
@@ -57,7 +57,7 @@ namespace Sandra.UI.WF
         /// or contains one or more invalid characters as defined by <see cref="Path.InvalidPathChars"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="absoluteFilePath"/> and/or <paramref name="schema"/> are null.
+        /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are null.
         /// </exception>
         /// <exception cref="PathTooLongException">
         /// The specified path, file name, or both exceed the system-defined maximum length.
@@ -67,12 +67,10 @@ namespace Sandra.UI.WF
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
-        public static SettingsFile Create(string absoluteFilePath, SettingSchema schema)
+        public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
         {
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
-            if (schema == null) throw new ArgumentNullException(nameof(schema));
-
-            var workingCopy = new SettingCopy(schema);
+            if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             try
             {
