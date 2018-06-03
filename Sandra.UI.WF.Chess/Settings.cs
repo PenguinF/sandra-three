@@ -64,7 +64,7 @@ namespace Sandra.UI.WF
 
     internal static class Settings
     {
-        public static SettingObject CreateDefault()
+        public static SettingObject CreateBuiltIn()
         {
             SettingCopy defaultSettings = new SettingCopy();
 
