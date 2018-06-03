@@ -16,6 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.IO;
@@ -29,6 +30,7 @@ namespace Sandra.UI.WF
     public class SettingsFile
     {
         private static bool IsExternalCauseFileException(Exception exception) =>
+            exception is JsonReaderException ||
             exception is IOException ||
             exception is UnauthorizedAccessException ||
             exception is FileNotFoundException ||
@@ -64,22 +66,17 @@ namespace Sandra.UI.WF
         /// </exception>
         public static SettingsFile Create(string absoluteFilePath)
         {
-            string fileText = null;
+            var workingCopy = new SettingCopy();
+
             try
             {
-                fileText = File.ReadAllText(absoluteFilePath);
+                string fileText = File.ReadAllText(absoluteFilePath);
+                workingCopy.LoadFromText(new StringReader(fileText));
             }
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
-            }
-
-            var workingCopy = new SettingCopy();
-
-            if (fileText != null)
-            {
-                workingCopy.LoadFromText(new StringReader(fileText));
             }
 
             return new SettingsFile(absoluteFilePath, workingCopy.Commit());
