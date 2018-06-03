@@ -21,12 +21,19 @@ using System;
 namespace Sandra.UI.WF
 {
     /// <summary>
+    /// Contains the declaration of a setting property, but doesn't specify its type.
+    /// </summary>
+    public abstract class SettingProperty
+    {
+    }
+
+    /// <summary>
     /// Contains the declaration of a setting property, i.e. its name and the type of value that it takes.
     /// </summary>
     /// <typeparam name="T">
     /// The .NET target <see cref="Type"/> to convert to and from.
     /// </typeparam>
-    public class SettingProperty<T>
+    public class SettingProperty<T> : SettingProperty
     {
         /// <summary>
         /// Gets the name of the property.
