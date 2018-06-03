@@ -54,7 +54,7 @@ namespace Sandra.UI.WF
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
             string appDataSubFolderName = DefaultSettings.Settings.GetValue(SettingKeys.AppDataSubFolderName);
-            AutoSave = new AutoSave(appDataSubFolderName, Settings.AutoSaveSchema);
+            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.AutoSaveSchema));
 
             Chess.Constants.ForceInitialize();
 
