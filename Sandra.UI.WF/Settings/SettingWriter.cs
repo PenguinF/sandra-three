@@ -29,29 +29,32 @@ namespace Sandra.UI.WF
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
-        private class CustomJsonTextWriter : JsonTextWriter
+        private class JsonPrettyPrinter : JsonTextWriter
         {
-            public CustomJsonTextWriter(TextWriter writer) : base(writer)
+            public JsonPrettyPrinter(TextWriter writer) : base(writer)
             {
+                Formatting = Formatting.Indented;
+                Indentation = 2;
+                IndentChar = ' ';
+            }
+
+            public override void Close()
+            {
+                // If pretty printing, end files with a newline character.
+                WriteWhitespace(Environment.NewLine);
+                base.Close();
             }
         }
 
         private readonly StringBuilder outputBuilder;
-        private readonly CustomJsonTextWriter jsonTextWriter;
+        private readonly JsonTextWriter jsonTextWriter;
 
-        public SettingWriter(bool indented)
+        public SettingWriter(bool compact)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
-            jsonTextWriter = new CustomJsonTextWriter(stringWriter);
-
-            if (indented)
-            {
-                jsonTextWriter.Formatting = Formatting.Indented;
-                jsonTextWriter.Indentation = 2;
-                jsonTextWriter.IndentChar = ' ';
-            }
+            jsonTextWriter = compact ? new JsonTextWriter(stringWriter) : new JsonPrettyPrinter(stringWriter);
         }
 
         public override void VisitBoolean(PBoolean value)
@@ -95,12 +98,6 @@ namespace Sandra.UI.WF
         /// </returns>
         public string Output()
         {
-            // If pretty printing, end files with a newline character.
-            if (jsonTextWriter.Formatting == Formatting.Indented)
-            {
-                jsonTextWriter.WriteWhitespace(Environment.NewLine);
-            }
-
             jsonTextWriter.Close();
             return outputBuilder.ToString();
         }
