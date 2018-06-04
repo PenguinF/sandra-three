@@ -154,9 +154,8 @@ namespace Sandra.UI.WF.Storage
 
                 foreach (var kv in map)
                 {
-                    SettingKey candidateKey = new SettingKey(kv.Key);
                     SettingProperty property;
-                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property))
+                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out property))
                     {
                         workingCopy.AddOrReplace(property, kv.Value);
                     }
