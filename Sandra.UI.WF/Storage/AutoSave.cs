@@ -41,7 +41,7 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
-        public static readonly int AutoSaveDelay = 500;
+        public static readonly int AutoSaveDelay = 5000;
 
         /// <summary>
         /// Gets the name of the file which indicates which of both auto-save files contains the latest data.
@@ -317,7 +317,14 @@ namespace Sandra.UI.WF.Storage
                 // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
                 if (!ct.IsCancellationRequested)
                 {
-                    await Task.Delay(AutoSaveDelay);
+                    try
+                    {
+                        await Task.Delay(AutoSaveDelay, ct);
+                    }
+                    catch
+                    {
+                        // If the task was cancelled, empty the queue before leaving this method.
+                    }
                 }
 
                 // Empty the queue, take the latest update from it.
