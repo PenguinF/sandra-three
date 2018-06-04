@@ -19,7 +19,6 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -53,8 +52,10 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
+#if DEBUG
             // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
             WriteToSourceDefaultSettingFile();
+#endif
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
@@ -125,15 +126,14 @@ namespace Sandra.UI.WF
             }
         }
 
-        [Conditional("DEBUG")]
+#if DEBUG
         private static void WriteToSourceDefaultSettingFile()
         {
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
 
-#if DEBUG
             DefaultSettings.WriteToFile(Path.Combine(devDir.FullName, "DefaultSettings.json"));
-#endif
         }
+#endif
     }
 }
