@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -46,9 +47,13 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="paragraphs"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// One or more strings in <paramref name="paragraphs"/> are null.
+        /// </exception>
         public SettingComment(params string[] paragraphs)
         {
             if (paragraphs == null) throw new ArgumentNullException(nameof(paragraphs));
+            if (paragraphs.Any(x => x == null)) throw new ArgumentException("At least one paragraph is null.", nameof(paragraphs));
             Paragraphs = paragraphs;
         }
 
@@ -58,9 +63,13 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="paragraphs"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// One or more strings in <paramref name="paragraphs"/> are null.
+        /// </exception>
         public SettingComment(IEnumerable<string> paragraphs)
         {
             if (paragraphs == null) throw new ArgumentNullException(nameof(paragraphs));
+            if (paragraphs.Any(x => x == null)) throw new ArgumentException("At least one paragraph is null.", nameof(paragraphs));
             Paragraphs = paragraphs;
         }
     }
