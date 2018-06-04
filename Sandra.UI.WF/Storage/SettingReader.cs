@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a single iteration of loading settings from a file.

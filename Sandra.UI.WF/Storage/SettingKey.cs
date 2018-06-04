@@ -19,7 +19,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a key for a setting value.

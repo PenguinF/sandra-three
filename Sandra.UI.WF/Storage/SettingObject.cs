@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a read-only collection of setting values (<see cref="PValue"/>) indexed by <see cref="SettingKey"/>.

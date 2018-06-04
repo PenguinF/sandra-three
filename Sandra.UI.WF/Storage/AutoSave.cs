@@ -25,7 +25,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Manages an auto-save file local to every non-roaming user.

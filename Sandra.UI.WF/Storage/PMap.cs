@@ -21,7 +21,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a read-only map of string keys onto <see cref="PValue"/>s.

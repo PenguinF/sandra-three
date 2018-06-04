@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a comment in a setting file.
