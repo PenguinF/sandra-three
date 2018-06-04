@@ -109,7 +109,7 @@ namespace Sandra.UI.WF
     /// Encapsulates the ICONINFO structure which is used by the Windows API.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct ICONINFO
+    internal struct ICONINFO
     {
         public bool fIcon;
         public int xHotspot;
