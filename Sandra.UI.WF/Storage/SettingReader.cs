@@ -156,10 +156,9 @@ namespace Sandra.UI.WF.Storage
                 {
                     SettingKey candidateKey = new SettingKey(kv.Key);
                     SettingProperty property;
-                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property)
-                        && property.IsValidValue(kv.Value))
+                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property))
                     {
-                        workingCopy.KeyValueMapping[candidateKey] = kv.Value;
+                        workingCopy.AddOrReplace(property, kv.Value);
                     }
                 }
             }

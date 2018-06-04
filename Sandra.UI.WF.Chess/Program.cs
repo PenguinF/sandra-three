@@ -69,10 +69,13 @@ namespace Sandra.UI.WF
             var defaultSettingsObject = DefaultSettings.Settings;
             foreach (var property in localSettingsCopy.Schema.AllProperties)
             {
+                // Copy by property name.
                 SettingProperty defaultSettingProperty;
-                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty))
+                PValue sourceValue;
+                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
+                    && defaultSettingsObject.TryGetPValue(defaultSettingProperty, out sourceValue))
                 {
-                    localSettingsCopy.AddOrReplace(property, defaultSettingsObject, defaultSettingProperty);
+                    localSettingsCopy.AddOrReplace(property, sourceValue);
                 }
             }
 
