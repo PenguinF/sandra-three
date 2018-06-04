@@ -159,6 +159,8 @@ namespace Sandra.UI.WF
                 Dock = DockStyle.Fill,
                 BoardWidth = Chess.Constants.SquareCount,
                 BoardHeight = Chess.Constants.SquareCount,
+                DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor),
+                LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor),
             };
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
