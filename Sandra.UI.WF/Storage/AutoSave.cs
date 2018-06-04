@@ -35,13 +35,13 @@ namespace Sandra.UI.WF.Storage
     public sealed class AutoSave
     {
         // These values seem to be recommended.
-        internal const int CharBufferSize = 1024;
-        internal const int FileStreamBufferSize = 4096;
+        private const int CharBufferSize = 1024;
+        private const int FileStreamBufferSize = 4096;
 
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
-        public const int AutoSaveDelay = 500;
+        public static readonly int AutoSaveDelay = 500;
 
         /// <summary>
         /// Gets the name of the file which indicates which of both auto-save files contains the latest data.
