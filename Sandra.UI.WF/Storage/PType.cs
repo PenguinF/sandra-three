@@ -16,7 +16,7 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a type of <see cref="PValue"/>, which controls the range of values that are possible.

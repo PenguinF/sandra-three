@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     public class SettingSchema
     {

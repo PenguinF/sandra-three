@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using Sandra.Chess;
+using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
 using System.Collections.Generic;

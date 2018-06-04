@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents a single iteration of loading settings from a file.
@@ -134,7 +134,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        public SettingCopy ReadWorkingCopy(SettingCopy workingCopy)
+        public void ReadWorkingCopy(SettingCopy workingCopy)
         {
             var tokenType = ReadSkipComments();
             if (tokenType != JsonToken.None)
@@ -154,17 +154,13 @@ namespace Sandra.UI.WF
 
                 foreach (var kv in map)
                 {
-                    SettingKey candidateKey = new SettingKey(kv.Key);
                     SettingProperty property;
-                    if (workingCopy.Schema.TryGetProperty(candidateKey, out property)
-                        && property.IsValidValue(kv.Value))
+                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out property))
                     {
-                        workingCopy.KeyValueMapping[candidateKey] = kv.Value;
+                        workingCopy.AddOrReplace(property, kv.Value);
                     }
                 }
             }
-
-            return workingCopy;
         }
     }
 }

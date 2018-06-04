@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Represents the mutable working copy of a <see cref="SettingObject"/>.
@@ -35,7 +35,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        internal readonly Dictionary<SettingKey, PValue> KeyValueMapping;
+        private readonly Dictionary<SettingKey, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
@@ -68,12 +68,10 @@ namespace Sandra.UI.WF
         /// </exception>
         public void AddOrReplace<TValue>(SettingProperty<TValue> property, TValue value)
         {
+            if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            if (Schema.ContainsProperty(property))
-            {
-                KeyValueMapping[property.Name] = property.PType.GetPValue(value);
-            }
+            AddOrReplace(property, property.PType.GetPValue(value));
         }
 
         /// <summary>
@@ -82,27 +80,20 @@ namespace Sandra.UI.WF
         /// <param name="property">
         /// The property for which to add or replace the value.
         /// </param>
-        /// <param name="source">
-        /// The source <see cref="SettingObject"/> to take the value from.
-        /// </param>
-        /// <param name="sourceProperty">
-        /// The source <see cref="SettingProperty"/> to take the value from.
+        /// <param name="value">
+        /// The new value to associate with the property.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="property"/> and/or <paramref name="source"/> and/or <paramref name="sourceProperty"/> are null.
+        /// <paramref name="property"/> and/or <paramref name="value"/> are null.
         /// </exception>
-        public void AddOrReplace(SettingProperty property, SettingObject source, SettingProperty sourceProperty)
+        public void AddOrReplace(SettingProperty property, PValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
-            if (source == null) throw new ArgumentNullException(nameof(source));
-            if (sourceProperty == null) throw new ArgumentNullException(nameof(sourceProperty));
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            PValue sourceValue;
-            if (Schema.ContainsProperty(property)
-                && source.TryGetPValue(sourceProperty, out sourceValue)
-                && property.IsValidValue(sourceValue))
+            if (Schema.ContainsProperty(property) && property.IsValidValue(value))
             {
-                KeyValueMapping[property.Name] = sourceValue;
+                KeyValueMapping[property.Name] = value;
             }
         }
 

@@ -18,7 +18,7 @@
  *********************************************************************************/
 using System.IO;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Specialized PType that only accepts a strings that are legal file names.

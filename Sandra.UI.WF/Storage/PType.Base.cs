@@ -19,7 +19,7 @@
 using System;
 using System.Numerics;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     public static partial class PType
     {

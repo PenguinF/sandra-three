@@ -64,28 +64,28 @@
     <Compile Include="RichTextBox\UpdatableRichTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Settings\AutoSave.cs" />
-    <Compile Include="Settings\FileNameType.cs" />
-    <Compile Include="Settings\PersistableFormState.cs" />
-    <Compile Include="Settings\PList.cs" />
-    <Compile Include="Settings\PMap.cs" />
-    <Compile Include="Settings\PType.Base.cs" />
-    <Compile Include="Settings\PType.Common.cs" />
-    <Compile Include="Settings\PType.cs" />
-    <Compile Include="Settings\PValue.cs" />
-    <Compile Include="Settings\SettingComment.cs" />
-    <Compile Include="Settings\SettingCopy.cs" />
-    <Compile Include="Settings\SettingKey.cs" />
-    <Compile Include="Settings\SettingObject.cs" />
-    <Compile Include="Settings\SettingProperty.cs" />
-    <Compile Include="Settings\SettingReader.cs" />
-    <Compile Include="Settings\SettingSchema.cs" />
-    <Compile Include="Settings\SettingsFile.cs" />
-    <Compile Include="Settings\SettingWriter.cs" />
-    <Compile Include="Settings\SubFolderNameType.cs" />
     <Compile Include="SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Storage\AutoSave.cs" />
+    <Compile Include="Storage\FileNameType.cs" />
+    <Compile Include="Storage\PersistableFormState.cs" />
+    <Compile Include="Storage\PList.cs" />
+    <Compile Include="Storage\PMap.cs" />
+    <Compile Include="Storage\PType.Base.cs" />
+    <Compile Include="Storage\PType.Common.cs" />
+    <Compile Include="Storage\PType.cs" />
+    <Compile Include="Storage\PValue.cs" />
+    <Compile Include="Storage\SettingComment.cs" />
+    <Compile Include="Storage\SettingCopy.cs" />
+    <Compile Include="Storage\SettingKey.cs" />
+    <Compile Include="Storage\SettingObject.cs" />
+    <Compile Include="Storage\SettingProperty.cs" />
+    <Compile Include="Storage\SettingReader.cs" />
+    <Compile Include="Storage\SettingSchema.cs" />
+    <Compile Include="Storage\SettingsFile.cs" />
+    <Compile Include="Storage\SettingWriter.cs" />
+    <Compile Include="Storage\SubFolderNameType.cs" />
     <Compile Include="UIAction\KeyUIActionMapping.cs" />
     <Compile Include="UIAction\UIAction.cs" />
     <Compile Include="UIAction\UIActionBinding.cs" />

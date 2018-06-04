@@ -18,7 +18,7 @@
  *********************************************************************************/
 using System.Numerics;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Base interface for all types of values which are persistable.

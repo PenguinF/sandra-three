@@ -18,7 +18,7 @@
  *********************************************************************************/
 using System;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Contains the declaration of a setting property, but doesn't specify its type.

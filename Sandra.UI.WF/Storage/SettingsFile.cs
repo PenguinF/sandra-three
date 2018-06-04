@@ -22,7 +22,7 @@ using System;
 using System.IO;
 using System.Security;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI.WF.Storage
 {
     /// <summary>
     /// Reads settings from a file.
