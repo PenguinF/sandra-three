@@ -19,6 +19,7 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
+using System.Drawing;
 using System.IO;
 using System.Text;
 
@@ -124,6 +125,24 @@ namespace Sandra.UI.WF
 
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
+
+        private const string DarkSquareColorDescription
+            = "The color of the dark squares. This value must be in the HTML color format, "
+            + "for example \"#808000\" is the Olive color.";
+
+        internal static readonly SettingProperty<Color> DarkSquareColor = new SettingProperty<Color>(
+            new SettingKey(nameof(DarkSquareColor).ToSnakeCase()),
+            OpaqueColorType.Instance,
+            new SettingComment(DarkSquareColorDescription));
+
+        private const string LightSquareColorDescription
+            = "The color of the light squares. This value must be in the HTML color format, "
+            + "for example \"#F0E68C\" is a Khaki color.";
+
+        internal static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
+            new SettingKey(nameof(LightSquareColor).ToSnakeCase()),
+            OpaqueColorType.Instance,
+            new SettingComment(LightSquareColorDescription));
     }
 
     internal static class Settings
@@ -148,6 +167,8 @@ namespace Sandra.UI.WF
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
+                SettingKeys.DarkSquareColor,
+                SettingKeys.LightSquareColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
@@ -155,6 +176,8 @@ namespace Sandra.UI.WF
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
+                SettingKeys.DarkSquareColor,
+                SettingKeys.LightSquareColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
@@ -164,8 +187,8 @@ namespace Sandra.UI.WF
 
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
-
-            // 10 plies == 5 moves.
+            defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
+            defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
             defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings;
