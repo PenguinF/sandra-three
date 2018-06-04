@@ -134,7 +134,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public SettingCopy ReadWorkingCopy(SettingCopy workingCopy)
+        public void ReadWorkingCopy(SettingCopy workingCopy)
         {
             var tokenType = ReadSkipComments();
             if (tokenType != JsonToken.None)
@@ -162,8 +162,6 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
             }
-
-            return workingCopy;
         }
     }
 }
