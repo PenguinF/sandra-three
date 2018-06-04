@@ -113,6 +113,9 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The value associated with the specified property is not of the target type.
+        /// </exception>
         /// <exception cref="KeyNotFoundException">
         /// The property does not exist.
         /// </exception>
@@ -120,11 +123,17 @@ namespace Sandra.UI.WF.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            TValue value;
-            if (!TryGetValue(property, out value))
+            if (!Map.ContainsKey(property.Name.Key))
             {
                 throw new KeyNotFoundException($"Key {property.Name} does not exist in the {nameof(SettingObject)}.");
             }
+
+            TValue value;
+            if (!TryGetValue(property, out value))
+            {
+                throw new ArgumentException($"The value of {property.Name} is not of the target type {typeof(TValue).FullName}.");
+            }
+
             return value;
         }
 
