@@ -46,7 +46,7 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentException">
         /// <paramref name="cursorIconHandle"/> is <see cref="IntPtr.Zero"/>.
         /// </exception>
-        public CursorFromHandle(IntPtr cursorIconHandle)
+        internal CursorFromHandle(IntPtr cursorIconHandle)
         {
             this.cursorIconHandle = cursorIconHandle;
             Cursor = new Cursor(cursorIconHandle);
