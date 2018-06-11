@@ -57,7 +57,7 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> is null.
         /// </exception>
-        public bool TryGetPValue(SettingProperty property, out PValue value)
+        public bool TryGetRawValue(SettingProperty property, out PValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
@@ -92,7 +92,7 @@ namespace Sandra.UI.WF.Storage
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
             PValue pValue;
-            if (TryGetPValue(property, out pValue)
+            if (TryGetRawValue(property, out pValue)
                 && property.TryGetValidValue(pValue, out value))
             {
                 return true;

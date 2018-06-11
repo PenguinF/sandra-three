@@ -21,43 +21,20 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Text;
 
 namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal const string DefaultAppDataSubFolderName = "SandraChess";
+        public static readonly string DefaultAppDataSubFolderName = "SandraChess";
 
-        internal const string DefaultLocalPreferencesFileName = "Preferences.settings";
-
-        /// <summary>
-        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
-        /// </summary>
-        private static string ToSnakeCase(this string pascalCaseIdentifier)
-        {
-            // Start with converting to lower case.
-            StringBuilder snakeCase = new StringBuilder(pascalCaseIdentifier.ToLowerInvariant());
-
-            // Start at the end so the loop index doesn't need an update after insertion of an underscore.
-            // Stop at index 1, to prevent underscore before the first letter.
-            for (int i = pascalCaseIdentifier.Length - 1; i > 0; --i)
-            {
-                // Insert underscores before letters that have changed case.
-                if (pascalCaseIdentifier[i] != snakeCase[i])
-                {
-                    snakeCase.Insert(i, '_');
-                }
-            }
-
-            return snakeCase.ToString();
-        }
+        public static readonly string DefaultLocalPreferencesFileName = "Preferences.settings";
 
         private static string localApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
             $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
 
-        internal static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
+        public static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
             "There are generally two copies of this file, one in the directory where "
             + Path.GetFileName(typeof(Program).Assembly.Location)
             + " is located ("
@@ -69,42 +46,42 @@ namespace Sandra.UI.WF
             + "In the majority of cases, only the latter file is changed, while the default "
             + "settings serve as a template.");
 
-        private const string AppDataSubFolderNameDescription
+        private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "
             + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
 
-        internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
+        public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(AppDataSubFolderNameDescription));
 
-        private const string LocalPreferencesFileNameDescription
+        private static readonly string LocalPreferencesFileNameDescription
             = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
 
-        internal static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
-            new SettingKey(nameof(LocalPreferencesFileName).ToSnakeCase()),
+        public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
 
-        internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
-            new SettingKey(nameof(Window).ToSnakeCase()),
+        public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
-        internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
-            new SettingKey(nameof(Notation).ToSnakeCase()),
+        public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
-        internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
-            new SettingKey(nameof(Zoom).ToSnakeCase()),
+        public static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
             PType.RichTextZoomFactor.Instance);
 
         private const string FastNavigationPlyCountDescription
             = "The number of plies (=half moves) to move forward of backward in a game for "
             + "fast navigation. This value must be between 2 and 40.";
 
-        internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
-            new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
+        public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
 
@@ -126,21 +103,21 @@ namespace Sandra.UI.WF
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        private const string DarkSquareColorDescription
+        private static readonly string DarkSquareColorDescription
             = "The color of the dark squares. This value must be in the HTML color format, "
             + "for example \"#808000\" is the Olive color.";
 
-        internal static readonly SettingProperty<Color> DarkSquareColor = new SettingProperty<Color>(
-            new SettingKey(nameof(DarkSquareColor).ToSnakeCase()),
+        public static readonly SettingProperty<Color> DarkSquareColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DarkSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(DarkSquareColorDescription));
 
-        private const string LightSquareColorDescription
+        private static readonly string LightSquareColorDescription
             = "The color of the light squares. This value must be in the HTML color format, "
             + "for example \"#F0E68C\" is a Khaki color.";
 
-        internal static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
-            new SettingKey(nameof(LightSquareColor).ToSnakeCase()),
+        public static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(LightSquareColorDescription));
     }
