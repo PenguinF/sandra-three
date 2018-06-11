@@ -66,20 +66,6 @@ namespace Sandra.UI.WF
             // Create a working copy with correct schema first.
             SettingCopy localSettingsCopy = new SettingCopy(Settings.LocalSettingsSchema);
 
-            // Copy from default settings.
-            var defaultSettingsObject = DefaultSettings.Settings;
-            foreach (var property in localSettingsCopy.Schema.AllProperties)
-            {
-                // Copy by property name.
-                SettingProperty defaultSettingProperty;
-                PValue sourceValue;
-                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
-                    && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out sourceValue))
-                {
-                    localSettingsCopy.AddOrReplaceRaw(property, sourceValue);
-                }
-            }
-
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
                 Path.Combine(
@@ -108,7 +94,12 @@ namespace Sandra.UI.WF
             => DefaultSettings.Settings.GetValue(property);
 
         internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
-            => LocalSettings.Settings.GetValue(property);
+        {
+            TValue result;
+            return LocalSettings.Settings.TryGetValue(property, out result)
+                ? result
+                : GetDefaultSetting(property);
+        }
 
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
