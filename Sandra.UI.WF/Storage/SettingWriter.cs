@@ -146,8 +146,6 @@ namespace Sandra.UI.WF.Storage
                 this.schema = schema;
                 newLine = writer.NewLine;
                 Formatting = Formatting.Indented;
-                Indentation = 2;
-                IndentChar = ' ';
 
                 // Write schema description, if any.
                 foreach (string commentLine in GetCommentLines(schema.Description, 0))
