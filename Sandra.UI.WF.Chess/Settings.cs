@@ -20,7 +20,6 @@ using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
 using System.IO;
-using System.Text;
 
 namespace Sandra.UI.WF
 {
@@ -29,28 +28,6 @@ namespace Sandra.UI.WF
         internal const string DefaultAppDataSubFolderName = "SandraChess";
 
         internal const string DefaultLocalPreferencesFileName = "Preferences.settings";
-
-        /// <summary>
-        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
-        /// </summary>
-        private static string ToSnakeCase(this string pascalCaseIdentifier)
-        {
-            // Start with converting to lower case.
-            StringBuilder snakeCase = new StringBuilder(pascalCaseIdentifier.ToLowerInvariant());
-
-            // Start at the end so the loop index doesn't need an update after insertion of an underscore.
-            // Stop at index 1, to prevent underscore before the first letter.
-            for (int i = pascalCaseIdentifier.Length - 1; i > 0; --i)
-            {
-                // Insert underscores before letters that have changed case.
-                if (pascalCaseIdentifier[i] != snakeCase[i])
-                {
-                    snakeCase.Insert(i, '_');
-                }
-            }
-
-            return snakeCase.ToString();
-        }
 
         private static string localApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
@@ -74,7 +51,7 @@ namespace Sandra.UI.WF
             + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
 
         internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(nameof(AppDataSubFolderName).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(AppDataSubFolderNameDescription));
 
@@ -82,20 +59,20 @@ namespace Sandra.UI.WF
             = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
 
         internal static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
-            new SettingKey(nameof(LocalPreferencesFileName).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
 
         internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
-            new SettingKey(nameof(Window).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
         internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
-            new SettingKey(nameof(Notation).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
         internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
-            new SettingKey(nameof(Zoom).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
             PType.RichTextZoomFactor.Instance);
 
         private const string FastNavigationPlyCountDescription
@@ -103,7 +80,7 @@ namespace Sandra.UI.WF
             + "fast navigation. This value must be between 2 and 40.";
 
         internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
-            new SettingKey(nameof(FastNavigationPlyCount).ToSnakeCase()),
+            new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
 
