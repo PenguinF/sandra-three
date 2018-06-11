@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * OptionValue.cs
+ * Union.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -29,19 +29,19 @@ namespace SysExtensions
     /// <typeparam name="T2">
     /// The second type of the value.
     /// </typeparam>
-    public abstract class OptionValue<T1, T2>
+    public abstract class Union<T1, T2>
     {
-        private OptionValue() { }
+        private Union() { }
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2}"/> with a value of the first type.
+        /// Creates a new <see cref="Union{T1, T2}"/> with a value of the first type.
         /// </summary>
-        public static OptionValue<T1, T2> Option1(T1 value) => new ValueOfType1(value);
+        public static Union<T1, T2> Option1(T1 value) => new ValueOfType1(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2}"/> with a value of the second type.
+        /// Creates a new <see cref="Union{T1, T2}"/> with a value of the second type.
         /// </summary>
-        public static OptionValue<T1, T2> Option2(T2 value) => new ValueOfType2(value);
+        public static Union<T1, T2> Option2(T2 value) => new ValueOfType2(value);
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -56,7 +56,7 @@ namespace SysExtensions
         /// The <see cref="Action"/> to invoke if no action is specified for the type of the value.
         /// If both <paramref name="whenOption1"/> and <paramref name="whenOption2"/> are given, this parameter is not used.
         /// </param>
-        public abstract void Case(
+        public abstract void Match(
             Action<T1> whenOption1 = null,
             Action<T2> whenOption2 = null,
             Action otherwise = null);
@@ -80,12 +80,12 @@ namespace SysExtensions
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
         /// </returns>
-        public abstract TResult Case<TResult>(
+        public abstract TResult Match<TResult>(
             Func<T1, TResult> whenOption1 = null,
             Func<T2, TResult> whenOption2 = null,
             Func<TResult> otherwise = null);
 
-        private sealed class ValueOfType1 : OptionValue<T1, T2>
+        private sealed class ValueOfType1 : Union<T1, T2>
         {
             public readonly T1 Value;
 
@@ -94,7 +94,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action otherwise = null)
@@ -103,7 +103,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<TResult> otherwise = null)
@@ -112,7 +112,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType2 : OptionValue<T1, T2>
+        private sealed class ValueOfType2 : Union<T1, T2>
         {
             public readonly T2 Value;
 
@@ -121,7 +121,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action otherwise = null)
@@ -130,7 +130,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<TResult> otherwise = null)
@@ -152,24 +152,24 @@ namespace SysExtensions
     /// <typeparam name="T3">
     /// The third type of the value.
     /// </typeparam>
-    public abstract class OptionValue<T1, T2, T3>
+    public abstract class Union<T1, T2, T3>
     {
-        private OptionValue() { }
+        private Union() { }
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3}"/> with a value of the first type.
+        /// Creates a new <see cref="Union{T1, T2, T3}"/> with a value of the first type.
         /// </summary>
-        public static OptionValue<T1, T2, T3> Option1(T1 value) => new ValueOfType1(value);
+        public static Union<T1, T2, T3> Option1(T1 value) => new ValueOfType1(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3}"/> with a value of the second type.
+        /// Creates a new <see cref="Union{T1, T2, T3}"/> with a value of the second type.
         /// </summary>
-        public static OptionValue<T1, T2, T3> Option2(T2 value) => new ValueOfType2(value);
+        public static Union<T1, T2, T3> Option2(T2 value) => new ValueOfType2(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3}"/> with a value of the third type.
+        /// Creates a new <see cref="Union{T1, T2, T3}"/> with a value of the third type.
         /// </summary>
-        public static OptionValue<T1, T2, T3> Option3(T3 value) => new ValueOfType3(value);
+        public static Union<T1, T2, T3> Option3(T3 value) => new ValueOfType3(value);
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -188,7 +188,7 @@ namespace SysExtensions
         /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, and <paramref name="whenOption3"/> are given,
         /// this parameter is not used.
         /// </param>
-        public abstract void Case(
+        public abstract void Match(
             Action<T1> whenOption1 = null,
             Action<T2> whenOption2 = null,
             Action<T3> whenOption3 = null,
@@ -217,13 +217,13 @@ namespace SysExtensions
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
         /// </returns>
-        public abstract TResult Case<TResult>(
+        public abstract TResult Match<TResult>(
             Func<T1, TResult> whenOption1 = null,
             Func<T2, TResult> whenOption2 = null,
             Func<T3, TResult> whenOption3 = null,
             Func<TResult> otherwise = null);
 
-        private sealed class ValueOfType1 : OptionValue<T1, T2, T3>
+        private sealed class ValueOfType1 : Union<T1, T2, T3>
         {
             public readonly T1 Value;
 
@@ -232,7 +232,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -242,7 +242,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -252,7 +252,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType2 : OptionValue<T1, T2, T3>
+        private sealed class ValueOfType2 : Union<T1, T2, T3>
         {
             public readonly T2 Value;
 
@@ -261,7 +261,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -271,7 +271,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -281,7 +281,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType3 : OptionValue<T1, T2, T3>
+        private sealed class ValueOfType3 : Union<T1, T2, T3>
         {
             public readonly T3 Value;
 
@@ -290,7 +290,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -300,7 +300,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -326,29 +326,29 @@ namespace SysExtensions
     /// <typeparam name="T4">
     /// The fourth type of the value.
     /// </typeparam>
-    public abstract class OptionValue<T1, T2, T3, T4>
+    public abstract class Union<T1, T2, T3, T4>
     {
-        private OptionValue() { }
+        private Union() { }
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3, T4}"/> with a value of the first type.
+        /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the first type.
         /// </summary>
-        public static OptionValue<T1, T2, T3, T4> Option1(T1 value) => new ValueOfType1(value);
+        public static Union<T1, T2, T3, T4> Option1(T1 value) => new ValueOfType1(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3, T4}"/> with a value of the second type.
+        /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the second type.
         /// </summary>
-        public static OptionValue<T1, T2, T3, T4> Option2(T2 value) => new ValueOfType2(value);
+        public static Union<T1, T2, T3, T4> Option2(T2 value) => new ValueOfType2(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3, T4}"/> with a value of the third type.
+        /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the third type.
         /// </summary>
-        public static OptionValue<T1, T2, T3, T4> Option3(T3 value) => new ValueOfType3(value);
+        public static Union<T1, T2, T3, T4> Option3(T3 value) => new ValueOfType3(value);
 
         /// <summary>
-        /// Creates a new <see cref="OptionValue{T1, T2, T3, T4}"/> with a value of the fourth type.
+        /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the fourth type.
         /// </summary>
-        public static OptionValue<T1, T2, T3, T4> Option4(T4 value) => new ValueOfType4(value);
+        public static Union<T1, T2, T3, T4> Option4(T4 value) => new ValueOfType4(value);
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -370,7 +370,7 @@ namespace SysExtensions
         /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, <paramref name="whenOption3"/>,
         /// and <paramref name="whenOption4"/> are given, this parameter is not used.
         /// </param>
-        public abstract void Case(
+        public abstract void Match(
             Action<T1> whenOption1 = null,
             Action<T2> whenOption2 = null,
             Action<T3> whenOption3 = null,
@@ -403,14 +403,14 @@ namespace SysExtensions
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
         /// </returns>
-        public abstract TResult Case<TResult>(
+        public abstract TResult Match<TResult>(
             Func<T1, TResult> whenOption1 = null,
             Func<T2, TResult> whenOption2 = null,
             Func<T3, TResult> whenOption3 = null,
             Func<T4, TResult> whenOption4 = null,
             Func<TResult> otherwise = null);
 
-        private sealed class ValueOfType1 : OptionValue<T1, T2, T3, T4>
+        private sealed class ValueOfType1 : Union<T1, T2, T3, T4>
         {
             public readonly T1 Value;
 
@@ -419,7 +419,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -430,7 +430,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -441,7 +441,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType2 : OptionValue<T1, T2, T3, T4>
+        private sealed class ValueOfType2 : Union<T1, T2, T3, T4>
         {
             public readonly T2 Value;
 
@@ -450,7 +450,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -461,7 +461,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -472,7 +472,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType3 : OptionValue<T1, T2, T3, T4>
+        private sealed class ValueOfType3 : Union<T1, T2, T3, T4>
         {
             public readonly T3 Value;
 
@@ -481,7 +481,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -492,7 +492,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,
@@ -503,7 +503,7 @@ namespace SysExtensions
                 : default(TResult);
         }
 
-        private sealed class ValueOfType4 : OptionValue<T1, T2, T3, T4>
+        private sealed class ValueOfType4 : Union<T1, T2, T3, T4>
         {
             public readonly T4 Value;
 
@@ -512,7 +512,7 @@ namespace SysExtensions
                 Value = value;
             }
 
-            public override void Case(
+            public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
                 Action<T3> whenOption3 = null,
@@ -523,7 +523,7 @@ namespace SysExtensions
                 else if (otherwise != null) otherwise();
             }
 
-            public override TResult Case<TResult>(
+            public override TResult Match<TResult>(
                 Func<T1, TResult> whenOption1 = null,
                 Func<T2, TResult> whenOption2 = null,
                 Func<T3, TResult> whenOption3 = null,

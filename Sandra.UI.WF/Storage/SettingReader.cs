@@ -157,7 +157,7 @@ namespace Sandra.UI.WF.Storage
                     SettingProperty property;
                     if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out property))
                     {
-                        workingCopy.AddOrReplace(property, kv.Value);
+                        workingCopy.AddOrReplaceRaw(property, kv.Value);
                     }
                 }
             }

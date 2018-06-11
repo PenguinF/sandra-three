@@ -4,8 +4,8 @@ Sandra 3 was inspired by ideas from various sources. They all deserve bountiful 
 Disclaimer:
 I did not copy any code from either of these sources. Feel free to copy mine though, as long as you keep in mind that I attached the Apache License to it, to ensure that:
 
-1) Even though I wrote the code, using it properly remains your responsibility.
-2) You cannot claim the code as your intellectual property, denying me the right to use my own code.
+1) Even though I wrote the code, using it remains your responsibility.
+2) You cannot claim the code as your intellectual property, denying me the right to use and modify it.
 
 
 Here then are the credits:
@@ -30,6 +30,9 @@ How to generate sliding moves using magic multipliers (dead link unfortunately):
 
 Royalty free globe image:
     https://www.iconfinder.com/icons/186398/globe_online_world_icon
+
+Roslyn compiler for their sensible visitor implementation, among other things:
+    http://source.roslyn.codeplex.com/
 
 
 There is also no way I could have done this without proper tools and documentation:

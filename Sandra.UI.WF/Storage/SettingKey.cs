@@ -18,6 +18,7 @@
  *********************************************************************************/
 using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -59,6 +60,28 @@ namespace Sandra.UI.WF.Storage
             if (ReferenceEquals(null, first)) return !ReferenceEquals(null, second);
             if (ReferenceEquals(null, second)) return true;
             return first.Key != second.Key;
+        }
+
+        /// <summary>
+        /// Converts a Pascal case identifier to snake case for use as a key in a settings file.
+        /// </summary>
+        public static string ToSnakeCase(string pascalCaseIdentifier)
+        {
+            // Start with converting to lower case.
+            StringBuilder snakeCase = new StringBuilder(pascalCaseIdentifier.ToLowerInvariant());
+
+            // Start at the end so the loop index doesn't need an update after insertion of an underscore.
+            // Stop at index 1, to prevent underscore before the first letter.
+            for (int i = pascalCaseIdentifier.Length - 1; i > 0; --i)
+            {
+                // Insert underscores before letters that have changed case.
+                if (pascalCaseIdentifier[i] != snakeCase[i])
+                {
+                    snakeCase.Insert(i, '_');
+                }
+            }
+
+            return snakeCase.ToString();
         }
     }
 }

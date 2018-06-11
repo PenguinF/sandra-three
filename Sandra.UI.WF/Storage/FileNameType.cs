@@ -21,7 +21,7 @@ using System.IO;
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Specialized PType that only accepts a strings that are legal file names.
+    /// Specialized PType that only accepts strings that are legal file names.
     /// </summary>
     public sealed class FileNameType : PType.Filter<string>
     {

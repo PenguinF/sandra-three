@@ -19,7 +19,6 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -53,8 +52,10 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
+#if DEBUG
             // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
             WriteToSourceDefaultSettingFile();
+#endif
 
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
@@ -64,20 +65,6 @@ namespace Sandra.UI.WF
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
             SettingCopy localSettingsCopy = new SettingCopy(Settings.LocalSettingsSchema);
-
-            // Copy from default settings.
-            var defaultSettingsObject = DefaultSettings.Settings;
-            foreach (var property in localSettingsCopy.Schema.AllProperties)
-            {
-                // Copy by property name.
-                SettingProperty defaultSettingProperty;
-                PValue sourceValue;
-                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
-                    && defaultSettingsObject.TryGetPValue(defaultSettingProperty, out sourceValue))
-                {
-                    localSettingsCopy.AddOrReplace(property, sourceValue);
-                }
-            }
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
@@ -107,7 +94,12 @@ namespace Sandra.UI.WF
             => DefaultSettings.Settings.GetValue(property);
 
         internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
-            => LocalSettings.Settings.GetValue(property);
+        {
+            TValue result;
+            return LocalSettings.Settings.TryGetValue(property, out result)
+                ? result
+                : GetDefaultSetting(property);
+        }
 
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
@@ -125,15 +117,14 @@ namespace Sandra.UI.WF
             }
         }
 
-        [Conditional("DEBUG")]
+#if DEBUG
         private static void WriteToSourceDefaultSettingFile()
         {
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
 
-#if DEBUG
             DefaultSettings.WriteToFile(Path.Combine(devDir.FullName, "DefaultSettings.json"));
-#endif
         }
+#endif
     }
 }
