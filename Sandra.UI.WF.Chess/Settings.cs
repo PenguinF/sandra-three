@@ -25,15 +25,15 @@ namespace Sandra.UI.WF
 {
     internal static class SettingKeys
     {
-        internal const string DefaultAppDataSubFolderName = "SandraChess";
+        public static readonly string DefaultAppDataSubFolderName = "SandraChess";
 
-        internal const string DefaultLocalPreferencesFileName = "Preferences.settings";
+        public static readonly string DefaultLocalPreferencesFileName = "Preferences.settings";
 
         private static string localApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
             $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
 
-        internal static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
+        public static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
             "There are generally two copies of this file, one in the directory where "
             + Path.GetFileName(typeof(Program).Assembly.Location)
             + " is located ("
@@ -45,33 +45,33 @@ namespace Sandra.UI.WF
             + "In the majority of cases, only the latter file is changed, while the default "
             + "settings serve as a template.");
 
-        private const string AppDataSubFolderNameDescription
+        private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "
             + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
 
-        internal static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
+        public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(AppDataSubFolderNameDescription));
 
-        private const string LocalPreferencesFileNameDescription
+        private static readonly string LocalPreferencesFileNameDescription
             = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
 
-        internal static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
+        public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
 
-        internal static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
+        public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
-        internal static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
+        public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
-        internal static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
+        public static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
             PType.RichTextZoomFactor.Instance);
 
@@ -79,7 +79,7 @@ namespace Sandra.UI.WF
             = "The number of plies (=half moves) to move forward of backward in a game for "
             + "fast navigation. This value must be between 2 and 40.";
 
-        internal static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
+        public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
             FastNavigationPlyCountRange.Instance,
             new SettingComment(FastNavigationPlyCountDescription));
