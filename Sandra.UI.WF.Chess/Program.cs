@@ -74,7 +74,7 @@ namespace Sandra.UI.WF
                 SettingProperty defaultSettingProperty;
                 PValue sourceValue;
                 if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
-                    && defaultSettingsObject.TryGetPValue(defaultSettingProperty, out sourceValue))
+                    && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out sourceValue))
                 {
                     localSettingsCopy.AddOrReplace(property, sourceValue);
                 }
