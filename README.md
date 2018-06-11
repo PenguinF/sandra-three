@@ -1,9 +1,22 @@
 # sandra-three
 Third incarnation of a chess UI for Windows 7 and higher.
 
-Aim of this project is twofold. The reason I put this on github and why I documented things so heavily is to show what can be achieved with Windows Forms controls and GDI+ in an ever increasing flood of new APIs, tools and languages. If this 25 year old technology is the right tool for some job, then its age should not be a reason to reject it.
+Main design principle is to have a fluid interface, in which everything should 'just work'. This has led to various complex features which should be hardly noticable, but without which the application feels clumsy:
 
-My personal goal is to research what an ideal chess UI would look and feel like to me.
+(∙) Windows click or snap together when moved around.
+(∙) There are hardly any modal dialogs. For example, choosing a promotion piece is done by hovering over one of the four quadrants of the promotion square.
+(∙) Appropriate effects for special types of moves.
+(∙) All text is localized. There's a list of available languages under the globe icon. Move notation is localized too. If necessary, there's always the option to switch to PGN.
+(∙) The session is auto-saved. When restarting the application, it continues exactly where it left off. Even after a system crash or power failure. [Work in progress.]
+(∙) User preferences are live: modified preferences are applied immediately, without requiring an application restart. [Work in progress.]
+(∙) Different modes of making moves.
+(∙) Everything is accessible by keyboard. [Work in progress.]
+(∙) Pieces can be picked up, and are drawn correctly no matter where the mouse is on the screen.
+(∙) Clicking on a move in the moves list navigates to the corresponding position in the game.
+(∙) A screenshot of a diagram can be copied to the clipboard with Ctrl+C or by using the corresponding menu item.
+(∙) Turning the mouse wheel, or pressing the Ctrl++ and Ctrl+- keyboard shortcuts will zoom in and out.
+
+Version 1.0 will be released when all abovementioned works-in-progress have been completed.
 
 ***
 
