@@ -71,7 +71,7 @@ namespace Sandra.UI.WF.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            AddOrReplace(property, property.PType.GetPValue(value));
+            AddOrReplaceRaw(property, property.PType.GetPValue(value));
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="property"/> and/or <paramref name="value"/> are null.
         /// </exception>
-        public void AddOrReplace(SettingProperty property, PValue value)
+        public void AddOrReplaceRaw(SettingProperty property, PValue value)
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));

@@ -76,7 +76,7 @@ namespace Sandra.UI.WF
                 if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
                     && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out sourceValue))
                 {
-                    localSettingsCopy.AddOrReplace(property, sourceValue);
+                    localSettingsCopy.AddOrReplaceRaw(property, sourceValue);
                 }
             }
 
