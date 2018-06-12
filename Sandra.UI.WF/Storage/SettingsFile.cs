@@ -74,6 +74,7 @@ namespace Sandra.UI.WF.Storage
 
             try
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(absoluteFilePath));
                 string fileText = File.ReadAllText(absoluteFilePath);
                 workingCopy.LoadFromText(new StringReader(fileText));
             }
