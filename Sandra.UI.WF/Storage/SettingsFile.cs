@@ -117,6 +117,23 @@ namespace Sandra.UI.WF.Storage
             Settings = workingCopy.Commit();
         }
 
+        private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
+
+        /// <summary>
+        /// Weak event which occurs after the <see cref="Settings"/> have been updated in the file.
+        /// </summary>
+        public event Action<object, EventArgs> SettingsChanged
+        {
+            add
+            {
+                event_SettingsChanged.AddListener(value);
+            }
+            remove
+            {
+                event_SettingsChanged.RemoveListener(value);
+            }
+        }
+
         /// <summary>
         /// Attempts to overwrite the setting file with the current values in <see cref="Settings"/>.
         /// </summary>
