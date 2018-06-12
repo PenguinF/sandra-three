@@ -72,6 +72,13 @@ namespace Sandra.UI.WF.Storage
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
+            Load(absoluteFilePath, workingCopy);
+
+            return new SettingsFile(absoluteFilePath, workingCopy.Commit());
+        }
+
+        private static void Load(string absoluteFilePath, SettingCopy workingCopy)
+        {
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(absoluteFilePath));
@@ -83,8 +90,6 @@ namespace Sandra.UI.WF.Storage
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
-
-            return new SettingsFile(absoluteFilePath, workingCopy.Commit());
         }
 
         /// <summary>
