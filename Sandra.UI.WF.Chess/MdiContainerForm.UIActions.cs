@@ -125,7 +125,10 @@ namespace Sandra.UI.WF
                             }
                         }
 
-                        exception = SettingsFile.WriteToFile(localSettingsExample.Commit(), Program.LocalSettings.AbsoluteFilePath);
+                        exception = SettingsFile.WriteToFile(
+                            localSettingsExample.Commit(),
+                            Program.LocalSettings.AbsoluteFilePath,
+                            commentOutProperties: true);
                     }
 
                     if (exception != null)

@@ -123,7 +123,7 @@ namespace Sandra.UI.WF
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
 
-            SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"));
+            SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"), false);
         }
 #endif
     }

@@ -138,12 +138,15 @@ namespace Sandra.UI.WF.Storage
 
             private readonly SettingSchema schema;
             private readonly string newLine;
+            private readonly bool commentOutProperties;
 
             private bool suppressNextValueDelimiter;
 
-            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema) : base(writer)
+            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema, bool commentOutProperties) : base(writer)
             {
                 this.schema = schema;
+                this.commentOutProperties = commentOutProperties;
+
                 newLine = writer.NewLine;
                 Formatting = Formatting.Indented;
 
@@ -211,14 +214,14 @@ namespace Sandra.UI.WF.Storage
         private readonly StringBuilder outputBuilder;
         private readonly CustomJsonTextWriter jsonTextWriter;
 
-        public SettingWriter(bool compact, SettingSchema schema)
+        public SettingWriter(SettingSchema schema, bool compact, bool commentOutProperties)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
 
             if (compact) jsonTextWriter = new JsonCompactWriter(stringWriter);
-            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema);
+            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema, commentOutProperties);
         }
 
         public override void VisitBoolean(PBoolean value)

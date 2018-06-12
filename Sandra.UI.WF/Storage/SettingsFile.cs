@@ -153,7 +153,7 @@ namespace Sandra.UI.WF.Storage
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
-        public Exception WriteToFile() => WriteToFile(Settings, AbsoluteFilePath);
+        public Exception WriteToFile() => WriteToFile(Settings, AbsoluteFilePath, false);
 
         /// <summary>
         /// Attempts to overwrite a file with the current values in a settings object.
@@ -164,6 +164,9 @@ namespace Sandra.UI.WF.Storage
         /// <param name="absoluteFilePath">
         /// The target file to write to. If the file already exists, it is overwritten.
         /// </param>
+        /// <param name="commentOutProperties">
+        /// True if the properties must be commented out, otherwise false.
+        /// </param>
         /// <returns>
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
@@ -171,12 +174,12 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
         /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath)
+        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, bool commentOutProperties)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
 
-            SettingWriter writer = new SettingWriter(compact: false, schema: settings.Schema);
+            SettingWriter writer = new SettingWriter(schema: settings.Schema, compact: false, commentOutProperties: commentOutProperties);
             writer.Visit(settings.Map);
             try
             {

@@ -345,7 +345,7 @@ namespace Sandra.UI.WF.Storage
 
                     try
                     {
-                        var writer = new SettingWriter(compact: true, schema: remoteSettings.Schema);
+                        var writer = new SettingWriter(schema: remoteSettings.Schema, compact: true, commentOutProperties: false);
                         writer.Visit(remoteSettings.Map);
 
                         // Alterate between both auto-save files.
