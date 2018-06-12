@@ -92,10 +92,15 @@ namespace Sandra.UI.WF.Storage
         /// </summary>
         public SettingObject Settings { get; private set; }
 
+        private readonly FileWatcher watcher;
+
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
         {
             AbsoluteFilePath = absoluteFilePath;
             TemplateSettings = templateSettings;
+
+            watcher = new FileWatcher(absoluteFilePath);
+            watcher.FileChanged += Watcher_FileChanged;
         }
 
         private void Load()
@@ -127,11 +132,18 @@ namespace Sandra.UI.WF.Storage
             add
             {
                 event_SettingsChanged.AddListener(value);
+                watcher.EnableRaisingEvents = true;
             }
             remove
             {
                 event_SettingsChanged.RemoveListener(value);
             }
+        }
+
+        private void Watcher_FileChanged()
+        {
+            Load();
+            event_SettingsChanged.Raise(this, EventArgs.Empty);
         }
 
         /// <summary>
