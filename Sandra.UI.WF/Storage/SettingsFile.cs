@@ -72,24 +72,9 @@ namespace Sandra.UI.WF.Storage
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
-            Load(absoluteFilePath, workingCopy);
-
-            return new SettingsFile(absoluteFilePath, workingCopy.Commit());
-        }
-
-        private static void Load(string absoluteFilePath, SettingCopy workingCopy)
-        {
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(absoluteFilePath));
-                string fileText = File.ReadAllText(absoluteFilePath);
-                workingCopy.LoadFromText(new StringReader(fileText));
-            }
-            catch (Exception exception)
-            {
-                // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
-            }
+            var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
+            settingsFile.Load();
+            return settingsFile;
         }
 
         /// <summary>
@@ -97,12 +82,39 @@ namespace Sandra.UI.WF.Storage
         /// </summary>
         public string AbsoluteFilePath { get; }
 
-        public SettingObject Settings { get; }
+        /// <summary>
+        /// Gets the template settings into which the values from the settings file are loaded.
+        /// </summary>
+        public SettingObject TemplateSettings { get; }
 
-        private SettingsFile(string absoluteFilePath, SettingObject settings)
+        /// <summary>
+        /// Gets the most recent version of the settings.
+        /// </summary>
+        public SettingObject Settings { get; private set; }
+
+        private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
         {
             AbsoluteFilePath = absoluteFilePath;
-            Settings = settings;
+            TemplateSettings = templateSettings;
+        }
+
+        private void Load()
+        {
+            SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
+
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
+                string fileText = File.ReadAllText(AbsoluteFilePath);
+                workingCopy.LoadFromText(new StringReader(fileText));
+            }
+            catch (Exception exception)
+            {
+                // 'Expected' exceptions can be traced, but rethrow developer errors.
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+            }
+
+            Settings = workingCopy.Commit();
         }
 
         /// <summary>
