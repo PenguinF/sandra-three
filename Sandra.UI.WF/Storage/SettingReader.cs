@@ -42,7 +42,7 @@ namespace Sandra.UI.WF.Storage
         private JsonToken ReadSkipComments()
         {
             // Skip comments until encountering something meaningful.
-            do jsonTextReader.Read(); while (jsonTextReader.TokenType == JsonToken.Comment);
+            while (jsonTextReader.Read() && jsonTextReader.TokenType == JsonToken.Comment);
             return jsonTextReader.TokenType;
         }
 
