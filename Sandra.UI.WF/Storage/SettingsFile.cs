@@ -153,17 +153,31 @@ namespace Sandra.UI.WF.Storage
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
-#if DEBUG
-        public Exception WriteToFile(string absoluteFilePath = null)
+        public Exception WriteToFile() => WriteToFile(Settings, AbsoluteFilePath);
+
+        /// <summary>
+        /// Attempts to overwrite a file with the current values in a settings object.
+        /// </summary>
+        /// <param name="settings">
+        /// The settings to write.
+        /// </param>
+        /// <param name="absoluteFilePath">
+        /// The target file to write to. If the file already exists, it is overwritten.
+        /// </param>
+        /// <returns>
+        /// Null if the operation was successful;
+        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
+        /// </exception>
+        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath)
         {
-            absoluteFilePath = absoluteFilePath ?? AbsoluteFilePath;
-#else
-        public Exception WriteToFile()
-        {
-            string absoluteFilePath = AbsoluteFilePath;
-#endif
-            SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
-            writer.Visit(Settings.Map);
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
+
+            SettingWriter writer = new SettingWriter(compact: false, schema: settings.Schema);
+            writer.Visit(settings.Map);
             try
             {
                 File.WriteAllText(absoluteFilePath, writer.Output());
