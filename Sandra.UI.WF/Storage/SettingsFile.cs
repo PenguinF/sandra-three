@@ -183,12 +183,8 @@ namespace Sandra.UI.WF.Storage
 
                 if (hasChanges)
                 {
-                    SettingCopy workingCopy = Load();
-                    if (!workingCopy.EqualTo(settings))
-                    {
-                        settings = workingCopy.Commit();
-                        sc.Send(raiseSettingsChangedEvent, null);
-                    }
+                    // Can block until all event handlers have returned.
+                    sc.Send(raiseSettingsChangedEvent, Load());
                 }
 
                 // Stop the loop if the FileWatcher errored out.
@@ -199,9 +195,14 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private void raiseSettingsChangedEvent(object _)
+        private void raiseSettingsChangedEvent(object state)
         {
-            event_SettingsChanged.Raise(this, EventArgs.Empty);
+            SettingCopy workingCopy = (SettingCopy)state;
+            if (!workingCopy.EqualTo(settings))
+            {
+                settings = workingCopy.Commit();
+                event_SettingsChanged.Raise(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
