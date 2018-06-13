@@ -17,6 +17,7 @@
  * 
  *********************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace SysExtensions
@@ -44,6 +45,46 @@ namespace SysExtensions
         public static void Times(this int numberOfIterations, Action action)
         {
             for (int i = numberOfIterations; i > 0; --i) action();
+        }
+
+        /// <summary>
+        /// Adds a value to a <see cref="Dictionary{TKey, TValue}" /> if the key does not already exist.
+        /// </summary>
+        /// <typeparam name="TKey">
+        /// The type of keys in the dictionary.
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        /// The type of values in the dictionary.
+        /// </typeparam>
+        /// <param name="dictionary">
+        /// The dictionary in which to add the value.
+        /// </param>
+        /// <param name="key">
+        /// The key of the value to add.
+        /// </param>
+        /// <param name="constructor">
+        /// The function used to generate a value for the key if it does not exist.
+        /// </param>
+        /// <returns>
+        /// The value for the key. This will be either the existing value for the key if the key is already in the dictionary,
+        /// or the new value for the key as returned by <paramref name="constructor" /> if the key was not in the dictionary.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="dictionary"/> and/or <paramref name="key"/> and/or <paramref name="constructor"/> are null.
+        /// </exception>
+        /// <remarks>
+        /// The key of the value returned from <paramref name="constructor" /> is assumed to be equal to the passed in <paramref name="key" /> parameter.
+        /// </remarks>
+        public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> constructor)
+        {
+            if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
+            if (constructor == null) throw new ArgumentNullException(nameof(constructor));
+
+            TValue value;
+            if (dictionary.TryGetValue(key, out value)) return value;
+            value = constructor(key);
+            dictionary.Add(key, value);
+            return value;
         }
 
         /// <summary>
