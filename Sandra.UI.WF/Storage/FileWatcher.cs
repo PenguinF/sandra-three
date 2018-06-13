@@ -50,29 +50,16 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Make sure to only turn this on when the UI message loop is active.
         /// </summary>
-        public bool EnableRaisingEvents
+        public void EnableRaisingEvents()
         {
-            get { return fileSystemWatcher != null; }
-            set
+            if (fileSystemWatcher == null)
             {
-                bool enableRaisingEvents = EnableRaisingEvents;
-                if (enableRaisingEvents != value)
-                {
-                    if (value)
-                    {
-                        // Capture the synchronization context so events can be posted to it.
-                        sc = SynchronizationContext.Current;
-                        Debug.Assert(sc != null);
+                // Capture the synchronization context so events can be posted to it.
+                sc = SynchronizationContext.Current;
+                Debug.Assert(sc != null);
 
-                        fileSystemWatcher = createFileSystemWatcher();
-                        fileSystemWatcher.EnableRaisingEvents = true;
-                    }
-                    else
-                    {
-                        fileSystemWatcher.Dispose();
-                        fileSystemWatcher = null;
-                    }
-                }
+                fileSystemWatcher = createFileSystemWatcher();
+                fileSystemWatcher.EnableRaisingEvents = true;
             }
         }
 
@@ -88,7 +75,7 @@ namespace Sandra.UI.WF.Storage
         private void fileChangePosted(object state)
         {
             // Back on the UI thread, called from the background, so check if EnableRaisingEvents is still synchronized.
-            if (EnableRaisingEvents)
+            if (fileSystemWatcher != null)
             {
                 FileChangeType fileChangeType = (FileChangeType)state;
 

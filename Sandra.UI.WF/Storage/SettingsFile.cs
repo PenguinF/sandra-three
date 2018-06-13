@@ -132,7 +132,7 @@ namespace Sandra.UI.WF.Storage
             add
             {
                 event_SettingsChanged.AddListener(value);
-                watcher.EnableRaisingEvents = true;
+                watcher.EnableRaisingEvents();
             }
             remove
             {
