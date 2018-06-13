@@ -166,33 +166,44 @@ namespace Sandra.UI.WF.Storage
 
         private void pollFileChangesLoop()
         {
-            for (;;)
+            try
             {
-                // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
-                fileChangeSignalWaitHandle.WaitOne();
-                while (fileChangeSignalWaitHandle.WaitOne(50)) ;
-
-                bool hasChanges = false;
-                bool disconnected = false;
-                FileChangeType fileChangeType;
-                while (fileChangeQueue.TryDequeue(out fileChangeType))
+                for (;;)
                 {
-                    hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
-                    disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
-                }
+                    // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
+                    fileChangeSignalWaitHandle.WaitOne();
+                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
 
-                if (hasChanges)
-                {
-                    // Can block until all event handlers have returned.
-                    sc.Send(raiseSettingsChangedEvent, Load());
-                }
+                    bool hasChanges = false;
+                    bool disconnected = false;
+                    FileChangeType fileChangeType;
+                    while (fileChangeQueue.TryDequeue(out fileChangeType))
+                    {
+                        hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
+                        disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
+                    }
 
-                // Stop the loop if the FileWatcher errored out.
-                if (disconnected)
-                {
-                    break;
+                    if (hasChanges)
+                    {
+                        // Can block until all event handlers have returned.
+                        sc.Send(raiseSettingsChangedEvent, Load());
+                    }
+
+                    // Stop the loop if the FileWatcher errored out.
+                    if (disconnected)
+                    {
+                        break;
+                    }
                 }
             }
+            catch (Exception exception)
+            {
+                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
+                // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
+                exception.Trace();
+            }
+
+            watcher.Dispose();
         }
 
         private void raiseSettingsChangedEvent(object state)
