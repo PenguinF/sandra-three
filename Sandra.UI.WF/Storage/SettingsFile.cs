@@ -19,8 +19,12 @@
 using Newtonsoft.Json;
 using SysExtensions;
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -73,7 +77,7 @@ namespace Sandra.UI.WF.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.Load();
+            settingsFile.settings = settingsFile.Load().Commit();
             return settingsFile;
         }
 
@@ -90,9 +94,17 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Gets the most recent version of the settings.
         /// </summary>
-        public SettingObject Settings { get; private set; }
+        public SettingObject Settings => settings;
+
+        private SettingObject settings;
 
         private readonly FileWatcher watcher;
+
+        // Thread synchronization fields.
+        private AutoResetEvent fileChangeSignalWaitHandle;
+        private ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private SynchronizationContext sc;
+        private Task pollFileChangesBackgroundTask;
 
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
         {
@@ -100,10 +112,9 @@ namespace Sandra.UI.WF.Storage
             TemplateSettings = templateSettings;
 
             watcher = new FileWatcher(absoluteFilePath);
-            watcher.FileChanged += Watcher_FileChanged;
         }
 
-        private void Load()
+        private SettingCopy Load()
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
@@ -119,7 +130,7 @@ namespace Sandra.UI.WF.Storage
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
-            Settings = workingCopy.Commit();
+            return workingCopy;
         }
 
         private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
@@ -132,7 +143,20 @@ namespace Sandra.UI.WF.Storage
             add
             {
                 event_SettingsChanged.AddListener(value);
-                watcher.EnableRaisingEvents();
+
+                if (pollFileChangesBackgroundTask == null)
+                {
+                    // Capture the synchronization context so events can be posted to it.
+                    sc = SynchronizationContext.Current;
+                    Debug.Assert(sc != null);
+
+                    // Set up file change listener thread.
+                    fileChangeSignalWaitHandle = new AutoResetEvent(false);
+                    fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+                    watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
+
+                    pollFileChangesBackgroundTask = Task.Run(() => pollFileChangesLoop());
+                }
             }
             remove
             {
@@ -140,9 +164,43 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private void Watcher_FileChanged()
+        private void pollFileChangesLoop()
         {
-            Load();
+            for (;;)
+            {
+                // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
+                fileChangeSignalWaitHandle.WaitOne();
+                while (fileChangeSignalWaitHandle.WaitOne(50)) ;
+
+                bool hasChanges = false;
+                bool disconnected = false;
+                FileChangeType fileChangeType;
+                while (fileChangeQueue.TryDequeue(out fileChangeType))
+                {
+                    hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
+                    disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
+                }
+
+                if (hasChanges)
+                {
+                    SettingCopy workingCopy = Load();
+                    if (!workingCopy.EqualTo(settings))
+                    {
+                        settings = workingCopy.Commit();
+                        sc.Send(raiseSettingsChangedEvent, null);
+                    }
+                }
+
+                // Stop the loop if the FileWatcher errored out.
+                if (disconnected)
+                {
+                    break;
+                }
+            }
+        }
+
+        private void raiseSettingsChangedEvent(object _)
+        {
             event_SettingsChanged.Raise(this, EventArgs.Empty);
         }
 
