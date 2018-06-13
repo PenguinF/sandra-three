@@ -21,7 +21,7 @@
   "dark_square_color": "#ADD8E6",
 
   // The color of the light squares. This value must be in the HTML color
-  // format, for example "#F0E68C" is a Khaki color.
+  // format, for example "#F0E68C" is the Khaki color.
   "light_square_color": "#F0FFFF",
 
   // The number of plies (=half moves) to move forward of backward in a game for

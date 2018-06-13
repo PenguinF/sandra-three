@@ -114,7 +114,7 @@ namespace Sandra.UI.WF
 
         private static readonly string LightSquareColorDescription
             = "The color of the light squares. This value must be in the HTML color format, "
-            + "for example \"#F0E68C\" is a Khaki color.";
+            + "for example \"#F0E68C\" is the Khaki color.";
 
         public static readonly SettingProperty<Color> LightSquareColor = new SettingProperty<Color>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
