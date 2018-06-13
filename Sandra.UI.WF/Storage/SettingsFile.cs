@@ -72,9 +72,45 @@ namespace Sandra.UI.WF.Storage
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
+            var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
+            settingsFile.Load();
+            return settingsFile;
+        }
+
+        /// <summary>
+        /// Returns the full path to the settings file.
+        /// </summary>
+        public string AbsoluteFilePath { get; }
+
+        /// <summary>
+        /// Gets the template settings into which the values from the settings file are loaded.
+        /// </summary>
+        public SettingObject TemplateSettings { get; }
+
+        /// <summary>
+        /// Gets the most recent version of the settings.
+        /// </summary>
+        public SettingObject Settings { get; private set; }
+
+        private readonly FileWatcher watcher;
+
+        private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
+        {
+            AbsoluteFilePath = absoluteFilePath;
+            TemplateSettings = templateSettings;
+
+            watcher = new FileWatcher(absoluteFilePath);
+            watcher.FileChanged += Watcher_FileChanged;
+        }
+
+        private void Load()
+        {
+            SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
+
             try
             {
-                string fileText = File.ReadAllText(absoluteFilePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
+                string fileText = File.ReadAllText(AbsoluteFilePath);
                 workingCopy.LoadFromText(new StringReader(fileText));
             }
             catch (Exception exception)
@@ -83,20 +119,31 @@ namespace Sandra.UI.WF.Storage
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
-            return new SettingsFile(absoluteFilePath, workingCopy.Commit());
+            Settings = workingCopy.Commit();
         }
 
+        private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
+
         /// <summary>
-        /// Returns the full path to the settings file.
+        /// Weak event which occurs after the <see cref="Settings"/> have been updated in the file.
         /// </summary>
-        public string AbsoluteFilePath { get; }
-
-        public SettingObject Settings { get; }
-
-        private SettingsFile(string absoluteFilePath, SettingObject settings)
+        public event Action<object, EventArgs> SettingsChanged
         {
-            AbsoluteFilePath = absoluteFilePath;
-            Settings = settings;
+            add
+            {
+                event_SettingsChanged.AddListener(value);
+                watcher.EnableRaisingEvents = true;
+            }
+            remove
+            {
+                event_SettingsChanged.RemoveListener(value);
+            }
+        }
+
+        private void Watcher_FileChanged()
+        {
+            Load();
+            event_SettingsChanged.Raise(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -106,17 +153,34 @@ namespace Sandra.UI.WF.Storage
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
-#if DEBUG
-        public Exception WriteToFile(string absoluteFilePath = null)
+        public Exception WriteToFile() => WriteToFile(Settings, AbsoluteFilePath, false);
+
+        /// <summary>
+        /// Attempts to overwrite a file with the current values in a settings object.
+        /// </summary>
+        /// <param name="settings">
+        /// The settings to write.
+        /// </param>
+        /// <param name="absoluteFilePath">
+        /// The target file to write to. If the file already exists, it is overwritten.
+        /// </param>
+        /// <param name="commentOutProperties">
+        /// True if the properties must be commented out, otherwise false.
+        /// </param>
+        /// <returns>
+        /// Null if the operation was successful;
+        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
+        /// </exception>
+        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, bool commentOutProperties)
         {
-            absoluteFilePath = absoluteFilePath ?? AbsoluteFilePath;
-#else
-        public Exception WriteToFile()
-        {
-            string absoluteFilePath = AbsoluteFilePath;
-#endif
-            SettingWriter writer = new SettingWriter(compact: false, schema: Settings.Schema);
-            writer.Visit(Settings.Map);
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
+
+            SettingWriter writer = new SettingWriter(schema: settings.Schema, compact: false, commentOutProperties: commentOutProperties);
+            writer.Visit(settings.Map);
             try
             {
                 File.WriteAllText(absoluteFilePath, writer.Output());

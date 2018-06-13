@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
     /// Form which contains a chess board on which a standard game of chess is played.
     /// Maintains its aspect ratio while resizing.
     /// </summary>
-    public partial class StandardChessBoardForm : SnappingMdiChildForm
+    public partial class StandardChessBoardForm : SnappingMdiChildForm, IWeakEventTarget
     {
         /// <summary>
         /// Gets a reference to the playing board control on this form.
@@ -159,7 +159,11 @@ namespace Sandra.UI.WF
                 Dock = DockStyle.Fill,
                 BoardWidth = Chess.Constants.SquareCount,
                 BoardHeight = Chess.Constants.SquareCount,
+                DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor),
+                LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor),
             };
+
+            Program.LocalSettings.SettingsChanged += LocalSettings_SettingsChanged;
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -185,6 +189,12 @@ namespace Sandra.UI.WF
                 StartCap = LineCap.Round,
                 EndCap = LineCap.RoundAnchor,
             };
+        }
+
+        private void LocalSettings_SettingsChanged(object sender, EventArgs e)
+        {
+            PlayingBoard.DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor);
+            PlayingBoard.LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor);
         }
 
         private void playingBoard_MouseWheel(object sender, MouseEventArgs e)

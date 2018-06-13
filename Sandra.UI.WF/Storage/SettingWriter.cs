@@ -53,6 +53,7 @@ namespace Sandra.UI.WF.Storage
         {
             private const int maxLineLength = 80;
             private const string startComment = "// ";
+            private const string startCommentShort = "//";
 
             private static IEnumerable<string> GetCommentLines(string commentText, int indent)
             {
@@ -138,12 +139,16 @@ namespace Sandra.UI.WF.Storage
 
             private readonly SettingSchema schema;
             private readonly string newLine;
+            private readonly bool commentOutProperties;
 
+            private bool commentOutNextToken;
             private bool suppressNextValueDelimiter;
 
-            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema) : base(writer)
+            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema, bool commentOutProperties) : base(writer)
             {
                 this.schema = schema;
+                this.commentOutProperties = commentOutProperties;
+
                 newLine = writer.NewLine;
                 Formatting = Formatting.Indented;
 
@@ -197,7 +202,20 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
 
+                // This assumes that all default setting values fit on one line.
+                commentOutNextToken = commentOutProperties;
                 WritePropertyName(name);
+                commentOutNextToken = false;
+            }
+
+            protected override void WriteIndent()
+            {
+                base.WriteIndent();
+
+                if (commentOutNextToken)
+                {
+                    WriteRaw(startCommentShort);
+                }
             }
 
             public override void Close()
@@ -211,14 +229,14 @@ namespace Sandra.UI.WF.Storage
         private readonly StringBuilder outputBuilder;
         private readonly CustomJsonTextWriter jsonTextWriter;
 
-        public SettingWriter(bool compact, SettingSchema schema)
+        public SettingWriter(SettingSchema schema, bool compact, bool commentOutProperties)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
 
             if (compact) jsonTextWriter = new JsonCompactWriter(stringWriter);
-            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema);
+            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema, commentOutProperties);
         }
 
         public override void VisitBoolean(PBoolean value)

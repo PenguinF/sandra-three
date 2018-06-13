@@ -105,9 +105,32 @@ namespace Sandra.UI.WF
             {
                 if (openLocalSettingsForm == null)
                 {
-                    // Before opening the possibly non-existent file, write to it.
-                    // This pretty-prints it too.
-                    Exception exception = Program.LocalSettings.WriteToFile();
+                    // If the file doesn't exist yet, generate a local settings file with a commented out copy
+                    // of the default settings to serve as an example, and to show which settings are available.
+                    Exception exception = null;
+                    if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
+                    {
+                        SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
+
+                        var defaultSettingsObject = Program.DefaultSettings.Settings;
+                        foreach (var property in localSettingsExample.Schema.AllProperties)
+                        {
+                            // Copy by property name.
+                            SettingProperty defaultSettingProperty;
+                            PValue sourceValue;
+                            if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
+                                && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out sourceValue))
+                            {
+                                localSettingsExample.AddOrReplaceRaw(property, sourceValue);
+                            }
+                        }
+
+                        exception = SettingsFile.WriteToFile(
+                            localSettingsExample.Commit(),
+                            Program.LocalSettings.AbsoluteFilePath,
+                            commentOutProperties: true);
+                    }
+
                     if (exception != null)
                     {
                         MessageBox.Show(exception.Message);

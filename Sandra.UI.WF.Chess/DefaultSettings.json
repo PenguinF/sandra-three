@@ -16,6 +16,14 @@
   // preferences.
   "local_preferences_file_name": "Preferences.settings",
 
+  // The color of the dark squares. This value must be in the HTML color format,
+  // for example "#808000" is the Olive color.
+  "dark_square_color": "#ADD8E6",
+
+  // The color of the light squares. This value must be in the HTML color
+  // format, for example "#F0E68C" is the Khaki color.
+  "light_square_color": "#F0FFFF",
+
   // The number of plies (=half moves) to move forward of backward in a game for
   // fast navigation. This value must be between 2 and 40.
   "fast_navigation_ply_count": 10
