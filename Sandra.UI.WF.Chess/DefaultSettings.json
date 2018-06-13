@@ -6,6 +6,10 @@
 // default. In the majority of cases, only the latter file is changed, while the
 // default settings serve as a template.
 {
+  // Identifies the version of the set of recognized properties. The only
+  // allowed value is 1.
+  "version": 1,
+
   // Subfolder of %APPDATA%/Local which should be used to store persistent data.
   // This includes the auto-save file, or e.g. a preferences file. Use forward
   // slashes to separate directories, an unrecognized escape sequence such as in

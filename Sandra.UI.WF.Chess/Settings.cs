@@ -46,6 +46,29 @@ namespace Sandra.UI.WF
             + "In the majority of cases, only the latter file is changed, while the default "
             + "settings serve as a template.");
 
+        private static readonly string VersionDescription
+            = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
+
+        public static readonly SettingProperty<int> Version = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Version))),
+            VersionRange.Instance,
+            new SettingComment(VersionDescription));
+
+        private sealed class VersionRange : PType.Derived<PInteger, int>
+        {
+            public static readonly VersionRange Instance = new VersionRange();
+
+            private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
+
+            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
+            {
+                targetValue = (int)integer.Value;
+                return true;
+            }
+
+            public override PInteger GetBaseValue(int value) => new PInteger(value);
+        }
+
         private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "
@@ -142,6 +165,7 @@ namespace Sandra.UI.WF
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                SettingKeys.Version,
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
                 SettingKeys.DarkSquareColor,
@@ -162,6 +186,7 @@ namespace Sandra.UI.WF
         {
             SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
 
+            defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
