@@ -134,34 +134,37 @@ namespace Sandra.UI.WF.Storage
             return workingCopy.Commit();
         }
 
-        private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
+        private readonly Dictionary<SettingKey, WeakEvent<object, EventArgs>> settingsChangedEvents
+            = new Dictionary<SettingKey, WeakEvent<object, EventArgs>>();
 
         /// <summary>
-        /// Weak event which occurs after the <see cref="Settings"/> have been updated in the file.
+        /// Registers a handler for the weak event which occurs after the <see cref="Settings"/> have been updated in the file.
+        /// The event handler cannot be an anonymous method.
+        /// For best performance, the class in which the event handler method is defined should implement <see cref="IWeakEventTarget"/>.
         /// </summary>
-        public event Action<object, EventArgs> SettingsChanged
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are null.
+        /// </exception>
+        public void RegisterSettingsChangedHandler(SettingProperty property, Action<object, EventArgs> eventHandler)
         {
-            add
+            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (eventHandler == null) throw new ArgumentNullException(nameof(eventHandler));
+
+            WeakEvent<object, EventArgs> keyedEvent = settingsChangedEvents.GetOrAdd(property.Name, key => new WeakEvent<object, EventArgs>());
+            keyedEvent.AddListener(eventHandler);
+
+            if (pollFileChangesBackgroundTask == null)
             {
-                event_SettingsChanged.AddListener(value);
+                // Capture the synchronization context so events can be posted to it.
+                sc = SynchronizationContext.Current;
+                Debug.Assert(sc != null);
 
-                if (pollFileChangesBackgroundTask == null)
-                {
-                    // Capture the synchronization context so events can be posted to it.
-                    sc = SynchronizationContext.Current;
-                    Debug.Assert(sc != null);
+                // Set up file change listener thread.
+                fileChangeSignalWaitHandle = new AutoResetEvent(false);
+                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
-                    // Set up file change listener thread.
-                    fileChangeSignalWaitHandle = new AutoResetEvent(false);
-                    fileChangeQueue = new ConcurrentQueue<FileChangeType>();
-                    watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-                    pollFileChangesBackgroundTask = Task.Run(() => pollFileChangesLoop());
-                }
-            }
-            remove
-            {
-                event_SettingsChanged.RemoveListener(value);
+                pollFileChangesBackgroundTask = Task.Run(() => pollFileChangesLoop());
             }
         }
 
@@ -246,8 +249,12 @@ namespace Sandra.UI.WF.Storage
             {
                 // Update settings if at least one property changed.
                 settings = newSettings;
-                event_SettingsChanged.Raise(this, EventArgs.Empty);
-                break;
+
+                WeakEvent<object, EventArgs> keyedEvent;
+                if (settingsChangedEvents.TryGetValue(property.Name, out keyedEvent))
+                {
+                    keyedEvent.Raise(this, EventArgs.Empty);
+                }
             }
         }
 
