@@ -19,8 +19,13 @@
 using Newtonsoft.Json;
 using SysExtensions;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -73,7 +78,7 @@ namespace Sandra.UI.WF.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.Load();
+            settingsFile.settings = settingsFile.Load();
             return settingsFile;
         }
 
@@ -90,9 +95,17 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Gets the most recent version of the settings.
         /// </summary>
-        public SettingObject Settings { get; private set; }
+        public SettingObject Settings => settings;
+
+        private SettingObject settings;
 
         private readonly FileWatcher watcher;
+
+        // Thread synchronization fields.
+        private AutoResetEvent fileChangeSignalWaitHandle;
+        private ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private SynchronizationContext sc;
+        private Task pollFileChangesBackgroundTask;
 
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
         {
@@ -100,10 +113,9 @@ namespace Sandra.UI.WF.Storage
             TemplateSettings = templateSettings;
 
             watcher = new FileWatcher(absoluteFilePath);
-            watcher.FileChanged += Watcher_FileChanged;
         }
 
-        private void Load()
+        private SettingObject Load()
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
@@ -119,31 +131,131 @@ namespace Sandra.UI.WF.Storage
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
-            Settings = workingCopy.Commit();
+            return workingCopy.Commit();
         }
 
-        private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
+        private readonly Dictionary<SettingKey, WeakEvent<object, EventArgs>> settingsChangedEvents
+            = new Dictionary<SettingKey, WeakEvent<object, EventArgs>>();
 
         /// <summary>
-        /// Weak event which occurs after the <see cref="Settings"/> have been updated in the file.
+        /// Registers a handler for the weak event which occurs after the <see cref="Settings"/> have been updated in the file.
+        /// The event handler cannot be an anonymous method.
+        /// For best performance, the class in which the event handler method is defined should implement <see cref="IWeakEventTarget"/>.
         /// </summary>
-        public event Action<object, EventArgs> SettingsChanged
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> and/or <paramref name="eventHandler"/> are null.
+        /// </exception>
+        public void RegisterSettingsChangedHandler(SettingProperty property, Action<object, EventArgs> eventHandler)
         {
-            add
+            if (property == null) throw new ArgumentNullException(nameof(property));
+            if (eventHandler == null) throw new ArgumentNullException(nameof(eventHandler));
+
+            WeakEvent<object, EventArgs> keyedEvent = settingsChangedEvents.GetOrAdd(property.Name, key => new WeakEvent<object, EventArgs>());
+            keyedEvent.AddListener(eventHandler);
+
+            if (pollFileChangesBackgroundTask == null)
             {
-                event_SettingsChanged.AddListener(value);
-                watcher.EnableRaisingEvents = true;
-            }
-            remove
-            {
-                event_SettingsChanged.RemoveListener(value);
+                // Capture the synchronization context so events can be posted to it.
+                sc = SynchronizationContext.Current;
+                Debug.Assert(sc != null);
+
+                // Set up file change listener thread.
+                fileChangeSignalWaitHandle = new AutoResetEvent(false);
+                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
+
+                pollFileChangesBackgroundTask = Task.Run(() => pollFileChangesLoop());
             }
         }
 
-        private void Watcher_FileChanged()
+        private void pollFileChangesLoop()
         {
-            Load();
-            event_SettingsChanged.Raise(this, EventArgs.Empty);
+            try
+            {
+                for (;;)
+                {
+                    // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
+                    fileChangeSignalWaitHandle.WaitOne();
+                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
+
+                    bool hasChanges = false;
+                    bool disconnected = false;
+                    FileChangeType fileChangeType;
+                    while (fileChangeQueue.TryDequeue(out fileChangeType))
+                    {
+                        hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
+                        disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
+                    }
+
+                    if (hasChanges)
+                    {
+                        sc.Post(raiseSettingsChangedEvent, Load());
+                    }
+
+                    // Stop the loop if the FileWatcher errored out.
+                    if (disconnected)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
+                // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
+                exception.Trace();
+            }
+
+            watcher.Dispose();
+        }
+
+        private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
+        {
+            PValueEqualityComparer eq = PValueEqualityComparer.Instance;
+
+            foreach (var property in settings.Schema.AllProperties)
+            {
+                // Change if added, updated or deleted.
+                PValue oldValue, newValue;
+                if (settings.TryGetRawValue(property, out oldValue))
+                {
+                    if (newSettings.TryGetRawValue(property, out newValue))
+                    {
+                        if (!eq.AreEqual(oldValue, newValue))
+                        {
+                            // Updated.
+                            yield return property;
+                        }
+                    }
+                    else
+                    {
+                        // Deleted.
+                        yield return property;
+                    }
+                }
+                else if (newSettings.TryGetRawValue(property, out newValue))
+                {
+                    // Added.
+                    yield return property;
+                }
+            }
+        }
+
+        private void raiseSettingsChangedEvent(object state)
+        {
+            SettingObject newSettings = (SettingObject)state;
+
+            foreach (var property in ChangedProperties(newSettings))
+            {
+                // Update settings if at least one property changed.
+                settings = newSettings;
+
+                WeakEvent<object, EventArgs> keyedEvent;
+                if (settingsChangedEvents.TryGetValue(property.Name, out keyedEvent))
+                {
+                    keyedEvent.Raise(this, EventArgs.Empty);
+                }
+            }
         }
 
         /// <summary>

@@ -17,7 +17,7 @@
  * 
  *********************************************************************************/
 using System;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 
@@ -28,8 +28,8 @@ namespace Sandra.UI.WF.Storage
         private readonly string filePath;
 
         private FileSystemWatcher fileSystemWatcher;
-
-        private SynchronizationContext sc;
+        private ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private EventWaitHandle eventWaitHandle;
 
         public FileWatcher(string filePath)
         {
@@ -47,82 +47,45 @@ namespace Sandra.UI.WF.Storage
             return fileSystemWatcher;
         }
 
-        /// <summary>
-        /// Make sure to only turn this on when the UI message loop is active.
-        /// </summary>
-        public bool EnableRaisingEvents
+        public void EnableRaisingEvents(EventWaitHandle eventWaitHandle, ConcurrentQueue<FileChangeType> fileChangeQueue)
         {
-            get { return fileSystemWatcher != null; }
-            set
+            if (fileSystemWatcher == null)
             {
-                bool enableRaisingEvents = EnableRaisingEvents;
-                if (enableRaisingEvents != value)
-                {
-                    if (value)
-                    {
-                        // Capture the synchronization context so events can be posted to it.
-                        sc = SynchronizationContext.Current;
-                        Debug.Assert(sc != null);
+                this.fileChangeQueue = fileChangeQueue;
+                this.eventWaitHandle = eventWaitHandle;
 
-                        fileSystemWatcher = createFileSystemWatcher();
-                        fileSystemWatcher.EnableRaisingEvents = true;
-                    }
-                    else
-                    {
-                        fileSystemWatcher.Dispose();
-                        fileSystemWatcher = null;
-                    }
-                }
+                fileSystemWatcher = createFileSystemWatcher();
+                fileSystemWatcher.EnableRaisingEvents = true;
             }
         }
 
-        public event Action FileChanged;
-
-        private enum FileChangeType
+        private void fileChangePosted(FileChangeType fileChangeType)
         {
-            Change,
-            ErrorBufferOverflow,
-            ErrorUnspecified,
-        }
-
-        private void fileChangePosted(object state)
-        {
-            // Back on the UI thread, called from the background, so check if EnableRaisingEvents is still synchronized.
-            if (EnableRaisingEvents)
-            {
-                FileChangeType fileChangeType = (FileChangeType)state;
-
-                if (fileChangeType == FileChangeType.ErrorBufferOverflow)
-                {
-                    // Recreate the watcher, also raise the Changed event.
-                    fileSystemWatcher.Dispose();
-                    fileSystemWatcher = createFileSystemWatcher();
-                    fileSystemWatcher.EnableRaisingEvents = true;
-                }
-
-                if (fileChangeType != FileChangeType.ErrorUnspecified)
-                {
-                    FileChanged?.Invoke();
-                }
-            }
+            // Enqueue the file change, and signal wait handle to wake up listener thread.
+            fileChangeQueue.Enqueue(fileChangeType);
+            eventWaitHandle.Set();
         }
 
         private void watcher_ChangedCreatedDeleted(object sender, FileSystemEventArgs e)
-            => sc.Post(fileChangePosted, FileChangeType.Change);
+            => fileChangePosted(FileChangeType.Change);
 
         private void watcher_Renamed(object sender, RenamedEventArgs e)
-            => sc.Post(fileChangePosted, FileChangeType.Change);
+            => fileChangePosted(FileChangeType.Change);
 
         private void watcher_Error(object sender, ErrorEventArgs e)
         {
             fileSystemWatcher.EnableRaisingEvents = false;
             if (e.GetException() is InternalBufferOverflowException)
             {
-                sc.Post(fileChangePosted, FileChangeType.ErrorBufferOverflow);
+                // Recreate the watcher.
+                fileSystemWatcher.Dispose();
+                fileSystemWatcher = createFileSystemWatcher();
+                fileSystemWatcher.EnableRaisingEvents = true;
+                fileChangePosted(FileChangeType.ErrorBufferOverflow);
             }
             else
             {
-                sc.Post(fileChangePosted, FileChangeType.ErrorUnspecified);
+                fileChangePosted(FileChangeType.ErrorUnspecified);
             }
         }
 
@@ -134,5 +97,12 @@ namespace Sandra.UI.WF.Storage
                 fileSystemWatcher = null;
             }
         }
+    }
+
+    internal enum FileChangeType
+    {
+        Change,
+        ErrorBufferOverflow,
+        ErrorUnspecified,
     }
 }

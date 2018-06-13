@@ -163,7 +163,8 @@ namespace Sandra.UI.WF
                 LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor),
             };
 
-            Program.LocalSettings.SettingsChanged += LocalSettings_SettingsChanged;
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -191,9 +192,13 @@ namespace Sandra.UI.WF
             };
         }
 
-        private void LocalSettings_SettingsChanged(object sender, EventArgs e)
+        private void DarkSquareColorChanged(object sender, EventArgs e)
         {
             PlayingBoard.DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor);
+        }
+
+        private void LightSquareColorChanged(object sender, EventArgs e)
+        {
             PlayingBoard.LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor);
         }
 
