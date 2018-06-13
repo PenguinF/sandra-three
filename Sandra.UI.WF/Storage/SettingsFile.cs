@@ -20,6 +20,7 @@ using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
@@ -77,7 +78,7 @@ namespace Sandra.UI.WF.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.settings = settingsFile.Load().Commit();
+            settingsFile.settings = settingsFile.Load();
             return settingsFile;
         }
 
@@ -114,7 +115,7 @@ namespace Sandra.UI.WF.Storage
             watcher = new FileWatcher(absoluteFilePath);
         }
 
-        private SettingCopy Load()
+        private SettingObject Load()
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
@@ -130,7 +131,7 @@ namespace Sandra.UI.WF.Storage
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
-            return workingCopy;
+            return workingCopy.Commit();
         }
 
         private readonly WeakEvent<object, EventArgs> event_SettingsChanged = new WeakEvent<object, EventArgs>();
@@ -205,13 +206,48 @@ namespace Sandra.UI.WF.Storage
             watcher.Dispose();
         }
 
+        private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
+        {
+            PValueEqualityComparer eq = PValueEqualityComparer.Instance;
+
+            foreach (var property in settings.Schema.AllProperties)
+            {
+                // Change if added, updated or deleted.
+                PValue oldValue, newValue;
+                if (settings.TryGetRawValue(property, out oldValue))
+                {
+                    if (newSettings.TryGetRawValue(property, out newValue))
+                    {
+                        if (!eq.AreEqual(oldValue, newValue))
+                        {
+                            // Updated.
+                            yield return property;
+                        }
+                    }
+                    else
+                    {
+                        // Deleted.
+                        yield return property;
+                    }
+                }
+                else if (newSettings.TryGetRawValue(property, out newValue))
+                {
+                    // Added.
+                    yield return property;
+                }
+            }
+        }
+
         private void raiseSettingsChangedEvent(object state)
         {
-            SettingCopy workingCopy = (SettingCopy)state;
-            if (!workingCopy.EqualTo(settings))
+            SettingObject newSettings = (SettingObject)state;
+
+            foreach (var property in ChangedProperties(newSettings))
             {
-                settings = workingCopy.Commit();
+                // Update settings if at least one property changed.
+                settings = newSettings;
                 event_SettingsChanged.Raise(this, EventArgs.Empty);
+                break;
             }
         }
 
