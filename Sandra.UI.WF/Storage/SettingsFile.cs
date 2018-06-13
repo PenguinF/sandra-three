@@ -185,8 +185,7 @@ namespace Sandra.UI.WF.Storage
 
                     if (hasChanges)
                     {
-                        // Can block until all event handlers have returned.
-                        sc.Send(raiseSettingsChangedEvent, Load());
+                        sc.Post(raiseSettingsChangedEvent, Load());
                     }
 
                     // Stop the loop if the FileWatcher errored out.
