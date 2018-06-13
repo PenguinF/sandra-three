@@ -77,8 +77,8 @@ namespace Sandra.UI.WF
             PType.RichTextZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
-            = "The number of plies (=half moves) to move forward of backward in a game for "
-            + "fast navigation. This value must be between 2 and 40.";
+            = "The number of plies (=half moves) to move forward of backward in a game for fast navigation. "
+            + $"This value must be between {FastNavigationPlyCountRange.MinPlyCount} and {FastNavigationPlyCountRange.MaxPlyCount}.";
 
         public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
