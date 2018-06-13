@@ -105,13 +105,13 @@ namespace Sandra.UI.WF
             {
                 if (openLocalSettingsForm == null)
                 {
-                    // If the file doesn't exist yet, copy the default settings to the local settings.
+                    // If the file doesn't exist yet, generate a local settings file with a commented out copy
+                    // of the default settings to serve as an example, and to show which settings are available.
                     Exception exception = null;
                     if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
                     {
                         SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
 
-                        // Copy from default settings.
                         var defaultSettingsObject = Program.DefaultSettings.Settings;
                         foreach (var property in localSettingsExample.Schema.AllProperties)
                         {
