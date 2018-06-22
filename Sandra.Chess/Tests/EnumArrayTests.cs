@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * TestEnumArray.cs
+ * EnumArrayTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Sandra.Chess.Tests
 {
-    public class TestEnumArray
+    public class EnumArrayTests
     {
         private void AssertEnumIsIllegal<T>() where T : struct
         {

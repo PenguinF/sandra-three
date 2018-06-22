@@ -65,8 +65,8 @@
     </When>
   </Choose>
   <ItemGroup>
-    <Compile Include="TestEnumArray.cs" />
-    <Compile Include="TestPosition.cs" />
+    <Compile Include="EnumArrayTests.cs" />
+    <Compile Include="PositionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

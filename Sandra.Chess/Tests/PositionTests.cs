@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * TestPosition.cs
+ * PositionTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Sandra.Chess.Tests
 {
-    public class TestPosition
+    public class PositionTests
     {
         /// <summary>
         /// Mirrors an actual <see cref="Position"/> to model its expected behavior.
