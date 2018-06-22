@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * TestPosition.cs
+ * PositionTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -16,13 +16,12 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SysExtensions;
+using Xunit;
 
 namespace Sandra.Chess.Tests
 {
-    [TestClass]
-    public class TestPosition
+    public class PositionTests
     {
         /// <summary>
         /// Mirrors an actual <see cref="Position"/> to model its expected behavior.
@@ -114,36 +113,23 @@ namespace Sandra.Chess.Tests
             }
         }
 
-        ShadowPosition expectedPosition;
-        Position position;
-
-        [TestInitialize]
-        public void InitPositions()
+        [Fact]
+        public void InitialPosition()
         {
-            expectedPosition = ShadowPosition.GetInitialPosition();
-            position = Position.GetInitialPosition();
-        }
+            ShadowPosition expectedPosition = ShadowPosition.GetInitialPosition();
+            Position position = Position.GetInitialPosition();
 
-        void assertEqualPositions()
-        {
-            Assert.AreEqual(expectedPosition.SideToMove, position.SideToMove);
+            Assert.Equal(expectedPosition.SideToMove, position.SideToMove);
 
-            Assert.AreEqual(expectedPosition.GetVector(Color.White), position.GetVector(Color.White));
-            Assert.AreEqual(expectedPosition.GetVector(Color.Black), position.GetVector(Color.Black));
+            Assert.Equal(expectedPosition.GetVector(Color.White), position.GetVector(Color.White));
+            Assert.Equal(expectedPosition.GetVector(Color.Black), position.GetVector(Color.Black));
 
-            Assert.AreEqual(expectedPosition.GetVector(Piece.Pawn), position.GetVector(Piece.Pawn));
-            Assert.AreEqual(expectedPosition.GetVector(Piece.Knight), position.GetVector(Piece.Knight));
-            Assert.AreEqual(expectedPosition.GetVector(Piece.Bishop), position.GetVector(Piece.Bishop));
-            Assert.AreEqual(expectedPosition.GetVector(Piece.Rook), position.GetVector(Piece.Rook));
-            Assert.AreEqual(expectedPosition.GetVector(Piece.Queen), position.GetVector(Piece.Queen));
-            Assert.AreEqual(expectedPosition.GetVector(Piece.King), position.GetVector(Piece.King));
-        }
-
-
-        [TestMethod]
-        public void TestInitialPosition()
-        {
-            assertEqualPositions();
+            Assert.Equal(expectedPosition.GetVector(Piece.Pawn), position.GetVector(Piece.Pawn));
+            Assert.Equal(expectedPosition.GetVector(Piece.Knight), position.GetVector(Piece.Knight));
+            Assert.Equal(expectedPosition.GetVector(Piece.Bishop), position.GetVector(Piece.Bishop));
+            Assert.Equal(expectedPosition.GetVector(Piece.Rook), position.GetVector(Piece.Rook));
+            Assert.Equal(expectedPosition.GetVector(Piece.Queen), position.GetVector(Piece.Queen));
+            Assert.Equal(expectedPosition.GetVector(Piece.King), position.GetVector(Piece.King));
         }
     }
 }
