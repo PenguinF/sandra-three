@@ -16,45 +16,29 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SysExtensions;
 using System;
+using Xunit;
 
 namespace Sandra.Chess.Tests
 {
-    [TestClass]
     public class TestEnumArray
     {
-        Exception ExpectException(Action testAction)
-        {
-            try
-            {
-                testAction();
-                return null;
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
-        }
-
-
         private void testIllegalEnum<T>() where T : struct
         {
             // The beauty of this is that the static constructor is only run when already inside the closure.
-            Exception exception = ExpectException(() => EnumIndexedArray<T, int>.New());
-            Assert.IsInstanceOfType(exception, typeof(TypeInitializationException));
+            Assert.Throws<TypeInitializationException>(() => EnumIndexedArray<T, int>.New());
         }
 
         enum EmptyEnum
         {
         }
 
-        [TestMethod]
+        [Fact]
         public void TestEmptyEnum()
         {
             var array = EnumIndexedArray<EmptyEnum, int>.New();
-            Assert.AreEqual(array.Length, 0);
+            Assert.Equal(0, array.Length);
         }
 
         enum IllegalEnum2
@@ -64,7 +48,7 @@ namespace Sandra.Chess.Tests
             One = 1,
         }
 
-        [TestMethod]
+        [Fact]
         public void TestIllegalEnum2()
         {
             testIllegalEnum<IllegalEnum2>();
@@ -78,7 +62,7 @@ namespace Sandra.Chess.Tests
             Two = 2,
         }
 
-        [TestMethod]
+        [Fact]
         public void TestIllegalEnum3()
         {
             testIllegalEnum<IllegalEnum3>();
@@ -91,11 +75,11 @@ namespace Sandra.Chess.Tests
             C = 2,
         }
 
-        [TestMethod]
+        [Fact]
         public void TestEnumWithDuplicates()
         {
             var array = EnumIndexedArray<EnumWithDuplicates, int>.New();
-            Assert.AreEqual(array.Length, 3);
+            Assert.Equal(3, array.Length);
         }
     }
 }
