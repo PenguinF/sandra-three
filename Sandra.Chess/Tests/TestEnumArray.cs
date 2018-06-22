@@ -24,20 +24,20 @@ namespace Sandra.Chess.Tests
 {
     public class TestEnumArray
     {
-        private void testIllegalEnum<T>() where T : struct
+        private void AssertEnumIsIllegal<T>() where T : struct
         {
             // The beauty of this is that the static constructor is only run when already inside the closure.
             Assert.Throws<TypeInitializationException>(() => EnumIndexedArray<T, int>.New());
         }
 
-        enum EmptyEnum
+        enum _EmptyEnum
         {
         }
 
         [Fact]
-        public void TestEmptyEnum()
+        public void EmptyEnum()
         {
-            var array = EnumIndexedArray<EmptyEnum, int>.New();
+            var array = EnumIndexedArray<_EmptyEnum, int>.New();
             Assert.Equal(0, array.Length);
         }
 
@@ -49,9 +49,9 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void TestIllegalEnum2()
+        public void EnumWithNegativeValue()
         {
-            testIllegalEnum<IllegalEnum2>();
+            AssertEnumIsIllegal<IllegalEnum2>();
         }
 
         enum IllegalEnum3
@@ -63,12 +63,12 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void TestIllegalEnum3()
+        public void EnumWithGaps()
         {
-            testIllegalEnum<IllegalEnum3>();
+            AssertEnumIsIllegal<IllegalEnum3>();
         }
 
-        enum EnumWithDuplicates
+        enum _EnumWithDuplicates
         {
             A1 = 0, A2 = 0,
             B2 = 1, B1 = 1,
@@ -76,9 +76,9 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void TestEnumWithDuplicates()
+        public void EnumWithDuplicates()
         {
-            var array = EnumIndexedArray<EnumWithDuplicates, int>.New();
+            var array = EnumIndexedArray<_EnumWithDuplicates, int>.New();
             Assert.Equal(3, array.Length);
         }
     }

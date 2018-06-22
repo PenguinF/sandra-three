@@ -114,7 +114,7 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void TestInitialPosition()
+        public void InitialPosition()
         {
             ShadowPosition expectedPosition = ShadowPosition.GetInitialPosition();
             Position position = Position.GetInitialPosition();
