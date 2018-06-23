@@ -34,6 +34,7 @@ namespace Sandra.UI.WF.Storage
 
         // Current state.
         private int currentIndex;
+        private Func<IEnumerable<JsonTerminalSymbol>> currentTokenizer;
 
         /// <summary>
         /// Gets the JSON which is tokenized.
@@ -52,15 +53,10 @@ namespace Sandra.UI.WF.Storage
             this.json = json;
             length = json.Length;
             currentIndex = 0;
+            currentTokenizer = Default;
         }
 
-        /// <summary>
-        /// Tokenizes the source <see cref="Json"/> from start to end.
-        /// </summary>
-        /// <returns>
-        /// An enumeration of <see cref="JsonTerminalSymbol"/> instances.
-        /// </returns>
-        public IEnumerable<JsonTerminalSymbol> TokenizeAll()
+        private IEnumerable<JsonTerminalSymbol> Default()
         {
             while (currentIndex < length)
             {
@@ -93,6 +89,27 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
                 currentIndex++;
+            }
+
+            currentTokenizer = null;
+        }
+
+        /// <summary>
+        /// Tokenizes the source <see cref="Json"/> from start to end.
+        /// </summary>
+        /// <returns>
+        /// An enumeration of <see cref="JsonTerminalSymbol"/> instances.
+        /// </returns>
+        public IEnumerable<JsonTerminalSymbol> TokenizeAll()
+        {
+            // currentTokenizer represents the state the tokenizer is in,
+            // e.g. whitespace, in a string, or whatnot.
+            while (currentTokenizer != null)
+            {
+                foreach (var symbol in currentTokenizer())
+                {
+                    yield return symbol;
+                }
             }
         }
     }
