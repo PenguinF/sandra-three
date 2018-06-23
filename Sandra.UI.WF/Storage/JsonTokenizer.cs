@@ -65,6 +65,7 @@ namespace Sandra.UI.WF.Storage
             {
                 char c = json[currentIndex];
 
+                bool isSeparator = false;
                 bool isSymbol = false;
 
                 var category = char.GetUnicodeCategory(c);
@@ -97,6 +98,7 @@ namespace Sandra.UI.WF.Storage
                     case UnicodeCategory.OtherSymbol:
                     case UnicodeCategory.OtherNotAssigned:
                         isSymbol = true;
+                        isSeparator = true;
                         break;
                     case UnicodeCategory.SpaceSeparator:
                     case UnicodeCategory.LineSeparator:
@@ -105,56 +107,64 @@ namespace Sandra.UI.WF.Storage
                     case UnicodeCategory.Format:
                     case UnicodeCategory.PrivateUse:
                     default:
+                        // Whitespace is a separator.
+                        isSeparator = true;
                         break;
                 }
 
-                if (isSymbol)
+                if (isSeparator)
                 {
-                    switch (c)
+                    firstUnusedIndex = currentIndex;
+
+                    if (isSymbol)
                     {
-                        case '{':
-                            yield return new JsonCurlyOpen(json, currentIndex);
-                            break;
-                        case '}':
-                            yield return new JsonCurlyClose(json, currentIndex);
-                            break;
-                        case '[':
-                            yield return new JsonSquareBracketOpen(json, currentIndex);
-                            break;
-                        case ']':
-                            yield return new JsonSquareBracketClose(json, currentIndex);
-                            break;
-                        case ':':
-                            yield return new JsonColon(json, currentIndex);
-                            break;
-                        case ',':
-                            yield return new JsonComma(json, currentIndex);
-                            break;
-                        case '/':
-                            // Look ahead 1 character to see if this is the start of a comment.
-                            // In all other cases, treat as an unexpected symbol.
-                            if (currentIndex + 1 < length)
-                            {
-                                char secondChar = json[currentIndex + 1];
-                                if (secondChar == '/')
+                        switch (c)
+                        {
+                            case '{':
+                                yield return new JsonCurlyOpen(json, currentIndex);
+                                break;
+                            case '}':
+                                yield return new JsonCurlyClose(json, currentIndex);
+                                break;
+                            case '[':
+                                yield return new JsonSquareBracketOpen(json, currentIndex);
+                                break;
+                            case ']':
+                                yield return new JsonSquareBracketClose(json, currentIndex);
+                                break;
+                            case ':':
+                                yield return new JsonColon(json, currentIndex);
+                                break;
+                            case ',':
+                                yield return new JsonComma(json, currentIndex);
+                                break;
+                            case '/':
+                                // Look ahead 1 character to see if this is the start of a comment.
+                                // In all other cases, treat as an unexpected symbol.
+                                if (currentIndex + 1 < length)
                                 {
-                                    currentTokenizer = InSingleLineComment;
-                                    yield break;
+                                    char secondChar = json[currentIndex + 1];
+                                    if (secondChar == '/')
+                                    {
+                                        currentTokenizer = InSingleLineComment;
+                                        yield break;
+                                    }
+                                    else if (secondChar == '*')
+                                    {
+                                        currentTokenizer = InMultiLineComment;
+                                        yield break;
+                                    }
                                 }
-                                else if (secondChar == '*')
-                                {
-                                    currentTokenizer = InMultiLineComment;
-                                    yield break;
-                                }
-                            }
-                            goto default;
-                        default:
-                            yield return new JsonUnknownSymbol(json, currentIndex);
-                            break;
+                                goto default;
+                            default:
+                                yield return new JsonUnknownSymbol(json, currentIndex);
+                                break;
+                        }
                     }
+
+                    firstUnusedIndex++;
                 }
 
-                firstUnusedIndex++;
                 currentIndex++;
             }
 
