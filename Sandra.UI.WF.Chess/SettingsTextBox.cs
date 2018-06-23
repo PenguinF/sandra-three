@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingsTextBox.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,9 +17,16 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
+using SysExtensions.SyntaxRenderer;
 using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -42,6 +50,12 @@ namespace Sandra.UI.WF
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
             this.settingsFile = settingsFile;
+
+            BorderStyle = BorderStyle.None;
+            BackColor = Color.White;
+            ForeColor = Color.Black;
+            Font = new Font("Consolas", 10);
+
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
         }
     }

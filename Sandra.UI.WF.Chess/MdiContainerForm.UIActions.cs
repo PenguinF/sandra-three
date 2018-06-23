@@ -60,10 +60,6 @@ namespace Sandra.UI.WF
             var settingsTextBox = new SettingsTextBox(settingsFile)
             {
                 Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.None,
-                BackColor = Color.White,
-                ForeColor = Color.Black,
-                Font = new Font("Consolas", 10),
                 ReadOnly = isReadOnly,
                 WordWrap = false,
                 ScrollBars = RichTextBoxScrollBars.Both,
