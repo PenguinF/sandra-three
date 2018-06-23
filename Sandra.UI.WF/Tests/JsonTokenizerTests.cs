@@ -168,6 +168,7 @@ namespace Sandra.UI.WF.Tests
 
         [Theory]
         [InlineData("\"\"", "")]
+        [InlineData("\" \"", " ")]
         public void StringValue(string json, string expectedValue)
         {
             var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
