@@ -119,6 +119,53 @@ namespace Sandra.UI.WF.Tests
             });
         }
 
+        [Theory]
+        [InlineData("true")]
+        [InlineData("false")]
+        [InlineData("null")]
+        [InlineData("0")]
+        [InlineData("-1")]
+        [InlineData("10.8")]
+        [InlineData("-9.00001")]
+        [InlineData("+00001")]
+        [InlineData("-1e+10")]
+        [InlineData("1.9E-5")]
+        [InlineData("0b01011001")]
+        [InlineData("0xffff")]
+        [InlineData("_")]
+        [InlineData("x80")]
+        [InlineData("189")]
+        [InlineData("x²")]
+        [InlineData("x₁")]
+        [InlineData("Grüßen")]
+        // Shamelessly plugged from that online translation tool. These are all 'thing's.
+        [InlineData("شيء")]
+        [InlineData("вещь")]
+        [InlineData("事情")]
+        [InlineData("もの")]
+        [InlineData("πράγμα")]
+        [InlineData("맡은일")]
+        [InlineData("चीज़")]
+        [InlineData("Điều")]
+        [InlineData("דָבָר")]
+        [InlineData("สิ่ง")]
+        [InlineData("విషయం")]
+        [InlineData("விஷயம்")]
+        [InlineData("දෙයක්")]
+        [InlineData("ڳالھ")]
+        public void ValueSymbol(string json)
+        {
+            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
+            Assert.Collection(tokens, symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<JsonValue>(symbol);
+                Assert.Equal(json, symbol.Json);
+                Assert.Equal(0, symbol.Start);
+                Assert.Equal(json.Length, symbol.Length);
+            });
+        }
+
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
             var symbolTypes = new Dictionary<string, Type>
@@ -132,6 +179,8 @@ namespace Sandra.UI.WF.Tests
                 { ":", typeof(JsonColon) },
                 { ",", typeof(JsonComma) },
                 { "*", typeof(JsonUnknownSymbol) },
+                { "_", typeof(JsonValue) },
+                { "true", typeof(JsonValue) },
             };
 
             var keys = symbolTypes.Keys;
@@ -153,6 +202,12 @@ namespace Sandra.UI.WF.Tests
             // Test all eight combinations of whitespace before/in between/after both strings.
             for (int i = 0; i < 8; i++)
             {
+                // Two JsonValues are glued together if there's no whitespace in between, so skip those.
+                if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
+                {
+                    continue;
+                }
+
                 string ws1 = (i & 1) != 0 ? " " : "";
                 string ws2 = (i & 2) != 0 ? " " : "";
                 string ws3 = (i & 4) != 0 ? " " : "";
