@@ -46,6 +46,13 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
+        [InlineData("")]
+        public void WhiteSpace(string ws)
+        {
+            Assert.False(new JsonTokenizer(ws).TokenizeAll().Any());
+        }
+
+        [Theory]
         [InlineData("*")]
         [InlineData("\0")]
         [InlineData("€")]
