@@ -85,6 +85,19 @@ namespace Sandra.UI.WF.Storage
                         case ',':
                             yield return new JsonComma(json, currentIndex);
                             break;
+                        case '/':
+                            // Look ahead 1 character to see if this is the start of a comment.
+                            // In all other cases, treat as an unexpected symbol.
+                            if (currentIndex + 1 < length)
+                            {
+                                char secondChar = json[currentIndex + 1];
+                                if (secondChar == '*')
+                                {
+                                    currentTokenizer = InMultiLineComment;
+                                    yield break;
+                                }
+                            }
+                            goto default;
                         default:
                             yield return new JsonUnknownSymbol(json, currentIndex);
                             break;
@@ -96,6 +109,48 @@ namespace Sandra.UI.WF.Storage
             }
 
             currentTokenizer = null;
+        }
+
+        private IEnumerable<JsonTerminalSymbol> InMultiLineComment()
+        {
+            // Eat /* characters, but leave firstUnusedIndex unchanged.
+            currentIndex += 2;
+
+            while (currentIndex < length)
+            {
+                if (json[currentIndex] == '*')
+                {
+                    currentIndex++;
+
+                    // Look ahead to see if the next character is a slash.
+                    if (currentIndex < length)
+                    {
+                        char secondChar = json[currentIndex];
+                        if (secondChar == '/')
+                        {
+                            // Increment so the closing '*/' is regarded as part of the comment.
+                            currentIndex++;
+
+                            yield return new JsonComment(
+                                json,
+                                firstUnusedIndex,
+                                currentIndex - firstUnusedIndex);
+
+                            firstUnusedIndex = currentIndex;
+                            currentTokenizer = Default;
+                            yield break;
+                        }
+                    }
+                }
+
+                currentIndex++;
+            }
+
+            currentTokenizer = null;
+            yield return new JsonComment(
+                json,
+                firstUnusedIndex,
+                currentIndex - firstUnusedIndex);
         }
 
         /// <summary>
