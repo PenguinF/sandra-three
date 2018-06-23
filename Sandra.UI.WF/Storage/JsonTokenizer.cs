@@ -158,6 +158,9 @@ namespace Sandra.UI.WF.Storage
                             case ',':
                                 yield return new JsonComma(json, currentIndex);
                                 break;
+                            case '"':
+                                currentTokenizer = InString;
+                                yield break;
                             case '/':
                                 // Look ahead 1 character to see if this is the start of a comment.
                                 // In all other cases, treat as an unexpected symbol.
@@ -194,6 +197,33 @@ namespace Sandra.UI.WF.Storage
                     json,
                     firstUnusedIndex,
                     currentIndex - firstUnusedIndex);
+            }
+
+            currentTokenizer = null;
+        }
+
+        private IEnumerable<JsonTerminalSymbol> InString()
+        {
+            // Eat " character, but leave firstUnusedIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = json[currentIndex];
+                switch (c)
+                {
+                    case '"':
+                        currentIndex++;
+                        yield return new JsonString(
+                            json,
+                            firstUnusedIndex,
+                            currentIndex - firstUnusedIndex, "");
+                        firstUnusedIndex = currentIndex;
+                        currentTokenizer = Default;
+                        yield break;
+                }
+
+                currentIndex++;
             }
 
             currentTokenizer = null;
