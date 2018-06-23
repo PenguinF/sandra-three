@@ -42,6 +42,7 @@ namespace Sandra.UI.WF.Storage
         public JsonTokenizer(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
+            Json = json;
         }
     }
 }
