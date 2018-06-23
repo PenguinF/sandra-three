@@ -51,6 +51,13 @@ namespace Sandra.UI.WF.Storage
 
         public JsonErrorInfo(string message, int start, int length)
         {
+            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            Message = message;
+            Start = start;
+            Length = length;
         }
     }
 }
