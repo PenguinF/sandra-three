@@ -120,6 +120,8 @@ namespace Sandra.UI.WF
             applyDefaultStyle();
             tokenize(Text);
             applySyntaxHighlighting();
+
+            TextChanged += SettingsTextBox_TextChanged;
         }
 
         private void tokenize(string json)
@@ -167,6 +169,21 @@ namespace Sandra.UI.WF
                     applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
                 }
             }
+        }
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            // Swallow updates to the caret position.
+            using (var updateToken = BeginUpdate())
+            {
+                base.OnSelectionChanged(e);
+            }
+        }
+
+        private void SettingsTextBox_TextChanged(object sender, EventArgs e)
+        {
+            tokenize(Text);
+            applySyntaxHighlighting();
         }
     }
 }
