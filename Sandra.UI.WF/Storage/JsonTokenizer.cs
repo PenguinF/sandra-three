@@ -54,7 +54,7 @@ namespace Sandra.UI.WF.Storage
         /// </returns>
         public IEnumerable<JsonTerminalSymbol> TokenizeAll()
         {
-            if (Json.Length > 0)
+            if (!string.IsNullOrWhiteSpace(Json))
             {
                 yield return new JsonUnknownSymbol(Json, 0, Json.Length);
             }
