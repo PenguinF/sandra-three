@@ -23,7 +23,7 @@ using System;
 
 namespace Sandra.UI.WF.Storage
 {
-    public class JsonTerminalSymbol
+    public abstract class JsonTerminalSymbol
     {
         public string Json { get; }
         public int Start { get; }
@@ -40,6 +40,13 @@ namespace Sandra.UI.WF.Storage
             Json = json;
             Start = start;
             Length = length;
+        }
+    }
+
+    public class JsonUnknownSymbol : JsonTerminalSymbol
+    {
+        public JsonUnknownSymbol(string json, int start, int length) : base(json, start, length)
+        {
         }
     }
 

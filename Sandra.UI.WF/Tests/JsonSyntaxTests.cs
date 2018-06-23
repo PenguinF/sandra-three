@@ -30,7 +30,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullJsonShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonTerminalSymbol(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null, 0, 0));
         }
 
         [Theory]
@@ -44,7 +44,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(" ", 2, 0, "start")]
         public void OutOfRangeArguments(string json, int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTerminalSymbol(json, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonUnknownSymbol(json, start, length));
         }
 
         [Theory]
@@ -55,7 +55,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\r\n", 0, 2)]
         public void UnchangedParameters(string json, int start, int length)
         {
-            var terminalSymbol = new JsonTerminalSymbol(json, start, length);
+            var terminalSymbol = new JsonUnknownSymbol(json, start, length);
             Assert.True(json == terminalSymbol.Json);
             Assert.True(start == terminalSymbol.Start);
             Assert.True(length == terminalSymbol.Length);
