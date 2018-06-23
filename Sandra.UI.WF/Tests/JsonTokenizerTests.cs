@@ -76,6 +76,7 @@ namespace Sandra.UI.WF.Tests
 
         [Theory]
         [InlineData("")]
+        [InlineData("\0")]
         [InlineData("                              ")]
         [InlineData("\n")]
         [InlineData("\r")]
@@ -96,7 +97,6 @@ namespace Sandra.UI.WF.Tests
         [InlineData(typeof(JsonColon), ':')]
         [InlineData(typeof(JsonComma), ',')]
         [InlineData(typeof(JsonUnknownSymbol), '*')]
-        [InlineData(typeof(JsonUnknownSymbol), '\0')]
         [InlineData(typeof(JsonUnknownSymbol), '€')]
         [InlineData(typeof(JsonUnknownSymbol), '≥')]
         [InlineData(typeof(JsonUnknownSymbol), '¿')]
