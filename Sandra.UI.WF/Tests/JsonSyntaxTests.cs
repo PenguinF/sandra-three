@@ -19,9 +19,18 @@
  *********************************************************************************/
 #endregion
 
+using Sandra.UI.WF.Storage;
+using System;
+using Xunit;
+
 namespace Sandra.UI.WF.Tests
 {
     public class JsonSyntaxTests
     {
+        [Fact]
+        public void InvalidArguments()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonTerminalSymbol(null, 0, 0));
+        }
     }
 }

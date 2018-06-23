@@ -21,4 +21,10 @@
 
 namespace Sandra.UI.WF.Storage
 {
+    public class JsonTerminalSymbol
+    {
+        public JsonTerminalSymbol(string json, int start, int length)
+        {
+        }
+    }
 }
