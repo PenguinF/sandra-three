@@ -65,6 +65,7 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="JsonSyntaxTests.cs" />
     <Compile Include="JsonTokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
