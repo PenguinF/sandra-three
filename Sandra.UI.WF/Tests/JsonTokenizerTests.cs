@@ -61,26 +61,59 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
-        [InlineData("*")]
-        [InlineData("\0")]
-        [InlineData("€")]
-        public void Unknown(string json)
+        [InlineData(typeof(JsonCurlyOpen), '{')]
+        [InlineData(typeof(JsonCurlyClose), '}')]
+        [InlineData(typeof(JsonSquareBracketOpen), '[')]
+        [InlineData(typeof(JsonSquareBracketClose), ']')]
+        [InlineData(typeof(JsonColon), ':')]
+        [InlineData(typeof(JsonComma), ',')]
+        [InlineData(typeof(JsonUnknownSymbol), '*')]
+        [InlineData(typeof(JsonUnknownSymbol), '\0')]
+        [InlineData(typeof(JsonUnknownSymbol), '€')]
+        [InlineData(typeof(JsonUnknownSymbol), '≥')]
+        [InlineData(typeof(JsonUnknownSymbol), '¿')]
+        [InlineData(typeof(JsonUnknownSymbol), '°')]
+        [InlineData(typeof(JsonUnknownSymbol), '╣')]
+        [InlineData(typeof(JsonUnknownSymbol), '∙')]
+
+        [InlineData(typeof(JsonUnknownSymbol), '▓')]
+        public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
+            string json = Convert.ToString(specialCharacter);
             var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
             Assert.Collection(tokens, symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonUnknownSymbol>(symbol);
-                JsonUnknownSymbol unknownSymbol = (JsonUnknownSymbol)symbol;
-                Assert.Equal(json, unknownSymbol.Json);
-                Assert.Equal(0, unknownSymbol.Start);
-                Assert.Equal(json.Length, unknownSymbol.Length);
+                Assert.IsType(tokenType, symbol);
+                Assert.Equal(json, symbol.Json);
+                Assert.Equal(0, symbol.Start);
+                Assert.Equal(json.Length, symbol.Length);
             });
         }
 
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
-            yield return new object[] { "*", typeof(JsonUnknownSymbol), "*", typeof(JsonUnknownSymbol) };
+            var symbolTypes = new Dictionary<string, Type>
+            {
+                { "{", typeof(JsonCurlyOpen) },
+                { "}", typeof(JsonCurlyClose) },
+                { "[", typeof(JsonSquareBracketOpen) },
+                { "]", typeof(JsonSquareBracketClose) },
+                { ":", typeof(JsonColon) },
+                { ",", typeof(JsonComma) },
+                { "*", typeof(JsonUnknownSymbol) },
+            };
+
+            var keys = symbolTypes.Keys;
+            foreach (var key1 in keys)
+            {
+                foreach (var key2 in keys)
+                {
+                    Type type1 = symbolTypes[key1];
+                    Type type2 = symbolTypes[key2];
+                    yield return new object[] { key1, type1, key2, type2 };
+                }
+            }
         }
 
         [Theory]

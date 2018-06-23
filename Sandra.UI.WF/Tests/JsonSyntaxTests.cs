@@ -93,6 +93,12 @@ namespace Sandra.UI.WF.Tests
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
+            yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
+            yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
+            yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };
+            yield return new object[] { new JsonSquareBracketClose("]", 0), typeof(JsonSquareBracketClose) };
+            yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
+            yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol(string.Empty, 0, 0), typeof(JsonUnknownSymbol) };
         }
 
