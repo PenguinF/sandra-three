@@ -217,7 +217,8 @@ namespace Sandra.UI.WF.Storage
                         yield return new JsonString(
                             json,
                             firstUnusedIndex,
-                            currentIndex - firstUnusedIndex, "");
+                            currentIndex - firstUnusedIndex,
+                            json.Substring(firstUnusedIndex + 1, currentIndex - firstUnusedIndex - 2));
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
