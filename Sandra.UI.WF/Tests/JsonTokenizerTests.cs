@@ -47,6 +47,34 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
+        [InlineData("//", "//")]
+        [InlineData("//\n", "//")]
+        [InlineData("//\r\n", "//")]
+        [InlineData("//\t\tComment \r\n", "//\t\tComment ")]
+        [InlineData("/**/", null)]
+        [InlineData("/*  */", null)]
+        [InlineData("/*\r\n*/", null)]
+        [InlineData("/*/**/", null)]
+        [InlineData("/*//\r\n*/\r\n", "/*//\r\n*/")]
+        [InlineData("///**/\r\n", "///**/")]
+        public void Comment(string json, string alternativeCommentText)
+        {
+            string expectedCommentText = alternativeCommentText ?? json;
+
+            var result = new JsonTokenizer(json).TokenizeAll().ToArray();
+
+            Assert.True(
+                result.Length == 1 && result[0] is JsonComment,
+                $"'{json}' not recognized as a comment.");
+
+            JsonComment symbol = (JsonComment)result[0];
+
+            Assert.True(
+                symbol.Start == 0 && symbol.Length == expectedCommentText.Length,
+                $"'{json}' not at the right position or length.");
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("                              ")]
         [InlineData("\n")]
@@ -95,6 +123,8 @@ namespace Sandra.UI.WF.Tests
         {
             var symbolTypes = new Dictionary<string, Type>
             {
+                { "//\n", typeof(JsonComment) },
+                { "/**/", typeof(JsonComment) },
                 { "{", typeof(JsonCurlyOpen) },
                 { "}", typeof(JsonCurlyClose) },
                 { "[", typeof(JsonSquareBracketOpen) },
@@ -129,8 +159,12 @@ namespace Sandra.UI.WF.Tests
 
                 int expectedSymbol1Start = (i & 1) != 0 ? 1 : 0;
                 int expectedSymbol2Start = expectedSymbol1Start + json1.Length + ((i & 2) != 0 ? 1 : 0);
+
+                // Exception for end-of-line comment "//\n".
                 int expectedSymbol1Length = json1.Length;
+                if (json1[json1.Length - 1] == '\n') expectedSymbol1Length--;
                 int expectedSymbol2Length = json2.Length;
+                if (json2[json2.Length - 1] == '\n') expectedSymbol2Length--;
 
                 var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
                 var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
