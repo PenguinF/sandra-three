@@ -21,6 +21,7 @@
 
 using Sandra.UI.WF.Storage;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Sandra.UI.WF.Tests
@@ -42,6 +43,24 @@ namespace Sandra.UI.WF.Tests
         public void JsonIsUnchanged(string json)
         {
             Assert.True(json == new JsonTokenizer(json).Json);
+        }
+
+        [Theory]
+        [InlineData("*")]
+        [InlineData("\0")]
+        [InlineData("€")]
+        public void Unknown(string json)
+        {
+            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
+            Assert.Collection(tokens, symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<JsonUnknownSymbol>(symbol);
+                JsonUnknownSymbol unknownSymbol = (JsonUnknownSymbol)symbol;
+                Assert.Equal(json, unknownSymbol.Json);
+                Assert.Equal(0, unknownSymbol.Start);
+                Assert.Equal(json.Length, unknownSymbol.Length);
+            });
         }
     }
 }
