@@ -28,6 +28,10 @@ namespace Sandra.UI.WF.Storage
         public JsonTerminalSymbol(string json, int start, int length)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (json.Length < start) throw new ArgumentOutOfRangeException(nameof(start));
+            if (json.Length < start + length) throw new ArgumentOutOfRangeException(nameof(length));
         }
     }
 }
