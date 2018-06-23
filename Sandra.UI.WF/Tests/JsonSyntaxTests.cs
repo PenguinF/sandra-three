@@ -113,6 +113,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol("*", 0), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
+            yield return new object[] { new JsonString("\"\"", 0, 2, string.Empty), typeof(JsonString) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor
@@ -161,6 +162,7 @@ namespace Sandra.UI.WF.Tests
             public override void VisitCurlyOpen(JsonCurlyOpen symbol) => VisitedType = typeof(JsonCurlyOpen);
             public override void VisitSquareBracketClose(JsonSquareBracketClose symbol) => VisitedType = typeof(JsonSquareBracketClose);
             public override void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => VisitedType = typeof(JsonSquareBracketOpen);
+            public override void VisitString(JsonString symbol) => VisitedType = typeof(JsonString);
             public override void VisitUnknownSymbol(JsonUnknownSymbol symbol) => VisitedType = typeof(JsonUnknownSymbol);
             public override void VisitValue(JsonValue symbol) => VisitedType = typeof(JsonValue);
 
@@ -188,6 +190,7 @@ namespace Sandra.UI.WF.Tests
             public override Type VisitCurlyOpen(JsonCurlyOpen symbol) => typeof(JsonCurlyOpen);
             public override Type VisitSquareBracketClose(JsonSquareBracketClose symbol) => typeof(JsonSquareBracketClose);
             public override Type VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => typeof(JsonSquareBracketOpen);
+            public override Type VisitString(JsonString symbol) => typeof(JsonString);
             public override Type VisitUnknownSymbol(JsonUnknownSymbol symbol) => typeof(JsonUnknownSymbol);
             public override Type VisitValue(JsonValue symbol) => typeof(JsonValue);
 
