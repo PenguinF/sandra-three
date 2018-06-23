@@ -56,12 +56,20 @@ namespace Sandra.UI.WF
 
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
         {
+            private readonly TextElementStyle commentStyle = new TextElementStyle()
+            {
+                HasForeColor = true,
+                ForeColor = Color.FromArgb(128, 220, 220),
+                Font = new Font("Consolas", 10, FontStyle.Italic),
+            };
+
             private readonly TextElementStyle errorStyle = new TextElementStyle()
             {
                 HasForeColor = true,
                 ForeColor = Color.FromArgb(255, 108, 108),
             };
 
+            public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
             public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
         }
 
