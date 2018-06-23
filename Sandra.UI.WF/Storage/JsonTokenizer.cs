@@ -19,6 +19,8 @@
  *********************************************************************************/
 #endregion
 
+using System;
+
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
@@ -28,6 +30,7 @@ namespace Sandra.UI.WF.Storage
     {
         public JsonTokenizer(string json)
         {
+            if (json == null) throw new ArgumentNullException(nameof(json));
         }
     }
 }
