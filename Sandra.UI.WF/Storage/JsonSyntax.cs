@@ -36,6 +36,10 @@ namespace Sandra.UI.WF.Storage
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (json.Length < start) throw new ArgumentOutOfRangeException(nameof(start));
             if (json.Length < start + length) throw new ArgumentOutOfRangeException(nameof(length));
+
+            Json = json;
+            Start = start;
+            Length = length;
         }
     }
 }
