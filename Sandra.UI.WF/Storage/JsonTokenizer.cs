@@ -91,7 +91,12 @@ namespace Sandra.UI.WF.Storage
                             if (currentIndex + 1 < length)
                             {
                                 char secondChar = json[currentIndex + 1];
-                                if (secondChar == '*')
+                                if (secondChar == '/')
+                                {
+                                    currentTokenizer = InSingleLineComment;
+                                    yield break;
+                                }
+                                else if (secondChar == '*')
                                 {
                                     currentTokenizer = InMultiLineComment;
                                     yield break;
@@ -109,6 +114,63 @@ namespace Sandra.UI.WF.Storage
             }
 
             currentTokenizer = null;
+        }
+
+        private IEnumerable<JsonTerminalSymbol> InSingleLineComment()
+        {
+            // Eat both / characters, but leave firstUnusedIndex unchanged.
+            currentIndex += 2;
+
+            while (currentIndex < length)
+            {
+                char c = json[currentIndex];
+
+                switch (c)
+                {
+                    case '\r':
+                        // Can already eat this whitespace character.
+                        currentIndex++;
+
+                        // Look ahead to see if the next character is a linefeed.
+                        if (currentIndex < length)
+                        {
+                            char secondChar = json[currentIndex];
+                            if (secondChar == '\n')
+                            {
+                                yield return new JsonComment(
+                                    json,
+                                    firstUnusedIndex,
+                                    currentIndex - firstUnusedIndex - 1);
+
+                                // Eat the second whitespace character.
+                                currentIndex++;
+                                firstUnusedIndex = currentIndex;
+                                currentTokenizer = Default;
+                                yield break;
+                            }
+                        }
+                        break;
+                    case '\n':
+                        yield return new JsonComment(
+                            json,
+                            firstUnusedIndex,
+                            currentIndex - firstUnusedIndex);
+
+                        // Eat the '\n'.
+                        currentIndex++;
+                        firstUnusedIndex = currentIndex;
+                        currentTokenizer = Default;
+                        yield break;
+                }
+
+                currentIndex++;
+            }
+
+            currentTokenizer = null;
+            yield return new JsonComment(
+                json,
+                firstUnusedIndex,
+                currentIndex - firstUnusedIndex);
         }
 
         private IEnumerable<JsonTerminalSymbol> InMultiLineComment()
