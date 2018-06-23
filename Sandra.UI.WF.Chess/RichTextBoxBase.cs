@@ -27,7 +27,7 @@ using System.Windows.Forms;
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a Windows rich text box with a number of applicatio-wide features
+    /// Represents a Windows rich text box with a number of application-wide features
     /// such as <see cref="UIAction"/> hooks and a mouse-wheel event handler.
     /// </summary>
     public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
