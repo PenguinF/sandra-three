@@ -88,7 +88,7 @@ namespace Sandra.UI.WF.Storage
                             yield return new JsonComma(json, currentIndex);
                             break;
                         default:
-                            yield return new JsonUnknownSymbol(json, currentIndex, 1);
+                            yield return new JsonUnknownSymbol(json, currentIndex);
                             break;
                     }
                 }

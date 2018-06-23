@@ -110,7 +110,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonSquareBracketClose("]", 0), typeof(JsonSquareBracketClose) };
             yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
             yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol(string.Empty, 0, 0), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol("*", 0), typeof(JsonUnknownSymbol) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor
