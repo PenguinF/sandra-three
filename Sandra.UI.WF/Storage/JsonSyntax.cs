@@ -19,12 +19,15 @@
  *********************************************************************************/
 #endregion
 
+using System;
+
 namespace Sandra.UI.WF.Storage
 {
     public class JsonTerminalSymbol
     {
         public JsonTerminalSymbol(string json, int start, int length)
         {
+            if (json == null) throw new ArgumentNullException(nameof(json));
         }
     }
 }
