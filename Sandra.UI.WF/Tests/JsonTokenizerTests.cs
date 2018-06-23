@@ -47,6 +47,13 @@ namespace Sandra.UI.WF.Tests
 
         [Theory]
         [InlineData("")]
+        [InlineData("                              ")]
+        [InlineData("\n")]
+        [InlineData("\r")]
+        [InlineData("\t\v\u000c\u0085\u00a0")]
+        [InlineData("\r\n")]
+        [InlineData("\r\n\r\n")]
+        [InlineData("\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000")]
         public void WhiteSpace(string ws)
         {
             Assert.False(new JsonTokenizer(ws).TokenizeAll().Any());
