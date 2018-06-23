@@ -166,6 +166,23 @@ namespace Sandra.UI.WF.Tests
             });
         }
 
+        [Theory]
+        [InlineData("\"\"", "")]
+        public void StringValue(string json, string expectedValue)
+        {
+            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
+            Assert.Collection(tokens, symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<JsonString>(symbol);
+                var stringSymbol = (JsonString)symbol;
+                Assert.Equal(json, stringSymbol.Json);
+                Assert.Equal(0, stringSymbol.Start);
+                Assert.Equal(json.Length, stringSymbol.Length);
+                Assert.Equal(expectedValue, stringSymbol.Value);
+            });
+        }
+
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
             var symbolTypes = new Dictionary<string, Type>
@@ -181,6 +198,7 @@ namespace Sandra.UI.WF.Tests
                 { "*", typeof(JsonUnknownSymbol) },
                 { "_", typeof(JsonValue) },
                 { "true", typeof(JsonValue) },
+                { "\"\"", typeof(JsonString) },
             };
 
             var keys = symbolTypes.Keys;
