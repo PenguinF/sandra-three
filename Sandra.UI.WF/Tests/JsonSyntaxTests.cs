@@ -28,9 +28,23 @@ namespace Sandra.UI.WF.Tests
     public class JsonSyntaxTests
     {
         [Fact]
-        public void InvalidArguments()
+        public void NullJsonShouldThrow()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonTerminalSymbol(null, 0, 0));
+        }
+
+        [Theory]
+        [InlineData("", -1, 0, "start")]
+        [InlineData("", -1, -1, "start")]
+        [InlineData("", 0, -1, "length")]
+        [InlineData("", 1, 0, "start")]
+        [InlineData("", 0, 1, "length")]
+        [InlineData(" ", 0, 2, "length")]
+        [InlineData(" ", 1, 1, "length")]
+        [InlineData(" ", 2, 0, "start")]
+        public void OutOfRangeArguments(string json, int start, int length, string parameterName)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTerminalSymbol(json, start, length));
         }
     }
 }
