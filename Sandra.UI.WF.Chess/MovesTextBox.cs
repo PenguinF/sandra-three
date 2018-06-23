@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * MovesTextBox.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.PGN;
 using SysExtensions;
 using SysExtensions.SyntaxRenderer;
@@ -32,18 +35,6 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class MovesTextBox : RichTextBoxBase
     {
-        private sealed class TextElementStyle
-        {
-            public bool HasBackColor { get; set; }
-            public Color BackColor { get; set; }
-
-            public bool HasForeColor { get; set; }
-            public Color ForeColor { get; set; }
-
-            public bool HasFont => Font != null;
-            public Font Font { get; set; }
-        }
-
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
             HasBackColor = true,

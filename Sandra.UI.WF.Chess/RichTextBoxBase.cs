@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * RichTextBoxBase.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,8 +17,11 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -28,6 +32,18 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
     {
+        protected sealed class TextElementStyle
+        {
+            public bool HasBackColor { get; set; }
+            public Color BackColor { get; set; }
+
+            public bool HasForeColor { get; set; }
+            public Color ForeColor { get; set; }
+
+            public bool HasFont => Font != null;
+            public Font Font { get; set; }
+        }
+
         public RichTextBoxBase()
         {
             int zoomFactor;
