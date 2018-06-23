@@ -52,6 +52,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void Visit(JsonTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual void VisitComma(JsonComma symbol) => DefaultVisit(symbol);
+        public virtual void VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
@@ -65,11 +66,20 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult Visit(JsonTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
         public virtual TResult VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComma(JsonComma symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
+    }
+
+    public class JsonComment : JsonTerminalSymbol
+    {
+        public JsonComment(string json, int start, int length) : base(json, start, length) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
     }
 
     public class JsonCurlyOpen : JsonTerminalSymbol

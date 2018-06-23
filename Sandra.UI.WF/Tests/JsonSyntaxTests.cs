@@ -104,6 +104,7 @@ namespace Sandra.UI.WF.Tests
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
+            yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
             yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
             yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
             yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };
@@ -154,6 +155,7 @@ namespace Sandra.UI.WF.Tests
 
             public override void VisitColon(JsonColon symbol) => VisitedType = typeof(JsonColon);
             public override void VisitComma(JsonComma symbol) => VisitedType = typeof(JsonComma);
+            public override void VisitComment(JsonComment symbol) => VisitedType = typeof(JsonComment);
             public override void VisitCurlyClose(JsonCurlyClose symbol) => VisitedType = typeof(JsonCurlyClose);
             public override void VisitCurlyOpen(JsonCurlyOpen symbol) => VisitedType = typeof(JsonCurlyOpen);
             public override void VisitSquareBracketClose(JsonSquareBracketClose symbol) => VisitedType = typeof(JsonSquareBracketClose);
@@ -179,6 +181,7 @@ namespace Sandra.UI.WF.Tests
         {
             public override Type VisitColon(JsonColon symbol) => typeof(JsonColon);
             public override Type VisitComma(JsonComma symbol) => typeof(JsonComma);
+            public override Type VisitComment(JsonComment symbol) => typeof(JsonComment);
             public override Type VisitCurlyClose(JsonCurlyClose symbol) => typeof(JsonCurlyClose);
             public override Type VisitCurlyOpen(JsonCurlyOpen symbol) => typeof(JsonCurlyOpen);
             public override Type VisitSquareBracketClose(JsonSquareBracketClose symbol) => typeof(JsonSquareBracketClose);
