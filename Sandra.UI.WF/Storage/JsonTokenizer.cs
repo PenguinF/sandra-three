@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -43,6 +44,20 @@ namespace Sandra.UI.WF.Storage
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
             Json = json;
+        }
+
+        /// <summary>
+        /// Tokenizes the source <see cref="Json"/> from start to end.
+        /// </summary>
+        /// <returns>
+        /// An enumeration of <see cref="JsonTerminalSymbol"/> instances.
+        /// </returns>
+        public IEnumerable<JsonTerminalSymbol> TokenizeAll()
+        {
+            if (Json.Length > 0)
+            {
+                yield return new JsonUnknownSymbol(Json, 0, Json.Length);
+            }
         }
     }
 }
