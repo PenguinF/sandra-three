@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -63,7 +64,51 @@ namespace Sandra.UI.WF.Storage
             while (currentIndex < length)
             {
                 char c = json[currentIndex];
-                if (!char.IsWhiteSpace(c))
+
+                bool isSymbol = false;
+
+                var category = char.GetUnicodeCategory(c);
+                switch (category)
+                {
+                    case UnicodeCategory.UppercaseLetter:
+                    case UnicodeCategory.LowercaseLetter:
+                    case UnicodeCategory.TitlecaseLetter:
+                    case UnicodeCategory.ModifierLetter:
+                    case UnicodeCategory.OtherLetter:
+                    case UnicodeCategory.NonSpacingMark:
+                    case UnicodeCategory.SpacingCombiningMark:
+                    case UnicodeCategory.EnclosingMark:
+                    case UnicodeCategory.DecimalDigitNumber:
+                    case UnicodeCategory.LetterNumber:
+                    case UnicodeCategory.OtherNumber:
+                    case UnicodeCategory.Surrogate:
+                    case UnicodeCategory.ConnectorPunctuation:  // underscore-like characters
+                    case UnicodeCategory.DashPunctuation:
+                        // Treat as part of a value.
+                        break;
+                    case UnicodeCategory.OpenPunctuation:
+                    case UnicodeCategory.ClosePunctuation:
+                    case UnicodeCategory.InitialQuotePunctuation:
+                    case UnicodeCategory.FinalQuotePunctuation:
+                    case UnicodeCategory.OtherPunctuation:
+                    case UnicodeCategory.MathSymbol:
+                    case UnicodeCategory.CurrencySymbol:
+                    case UnicodeCategory.ModifierSymbol:
+                    case UnicodeCategory.OtherSymbol:
+                    case UnicodeCategory.OtherNotAssigned:
+                        isSymbol = true;
+                        break;
+                    case UnicodeCategory.SpaceSeparator:
+                    case UnicodeCategory.LineSeparator:
+                    case UnicodeCategory.ParagraphSeparator:
+                    case UnicodeCategory.Control:
+                    case UnicodeCategory.Format:
+                    case UnicodeCategory.PrivateUse:
+                    default:
+                        break;
+                }
+
+                if (isSymbol)
                 {
                     switch (c)
                     {
