@@ -19,9 +19,18 @@
  *********************************************************************************/
 #endregion
 
+using Sandra.UI.WF.Storage;
+using System;
+using Xunit;
+
 namespace Sandra.UI.WF.Tests
 {
     public class JsonTokenizerTests
     {
+        [Fact]
+        public void NullJsonThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonTokenizer(null));
+        }
     }
 }

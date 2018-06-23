@@ -21,4 +21,13 @@
 
 namespace Sandra.UI.WF.Storage
 {
+    /// <summary>
+    /// Based on https://www.json.org/.
+    /// </summary>
+    public sealed class JsonTokenizer
+    {
+        public JsonTokenizer(string json)
+        {
+        }
+    }
 }
