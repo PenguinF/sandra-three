@@ -57,6 +57,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
+        public virtual void VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
@@ -72,6 +73,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
@@ -148,6 +150,19 @@ namespace Sandra.UI.WF.Storage
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
+    }
+
+    public class JsonString : JsonTerminalSymbol
+    {
+        public string Value { get; }
+
+        public JsonString(string json, int start, int length, string value) : base(json, start, length)
+        {
+            Value = value;
+        }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitString(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitString(this);
     }
 
     public class JsonErrorInfo
