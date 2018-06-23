@@ -21,6 +21,7 @@
 
 using Sandra.UI.WF.Storage;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Sandra.UI.WF.Tests
@@ -88,6 +89,86 @@ namespace Sandra.UI.WF.Tests
             Assert.True(message == errorInfo.Message);
             Assert.True(start == errorInfo.Start);
             Assert.True(length == errorInfo.Length);
+        }
+
+        public static IEnumerable<object[]> TerminalSymbolsOfEachType()
+        {
+            yield return new object[] { new JsonUnknownSymbol(string.Empty, 0, 0), typeof(JsonUnknownSymbol) };
+        }
+
+        private sealed class TestVisitor1 : JsonTerminalSymbolVisitor
+        {
+            public bool DefaultVisited;
+
+            public override void DefaultVisit(JsonTerminalSymbol symbol) => DefaultVisited = true;
+        }
+
+        [Theory]
+        [MemberData(nameof(TerminalSymbolsOfEachType))]
+#pragma warning disable xUnit1026 // otherwise 2 generate methods are necessary.
+        public void DefaultVisitVoid(JsonTerminalSymbol symbol, Type symbolType)
+#pragma warning restore xUnit1026
+        {
+            var testVisitor = new TestVisitor1();
+            testVisitor.Visit(symbol);
+            Assert.True(testVisitor.DefaultVisited);
+        }
+
+        private sealed class TestVisitor2 : JsonTerminalSymbolVisitor<int>
+        {
+            public const int ReturnValue = 1;
+
+            public override int DefaultVisit(JsonTerminalSymbol symbol) => ReturnValue;
+        }
+
+        [Theory]
+        [MemberData(nameof(TerminalSymbolsOfEachType))]
+#pragma warning disable xUnit1026 // otherwise 2 generate methods are necessary.
+        public void DefaultVisitInt(JsonTerminalSymbol symbol, Type symbolType)
+#pragma warning restore xUnit1026
+        {
+            var testVisitor = new TestVisitor2();
+            Assert.Equal(TestVisitor2.ReturnValue, testVisitor.Visit(symbol));
+        }
+
+        private sealed class TestVisitor3 : JsonTerminalSymbolVisitor
+        {
+            public Type VisitedType;
+
+            public override void VisitUnknownSymbol(JsonUnknownSymbol symbol) => VisitedType = typeof(JsonUnknownSymbol);
+
+            public override void DefaultVisit(JsonTerminalSymbol symbol)
+            {
+                throw new InvalidOperationException("DefaultVisit should not have been called");
+            }
+
+        }
+
+        [Theory]
+        [MemberData(nameof(TerminalSymbolsOfEachType))]
+        public void NonDefaultVisitVoid(JsonTerminalSymbol symbol, Type symbolType)
+        {
+            var testVisitor = new TestVisitor3();
+            testVisitor.Visit(symbol);
+            Assert.Equal(symbolType, testVisitor.VisitedType);
+        }
+
+        private sealed class TestVisitor4 : JsonTerminalSymbolVisitor<Type>
+        {
+            public override Type VisitUnknownSymbol(JsonUnknownSymbol symbol) => typeof(JsonUnknownSymbol);
+
+            public override Type DefaultVisit(JsonTerminalSymbol symbol)
+            {
+                throw new InvalidOperationException("DefaultVisit should not have been called");
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TerminalSymbolsOfEachType))]
+        public void NonDefaultVisit(JsonTerminalSymbol symbol, Type symbolType)
+        {
+            var testVisitor = new TestVisitor4();
+            Assert.Equal(symbolType, testVisitor.Visit(symbol));
         }
     }
 }

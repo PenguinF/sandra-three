@@ -41,6 +41,23 @@ namespace Sandra.UI.WF.Storage
             Start = start;
             Length = length;
         }
+
+        public abstract void Accept(JsonTerminalSymbolVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
+    }
+
+    public abstract class JsonTerminalSymbolVisitor
+    {
+        public virtual void DefaultVisit(JsonTerminalSymbol symbol) { }
+        public virtual void Visit(JsonTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
+    }
+
+    public abstract class JsonTerminalSymbolVisitor<TResult>
+    {
+        public virtual TResult DefaultVisit(JsonTerminalSymbol symbol) => default(TResult);
+        public virtual TResult Visit(JsonTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
     }
 
     public class JsonUnknownSymbol : JsonTerminalSymbol
@@ -48,6 +65,9 @@ namespace Sandra.UI.WF.Storage
         public JsonUnknownSymbol(string json, int start, int length) : base(json, start, length)
         {
         }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbol(this);
     }
 
     public class JsonErrorInfo
