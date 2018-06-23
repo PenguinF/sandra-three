@@ -141,13 +141,18 @@ namespace Sandra.UI.WF.Tests
         {
             public Type VisitedType;
 
+            public override void VisitColon(JsonColon symbol) => VisitedType = typeof(JsonColon);
+            public override void VisitComma(JsonComma symbol) => VisitedType = typeof(JsonComma);
+            public override void VisitCurlyClose(JsonCurlyClose symbol) => VisitedType = typeof(JsonCurlyClose);
+            public override void VisitCurlyOpen(JsonCurlyOpen symbol) => VisitedType = typeof(JsonCurlyOpen);
+            public override void VisitSquareBracketClose(JsonSquareBracketClose symbol) => VisitedType = typeof(JsonSquareBracketClose);
+            public override void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => VisitedType = typeof(JsonSquareBracketOpen);
             public override void VisitUnknownSymbol(JsonUnknownSymbol symbol) => VisitedType = typeof(JsonUnknownSymbol);
 
             public override void DefaultVisit(JsonTerminalSymbol symbol)
             {
                 throw new InvalidOperationException("DefaultVisit should not have been called");
             }
-
         }
 
         [Theory]
@@ -161,6 +166,12 @@ namespace Sandra.UI.WF.Tests
 
         private sealed class TestVisitor4 : JsonTerminalSymbolVisitor<Type>
         {
+            public override Type VisitColon(JsonColon symbol) => typeof(JsonColon);
+            public override Type VisitComma(JsonComma symbol) => typeof(JsonComma);
+            public override Type VisitCurlyClose(JsonCurlyClose symbol) => typeof(JsonCurlyClose);
+            public override Type VisitCurlyOpen(JsonCurlyOpen symbol) => typeof(JsonCurlyOpen);
+            public override Type VisitSquareBracketClose(JsonSquareBracketClose symbol) => typeof(JsonSquareBracketClose);
+            public override Type VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => typeof(JsonSquareBracketOpen);
             public override Type VisitUnknownSymbol(JsonUnknownSymbol symbol) => typeof(JsonUnknownSymbol);
 
             public override Type DefaultVisit(JsonTerminalSymbol symbol)
