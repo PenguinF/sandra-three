@@ -21,6 +21,7 @@
 
 using Sandra.UI.WF.Storage;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -75,6 +76,46 @@ namespace Sandra.UI.WF.Tests
                 Assert.Equal(0, unknownSymbol.Start);
                 Assert.Equal(json.Length, unknownSymbol.Length);
             });
+        }
+
+        public static IEnumerable<object[]> TwoSymbolsOfEachType()
+        {
+            yield return new object[] { "*", typeof(JsonUnknownSymbol), "*", typeof(JsonUnknownSymbol) };
+        }
+
+        [Theory]
+        [MemberData(nameof(TwoSymbolsOfEachType))]
+        public void Transition(string json1, Type type1, string json2, Type type2)
+        {
+            // Test all eight combinations of whitespace before/in between/after both strings.
+            for (int i = 0; i < 8; i++)
+            {
+                string ws1 = (i & 1) != 0 ? " " : "";
+                string ws2 = (i & 2) != 0 ? " " : "";
+                string ws3 = (i & 4) != 0 ? " " : "";
+
+                int expectedSymbol1Start = (i & 1) != 0 ? 1 : 0;
+                int expectedSymbol2Start = expectedSymbol1Start + json1.Length + ((i & 2) != 0 ? 1 : 0);
+                int expectedSymbol1Length = json1.Length;
+                int expectedSymbol2Length = json2.Length;
+
+                var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
+                var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
+
+                Assert.Collection(tokens, symbol1 =>
+                {
+                    Assert.NotNull(symbol1);
+                    Assert.IsType(type1, symbol1);
+                    Assert.Equal(expectedSymbol1Start, symbol1.Start);
+                    Assert.Equal(expectedSymbol1Length, symbol1.Length);
+                }, symbol2 =>
+                {
+                    Assert.NotNull(symbol2);
+                    Assert.IsType(type2, symbol2);
+                    Assert.Equal(expectedSymbol2Start, symbol2.Start);
+                    Assert.Equal(expectedSymbol2Length, symbol2.Length);
+                });
+            }
         }
     }
 }
