@@ -63,6 +63,13 @@ namespace Sandra.UI.WF
                 Font = new Font("Consolas", 10, FontStyle.Italic),
             };
 
+            private readonly TextElementStyle valueStyle = new TextElementStyle()
+            {
+                HasForeColor = true,
+                ForeColor = Color.FromArgb(255, 255, 60),
+                Font = new Font("Consolas", 10, FontStyle.Bold),
+            };
+
             private readonly TextElementStyle errorStyle = new TextElementStyle()
             {
                 HasForeColor = true,
@@ -71,6 +78,7 @@ namespace Sandra.UI.WF
 
             public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
             public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
+            public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
         }
 
         private readonly SettingsFile settingsFile;
