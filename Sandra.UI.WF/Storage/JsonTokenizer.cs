@@ -29,10 +29,16 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class JsonTokenizer
     {
+        private readonly int length;
+        private readonly string json;
+
+        // Current state.
+        private int currentIndex;
+
         /// <summary>
         /// Gets the JSON which is tokenized.
         /// </summary>
-        public string Json { get; }
+        public string Json => json;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonTokenizer"/>.
@@ -43,7 +49,9 @@ namespace Sandra.UI.WF.Storage
         public JsonTokenizer(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
-            Json = json;
+            this.json = json;
+            length = json.Length;
+            currentIndex = 0;
         }
 
         /// <summary>
@@ -54,9 +62,14 @@ namespace Sandra.UI.WF.Storage
         /// </returns>
         public IEnumerable<JsonTerminalSymbol> TokenizeAll()
         {
-            if (!string.IsNullOrWhiteSpace(Json))
+            while (currentIndex < length)
             {
-                yield return new JsonUnknownSymbol(Json, 0, Json.Length);
+                char c = json[currentIndex];
+                if (!char.IsWhiteSpace(c))
+                {
+                    yield return new JsonUnknownSymbol(json, currentIndex, 1);
+                }
+                currentIndex++;
             }
         }
     }
