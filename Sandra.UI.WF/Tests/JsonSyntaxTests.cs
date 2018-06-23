@@ -46,5 +46,19 @@ namespace Sandra.UI.WF.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTerminalSymbol(json, start, length));
         }
+
+        [Theory]
+        [InlineData("", 0, 0)]
+        [InlineData("{}", 0, 1)]
+        // No newline conversions.
+        [InlineData("\n", 1, 0)]
+        [InlineData("\r\n", 0, 2)]
+        public void UnchangedParameters(string json, int start, int length)
+        {
+            var terminalSymbol = new JsonTerminalSymbol(json, start, length);
+            Assert.True(json == terminalSymbol.Json);
+            Assert.True(start == terminalSymbol.Start);
+            Assert.True(length == terminalSymbol.Length);
+        }
     }
 }

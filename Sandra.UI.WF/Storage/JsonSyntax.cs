@@ -25,6 +25,10 @@ namespace Sandra.UI.WF.Storage
 {
     public class JsonTerminalSymbol
     {
+        public string Json { get; }
+        public int Start { get; }
+        public int Length { get; }
+
         public JsonTerminalSymbol(string json, int start, int length)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
