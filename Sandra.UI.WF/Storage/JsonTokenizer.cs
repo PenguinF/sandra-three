@@ -28,6 +28,12 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class JsonTokenizer
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonTokenizer"/>.
+        /// </summary>
+        /// <param name="json">
+        /// The JSON to tokenize.
+        /// </param>
         public JsonTokenizer(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
