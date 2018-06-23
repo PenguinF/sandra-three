@@ -32,5 +32,16 @@ namespace Sandra.UI.WF.Tests
         {
             Assert.Throws<ArgumentNullException>(() => new JsonTokenizer(null));
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("{}")]
+        // No newline conversions.
+        [InlineData("\n")]
+        [InlineData("\r\n")]
+        public void JsonIsUnchanged(string json)
+        {
+            Assert.True(json == new JsonTokenizer(json).Json);
+        }
     }
 }
