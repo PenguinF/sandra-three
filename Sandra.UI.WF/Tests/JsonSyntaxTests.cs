@@ -60,5 +60,34 @@ namespace Sandra.UI.WF.Tests
             Assert.True(start == terminalSymbol.Start);
             Assert.True(length == terminalSymbol.Length);
         }
+
+        [Fact]
+        public void NullMessageShouldThrowInError()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorInfo(null, 0, 0));
+        }
+
+        [Theory]
+        [InlineData(-1, 0, "start")]
+        [InlineData(-1, -1, "start")]
+        [InlineData(0, -1, "length")]
+        public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(string.Empty, start, length));
+        }
+
+        [Theory]
+        [InlineData("", 0, 0)]
+        [InlineData("Error!", 0, 1)]
+        // No newline conversions.
+        [InlineData("\n", 1, 0)]
+        [InlineData("Error!\r\n", 0, 2)]
+        public void UnchangedParametersInError(string message, int start, int length)
+        {
+            var errorInfo = new JsonErrorInfo(message, start, length);
+            Assert.True(message == errorInfo.Message);
+            Assert.True(start == errorInfo.Start);
+            Assert.True(length == errorInfo.Length);
+        }
     }
 }

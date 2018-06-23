@@ -42,4 +42,15 @@ namespace Sandra.UI.WF.Storage
             Length = length;
         }
     }
+
+    public class JsonErrorInfo
+    {
+        public string Message { get; }
+        public int Start { get; }
+        public int Length { get; }
+
+        public JsonErrorInfo(string message, int start, int length)
+        {
+        }
+    }
 }
