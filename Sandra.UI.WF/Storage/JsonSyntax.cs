@@ -50,6 +50,12 @@ namespace Sandra.UI.WF.Storage
     {
         public virtual void DefaultVisit(JsonTerminalSymbol symbol) { }
         public virtual void Visit(JsonTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void VisitColon(JsonColon symbol) => DefaultVisit(symbol);
+        public virtual void VisitComma(JsonComma symbol) => DefaultVisit(symbol);
+        public virtual void VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
+        public virtual void VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
+        public virtual void VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
+        public virtual void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
     }
 
@@ -57,7 +63,61 @@ namespace Sandra.UI.WF.Storage
     {
         public virtual TResult DefaultVisit(JsonTerminalSymbol symbol) => default(TResult);
         public virtual TResult Visit(JsonTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult VisitColon(JsonColon symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitComma(JsonComma symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
+    }
+
+    public class JsonCurlyOpen : JsonTerminalSymbol
+    {
+        public JsonCurlyOpen(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
+    }
+
+    public class JsonCurlyClose : JsonTerminalSymbol
+    {
+        public JsonCurlyClose(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
+    }
+
+    public class JsonSquareBracketOpen : JsonTerminalSymbol
+    {
+        public JsonSquareBracketOpen(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
+    }
+
+    public class JsonSquareBracketClose : JsonTerminalSymbol
+    {
+        public JsonSquareBracketClose(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
+    }
+
+    public class JsonColon : JsonTerminalSymbol
+    {
+        public JsonColon(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
+    }
+
+    public class JsonComma : JsonTerminalSymbol
+    {
+        public JsonComma(string json, int start) : base(json, start, 1) { }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
     }
 
     public class JsonUnknownSymbol : JsonTerminalSymbol
