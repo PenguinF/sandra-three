@@ -67,7 +67,30 @@ namespace Sandra.UI.WF.Storage
                 char c = json[currentIndex];
                 if (!char.IsWhiteSpace(c))
                 {
-                    yield return new JsonUnknownSymbol(json, currentIndex, 1);
+                    switch (c)
+                    {
+                        case '{':
+                            yield return new JsonCurlyOpen(json, currentIndex);
+                            break;
+                        case '}':
+                            yield return new JsonCurlyClose(json, currentIndex);
+                            break;
+                        case '[':
+                            yield return new JsonSquareBracketOpen(json, currentIndex);
+                            break;
+                        case ']':
+                            yield return new JsonSquareBracketClose(json, currentIndex);
+                            break;
+                        case ':':
+                            yield return new JsonColon(json, currentIndex);
+                            break;
+                        case ',':
+                            yield return new JsonComma(json, currentIndex);
+                            break;
+                        default:
+                            yield return new JsonUnknownSymbol(json, currentIndex, 1);
+                            break;
+                    }
                 }
                 currentIndex++;
             }
