@@ -114,7 +114,15 @@ namespace Sandra.UI.WF.Storage
 
                 if (isSeparator)
                 {
-                    firstUnusedIndex = currentIndex;
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return new JsonValue(
+                            json,
+                            firstUnusedIndex,
+                            currentIndex - firstUnusedIndex);
+
+                        firstUnusedIndex = currentIndex;
+                    }
 
                     if (isSymbol)
                     {
@@ -166,6 +174,14 @@ namespace Sandra.UI.WF.Storage
                 }
 
                 currentIndex++;
+            }
+
+            if (firstUnusedIndex < currentIndex)
+            {
+                yield return new JsonValue(
+                    json,
+                    firstUnusedIndex,
+                    currentIndex - firstUnusedIndex);
             }
 
             currentTokenizer = null;
@@ -221,11 +237,12 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            currentTokenizer = null;
             yield return new JsonComment(
                 json,
                 firstUnusedIndex,
                 currentIndex - firstUnusedIndex);
+
+            currentTokenizer = null;
         }
 
         private IEnumerable<JsonTerminalSymbol> InMultiLineComment()
@@ -263,11 +280,12 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            currentTokenizer = null;
             yield return new JsonComment(
                 json,
                 firstUnusedIndex,
                 currentIndex - firstUnusedIndex);
+
+            currentTokenizer = null;
         }
 
         /// <summary>
