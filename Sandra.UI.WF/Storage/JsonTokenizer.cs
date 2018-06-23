@@ -91,14 +91,26 @@ namespace Sandra.UI.WF.Storage
                     case UnicodeCategory.ClosePunctuation:
                     case UnicodeCategory.InitialQuotePunctuation:
                     case UnicodeCategory.FinalQuotePunctuation:
-                    case UnicodeCategory.OtherPunctuation:
-                    case UnicodeCategory.MathSymbol:
                     case UnicodeCategory.CurrencySymbol:
                     case UnicodeCategory.ModifierSymbol:
                     case UnicodeCategory.OtherSymbol:
                     case UnicodeCategory.OtherNotAssigned:
                         isSymbol = true;
                         isSeparator = true;
+                        break;
+                    case UnicodeCategory.OtherPunctuation:
+                        if (c != '.')
+                        {
+                            isSymbol = true;
+                            isSeparator = true;
+                        }
+                        break;
+                    case UnicodeCategory.MathSymbol:
+                        if (c != '+')
+                        {
+                            isSymbol = true;
+                            isSeparator = true;
+                        }
                         break;
                     case UnicodeCategory.SpaceSeparator:
                     case UnicodeCategory.LineSeparator:
