@@ -34,6 +34,7 @@ namespace Sandra.UI.WF.Storage
 
         // Current state.
         private int currentIndex;
+        private int firstUnusedIndex;
         private Func<IEnumerable<JsonTerminalSymbol>> currentTokenizer;
 
         /// <summary>
@@ -53,6 +54,7 @@ namespace Sandra.UI.WF.Storage
             this.json = json;
             length = json.Length;
             currentIndex = 0;
+            firstUnusedIndex = 0;
             currentTokenizer = Default;
         }
 
@@ -88,6 +90,8 @@ namespace Sandra.UI.WF.Storage
                             break;
                     }
                 }
+
+                firstUnusedIndex++;
                 currentIndex++;
             }
 
