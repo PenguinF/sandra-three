@@ -35,7 +35,30 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class SettingsTextBox : RichTextBoxBase
     {
+        private readonly TextElementStyle defaultStyle = new TextElementStyle()
+        {
+            HasBackColor = true,
+            BackColor = Color.FromArgb(16, 16, 16),
+            HasForeColor = true,
+            ForeColor = Color.WhiteSmoke,
+            Font = new Font("Consolas", 10),
+        };
+
         private readonly SettingsFile settingsFile;
+
+        private void applyDefaultStyle()
+        {
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                BackColor = defaultStyle.BackColor;
+                ForeColor = defaultStyle.ForeColor;
+                Font = defaultStyle.Font;
+                SelectAll();
+                SelectionBackColor = defaultStyle.BackColor;
+                SelectionColor = defaultStyle.ForeColor;
+                SelectionFont = defaultStyle.Font;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
@@ -52,11 +75,10 @@ namespace Sandra.UI.WF
             this.settingsFile = settingsFile;
 
             BorderStyle = BorderStyle.None;
-            BackColor = Color.White;
-            ForeColor = Color.Black;
-            Font = new Font("Consolas", 10);
 
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+
+            applyDefaultStyle();
         }
     }
 }
