@@ -22,7 +22,6 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions.SyntaxRenderer;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -35,6 +34,17 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class SettingsTextBox : RichTextBoxBase
     {
+        /// <summary>
+        /// Because the syntax renderer does not support discontinuous terminal symbols.
+        /// </summary>
+        private class JsonWhitespace : JsonTerminalSymbol
+        {
+            public JsonWhitespace(string json, int start, int length) : base(json, start, length) { }
+
+            public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
+            public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+        }
+
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
             HasBackColor = true,
@@ -44,7 +54,20 @@ namespace Sandra.UI.WF
             Font = new Font("Consolas", 10),
         };
 
+        private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
+        {
+            private readonly TextElementStyle errorStyle = new TextElementStyle()
+            {
+                HasForeColor = true,
+                ForeColor = Color.FromArgb(255, 108, 108),
+            };
+
+            public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
+        }
+
         private readonly SettingsFile settingsFile;
+
+        private readonly SyntaxRenderer<JsonTerminalSymbol> syntaxRenderer;
 
         private void applyDefaultStyle()
         {
@@ -57,6 +80,20 @@ namespace Sandra.UI.WF
                 SelectionBackColor = defaultStyle.BackColor;
                 SelectionColor = defaultStyle.ForeColor;
                 SelectionFont = defaultStyle.Font;
+            }
+        }
+
+        private void applyStyle(TextElement<JsonTerminalSymbol> element, TextElementStyle style)
+        {
+            if (style != null)
+            {
+                using (var updateToken = BeginUpdateRememberCaret())
+                {
+                    Select(element.Start, element.Length);
+                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
+                    if (style.HasForeColor) SelectionColor = style.ForeColor;
+                    if (style.HasFont) SelectionFont = style.Font;
+                }
             }
         }
 
@@ -75,10 +112,61 @@ namespace Sandra.UI.WF
             this.settingsFile = settingsFile;
 
             BorderStyle = BorderStyle.None;
+            syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);
 
+            // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
 
             applyDefaultStyle();
+            tokenize(Text);
+            applySyntaxHighlighting();
+        }
+
+        private void tokenize(string json)
+        {
+            int firstUnusedIndex = 0;
+
+            using (var updateToken = BeginUpdate())
+            {
+                syntaxRenderer.Clear();
+                new JsonTokenizer(json).TokenizeAll().ForEach(x =>
+                {
+                    if (firstUnusedIndex < x.Start)
+                    {
+                        // Since whitespace is not returned from TokenizeAll().
+                        int length = x.Start - firstUnusedIndex;
+                        syntaxRenderer.AppendTerminalSymbol(
+                            new JsonWhitespace(json, firstUnusedIndex, length),
+                            length);
+                    }
+                    syntaxRenderer.AppendTerminalSymbol(x, x.Length);
+                    firstUnusedIndex = x.Start + x.Length;
+                });
+
+                if (firstUnusedIndex < json.Length)
+                {
+                    // Since whitespace is not returned from TokenizeAll().
+                    int length = json.Length - firstUnusedIndex;
+                    syntaxRenderer.AppendTerminalSymbol(
+                        new JsonWhitespace(json, firstUnusedIndex, length),
+                        length);
+                }
+            }
+        }
+
+        private void applySyntaxHighlighting()
+        {
+            using (var updateToken = BeginUpdateRememberCaret())
+            {
+                applyDefaultStyle();
+
+                var styleSelector = new StyleSelector();
+
+                foreach (var textElement in syntaxRenderer.Elements)
+                {
+                    applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
+                }
+            }
         }
     }
 }
