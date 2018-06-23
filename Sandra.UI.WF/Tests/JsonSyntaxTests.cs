@@ -28,10 +28,21 @@ namespace Sandra.UI.WF.Tests
 {
     public class JsonSyntaxTests
     {
+        /// <summary>
+        /// For testing JsonTerminalSymbols in general.
+        /// </summary>
+        private class JsonTestSymbol : JsonTerminalSymbol
+        {
+            public JsonTestSymbol(string json, int start, int length) : base(json, start, length) { }
+
+            public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
+            public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+        }
+
         [Fact]
         public void NullJsonShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonTestSymbol(null, 0, 0));
         }
 
         [Theory]
@@ -45,7 +56,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(" ", 2, 0, "start")]
         public void OutOfRangeArguments(string json, int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonUnknownSymbol(json, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTestSymbol(json, start, length));
         }
 
         [Theory]
@@ -56,7 +67,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\r\n", 0, 2)]
         public void UnchangedParameters(string json, int start, int length)
         {
-            var terminalSymbol = new JsonUnknownSymbol(json, start, length);
+            var terminalSymbol = new JsonTestSymbol(json, start, length);
             Assert.True(json == terminalSymbol.Json);
             Assert.True(start == terminalSymbol.Start);
             Assert.True(length == terminalSymbol.Length);
