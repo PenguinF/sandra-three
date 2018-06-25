@@ -152,31 +152,28 @@ namespace Sandra.UI.WF
         {
             int firstUnusedIndex = 0;
 
-            using (var updateToken = BeginUpdate())
+            syntaxRenderer.Clear();
+            new JsonTokenizer(json).TokenizeAll().ForEach(x =>
             {
-                syntaxRenderer.Clear();
-                new JsonTokenizer(json).TokenizeAll().ForEach(x =>
+                if (firstUnusedIndex < x.Start)
                 {
-                    if (firstUnusedIndex < x.Start)
-                    {
                         // Since whitespace is not returned from TokenizeAll().
                         int length = x.Start - firstUnusedIndex;
-                        syntaxRenderer.AppendTerminalSymbol(
-                            new JsonWhitespace(json, firstUnusedIndex, length),
-                            length);
-                    }
-                    syntaxRenderer.AppendTerminalSymbol(x, x.Length);
-                    firstUnusedIndex = x.Start + x.Length;
-                });
-
-                if (firstUnusedIndex < json.Length)
-                {
-                    // Since whitespace is not returned from TokenizeAll().
-                    int length = json.Length - firstUnusedIndex;
                     syntaxRenderer.AppendTerminalSymbol(
                         new JsonWhitespace(json, firstUnusedIndex, length),
                         length);
                 }
+                syntaxRenderer.AppendTerminalSymbol(x, x.Length);
+                firstUnusedIndex = x.Start + x.Length;
+            });
+
+            if (firstUnusedIndex < json.Length)
+            {
+                // Since whitespace is not returned from TokenizeAll().
+                int length = json.Length - firstUnusedIndex;
+                syntaxRenderer.AppendTerminalSymbol(
+                    new JsonWhitespace(json, firstUnusedIndex, length),
+                    length);
             }
         }
 
