@@ -174,6 +174,12 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonErrorString : JsonTerminalSymbol
     {
+        public JsonErrorString(string json, int start, int length, params JsonErrorInfo[] errors)
+            : base(json, start, length)
+        {
+            if (errors == null) throw new ArgumentNullException(nameof(errors));
+        }
+
         public JsonErrorString(string json, int start, int length, IEnumerable<JsonErrorInfo> errors)
             : base(json, start, length)
         {

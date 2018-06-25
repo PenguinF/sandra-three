@@ -118,7 +118,9 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullErrorsShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, null));
+            // Explicit casts to ensure the right constructor overload is always called.
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (JsonErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<JsonErrorInfo>)null));
         }
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
