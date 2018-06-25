@@ -265,6 +265,7 @@ namespace Sandra.UI.WF.Tests
         public static IEnumerable<object[]> GetErrorStrings()
         {
             yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
+            yield return new object[] { "\"\\", new[] { JsonErrorInfo.UnterminatedString(2) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
