@@ -104,8 +104,7 @@ namespace Sandra.UI.WF.Tests
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
-            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
-            Assert.Collection(tokens, symbol =>
+            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType(tokenType, symbol);
@@ -151,8 +150,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("ڳالھ")]
         public void ValueSymbol(string json)
         {
-            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
-            Assert.Collection(tokens, symbol =>
+            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType<JsonValue>(symbol);
@@ -167,8 +165,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\" \"", " ")]
         public void StringValue(string json, string expectedValue)
         {
-            var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
-            Assert.Collection(tokens, symbol =>
+            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType<JsonString>(symbol);
@@ -237,9 +234,7 @@ namespace Sandra.UI.WF.Tests
                 if (json2[json2.Length - 1] == '\n') expectedSymbol2Length--;
 
                 var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
-                var tokens = new JsonTokenizer(json).TokenizeAll().ToArray();
-
-                Assert.Collection(tokens, symbol1 =>
+                Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
                 {
                     Assert.NotNull(symbol1);
                     Assert.IsType(type1, symbol1);
