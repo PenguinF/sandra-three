@@ -216,12 +216,6 @@ namespace Sandra.UI.WF.Tests
             // Test all eight combinations of whitespace before/in between/after both strings.
             for (int i = 0; i < 8; i++)
             {
-                // Two JsonValues are glued together if there's no whitespace in between, so skip those.
-                if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
-                {
-                    continue;
-                }
-
                 string ws1 = (i & 1) != 0 ? " " : "";
                 string ws2 = (i & 2) != 0 ? " " : "";
                 string ws3 = (i & 4) != 0 ? " " : "";
@@ -236,19 +230,35 @@ namespace Sandra.UI.WF.Tests
                 if (json2[json2.Length - 1] == '\n') expectedSymbol2Length--;
 
                 var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
-                Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
+
+                // Two JsonValues are glued together if there's no whitespace in between,
+                // so assert that this is indeed what happens.
+                if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
                 {
-                    Assert.NotNull(symbol1);
-                    Assert.IsType(type1, symbol1);
-                    Assert.Equal(expectedSymbol1Start, symbol1.Start);
-                    Assert.Equal(expectedSymbol1Length, symbol1.Length);
-                }, symbol2 =>
+                    Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
+                    {
+                        Assert.NotNull(symbol1);
+                        Assert.IsType(type1, symbol1);
+                        Assert.Equal(expectedSymbol1Start, symbol1.Start);
+                        Assert.Equal(expectedSymbol2Start + expectedSymbol2Length - expectedSymbol1Start, symbol1.Length);
+                    });
+                }
+                else
                 {
-                    Assert.NotNull(symbol2);
-                    Assert.IsType(type2, symbol2);
-                    Assert.Equal(expectedSymbol2Start, symbol2.Start);
-                    Assert.Equal(expectedSymbol2Length, symbol2.Length);
-                });
+                    Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
+                    {
+                        Assert.NotNull(symbol1);
+                        Assert.IsType(type1, symbol1);
+                        Assert.Equal(expectedSymbol1Start, symbol1.Start);
+                        Assert.Equal(expectedSymbol1Length, symbol1.Length);
+                    }, symbol2 =>
+                    {
+                        Assert.NotNull(symbol2);
+                        Assert.IsType(type2, symbol2);
+                        Assert.Equal(expectedSymbol2Start, symbol2.Start);
+                        Assert.Equal(expectedSymbol2Length, symbol2.Length);
+                    });
+                }
             }
         }
     }
