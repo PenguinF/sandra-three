@@ -144,6 +144,7 @@ namespace Sandra.UI.WF.Storage
     {
         public JsonUnknownSymbol(string json, int start, JsonErrorInfo error) : base(json, start, 1)
         {
+            if (error == null) throw new ArgumentNullException(nameof(error));
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
