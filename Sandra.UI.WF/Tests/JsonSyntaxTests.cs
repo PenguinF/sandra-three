@@ -74,6 +74,39 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Fact]
+        public void NullErrorsShouldThrow()
+        {
+            // Explicit casts to ensure the right constructor overload is always called.
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (JsonErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<JsonErrorInfo>)null));
+        }
+
+        [Theory]
+        [InlineData("", 0, 0)]
+        [InlineData("Error!", 0, 1)]
+        // No newline conversions.
+        [InlineData("\n", 1, 0)]
+        [InlineData("Error!\r\n", 0, 2)]
+        public void UnchangedParametersInErrorString(string message, int start, int length)
+        {
+            var errorInfo1 = new JsonErrorInfo(message, start, length);
+            var errorInfo2 = new JsonErrorInfo(message + message, start + 1, length * 2);
+            var errorInfo3 = new JsonErrorInfo(message + message + message, start + 2, length * 3);
+
+            Assert.Collection(
+                new JsonErrorString("", 0, 0, errorInfo1, errorInfo2, errorInfo3).Errors,
+                error1 => Assert.Same(errorInfo1, error1),
+                error2 => Assert.Same(errorInfo2, error2),
+                error3 => Assert.Same(errorInfo3, error3));
+
+            Assert.Collection(
+                new JsonErrorString("", 0, 0, new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 }).Errors,
+                error1 => Assert.Same(errorInfo1, error1),
+                error2 => Assert.Same(errorInfo2, error2),
+                error3 => Assert.Same(errorInfo3, error3));
+        }
+
+        [Fact]
         public void NullMessageShouldThrowInError()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonErrorInfo(null, 0, 0));
@@ -113,14 +146,6 @@ namespace Sandra.UI.WF.Tests
             Assert.Equal("Unterminated string", error.Message);
             Assert.Equal(length, error.Start);
             Assert.Equal(0, error.Length);
-        }
-
-        [Fact]
-        public void NullErrorsShouldThrow()
-        {
-            // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (JsonErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<JsonErrorInfo>)null));
         }
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
