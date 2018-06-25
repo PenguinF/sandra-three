@@ -250,6 +250,12 @@ namespace Sandra.UI.WF.Tests
                 }
                 else
                 {
+                    if ((i & 4) != 0 && json2 == "\"")
+                    {
+                        // If symbol2 is an unterminated string, its length should include the whitespace after it.
+                        expectedSymbol2Length++;
+                    }
+
                     Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
