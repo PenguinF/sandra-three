@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -180,12 +181,14 @@ namespace Sandra.UI.WF.Storage
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
+            Errors = errors;
         }
 
         public JsonErrorString(string json, int start, int length, IEnumerable<JsonErrorInfo> errors)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
+            Errors = errors.ToArray();
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitErrorString(this);
