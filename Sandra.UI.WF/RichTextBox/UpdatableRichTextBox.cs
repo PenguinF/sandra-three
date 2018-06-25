@@ -173,9 +173,10 @@ namespace Sandra.UI.WF
             Select(textStart, textLength);
 
             // This only works if not read-only, so temporarily turn it off.
-            ReadOnly = false;
+            bool wasReadOnly = ReadOnly;
+            if (wasReadOnly) ReadOnly = false;
             SelectedText = string.Empty;
-            ReadOnly = true;
+            if (wasReadOnly) ReadOnly = true;
         }
 
         public UpdatableRichTextBox()
