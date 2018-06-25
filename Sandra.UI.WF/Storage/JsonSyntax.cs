@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -55,6 +56,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
+        public virtual void VisitErrorString(JsonErrorString symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitString(JsonString symbol) => DefaultVisit(symbol);
@@ -71,6 +73,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitErrorString(JsonErrorString symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketClose(JsonSquareBracketClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitString(JsonString symbol) => DefaultVisit(symbol);
@@ -167,6 +170,17 @@ namespace Sandra.UI.WF.Storage
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitString(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitString(this);
+    }
+
+    public class JsonErrorString : JsonTerminalSymbol
+    {
+        public JsonErrorString(string json, int start, int length, IEnumerable<JsonErrorInfo> errors)
+            : base(json, start, length)
+        {
+        }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitErrorString(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
     }
 
     public class JsonErrorInfo

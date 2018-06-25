@@ -115,6 +115,12 @@ namespace Sandra.UI.WF.Tests
             Assert.Equal(0, error.Length);
         }
 
+        [Fact]
+        public void NullErrorsShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, null));
+        }
+
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
