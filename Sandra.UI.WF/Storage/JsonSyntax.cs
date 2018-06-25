@@ -148,7 +148,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
-        public string Value { get; }
+        public string Value => Json.Substring(Start, Length);
 
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
 
