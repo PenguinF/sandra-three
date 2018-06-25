@@ -102,6 +102,19 @@ namespace Sandra.UI.WF.Tests
             Assert.Equal(length, errorInfo.Length);
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(3000)]
+        [InlineData(int.MaxValue)]
+        public void UnterminatedStringMessage(int length)
+        {
+            var error = JsonErrorInfo.UnterminatedString(length);
+            Assert.NotNull(error);
+            Assert.Equal("Unterminated string", error.Message);
+            Assert.Equal(length, error.Start);
+            Assert.Equal(0, error.Length);
+        }
+
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };

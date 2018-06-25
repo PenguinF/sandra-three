@@ -185,5 +185,14 @@ namespace Sandra.UI.WF.Storage
             Start = start;
             Length = length;
         }
+
+        /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
+        /// </summary>
+        /// <param name="start">
+        /// The length of the source json, or the position of the unexpected EOF.
+        /// </param>
+        public static JsonErrorInfo UnterminatedString(int length)
+            => null;
     }
 }
