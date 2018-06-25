@@ -30,8 +30,8 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class JsonTokenizer
     {
-        private readonly int length;
         private readonly string json;
+        private readonly int length;
 
         // Current state.
         private int currentIndex;
@@ -226,6 +226,12 @@ namespace Sandra.UI.WF.Storage
 
                 currentIndex++;
             }
+
+            yield return new JsonErrorString(
+                json,
+                firstUnusedIndex,
+                length - firstUnusedIndex,
+                JsonErrorInfo.UnterminatedString(currentIndex));
 
             currentTokenizer = null;
         }
