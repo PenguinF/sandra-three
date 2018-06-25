@@ -67,6 +67,7 @@ namespace Sandra.UI.WF.Tests
                 var commentSymbol = (JsonComment)symbol;
                 Assert.Equal(0, commentSymbol.Start);
                 Assert.Equal(expectedCommentText.Length, commentSymbol.Length);
+                Assert.Equal(expectedCommentText, commentSymbol.Text);
             });
         }
 
