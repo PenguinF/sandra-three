@@ -63,8 +63,7 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonComment>(symbol);
-                var commentSymbol = (JsonComment)symbol;
+                var commentSymbol = Assert.IsType<JsonComment>(symbol);
                 Assert.Equal(0, commentSymbol.Start);
                 Assert.Equal(expectedCommentText.Length, commentSymbol.Length);
                 Assert.Equal(expectedCommentText, commentSymbol.Text);
@@ -154,11 +153,11 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonValue>(symbol);
+                var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, ((JsonValue)symbol).Value);
+                Assert.Equal(json, valueSymbol.Value);
             });
         }
 
@@ -170,8 +169,7 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonString>(symbol);
-                var stringSymbol = (JsonString)symbol;
+                var stringSymbol = Assert.IsType<JsonString>(symbol);
                 Assert.Equal(json, stringSymbol.Json);
                 Assert.Equal(0, stringSymbol.Start);
                 Assert.Equal(json.Length, stringSymbol.Length);
