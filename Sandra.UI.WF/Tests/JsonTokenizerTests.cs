@@ -60,18 +60,14 @@ namespace Sandra.UI.WF.Tests
         public void Comment(string json, string alternativeCommentText)
         {
             string expectedCommentText = alternativeCommentText ?? json;
-
-            var result = new JsonTokenizer(json).TokenizeAll().ToArray();
-
-            Assert.True(
-                result.Length == 1 && result[0] is JsonComment,
-                $"'{json}' not recognized as a comment.");
-
-            JsonComment symbol = (JsonComment)result[0];
-
-            Assert.True(
-                symbol.Start == 0 && symbol.Length == expectedCommentText.Length,
-                $"'{json}' not at the right position or length.");
+            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<JsonComment>(symbol);
+                var commentSymbol = (JsonComment)symbol;
+                Assert.Equal(0, commentSymbol.Start);
+                Assert.Equal(expectedCommentText.Length, commentSymbol.Length);
+            });
         }
 
         [Theory]
