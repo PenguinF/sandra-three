@@ -195,16 +195,21 @@ namespace Sandra.UI.WF.Tests
                 { "true", typeof(JsonValue) },
                 { "\"\"", typeof(JsonString) },
                 { "\" \"", typeof(JsonString) },  // Have to check if the space isn't interpreted as whitespace.
+                { "\"", typeof(JsonErrorString) },
             };
 
             var keys = symbolTypes.Keys;
             foreach (var key1 in keys)
             {
-                foreach (var key2 in keys)
+                // Unterminated strings mess up the tokenization, skip those if they're the first key.
+                if (key1 != "\"")
                 {
-                    Type type1 = symbolTypes[key1];
-                    Type type2 = symbolTypes[key2];
-                    yield return new object[] { key1, type1, key2, type2 };
+                    foreach (var key2 in keys)
+                    {
+                        Type type1 = symbolTypes[key1];
+                        Type type2 = symbolTypes[key2];
+                        yield return new object[] { key1, type1, key2, type2 };
+                    }
                 }
             }
         }
