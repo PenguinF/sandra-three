@@ -103,7 +103,7 @@ namespace Sandra.UI.WF
         /// The RichTextBox API seems to have this hiatus that makes it impossible to decide what the direction was in which the text was selected.
         /// For this reason, the SelectionLength is always set to zero when the token is disposed.
         /// </remarks>
-        public UpdateToken BeginUpdateRememberCaret() => beginUpdate(true);
+        public UpdateToken BeginUpdateRememberState() => beginUpdate(true);
 
         /// <summary>
         /// Resumes repainting of the <see cref="UpdatableRichTextBox"/> after it's being updated.

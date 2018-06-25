@@ -95,7 +95,7 @@ namespace Sandra.UI.WF
 
         private void applyDefaultStyle()
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 BackColor = defaultStyle.BackColor;
                 ForeColor = defaultStyle.ForeColor;
@@ -111,7 +111,7 @@ namespace Sandra.UI.WF
         {
             if (style != null)
             {
-                using (var updateToken = BeginUpdateRememberCaret())
+                using (var updateToken = BeginUpdateRememberState())
                 {
                     Select(element.Start, element.Length);
                     if (style.HasBackColor) SelectionBackColor = style.BackColor;
@@ -157,8 +157,8 @@ namespace Sandra.UI.WF
             {
                 if (firstUnusedIndex < x.Start)
                 {
-                        // Since whitespace is not returned from TokenizeAll().
-                        int length = x.Start - firstUnusedIndex;
+                    // Since whitespace is not returned from TokenizeAll().
+                    int length = x.Start - firstUnusedIndex;
                     syntaxRenderer.AppendTerminalSymbol(
                         new JsonWhitespace(json, firstUnusedIndex, length),
                         length);
@@ -179,7 +179,7 @@ namespace Sandra.UI.WF
 
         private void applySyntaxHighlighting()
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 applyDefaultStyle();
 

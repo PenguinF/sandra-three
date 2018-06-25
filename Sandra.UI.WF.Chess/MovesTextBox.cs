@@ -76,7 +76,7 @@ namespace Sandra.UI.WF
 
         private void applyDefaultStyle()
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 BackColor = defaultStyle.BackColor;
                 ForeColor = defaultStyle.ForeColor;
@@ -90,7 +90,7 @@ namespace Sandra.UI.WF
 
         private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 Select(element.Start, element.Length);
                 if (style.HasBackColor) SelectionBackColor = style.BackColor;
@@ -400,7 +400,7 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    using (var updateToken = BeginUpdateRememberCaret())
+                    using (var updateToken = BeginUpdateRememberState())
                     {
                         // Reset markup of the previously active move element.
                         if (currentActiveMoveStyleElement != null)
