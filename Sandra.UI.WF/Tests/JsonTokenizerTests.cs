@@ -158,6 +158,7 @@ namespace Sandra.UI.WF.Tests
                 Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
+                Assert.Equal(json, ((JsonValue)symbol).Value);
             });
         }
 

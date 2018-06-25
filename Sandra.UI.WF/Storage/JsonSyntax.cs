@@ -148,6 +148,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
+        public string Value { get; }
+
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
