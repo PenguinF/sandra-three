@@ -19,6 +19,7 @@
 using SysExtensions;
 using SysExtensions.SyntaxRenderer;
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -43,19 +44,22 @@ namespace Sandra.UI.WF
             private readonly UpdatableRichTextBox owner;
             private readonly bool restore;
             private readonly int selectionStart;
+            private readonly int firstVisibleLine;
 
             public _UpdateToken(UpdatableRichTextBox owner,
                                 bool restore,
-                                int selectionStart)
+                                int selectionStart,
+                                int firstVisibleLine)
             {
                 this.owner = owner;
                 this.restore = restore;
                 this.selectionStart = selectionStart;
+                this.firstVisibleLine = firstVisibleLine;
             }
 
             public override void Dispose()
             {
-                owner.EndUpdate(restore, selectionStart);
+                owner.EndUpdate(restore, selectionStart, firstVisibleLine);
                 GC.SuppressFinalize(this);
             }
 
@@ -63,7 +67,7 @@ namespace Sandra.UI.WF
             {
                 // Make sure that _UpdateTokens which go out of scope without being disposed
                 // stop blocking an UpdatableRichTextBox when they are garbage collected.
-                if (owner != null) owner.EndUpdate(false, 0);
+                if (owner != null) owner.EndUpdate(false, 0, 0);
             }
         }
 
@@ -84,7 +88,16 @@ namespace Sandra.UI.WF
                 WinAPI.SendMessage(new HandleRef(this, Handle), WM_SETREDRAW, IntPtr.Zero, IntPtr.Zero);
             }
             ++blockingUpdateTokenCount;
-            return new _UpdateToken(this, restore, restore ? SelectionStart : 0);
+
+            int selectionStartToRestore = 0;
+            int firstVisibleLineToRestore = 0;
+            if (restore)
+            {
+                selectionStartToRestore = SelectionStart;
+                firstVisibleLineToRestore = GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
+            }
+
+            return new _UpdateToken(this, restore, selectionStartToRestore, firstVisibleLineToRestore);
         }
 
         /// <summary>
@@ -108,9 +121,20 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Resumes repainting of the <see cref="UpdatableRichTextBox"/> after it's being updated.
         /// </summary>
-        private void EndUpdate(bool setSelectionStart, int selectionStart)
+        private void EndUpdate(bool restore, int selectionStart, int firstVisibleLine)
         {
-            if (setSelectionStart) Select(selectionStart, 0);
+            if (restore)
+            {
+                // Sort of restore first visible char index with this trick:
+                // a) Move to end to get downwards as much as possible so step (b) has the best chance to succeed.
+                // b) Move to first character of the line to restore so it becomes the first visible line again.
+                Select(TextLength, 0);
+                Select(GetFirstCharIndexFromLine(firstVisibleLine), 0);
+
+                // Only then move back to selectionStart.
+                Select(selectionStart, 0);
+            }
+
             --blockingUpdateTokenCount;
             if (blockingUpdateTokenCount == 0 && !IsDisposed && !Disposing && IsHandleCreated)
             {
