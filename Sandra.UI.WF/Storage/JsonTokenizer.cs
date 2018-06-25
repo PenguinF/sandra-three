@@ -180,7 +180,10 @@ namespace Sandra.UI.WF.Storage
                                 }
                                 goto default;
                             default:
-                                yield return new JsonUnknownSymbol(json, currentIndex);
+                                yield return new JsonUnknownSymbol(
+                                    json,
+                                    currentIndex,
+                                    JsonErrorInfo.UnexpectedSymbol(Convert.ToString(c), currentIndex));
                                 break;
                         }
                     }

@@ -142,7 +142,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnknownSymbol : JsonTerminalSymbol
     {
-        public JsonUnknownSymbol(string json, int start) : base(json, start, 1)
+        public JsonUnknownSymbol(string json, int start, JsonErrorInfo error) : base(json, start, 1)
         {
         }
 
