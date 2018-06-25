@@ -89,6 +89,7 @@ namespace Sandra.UI.WF
 
         /// <summary>
         /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
+        /// Use this method when the <see cref="Text"/> is about to change.
         /// </summary>
         public UpdateToken BeginUpdate() => beginUpdate(false);
 
@@ -96,6 +97,7 @@ namespace Sandra.UI.WF
         /// Suspends repainting of the <see cref="UpdatableRichTextBox"/> while it's being updated.
         /// Attempts to restore the current position of the caret when the token is disposed.
         /// As a result, the current selection state will always be reset.
+        /// Use this method when the <see cref="Text"/> remains unchanged and the style is updated.
         /// </summary>
         /// <remarks>
         /// The RichTextBox API seems to have this hiatus that makes it impossible to decide what the direction was in which the text was selected.
