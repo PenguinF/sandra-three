@@ -164,6 +164,7 @@ namespace Sandra.UI.WF.Tests
         [Theory]
         [InlineData("\"\"", "")]
         [InlineData("\" \"", " ")]
+        [InlineData("\"xxx\"", "xxx")]
         public void StringValue(string json, string expectedValue)
         {
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
@@ -193,6 +194,7 @@ namespace Sandra.UI.WF.Tests
                 { "_", typeof(JsonValue) },
                 { "true", typeof(JsonValue) },
                 { "\"\"", typeof(JsonString) },
+                { "\" \"", typeof(JsonString) },  // Have to check if the space isn't interpreted as whitespace.
             };
 
             var keys = symbolTypes.Keys;
