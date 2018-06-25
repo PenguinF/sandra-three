@@ -192,7 +192,7 @@ namespace Sandra.UI.WF.Storage
         /// <param name="start">
         /// The length of the source json, or the position of the unexpected EOF.
         /// </param>
-        public static JsonErrorInfo UnterminatedString(int length)
-            => null;
+        public static JsonErrorInfo UnterminatedString(int start)
+            => new JsonErrorInfo("Unterminated string", start, 0);
     }
 }
