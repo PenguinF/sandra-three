@@ -80,7 +80,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
-        public string Text { get; }
+        public string Text => Json.Substring(Start, Length);
 
         public JsonComment(string json, int start, int length) : base(json, start, length) { }
 
