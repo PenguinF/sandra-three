@@ -136,6 +136,21 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
+        [InlineData("*", 0)]
+        [InlineData("€", 0)]
+        [InlineData("≥", 0)]
+
+        [InlineData("▓", 200)]
+        public void UnexpectedSymbolMessage(string displayCharValue, int position)
+        {
+            var error = JsonErrorInfo.UnexpectedSymbol(displayCharValue, position);
+            Assert.NotNull(error);
+            Assert.Equal($"Unexpected symbol '{displayCharValue}'", error.Message);
+            Assert.Equal(position, error.Start);
+            Assert.Equal(1, error.Length);
+        }
+
+        [Theory]
         [InlineData(0)]
         [InlineData(3000)]
         [InlineData(int.MaxValue)]
