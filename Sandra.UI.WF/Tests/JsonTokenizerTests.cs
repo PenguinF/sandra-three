@@ -43,7 +43,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\r\n")]
         public void JsonIsUnchanged(string json)
         {
-            Assert.True(json == new JsonTokenizer(json).Json);
+            Assert.Equal(json, new JsonTokenizer(json).Json);
         }
 
         [Theory]

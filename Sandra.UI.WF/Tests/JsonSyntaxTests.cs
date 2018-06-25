@@ -68,9 +68,9 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParameters(string json, int start, int length)
         {
             var terminalSymbol = new JsonTestSymbol(json, start, length);
-            Assert.True(json == terminalSymbol.Json);
-            Assert.True(start == terminalSymbol.Start);
-            Assert.True(length == terminalSymbol.Length);
+            Assert.Equal(json, terminalSymbol.Json);
+            Assert.Equal(start, terminalSymbol.Start);
+            Assert.Equal(length, terminalSymbol.Length);
         }
 
         [Fact]
@@ -97,9 +97,9 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParametersInError(string message, int start, int length)
         {
             var errorInfo = new JsonErrorInfo(message, start, length);
-            Assert.True(message == errorInfo.Message);
-            Assert.True(start == errorInfo.Start);
-            Assert.True(length == errorInfo.Length);
+            Assert.Equal(message, errorInfo.Message);
+            Assert.Equal(start, errorInfo.Start);
+            Assert.Equal(length, errorInfo.Length);
         }
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
