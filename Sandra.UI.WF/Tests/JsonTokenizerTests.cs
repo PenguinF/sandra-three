@@ -259,5 +259,32 @@ namespace Sandra.UI.WF.Tests
                 }
             }
         }
+
+        public static IEnumerable<object[]> GetErrorStrings()
+        {
+            yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
+        }
+
+        private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
+        {
+            public override IEnumerable<JsonErrorInfo> VisitErrorString(JsonErrorString symbol)
+                => symbol.Errors;
+        }
+
+        [Theory]
+        [MemberData(nameof(GetErrorStrings))]
+        public void Errors(string json, JsonErrorInfo[] expectedErrors)
+        {
+            ErrorInfoFinder errorInfoFinder = new ErrorInfoFinder();
+
+            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(errorInfoFinder.Visit);
+            Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
+            {
+                Assert.NotNull(generatedError);
+                Assert.Equal(expectedError.Message, generatedError.Message);
+                Assert.Equal(expectedError.Start, generatedError.Start);
+                Assert.Equal(expectedError.Length, generatedError.Length);
+            })).ToArray());
+        }
     }
 }
