@@ -216,7 +216,7 @@ namespace Sandra.UI.WF.Storage
         /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
         /// </summary>
         public static JsonErrorInfo UnexpectedSymbol(string displayCharValue, int position)
-            => null;
+            => new JsonErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
