@@ -264,11 +264,12 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
+            errors.Add(JsonErrorInfo.UnterminatedString(currentIndex));
             yield return new JsonErrorString(
                 json,
                 firstUnusedIndex,
                 length - firstUnusedIndex,
-                JsonErrorInfo.UnterminatedString(currentIndex));
+                errors);
 
             currentTokenizer = null;
         }
