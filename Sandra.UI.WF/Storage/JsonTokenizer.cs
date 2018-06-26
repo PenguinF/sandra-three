@@ -244,6 +244,46 @@ namespace Sandra.UI.WF.Storage
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
+                    case '\\':
+                        // Escape sequence.
+                        int escapeSequenceStart = currentIndex;
+                        currentIndex++;
+                        if (currentIndex < length)
+                        {
+                            char escapedChar = json[currentIndex];
+                            switch (escapedChar)
+                            {
+                                case '"':
+                                case '\\':
+                                case '/':  // Weird one, but it's in the specification.
+                                    valueBuilder.Append(escapedChar);
+                                    break;
+                                case 'b':
+                                    valueBuilder.Append('\b');
+                                    break;
+                                case 'f':
+                                    valueBuilder.Append('\f');
+                                    break;
+                                case 'n':
+                                    valueBuilder.Append('\n');
+                                    break;
+                                case 'r':
+                                    valueBuilder.Append('\r');
+                                    break;
+                                case 't':
+                                    valueBuilder.Append('\t');
+                                    break;
+                                case 'v':
+                                    valueBuilder.Append('\v');
+                                    break;
+                                default:
+                                    errors.Add(JsonErrorInfo.UnrecognizedEscapeSequence(
+                                        json.Substring(escapeSequenceStart, 2),
+                                        escapeSequenceStart));
+                                    break;
+                            }
+                        }
+                        break;
                     default:
                         if (char.IsControl(c))
                         {
