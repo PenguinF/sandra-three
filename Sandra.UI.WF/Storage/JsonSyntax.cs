@@ -235,13 +235,13 @@ namespace Sandra.UI.WF.Storage
         /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
         /// </summary>
         public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => null;
+            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
         /// </summary>
         public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => null;
+            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
