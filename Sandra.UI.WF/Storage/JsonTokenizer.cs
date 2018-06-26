@@ -276,6 +276,61 @@ namespace Sandra.UI.WF.Storage
                                 case 'v':
                                     valueBuilder.Append('\v');
                                     break;
+                                case 'u':
+                                    bool validUnicodeSequence = true;
+                                    int unicodeValue = 0;
+
+                                    // Expect exactly 4 hex characters.
+                                    const int expectedHexLength = 4;
+                                    for (int i = 0; i < expectedHexLength; i++)
+                                    {
+                                        currentIndex++;
+                                        if (currentIndex < length)
+                                        {
+                                            // 1 hex character = 4 bits.
+                                            unicodeValue <<= 4;
+                                            char hexChar = json[currentIndex];
+                                            if ('0' <= hexChar && hexChar <= '9')
+                                            {
+                                                unicodeValue = unicodeValue + hexChar - '0';
+                                            }
+                                            else if ('a' <= hexChar && hexChar <= 'f')
+                                            {
+                                                const int aValue = 'a' - 10;
+                                                unicodeValue = unicodeValue + hexChar - aValue;
+                                            }
+                                            else if ('A' <= hexChar && hexChar <= 'F')
+                                            {
+                                                const int aValue = 'A' - 10;
+                                                unicodeValue = unicodeValue + hexChar - aValue;
+                                            }
+                                            else
+                                            {
+                                                currentIndex--;
+                                                validUnicodeSequence = false;
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            currentIndex--;
+                                            validUnicodeSequence = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (validUnicodeSequence)
+                                    {
+                                        valueBuilder.Append(Convert.ToChar(unicodeValue));
+                                    }
+                                    else
+                                    {
+                                        int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
+                                        errors.Add(JsonErrorInfo.UnrecognizedUnicodeEscapeSequence(
+                                            json.Substring(escapeSequenceStart, escapeSequenceLength),
+                                            escapeSequenceStart, escapeSequenceLength));
+                                    }
+                                    break;
                                 default:
                                     errors.Add(JsonErrorInfo.UnrecognizedEscapeSequence(
                                         json.Substring(escapeSequenceStart, 2),
