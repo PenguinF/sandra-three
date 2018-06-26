@@ -181,10 +181,13 @@ namespace Sandra.UI.WF.Storage
                                 }
                                 goto default;
                             default:
+                                string displayCharValue = category == UnicodeCategory.OtherNotAssigned
+                                    ? $"\\u{((int)c).ToString("x4")}"
+                                    : Convert.ToString(c);
                                 yield return new JsonUnknownSymbol(
                                     json,
                                     currentIndex,
-                                    JsonErrorInfo.UnexpectedSymbol(Convert.ToString(c), currentIndex));
+                                    JsonErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex));
                                 break;
                         }
                     }
