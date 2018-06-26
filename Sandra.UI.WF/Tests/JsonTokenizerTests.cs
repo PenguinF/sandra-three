@@ -165,6 +165,21 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\"\"", "")]
         [InlineData("\" \"", " ")]
         [InlineData("\"xxx\"", "xxx")]
+
+        // Escape sequences.
+        [InlineData("\"\\\"\"", "\"")]
+        [InlineData("\"\\/\"", "/")]
+        [InlineData("\"\\b\"", "\b")]
+        [InlineData("\"\\f\"", "\f")]
+        [InlineData("\"\\n\"", "\n")]
+        [InlineData("\"\\r\"", "\r")]
+        [InlineData("\"\\t\"", "\t")]
+        [InlineData("\"\\v\"", "\v")]  // Support \v, contrary to JSON specification.
+
+        // \u escape sequences.
+        [InlineData("\"\\u000d\\u000a\"", "\r\n")]
+        [InlineData("\"\\u0020\\u004E\"", " N")]
+        [InlineData("\"\\u00200\"", " 0")] // last 0 is not part of the \u escape sequence
         public void StringValue(string json, string expectedValue)
         {
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
@@ -196,6 +211,8 @@ namespace Sandra.UI.WF.Tests
                 { "\"\"", typeof(JsonString) },
                 { "\" \"", typeof(JsonString) },  // Have to check if the space isn't interpreted as whitespace.
                 { "\"", typeof(JsonErrorString) },
+                { "\"\n\\ \n\"", typeof(JsonErrorString) },
+                { "\"\\u0\"", typeof(JsonErrorString) },
             };
 
             var keys = symbolTypes.Keys;
@@ -283,6 +300,23 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
             yield return new object[] { "\"\\", new[] { JsonErrorInfo.UnterminatedString(2) } };
 
+            // Unterminated because the closing " is escaped.
+            yield return new object[] { "\"\\\"", new[] { JsonErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "\"\\ \"", new[] { JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 1) } };
+            yield return new object[] { "\"\\e\"", new[] { JsonErrorInfo.UnrecognizedEscapeSequence("\\e", 1) } };
+
+            // Unicode escape sequences.
+            yield return new object[] { "\"\\u\"", new[] { JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\ux\"", new[] { JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\uxxxx\"", new[] { JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\u0\"", new[] { JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\u0", 1, 3) } };
+            yield return new object[] { "\"\\u00\"", new[] { JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\u00", 1, 4) } };
+            yield return new object[] { "\"\\u000\"", new[] { JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
+            yield return new object[] { "\"\\u000g\"", new[] { JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
+
+            // Prevent int.TryParse hacks.
+            yield return new object[] { "\"\\u-1000\"", new[] { JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\u", 1, 2) } };
+
             // Disallow control characters.
             yield return new object[] { "\"\n\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\n", 1) } };
             yield return new object[] { "\"\t\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\t", 1) } };
@@ -294,14 +328,43 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { " ∙\"∙\"\"", new JsonErrorInfo[] {
                 JsonErrorInfo.UnexpectedSymbol("∙", 1),
                 JsonErrorInfo.UnterminatedString(6) } };
+            yield return new object[] { "\"\r\n\"", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\r", 1),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 2) } };
+            yield return new object[] { "\"\\ ", new[] {
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 1),
+                JsonErrorInfo.UnterminatedString(3) } };
             yield return new object[] { "\"\r\n∙\"∙", new[] {
                 JsonErrorInfo.IllegalControlCharacterInString("\\r", 1),
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
                 JsonErrorInfo.UnexpectedSymbol("∙", 5) } };
-            yield return new object[] { "\"\n\n", new[] {
-                JsonErrorInfo.IllegalControlCharacterInString("\\n", 1),
+            yield return new object[] { "\"\t\n", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\t", 1),
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
                 JsonErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "\" \\ \n\"", new[] {
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 4) } };
+            yield return new object[] { "\"\n\\ \n\"", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 1),
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 4) } };
+            yield return new object[] { "\"\\u\n", new[] {
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 3),
+                JsonErrorInfo.UnterminatedString(4) } };
+            yield return new object[] { "\"\\ufff\n", new[] {
+                JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\ufff", 1, 5),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 6),
+                JsonErrorInfo.UnterminatedString(7) } };
+            yield return new object[] { "\"\n\\ ∙\"∙", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 1),
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonErrorInfo.UnexpectedSymbol("∙", 6) } };
+            yield return new object[] { "∙\"\n\\ ∙\"", new[] {
+                JsonErrorInfo.UnexpectedSymbol("∙", 0),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 3) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
