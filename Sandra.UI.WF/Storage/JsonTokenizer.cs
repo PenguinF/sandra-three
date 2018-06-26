@@ -34,6 +34,10 @@ namespace Sandra.UI.WF.Storage
         private readonly string json;
         private readonly int length;
 
+        // Reusable fields for building terminal symbols.
+        private readonly List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
+        private readonly StringBuilder valueBuilder = new StringBuilder();
+
         // Current state.
         private int currentIndex;
         private int firstUnusedIndex;
@@ -215,9 +219,6 @@ namespace Sandra.UI.WF.Storage
             // Eat " character, but leave firstUnusedIndex unchanged.
             currentIndex++;
 
-            List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
-            StringBuilder valueBuilder = new StringBuilder();
-
             while (currentIndex < length)
             {
                 char c = json[currentIndex];
@@ -232,6 +233,7 @@ namespace Sandra.UI.WF.Storage
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex,
                                 errors);
+                            errors.Clear();
                         }
                         else
                         {
@@ -241,6 +243,7 @@ namespace Sandra.UI.WF.Storage
                                 currentIndex - firstUnusedIndex,
                                 valueBuilder.ToString());
                         }
+                        valueBuilder.Clear();
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
