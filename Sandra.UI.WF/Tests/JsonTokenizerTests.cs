@@ -349,6 +349,12 @@ namespace Sandra.UI.WF.Tests
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 1),
                 JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 4) } };
+            yield return new object[] { "\"\\u", new[] {
+                JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1),
+                JsonErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "\"\\uA", new[] {
+                JsonErrorInfo.UnrecognizedUnicodeEscapeSequence("\\uA", 1, 3),
+                JsonErrorInfo.UnterminatedString(4) } };
             yield return new object[] { "\"\\u\n", new[] {
                 JsonErrorInfo.UnrecognizedEscapeSequence("\\u", 1),
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 3),
