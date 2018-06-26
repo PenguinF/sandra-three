@@ -169,6 +169,16 @@ namespace Sandra.UI.WF.Tests
             Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol("*", 0, null));
         }
 
+        [Theory]
+        [InlineData("*")]
+        [InlineData("€")]
+        public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
+        {
+            var error = JsonErrorInfo.UnexpectedSymbol(displayCharValue, 0);
+            var symbol = new JsonUnknownSymbol(displayCharValue, 0, error);
+            Assert.Same(error, symbol.Error);
+        }
+
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
