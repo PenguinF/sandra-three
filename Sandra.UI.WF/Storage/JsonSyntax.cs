@@ -230,5 +230,11 @@ namespace Sandra.UI.WF.Storage
         /// </param>
         public static JsonErrorInfo UnterminatedString(int start)
             => new JsonErrorInfo("Unterminated string", start, 0);
+
+        /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
+        /// </summary>
+        public static JsonErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
+            => null;
     }
 }

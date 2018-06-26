@@ -130,6 +130,18 @@ namespace Sandra.UI.WF.Tests
             Assert.Equal(0, error.Length);
         }
 
+        [Theory]
+        [InlineData("\\u007f", 1)]
+        [InlineData("\\n", 70)]
+        [InlineData("\\0", 1)]
+        public void IllegalControlCharacterInStringMessage(string displayCharValue, int position)
+        {
+            var error = JsonErrorInfo.IllegalControlCharacterInString(displayCharValue, position);
+            Assert.Equal($"Illegal control character '{displayCharValue}' in string", error.Message);
+            Assert.Equal(position, error.Start);
+            Assert.Equal(1, error.Length);
+        }
+
         [Fact]
         public void NullErrorsShouldThrow()
         {
