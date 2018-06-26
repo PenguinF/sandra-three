@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -215,6 +216,7 @@ namespace Sandra.UI.WF.Storage
             currentIndex++;
 
             List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
+            StringBuilder valueBuilder = new StringBuilder();
 
             while (currentIndex < length)
             {
@@ -237,7 +239,7 @@ namespace Sandra.UI.WF.Storage
                                 json,
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex,
-                                json.Substring(firstUnusedIndex + 1, currentIndex - firstUnusedIndex - 2));
+                                valueBuilder.ToString());
                         }
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
@@ -260,6 +262,10 @@ namespace Sandra.UI.WF.Storage
                             }
 
                             errors.Add(JsonErrorInfo.IllegalControlCharacterInString(displayCharValue, currentIndex));
+                        }
+                        else
+                        {
+                            valueBuilder.Append(c);
                         }
                         break;
                 }
