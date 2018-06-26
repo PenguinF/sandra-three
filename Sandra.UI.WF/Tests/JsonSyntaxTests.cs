@@ -191,8 +191,17 @@ namespace Sandra.UI.WF.Tests
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
 
+            // Assert that the elements of the list are copied, i.e. that if this collection is modified
+            // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
+            var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
+            var errorString = new JsonErrorString("", 0, 0, errorList);
+            Assert.NotSame(errorString.Errors, errorList);
+
+            // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
+            errorList.Add(errorInfo1);
+
             Assert.Collection(
-                new JsonErrorString("", 0, 0, new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 }).Errors,
+                errorString.Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
