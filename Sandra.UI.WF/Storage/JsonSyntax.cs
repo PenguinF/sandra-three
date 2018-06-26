@@ -235,6 +235,6 @@ namespace Sandra.UI.WF.Storage
         /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
         /// </summary>
         public static JsonErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
-            => null;
+            => new JsonErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
     }
 }
