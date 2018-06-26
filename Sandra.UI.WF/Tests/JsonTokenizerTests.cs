@@ -294,6 +294,14 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { " ∙\"∙\"\"", new JsonErrorInfo[] {
                 JsonErrorInfo.UnexpectedSymbol("∙", 1),
                 JsonErrorInfo.UnterminatedString(6) } };
+            yield return new object[] { "\"\r\n∙\"∙", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\r", 1),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
+                JsonErrorInfo.UnexpectedSymbol("∙", 5) } };
+            yield return new object[] { "\"\n\n", new[] {
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 1),
+                JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
+                JsonErrorInfo.UnterminatedString(3) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
