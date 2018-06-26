@@ -133,6 +133,7 @@ namespace Sandra.UI.WF.Storage
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
 
+                        // Important not to increment firstUnusedIndex here already, in case of a '"'.
                         firstUnusedIndex = currentIndex;
                     }
 
