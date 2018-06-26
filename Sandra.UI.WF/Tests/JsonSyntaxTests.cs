@@ -142,6 +142,29 @@ namespace Sandra.UI.WF.Tests
             Assert.Equal(1, error.Length);
         }
 
+        [Theory]
+        [InlineData("\\ ", 2)]
+        [InlineData("\\0", 1)]
+        public void UnrecognizedEscapeSequenceMessage(string displayCharValue, int position)
+        {
+            var error = JsonErrorInfo.UnrecognizedEscapeSequence(displayCharValue, position);
+            Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
+            Assert.Equal(position, error.Start);
+            Assert.Equal(2, error.Length);
+        }
+
+        [Theory]
+        [InlineData("\\u", 0)]
+        [InlineData("\\u00", 1)]
+        [InlineData("\\uffff", 1)]
+        public void UnrecognizedUnicodeEscapeSequenceMessage(string displayCharValue, int position)
+        {
+            var error = JsonErrorInfo.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
+            Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
+            Assert.Equal(position, error.Start);
+            Assert.Equal(displayCharValue.Length, error.Length);
+        }
+
         [Fact]
         public void NullErrorsShouldThrow()
         {

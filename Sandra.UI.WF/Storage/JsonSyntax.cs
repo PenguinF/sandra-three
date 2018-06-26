@@ -232,6 +232,18 @@ namespace Sandra.UI.WF.Storage
             => new JsonErrorInfo("Unterminated string", start, 0);
 
         /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
+        /// </summary>
+        public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
+            => null;
+
+        /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
+        /// </summary>
+        public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
+            => null;
+
+        /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
         /// </summary>
         public static JsonErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
