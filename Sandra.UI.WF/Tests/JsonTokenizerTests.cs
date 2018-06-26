@@ -283,6 +283,13 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
             yield return new object[] { "\"\\", new[] { JsonErrorInfo.UnterminatedString(2) } };
 
+            // Disallow control characters.
+            yield return new object[] { "\"\n\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\n", 1) } };
+            yield return new object[] { "\"\t\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\t", 1) } };
+            yield return new object[] { "\"\0\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\0", 1) } };
+            yield return new object[] { "\"\u0001\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\u0001", 1) } };
+            yield return new object[] { "\"\u007f\"", new[] { JsonErrorInfo.IllegalControlCharacterInString("\\u007f", 1) } };
+
             // Multiple errors.
             yield return new object[] { " ∙\"∙\"\"", new JsonErrorInfo[] {
                 JsonErrorInfo.UnexpectedSymbol("∙", 1),
