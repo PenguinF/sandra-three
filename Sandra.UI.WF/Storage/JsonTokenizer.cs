@@ -313,7 +313,8 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            errors.Add(JsonErrorInfo.UnterminatedString(currentIndex));
+            // Use length rather than currentIndex; currentIndex is bigger after a '\'.
+            errors.Add(JsonErrorInfo.UnterminatedString(length));
             yield return new JsonErrorString(
                 json,
                 firstUnusedIndex,
