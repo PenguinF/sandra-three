@@ -275,12 +275,22 @@ namespace Sandra.UI.WF.Tests
 
         public static IEnumerable<object[]> GetErrorStrings()
         {
+            yield return new object[] { "*", new[] { JsonErrorInfo.UnexpectedSymbol("*", 0) } };
+            yield return new object[] { " *", new[] { JsonErrorInfo.UnexpectedSymbol("*", 1) } };
+            yield return new object[] { "  °  ", new[] { JsonErrorInfo.UnexpectedSymbol("°", 2) } };
+
+            // Invalid strings.
             yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
             yield return new object[] { "\"\\", new[] { JsonErrorInfo.UnterminatedString(2) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
         {
+            public override IEnumerable<JsonErrorInfo> VisitUnknownSymbol(JsonUnknownSymbol symbol)
+            {
+                yield return symbol.Error;
+            }
+
             public override IEnumerable<JsonErrorInfo> VisitErrorString(JsonErrorString symbol)
                 => symbol.Errors;
         }
