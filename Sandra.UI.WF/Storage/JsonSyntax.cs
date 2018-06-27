@@ -229,7 +229,7 @@ namespace Sandra.UI.WF.Storage
         /// The length of the source json, or the position of the unexpected EOF.
         /// </param>
         public static JsonErrorInfo UnterminatedMultiLineComment(int start)
-            => null;
+            => new JsonErrorInfo("Unterminated multi-line comment", start, 0);
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
