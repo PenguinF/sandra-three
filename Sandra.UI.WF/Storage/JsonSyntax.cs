@@ -62,6 +62,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
+        public virtual void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
@@ -79,6 +80,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
@@ -98,10 +100,12 @@ namespace Sandra.UI.WF.Storage
 
         public JsonUnterminatedMultiLineComment(string json, int start, int length, JsonErrorInfo error) : base(json, start, length)
         {
+            if (error == null) throw new ArgumentNullException(nameof(error));
+            Error = error;
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineComment(this);
     }
 
     public class JsonCurlyOpen : JsonTerminalSymbol

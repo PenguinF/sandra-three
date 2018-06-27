@@ -316,6 +316,7 @@ namespace Sandra.UI.WF.Tests
             public override void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => VisitedType = typeof(JsonSquareBracketOpen);
             public override void VisitString(JsonString symbol) => VisitedType = typeof(JsonString);
             public override void VisitUnknownSymbol(JsonUnknownSymbol symbol) => VisitedType = typeof(JsonUnknownSymbol);
+            public override void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => VisitedType = typeof(JsonUnterminatedMultiLineComment);
             public override void VisitValue(JsonValue symbol) => VisitedType = typeof(JsonValue);
 
             public override void DefaultVisit(JsonTerminalSymbol symbol)
@@ -345,6 +346,7 @@ namespace Sandra.UI.WF.Tests
             public override Type VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => typeof(JsonSquareBracketOpen);
             public override Type VisitString(JsonString symbol) => typeof(JsonString);
             public override Type VisitUnknownSymbol(JsonUnknownSymbol symbol) => typeof(JsonUnknownSymbol);
+            public override Type VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => typeof(JsonUnterminatedMultiLineComment);
             public override Type VisitValue(JsonValue symbol) => typeof(JsonValue);
 
             public override Type DefaultVisit(JsonTerminalSymbol symbol)
