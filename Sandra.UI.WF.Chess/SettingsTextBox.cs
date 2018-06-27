@@ -45,7 +45,7 @@ namespace Sandra.UI.WF
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
-        private readonly TextElementStyle defaultStyle = new TextElementStyle()
+        private static readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
             HasBackColor = true,
             BackColor = Color.FromArgb(16, 16, 16),
@@ -54,35 +54,35 @@ namespace Sandra.UI.WF
             Font = new Font("Consolas", 10),
         };
 
+        private static readonly TextElementStyle commentStyle = new TextElementStyle()
+        {
+            HasForeColor = true,
+            ForeColor = Color.FromArgb(128, 220, 220),
+            Font = new Font("Consolas", 10, FontStyle.Italic),
+        };
+
+        private static readonly TextElementStyle valueStyle = new TextElementStyle()
+        {
+            HasForeColor = true,
+            ForeColor = Color.FromArgb(255, 255, 60),
+            Font = new Font("Consolas", 10, FontStyle.Bold),
+        };
+
+        private static readonly TextElementStyle stringStyle = new TextElementStyle()
+        {
+            HasForeColor = true,
+            ForeColor = Color.FromArgb(255, 192, 144),
+        };
+
+        private static readonly TextElementStyle errorStyle = new TextElementStyle()
+        {
+            HasForeColor = true,
+            ForeColor = Color.FromArgb(255, 72, 72),
+            Font = new Font("Consolas", 10, FontStyle.Underline),
+        };
+
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
         {
-            private readonly TextElementStyle commentStyle = new TextElementStyle()
-            {
-                HasForeColor = true,
-                ForeColor = Color.FromArgb(128, 220, 220),
-                Font = new Font("Consolas", 10, FontStyle.Italic),
-            };
-
-            private readonly TextElementStyle valueStyle = new TextElementStyle()
-            {
-                HasForeColor = true,
-                ForeColor = Color.FromArgb(255, 255, 60),
-                Font = new Font("Consolas", 10, FontStyle.Bold),
-            };
-
-            private readonly TextElementStyle stringStyle = new TextElementStyle()
-            {
-                HasForeColor = true,
-                ForeColor = Color.FromArgb(255, 192, 144),
-            };
-
-            private readonly TextElementStyle errorStyle = new TextElementStyle()
-            {
-                HasForeColor = true,
-                ForeColor = Color.FromArgb(255, 72, 72),
-                Font = new Font("Consolas", 10, FontStyle.Underline),
-            };
-
             public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
             public override TextElementStyle VisitErrorString(JsonErrorString symbol) => errorStyle;
             public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
