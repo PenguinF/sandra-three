@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * MovesTextBox.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.PGN;
 using SysExtensions;
 using SysExtensions.SyntaxRenderer;
@@ -32,18 +35,6 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class MovesTextBox : RichTextBoxBase
     {
-        private sealed class TextElementStyle
-        {
-            public bool HasBackColor { get; set; }
-            public Color BackColor { get; set; }
-
-            public bool HasForeColor { get; set; }
-            public Color ForeColor { get; set; }
-
-            public bool HasFont => Font != null;
-            public Font Font { get; set; }
-        }
-
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
             HasBackColor = true,
@@ -67,7 +58,7 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
-            syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this);
+            syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this, isSlave: false);
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
 
             applyDefaultStyle();
@@ -85,7 +76,7 @@ namespace Sandra.UI.WF
 
         private void applyDefaultStyle()
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 BackColor = defaultStyle.BackColor;
                 ForeColor = defaultStyle.ForeColor;
@@ -99,7 +90,7 @@ namespace Sandra.UI.WF
 
         private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
         {
-            using (var updateToken = BeginUpdateRememberCaret())
+            using (var updateToken = BeginUpdateRememberState())
             {
                 Select(element.Start, element.Length);
                 if (style.HasBackColor) SelectionBackColor = style.BackColor;
@@ -409,7 +400,7 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    using (var updateToken = BeginUpdateRememberCaret())
+                    using (var updateToken = BeginUpdateRememberState())
                     {
                         // Reset markup of the previously active move element.
                         if (currentActiveMoveStyleElement != null)
