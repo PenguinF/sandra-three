@@ -47,7 +47,7 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
-        [InlineData("//", "//")]
+        [InlineData("//", null)]
         [InlineData("//\n", "//")]
         [InlineData("//\r\n", "//")]
         [InlineData("//\t\tComment \r\n", "//\t\tComment ")]
@@ -199,6 +199,9 @@ namespace Sandra.UI.WF.Tests
             {
                 { "//\n", typeof(JsonComment) },
                 { "/**/", typeof(JsonComment) },
+                { "/***/", typeof(JsonComment) },
+                { "/*/*/", typeof(JsonComment) },
+                { "/*", typeof(JsonUnterminatedMultiLineComment) },
                 { "{", typeof(JsonCurlyOpen) },
                 { "}", typeof(JsonCurlyClose) },
                 { "[", typeof(JsonSquareBracketOpen) },
@@ -218,8 +221,8 @@ namespace Sandra.UI.WF.Tests
             var keys = symbolTypes.Keys;
             foreach (var key1 in keys)
             {
-                // Unterminated strings mess up the tokenization, skip those if they're the first key.
-                if (key1 != "\"")
+                // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
+                if (key1 != "\"" && key1 != "/*")
                 {
                     foreach (var key2 in keys)
                     {
@@ -267,9 +270,9 @@ namespace Sandra.UI.WF.Tests
                 }
                 else
                 {
-                    if ((i & 4) != 0 && json2 == "\"")
+                    if ((i & 4) != 0 && (json2 == "\"" || json2 == "/*"))
                     {
-                        // If symbol2 is an unterminated string, its length should include the whitespace after it.
+                        // If symbol2 is an unterminated string/comment, its length should include the whitespace after it.
                         expectedSymbol2Length++;
                     }
 
@@ -295,6 +298,12 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "*", new[] { JsonErrorInfo.UnexpectedSymbol("*", 0) } };
             yield return new object[] { " *", new[] { JsonErrorInfo.UnexpectedSymbol("*", 1) } };
             yield return new object[] { "  °  ", new[] { JsonErrorInfo.UnexpectedSymbol("°", 2) } };
+
+            // Unterminated comments.
+            yield return new object[] { "/*", new[] { JsonErrorInfo.UnterminatedMultiLineComment(2) } };
+            yield return new object[] { "/*\n\n", new[] { JsonErrorInfo.UnterminatedMultiLineComment(4) } };
+            yield return new object[] { "  /*\n\n*", new[] { JsonErrorInfo.UnterminatedMultiLineComment(7) } };
+            yield return new object[] { "  /*\n\n* /", new[] { JsonErrorInfo.UnterminatedMultiLineComment(9) } };
 
             // Invalid strings.
             yield return new object[] { "\"", new[] { JsonErrorInfo.UnterminatedString(1) } };
@@ -371,6 +380,12 @@ namespace Sandra.UI.WF.Tests
                 JsonErrorInfo.UnexpectedSymbol("∙", 0),
                 JsonErrorInfo.IllegalControlCharacterInString("\\n", 2),
                 JsonErrorInfo.UnrecognizedEscapeSequence("\\ ", 3) } };
+
+            // Know what's unterminated.
+            yield return new object[] { "\"/*", new[] { JsonErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "/*\"", new[] { JsonErrorInfo.UnterminatedMultiLineComment(3) } };
+            yield return new object[] { "///*\n\"", new[] { JsonErrorInfo.UnterminatedString(6) } };
+            yield return new object[] { "///*\"\n/*", new[] { JsonErrorInfo.UnterminatedMultiLineComment(8) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<JsonErrorInfo>>
@@ -379,6 +394,11 @@ namespace Sandra.UI.WF.Tests
                 => Enumerable.Empty<JsonErrorInfo>();
 
             public override IEnumerable<JsonErrorInfo> VisitUnknownSymbol(JsonUnknownSymbol symbol)
+            {
+                yield return symbol.Error;
+            }
+
+            public override IEnumerable<JsonErrorInfo> VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol)
             {
                 yield return symbol.Error;
             }
