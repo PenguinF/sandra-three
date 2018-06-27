@@ -449,16 +449,14 @@ namespace Sandra.UI.WF.Storage
             {
                 if (json[currentIndex] == '*')
                 {
-                    currentIndex++;
-
                     // Look ahead to see if the next character is a slash.
-                    if (currentIndex < length)
+                    if (currentIndex + 1 < length)
                     {
-                        char secondChar = json[currentIndex];
+                        char secondChar = json[currentIndex + 1];
                         if (secondChar == '/')
                         {
                             // Increment so the closing '*/' is regarded as part of the comment.
-                            currentIndex++;
+                            currentIndex += 2;
 
                             yield return new JsonComment(
                                 json,
@@ -475,10 +473,11 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            yield return new JsonComment(
+            yield return new JsonUnterminatedMultiLineComment(
                 json,
                 firstUnusedIndex,
-                currentIndex - firstUnusedIndex);
+                length - firstUnusedIndex,
+                JsonErrorInfo.UnterminatedMultiLineComment(length));
 
             currentTokenizer = null;
         }
