@@ -87,6 +87,7 @@ namespace Sandra.UI.WF
             public override TextElementStyle VisitErrorString(JsonErrorString symbol) => errorStyle;
             public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
             public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
+            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => errorStyle;
             public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
         }
 
