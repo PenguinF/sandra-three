@@ -1,5 +1,5 @@
 ﻿/*********************************************************************************
- * TestEnumArray.cs
+ * EnumArrayTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -16,45 +16,29 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SysExtensions;
 using System;
+using Xunit;
 
 namespace Sandra.Chess.Tests
 {
-    [TestClass]
-    public class TestEnumArray
+    public class EnumArrayTests
     {
-        Exception ExpectException(Action testAction)
-        {
-            try
-            {
-                testAction();
-                return null;
-            }
-            catch (Exception exception)
-            {
-                return exception;
-            }
-        }
-
-
-        private void testIllegalEnum<T>() where T : struct
+        private void AssertEnumIsIllegal<T>() where T : struct
         {
             // The beauty of this is that the static constructor is only run when already inside the closure.
-            Exception exception = ExpectException(() => EnumIndexedArray<T, int>.New());
-            Assert.IsInstanceOfType(exception, typeof(TypeInitializationException));
+            Assert.Throws<TypeInitializationException>(() => EnumIndexedArray<T, int>.New());
         }
 
-        enum EmptyEnum
+        enum _EmptyEnum
         {
         }
 
-        [TestMethod]
-        public void TestEmptyEnum()
+        [Fact]
+        public void EmptyEnum()
         {
-            var array = EnumIndexedArray<EmptyEnum, int>.New();
-            Assert.AreEqual(array.Length, 0);
+            var array = EnumIndexedArray<_EmptyEnum, int>.New();
+            Assert.Equal(0, array.Length);
         }
 
         enum IllegalEnum2
@@ -64,10 +48,10 @@ namespace Sandra.Chess.Tests
             One = 1,
         }
 
-        [TestMethod]
-        public void TestIllegalEnum2()
+        [Fact]
+        public void EnumWithNegativeValue()
         {
-            testIllegalEnum<IllegalEnum2>();
+            AssertEnumIsIllegal<IllegalEnum2>();
         }
 
         enum IllegalEnum3
@@ -78,24 +62,24 @@ namespace Sandra.Chess.Tests
             Two = 2,
         }
 
-        [TestMethod]
-        public void TestIllegalEnum3()
+        [Fact]
+        public void EnumWithGaps()
         {
-            testIllegalEnum<IllegalEnum3>();
+            AssertEnumIsIllegal<IllegalEnum3>();
         }
 
-        enum EnumWithDuplicates
+        enum _EnumWithDuplicates
         {
             A1 = 0, A2 = 0,
             B2 = 1, B1 = 1,
             C = 2,
         }
 
-        [TestMethod]
-        public void TestEnumWithDuplicates()
+        [Fact]
+        public void EnumWithDuplicates()
         {
-            var array = EnumIndexedArray<EnumWithDuplicates, int>.New();
-            Assert.AreEqual(array.Length, 3);
+            var array = EnumIndexedArray<_EnumWithDuplicates, int>.New();
+            Assert.Equal(3, array.Length);
         }
     }
 }

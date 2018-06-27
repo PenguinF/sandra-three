@@ -35,12 +35,20 @@ namespace SysExtensions.SyntaxRenderer
     /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
-        public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget) => new SyntaxRenderer<TTerminal>(renderTarget);
+        /// <summary>
+        /// Attaches a syntax renderer to a render target.
+        /// </summary>
+        /// <param name="isSlave">
+        /// True if the renderer should not update the render target but assume it is always in sync; false otherwise.
+        /// </param>
+        public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget, bool isSlave)
+            => new SyntaxRenderer<TTerminal>(renderTarget, isSlave);
 
-        private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
+        private SyntaxRenderer(ISyntaxRenderTarget renderTarget, bool isSlave)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             RenderTarget = renderTarget;
+            this.isSlave = isSlave;
 
             Elements = elements;
 
@@ -52,6 +60,8 @@ namespace SysExtensions.SyntaxRenderer
         }
 
         internal readonly ISyntaxRenderTarget RenderTarget;
+
+        private readonly bool isSlave;
 
         private readonly List<int> elementIndexes = new List<int>();
 
@@ -80,6 +90,7 @@ namespace SysExtensions.SyntaxRenderer
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
         {
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
+            if (isSlave) throw new InvalidOperationException("Slave syntax renderers should not append text.");
             if (text == null) throw new ArgumentNullException(nameof(text));
 
             int length = text.Length;
@@ -101,12 +112,36 @@ namespace SysExtensions.SyntaxRenderer
             return textElement;
         }
 
+        public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, int length)
+        {
+            if (terminal == null) throw new ArgumentNullException(nameof(terminal));
+            if (!isSlave) throw new InvalidOperationException("Non-slave syntax renderers should not be modified without changing the text too.");
+            if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
+
+            int start = elementIndexes.Count;
+            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
+
+            var textElement = new TextElement<TTerminal>(this)
+            {
+                TerminalSymbol = terminal,
+                Start = start,
+                Length = length,
+            };
+
+            elements.Add(textElement);
+            assertInvariants();
+            return textElement;
+        }
+
         /// <summary>
         /// Clears all syntax from the renderer.
         /// </summary>
         public void Clear()
         {
-            RenderTarget.RemoveText(0, elementIndexes.Count);
+            if (!isSlave)
+            {
+                RenderTarget.RemoveText(0, elementIndexes.Count);
+            }
 
             elementIndexes.Clear();
             elements.ForEach(e => e.Detach());
@@ -119,7 +154,10 @@ namespace SysExtensions.SyntaxRenderer
             int textStart = elements[index].Start;
             int textLength = elementIndexes.Count - textStart;
 
-            RenderTarget.RemoveText(textStart, textLength);
+            if (!isSlave)
+            {
+                RenderTarget.RemoveText(textStart, textLength);
+            }
 
             elementIndexes.RemoveRange(textStart, textLength);
             elements.Skip(index).ForEach(e => e.Detach());

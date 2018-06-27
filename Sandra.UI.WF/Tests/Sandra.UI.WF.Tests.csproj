@@ -5,11 +5,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{9DDB6AD7-4822-4732-9E18-309405917032}</ProjectGuid>
+    <ProjectGuid>{E87BD8F7-E4DB-4509-A2F0-327C3A01D07D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sandra.Chess.Tests</RootNamespace>
-    <AssemblyName>Sandra.Chess.Tests</AssemblyName>
+    <RootNamespace>Sandra.UI.WF.Tests</RootNamespace>
+    <AssemblyName>Sandra.UI.WF.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -65,8 +65,8 @@
     </When>
   </Choose>
   <ItemGroup>
-    <Compile Include="EnumArrayTests.cs" />
-    <Compile Include="PositionTests.cs" />
+    <Compile Include="JsonSyntaxTests.cs" />
+    <Compile Include="JsonTokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -74,9 +74,9 @@
       <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
       <Name>SysExtensions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Sandra.Chess.csproj">
-      <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
-      <Name>Sandra.Chess</Name>
+    <ProjectReference Include="..\Sandra.UI.WF.csproj">
+      <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
+      <Name>Sandra.UI.WF</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
