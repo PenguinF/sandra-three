@@ -223,6 +223,15 @@ namespace Sandra.UI.WF.Storage
             => new JsonErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
 
         /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
+        /// </summary>
+        /// <param name="start">
+        /// The length of the source json, or the position of the unexpected EOF.
+        /// </param>
+        public static JsonErrorInfo UnterminatedMultiLineComment(int start)
+            => null;
+
+        /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
         /// </summary>
         /// <param name="start">

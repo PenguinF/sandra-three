@@ -121,6 +121,19 @@ namespace Sandra.UI.WF.Tests
         [InlineData(0)]
         [InlineData(3000)]
         [InlineData(int.MaxValue)]
+        public void UnterminatedMultiLineCommentMessage(int length)
+        {
+            var error = JsonErrorInfo.UnterminatedMultiLineComment(length);
+            Assert.NotNull(error);
+            Assert.Equal("Unterminated multi-line comment", error.Message);
+            Assert.Equal(length, error.Start);
+            Assert.Equal(0, error.Length);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(3000)]
+        [InlineData(int.MaxValue)]
         public void UnterminatedStringMessage(int length)
         {
             var error = JsonErrorInfo.UnterminatedString(length);
