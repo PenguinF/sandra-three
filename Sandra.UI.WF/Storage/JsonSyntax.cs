@@ -92,6 +92,18 @@ namespace Sandra.UI.WF.Storage
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
     }
 
+    public class JsonUnterminatedMultiLineComment : JsonTerminalSymbol
+    {
+        public JsonErrorInfo Error { get; }
+
+        public JsonUnterminatedMultiLineComment(string json, int start, int length, JsonErrorInfo error) : base(json, start, length)
+        {
+        }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+    }
+
     public class JsonCurlyOpen : JsonTerminalSymbol
     {
         public JsonCurlyOpen(string json, int start) : base(json, start, 1) { }
