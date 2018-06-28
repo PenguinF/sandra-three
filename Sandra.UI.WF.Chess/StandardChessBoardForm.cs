@@ -169,6 +169,7 @@ namespace Sandra.UI.WF
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -216,6 +217,14 @@ namespace Sandra.UI.WF
             lastMoveArrowPen.Dispose();
             updateLastMoveArrowPen();
             PlayingBoard.Invalidate();
+        }
+
+        private void DisplayLegalTargetSquaresChanged(object sender, EventArgs e)
+        {
+            if (moveStatus != MoveStatus.None)
+            {
+                displayLegalTargetSquaresEffect();
+            }
         }
 
         private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
