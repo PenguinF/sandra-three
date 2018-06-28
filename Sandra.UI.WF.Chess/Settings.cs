@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Settings.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
@@ -45,6 +48,29 @@ namespace Sandra.UI.WF
             "Preferences in the latter file override those that are specified in the default. "
             + "In the majority of cases, only the latter file is changed, while the default "
             + "settings serve as a template.");
+
+        private static readonly string VersionDescription
+            = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
+
+        public static readonly SettingProperty<int> Version = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Version))),
+            VersionRange.Instance,
+            new SettingComment(VersionDescription));
+
+        private sealed class VersionRange : PType.Derived<PInteger, int>
+        {
+            public static readonly VersionRange Instance = new VersionRange();
+
+            private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
+
+            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
+            {
+                targetValue = (int)integer.Value;
+                return true;
+            }
+
+            public override PInteger GetBaseValue(int value) => new PInteger(value);
+        }
 
         private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
@@ -77,8 +103,8 @@ namespace Sandra.UI.WF
             PType.RichTextZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
-            = "The number of plies (=half moves) to move forward of backward in a game for "
-            + "fast navigation. This value must be between 2 and 40.";
+            = "The number of plies (=half moves) to move forward of backward in a game for fast navigation. "
+            + $"This value must be between {FastNavigationPlyCountRange.MinPlyCount} and {FastNavigationPlyCountRange.MaxPlyCount}.";
 
         public static readonly SettingProperty<int> FastNavigationPlyCount = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(FastNavigationPlyCount))),
@@ -120,52 +146,84 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(LightSquareColorDescription));
+
+        private static readonly string LastMoveArrowColorDescription
+            = "The color of the arrow which displays the last move. This value must be in the HTML color format, "
+            + "for example \"#DC143C\" is the Crimson color.";
+
+        public static readonly SettingProperty<Color> LastMoveArrowColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
+            OpaqueColorType.Instance,
+            new SettingComment(LastMoveArrowColorDescription));
+
+        private static readonly string DisplayLegalTargetSquaresDescription
+            = "Whether or not to display all legal target squares of a piece when it is selected.";
+
+        public static readonly SettingProperty<bool> DisplayLegalTargetSquares = new SettingProperty<bool>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
+            PType.CLR.Boolean,
+            new SettingComment(DisplayLegalTargetSquaresDescription));
+
+        private static readonly string LegalTargetSquaresColorDescription
+            = "Overlay color used to display legal target squares. This value must be in the HTML color format, "
+            + "for example \"#B0E0E6\" is the PowderBlue color.";
+
+        public static readonly SettingProperty<Color> LegalTargetSquaresColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LegalTargetSquaresColor))),
+            OpaqueColorType.Instance,
+            new SettingComment(LegalTargetSquaresColorDescription));
     }
 
     internal static class Settings
     {
-        public static readonly SettingSchema AutoSaveSchema = CreateAutoSaveSchema();
-
-        public static readonly SettingSchema DefaultSettingsSchema = CreateDefaultSettingsSchema();
-
-        public static readonly SettingSchema LocalSettingsSchema = CreateLocalSettingsSchema();
-
-        private static SettingSchema CreateAutoSaveSchema()
+        public static SettingSchema CreateAutoSaveSchema()
         {
             return new SettingSchema(
+                Localizers.LangSetting,
                 SettingKeys.Window,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
         }
 
-        private static SettingSchema CreateDefaultSettingsSchema()
+        public static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                SettingKeys.Version,
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
+                SettingKeys.LastMoveArrowColor,
+                SettingKeys.DisplayLegalTargetSquares,
+                SettingKeys.LegalTargetSquaresColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
-        private static SettingSchema CreateLocalSettingsSchema()
+        public static SettingSchema CreateLocalSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
+                SettingKeys.LastMoveArrowColor,
+                SettingKeys.DisplayLegalTargetSquares,
+                SettingKeys.LegalTargetSquaresColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
         public static SettingCopy CreateBuiltIn()
         {
-            SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
+            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
 
+            defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
+            defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);
+            defaultSettings.AddOrReplace(SettingKeys.DisplayLegalTargetSquares, true);
+            defaultSettings.AddOrReplace(SettingKeys.LegalTargetSquaresColor, Color.FromArgb(240, 90, 90));
             defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings;

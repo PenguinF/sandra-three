@@ -6,6 +6,10 @@
 // default. In the majority of cases, only the latter file is changed, while the
 // default settings serve as a template.
 {
+  // Identifies the version of the set of recognized properties. The only
+  // allowed value is 1.
+  "version": 1,
+
   // Subfolder of %APPDATA%/Local which should be used to store persistent data.
   // This includes the auto-save file, or e.g. a preferences file. Use forward
   // slashes to separate directories, an unrecognized escape sequence such as in
@@ -23,6 +27,18 @@
   // The color of the light squares. This value must be in the HTML color
   // format, for example "#F0E68C" is the Khaki color.
   "light_square_color": "#F0FFFF",
+
+  // The color of the arrow which displays the last move. This value must be in
+  // the HTML color format, for example "#DC143C" is the Crimson color.
+  "last_move_arrow_color": "#696969",
+
+  // Whether or not to display all legal target squares of a piece when it is
+  // selected.
+  "display_legal_target_squares": true,
+
+  // Overlay color used to display legal target squares. This value must be in
+  // the HTML color format, for example "#B0E0E6" is the PowderBlue color.
+  "legal_target_squares_color": "#F05A5A",
 
   // The number of plies (=half moves) to move forward of backward in a game for
   // fast navigation. This value must be between 2 and 40.

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * StandardChessBoardForm.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System;
 using System.Drawing;
@@ -165,6 +168,9 @@ namespace Sandra.UI.WF
 
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LegalTargetSquaresColor, DisplayLegalTargetSquaresChanged);
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -182,7 +188,12 @@ namespace Sandra.UI.WF
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
-            lastMoveArrowPen = new Pen(Color.DimGray)
+            updateLastMoveArrowPen();
+        }
+
+        private void updateLastMoveArrowPen()
+        {
+            lastMoveArrowPen = new Pen(Program.GetSetting(SettingKeys.LastMoveArrowColor))
             {
                 DashStyle = DashStyle.Dot,
                 Width = 2,
@@ -200,6 +211,21 @@ namespace Sandra.UI.WF
         private void LightSquareColorChanged(object sender, EventArgs e)
         {
             PlayingBoard.LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor);
+        }
+
+        private void LastMoveArrowColorChanged(object sender, EventArgs e)
+        {
+            lastMoveArrowPen.Dispose();
+            updateLastMoveArrowPen();
+            PlayingBoard.Invalidate();
+        }
+
+        private void DisplayLegalTargetSquaresChanged(object sender, EventArgs e)
+        {
+            if (moveStatus != MoveStatus.None)
+            {
+                displayLegalTargetSquaresEffect();
+            }
         }
 
         private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
@@ -526,6 +552,10 @@ namespace Sandra.UI.WF
 
         private void displayLegalTargetSquaresEffect()
         {
+            Color overlayColor = Program.GetSetting(SettingKeys.DisplayLegalTargetSquares)
+                ? Color.FromArgb(48, Program.GetSetting(SettingKeys.LegalTargetSquaresColor))
+                : Color.Empty;
+
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
             Chess.MoveInfo moveInfo = new Chess.MoveInfo()
             {
@@ -540,7 +570,7 @@ namespace Sandra.UI.WF
                 if (moveCheckResult.IsLegalMove())
                 {
                     // Highlight each found square.
-                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
+                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), overlayColor);
                 }
             }
         }
