@@ -34,6 +34,9 @@ Royalty free globe image:
 Roslyn compiler for their sensible visitor implementation, among other things:
     http://source.roslyn.codeplex.com/
 
+xUnit.net, for their principled and well thought out unit testing framework:
+    https://xunit.github.io/
+
 
 There is also no way I could have done this without proper tools and documentation:
 
