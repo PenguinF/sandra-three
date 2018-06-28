@@ -150,6 +150,7 @@ namespace Sandra.UI.WF
         public static SettingSchema CreateAutoSaveSchema()
         {
             return new SettingSchema(
+                Localizers.LangSetting,
                 SettingKeys.Window,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
