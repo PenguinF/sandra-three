@@ -60,11 +60,11 @@ namespace Sandra.UI.WF
             Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
 
             string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
-            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.AutoSaveSchema));
+            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
-            SettingCopy localSettingsCopy = new SettingCopy(Settings.LocalSettingsSchema);
+            SettingCopy localSettingsCopy = new SettingCopy(Settings.CreateLocalSettingsSchema());
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(

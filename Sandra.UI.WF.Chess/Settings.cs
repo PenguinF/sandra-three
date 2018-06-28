@@ -147,13 +147,7 @@ namespace Sandra.UI.WF
 
     internal static class Settings
     {
-        public static readonly SettingSchema AutoSaveSchema = CreateAutoSaveSchema();
-
-        public static readonly SettingSchema DefaultSettingsSchema = CreateDefaultSettingsSchema();
-
-        public static readonly SettingSchema LocalSettingsSchema = CreateLocalSettingsSchema();
-
-        private static SettingSchema CreateAutoSaveSchema()
+        public static SettingSchema CreateAutoSaveSchema()
         {
             return new SettingSchema(
                 SettingKeys.Window,
@@ -161,7 +155,7 @@ namespace Sandra.UI.WF
                 SettingKeys.Zoom);
         }
 
-        private static SettingSchema CreateDefaultSettingsSchema()
+        public static SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
@@ -173,7 +167,7 @@ namespace Sandra.UI.WF
                 SettingKeys.FastNavigationPlyCount);
         }
 
-        private static SettingSchema CreateLocalSettingsSchema()
+        public static SettingSchema CreateLocalSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
@@ -184,7 +178,7 @@ namespace Sandra.UI.WF
 
         public static SettingCopy CreateBuiltIn()
         {
-            SettingCopy defaultSettings = new SettingCopy(DefaultSettingsSchema);
+            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
