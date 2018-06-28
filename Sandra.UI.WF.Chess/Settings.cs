@@ -177,6 +177,7 @@ namespace Sandra.UI.WF
                 SettingKeys.LocalPreferencesFileName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
+                SettingKeys.LastMoveArrowColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
@@ -186,6 +187,7 @@ namespace Sandra.UI.WF
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
+                SettingKeys.LastMoveArrowColor,
                 SettingKeys.FastNavigationPlyCount);
         }
 
@@ -198,6 +200,7 @@ namespace Sandra.UI.WF
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
+            defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);
             defaultSettings.AddOrReplace(SettingKeys.FastNavigationPlyCount, 10);
 
             return defaultSettings;

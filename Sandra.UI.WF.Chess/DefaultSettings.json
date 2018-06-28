@@ -28,6 +28,10 @@
   // format, for example "#F0E68C" is the Khaki color.
   "light_square_color": "#F0FFFF",
 
+  // The color of the arrow which displays the last move. This value must be in
+  // the HTML color format, for example "#DC143C" is the Crimson color.
+  "last_move_arrow_color": "#696969",
+
   // The number of plies (=half moves) to move forward of backward in a game for
   // fast navigation. This value must be between 2 and 40.
   "fast_navigation_ply_count": 10

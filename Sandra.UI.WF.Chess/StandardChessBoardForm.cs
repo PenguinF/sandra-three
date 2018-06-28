@@ -182,7 +182,7 @@ namespace Sandra.UI.WF
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
-            lastMoveArrowPen = new Pen(Color.DimGray)
+            lastMoveArrowPen = new Pen(Program.GetSetting(SettingKeys.LastMoveArrowColor))
             {
                 DashStyle = DashStyle.Dot,
                 Width = 2,
