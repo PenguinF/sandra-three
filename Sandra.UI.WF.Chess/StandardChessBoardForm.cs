@@ -539,6 +539,10 @@ namespace Sandra.UI.WF
 
         private void displayLegalTargetSquaresEffect()
         {
+            Color overlayColor = Program.GetSetting(SettingKeys.DisplayLegalTargetSquares)
+                ? Color.FromArgb(48, 240, 90, 90)
+                : Color.Empty;
+
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
             Chess.MoveInfo moveInfo = new Chess.MoveInfo()
             {
@@ -553,7 +557,7 @@ namespace Sandra.UI.WF
                 if (moveCheckResult.IsLegalMove())
                 {
                     // Highlight each found square.
-                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), Color.FromArgb(48, 240, 90, 90));
+                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), overlayColor);
                 }
             }
         }
