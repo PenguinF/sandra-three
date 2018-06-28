@@ -146,6 +146,15 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(LightSquareColor))),
             OpaqueColorType.Instance,
             new SettingComment(LightSquareColorDescription));
+
+        private static readonly string LastMoveArrowColorDescription
+            = "The color of the arrow which displays the last move. This value must be in the HTML color format, "
+            + "for example \"#DC143C\" is the Crimson color.";
+
+        public static readonly SettingProperty<Color> LastMoveArrowColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
+            OpaqueColorType.Instance,
+            new SettingComment(LastMoveArrowColorDescription));
     }
 
     internal static class Settings
