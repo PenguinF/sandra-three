@@ -552,7 +552,7 @@ namespace Sandra.UI.WF
         private void displayLegalTargetSquaresEffect()
         {
             Color overlayColor = Program.GetSetting(SettingKeys.DisplayLegalTargetSquares)
-                ? Color.FromArgb(48, 240, 90, 90)
+                ? Color.FromArgb(48, Program.GetSetting(SettingKeys.LegalTargetSquaresColor))
                 : Color.Empty;
 
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
