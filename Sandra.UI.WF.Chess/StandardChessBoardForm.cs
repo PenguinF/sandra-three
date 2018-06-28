@@ -165,6 +165,7 @@ namespace Sandra.UI.WF
 
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
@@ -182,6 +183,11 @@ namespace Sandra.UI.WF
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
+            updateLastMoveArrowPen();
+        }
+
+        private void updateLastMoveArrowPen()
+        {
             lastMoveArrowPen = new Pen(Program.GetSetting(SettingKeys.LastMoveArrowColor))
             {
                 DashStyle = DashStyle.Dot,
@@ -200,6 +206,13 @@ namespace Sandra.UI.WF
         private void LightSquareColorChanged(object sender, EventArgs e)
         {
             PlayingBoard.LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor);
+        }
+
+        private void LastMoveArrowColorChanged(object sender, EventArgs e)
+        {
+            lastMoveArrowPen.Dispose();
+            updateLastMoveArrowPen();
+            PlayingBoard.Invalidate();
         }
 
         private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
