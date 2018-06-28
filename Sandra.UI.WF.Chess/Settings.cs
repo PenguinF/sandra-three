@@ -163,6 +163,15 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
             PType.CLR.Boolean,
             new SettingComment(DisplayLegalTargetSquaresDescription));
+
+        private static readonly string LegalTargetSquaresColorDescription
+            = "Overlay color used to display legal target squares. This value must be in the HTML color format, "
+            + "for example \"#B0E0E6\" is the PowderBlue color.";
+
+        public static readonly SettingProperty<Color> LegalTargetSquaresColor = new SettingProperty<Color>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LegalTargetSquaresColor))),
+            OpaqueColorType.Instance,
+            new SettingComment(LegalTargetSquaresColorDescription));
     }
 
     internal static class Settings
