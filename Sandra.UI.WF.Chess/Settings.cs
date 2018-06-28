@@ -155,6 +155,14 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(LastMoveArrowColor))),
             OpaqueColorType.Instance,
             new SettingComment(LastMoveArrowColorDescription));
+
+        private static readonly string DisplayLegalTargetSquaresDescription
+            = "Whether or not to display all legal target squares of a piece when it is selected.";
+
+        public static readonly SettingProperty<bool> DisplayLegalTargetSquares = new SettingProperty<bool>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DisplayLegalTargetSquares))),
+            PType.CLR.Boolean,
+            new SettingComment(DisplayLegalTargetSquaresDescription));
     }
 
     internal static class Settings
