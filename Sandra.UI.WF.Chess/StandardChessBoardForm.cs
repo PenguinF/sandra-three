@@ -170,6 +170,7 @@ namespace Sandra.UI.WF
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LegalTargetSquaresColor, DisplayLegalTargetSquaresChanged);
 
             PlayingBoard.MouseMove += playingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
