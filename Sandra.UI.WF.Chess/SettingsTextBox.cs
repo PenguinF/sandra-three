@@ -60,6 +60,7 @@ namespace Sandra.UI.WF
         private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
         private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
         private static readonly Font errorsFont = new Font("Calibri", 10f);
+        private static readonly Color errorBackColor = Color.FromArgb(255, 72, 72);
 
         private static readonly TextElementStyle commentStyle = new TextElementStyle()
         {
@@ -81,20 +82,12 @@ namespace Sandra.UI.WF
             ForeColor = Color.FromArgb(255, 192, 144),
         };
 
-        private static readonly TextElementStyle errorStyle = new TextElementStyle()
-        {
-            HasForeColor = true,
-            ForeColor = Color.FromArgb(255, 72, 72),
-            Font = new Font("Consolas", 10, FontStyle.Underline),
-        };
-
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
         {
             public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
-            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => errorStyle;
+            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => stringStyle;
             public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
-            public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
-            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => errorStyle;
+            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => commentStyle;
             public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
         }
 
