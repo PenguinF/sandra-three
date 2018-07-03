@@ -213,9 +213,14 @@ namespace Sandra.UI.WF.Storage
                     : autoSaveFileStream1;
 
                 // Load remote settings.
+                List<TextErrorInfo> errors;
                 try
                 {
-                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                    if (errors.Count > 0)
+                    {
+                        throw new JsonReaderException(errors[0].Message);
+                    }
                 }
                 catch (Exception firstLoadException)
                 {
@@ -229,7 +234,11 @@ namespace Sandra.UI.WF.Storage
 
                     try
                     {
-                        remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                        remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                        if (errors.Count > 0)
+                        {
+                            throw new JsonReaderException(errors[0].Message);
+                        }
                     }
                     catch (Exception secondLoadException)
                     {
@@ -415,7 +424,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
+        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<TextErrorInfo> errors)
         {
             // Reuse one string builder to build keys and values.
             StringBuilder sb = new StringBuilder();
@@ -436,11 +445,7 @@ namespace Sandra.UI.WF.Storage
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
             SettingReader settingReader = new SettingReader(sb.ToString());
-            List<TextErrorInfo> errors = settingReader.ReadWorkingCopy(workingCopy);
-            if (errors.Count > 0)
-            {
-                throw new JsonReaderException(errors[0].Message);
-            }
+            errors = settingReader.ReadWorkingCopy(workingCopy);
             return workingCopy.Commit();
         }
 
