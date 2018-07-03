@@ -35,6 +35,10 @@ namespace Sandra.UI.WF.Storage
     {
         private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
+            private const string EmptyValueMessage = "Missing value";
+            private const string MultipleValuesMessage = "',' expected";
+            private const string EofInArrayMessage = "Unexpected end of file, expected ']'";
+            private const string ControlSymbolInArrayMessage = "']' expected";
             private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
             private const string NoPMapMessage = "Expected json object at root";
             private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
@@ -136,32 +140,39 @@ namespace Sandra.UI.WF.Storage
             {
                 List<PValue> listBuilder = new List<PValue>();
 
-                JsonTerminalSymbol symbol = ReadSkipComments();
-                if (symbol is JsonSquareBracketClose)
-                {
-                    return new PList(listBuilder);
-                }
-
                 for (;;)
                 {
-                    if (symbol == null)
+                    PValue parsedValue;
+                    JsonTerminalSymbol firstSymbol;
+
+                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstSymbol);
+                    if (gotValue) listBuilder.Add(parsedValue);
+
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    JsonTerminalSymbol symbol = ReadSkipComments();
+                    if (symbol is JsonComma)
                     {
-                        throw new JsonReaderException("Unexpected end of file");
+                        if (!gotValue)
+                        {
+                            // Two commas or '[,': add an empty PErrorValue.
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                            listBuilder.Add(PUndefined.Value);
+                        }
                     }
-
-                    listBuilder.Add(ParseValue(symbol));
-
-                    symbol = ReadSkipComments();
-                    if (symbol is JsonSquareBracketClose)
+                    else
                     {
+                        // Assume missing closing bracket ']' on EOF or control symbol.
+                        if (symbol == null)
+                        {
+                            Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength - 1, 1));
+                        }
+                        else if (!(symbol is JsonSquareBracketClose))
+                        {
+                            Errors.Add(new TextErrorInfo(ControlSymbolInArrayMessage, symbol.Start, symbol.Length));
+                        }
+
                         return new PList(listBuilder);
                     }
-                    else if (!(symbol is JsonComma))
-                    {
-                        throw new JsonReaderException("Comma ',' or EndArray ']' expected");
-                    }
-
-                    symbol = ReadSkipComments();
                 }
             }
 
