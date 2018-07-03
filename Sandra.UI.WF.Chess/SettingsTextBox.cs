@@ -57,6 +57,7 @@ namespace Sandra.UI.WF
 
         private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
         private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
+        private static readonly Font errorsFont = new Font("Calibri", 10f);
 
         private static readonly TextElementStyle commentStyle = new TextElementStyle()
         {
@@ -198,7 +199,18 @@ namespace Sandra.UI.WF
                 applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            displayNoErrors();
+            PMap dummy;
+            List<TextErrorInfo> errors;
+            parser.TryParse(out dummy, out errors);
+
+            if (errors.Count == 0)
+            {
+                displayNoErrors();
+            }
+            else
+            {
+                displayErrors(errors);
+            }
         }
 
         protected override void OnSelectionChanged(EventArgs e)
@@ -232,6 +244,31 @@ namespace Sandra.UI.WF
                     errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
                     errorsTextBox.SelectionColor = noErrorsForeColor;
                     errorsTextBox.SelectionFont = noErrorsFont;
+                    errorsTextBox.Select(0, 0);
+                }
+            }
+        }
+
+        private void displayErrors(List<TextErrorInfo> errors)
+        {
+            if (errorsTextBox != null)
+            {
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    var errorMessages = from error in errors
+                                        let lineIndex = GetLineFromCharIndex(error.Start)
+                                        let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
+                                        select $"{error.Message} at line {lineIndex}, position {position}";
+
+                    errorsTextBox.Text = string.Join("\n", errorMessages);
+
+                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.ForeColor = defaultStyle.ForeColor;
+                    errorsTextBox.Font = errorsFont;
+                    errorsTextBox.SelectAll();
+                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
+                    errorsTextBox.SelectionColor = defaultStyle.ForeColor;
+                    errorsTextBox.SelectionFont = errorsFont;
                     errorsTextBox.Select(0, 0);
                 }
             }
