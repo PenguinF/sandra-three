@@ -243,6 +243,7 @@ namespace Sandra.UI.WF
             if (errorsTextBox != null)
             {
                 currentErrors = null;
+                currentSelectedError = null;
 
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
@@ -264,6 +265,7 @@ namespace Sandra.UI.WF
             if (errorsTextBox != null)
             {
                 currentErrors = errors;
+                currentSelectedError = null;
 
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
@@ -286,19 +288,46 @@ namespace Sandra.UI.WF
             }
         }
 
+        private TextErrorInfo currentSelectedError;
+
+        private void resetSelectedErrorText()
+        {
+            if (currentSelectedError != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    Select(currentSelectedError.Start, currentSelectedError.Length);
+                    SelectionBackColor = defaultStyle.BackColor;
+                }
+
+                currentSelectedError = null;
+            }
+        }
+
         private void selectErrorText(int charIndex)
         {
+            var oldSelectedError = currentSelectedError;
+
+            // Reset the old error first.
+            resetSelectedErrorText();
+
             // Select the text that generated the error.
             if (currentErrors != null)
             {
                 int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
                 if (0 <= lineIndex && lineIndex < currentErrors.Count)
                 {
-                    var currentSelectedError = currentErrors[lineIndex];
-                    using (var updateToken = errorsTextBox.BeginUpdateRememberState())
+                    // Only show selected error if it's different.
+                    // This way, if an error is clicked twice, its style gets deselected again.
+                    if (oldSelectedError == null || !oldSelectedError.EqualTo(currentErrors[lineIndex]))
                     {
-                        Select(currentSelectedError.Start, currentSelectedError.Length);
-                        SelectionBackColor = errorBackColor;
+                        currentSelectedError = currentErrors[lineIndex];
+
+                        using (var updateToken = errorsTextBox.BeginUpdateRememberState())
+                        {
+                            Select(currentSelectedError.Start, currentSelectedError.Length);
+                            SelectionBackColor = errorBackColor;
+                        }
                     }
                 }
             }
