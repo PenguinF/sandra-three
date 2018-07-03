@@ -35,10 +35,15 @@ namespace Sandra.UI.WF.Storage
     {
         private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
+            private const string EmptyKeyMessage = "Missing property key";
             private const string EmptyValueMessage = "Missing value";
             private const string MultipleValuesMessage = "',' expected";
+            private const string MultiplePropertyKeysMessage = "':' expected";
+            private const string MultipleKeySectionsMessage = "Unexpected ':', expected ',' or '}'";
+            private const string EofInObjectMessage = "Unexpected end of file, expected '}'";
             private const string InvalidKeyMessage = "Invalid property key";
             private const string DuplicateKeyMessage = "Key '{0}' already exists in object";
+            private const string ControlSymbolInObjectMessage = "'}' expected";
             private const string EofInArrayMessage = "Unexpected end of file, expected ']'";
             private const string ControlSymbolInArrayMessage = "']' expected";
             private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
@@ -92,67 +97,103 @@ namespace Sandra.UI.WF.Storage
                 // Maintain a separate set of keys to aid error reporting on duplicate keys.
                 HashSet<string> foundKeys = new HashSet<string>();
 
-                JsonTerminalSymbol symbol = ReadSkipComments();
-                if (symbol is JsonCurlyClose)
-                {
-                    return new PMap(mapBuilder);
-                }
-
                 for (;;)
                 {
+                    PValue parsedKey;
+                    JsonTerminalSymbol first;
+                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out parsedKey, out first);
+
                     bool validKey = false;
                     string propertyKey = default(string);
 
-                    // Analyze if this is an actual, unique property key.
-                    if (symbol is JsonString)
+                    if (gotKey)
                     {
-                        propertyKey = ((JsonString)symbol).Value;
-
-                        // Expect unique keys.
-                        validKey = !foundKeys.Contains(propertyKey);
-
-                        if (validKey)
+                        // Analyze if this is an actual, unique property key.
+                        if (parsedKey is PString)
                         {
-                            foundKeys.Add(propertyKey);
+                            propertyKey = ((PString)parsedKey).Value;
+
+                            // Expect unique keys.
+                            validKey = !foundKeys.Contains(propertyKey);
+
+                            if (validKey)
+                            {
+                                foundKeys.Add(propertyKey);
+                            }
+                            else
+                            {
+                                Errors.Add(new TextErrorInfo(string.Format(DuplicateKeyMessage, propertyKey), first.Start, first.Length));
+                            }
                         }
                         else
                         {
-                            Errors.Add(new TextErrorInfo(string.Format(DuplicateKeyMessage, propertyKey), symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(InvalidKeyMessage, first.Start, first.Length));
                         }
                     }
-                    else
+
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    JsonTerminalSymbol symbol = ReadSkipComments();
+                    PValue parsedValue = default(PValue);
+
+                    // If gotValue remains false, a missing value error will be reported.
+                    bool gotValue = false;
+
+                    // Loop parsing values until encountering a non ':'.
+                    bool gotColon = false;
+                    while (symbol is JsonColon)
                     {
-                        Errors.Add(new TextErrorInfo(InvalidKeyMessage, symbol.Start, symbol.Length));
+                        if (gotColon)
+                        {
+                            // Multiple ':' without a ','.
+                            Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, symbol.Start, symbol.Length));
+                        }
+
+                        JsonTerminalSymbol firstValueSymbol;
+                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstValueSymbol);
+
+                        // Only the first value can be valid, even if it's undefined.
+                        if (validKey && !gotColon && gotValue)
+                        {
+                            mapBuilder.Add(propertyKey, parsedValue);
+                        }
+
+                        symbol = ReadSkipComments();
+                        gotColon = true;
                     }
 
-                    symbol = ReadSkipComments();
-                    if (!(symbol is JsonColon))
+                    bool isComma = symbol is JsonComma;
+                    bool isCurlyClose = symbol is JsonCurlyClose;
+
+                    // '}' directly following a ',' should not report errors.
+                    // '..., : }' however misses both a key and a value.
+                    if (isComma || (isCurlyClose && (gotKey || gotColon)))
                     {
-                        throw new JsonReaderException("Colon ':' expected");
+                        // Report missing property key and/or value.
+                        if (!gotKey)
+                        {
+                            Errors.Add(new TextErrorInfo(EmptyKeyMessage, symbol.Start, symbol.Length));
+                        }
+
+                        if (!gotValue)
+                        {
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                        }
                     }
 
-                    symbol = ReadSkipComments();
-                    if (symbol == null)
+                    if (!isComma)
                     {
-                        throw new JsonReaderException("Unexpected end of file");
-                    }
+                        // Assume missing closing bracket '}' on EOF or control symbol.
+                        if (symbol == null)
+                        {
+                            Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength - 1, 1));
+                        }
+                        else if (!isCurlyClose)
+                        {
+                            Errors.Add(new TextErrorInfo(ControlSymbolInObjectMessage, symbol.Start, symbol.Length));
+                        }
 
-                    if (validKey)
-                    {
-                        mapBuilder.Add(propertyKey, ParseValue(symbol));
-                    }
-
-                    symbol = ReadSkipComments();
-                    if (symbol is JsonCurlyClose)
-                    {
                         return new PMap(mapBuilder);
                     }
-                    else if (!(symbol is JsonComma))
-                    {
-                        throw new JsonReaderException("Comma ',' or EndObject '}' expected");
-                    }
-
-                    symbol = ReadSkipComments();
                 }
             }
 
