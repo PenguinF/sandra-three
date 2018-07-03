@@ -22,7 +22,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
@@ -33,47 +33,49 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class TempJsonParser
     {
-        private readonly JsonTextReader jsonTextReader;
-
         private readonly List<JsonTerminalSymbol> tokens;
 
         public IReadOnlyList<JsonTerminalSymbol> Tokens => tokens.AsReadOnly();
 
+        private int currentTokenIndex;
+
         public TempJsonParser(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
-            jsonTextReader = new JsonTextReader(new StringReader(json));
             tokens = new JsonTokenizer(json).TokenizeAll().ToList();
+            currentTokenIndex = 0;
         }
 
-        private Exception TokenTypeNotSupported(JsonToken jsonToken)
-            => new JsonReaderException($"Token type {jsonToken} is not supported for settings.");
-
-        private JsonToken ReadSkipComments()
+        private JsonTerminalSymbol ReadSkipComments()
         {
             // Skip comments until encountering something meaningful.
-            while (jsonTextReader.Read() && jsonTextReader.TokenType == JsonToken.Comment) ;
-            return jsonTextReader.TokenType;
+            while (currentTokenIndex < tokens.Count)
+            {
+                JsonTerminalSymbol current = tokens[currentTokenIndex];
+                currentTokenIndex++;
+                if (!(current is JsonComment || current is JsonUnterminatedMultiLineComment)) return current;
+            }
+            return null;
         }
 
         private PMap ParseMap()
         {
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
 
+            var tokenType = ReadSkipComments();
+            if (tokenType is JsonCurlyClose)
+            {
+                return new PMap(mapBuilder);
+            }
+
             for (;;)
             {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndObject)
-                {
-                    return new PMap(mapBuilder);
-                }
-
-                if (tokenType != JsonToken.PropertyName)
+                if (!(tokenType is JsonString))
                 {
                     throw new JsonReaderException("PropertyName or EndObject '}' expected");
                 }
 
-                string key = (string)jsonTextReader.Value;
+                string key = ((JsonString)tokenType).Value;
 
                 // Expect unique keys.
                 if (mapBuilder.ContainsKey(key))
@@ -81,7 +83,25 @@ namespace Sandra.UI.WF.Storage
                     throw new JsonReaderException($"Non-unique key in object: {key}");
                 }
 
+                tokenType = ReadSkipComments();
+                if (!(tokenType is JsonColon))
+                {
+                    throw new JsonReaderException("Colon ':' expected");
+                }
+
                 mapBuilder.Add(key, ParseValue(ReadSkipComments()));
+
+                tokenType = ReadSkipComments();
+                if (tokenType is JsonCurlyClose)
+                {
+                    return new PMap(mapBuilder);
+                }
+                else if (!(tokenType is JsonComma))
+                {
+                    throw new JsonReaderException("Comma ',' or EndObject '}' expected");
+                }
+
+                tokenType = ReadSkipComments();
             }
         }
 
@@ -89,59 +109,68 @@ namespace Sandra.UI.WF.Storage
         {
             List<PValue> listBuilder = new List<PValue>();
 
+            var tokenType = ReadSkipComments();
+            if (tokenType is JsonSquareBracketClose)
+            {
+                return new PList(listBuilder);
+            }
+
             for (;;)
             {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndArray)
+                listBuilder.Add(ParseValue(tokenType));
+
+                tokenType = ReadSkipComments();
+                if (tokenType is JsonSquareBracketClose)
                 {
                     return new PList(listBuilder);
                 }
+                else if (!(tokenType is JsonComma))
+                {
+                    throw new JsonReaderException("Comma ',' or EndArray ']' expected");
+                }
 
-                listBuilder.Add(ParseValue(tokenType));
+                tokenType = ReadSkipComments();
             }
         }
 
-        private PValue ParseValue(JsonToken currentTokenType)
+        private PValue ParseValue(JsonTerminalSymbol currentTokenType)
         {
-            switch (currentTokenType)
+            if (currentTokenType is JsonValue)
             {
-                case JsonToken.Boolean:
-                    return new PBoolean((bool)jsonTextReader.Value);
+                string value = currentTokenType.Json.Substring(currentTokenType.Start, currentTokenType.Length);
+                if (value == "true") return new PBoolean(true);
+                if (value == "false") return new PBoolean(false);
 
-                case JsonToken.Integer:
-                    return jsonTextReader.Value is BigInteger
-                        ? new PInteger((BigInteger)jsonTextReader.Value)
-                        : new PInteger((long)jsonTextReader.Value); ;
+                BigInteger integerValue;
+                if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
+                {
+                    return new PInteger(integerValue);
+                }
 
-                case JsonToken.String:
-                    return new PString((string)jsonTextReader.Value);
-
-                case JsonToken.StartObject:
-                    return ParseMap();
-
-                case JsonToken.StartArray:
-                    return ParseList();
-
-                case JsonToken.None:
-                    throw new JsonReaderException("Unexpected end of file");
-
-                case JsonToken.Comment:
-                case JsonToken.EndArray:
-                case JsonToken.EndObject:
-                case JsonToken.PropertyName:
-                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
-
-                case JsonToken.Bytes:
-                case JsonToken.Date:
-                case JsonToken.EndConstructor:
-                case JsonToken.Float:
-                case JsonToken.Null:
-                case JsonToken.Raw:
-                case JsonToken.StartConstructor:
-                case JsonToken.Undefined:
-                default:
-                    throw TokenTypeNotSupported(currentTokenType);
+                throw new JsonReaderException($"Unrecognized value {value}");
             }
+
+            if (currentTokenType is JsonString)
+            {
+                return new PString(((JsonString)currentTokenType).Value);
+            }
+
+            if (currentTokenType is JsonCurlyOpen)
+            {
+                return ParseMap();
+            }
+
+            if (currentTokenType is JsonSquareBracketOpen)
+            {
+                return ParseList();
+            }
+
+            if (currentTokenType == null)
+            {
+                throw new JsonReaderException("Unexpected end of file");
+            }
+
+            throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
         }
 
         public bool TryParse(out PMap map, out List<TextErrorInfo> errors)
@@ -151,11 +180,11 @@ namespace Sandra.UI.WF.Storage
             try
             {
                 var tokenType = ReadSkipComments();
-                if (tokenType != JsonToken.None)
+                if (tokenType != null)
                 {
                     PValue rootValue = ParseValue(tokenType);
 
-                    if (ReadSkipComments() != JsonToken.None)
+                    if (ReadSkipComments() != null)
                     {
                         throw new JsonReaderException("End of file expected");
                     }
