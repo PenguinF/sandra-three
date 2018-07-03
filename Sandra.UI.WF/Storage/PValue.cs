@@ -45,6 +45,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitList(PList value) => DefaultVisit(value);
         public virtual void VisitMap(PMap value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
+        public virtual void VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -60,6 +61,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitList(PList value) => DefaultVisit(value);
         public virtual TResult VisitMap(PMap value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
+        public virtual TResult VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -99,6 +101,19 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitString(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
+    }
+
+    /// <summary>
+    /// Represents an invalid or undefined <see cref="PValue"/>.
+    /// </summary>
+    public sealed class PUndefined : PValue
+    {
+        public static readonly PUndefined Value = new PUndefined();
+
+        private PUndefined() { }
+
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitUndefined(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitUndefined(this);
     }
 
     /// <summary>
@@ -151,5 +166,8 @@ namespace Sandra.UI.WF.Storage
 
         public override bool VisitString(PString value)
             => value.Value == ((PString)compareValue).Value;
+
+        // Return true for all undefined values, so change detection code ignores them.
+        public override bool VisitUndefined(PUndefined value) => true;
     }
 }
