@@ -41,6 +41,7 @@ namespace Sandra.UI.WF.Storage
 
         public TempJsonParser(string json)
         {
+            if (json == null) throw new ArgumentNullException(nameof(json));
             jsonTextReader = new JsonTextReader(new StringReader(json));
             tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
