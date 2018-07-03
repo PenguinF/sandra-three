@@ -23,12 +23,38 @@ using System;
 
 namespace Sandra.UI.WF.Storage
 {
+    /// <summary>
+    /// Reports an error at a certain location in a source text.
+    /// </summary>
     public class TextErrorInfo
     {
+        /// <summary>
+        /// Gets the error message.
+        /// </summary>
         public string Message { get; }
+
+        /// <summary>
+        /// Gets the start position of the text span where the error occurred.
+        /// </summary>
         public int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span where the error occurred.
+        /// </summary>
         public int Length { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="TextErrorInfo"/>.
+        /// </summary>
+        /// <param name="message">
+        /// The error message.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the text span where the error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the error occurred.
+        /// </param>
         public TextErrorInfo(string message, int start, int length)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
