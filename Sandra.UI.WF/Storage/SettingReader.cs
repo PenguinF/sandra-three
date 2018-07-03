@@ -221,7 +221,7 @@ namespace Sandra.UI.WF.Storage
             parser = new TempJsonParser(json);
         }
 
-        public void ReadWorkingCopy(SettingCopy workingCopy)
+        public List<TextErrorInfo> ReadWorkingCopy(SettingCopy workingCopy)
         {
             PMap map;
             List<TextErrorInfo> errors;
@@ -238,10 +238,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            if (errors.Count > 0)
-            {
-                throw new JsonReaderException(errors[0].Message);
-            }
+            return errors;
         }
     }
 }

@@ -19,9 +19,11 @@
  *********************************************************************************/
 #endregion
 
+using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -434,7 +436,11 @@ namespace Sandra.UI.WF.Storage
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
             SettingReader settingReader = new SettingReader(sb.ToString());
-            settingReader.ReadWorkingCopy(workingCopy);
+            List<TextErrorInfo> errors = settingReader.ReadWorkingCopy(workingCopy);
+            if (errors.Count > 0)
+            {
+                throw new JsonReaderException(errors[0].Message);
+            }
             return workingCopy.Commit();
         }
 

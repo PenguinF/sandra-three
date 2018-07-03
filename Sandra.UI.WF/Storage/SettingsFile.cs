@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -38,7 +37,6 @@ namespace Sandra.UI.WF.Storage
     public class SettingsFile
     {
         private static bool IsExternalCauseFileException(Exception exception) =>
-            exception is JsonReaderException ||
             exception is IOException ||
             exception is UnauthorizedAccessException ||
             exception is FileNotFoundException ||
