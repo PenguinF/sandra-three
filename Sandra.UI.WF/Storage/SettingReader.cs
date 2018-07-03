@@ -40,14 +40,16 @@ namespace Sandra.UI.WF.Storage
             private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
             private readonly List<JsonTerminalSymbol> tokens;
+            private readonly int sourceLength;
 
             public readonly List<TextErrorInfo> Errors = new List<TextErrorInfo>();
 
             private int currentTokenIndex;
 
-            public ParseRun(List<JsonTerminalSymbol> tokens)
+            public ParseRun(List<JsonTerminalSymbol> tokens, int sourceLength)
             {
                 this.tokens = tokens;
+                this.sourceLength = sourceLength;
                 currentTokenIndex = 0;
             }
 
@@ -273,6 +275,8 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
+        private readonly string json;
+
         private readonly List<JsonTerminalSymbol> tokens;
 
         public IReadOnlyList<JsonTerminalSymbol> Tokens => tokens.AsReadOnly();
@@ -280,12 +284,13 @@ namespace Sandra.UI.WF.Storage
         public TempJsonParser(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
+            this.json = json;
             tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
 
         public bool TryParse(out PMap map, out List<TextErrorInfo> errors)
         {
-            ParseRun parseRun = new ParseRun(tokens);
+            ParseRun parseRun = new ParseRun(tokens, json.Length);
             var validMap = parseRun.TryParse(out map);
             errors = parseRun.Errors;
             return validMap;
