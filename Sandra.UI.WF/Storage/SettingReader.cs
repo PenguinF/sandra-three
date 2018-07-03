@@ -53,7 +53,7 @@ namespace Sandra.UI.WF.Storage
             {
                 JsonTerminalSymbol current = tokens[currentTokenIndex];
                 currentTokenIndex++;
-                if (!(current is JsonComment || current is JsonUnterminatedMultiLineComment)) return current;
+                if (!current.IsBackground) return current;
             }
             return null;
         }

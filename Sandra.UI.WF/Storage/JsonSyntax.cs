@@ -44,6 +44,7 @@ namespace Sandra.UI.WF.Storage
             Length = length;
         }
 
+        public virtual bool IsBackground => false;
         public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
 
         public string GetText() => Json.Substring(Start, Length);
@@ -90,6 +91,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
+        public override bool IsBackground => true;
+
         public JsonComment(string json, int start, int length) : base(json, start, length) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
@@ -100,6 +103,7 @@ namespace Sandra.UI.WF.Storage
     {
         public TextErrorInfo Error { get; }
 
+        public override bool IsBackground => true;
         public override IEnumerable<TextErrorInfo> Errors { get; }
 
         public JsonUnterminatedMultiLineComment(string json, int start, int length, TextErrorInfo error) : base(json, start, length)
