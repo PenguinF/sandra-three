@@ -22,6 +22,7 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions.SyntaxRenderer;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -165,7 +166,9 @@ namespace Sandra.UI.WF
             int firstUnusedIndex = 0;
 
             syntaxRenderer.Clear();
-            new JsonTokenizer(json).TokenizeAll().ForEach(x =>
+
+            var parser = new TempJsonParser(json);
+            parser.Tokens.ForEach(x =>
             {
                 if (firstUnusedIndex < x.Start)
                 {
