@@ -54,6 +54,9 @@ namespace Sandra.UI.WF
             Font = new Font("Consolas", 10),
         };
 
+        private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
+        private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
+
         private static readonly TextElementStyle commentStyle = new TextElementStyle()
         {
             HasForeColor = true,
@@ -151,6 +154,11 @@ namespace Sandra.UI.WF
             applySyntaxHighlighting();
 
             TextChanged += SettingsTextBox_TextChanged;
+
+            if (errorsTextBox != null)
+            {
+                errorsTextBox.ReadOnly = true;
+            }
         }
 
         private void tokenize(string json)
@@ -195,6 +203,8 @@ namespace Sandra.UI.WF
                     applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
                 }
             }
+
+            displayNoErrors();
         }
 
         protected override void OnSelectionChanged(EventArgs e)
@@ -210,6 +220,25 @@ namespace Sandra.UI.WF
         {
             tokenize(Text);
             applySyntaxHighlighting();
+        }
+
+        private void displayNoErrors()
+        {
+            if (errorsTextBox != null)
+            {
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    errorsTextBox.Text = "(No errors)";
+                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.ForeColor = noErrorsForeColor;
+                    errorsTextBox.Font = noErrorsFont;
+                    errorsTextBox.SelectAll();
+                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
+                    errorsTextBox.SelectionColor = noErrorsForeColor;
+                    errorsTextBox.SelectionFont = noErrorsFont;
+                    errorsTextBox.Select(0, 0);
+                }
+            }
         }
     }
 }
