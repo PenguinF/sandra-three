@@ -194,6 +194,47 @@ namespace Sandra.UI.WF.Storage
                 return Visit(symbol);
             }
 
+            private bool ParseMultiValue(string multipleValuesMessage,
+                                         out PValue firstValue,
+                                         out JsonTerminalSymbol firstValueSymbol)
+            {
+                firstValue = default(PValue);
+                firstValueSymbol = default(JsonTerminalSymbol);
+
+                JsonTerminalSymbol symbol = PeekSkipComments();
+                if (symbol == null || !symbol.IsValueStartSymbol) return false;
+
+                firstValueSymbol = symbol;
+                bool hasValue = false;
+
+                for (;;)
+                {
+                    // Read the same symbol again but now eat it.
+                    symbol = ReadSkipComments();
+
+                    if (!hasValue)
+                    {
+                        if (symbol.Errors.Any()) firstValue = PUndefined.Value;
+                        else firstValue = Visit(symbol);
+                        hasValue = true;
+                    }
+                    else if (!symbol.Errors.Any())
+                    {
+                        // Make sure consecutive symbols are parsed as if they were valid.
+                        // Discard the result.
+                        Visit(symbol);
+                    }
+
+                    // Peek at the next symbol.
+                    // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
+                    symbol = PeekSkipComments();
+                    if (symbol == null || !symbol.IsValueStartSymbol) return true;
+
+                    // Two or more consecutive values not allowed.
+                    Errors.Add(new TextErrorInfo(multipleValuesMessage, symbol.Start, symbol.Length));
+                }
+            }
+
             public bool TryParse(out PMap map)
             {
                 try
