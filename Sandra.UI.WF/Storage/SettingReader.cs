@@ -95,7 +95,13 @@ namespace Sandra.UI.WF.Storage
                         throw new JsonReaderException("Colon ':' expected");
                     }
 
-                    mapBuilder.Add(key, ParseValue(ReadSkipComments()));
+                    symbol = ReadSkipComments();
+                    if (symbol == null)
+                    {
+                        throw new JsonReaderException("Unexpected end of file");
+                    }
+
+                    mapBuilder.Add(key, ParseValue(symbol));
 
                     symbol = ReadSkipComments();
                     if (symbol is JsonCurlyClose)
@@ -123,6 +129,11 @@ namespace Sandra.UI.WF.Storage
 
                 for (;;)
                 {
+                    if (symbol == null)
+                    {
+                        throw new JsonReaderException("Unexpected end of file");
+                    }
+
                     listBuilder.Add(ParseValue(symbol));
 
                     symbol = ReadSkipComments();
@@ -170,11 +181,6 @@ namespace Sandra.UI.WF.Storage
                 if (symbol is JsonSquareBracketOpen)
                 {
                     return ParseList();
-                }
-
-                if (symbol == null)
-                {
-                    throw new JsonReaderException("Unexpected end of file");
                 }
 
                 throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
