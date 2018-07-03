@@ -87,6 +87,9 @@ namespace Sandra.UI.WF.Storage
             {
                 Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
 
+                // Maintain a separate set of keys to aid error reporting on duplicate keys.
+                HashSet<string> foundKeys = new HashSet<string>();
+
                 JsonTerminalSymbol symbol = ReadSkipComments();
                 if (symbol is JsonCurlyClose)
                 {
@@ -100,13 +103,15 @@ namespace Sandra.UI.WF.Storage
                         throw new JsonReaderException("PropertyName or EndObject '}' expected");
                     }
 
-                    string key = ((JsonString)symbol).Value;
+                    string propertyKey = ((JsonString)symbol).Value;
 
                     // Expect unique keys.
-                    if (mapBuilder.ContainsKey(key))
+                    if (foundKeys.Contains(propertyKey))
                     {
-                        throw new JsonReaderException($"Non-unique key in object: {key}");
+                        throw new JsonReaderException($"Non-unique key in object: {propertyKey}");
                     }
+
+                    foundKeys.Add(propertyKey);
 
                     symbol = ReadSkipComments();
                     if (!(symbol is JsonColon))
@@ -120,7 +125,7 @@ namespace Sandra.UI.WF.Storage
                         throw new JsonReaderException("Unexpected end of file");
                     }
 
-                    mapBuilder.Add(key, ParseValue(symbol));
+                    mapBuilder.Add(propertyKey, ParseValue(symbol));
 
                     symbol = ReadSkipComments();
                     if (symbol is JsonCurlyClose)
