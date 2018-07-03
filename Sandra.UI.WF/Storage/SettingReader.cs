@@ -51,6 +51,19 @@ namespace Sandra.UI.WF.Storage
                 currentTokenIndex = 0;
             }
 
+            private JsonTerminalSymbol PeekSkipComments()
+            {
+                // Skip comments until encountering something meaningful.
+                while (currentTokenIndex < tokens.Count)
+                {
+                    JsonTerminalSymbol current = tokens[currentTokenIndex];
+                    if (!current.IsBackground) return current;
+                    Errors.AddRange(current.Errors);
+                    currentTokenIndex++;
+                }
+                return null;
+            }
+
             private JsonTerminalSymbol ReadSkipComments()
             {
                 // Skip comments until encountering something meaningful.
