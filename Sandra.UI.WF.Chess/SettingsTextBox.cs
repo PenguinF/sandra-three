@@ -188,16 +188,13 @@ namespace Sandra.UI.WF
                     length);
             }
 
-            using (var updateToken = BeginUpdateRememberState())
+            applyDefaultStyle();
+
+            var styleSelector = new StyleSelector();
+
+            foreach (var textElement in syntaxRenderer.Elements)
             {
-                applyDefaultStyle();
-
-                var styleSelector = new StyleSelector();
-
-                foreach (var textElement in syntaxRenderer.Elements)
-                {
-                    applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
-                }
+                applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
             displayNoErrors();
@@ -214,7 +211,10 @@ namespace Sandra.UI.WF
 
         private void SettingsTextBox_TextChanged(object sender, EventArgs e)
         {
-            parseAndApplySyntaxHighlighting(Text);
+            using (var updateToken = BeginUpdateRememberState())
+            {
+                parseAndApplySyntaxHighlighting(Text);
+            }
         }
 
         private void displayNoErrors()
