@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -255,19 +254,6 @@ namespace Sandra.UI.WF.Storage
 
             public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
 
-            private PValue ParseValue(JsonTerminalSymbol symbol)
-            {
-                if (!symbol.IsValueStartSymbol)
-                {
-                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
-                }
-                if (symbol.Errors.Any())
-                {
-                    return PUndefined.Value;
-                }
-                return Visit(symbol);
-            }
-
             private bool ParseMultiValue(string multipleValuesMessage,
                                          out PValue firstValue,
                                          out JsonTerminalSymbol firstValueSymbol)
@@ -311,39 +297,30 @@ namespace Sandra.UI.WF.Storage
 
             public bool TryParse(out PMap map)
             {
-                try
+                PValue rootValue;
+                JsonTerminalSymbol symbol;
+
+                bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out symbol);
+
+                JsonTerminalSymbol extraSymbol = ReadSkipComments();
+                if (extraSymbol != null)
                 {
-                    PValue rootValue;
-                    JsonTerminalSymbol symbol;
+                    Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
+                }
 
-                    bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out symbol);
-
-                    JsonTerminalSymbol extraSymbol = ReadSkipComments();
-                    if (extraSymbol != null)
+                if (hasRootValue)
+                {
+                    bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
+                    if (!validMap)
                     {
-                        Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
+                        Errors.Add(new TextErrorInfo(NoPMapMessage, symbol.Start, symbol.Length));
                     }
 
-                    if (hasRootValue)
-                    {
-                        bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
-                        if (!validMap)
-                        {
-                            Errors.Add(new TextErrorInfo(NoPMapMessage, symbol.Start, symbol.Length));
-                        }
-
-                        return validMap;
-                    }
-
-                    map = default(PMap);
-                    return false;
+                    return validMap;
                 }
-                catch (JsonReaderException exception)
-                {
-                    Errors.Add(new TextErrorInfo(exception.Message, 0, 0));
-                    map = default(PMap);
-                    return false;
-                }
+
+                map = default(PMap);
+                return false;
             }
         }
 
