@@ -90,6 +90,7 @@
     <Compile Include="Storage\SettingsFile.cs" />
     <Compile Include="Storage\SettingWriter.cs" />
     <Compile Include="Storage\SubFolderNameType.cs" />
+    <Compile Include="Storage\TextErrorInfo.cs" />
     <Compile Include="UIAction\KeyUIActionMapping.cs" />
     <Compile Include="UIAction\UIAction.cs" />
     <Compile Include="UIAction\UIActionBinding.cs" />
