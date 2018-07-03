@@ -137,28 +137,39 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public bool TryParse(out PMap map)
+        public bool TryParse(out PMap map, out List<TextErrorInfo> errors)
         {
-            var tokenType = ReadSkipComments();
-            if (tokenType != JsonToken.None)
+            errors = new List<TextErrorInfo>();
+
+            try
             {
-                PValue rootValue = ParseValue(tokenType);
-
-                if (ReadSkipComments() != JsonToken.None)
+                var tokenType = ReadSkipComments();
+                if (tokenType != JsonToken.None)
                 {
-                    throw new JsonReaderException("End of file expected");
+                    PValue rootValue = ParseValue(tokenType);
+
+                    if (ReadSkipComments() != JsonToken.None)
+                    {
+                        throw new JsonReaderException("End of file expected");
+                    }
+
+                    if (!PType.Map.TryGetValidValue(rootValue, out map))
+                    {
+                        throw new JsonReaderException("Expected json object at root");
+                    }
+
+                    return true;
                 }
 
-                if (!PType.Map.TryGetValidValue(rootValue, out map))
-                {
-                    throw new JsonReaderException("Expected json object at root");
-                }
-
-                return true;
+                map = default(PMap);
+                return false;
             }
-
-            map = default(PMap);
-            return false;
+            catch (JsonReaderException exception)
+            {
+                errors.Add(new TextErrorInfo(exception.Message, 0, 0));
+                map = default(PMap);
+                return false;
+            }
         }
     }
 
@@ -177,8 +188,9 @@ namespace Sandra.UI.WF.Storage
         public void ReadWorkingCopy(SettingCopy workingCopy)
         {
             PMap map;
+            List<TextErrorInfo> errors;
 
-            if (parser.TryParse(out map))
+            if (parser.TryParse(out map, out errors))
             {
                 foreach (var kv in map)
                 {
@@ -188,6 +200,11 @@ namespace Sandra.UI.WF.Storage
                         workingCopy.AddOrReplaceRaw(property, kv.Value);
                     }
                 }
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new JsonReaderException(errors[0].Message);
             }
         }
     }
