@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -166,12 +165,6 @@ namespace Sandra.UI.WF.Storage
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
             return new PMap(mapBuilder);
-        }
-
-        internal void LoadFromText(TextReader textReader)
-        {
-            SettingReader settingReader = new SettingReader(textReader);
-            settingReader.ReadWorkingCopy(this);
         }
     }
 }

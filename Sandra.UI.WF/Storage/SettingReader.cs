@@ -34,9 +34,9 @@ namespace Sandra.UI.WF.Storage
     {
         private readonly JsonTextReader jsonTextReader;
 
-        public SettingReader(TextReader inputReader)
+        public SettingReader(string json)
         {
-            jsonTextReader = new JsonTextReader(inputReader);
+            jsonTextReader = new JsonTextReader(new StringReader(json));
         }
 
         private Exception TokenTypeNotSupported(JsonToken jsonToken)
@@ -45,7 +45,7 @@ namespace Sandra.UI.WF.Storage
         private JsonToken ReadSkipComments()
         {
             // Skip comments until encountering something meaningful.
-            while (jsonTextReader.Read() && jsonTextReader.TokenType == JsonToken.Comment);
+            while (jsonTextReader.Read() && jsonTextReader.TokenType == JsonToken.Comment) ;
             return jsonTextReader.TokenType;
         }
 
