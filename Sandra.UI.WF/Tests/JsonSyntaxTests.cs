@@ -159,7 +159,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonUnknownSymbol("*", 0, TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
             yield return new object[] { new JsonString("\"\"", 0, 2, string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString("\"", 0, 1, TextErrorInfo.UnterminatedString(1)), typeof(JsonErrorString) };
+            yield return new object[] { new JsonErrorString("\"", 0, 1, TextErrorInfo.UnterminatedString(0, 1)), typeof(JsonErrorString) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor

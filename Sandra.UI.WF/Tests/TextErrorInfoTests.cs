@@ -85,16 +85,16 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(3000)]
-        [InlineData(int.MaxValue)]
-        public void UnterminatedStringMessage(int length)
+        [InlineData(0, 0)]
+        [InlineData(2999, 3000)]
+        [InlineData(0, int.MaxValue)]
+        public void UnterminatedStringMessage(int start, int length)
         {
-            var error = TextErrorInfo.UnterminatedString(length);
+            var error = TextErrorInfo.UnterminatedString(start, length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated string", error.Message);
-            Assert.Equal(length, error.Start);
-            Assert.Equal(0, error.Length);
+            Assert.Equal(start, error.Start);
+            Assert.Equal(length, error.Length);
         }
 
         [Theory]

@@ -88,10 +88,13 @@ namespace Sandra.UI.WF.Storage
         /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
         /// </summary>
         /// <param name="start">
-        /// The length of the source json, or the position of the unexpected EOF.
+        /// The start position of the unterminated string.
         /// </param>
-        public static TextErrorInfo UnterminatedString(int start)
-            => new TextErrorInfo("Unterminated string", start, 0);
+        /// <param name="length">
+        /// The length of the unterminated string.
+        /// </param>
+        public static TextErrorInfo UnterminatedString(int start, int length)
+            => new TextErrorInfo("Unterminated string", start, length);
 
         /// <summary>
         /// Creates a <see cref="TextErrorInfo"/> for unrecognized escape sequences.

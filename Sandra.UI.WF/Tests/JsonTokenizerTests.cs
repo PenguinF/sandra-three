@@ -306,11 +306,11 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "  /*\n\n* /", new[] { TextErrorInfo.UnterminatedMultiLineComment(2, 7) } };
 
             // Invalid strings.
-            yield return new object[] { "\"", new[] { TextErrorInfo.UnterminatedString(1) } };
-            yield return new object[] { "\"\\", new[] { TextErrorInfo.UnterminatedString(2) } };
+            yield return new object[] { "\"", new[] { TextErrorInfo.UnterminatedString(0, 1) } };
+            yield return new object[] { "\"\\", new[] { TextErrorInfo.UnterminatedString(0, 2) } };
 
             // Unterminated because the closing " is escaped.
-            yield return new object[] { "\"\\\"", new[] { TextErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "\"\\\"", new[] { TextErrorInfo.UnterminatedString(0, 3) } };
             yield return new object[] { "\"\\ \"", new[] { TextErrorInfo.UnrecognizedEscapeSequence("\\ ", 1) } };
             yield return new object[] { "\"\\e\"", new[] { TextErrorInfo.UnrecognizedEscapeSequence("\\e", 1) } };
 
@@ -336,13 +336,13 @@ namespace Sandra.UI.WF.Tests
             // Multiple errors.
             yield return new object[] { " ∙\"∙\"\"", new TextErrorInfo[] {
                 TextErrorInfo.UnexpectedSymbol("∙", 1),
-                TextErrorInfo.UnterminatedString(6) } };
+                TextErrorInfo.UnterminatedString(5, 1) } };
             yield return new object[] { "\"\r\n\"", new[] {
                 TextErrorInfo.IllegalControlCharacterInString("\\r", 1),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 2) } };
             yield return new object[] { "\"\\ ", new[] {
                 TextErrorInfo.UnrecognizedEscapeSequence("\\ ", 1),
-                TextErrorInfo.UnterminatedString(3) } };
+                TextErrorInfo.UnterminatedString(0, 3) } };
             yield return new object[] { "\"\r\n∙\"∙", new[] {
                 TextErrorInfo.IllegalControlCharacterInString("\\r", 1),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 2),
@@ -350,7 +350,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "\"\t\n", new[] {
                 TextErrorInfo.IllegalControlCharacterInString("\\t", 1),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 2),
-                TextErrorInfo.UnterminatedString(3) } };
+                TextErrorInfo.UnterminatedString(0, 3) } };
             yield return new object[] { "\" \\ \n\"", new[] {
                 TextErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 4) } };
@@ -360,18 +360,18 @@ namespace Sandra.UI.WF.Tests
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 4) } };
             yield return new object[] { "\"\\u", new[] {
                 TextErrorInfo.UnrecognizedEscapeSequence("\\u", 1),
-                TextErrorInfo.UnterminatedString(3) } };
+                TextErrorInfo.UnterminatedString(0, 3) } };
             yield return new object[] { "\"\\uA", new[] {
                 TextErrorInfo.UnrecognizedUnicodeEscapeSequence("\\uA", 1, 3),
-                TextErrorInfo.UnterminatedString(4) } };
+                TextErrorInfo.UnterminatedString(0, 4) } };
             yield return new object[] { "\"\\u\n", new[] {
                 TextErrorInfo.UnrecognizedEscapeSequence("\\u", 1),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 3),
-                TextErrorInfo.UnterminatedString(4) } };
+                TextErrorInfo.UnterminatedString(0, 4) } };
             yield return new object[] { "\"\\ufff\n", new[] {
                 TextErrorInfo.UnrecognizedUnicodeEscapeSequence("\\ufff", 1, 5),
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 6),
-                TextErrorInfo.UnterminatedString(7) } };
+                TextErrorInfo.UnterminatedString(0, 7) } };
             yield return new object[] { "\"\n\\ ∙\"∙", new[] {
                 TextErrorInfo.IllegalControlCharacterInString("\\n", 1),
                 TextErrorInfo.UnrecognizedEscapeSequence("\\ ", 2),
@@ -382,9 +382,9 @@ namespace Sandra.UI.WF.Tests
                 TextErrorInfo.UnrecognizedEscapeSequence("\\ ", 3) } };
 
             // Know what's unterminated.
-            yield return new object[] { "\"/*", new[] { TextErrorInfo.UnterminatedString(3) } };
+            yield return new object[] { "\"/*", new[] { TextErrorInfo.UnterminatedString(0, 3) } };
             yield return new object[] { "/*\"", new[] { TextErrorInfo.UnterminatedMultiLineComment(0, 3) } };
-            yield return new object[] { "///*\n\"", new[] { TextErrorInfo.UnterminatedString(6) } };
+            yield return new object[] { "///*\n\"", new[] { TextErrorInfo.UnterminatedString(5, 1) } };
             yield return new object[] { "///*\"\n/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(6, 2) } };
         }
 
