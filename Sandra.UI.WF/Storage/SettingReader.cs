@@ -183,32 +183,15 @@ namespace Sandra.UI.WF.Storage
 
             private PValue ParseValue(JsonTerminalSymbol symbol)
             {
+                if (!symbol.IsValueStartSymbol)
+                {
+                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
+                }
                 if (symbol.Errors.Any())
                 {
                     return PUndefined.Value;
                 }
-
-                if (symbol is JsonValue)
-                {
-                    return Visit(symbol);
-                }
-
-                if (symbol is JsonString)
-                {
-                    return Visit(symbol);
-                }
-
-                if (symbol is JsonCurlyOpen)
-                {
-                    return Visit(symbol);
-                }
-
-                if (symbol is JsonSquareBracketOpen)
-                {
-                    return Visit(symbol);
-                }
-
-                throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
+                return Visit(symbol);
             }
 
             public bool TryParse(out PMap map)
