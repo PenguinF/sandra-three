@@ -37,6 +37,8 @@ namespace Sandra.UI.WF.Storage
         {
             private const string EmptyValueMessage = "Missing value";
             private const string MultipleValuesMessage = "',' expected";
+            private const string InvalidKeyMessage = "Invalid property key";
+            private const string DuplicateKeyMessage = "Key '{0}' already exists in object";
             private const string EofInArrayMessage = "Unexpected end of file, expected ']'";
             private const string ControlSymbolInArrayMessage = "']' expected";
             private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
@@ -98,20 +100,30 @@ namespace Sandra.UI.WF.Storage
 
                 for (;;)
                 {
-                    if (!(symbol is JsonString))
+                    bool validKey = false;
+                    string propertyKey = default(string);
+
+                    // Analyze if this is an actual, unique property key.
+                    if (symbol is JsonString)
                     {
-                        throw new JsonReaderException("PropertyName or EndObject '}' expected");
+                        propertyKey = ((JsonString)symbol).Value;
+
+                        // Expect unique keys.
+                        validKey = !foundKeys.Contains(propertyKey);
+
+                        if (validKey)
+                        {
+                            foundKeys.Add(propertyKey);
+                        }
+                        else
+                        {
+                            Errors.Add(new TextErrorInfo(string.Format(DuplicateKeyMessage, propertyKey), symbol.Start, symbol.Length));
+                        }
                     }
-
-                    string propertyKey = ((JsonString)symbol).Value;
-
-                    // Expect unique keys.
-                    if (foundKeys.Contains(propertyKey))
+                    else
                     {
-                        throw new JsonReaderException($"Non-unique key in object: {propertyKey}");
+                        Errors.Add(new TextErrorInfo(InvalidKeyMessage, symbol.Start, symbol.Length));
                     }
-
-                    foundKeys.Add(propertyKey);
 
                     symbol = ReadSkipComments();
                     if (!(symbol is JsonColon))
@@ -125,7 +137,10 @@ namespace Sandra.UI.WF.Storage
                         throw new JsonReaderException("Unexpected end of file");
                     }
 
-                    mapBuilder.Add(propertyKey, ParseValue(symbol));
+                    if (validKey)
+                    {
+                        mapBuilder.Add(propertyKey, ParseValue(symbol));
+                    }
 
                     symbol = ReadSkipComments();
                     if (symbol is JsonCurlyClose)
