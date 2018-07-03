@@ -64,20 +64,20 @@ namespace Sandra.UI.WF.Storage
             {
                 Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
 
-                var tokenType = ReadSkipComments();
-                if (tokenType is JsonCurlyClose)
+                JsonTerminalSymbol symbol = ReadSkipComments();
+                if (symbol is JsonCurlyClose)
                 {
                     return new PMap(mapBuilder);
                 }
 
                 for (;;)
                 {
-                    if (!(tokenType is JsonString))
+                    if (!(symbol is JsonString))
                     {
                         throw new JsonReaderException("PropertyName or EndObject '}' expected");
                     }
 
-                    string key = ((JsonString)tokenType).Value;
+                    string key = ((JsonString)symbol).Value;
 
                     // Expect unique keys.
                     if (mapBuilder.ContainsKey(key))
@@ -85,25 +85,25 @@ namespace Sandra.UI.WF.Storage
                         throw new JsonReaderException($"Non-unique key in object: {key}");
                     }
 
-                    tokenType = ReadSkipComments();
-                    if (!(tokenType is JsonColon))
+                    symbol = ReadSkipComments();
+                    if (!(symbol is JsonColon))
                     {
                         throw new JsonReaderException("Colon ':' expected");
                     }
 
                     mapBuilder.Add(key, ParseValue(ReadSkipComments()));
 
-                    tokenType = ReadSkipComments();
-                    if (tokenType is JsonCurlyClose)
+                    symbol = ReadSkipComments();
+                    if (symbol is JsonCurlyClose)
                     {
                         return new PMap(mapBuilder);
                     }
-                    else if (!(tokenType is JsonComma))
+                    else if (!(symbol is JsonComma))
                     {
                         throw new JsonReaderException("Comma ',' or EndObject '}' expected");
                     }
 
-                    tokenType = ReadSkipComments();
+                    symbol = ReadSkipComments();
                 }
             }
 
@@ -111,35 +111,35 @@ namespace Sandra.UI.WF.Storage
             {
                 List<PValue> listBuilder = new List<PValue>();
 
-                var tokenType = ReadSkipComments();
-                if (tokenType is JsonSquareBracketClose)
+                JsonTerminalSymbol symbol = ReadSkipComments();
+                if (symbol is JsonSquareBracketClose)
                 {
                     return new PList(listBuilder);
                 }
 
                 for (;;)
                 {
-                    listBuilder.Add(ParseValue(tokenType));
+                    listBuilder.Add(ParseValue(symbol));
 
-                    tokenType = ReadSkipComments();
-                    if (tokenType is JsonSquareBracketClose)
+                    symbol = ReadSkipComments();
+                    if (symbol is JsonSquareBracketClose)
                     {
                         return new PList(listBuilder);
                     }
-                    else if (!(tokenType is JsonComma))
+                    else if (!(symbol is JsonComma))
                     {
                         throw new JsonReaderException("Comma ',' or EndArray ']' expected");
                     }
 
-                    tokenType = ReadSkipComments();
+                    symbol = ReadSkipComments();
                 }
             }
 
-            private PValue ParseValue(JsonTerminalSymbol currentTokenType)
+            private PValue ParseValue(JsonTerminalSymbol symbol)
             {
-                if (currentTokenType is JsonValue)
+                if (symbol is JsonValue)
                 {
-                    string value = currentTokenType.GetText();
+                    string value = symbol.GetText();
                     if (value == "true") return new PBoolean(true);
                     if (value == "false") return new PBoolean(false);
 
@@ -152,22 +152,22 @@ namespace Sandra.UI.WF.Storage
                     throw new JsonReaderException($"Unrecognized value {value}");
                 }
 
-                if (currentTokenType is JsonString)
+                if (symbol is JsonString)
                 {
-                    return new PString(((JsonString)currentTokenType).Value);
+                    return new PString(((JsonString)symbol).Value);
                 }
 
-                if (currentTokenType is JsonCurlyOpen)
+                if (symbol is JsonCurlyOpen)
                 {
                     return ParseMap();
                 }
 
-                if (currentTokenType is JsonSquareBracketOpen)
+                if (symbol is JsonSquareBracketOpen)
                 {
                     return ParseList();
                 }
 
-                if (currentTokenType == null)
+                if (symbol == null)
                 {
                     throw new JsonReaderException("Unexpected end of file");
                 }
@@ -179,10 +179,10 @@ namespace Sandra.UI.WF.Storage
             {
                 try
                 {
-                    var tokenType = ReadSkipComments();
-                    if (tokenType != null)
+                    JsonTerminalSymbol symbol = ReadSkipComments();
+                    if (symbol != null)
                     {
-                        PValue rootValue = ParseValue(tokenType);
+                        PValue rootValue = ParseValue(symbol);
 
                         if (ReadSkipComments() != null)
                         {
