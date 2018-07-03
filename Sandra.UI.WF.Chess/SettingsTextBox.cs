@@ -148,8 +148,6 @@ namespace Sandra.UI.WF
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
-
-            applyDefaultStyle();
             parseAndApplySyntaxHighlighting(Text);
 
             TextChanged += SettingsTextBox_TextChanged;
@@ -162,6 +160,8 @@ namespace Sandra.UI.WF
 
         private void parseAndApplySyntaxHighlighting(string json)
         {
+            applyDefaultStyle();
+
             int firstUnusedIndex = 0;
 
             syntaxRenderer.Clear();
@@ -187,8 +187,6 @@ namespace Sandra.UI.WF
                     new JsonWhitespace(json, firstUnusedIndex, length),
                     length);
             }
-
-            applyDefaultStyle();
 
             var styleSelector = new StyleSelector();
 
