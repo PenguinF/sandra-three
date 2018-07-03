@@ -239,17 +239,19 @@ namespace Sandra.UI.WF.Storage
             {
                 try
                 {
-                    JsonTerminalSymbol symbol = ReadSkipComments();
-                    if (symbol != null)
+                    PValue rootValue;
+                    JsonTerminalSymbol symbol;
+
+                    bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out symbol);
+
+                    JsonTerminalSymbol extraSymbol = ReadSkipComments();
+                    if (extraSymbol != null)
                     {
-                        PValue rootValue = ParseValue(symbol);
+                        Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
+                    }
 
-                        JsonTerminalSymbol extraSymbol = ReadSkipComments();
-                        if (extraSymbol != null)
-                        {
-                            Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
-                        }
-
+                    if (hasRootValue)
+                    {
                         bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
                         if (!validMap)
                         {
