@@ -37,6 +37,7 @@ namespace Sandra.UI.WF.Storage
         {
             private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
             private const string NoPMapMessage = "Expected json object at root";
+            private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
             private readonly List<JsonTerminalSymbol> tokens;
 
@@ -188,9 +189,10 @@ namespace Sandra.UI.WF.Storage
                     {
                         PValue rootValue = ParseValue(symbol);
 
-                        if (ReadSkipComments() != null)
+                        JsonTerminalSymbol extraSymbol = ReadSkipComments();
+                        if (extraSymbol != null)
                         {
-                            throw new JsonReaderException("End of file expected");
+                            Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
                         }
 
                         bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
