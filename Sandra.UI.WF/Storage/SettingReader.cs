@@ -183,6 +183,11 @@ namespace Sandra.UI.WF.Storage
 
             private PValue ParseValue(JsonTerminalSymbol symbol)
             {
+                if (symbol.Errors.Any())
+                {
+                    return PUndefined.Value;
+                }
+
                 if (symbol is JsonValue)
                 {
                     return Visit(symbol);
