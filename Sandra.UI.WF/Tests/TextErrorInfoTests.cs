@@ -72,16 +72,16 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(3000)]
-        [InlineData(int.MaxValue)]
-        public void UnterminatedMultiLineCommentMessage(int length)
+        [InlineData(0, 0)]
+        [InlineData(2999, 3000)]
+        [InlineData(0, int.MaxValue)]
+        public void UnterminatedMultiLineCommentMessage(int start, int length)
         {
-            var error = TextErrorInfo.UnterminatedMultiLineComment(length);
+            var error = TextErrorInfo.UnterminatedMultiLineComment(start, length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated multi-line comment", error.Message);
-            Assert.Equal(length, error.Start);
-            Assert.Equal(0, error.Length);
+            Assert.Equal(start, error.Start);
+            Assert.Equal(length, error.Length);
         }
 
         [Theory]

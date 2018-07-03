@@ -141,7 +141,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var error = TextErrorInfo.UnterminatedMultiLineComment(commentText.Length);
+            var error = TextErrorInfo.UnterminatedMultiLineComment(0, commentText.Length);
             var symbol = new JsonUnterminatedMultiLineComment(commentText, 0, commentText.Length, error);
             Assert.Same(error, symbol.Error);
         }
@@ -149,7 +149,7 @@ namespace Sandra.UI.WF.Tests
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, TextErrorInfo.UnterminatedMultiLineComment(2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
             yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
             yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };

@@ -477,7 +477,7 @@ namespace Sandra.UI.WF.Storage
                 json,
                 firstUnusedIndex,
                 length - firstUnusedIndex,
-                TextErrorInfo.UnterminatedMultiLineComment(length));
+                TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex));
 
             currentTokenizer = null;
         }

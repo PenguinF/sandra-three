@@ -300,10 +300,10 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "  °  ", new[] { TextErrorInfo.UnexpectedSymbol("°", 2) } };
 
             // Unterminated comments.
-            yield return new object[] { "/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(2) } };
-            yield return new object[] { "/*\n\n", new[] { TextErrorInfo.UnterminatedMultiLineComment(4) } };
-            yield return new object[] { "  /*\n\n*", new[] { TextErrorInfo.UnterminatedMultiLineComment(7) } };
-            yield return new object[] { "  /*\n\n* /", new[] { TextErrorInfo.UnterminatedMultiLineComment(9) } };
+            yield return new object[] { "/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(0, 2) } };
+            yield return new object[] { "/*\n\n", new[] { TextErrorInfo.UnterminatedMultiLineComment(0, 4) } };
+            yield return new object[] { "  /*\n\n*", new[] { TextErrorInfo.UnterminatedMultiLineComment(2, 5) } };
+            yield return new object[] { "  /*\n\n* /", new[] { TextErrorInfo.UnterminatedMultiLineComment(2, 7) } };
 
             // Invalid strings.
             yield return new object[] { "\"", new[] { TextErrorInfo.UnterminatedString(1) } };
@@ -383,9 +383,9 @@ namespace Sandra.UI.WF.Tests
 
             // Know what's unterminated.
             yield return new object[] { "\"/*", new[] { TextErrorInfo.UnterminatedString(3) } };
-            yield return new object[] { "/*\"", new[] { TextErrorInfo.UnterminatedMultiLineComment(3) } };
+            yield return new object[] { "/*\"", new[] { TextErrorInfo.UnterminatedMultiLineComment(0, 3) } };
             yield return new object[] { "///*\n\"", new[] { TextErrorInfo.UnterminatedString(6) } };
-            yield return new object[] { "///*\"\n/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(8) } };
+            yield return new object[] { "///*\"\n/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(6, 2) } };
         }
 
         private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<TextErrorInfo>>

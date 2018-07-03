@@ -76,10 +76,13 @@ namespace Sandra.UI.WF.Storage
         /// Creates a <see cref="TextErrorInfo"/> for unterminated multiline comments.
         /// </summary>
         /// <param name="start">
-        /// The length of the source json, or the position of the unexpected EOF.
+        /// The start position of the unterminated comment.
         /// </param>
-        public static TextErrorInfo UnterminatedMultiLineComment(int start)
-            => new TextErrorInfo("Unterminated multi-line comment", start, 0);
+        /// <param name="length">
+        /// The length of the unterminated comment.
+        /// </param>
+        public static TextErrorInfo UnterminatedMultiLineComment(int start, int length)
+            => new TextErrorInfo("Unterminated multi-line comment", start, length);
 
         /// <summary>
         /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
