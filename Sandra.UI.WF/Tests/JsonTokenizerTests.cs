@@ -66,7 +66,7 @@ namespace Sandra.UI.WF.Tests
                 var commentSymbol = Assert.IsType<JsonComment>(symbol);
                 Assert.Equal(0, commentSymbol.Start);
                 Assert.Equal(expectedCommentText.Length, commentSymbol.Length);
-                Assert.Equal(expectedCommentText, commentSymbol.Text);
+                Assert.Equal(expectedCommentText, commentSymbol.GetText());
             });
         }
 
@@ -157,7 +157,7 @@ namespace Sandra.UI.WF.Tests
                 Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, valueSymbol.Value);
+                Assert.Equal(json, valueSymbol.GetText());
             });
         }
 

@@ -46,6 +46,8 @@ namespace Sandra.UI.WF.Storage
 
         public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
 
+        public string GetText() => Json.Substring(Start, Length);
+
         public abstract void Accept(JsonTerminalSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
     }
@@ -88,8 +90,6 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
-        public string Text => Json.Substring(Start, Length);
-
         public JsonComment(string json, int start, int length) : base(json, start, length) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
@@ -180,8 +180,6 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
-        public string Value => Json.Substring(Start, Length);
-
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);

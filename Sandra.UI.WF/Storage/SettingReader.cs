@@ -137,7 +137,7 @@ namespace Sandra.UI.WF.Storage
         {
             if (currentTokenType is JsonValue)
             {
-                string value = currentTokenType.Json.Substring(currentTokenType.Start, currentTokenType.Length);
+                string value = currentTokenType.GetText();
                 if (value == "true") return new PBoolean(true);
                 if (value == "false") return new PBoolean(false);
 
