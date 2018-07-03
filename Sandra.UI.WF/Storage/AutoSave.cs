@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using Newtonsoft.Json;
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -214,12 +213,14 @@ namespace Sandra.UI.WF.Storage
 
                 // Load remote settings.
                 List<TextErrorInfo> errors;
+                bool tryOtherAutoSaveStream = false;
                 try
                 {
                     remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                     if (errors.Count > 0)
                     {
-                        throw new JsonReaderException(errors[0].Message);
+                        errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                        tryOtherAutoSaveStream = true;
                     }
                 }
                 catch (Exception firstLoadException)
@@ -227,6 +228,11 @@ namespace Sandra.UI.WF.Storage
                     // Trace and try the other auto-save file as a backup.
                     // Also use a new decoder.
                     firstLoadException.Trace();
+                    tryOtherAutoSaveStream = true;
+                }
+
+                if (tryOtherAutoSaveStream)
+                {
                     latestAutoSaveFileStream
                         = latestAutoSaveFileStream == autoSaveFileStream1
                         ? autoSaveFileStream2
@@ -237,7 +243,8 @@ namespace Sandra.UI.WF.Storage
                         remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                         if (errors.Count > 0)
                         {
-                            throw new JsonReaderException(errors[0].Message);
+                            errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                            remoteSettings = localSettings;
                         }
                     }
                     catch (Exception secondLoadException)
@@ -498,5 +505,11 @@ namespace Sandra.UI.WF.Storage
                 }
             }
         }
+    }
+
+    internal class AutoSaveFileParseException : Exception
+    {
+        public AutoSaveFileParseException(string message, int start, int length)
+            : base($"{message} at position {start}, length {length}") { }
     }
 }
