@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 
 namespace Sandra.UI.WF.Storage
@@ -34,9 +35,14 @@ namespace Sandra.UI.WF.Storage
     {
         private readonly JsonTextReader jsonTextReader;
 
+        private readonly List<JsonTerminalSymbol> tokens;
+
+        public IReadOnlyList<JsonTerminalSymbol> Tokens => tokens.AsReadOnly();
+
         public TempJsonParser(string json)
         {
             jsonTextReader = new JsonTextReader(new StringReader(json));
+            tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
 
         private Exception TokenTypeNotSupported(JsonToken jsonToken)
