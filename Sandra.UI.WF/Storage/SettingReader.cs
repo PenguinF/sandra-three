@@ -28,13 +28,13 @@ using System.Numerics;
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Represents a single iteration of loading settings from a file.
+    /// Temporary class which parses a list of <see cref="JsonTerminalSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
-    internal class SettingReader
+    public class TempJsonParser
     {
         private readonly JsonTextReader jsonTextReader;
 
-        public SettingReader(string json)
+        public TempJsonParser(string json)
         {
             jsonTextReader = new JsonTextReader(new StringReader(json));
         }
@@ -137,7 +137,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public void ReadWorkingCopy(SettingCopy workingCopy)
+        public bool TryParse(out PMap map)
         {
             var tokenType = ReadSkipComments();
             if (tokenType != JsonToken.None)
@@ -149,12 +149,37 @@ namespace Sandra.UI.WF.Storage
                     throw new JsonReaderException("End of file expected");
                 }
 
-                PMap map;
                 if (!PType.Map.TryGetValidValue(rootValue, out map))
                 {
                     throw new JsonReaderException("Expected json object at root");
                 }
 
+                return true;
+            }
+
+            map = default(PMap);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Represents a single iteration of loading settings from a file.
+    /// </summary>
+    internal class SettingReader
+    {
+        private readonly TempJsonParser parser;
+
+        public SettingReader(string json)
+        {
+            parser = new TempJsonParser(json);
+        }
+
+        public void ReadWorkingCopy(SettingCopy workingCopy)
+        {
+            PMap map;
+
+            if (parser.TryParse(out map))
+            {
                 foreach (var kv in map)
                 {
                     SettingProperty property;
