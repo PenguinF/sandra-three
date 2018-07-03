@@ -64,7 +64,7 @@ namespace Sandra.UI.WF.Storage
                 return null;
             }
 
-            private PMap ParseMap()
+            public override PValue VisitCurlyOpen(JsonCurlyOpen curlyOpen)
             {
                 Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
 
@@ -117,7 +117,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            private PList ParseList()
+            public override PValue VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
             {
                 List<PValue> listBuilder = new List<PValue>();
 
@@ -150,37 +150,44 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
+            public override PValue VisitValue(JsonValue symbol)
+            {
+                string value = symbol.GetText();
+                if (value == "true") return new PBoolean(true);
+                if (value == "false") return new PBoolean(false);
+
+                BigInteger integerValue;
+                if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
+                {
+                    return new PInteger(integerValue);
+                }
+
+                Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
+                return PUndefined.Value;
+            }
+
+            public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
+
             private PValue ParseValue(JsonTerminalSymbol symbol)
             {
                 if (symbol is JsonValue)
                 {
-                    string value = symbol.GetText();
-                    if (value == "true") return new PBoolean(true);
-                    if (value == "false") return new PBoolean(false);
-
-                    BigInteger integerValue;
-                    if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
-                    {
-                        return new PInteger(integerValue);
-                    }
-
-                    Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
-                    return PUndefined.Value;
+                    return Visit(symbol);
                 }
 
                 if (symbol is JsonString)
                 {
-                    return new PString(((JsonString)symbol).Value);
+                    return Visit(symbol);
                 }
 
                 if (symbol is JsonCurlyOpen)
                 {
-                    return ParseMap();
+                    return Visit(symbol);
                 }
 
                 if (symbol is JsonSquareBracketOpen)
                 {
-                    return ParseList();
+                    return Visit(symbol);
                 }
 
                 throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
