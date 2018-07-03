@@ -96,9 +96,9 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnterminatedMultiLineComment : JsonTerminalSymbol
     {
-        public JsonErrorInfo Error { get; }
+        public TextErrorInfo Error { get; }
 
-        public JsonUnterminatedMultiLineComment(string json, int start, int length, JsonErrorInfo error) : base(json, start, length)
+        public JsonUnterminatedMultiLineComment(string json, int start, int length, TextErrorInfo error) : base(json, start, length)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
@@ -158,9 +158,9 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnknownSymbol : JsonTerminalSymbol
     {
-        public JsonErrorInfo Error { get; }
+        public TextErrorInfo Error { get; }
 
-        public JsonUnknownSymbol(string json, int start, JsonErrorInfo error) : base(json, start, 1)
+        public JsonUnknownSymbol(string json, int start, TextErrorInfo error) : base(json, start, 1)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
@@ -195,16 +195,16 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonErrorString : JsonTerminalSymbol
     {
-        public JsonErrorInfo[] Errors { get; }
+        public TextErrorInfo[] Errors { get; }
 
-        public JsonErrorString(string json, int start, int length, params JsonErrorInfo[] errors)
+        public JsonErrorString(string json, int start, int length, params TextErrorInfo[] errors)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors;
         }
 
-        public JsonErrorString(string json, int start, int length, IEnumerable<JsonErrorInfo> errors)
+        public JsonErrorString(string json, int start, int length, IEnumerable<TextErrorInfo> errors)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
@@ -215,13 +215,13 @@ namespace Sandra.UI.WF.Storage
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
     }
 
-    public class JsonErrorInfo
+    public class TextErrorInfo
     {
         public string Message { get; }
         public int Start { get; }
         public int Length { get; }
 
-        public JsonErrorInfo(string message, int start, int length)
+        public TextErrorInfo(string message, int start, int length)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
@@ -233,45 +233,45 @@ namespace Sandra.UI.WF.Storage
         }
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
+        /// Creates a <see cref="TextErrorInfo"/> for unexpected symbol characters.
         /// </summary>
-        public static JsonErrorInfo UnexpectedSymbol(string displayCharValue, int position)
-            => new JsonErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
+        public static TextErrorInfo UnexpectedSymbol(string displayCharValue, int position)
+            => new TextErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
+        /// Creates a <see cref="TextErrorInfo"/> for unterminated multiline comments.
         /// </summary>
         /// <param name="start">
         /// The length of the source json, or the position of the unexpected EOF.
         /// </param>
-        public static JsonErrorInfo UnterminatedMultiLineComment(int start)
-            => new JsonErrorInfo("Unterminated multi-line comment", start, 0);
+        public static TextErrorInfo UnterminatedMultiLineComment(int start)
+            => new TextErrorInfo("Unterminated multi-line comment", start, 0);
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
+        /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
         /// </summary>
         /// <param name="start">
         /// The length of the source json, or the position of the unexpected EOF.
         /// </param>
-        public static JsonErrorInfo UnterminatedString(int start)
-            => new JsonErrorInfo("Unterminated string", start, 0);
+        public static TextErrorInfo UnterminatedString(int start)
+            => new TextErrorInfo("Unterminated string", start, 0);
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
+        /// Creates a <see cref="TextErrorInfo"/> for unrecognized escape sequences.
         /// </summary>
-        public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
+        public static TextErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
+            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
+        /// Creates a <see cref="TextErrorInfo"/> for unrecognized Unicode escape sequences.
         /// </summary>
-        public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
+        public static TextErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
+            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
 
         /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
+        /// Creates a <see cref="TextErrorInfo"/> for illegal control characters inside string literals.
         /// </summary>
-        public static JsonErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
-            => new JsonErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
+        public static TextErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
+            => new TextErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
     }
 }

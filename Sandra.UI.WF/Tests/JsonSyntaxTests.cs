@@ -76,7 +76,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullMessageShouldThrowInError()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorInfo(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new TextErrorInfo(null, 0, 0));
         }
 
         [Theory]
@@ -85,7 +85,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(0, -1, "length")]
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(string.Empty, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new TextErrorInfo(string.Empty, start, length));
         }
 
         [Theory]
@@ -96,7 +96,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("Error!\r\n", 0, 2)]
         public void UnchangedParametersInError(string message, int start, int length)
         {
-            var errorInfo = new JsonErrorInfo(message, start, length);
+            var errorInfo = new TextErrorInfo(message, start, length);
             Assert.Equal(message, errorInfo.Message);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
@@ -110,7 +110,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("▓", 200)]
         public void UnexpectedSymbolMessage(string displayCharValue, int position)
         {
-            var error = JsonErrorInfo.UnexpectedSymbol(displayCharValue, position);
+            var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, position);
             Assert.NotNull(error);
             Assert.Equal($"Unexpected symbol '{displayCharValue}'", error.Message);
             Assert.Equal(position, error.Start);
@@ -123,7 +123,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(int.MaxValue)]
         public void UnterminatedMultiLineCommentMessage(int length)
         {
-            var error = JsonErrorInfo.UnterminatedMultiLineComment(length);
+            var error = TextErrorInfo.UnterminatedMultiLineComment(length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated multi-line comment", error.Message);
             Assert.Equal(length, error.Start);
@@ -136,7 +136,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(int.MaxValue)]
         public void UnterminatedStringMessage(int length)
         {
-            var error = JsonErrorInfo.UnterminatedString(length);
+            var error = TextErrorInfo.UnterminatedString(length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated string", error.Message);
             Assert.Equal(length, error.Start);
@@ -149,7 +149,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\0", 1)]
         public void IllegalControlCharacterInStringMessage(string displayCharValue, int position)
         {
-            var error = JsonErrorInfo.IllegalControlCharacterInString(displayCharValue, position);
+            var error = TextErrorInfo.IllegalControlCharacterInString(displayCharValue, position);
             Assert.Equal($"Illegal control character '{displayCharValue}' in string", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
@@ -160,7 +160,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\0", 1)]
         public void UnrecognizedEscapeSequenceMessage(string displayCharValue, int position)
         {
-            var error = JsonErrorInfo.UnrecognizedEscapeSequence(displayCharValue, position);
+            var error = TextErrorInfo.UnrecognizedEscapeSequence(displayCharValue, position);
             Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(2, error.Length);
@@ -172,7 +172,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\uffff", 1)]
         public void UnrecognizedUnicodeEscapeSequenceMessage(string displayCharValue, int position)
         {
-            var error = JsonErrorInfo.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
+            var error = TextErrorInfo.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
             Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(displayCharValue.Length, error.Length);
@@ -182,8 +182,8 @@ namespace Sandra.UI.WF.Tests
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (JsonErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<JsonErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (TextErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<TextErrorInfo>)null));
         }
 
         [Theory]
@@ -194,9 +194,9 @@ namespace Sandra.UI.WF.Tests
         [InlineData("Error!\r\n", 0, 2)]
         public void UnchangedParametersInErrorString(string message, int start, int length)
         {
-            var errorInfo1 = new JsonErrorInfo(message, start, length);
-            var errorInfo2 = new JsonErrorInfo(message + message, start + 1, length * 2);
-            var errorInfo3 = new JsonErrorInfo(message + message + message, start + 2, length * 3);
+            var errorInfo1 = new TextErrorInfo(message, start, length);
+            var errorInfo2 = new TextErrorInfo(message + message, start + 1, length * 2);
+            var errorInfo3 = new TextErrorInfo(message + message + message, start + 2, length * 3);
 
             Assert.Collection(
                 new JsonErrorString("", 0, 0, errorInfo1, errorInfo2, errorInfo3).Errors,
@@ -206,7 +206,7 @@ namespace Sandra.UI.WF.Tests
 
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
-            var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
+            var errorList = new List<TextErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
             var errorString = new JsonErrorString("", 0, 0, errorList);
             Assert.NotSame(errorString.Errors, errorList);
 
@@ -231,7 +231,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
-            var error = JsonErrorInfo.UnexpectedSymbol(displayCharValue, 0);
+            var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, 0);
             var symbol = new JsonUnknownSymbol(displayCharValue, 0, error);
             Assert.Same(error, symbol.Error);
         }
@@ -246,7 +246,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var error = JsonErrorInfo.UnterminatedMultiLineComment(commentText.Length);
+            var error = TextErrorInfo.UnterminatedMultiLineComment(commentText.Length);
             var symbol = new JsonUnterminatedMultiLineComment(commentText, 0, commentText.Length, error);
             Assert.Same(error, symbol.Error);
         }
@@ -254,17 +254,17 @@ namespace Sandra.UI.WF.Tests
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, JsonErrorInfo.UnterminatedMultiLineComment(2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, TextErrorInfo.UnterminatedMultiLineComment(2)), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
             yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
             yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };
             yield return new object[] { new JsonSquareBracketClose("]", 0), typeof(JsonSquareBracketClose) };
             yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
             yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol("*", 0, JsonErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol("*", 0, TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
             yield return new object[] { new JsonString("\"\"", 0, 2, string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString("\"", 0, 1, JsonErrorInfo.UnterminatedString(1)), typeof(JsonErrorString) };
+            yield return new object[] { new JsonErrorString("\"", 0, 1, TextErrorInfo.UnterminatedString(1)), typeof(JsonErrorString) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor
