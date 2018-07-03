@@ -53,6 +53,7 @@ namespace Sandra.UI.WF.Storage
                 while (currentTokenIndex < tokens.Count)
                 {
                     JsonTerminalSymbol current = tokens[currentTokenIndex];
+                    Errors.AddRange(current.Errors);
                     currentTokenIndex++;
                     if (!current.IsBackground) return current;
                 }
