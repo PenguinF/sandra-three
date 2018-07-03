@@ -150,8 +150,7 @@ namespace Sandra.UI.WF
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
 
             applyDefaultStyle();
-            tokenize(Text);
-            applySyntaxHighlighting();
+            parseAndApplySyntaxHighlighting(Text);
 
             TextChanged += SettingsTextBox_TextChanged;
 
@@ -161,7 +160,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void tokenize(string json)
+        private void parseAndApplySyntaxHighlighting(string json)
         {
             int firstUnusedIndex = 0;
 
@@ -188,10 +187,7 @@ namespace Sandra.UI.WF
                     new JsonWhitespace(json, firstUnusedIndex, length),
                     length);
             }
-        }
 
-        private void applySyntaxHighlighting()
-        {
             using (var updateToken = BeginUpdateRememberState())
             {
                 applyDefaultStyle();
@@ -218,8 +214,7 @@ namespace Sandra.UI.WF
 
         private void SettingsTextBox_TextChanged(object sender, EventArgs e)
         {
-            tokenize(Text);
-            applySyntaxHighlighting();
+            parseAndApplySyntaxHighlighting(Text);
         }
 
         private void displayNoErrors()
