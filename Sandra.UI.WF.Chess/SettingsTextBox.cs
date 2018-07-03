@@ -95,6 +95,8 @@ namespace Sandra.UI.WF
 
         private readonly SyntaxRenderer<JsonTerminalSymbol> syntaxRenderer;
 
+        private readonly UpdatableRichTextBox errorsTextBox;
+
         private void applyDefaultStyle()
         {
             using (var updateToken = BeginUpdateRememberState())
@@ -132,10 +134,11 @@ namespace Sandra.UI.WF
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public SettingsTextBox(SettingsFile settingsFile)
+        public SettingsTextBox(SettingsFile settingsFile, UpdatableRichTextBox errorsTextBox)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
             this.settingsFile = settingsFile;
+            this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);

@@ -60,7 +60,14 @@ namespace Sandra.UI.WF
 
         private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
         {
-            var settingsTextBox = new SettingsTextBox(settingsFile)
+            var errorsTextBox = new UpdatableRichTextBox
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+            };
+
+            var settingsTextBox = new SettingsTextBox(settingsFile, errorsTextBox)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
@@ -93,7 +100,23 @@ namespace Sandra.UI.WF
                 Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
             };
 
-            settingsForm.Controls.Add(settingsTextBox);
+            var splitter = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                SplitterWidth = 4,
+                FixedPanel = FixedPanel.Panel2,
+                Orientation = Orientation.Horizontal,
+            };
+
+            settingsForm.Load += (_, __) =>
+            {
+                splitter.SplitterDistance = settingsForm.ClientSize.Height - 38;
+            };
+
+            splitter.Panel1.Controls.Add(settingsTextBox);
+            splitter.Panel2.Controls.Add(errorsTextBox);
+
+            settingsForm.Controls.Add(splitter);
 
             return settingsForm;
         }
