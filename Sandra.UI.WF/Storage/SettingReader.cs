@@ -35,6 +35,8 @@ namespace Sandra.UI.WF.Storage
     {
         private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
+            private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
+
             private readonly List<JsonTerminalSymbol> tokens;
 
             public readonly List<TextErrorInfo> Errors = new List<TextErrorInfo>();
@@ -149,7 +151,8 @@ namespace Sandra.UI.WF.Storage
                         return new PInteger(integerValue);
                     }
 
-                    throw new JsonReaderException($"Unrecognized value {value}");
+                    Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
+                    return PUndefined.Value;
                 }
 
                 if (symbol is JsonString)
