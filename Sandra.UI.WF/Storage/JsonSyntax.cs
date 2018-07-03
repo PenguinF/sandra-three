@@ -44,6 +44,8 @@ namespace Sandra.UI.WF.Storage
             Length = length;
         }
 
+        public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
+
         public abstract void Accept(JsonTerminalSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
     }
@@ -98,10 +100,13 @@ namespace Sandra.UI.WF.Storage
     {
         public TextErrorInfo Error { get; }
 
+        public override IEnumerable<TextErrorInfo> Errors { get; }
+
         public JsonUnterminatedMultiLineComment(string json, int start, int length, TextErrorInfo error) : base(json, start, length)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
+            Errors = new[] { error };
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
@@ -160,10 +165,13 @@ namespace Sandra.UI.WF.Storage
     {
         public TextErrorInfo Error { get; }
 
+        public override IEnumerable<TextErrorInfo> Errors { get; }
+
         public JsonUnknownSymbol(string json, int start, TextErrorInfo error) : base(json, start, 1)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
+            Errors = new[] { error };
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
@@ -195,7 +203,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonErrorString : JsonTerminalSymbol
     {
-        public TextErrorInfo[] Errors { get; }
+        public override IEnumerable<TextErrorInfo> Errors { get; }
 
         public JsonErrorString(string json, int start, int length, params TextErrorInfo[] errors)
             : base(json, start, length)

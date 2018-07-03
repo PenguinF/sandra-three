@@ -388,32 +388,11 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { "///*\"\n/*", new[] { TextErrorInfo.UnterminatedMultiLineComment(6, 2) } };
         }
 
-        private class ErrorInfoFinder : JsonTerminalSymbolVisitor<IEnumerable<TextErrorInfo>>
-        {
-            public override IEnumerable<TextErrorInfo> DefaultVisit(JsonTerminalSymbol symbol)
-                => Enumerable.Empty<TextErrorInfo>();
-
-            public override IEnumerable<TextErrorInfo> VisitUnknownSymbol(JsonUnknownSymbol symbol)
-            {
-                yield return symbol.Error;
-            }
-
-            public override IEnumerable<TextErrorInfo> VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol)
-            {
-                yield return symbol.Error;
-            }
-
-            public override IEnumerable<TextErrorInfo> VisitErrorString(JsonErrorString symbol)
-                => symbol.Errors;
-        }
-
         [Theory]
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, TextErrorInfo[] expectedErrors)
         {
-            ErrorInfoFinder errorInfoFinder = new ErrorInfoFinder();
-
-            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(errorInfoFinder.Visit);
+            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(x => x.Errors);
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<TextErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);
