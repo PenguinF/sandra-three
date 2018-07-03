@@ -36,6 +36,7 @@ namespace Sandra.UI.WF.Storage
         private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
             private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
+            private const string NoPMapMessage = "Expected json object at root";
 
             private readonly List<JsonTerminalSymbol> tokens;
 
@@ -192,12 +193,13 @@ namespace Sandra.UI.WF.Storage
                             throw new JsonReaderException("End of file expected");
                         }
 
-                        if (!PType.Map.TryGetValidValue(rootValue, out map))
+                        bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
+                        if (!validMap)
                         {
-                            throw new JsonReaderException("Expected json object at root");
+                            Errors.Add(new TextErrorInfo(NoPMapMessage, symbol.Start, symbol.Length));
                         }
 
-                        return true;
+                        return validMap;
                     }
 
                     map = default(PMap);
