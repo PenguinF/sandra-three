@@ -152,11 +152,15 @@ namespace Sandra.UI.WF
             if (errorsTextBox != null)
             {
                 errorsTextBox.ReadOnly = true;
+                errorsTextBox.Click += ErrorsTextBox_Click;
+                errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
             }
         }
 
         private void parseAndApplySyntaxHighlighting(string json)
         {
+            lastParsedText = json;
+
             applyDefaultStyle();
 
             int firstUnusedIndex = 0;
@@ -217,18 +221,29 @@ namespace Sandra.UI.WF
             }
         }
 
+        private string lastParsedText;
+
         private void SettingsTextBox_TextChanged(object sender, EventArgs e)
         {
-            using (var updateToken = BeginUpdateRememberState())
+            // Only parse and analyze errors if the text actually changed, not just the style.
+            string newText = Text;
+            if (lastParsedText != newText)
             {
-                parseAndApplySyntaxHighlighting(Text);
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    parseAndApplySyntaxHighlighting(newText);
+                }
             }
         }
+
+        private List<TextErrorInfo> currentErrors;
 
         private void displayNoErrors()
         {
             if (errorsTextBox != null)
             {
+                currentErrors = null;
+
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     errorsTextBox.Text = "(No errors)";
@@ -248,6 +263,8 @@ namespace Sandra.UI.WF
         {
             if (errorsTextBox != null)
             {
+                currentErrors = errors;
+
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     var errorMessages = from error in errors
@@ -266,6 +283,37 @@ namespace Sandra.UI.WF
                     errorsTextBox.SelectionFont = errorsFont;
                     errorsTextBox.Select(0, 0);
                 }
+            }
+        }
+
+        private void selectErrorText(int charIndex)
+        {
+            // Select the text that generated the error.
+            if (currentErrors != null)
+            {
+                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                if (0 <= lineIndex && lineIndex < currentErrors.Count)
+                {
+                    var currentSelectedError = currentErrors[lineIndex];
+                    using (var updateToken = errorsTextBox.BeginUpdateRememberState())
+                    {
+                        Select(currentSelectedError.Start, currentSelectedError.Length);
+                        SelectionBackColor = errorBackColor;
+                    }
+                }
+            }
+        }
+
+        private void ErrorsTextBox_Click(object sender, EventArgs e)
+        {
+            selectErrorText(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
+        }
+
+        private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                selectErrorText(errorsTextBox.SelectionStart);
             }
         }
     }
