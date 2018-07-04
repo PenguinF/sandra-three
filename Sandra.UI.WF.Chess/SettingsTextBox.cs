@@ -131,6 +131,9 @@ namespace Sandra.UI.WF
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
+        /// <param name="errorsTextBox">
+        /// An optional <see cref="UpdatableRichTextBox"/> which displays JSON parse errors.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
