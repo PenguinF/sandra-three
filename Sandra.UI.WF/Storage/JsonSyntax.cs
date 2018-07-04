@@ -44,6 +44,12 @@ namespace Sandra.UI.WF.Storage
             Length = length;
         }
 
+        public virtual bool IsBackground => false;
+        public virtual bool IsValueStartSymbol => false;
+        public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
+
+        public string GetText() => Json.Substring(Start, Length);
+
         public abstract void Accept(JsonTerminalSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
     }
@@ -86,7 +92,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
-        public string Text => Json.Substring(Start, Length);
+        public override bool IsBackground => true;
 
         public JsonComment(string json, int start, int length) : base(json, start, length) { }
 
@@ -96,12 +102,16 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnterminatedMultiLineComment : JsonTerminalSymbol
     {
-        public JsonErrorInfo Error { get; }
+        public TextErrorInfo Error { get; }
 
-        public JsonUnterminatedMultiLineComment(string json, int start, int length, JsonErrorInfo error) : base(json, start, length)
+        public override bool IsBackground => true;
+        public override IEnumerable<TextErrorInfo> Errors { get; }
+
+        public JsonUnterminatedMultiLineComment(string json, int start, int length, TextErrorInfo error) : base(json, start, length)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
+            Errors = new[] { error };
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
@@ -110,6 +120,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonCurlyOpen : JsonTerminalSymbol
     {
+        public override bool IsValueStartSymbol => true;
+
         public JsonCurlyOpen(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
@@ -126,6 +138,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonSquareBracketOpen : JsonTerminalSymbol
     {
+        public override bool IsValueStartSymbol => true;
+
         public JsonSquareBracketOpen(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
@@ -158,12 +172,17 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnknownSymbol : JsonTerminalSymbol
     {
-        public JsonErrorInfo Error { get; }
+        public TextErrorInfo Error { get; }
 
-        public JsonUnknownSymbol(string json, int start, JsonErrorInfo error) : base(json, start, 1)
+        public override IEnumerable<TextErrorInfo> Errors { get; }
+
+        public override bool IsValueStartSymbol => true;
+
+        public JsonUnknownSymbol(string json, int start, TextErrorInfo error) : base(json, start, 1)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
+            Errors = new[] { error };
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
@@ -172,7 +191,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
-        public string Value => Json.Substring(Start, Length);
+        public override bool IsValueStartSymbol => true;
 
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
 
@@ -183,6 +202,8 @@ namespace Sandra.UI.WF.Storage
     public class JsonString : JsonTerminalSymbol
     {
         public string Value { get; }
+
+        public override bool IsValueStartSymbol => true;
 
         public JsonString(string json, int start, int length, string value) : base(json, start, length)
         {
@@ -195,16 +216,17 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonErrorString : JsonTerminalSymbol
     {
-        public JsonErrorInfo[] Errors { get; }
+        public override IEnumerable<TextErrorInfo> Errors { get; }
+        public override bool IsValueStartSymbol => true;
 
-        public JsonErrorString(string json, int start, int length, params JsonErrorInfo[] errors)
+        public JsonErrorString(string json, int start, int length, params TextErrorInfo[] errors)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors;
         }
 
-        public JsonErrorString(string json, int start, int length, IEnumerable<JsonErrorInfo> errors)
+        public JsonErrorString(string json, int start, int length, IEnumerable<TextErrorInfo> errors)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
@@ -213,65 +235,5 @@ namespace Sandra.UI.WF.Storage
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitErrorString(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
-    }
-
-    public class JsonErrorInfo
-    {
-        public string Message { get; }
-        public int Start { get; }
-        public int Length { get; }
-
-        public JsonErrorInfo(string message, int start, int length)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-
-            Message = message;
-            Start = start;
-            Length = length;
-        }
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
-        /// </summary>
-        public static JsonErrorInfo UnexpectedSymbol(string displayCharValue, int position)
-            => new JsonErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
-        /// </summary>
-        /// <param name="start">
-        /// The length of the source json, or the position of the unexpected EOF.
-        /// </param>
-        public static JsonErrorInfo UnterminatedMultiLineComment(int start)
-            => new JsonErrorInfo("Unterminated multi-line comment", start, 0);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
-        /// </summary>
-        /// <param name="start">
-        /// The length of the source json, or the position of the unexpected EOF.
-        /// </param>
-        public static JsonErrorInfo UnterminatedString(int start)
-            => new JsonErrorInfo("Unterminated string", start, 0);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
-        /// </summary>
-        public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
-        /// </summary>
-        public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new JsonErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
-
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
-        /// </summary>
-        public static JsonErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
-            => new JsonErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
     }
 }

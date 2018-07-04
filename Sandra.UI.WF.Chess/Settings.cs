@@ -94,6 +94,22 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
+        public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> DefaultSettingsErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsErrorHeight))),
+            PType.CLR.Int32);
+
+        public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
+            PType.CLR.Int32);
+
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
@@ -181,6 +197,10 @@ namespace Sandra.UI.WF
             return new SettingSchema(
                 Localizers.LangSetting,
                 SettingKeys.Window,
+                SettingKeys.DefaultSettingsWindow,
+                SettingKeys.DefaultSettingsErrorHeight,
+                SettingKeys.PreferencesWindow,
+                SettingKeys.PreferencesErrorHeight,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
         }

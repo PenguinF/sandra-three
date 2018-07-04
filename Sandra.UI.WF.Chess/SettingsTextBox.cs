@@ -22,6 +22,7 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions.SyntaxRenderer;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -32,13 +33,15 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : RichTextBoxBase
+    public partial class SettingsTextBox : SyntaxEditor
     {
         /// <summary>
         /// Because the syntax renderer does not support discontinuous terminal symbols.
         /// </summary>
         private class JsonWhitespace : JsonTerminalSymbol
         {
+            public override bool IsBackground => true;
+
             public JsonWhitespace(string json, int start, int length) : base(json, start, length) { }
 
             public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
@@ -53,6 +56,11 @@ namespace Sandra.UI.WF
             ForeColor = Color.WhiteSmoke,
             Font = new Font("Consolas", 10),
         };
+
+        private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
+        private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
+        private static readonly Font errorsFont = new Font("Calibri", 10f);
+        private static readonly Color errorBackColor = Color.FromArgb(255, 72, 72);
 
         private static readonly TextElementStyle commentStyle = new TextElementStyle()
         {
@@ -74,26 +82,20 @@ namespace Sandra.UI.WF
             ForeColor = Color.FromArgb(255, 192, 144),
         };
 
-        private static readonly TextElementStyle errorStyle = new TextElementStyle()
-        {
-            HasForeColor = true,
-            ForeColor = Color.FromArgb(255, 72, 72),
-            Font = new Font("Consolas", 10, FontStyle.Underline),
-        };
-
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
         {
             public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
-            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => errorStyle;
+            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => stringStyle;
             public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
-            public override TextElementStyle VisitUnknownSymbol(JsonUnknownSymbol symbol) => errorStyle;
-            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => errorStyle;
+            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => commentStyle;
             public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
         }
 
         private readonly SettingsFile settingsFile;
 
         private readonly SyntaxRenderer<JsonTerminalSymbol> syntaxRenderer;
+
+        private readonly UpdatableRichTextBox errorsTextBox;
 
         private void applyDefaultStyle()
         {
@@ -129,33 +131,47 @@ namespace Sandra.UI.WF
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
+        /// <param name="errorsTextBox">
+        /// An optional <see cref="UpdatableRichTextBox"/> which displays JSON parse errors.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public SettingsTextBox(SettingsFile settingsFile)
+        public SettingsTextBox(SettingsFile settingsFile, UpdatableRichTextBox errorsTextBox)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
             this.settingsFile = settingsFile;
+            this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
             syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
-
-            applyDefaultStyle();
-            tokenize(Text);
-            applySyntaxHighlighting();
+            parseAndApplySyntaxHighlighting(Text);
 
             TextChanged += SettingsTextBox_TextChanged;
+
+            if (errorsTextBox != null)
+            {
+                errorsTextBox.ReadOnly = true;
+                errorsTextBox.Click += ErrorsTextBox_Click;
+                errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
+            }
         }
 
-        private void tokenize(string json)
+        private void parseAndApplySyntaxHighlighting(string json)
         {
+            lastParsedText = json;
+
+            applyDefaultStyle();
+
             int firstUnusedIndex = 0;
 
             syntaxRenderer.Clear();
-            new JsonTokenizer(json).TokenizeAll().ForEach(x =>
+
+            var parser = new SettingReader(json);
+            parser.Tokens.ForEach(x =>
             {
                 if (firstUnusedIndex < x.Start)
                 {
@@ -177,20 +193,25 @@ namespace Sandra.UI.WF
                     new JsonWhitespace(json, firstUnusedIndex, length),
                     length);
             }
-        }
 
-        private void applySyntaxHighlighting()
-        {
-            using (var updateToken = BeginUpdateRememberState())
+            var styleSelector = new StyleSelector();
+
+            foreach (var textElement in syntaxRenderer.Elements)
             {
-                applyDefaultStyle();
+                applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
+            }
 
-                var styleSelector = new StyleSelector();
+            PMap dummy;
+            List<TextErrorInfo> errors;
+            parser.TryParse(out dummy, out errors);
 
-                foreach (var textElement in syntaxRenderer.Elements)
-                {
-                    applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
-                }
+            if (errors.Count == 0)
+            {
+                displayNoErrors();
+            }
+            else
+            {
+                displayErrors(errors);
             }
         }
 
@@ -203,10 +224,129 @@ namespace Sandra.UI.WF
             }
         }
 
+        private string lastParsedText;
+
         private void SettingsTextBox_TextChanged(object sender, EventArgs e)
         {
-            tokenize(Text);
-            applySyntaxHighlighting();
+            // Only parse and analyze errors if the text actually changed, not just the style.
+            string newText = Text;
+            if (lastParsedText != newText)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    parseAndApplySyntaxHighlighting(newText);
+                }
+            }
+        }
+
+        private List<TextErrorInfo> currentErrors;
+
+        private void displayNoErrors()
+        {
+            if (errorsTextBox != null)
+            {
+                currentErrors = null;
+                currentSelectedError = null;
+
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    errorsTextBox.Text = "(No errors)";
+                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.ForeColor = noErrorsForeColor;
+                    errorsTextBox.Font = noErrorsFont;
+                    errorsTextBox.SelectAll();
+                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
+                    errorsTextBox.SelectionColor = noErrorsForeColor;
+                    errorsTextBox.SelectionFont = noErrorsFont;
+                    errorsTextBox.Select(0, 0);
+                }
+            }
+        }
+
+        private void displayErrors(List<TextErrorInfo> errors)
+        {
+            if (errorsTextBox != null)
+            {
+                currentErrors = errors;
+                currentSelectedError = null;
+
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    var errorMessages = from error in errors
+                                        let lineIndex = GetLineFromCharIndex(error.Start)
+                                        let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
+                                        select $"{error.Message} at line {lineIndex}, position {position}";
+
+                    errorsTextBox.Text = string.Join("\n", errorMessages);
+
+                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.ForeColor = defaultStyle.ForeColor;
+                    errorsTextBox.Font = errorsFont;
+                    errorsTextBox.SelectAll();
+                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
+                    errorsTextBox.SelectionColor = defaultStyle.ForeColor;
+                    errorsTextBox.SelectionFont = errorsFont;
+                    errorsTextBox.Select(0, 0);
+                }
+            }
+        }
+
+        private TextErrorInfo currentSelectedError;
+
+        private void resetSelectedErrorText()
+        {
+            if (currentSelectedError != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    Select(currentSelectedError.Start, currentSelectedError.Length);
+                    SelectionBackColor = defaultStyle.BackColor;
+                }
+
+                currentSelectedError = null;
+            }
+        }
+
+        private void selectErrorText(int charIndex)
+        {
+            var oldSelectedError = currentSelectedError;
+
+            // Reset the old error first.
+            resetSelectedErrorText();
+
+            // Select the text that generated the error.
+            if (currentErrors != null)
+            {
+                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                if (0 <= lineIndex && lineIndex < currentErrors.Count)
+                {
+                    // Only show selected error if it's different.
+                    // This way, if an error is clicked twice, its style gets deselected again.
+                    if (oldSelectedError == null || !oldSelectedError.EqualTo(currentErrors[lineIndex]))
+                    {
+                        currentSelectedError = currentErrors[lineIndex];
+
+                        using (var updateToken = errorsTextBox.BeginUpdateRememberState())
+                        {
+                            Select(currentSelectedError.Start, currentSelectedError.Length);
+                            SelectionBackColor = errorBackColor;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ErrorsTextBox_Click(object sender, EventArgs e)
+        {
+            selectErrorText(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
+        }
+
+        private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                selectErrorText(errorsTextBox.SelectionStart);
+            }
         }
     }
 }

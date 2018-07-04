@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * AutoSave.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,9 +17,12 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -208,15 +212,27 @@ namespace Sandra.UI.WF.Storage
                     : autoSaveFileStream1;
 
                 // Load remote settings.
+                List<TextErrorInfo> errors;
+                bool tryOtherAutoSaveStream = false;
                 try
                 {
-                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                    if (errors.Count > 0)
+                    {
+                        errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                        tryOtherAutoSaveStream = true;
+                    }
                 }
                 catch (Exception firstLoadException)
                 {
                     // Trace and try the other auto-save file as a backup.
                     // Also use a new decoder.
                     firstLoadException.Trace();
+                    tryOtherAutoSaveStream = true;
+                }
+
+                if (tryOtherAutoSaveStream)
+                {
                     latestAutoSaveFileStream
                         = latestAutoSaveFileStream == autoSaveFileStream1
                         ? autoSaveFileStream2
@@ -224,7 +240,12 @@ namespace Sandra.UI.WF.Storage
 
                     try
                     {
-                        remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer);
+                        remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                        if (errors.Count > 0)
+                        {
+                            errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                            remoteSettings = localSettings;
+                        }
                     }
                     catch (Exception secondLoadException)
                     {
@@ -410,7 +431,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer)
+        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<TextErrorInfo> errors)
         {
             // Reuse one string builder to build keys and values.
             StringBuilder sb = new StringBuilder();
@@ -430,7 +451,7 @@ namespace Sandra.UI.WF.Storage
 
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
-            workingCopy.LoadFromText(new StringReader(sb.ToString()));
+            errors = SettingReader.ReadWorkingCopy(sb.ToString(), workingCopy);
             return workingCopy.Commit();
         }
 
@@ -483,5 +504,11 @@ namespace Sandra.UI.WF.Storage
                 }
             }
         }
+    }
+
+    internal class AutoSaveFileParseException : Exception
+    {
+        public AutoSaveFileParseException(string message, int start, int length)
+            : base($"{message} at position {start}, length {length}") { }
     }
 }

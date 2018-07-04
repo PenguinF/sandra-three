@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingsFile.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,7 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Newtonsoft.Json;
+#endregion
+
 using SysExtensions;
 using System;
 using System.Collections.Concurrent;
@@ -35,7 +37,6 @@ namespace Sandra.UI.WF.Storage
     public class SettingsFile
     {
         private static bool IsExternalCauseFileException(Exception exception) =>
-            exception is JsonReaderException ||
             exception is IOException ||
             exception is UnauthorizedAccessException ||
             exception is FileNotFoundException ||
@@ -123,7 +124,7 @@ namespace Sandra.UI.WF.Storage
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
                 string fileText = File.ReadAllText(AbsoluteFilePath);
-                workingCopy.LoadFromText(new StringReader(fileText));
+                SettingReader.ReadWorkingCopy(fileText, workingCopy);
             }
             catch (Exception exception)
             {

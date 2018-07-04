@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * RichTextBoxBase.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using System;
 using System.Windows.Forms;
@@ -102,7 +105,7 @@ namespace Sandra.UI.WF
             {
                 zoomFactor++;
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
+                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;
         }
@@ -115,7 +118,7 @@ namespace Sandra.UI.WF
             {
                 zoomFactor--;
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-                autoSaveZoomFactor(zoomFactor);
+                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;
         }

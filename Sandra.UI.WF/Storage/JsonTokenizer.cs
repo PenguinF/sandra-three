@@ -35,7 +35,7 @@ namespace Sandra.UI.WF.Storage
         private readonly int length;
 
         // Reusable fields for building terminal symbols.
-        private readonly List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
+        private readonly List<TextErrorInfo> errors = new List<TextErrorInfo>();
         private readonly StringBuilder valueBuilder = new StringBuilder();
 
         // Current state.
@@ -192,7 +192,7 @@ namespace Sandra.UI.WF.Storage
                                 yield return new JsonUnknownSymbol(
                                     json,
                                     currentIndex,
-                                    JsonErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex));
+                                    TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex));
                                 break;
                         }
                     }
@@ -329,13 +329,13 @@ namespace Sandra.UI.WF.Storage
                                     else
                                     {
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
-                                        errors.Add(JsonErrorInfo.UnrecognizedUnicodeEscapeSequence(
+                                        errors.Add(TextErrorInfo.UnrecognizedUnicodeEscapeSequence(
                                             json.Substring(escapeSequenceStart, escapeSequenceLength),
                                             escapeSequenceStart, escapeSequenceLength));
                                     }
                                     break;
                                 default:
-                                    errors.Add(JsonErrorInfo.UnrecognizedEscapeSequence(
+                                    errors.Add(TextErrorInfo.UnrecognizedEscapeSequence(
                                         json.Substring(escapeSequenceStart, 2),
                                         escapeSequenceStart));
                                     break;
@@ -359,7 +359,7 @@ namespace Sandra.UI.WF.Storage
                                 default: displayCharValue = $"\\u{((int)c).ToString("x4")}"; break;
                             }
 
-                            errors.Add(JsonErrorInfo.IllegalControlCharacterInString(displayCharValue, currentIndex));
+                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(displayCharValue, currentIndex));
                         }
                         else
                         {
@@ -372,7 +372,7 @@ namespace Sandra.UI.WF.Storage
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            errors.Add(JsonErrorInfo.UnterminatedString(length));
+            errors.Add(TextErrorInfo.UnterminatedString(firstUnusedIndex, length - firstUnusedIndex));
             yield return new JsonErrorString(
                 json,
                 firstUnusedIndex,
@@ -477,7 +477,7 @@ namespace Sandra.UI.WF.Storage
                 json,
                 firstUnusedIndex,
                 length - firstUnusedIndex,
-                JsonErrorInfo.UnterminatedMultiLineComment(length));
+                TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex));
 
             currentTokenizer = null;
         }

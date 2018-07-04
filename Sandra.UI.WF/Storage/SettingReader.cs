@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingReader.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,142 +17,346 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
-using Newtonsoft.Json;
+#endregion
+
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
+using System.Linq;
 using System.Numerics;
 
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Represents a single iteration of loading settings from a file.
+    /// Temporary class which parses a list of <see cref="JsonTerminalSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
-    internal class SettingReader
+    public class SettingReader
     {
-        private readonly JsonTextReader jsonTextReader;
-
-        public SettingReader(TextReader inputReader)
+        private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
-            jsonTextReader = new JsonTextReader(inputReader);
-        }
+            private const string EmptyKeyMessage = "Missing property key";
+            private const string EmptyValueMessage = "Missing value";
+            private const string MultipleValuesMessage = "',' expected";
+            private const string MultiplePropertyKeysMessage = "':' expected";
+            private const string MultipleKeySectionsMessage = "Unexpected ':', expected ',' or '}'";
+            private const string EofInObjectMessage = "Unexpected end of file, expected '}'";
+            private const string InvalidKeyMessage = "Invalid property key";
+            private const string DuplicateKeyMessage = "Key '{0}' already exists in object";
+            private const string ControlSymbolInObjectMessage = "'}' expected";
+            private const string EofInArrayMessage = "Unexpected end of file, expected ']'";
+            private const string ControlSymbolInArrayMessage = "']' expected";
+            private const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
+            private const string NoPMapMessage = "Expected json object at root";
+            private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
-        private Exception TokenTypeNotSupported(JsonToken jsonToken)
-            => new JsonReaderException($"Token type {jsonToken} is not supported for settings.");
+            private readonly List<JsonTerminalSymbol> tokens;
+            private readonly int sourceLength;
 
-        private JsonToken ReadSkipComments()
-        {
-            // Skip comments until encountering something meaningful.
-            while (jsonTextReader.Read() && jsonTextReader.TokenType == JsonToken.Comment);
-            return jsonTextReader.TokenType;
-        }
+            public readonly List<TextErrorInfo> Errors = new List<TextErrorInfo>();
 
-        private PMap ParseMap()
-        {
-            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+            private int currentTokenIndex;
 
-            for (;;)
+            public ParseRun(List<JsonTerminalSymbol> tokens, int sourceLength)
             {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndObject)
+                this.tokens = tokens;
+                this.sourceLength = sourceLength;
+                currentTokenIndex = 0;
+            }
+
+            private JsonTerminalSymbol PeekSkipComments()
+            {
+                // Skip comments until encountering something meaningful.
+                while (currentTokenIndex < tokens.Count)
                 {
-                    return new PMap(mapBuilder);
+                    JsonTerminalSymbol current = tokens[currentTokenIndex];
+                    if (!current.IsBackground) return current;
+                    Errors.AddRange(current.Errors);
+                    currentTokenIndex++;
+                }
+                return null;
+            }
+
+            private JsonTerminalSymbol ReadSkipComments()
+            {
+                // Skip comments until encountering something meaningful.
+                while (currentTokenIndex < tokens.Count)
+                {
+                    JsonTerminalSymbol current = tokens[currentTokenIndex];
+                    Errors.AddRange(current.Errors);
+                    currentTokenIndex++;
+                    if (!current.IsBackground) return current;
+                }
+                return null;
+            }
+
+            public override PValue VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+            {
+                Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+
+                // Maintain a separate set of keys to aid error reporting on duplicate keys.
+                HashSet<string> foundKeys = new HashSet<string>();
+
+                for (;;)
+                {
+                    PValue parsedKey;
+                    JsonTerminalSymbol first;
+                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out parsedKey, out first);
+
+                    bool validKey = false;
+                    string propertyKey = default(string);
+
+                    if (gotKey)
+                    {
+                        // Analyze if this is an actual, unique property key.
+                        if (parsedKey is PString)
+                        {
+                            propertyKey = ((PString)parsedKey).Value;
+
+                            // Expect unique keys.
+                            validKey = !foundKeys.Contains(propertyKey);
+
+                            if (validKey)
+                            {
+                                foundKeys.Add(propertyKey);
+                            }
+                            else
+                            {
+                                Errors.Add(new TextErrorInfo(string.Format(DuplicateKeyMessage, propertyKey), first.Start, first.Length));
+                            }
+                        }
+                        else
+                        {
+                            Errors.Add(new TextErrorInfo(InvalidKeyMessage, first.Start, first.Length));
+                        }
+                    }
+
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    JsonTerminalSymbol symbol = ReadSkipComments();
+                    PValue parsedValue = default(PValue);
+
+                    // If gotValue remains false, a missing value error will be reported.
+                    bool gotValue = false;
+
+                    // Loop parsing values until encountering a non ':'.
+                    bool gotColon = false;
+                    while (symbol is JsonColon)
+                    {
+                        if (gotColon)
+                        {
+                            // Multiple ':' without a ','.
+                            Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, symbol.Start, symbol.Length));
+                        }
+
+                        JsonTerminalSymbol firstValueSymbol;
+                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstValueSymbol);
+
+                        // Only the first value can be valid, even if it's undefined.
+                        if (validKey && !gotColon && gotValue)
+                        {
+                            mapBuilder.Add(propertyKey, parsedValue);
+                        }
+
+                        symbol = ReadSkipComments();
+                        gotColon = true;
+                    }
+
+                    bool isComma = symbol is JsonComma;
+                    bool isCurlyClose = symbol is JsonCurlyClose;
+
+                    // '}' directly following a ',' should not report errors.
+                    // '..., : }' however misses both a key and a value.
+                    if (isComma || (isCurlyClose && (gotKey || gotColon)))
+                    {
+                        // Report missing property key and/or value.
+                        if (!gotKey)
+                        {
+                            Errors.Add(new TextErrorInfo(EmptyKeyMessage, symbol.Start, symbol.Length));
+                        }
+
+                        if (!gotValue)
+                        {
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                        }
+                    }
+
+                    if (!isComma)
+                    {
+                        // Assume missing closing bracket '}' on EOF or control symbol.
+                        if (symbol == null)
+                        {
+                            Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength - 1, 1));
+                        }
+                        else if (!isCurlyClose)
+                        {
+                            Errors.Add(new TextErrorInfo(ControlSymbolInObjectMessage, symbol.Start, symbol.Length));
+                        }
+
+                        return new PMap(mapBuilder);
+                    }
+                }
+            }
+
+            public override PValue VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
+            {
+                List<PValue> listBuilder = new List<PValue>();
+
+                for (;;)
+                {
+                    PValue parsedValue;
+                    JsonTerminalSymbol firstSymbol;
+
+                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstSymbol);
+                    if (gotValue) listBuilder.Add(parsedValue);
+
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    JsonTerminalSymbol symbol = ReadSkipComments();
+                    if (symbol is JsonComma)
+                    {
+                        if (!gotValue)
+                        {
+                            // Two commas or '[,': add an empty PErrorValue.
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                            listBuilder.Add(PConstantValue.Undefined);
+                        }
+                    }
+                    else
+                    {
+                        // Assume missing closing bracket ']' on EOF or control symbol.
+                        if (symbol == null)
+                        {
+                            Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength - 1, 1));
+                        }
+                        else if (!(symbol is JsonSquareBracketClose))
+                        {
+                            Errors.Add(new TextErrorInfo(ControlSymbolInArrayMessage, symbol.Start, symbol.Length));
+                        }
+
+                        return new PList(listBuilder);
+                    }
+                }
+            }
+
+            public override PValue VisitValue(JsonValue symbol)
+            {
+                string value = symbol.GetText();
+                if (value == "true") return PConstantValue.True;
+                if (value == "false") return PConstantValue.False;
+
+                BigInteger integerValue;
+                if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
+                {
+                    return new PInteger(integerValue);
                 }
 
-                if (tokenType != JsonToken.PropertyName)
+                Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
+                return PConstantValue.Undefined;
+            }
+
+            public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
+
+            private bool ParseMultiValue(string multipleValuesMessage,
+                                         out PValue firstValue,
+                                         out JsonTerminalSymbol firstValueSymbol)
+            {
+                firstValue = default(PValue);
+                firstValueSymbol = default(JsonTerminalSymbol);
+
+                JsonTerminalSymbol symbol = PeekSkipComments();
+                if (symbol == null || !symbol.IsValueStartSymbol) return false;
+
+                firstValueSymbol = symbol;
+                bool hasValue = false;
+
+                for (;;)
                 {
-                    throw new JsonReaderException("PropertyName or EndObject '}' expected");
+                    // Read the same symbol again but now eat it.
+                    symbol = ReadSkipComments();
+
+                    if (!hasValue)
+                    {
+                        if (symbol.Errors.Any()) firstValue = PConstantValue.Undefined;
+                        else firstValue = Visit(symbol);
+                        hasValue = true;
+                    }
+                    else if (!symbol.Errors.Any())
+                    {
+                        // Make sure consecutive symbols are parsed as if they were valid.
+                        // Discard the result.
+                        Visit(symbol);
+                    }
+
+                    // Peek at the next symbol.
+                    // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
+                    symbol = PeekSkipComments();
+                    if (symbol == null || !symbol.IsValueStartSymbol) return true;
+
+                    // Two or more consecutive values not allowed.
+                    Errors.Add(new TextErrorInfo(multipleValuesMessage, symbol.Start, symbol.Length));
+                }
+            }
+
+            public bool TryParse(out PMap map)
+            {
+                PValue rootValue;
+                JsonTerminalSymbol symbol;
+
+                bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out symbol);
+
+                JsonTerminalSymbol extraSymbol = ReadSkipComments();
+                if (extraSymbol != null)
+                {
+                    Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
                 }
 
-                string key = (string)jsonTextReader.Value;
-
-                // Expect unique keys.
-                if (mapBuilder.ContainsKey(key))
+                if (hasRootValue)
                 {
-                    throw new JsonReaderException($"Non-unique key in object: {key}");
+                    bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
+                    if (!validMap)
+                    {
+                        Errors.Add(new TextErrorInfo(NoPMapMessage, symbol.Start, symbol.Length));
+                    }
+
+                    return validMap;
                 }
 
-                mapBuilder.Add(key, ParseValue(ReadSkipComments()));
+                map = default(PMap);
+                return false;
             }
         }
 
-        private PList ParseList()
+        private readonly string json;
+
+        private readonly List<JsonTerminalSymbol> tokens;
+
+        public IReadOnlyList<JsonTerminalSymbol> Tokens => tokens.AsReadOnly();
+
+        public SettingReader(string json)
         {
-            List<PValue> listBuilder = new List<PValue>();
-
-            for (;;)
-            {
-                var tokenType = ReadSkipComments();
-                if (tokenType == JsonToken.EndArray)
-                {
-                    return new PList(listBuilder);
-                }
-
-                listBuilder.Add(ParseValue(tokenType));
-            }
+            if (json == null) throw new ArgumentNullException(nameof(json));
+            this.json = json;
+            tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
 
-        private PValue ParseValue(JsonToken currentTokenType)
+        public bool TryParse(out PMap map, out List<TextErrorInfo> errors)
         {
-            switch (currentTokenType)
-            {
-                case JsonToken.Boolean:
-                    return new PBoolean((bool)jsonTextReader.Value);
-
-                case JsonToken.Integer:
-                    return jsonTextReader.Value is BigInteger
-                        ? new PInteger((BigInteger)jsonTextReader.Value)
-                        : new PInteger((long)jsonTextReader.Value); ;
-
-                case JsonToken.String:
-                    return new PString((string)jsonTextReader.Value);
-
-                case JsonToken.StartObject:
-                    return ParseMap();
-
-                case JsonToken.StartArray:
-                    return ParseList();
-
-                case JsonToken.None:
-                    throw new JsonReaderException("Unexpected end of file");
-
-                case JsonToken.Comment:
-                case JsonToken.EndArray:
-                case JsonToken.EndObject:
-                case JsonToken.PropertyName:
-                    throw new JsonReaderException("'{', '[', Boolean, Integer or String expected");
-
-                case JsonToken.Bytes:
-                case JsonToken.Date:
-                case JsonToken.EndConstructor:
-                case JsonToken.Float:
-                case JsonToken.Null:
-                case JsonToken.Raw:
-                case JsonToken.StartConstructor:
-                case JsonToken.Undefined:
-                default:
-                    throw TokenTypeNotSupported(currentTokenType);
-            }
+            ParseRun parseRun = new ParseRun(tokens, json.Length);
+            var validMap = parseRun.TryParse(out map);
+            errors = parseRun.Errors;
+            return validMap;
         }
 
-        public void ReadWorkingCopy(SettingCopy workingCopy)
+        /// <summary>
+        /// Loads settings from a file into a <see cref="SettingCopy"/>.
+        /// </summary>
+        internal static List<TextErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
         {
-            var tokenType = ReadSkipComments();
-            if (tokenType != JsonToken.None)
+            var parser = new SettingReader(json);
+
+            PMap map;
+            List<TextErrorInfo> errors;
+
+            if (parser.TryParse(out map, out errors))
             {
-                PValue rootValue = ParseValue(tokenType);
-
-                if (ReadSkipComments() != JsonToken.None)
-                {
-                    throw new JsonReaderException("End of file expected");
-                }
-
-                PMap map;
-                if (!PType.Map.TryGetValidValue(rootValue, out map))
-                {
-                    throw new JsonReaderException("Expected json object at root");
-                }
-
                 foreach (var kv in map)
                 {
                     SettingProperty property;
@@ -161,6 +366,8 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
             }
+
+            return errors;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PValue.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System.Numerics;
 
 namespace Sandra.UI.WF.Storage
@@ -42,6 +45,7 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitList(PList value) => DefaultVisit(value);
         public virtual void VisitMap(PMap value) => DefaultVisit(value);
         public virtual void VisitString(PString value) => DefaultVisit(value);
+        public virtual void VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -57,6 +61,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitList(PList value) => DefaultVisit(value);
         public virtual TResult VisitMap(PMap value) => DefaultVisit(value);
         public virtual TResult VisitString(PString value) => DefaultVisit(value);
+        public virtual TResult VisitUndefined(PUndefined value) => DefaultVisit(value);
     }
 
     /// <summary>
@@ -96,6 +101,38 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitString(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
+    }
+
+    /// <summary>
+    /// Represents an invalid or undefined <see cref="PValue"/>.
+    /// </summary>
+    public sealed class PUndefined : PValue
+    {
+        internal PUndefined() { }
+
+        void PValue.Accept(PValueVisitor visitor) => visitor.VisitUndefined(this);
+        TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitUndefined(this);
+    }
+
+    /// <summary>
+    /// Contains constant a number of useful <see cref="PValue"/>s.
+    /// </summary>
+    public static class PConstantValue
+    {
+        /// <summary>
+        /// Gets the undefined <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PUndefined Undefined = new PUndefined();
+
+        /// <summary>
+        /// Gets the false <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PBoolean False = new PBoolean(false);
+
+        /// <summary>
+        /// Gets the true <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PBoolean True = new PBoolean(true);
     }
 
     /// <summary>
@@ -148,5 +185,8 @@ namespace Sandra.UI.WF.Storage
 
         public override bool VisitString(PString value)
             => value.Value == ((PString)compareValue).Value;
+
+        // Return true for all undefined values, so change detection code ignores them.
+        public override bool VisitUndefined(PUndefined value) => true;
     }
 }

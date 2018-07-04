@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Program.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
@@ -104,6 +107,47 @@ namespace Sandra.UI.WF
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
 
+        internal static void AttachFormStateAutoSaver(
+            Form targetForm,
+            SettingProperty<PersistableFormState> property,
+            Action noValidFormStateAction)
+        {
+            bool boundsInitialized = false;
+
+            PersistableFormState formState;
+            if (TryGetAutoSaveValue(property, out formState))
+            {
+                Rectangle targetBounds = formState.Bounds;
+
+                // If all bounds are known initialize from those.
+                // Do make sure it ends up on a visible working area.
+                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+                if (targetBounds.Width >= targetForm.MinimumSize.Width && targetBounds.Height >= targetForm.MinimumSize.Height)
+                {
+                    targetForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
+                    boundsInitialized = true;
+                }
+            }
+            else
+            {
+                formState = new PersistableFormState(false, Rectangle.Empty);
+            }
+
+            // Allow caller to determine a window state itself if no formState was applied successfully.
+            if (!boundsInitialized && noValidFormStateAction != null)
+            {
+                noValidFormStateAction();
+            }
+
+            // Restore maximized setting after setting the Bounds.
+            if (formState.Maximized)
+            {
+                targetForm.WindowState = FormWindowState.Maximized;
+            }
+
+            new FormStateAutoSaver(targetForm, property, formState);
+        }
+
         internal static Image LoadImage(string imageFileKey)
         {
             try
@@ -126,5 +170,32 @@ namespace Sandra.UI.WF
             SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"), false);
         }
 #endif
+    }
+
+    internal class FormStateAutoSaver
+    {
+        private readonly SettingProperty<PersistableFormState> autoSaveProperty;
+        private readonly PersistableFormState formState;
+
+        public FormStateAutoSaver(
+            Form targetForm,
+            SettingProperty<PersistableFormState> autoSaveProperty,
+            PersistableFormState formState)
+        {
+            this.autoSaveProperty = autoSaveProperty;
+            this.formState = formState;
+
+            // Attach only after restoring.
+            formState.AttachTo(targetForm);
+
+            // This object goes out of scope when FormState goes out of scope,
+            // which is when the target Form is closed.
+            formState.Changed += FormState_Changed;
+        }
+
+        private void FormState_Changed(object sender, EventArgs e)
+        {
+            Program.AutoSave.Persist(autoSaveProperty, formState);
+        }
     }
 }

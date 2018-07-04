@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * MdiContainerForm.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using System;
 using System.Drawing;
@@ -55,9 +58,32 @@ namespace Sandra.UI.WF
                 MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
             });
 
-        private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
+        private Form CreateSettingsForm(bool isReadOnly,
+                                        SettingsFile settingsFile,
+                                        SettingProperty<PersistableFormState> formStateSetting,
+                                        SettingProperty<int> errorHeightSetting)
         {
-            var settingsTextBox = new SettingsTextBox(settingsFile)
+            var errorsTextBox = new RichTextBoxBase
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+            };
+
+            errorsTextBox.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, errorsTextBox.TryZoomIn },
+                { SharedUIAction.ZoomOut, errorsTextBox.TryZoomOut },
+
+                { RichTextBoxBase.CutSelectionToClipBoard, errorsTextBox.TryCutSelectionToClipBoard },
+                { RichTextBoxBase.CopySelectionToClipBoard, errorsTextBox.TryCopySelectionToClipBoard },
+                { RichTextBoxBase.PasteSelectionFromClipBoard, errorsTextBox.TryPasteSelectionFromClipBoard },
+                { RichTextBoxBase.SelectAllText, errorsTextBox.TrySelectAllText },
+            });
+
+            UIMenu.AddTo(errorsTextBox);
+
+            var settingsTextBox = new SettingsTextBox(settingsFile, errorsTextBox)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
@@ -88,9 +114,41 @@ namespace Sandra.UI.WF
                 ShowInTaskbar = false,
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
+                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
 
-            settingsForm.Controls.Add(settingsTextBox);
+            var splitter = new SplitContainer
+            {
+                Dock = DockStyle.Fill,
+                SplitterWidth = 4,
+                FixedPanel = FixedPanel.Panel2,
+                Orientation = Orientation.Horizontal,
+            };
+
+            // Default value shows about 2 errors at default zoom level.
+            const int defaultErrorHeight = 34;
+
+            settingsForm.Load += (_, __) =>
+            {
+                Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
+
+                int targetErrorHeight;
+                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out targetErrorHeight))
+                {
+                    targetErrorHeight = defaultErrorHeight;
+                }
+
+                // Calculate target splitter distance which will restore the target error height exactly.
+                int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
+                if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
+
+                splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
+            };
+
+            splitter.Panel1.Controls.Add(settingsTextBox);
+            splitter.Panel2.Controls.Add(errorsTextBox);
+
+            settingsForm.Controls.Add(splitter);
 
             return settingsForm;
         }
@@ -134,7 +192,12 @@ namespace Sandra.UI.WF
                     else
                     {
                         // Rely on exception handler in call stack, so no try-catch here.
-                        openLocalSettingsForm = CreateSettingsForm(false, Program.LocalSettings);
+                        openLocalSettingsForm = CreateSettingsForm(
+                            false,
+                            Program.LocalSettings,
+                            SettingKeys.PreferencesWindow,
+                            SettingKeys.PreferencesErrorHeight);
+
                         openLocalSettingsForm.FormClosed += (_, __) => openLocalSettingsForm = null;
                     }
                 }
@@ -168,7 +231,12 @@ namespace Sandra.UI.WF
                     Program.DefaultSettings.WriteToFile();
 
                     // Rely on exception handler in call stack, so no try-catch here.
-                    openDefaultSettingsForm = CreateSettingsForm(true, Program.DefaultSettings);
+                    openDefaultSettingsForm = CreateSettingsForm(
+                        true,
+                        Program.DefaultSettings,
+                        SettingKeys.DefaultSettingsWindow,
+                        SettingKeys.DefaultSettingsErrorHeight);
+
                     openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
                 }
 
