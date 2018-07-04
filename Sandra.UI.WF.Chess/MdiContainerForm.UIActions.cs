@@ -58,7 +58,9 @@ namespace Sandra.UI.WF
                 MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
             });
 
-        private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
+        private Form CreateSettingsForm(bool isReadOnly,
+                                        SettingsFile settingsFile,
+                                        SettingProperty<PersistableFormState> formStateSetting)
         {
             var errorsTextBox = new RichTextBoxBase
             {
@@ -124,6 +126,8 @@ namespace Sandra.UI.WF
 
             settingsForm.Load += (_, __) =>
             {
+                Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
+
                 splitter.SplitterDistance = settingsForm.ClientSize.Height - 38;
             };
 
@@ -174,7 +178,11 @@ namespace Sandra.UI.WF
                     else
                     {
                         // Rely on exception handler in call stack, so no try-catch here.
-                        openLocalSettingsForm = CreateSettingsForm(false, Program.LocalSettings);
+                        openLocalSettingsForm = CreateSettingsForm(
+                            false,
+                            Program.LocalSettings,
+                            SettingKeys.PreferencesWindow);
+
                         openLocalSettingsForm.FormClosed += (_, __) => openLocalSettingsForm = null;
                     }
                 }
@@ -208,7 +216,11 @@ namespace Sandra.UI.WF
                     Program.DefaultSettings.WriteToFile();
 
                     // Rely on exception handler in call stack, so no try-catch here.
-                    openDefaultSettingsForm = CreateSettingsForm(true, Program.DefaultSettings);
+                    openDefaultSettingsForm = CreateSettingsForm(
+                        true,
+                        Program.DefaultSettings,
+                        SettingKeys.DefaultSettingsWindow);
+
                     openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
                 }
 
