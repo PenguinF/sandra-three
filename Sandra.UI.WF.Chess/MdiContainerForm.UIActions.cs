@@ -60,7 +60,8 @@ namespace Sandra.UI.WF
 
         private Form CreateSettingsForm(bool isReadOnly,
                                         SettingsFile settingsFile,
-                                        SettingProperty<PersistableFormState> formStateSetting)
+                                        SettingProperty<PersistableFormState> formStateSetting,
+                                        SettingProperty<int> errorHeightSetting)
         {
             var errorsTextBox = new RichTextBoxBase
             {
@@ -124,11 +125,24 @@ namespace Sandra.UI.WF
                 Orientation = Orientation.Horizontal,
             };
 
+            // Default value shows about 2 errors at default zoom level.
+            const int defaultErrorHeight = 34;
+
             settingsForm.Load += (_, __) =>
             {
                 Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
-                splitter.SplitterDistance = settingsForm.ClientSize.Height - 38;
+                int targetErrorHeight;
+                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out targetErrorHeight))
+                {
+                    targetErrorHeight = defaultErrorHeight;
+                }
+
+                // Calculate target splitter distance which will restore the target error height exactly.
+                int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
+                if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
+
+                splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
             };
 
             splitter.Panel1.Controls.Add(settingsTextBox);
@@ -181,7 +195,8 @@ namespace Sandra.UI.WF
                         openLocalSettingsForm = CreateSettingsForm(
                             false,
                             Program.LocalSettings,
-                            SettingKeys.PreferencesWindow);
+                            SettingKeys.PreferencesWindow,
+                            SettingKeys.PreferencesErrorHeight);
 
                         openLocalSettingsForm.FormClosed += (_, __) => openLocalSettingsForm = null;
                     }
@@ -219,7 +234,8 @@ namespace Sandra.UI.WF
                     openDefaultSettingsForm = CreateSettingsForm(
                         true,
                         Program.DefaultSettings,
-                        SettingKeys.DefaultSettingsWindow);
+                        SettingKeys.DefaultSettingsWindow,
+                        SettingKeys.DefaultSettingsErrorHeight);
 
                     openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
                 }
