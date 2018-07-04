@@ -124,8 +124,7 @@ namespace Sandra.UI.WF.Storage
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
                 string fileText = File.ReadAllText(AbsoluteFilePath);
-                SettingReader settingReader = new SettingReader(fileText);
-                settingReader.ReadWorkingCopy(workingCopy);
+                SettingReader.ReadWorkingCopy(fileText, workingCopy);
             }
             catch (Exception exception)
             {

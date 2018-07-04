@@ -167,7 +167,7 @@ namespace Sandra.UI.WF
 
             syntaxRenderer.Clear();
 
-            var parser = new TempJsonParser(json);
+            var parser = new SettingReader(json);
             parser.Tokens.ForEach(x =>
             {
                 if (firstUnusedIndex < x.Start)

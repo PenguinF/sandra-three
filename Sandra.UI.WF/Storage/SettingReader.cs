@@ -30,7 +30,7 @@ namespace Sandra.UI.WF.Storage
     /// <summary>
     /// Temporary class which parses a list of <see cref="JsonTerminalSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
-    public class TempJsonParser
+    public class SettingReader
     {
         private class ParseRun : JsonTerminalSymbolVisitor<PValue>
         {
@@ -330,7 +330,7 @@ namespace Sandra.UI.WF.Storage
 
         public IReadOnlyList<JsonTerminalSymbol> Tokens => tokens.AsReadOnly();
 
-        public TempJsonParser(string json)
+        public SettingReader(string json)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
             this.json = json;
@@ -344,22 +344,14 @@ namespace Sandra.UI.WF.Storage
             errors = parseRun.Errors;
             return validMap;
         }
-    }
 
-    /// <summary>
-    /// Represents a single iteration of loading settings from a file.
-    /// </summary>
-    internal class SettingReader
-    {
-        private readonly TempJsonParser parser;
-
-        public SettingReader(string json)
+        /// <summary>
+        /// Loads settings from a file into a <see cref="SettingCopy"/>.
+        /// </summary>
+        internal static List<TextErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
         {
-            parser = new TempJsonParser(json);
-        }
+            var parser = new SettingReader(json);
 
-        public List<TextErrorInfo> ReadWorkingCopy(SettingCopy workingCopy)
-        {
             PMap map;
             List<TextErrorInfo> errors;
 

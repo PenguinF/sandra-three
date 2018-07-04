@@ -451,8 +451,7 @@ namespace Sandra.UI.WF.Storage
 
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
-            SettingReader settingReader = new SettingReader(sb.ToString());
-            errors = settingReader.ReadWorkingCopy(workingCopy);
+            errors = SettingReader.ReadWorkingCopy(sb.ToString(), workingCopy);
             return workingCopy.Commit();
         }
 
