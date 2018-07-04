@@ -111,6 +111,7 @@ namespace Sandra.UI.WF
                 ShowInTaskbar = false,
                 StartPosition = FormStartPosition.CenterScreen,
                 Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
+                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
 
             var splitter = new SplitContainer
