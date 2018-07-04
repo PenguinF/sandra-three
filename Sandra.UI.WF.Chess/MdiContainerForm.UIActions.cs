@@ -60,12 +60,25 @@ namespace Sandra.UI.WF
 
         private Form CreateSettingsForm(bool isReadOnly, SettingsFile settingsFile)
         {
-            var errorsTextBox = new UpdatableRichTextBox
+            var errorsTextBox = new RichTextBoxBase
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
             };
+
+            errorsTextBox.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, errorsTextBox.TryZoomIn },
+                { SharedUIAction.ZoomOut, errorsTextBox.TryZoomOut },
+
+                { RichTextBoxBase.CutSelectionToClipBoard, errorsTextBox.TryCutSelectionToClipBoard },
+                { RichTextBoxBase.CopySelectionToClipBoard, errorsTextBox.TryCopySelectionToClipBoard },
+                { RichTextBoxBase.PasteSelectionFromClipBoard, errorsTextBox.TryPasteSelectionFromClipBoard },
+                { RichTextBoxBase.SelectAllText, errorsTextBox.TrySelectAllText },
+            });
+
+            UIMenu.AddTo(errorsTextBox);
 
             var settingsTextBox = new SettingsTextBox(settingsFile, errorsTextBox)
             {
