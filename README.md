@@ -9,6 +9,7 @@ Main design principle is to have a fluid interface, in which everything should '
 * All text is localized. There's a list of available languages under the globe icon. Move notation is localized too. If necessary, there's always the option to switch to PGN.
 * The session is auto-saved. When restarting the application, it continues exactly where it left off. Even after a system crash or power failure. *[Work in progress.]*
 * User preferences are live: modified preferences are applied immediately, without requiring an application restart.
+* JSON editor for user preferences with syntax highlighting and error reporting.
 * Different modes of making moves.
 * Everything is accessible by keyboard. *[Work in progress.]*
 * Pieces can be picked up, and are drawn correctly no matter where the mouse is on the screen.
