@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.Chess;
-using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
 using System.Collections.Generic;
@@ -36,8 +35,6 @@ namespace Sandra.UI.WF
     public partial class MdiContainerForm : UIActionForm
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
-
-        private PersistableFormState formState;
 
         private Form openLocalSettingsForm;
         private Form openDefaultSettingsForm;
@@ -303,7 +300,7 @@ namespace Sandra.UI.WF
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            formState = Program.RestoreFormState(
+            Program.AttachFormStateAutoSaver(
                 this,
                 SettingKeys.Window,
                 () =>
@@ -319,19 +316,10 @@ namespace Sandra.UI.WF
                     SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
                 });
 
-            // Attach only after restoring from settings.
-            formState.AttachTo(this);
-            formState.Changed += FormState_Changed;
-
             // Load chess piece images from a fixed path.
             PieceImages = loadChessPieceImages();
 
             NewPlayingBoard();
-        }
-
-        private void FormState_Changed(object sender, EventArgs e)
-        {
-            Program.AutoSave.Persist(SettingKeys.Window, formState);
         }
 
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()

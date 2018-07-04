@@ -107,7 +107,7 @@ namespace Sandra.UI.WF
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
 
-        internal static PersistableFormState RestoreFormState(
+        internal static void AttachFormStateAutoSaver(
             Form targetForm,
             SettingProperty<PersistableFormState> property,
             Action noValidFormStateAction)
@@ -145,7 +145,7 @@ namespace Sandra.UI.WF
                 targetForm.WindowState = FormWindowState.Maximized;
             }
 
-            return formState;
+            new FormStateAutoSaver(targetForm, property, formState);
         }
 
         internal static Image LoadImage(string imageFileKey)
@@ -170,5 +170,32 @@ namespace Sandra.UI.WF
             SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"), false);
         }
 #endif
+    }
+
+    internal class FormStateAutoSaver
+    {
+        private readonly SettingProperty<PersistableFormState> autoSaveProperty;
+        private readonly PersistableFormState formState;
+
+        public FormStateAutoSaver(
+            Form targetForm,
+            SettingProperty<PersistableFormState> autoSaveProperty,
+            PersistableFormState formState)
+        {
+            this.autoSaveProperty = autoSaveProperty;
+            this.formState = formState;
+
+            // Attach only after restoring.
+            formState.AttachTo(targetForm);
+
+            // This object goes out of scope when FormState goes out of scope,
+            // which is when the target Form is closed.
+            formState.Changed += FormState_Changed;
+        }
+
+        private void FormState_Changed(object sender, EventArgs e)
+        {
+            Program.AutoSave.Persist(autoSaveProperty, formState);
+        }
     }
 }
