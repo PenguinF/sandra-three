@@ -216,7 +216,7 @@ namespace Sandra.UI.WF.Storage
                         {
                             // Two commas or '[,': add an empty PErrorValue.
                             Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
-                            listBuilder.Add(PUndefined.Value);
+                            listBuilder.Add(PConstantValue.Undefined);
                         }
                     }
                     else
@@ -239,8 +239,8 @@ namespace Sandra.UI.WF.Storage
             public override PValue VisitValue(JsonValue symbol)
             {
                 string value = symbol.GetText();
-                if (value == "true") return new PBoolean(true);
-                if (value == "false") return new PBoolean(false);
+                if (value == "true") return PConstantValue.True;
+                if (value == "false") return PConstantValue.False;
 
                 BigInteger integerValue;
                 if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
@@ -249,7 +249,7 @@ namespace Sandra.UI.WF.Storage
                 }
 
                 Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
-                return PUndefined.Value;
+                return PConstantValue.Undefined;
             }
 
             public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
@@ -274,7 +274,7 @@ namespace Sandra.UI.WF.Storage
 
                     if (!hasValue)
                     {
-                        if (symbol.Errors.Any()) firstValue = PUndefined.Value;
+                        if (symbol.Errors.Any()) firstValue = PConstantValue.Undefined;
                         else firstValue = Visit(symbol);
                         hasValue = true;
                     }

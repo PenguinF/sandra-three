@@ -108,12 +108,31 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class PUndefined : PValue
     {
-        public static readonly PUndefined Value = new PUndefined();
-
-        private PUndefined() { }
+        internal PUndefined() { }
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitUndefined(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitUndefined(this);
+    }
+
+    /// <summary>
+    /// Contains constant a number of useful <see cref="PValue"/>s.
+    /// </summary>
+    public static class PConstantValue
+    {
+        /// <summary>
+        /// Gets the undefined <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PUndefined Undefined = new PUndefined();
+
+        /// <summary>
+        /// Gets the false <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PBoolean False = new PBoolean(false);
+
+        /// <summary>
+        /// Gets the true <see cref="PValue"/>.
+        /// </summary>
+        public static readonly PBoolean True = new PBoolean(true);
     }
 
     /// <summary>
