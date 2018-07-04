@@ -303,40 +303,21 @@ namespace Sandra.UI.WF
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            bool boundsInitialized = false;
-            if (Program.TryGetAutoSaveValue(SettingKeys.Window, out formState))
-            {
-                Rectangle targetBounds = formState.Bounds;
-
-                // If all bounds are known initialize from those.
-                // Do make sure it ends up on a visible working area.
-                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
-                if (targetBounds.Width >= MinimumSize.Width && targetBounds.Height >= MinimumSize.Height)
+            formState = Program.RestoreFormState(
+                this,
+                SettingKeys.Window,
+                () =>
                 {
-                    SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    boundsInitialized = true;
-                }
-            }
-            else
-            {
-                formState = new PersistableFormState(false, Rectangle.Empty);
-            }
+                    // Show in the center of the monitor where the mouse currently is.
+                    var activeScreen = Screen.FromPoint(MousePosition);
+                    Rectangle workingArea = activeScreen.WorkingArea;
 
-            if (!boundsInitialized)
-            {
-                // Show in the center of the monitor where the mouse currently is.
-                var activeScreen = Screen.FromPoint(MousePosition);
-                Rectangle workingArea = activeScreen.WorkingArea;
+                    // Two thirds the size of the active monitor's working area.
+                    workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
 
-                // Two thirds the size of the active monitor's working area.
-                workingArea.Inflate(-workingArea.Width / 6, -workingArea.Height / 6);
-
-                // Update the bounds of the form.
-                SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
-            }
-
-            // Restore maximized setting after setting the Bounds.
-            if (formState.Maximized) WindowState = FormWindowState.Maximized;
+                    // Update the bounds of the form.
+                    SetBounds(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height, BoundsSpecified.All);
+                });
 
             // Attach only after restoring from settings.
             formState.AttachTo(this);

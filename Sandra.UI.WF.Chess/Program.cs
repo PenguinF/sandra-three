@@ -107,6 +107,47 @@ namespace Sandra.UI.WF
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
 
+        internal static PersistableFormState RestoreFormState(
+            Form targetForm,
+            SettingProperty<PersistableFormState> property,
+            Action noValidFormStateAction)
+        {
+            bool boundsInitialized = false;
+
+            PersistableFormState formState;
+            if (TryGetAutoSaveValue(property, out formState))
+            {
+                Rectangle targetBounds = formState.Bounds;
+
+                // If all bounds are known initialize from those.
+                // Do make sure it ends up on a visible working area.
+                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
+                if (targetBounds.Width >= targetForm.MinimumSize.Width && targetBounds.Height >= targetForm.MinimumSize.Height)
+                {
+                    targetForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
+                    boundsInitialized = true;
+                }
+            }
+            else
+            {
+                formState = new PersistableFormState(false, Rectangle.Empty);
+            }
+
+            // Allow caller to determine a window state itself if no formState was applied successfully.
+            if (!boundsInitialized && noValidFormStateAction != null)
+            {
+                noValidFormStateAction();
+            }
+
+            // Restore maximized setting after setting the Bounds.
+            if (formState.Maximized)
+            {
+                targetForm.WindowState = FormWindowState.Maximized;
+            }
+
+            return formState;
+        }
+
         internal static Image LoadImage(string imageFileKey)
         {
             try
