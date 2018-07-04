@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : RichTextBoxBase
+    public partial class SettingsTextBox : SyntaxEditor
     {
         /// <summary>
         /// Because the syntax renderer does not support discontinuous terminal symbols.

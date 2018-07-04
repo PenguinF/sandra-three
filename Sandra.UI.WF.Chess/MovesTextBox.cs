@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : RichTextBoxBase
+    public partial class MovesTextBox : SyntaxEditor
     {
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {

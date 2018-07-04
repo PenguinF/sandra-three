@@ -21,7 +21,6 @@
 
 using Sandra.UI.WF.Storage;
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -32,27 +31,6 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
     {
-        protected sealed class TextElementStyle
-        {
-            public bool HasBackColor { get; set; }
-            public Color BackColor { get; set; }
-
-            public bool HasForeColor { get; set; }
-            public Color ForeColor { get; set; }
-
-            public bool HasFont => Font != null;
-            public Font Font { get; set; }
-        }
-
-        public RichTextBoxBase()
-        {
-            int zoomFactor;
-            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
-            {
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-            }
-        }
-
         /// <summary>
         /// Gets the action handler for this control.
         /// </summary>
@@ -65,13 +43,46 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                autoSaveZoomFactor(PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta));
+                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta);
+                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
             }
         }
 
-        private void autoSaveZoomFactor(int zoomFactor)
+        /// <summary>
+        /// Occurs when the zoom factor of this <see cref="RichTextBox"/> is updated.
+        /// </summary>
+        public event EventHandler<ZoomFactorChangedEventArgs> ZoomFactorChanged;
+
+        /// <summary>
+        /// Raises the <see cref="ZoomFactorChanged"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The data for the event.
+        /// </param>
+        protected virtual void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
         {
-            Program.AutoSave.Persist(SettingKeys.Zoom, zoomFactor);
+        }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="RichTextBoxBase.ZoomFactorChanged"/> event.
+    /// </summary>
+    public class ZoomFactorChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the new zoom factor, represented as an integer in the range [-9..649].
+        /// </summary>
+        public int ZoomFactor { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZoomFactorChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="zoomFactor">
+        /// The new zoom factor, represented as an integer in the range [-9..649].
+        /// </param>
+        public ZoomFactorChangedEventArgs(int zoomFactor)
+        {
+            ZoomFactor = zoomFactor;
         }
     }
 }
