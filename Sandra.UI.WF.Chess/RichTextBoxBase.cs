@@ -61,6 +61,7 @@ namespace Sandra.UI.WF
         /// </param>
         protected virtual void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
         {
+            ZoomFactorChanged?.Invoke(this, e);
         }
     }
 
