@@ -206,6 +206,9 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonString : JsonTerminalSymbol
     {
+        public const char Quote = '"';
+        public const char Escape = '\\';
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
