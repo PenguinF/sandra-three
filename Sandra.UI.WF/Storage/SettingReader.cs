@@ -239,8 +239,8 @@ namespace Sandra.UI.WF.Storage
             public override PValue VisitValue(JsonValue symbol)
             {
                 string value = symbol.GetText();
-                if (value == "true") return PConstantValue.True;
-                if (value == "false") return PConstantValue.False;
+                if (value == JsonValue.True) return PConstantValue.True;
+                if (value == JsonValue.False) return PConstantValue.False;
 
                 BigInteger integerValue;
                 if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))

@@ -92,7 +92,7 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
-        public const string SingleLineCommentStart = "//";
+        public static readonly string SingleLineCommentStart = "//";
 
         public override bool IsBackground => true;
 
@@ -193,6 +193,9 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
+        public static readonly string True = "true";
+        public static readonly string False = "false";
+
         public override bool IsValueStartSymbol => true;
 
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
