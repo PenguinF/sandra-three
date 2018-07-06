@@ -92,6 +92,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
+        public const string SingleLineCommentStart = "//";
+
         public override bool IsBackground => true;
 
         public JsonComment(string json, int start, int length) : base(json, start, length) { }

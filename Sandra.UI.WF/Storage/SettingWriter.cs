@@ -56,7 +56,6 @@ namespace Sandra.UI.WF.Storage
         {
             private const int maxLineLength = 80;
             private const string startComment = "// ";
-            private const string startCommentShort = "//";
 
             private static IEnumerable<string> GetCommentLines(string commentText, int indent)
             {
@@ -217,7 +216,7 @@ namespace Sandra.UI.WF.Storage
 
                 if (commentOutNextToken)
                 {
-                    WriteRaw(startCommentShort);
+                    WriteRaw(JsonComment.SingleLineCommentStart);
                 }
             }
 
