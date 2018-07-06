@@ -146,39 +146,39 @@ namespace Sandra.UI.WF.Storage
                     {
                         switch (c)
                         {
-                            case '{':
+                            case JsonCurlyOpen.CurlyOpenCharacter:
                                 yield return new JsonCurlyOpen(json, currentIndex);
                                 break;
-                            case '}':
+                            case JsonCurlyClose.CurlyCloseCharacter:
                                 yield return new JsonCurlyClose(json, currentIndex);
                                 break;
-                            case '[':
+                            case JsonSquareBracketOpen.SquareBracketOpenCharacter:
                                 yield return new JsonSquareBracketOpen(json, currentIndex);
                                 break;
-                            case ']':
+                            case JsonSquareBracketClose.SquareBracketCloseCharacter:
                                 yield return new JsonSquareBracketClose(json, currentIndex);
                                 break;
-                            case ':':
+                            case JsonColon.ColonCharacter:
                                 yield return new JsonColon(json, currentIndex);
                                 break;
-                            case ',':
+                            case JsonComma.CommaCharacter:
                                 yield return new JsonComma(json, currentIndex);
                                 break;
                             case JsonString.Quote:
                                 currentTokenizer = InString;
                                 yield break;
-                            case '/':
+                            case JsonComment.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
                                 // In all other cases, treat as an unexpected symbol.
                                 if (currentIndex + 1 < length)
                                 {
                                     char secondChar = json[currentIndex + 1];
-                                    if (secondChar == '/')
+                                    if (secondChar == JsonComment.SingleLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InSingleLineComment;
                                         yield break;
                                     }
-                                    else if (secondChar == '*')
+                                    else if (secondChar == JsonComment.MultiLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InMultiLineComment;
                                         yield break;
