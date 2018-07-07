@@ -45,7 +45,7 @@ namespace Sandra.UI.WF.Storage
 
                 // Cut up the description in pieces.
                 // Available length depends on the current indent level.
-                int availableLength = maxLineLength - indent - startComment.Length;
+                int availableLength = maxLineLength - indent - JsonComment.SingleLineCommentStart.Length;
                 int totalLength = commentText.Length;
                 int remainingLength = totalLength;
                 int currentPos = 0;
@@ -114,7 +114,9 @@ namespace Sandra.UI.WF.Storage
                     {
                         if (!first) lines.Add(string.Empty);
                         first = false;
-                        lines.AddRange(GetCommentLines(paragraph, indent));
+
+                        // Add one extra indent because of the space between '//' and the text.
+                        lines.AddRange(GetCommentLines(paragraph, indent + 1));
                     }
                 }
                 return lines;
