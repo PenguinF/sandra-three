@@ -265,5 +265,31 @@ namespace Sandra.UI.WF
             if (perform) NewPlayingBoard();
             return UIActionVisibility.Enabled;
         }
+
+        public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenAbout)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.About,
+            });
+
+        public UIActionState TryOpenAbout(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(ShowCredits)),
+            new UIActionBinding()
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.Credits,
+            });
+
+        public UIActionState TryShowCredits(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
     }
 }

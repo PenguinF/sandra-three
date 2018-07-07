@@ -148,11 +148,13 @@ namespace Sandra.UI.WF
             this.BindAction(ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
+            this.BindAction(OpenAbout, TryOpenAbout);
+            this.BindAction(ShowCredits, TryShowCredits);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
 
-            // Add these actions to the "Game" dropdown list.
+            // Add these actions to the "File" dropdown list.
             bindFocusDependentUIActions(fileMenu,
                                         EditPreferencesFile,
                                         ShowDefaultSettingsFile,
@@ -203,6 +205,14 @@ namespace Sandra.UI.WF
                                         InteractiveGame.GotoMovesForm,
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
+
+            UIMenuNode.Container helpMenu = new UIMenuNode.Container(LocalizedStringKeys.Help);
+            mainMenuActionHandler.RootMenuNode.Nodes.Add(helpMenu);
+
+            // Add these actions to the "Help" dropdown list.
+            bindFocusDependentUIActions(helpMenu,
+                                        OpenAbout,
+                                        ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
