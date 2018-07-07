@@ -208,44 +208,6 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public void WriteSettingPropertyName(string name, bool isFirst)
-        {
-            SettingProperty property;
-            if (schema.TryGetProperty(new SettingKey(name), out property))
-            {
-                var commentLines = GetCommentLines(property.Description);
-
-                // Only do the custom formatting when there are comments to write.
-                if (commentLines.Any())
-                {
-                    // Prepare by doing a manual auto-completion of a previous value.
-                    if (!isFirst)
-                    {
-                        // Write the value delimiter here already, and suppress it the next time it's called.
-                        // This happens in WritePropertyName().
-                        jsonTextWriter._WriteValueDelimiter();
-                        jsonTextWriter.suppressNextValueDelimiter = true;
-                        jsonTextWriter.WriteWhitespace(newLine);
-                    }
-
-                    foreach (string commentLine in commentLines)
-                    {
-                        WriteIndent();
-                        // The base WriteComment wraps comments in /*-*/ delimiters,
-                        // so generate raw comments starting with // instead.
-                        jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
-                        jsonTextWriter.WriteRaw(" ");
-                        jsonTextWriter.WriteRaw(commentLine);
-                    }
-                }
-            }
-
-            // This assumes that all default setting values fit on one line.
-            jsonTextWriter.commentOutNextToken = commentOutProperties;
-            jsonTextWriter.WritePropertyName(name);
-            jsonTextWriter.commentOutNextToken = false;
-        }
-
         public override void VisitBoolean(PBoolean value)
         {
             jsonTextWriter.WriteValue(value.Value);
@@ -278,7 +240,42 @@ namespace Sandra.UI.WF.Storage
             bool first = true;
             foreach (var kv in value)
             {
-                WriteSettingPropertyName(kv.Key, first);
+                string name = kv.Key;
+                SettingProperty property;
+                if (schema.TryGetProperty(new SettingKey(name), out property))
+                {
+                    var commentLines = GetCommentLines(property.Description);
+
+                    // Only do the custom formatting when there are comments to write.
+                    if (commentLines.Any())
+                    {
+                        // Prepare by doing a manual auto-completion of a previous value.
+                        if (!first)
+                        {
+                            // Write the value delimiter here already, and suppress it the next time it's called.
+                            // This happens in WritePropertyName().
+                            jsonTextWriter._WriteValueDelimiter();
+                            jsonTextWriter.suppressNextValueDelimiter = true;
+                            jsonTextWriter.WriteWhitespace(newLine);
+                        }
+
+                        foreach (string commentLine in commentLines)
+                        {
+                            WriteIndent();
+                            // The base WriteComment wraps comments in /*-*/ delimiters,
+                            // so generate raw comments starting with // instead.
+                            jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
+                            jsonTextWriter.WriteRaw(" ");
+                            jsonTextWriter.WriteRaw(commentLine);
+                        }
+                    }
+                }
+
+                // This assumes that all default setting values fit on one line.
+                jsonTextWriter.commentOutNextToken = commentOutProperties;
+                jsonTextWriter.WritePropertyName(name);
+                jsonTextWriter.commentOutNextToken = false;
+
                 first = false;
                 Visit(kv.Value);
             }
