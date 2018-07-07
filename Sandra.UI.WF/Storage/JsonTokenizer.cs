@@ -346,20 +346,9 @@ namespace Sandra.UI.WF.Storage
                         if (char.IsControl(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
-                            string displayCharValue;
-                            switch (c)
-                            {
-                                case '\0': displayCharValue = "\\0"; break;
-                                case '\b': displayCharValue = "\\b"; break;
-                                case '\f': displayCharValue = "\\f"; break;
-                                case '\n': displayCharValue = "\\n"; break;
-                                case '\r': displayCharValue = "\\r"; break;
-                                case '\t': displayCharValue = "\\t"; break;
-                                case '\v': displayCharValue = "\\v"; break;
-                                default: displayCharValue = $"\\u{((int)c).ToString("x4")}"; break;
-                            }
-
-                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(displayCharValue, currentIndex));
+                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(
+                                JsonString.EscapedCharacterString(c),
+                                currentIndex));
                         }
                         else
                         {

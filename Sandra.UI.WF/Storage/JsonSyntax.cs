@@ -226,6 +226,24 @@ namespace Sandra.UI.WF.Storage
         public const char Quote = '"';
         public const char Escape = '\\';
 
+        /// <summary>
+        /// Generates the escape sequence string for a character.
+        /// </summary>
+        public static string EscapedCharacterString(char c)
+        {
+            switch (c)
+            {
+                case '\0': return "\\0";
+                case '\b': return "\\b";
+                case '\f': return "\\f";
+                case '\n': return "\\n";
+                case '\r': return "\\r";
+                case '\t': return "\\t";
+                case '\v': return "\\v";
+                default: return $"\\u{((int)c).ToString("x4")}";
+            }
+        }
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
