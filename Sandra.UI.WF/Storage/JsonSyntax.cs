@@ -223,8 +223,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonString : JsonTerminalSymbol
     {
-        public const char Quote = '"';
-        public const char Escape = '\\';
+        public const char QuoteCharacter = '"';
+        public const char EscapeCharacter = '\\';
 
         /// <summary>
         /// Generates the escape sequence string for a character.

@@ -164,7 +164,7 @@ namespace Sandra.UI.WF.Storage
                             case JsonComma.CommaCharacter:
                                 yield return new JsonComma(json, currentIndex);
                                 break;
-                            case JsonString.Quote:
+                            case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
                                 yield break;
                             case JsonComment.CommentStartFirstCharacter:
@@ -224,7 +224,7 @@ namespace Sandra.UI.WF.Storage
                 char c = json[currentIndex];
                 switch (c)
                 {
-                    case JsonString.Quote:
+                    case JsonString.QuoteCharacter:
                         currentIndex++;
                         if (errors.Count > 0)
                         {
@@ -247,7 +247,7 @@ namespace Sandra.UI.WF.Storage
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
-                    case JsonString.Escape:
+                    case JsonString.EscapeCharacter:
                         // Escape sequence.
                         int escapeSequenceStart = currentIndex;
                         currentIndex++;
@@ -256,8 +256,8 @@ namespace Sandra.UI.WF.Storage
                             char escapedChar = json[currentIndex];
                             switch (escapedChar)
                             {
-                                case JsonString.Quote:
-                                case JsonString.Escape:
+                                case JsonString.QuoteCharacter:
+                                case JsonString.EscapeCharacter:
                                 case '/':  // Weird one, but it's in the specification.
                                     valueBuilder.Append(escapedChar);
                                     break;
