@@ -22,6 +22,7 @@
 using Sandra.UI.WF.Storage;
 using SysExtensions;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -308,6 +309,14 @@ namespace Sandra.UI.WF
             });
 
             UIMenu.AddTo(textBox);
+
+            // Immediately dispose the handle to the process after creating it.
+            // Won't kill the process, just release its unmanaged resource in this one.
+            textBox.LinkClicked += (_, e) =>
+            {
+                var process = Process.Start(e.LinkText);
+                if (process != null) process.Dispose();
+            };
 
             var readOnlyTextForm = new UIActionForm()
             {
