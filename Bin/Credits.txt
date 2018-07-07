@@ -2,7 +2,8 @@
 SandraChess could not have existed as it is now, if not for these people/tools/websites:
 
 
-Dirkjan Knoeff, for testing prototypes, and being an enthusiastic sparring partner and friend.
+Dirkjan Knoeff, for testing prototypes, being an enthusiastic sparring partner
+and good friend.
 
 Thief, my favorite other chess client:
     http://thief.sourceforge.net/
