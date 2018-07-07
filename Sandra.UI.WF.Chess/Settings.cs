@@ -75,7 +75,8 @@ namespace Sandra.UI.WF
         private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "
-            + "Use forward slashes to separate directories, an unrecognized escape sequence such as in \"Test\\Test\" renders the whole file unusable.";
+            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
+            + "Instead, forward slashes ('/') can be used to separate directories as well.";
 
         public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
