@@ -33,165 +33,106 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
-        private class JsonPrettyPrinter : JsonTextWriter
+        private const int maxLineLength = 80;
+
+        private static IEnumerable<string> GetCommentLines(string commentText, int indent)
         {
-            private const int maxLineLength = 80;
+            List<string> lines = new List<string>();
+            if (commentText == null) return lines;
 
-            private static IEnumerable<string> GetCommentLines(string commentText, int indent)
+            // Cut up the description in pieces.
+            // Available length depends on the current indent level.
+            int availableLength = maxLineLength - indent - JsonComment.SingleLineCommentStart.Length;
+            int totalLength = commentText.Length;
+            int remainingLength = totalLength;
+            int currentPos = 0;
+
+            // Use a StringBuilder for substring generation.
+            StringBuilder text = new StringBuilder(commentText);
+
+            // Set currentPos to first non-whitespace character.
+            while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
             {
-                List<string> lines = new List<string>();
-                if (commentText == null) return lines;
+                currentPos++;
+                remainingLength--;
+            }
 
-                // Cut up the description in pieces.
-                // Available length depends on the current indent level.
-                int availableLength = maxLineLength - indent - JsonComment.SingleLineCommentStart.Length;
-                int totalLength = commentText.Length;
-                int remainingLength = totalLength;
-                int currentPos = 0;
+            // Invariants:
+            // 1) currentPos is between 0 and totalLength.
+            // 2) currentPos is at a non-whitespace character, or equal to totalLength.
+            // 3) currentPos + remainingLength == totalLength.
+            while (remainingLength > availableLength)
+            {
+                // Search for the first whitespace character before the maximum break position.
+                int breakPos = currentPos + availableLength;
+                while (breakPos > currentPos && !char.IsWhiteSpace(text[breakPos])) breakPos--;
 
-                // Use a StringBuilder for substring generation.
-                StringBuilder text = new StringBuilder(commentText);
+                if (breakPos == currentPos)
+                {
+                    // Word longer than availableLength, just snip it up midway.
+                    breakPos = currentPos + availableLength;
+                }
+                else
+                {
+                    // Find last non-whitespace character before the found whitespace.
+                    while (breakPos > currentPos && char.IsWhiteSpace(text[breakPos])) breakPos--;
+                    // Increase by 1 again to end up on the first whitespace character after the last word.
+                    breakPos++;
+                }
 
-                // Set currentPos to first non-whitespace character.
+                // Add line which neither starts nor ends with a whitespace character.
+                lines.Add(text.ToString(currentPos, breakPos - currentPos));
+                currentPos = breakPos;
+                remainingLength = totalLength - currentPos;
+
+                // Set currentPos to first non-whitespace character again.
                 while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
                 {
                     currentPos++;
                     remainingLength--;
                 }
-
-                // Invariants:
-                // 1) currentPos is between 0 and totalLength.
-                // 2) currentPos is at a non-whitespace character, or equal to totalLength.
-                // 3) currentPos + remainingLength == totalLength.
-                while (remainingLength > availableLength)
-                {
-                    // Search for the first whitespace character before the maximum break position.
-                    int breakPos = currentPos + availableLength;
-                    while (breakPos > currentPos && !char.IsWhiteSpace(text[breakPos])) breakPos--;
-
-                    if (breakPos == currentPos)
-                    {
-                        // Word longer than availableLength, just snip it up midway.
-                        breakPos = currentPos + availableLength;
-                    }
-                    else
-                    {
-                        // Find last non-whitespace character before the found whitespace.
-                        while (breakPos > currentPos && char.IsWhiteSpace(text[breakPos])) breakPos--;
-                        // Increase by 1 again to end up on the first whitespace character after the last word.
-                        breakPos++;
-                    }
-
-                    // Add line which neither starts nor ends with a whitespace character.
-                    lines.Add(text.ToString(currentPos, breakPos - currentPos));
-                    currentPos = breakPos;
-                    remainingLength = totalLength - currentPos;
-
-                    // Set currentPos to first non-whitespace character again.
-                    while (currentPos < totalLength && char.IsWhiteSpace(text[currentPos]))
-                    {
-                        currentPos++;
-                        remainingLength--;
-                    }
-                }
-
-                if (remainingLength > 0)
-                {
-                    lines.Add(text.ToString(currentPos, remainingLength));
-                }
-
-                return lines;
             }
 
-            private static List<string> GetCommentLines(SettingComment comment, int indent)
+            if (remainingLength > 0)
             {
-                List<string> lines = new List<string>();
-                if (comment != null)
-                {
-                    bool first = true;
-                    foreach (var paragraph in comment.Paragraphs)
-                    {
-                        if (!first) lines.Add(string.Empty);
-                        first = false;
-
-                        // Add one extra indent because of the space between '//' and the text.
-                        lines.AddRange(GetCommentLines(paragraph, indent + 1));
-                    }
-                }
-                return lines;
+                lines.Add(text.ToString(currentPos, remainingLength));
             }
 
-            private readonly SettingSchema schema;
-            private readonly string newLine;
-            private readonly bool commentOutProperties;
+            return lines;
+        }
 
-            private bool commentOutNextToken;
-            private bool suppressNextValueDelimiter;
-
-            public JsonPrettyPrinter(TextWriter writer, SettingSchema schema, bool commentOutProperties) : base(writer)
+        private static List<string> GetCommentLines(SettingComment comment, int indent)
+        {
+            List<string> lines = new List<string>();
+            if (comment != null)
             {
-                this.schema = schema;
-                this.commentOutProperties = commentOutProperties;
+                bool first = true;
+                foreach (var paragraph in comment.Paragraphs)
+                {
+                    if (!first) lines.Add(string.Empty);
+                    first = false;
 
-                newLine = writer.NewLine;
+                    // Add one extra indent because of the space between '//' and the text.
+                    lines.AddRange(GetCommentLines(paragraph, indent + 1));
+                }
+            }
+            return lines;
+        }
+
+        private class JsonPrettyPrinter : JsonTextWriter
+        {
+            internal bool commentOutNextToken;
+            internal bool suppressNextValueDelimiter;
+
+            public JsonPrettyPrinter(TextWriter writer) : base(writer)
+            {
                 Formatting = Formatting.Indented;
-
-                // Write schema description, if any.
-                foreach (string commentLine in GetCommentLines(schema.Description, 0))
-                {
-                    // The base WriteComment wraps comments in /*-*/ delimiters,
-                    // so generate raw comments starting with // instead.
-                    WriteRaw(JsonComment.SingleLineCommentStart);
-                    WriteRaw(" ");
-                    WriteRaw(commentLine);
-
-                    // Do this at the end to generate a line-break.
-                    WriteIndent();
-                }
             }
 
             protected override void WriteValueDelimiter()
             {
                 if (suppressNextValueDelimiter) suppressNextValueDelimiter = false;
                 else base.WriteValueDelimiter();
-            }
-
-            public void WriteSettingPropertyName(string name, bool isFirst)
-            {
-                SettingProperty property;
-                if (schema.TryGetProperty(new SettingKey(name), out property))
-                {
-                    var commentLines = GetCommentLines(property.Description, Top * Indentation);
-
-                    // Only do the custom formatting when there are comments to write.
-                    if (commentLines.Any())
-                    {
-                        // Prepare by doing a manual auto-completion of a previous value.
-                        if (!isFirst)
-                        {
-                            // Write the value delimiter here already, and suppress it the next time it's called.
-                            // This happens in WritePropertyName().
-                            WriteValueDelimiter();
-                            suppressNextValueDelimiter = true;
-                            WriteWhitespace(newLine);
-                        }
-
-                        foreach (string commentLine in commentLines)
-                        {
-                            WriteIndent();
-                            // The base WriteComment wraps comments in /*-*/ delimiters,
-                            // so generate raw comments starting with // instead.
-                            WriteRaw(JsonComment.SingleLineCommentStart);
-                            WriteRaw(" ");
-                            WriteRaw(commentLine);
-                        }
-                    }
-                }
-
-                // This assumes that all default setting values fit on one line.
-                commentOutNextToken = commentOutProperties;
-                WritePropertyName(name);
-                commentOutNextToken = false;
             }
 
             protected override void WriteIndent()
@@ -204,16 +145,18 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public override void Close()
-            {
-                // End files with a newline character.
-                WriteWhitespace(newLine);
-                base.Close();
-            }
+            public int CurrentDepth => Top;
+
+            public void _WriteIndent() => WriteIndent();
+            public void _WriteValueDelimiter() => WriteValueDelimiter();
         }
 
+        private readonly SettingSchema schema;
         private readonly StringBuilder outputBuilder;
         private readonly JsonPrettyPrinter jsonTextWriter;
+
+        private readonly string newLine;
+        private readonly bool commentOutProperties;
 
         public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
@@ -221,7 +164,61 @@ namespace Sandra.UI.WF.Storage
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
 
-            jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema, commentOutProperties);
+            this.schema = schema;
+            this.commentOutProperties = commentOutProperties;
+            newLine = stringWriter.NewLine;
+            jsonTextWriter = new JsonPrettyPrinter(stringWriter);
+
+            // Write schema description, if any.
+            foreach (string commentLine in GetCommentLines(schema.Description, 0))
+            {
+                // The base WriteComment wraps comments in /*-*/ delimiters,
+                // so generate raw comments starting with // instead.
+                jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
+                jsonTextWriter.WriteRaw(" ");
+                jsonTextWriter.WriteRaw(commentLine);
+
+                // Do this at the end to generate a line-break.
+                jsonTextWriter._WriteIndent();
+            }
+        }
+
+        public void WriteSettingPropertyName(string name, bool isFirst)
+        {
+            SettingProperty property;
+            if (schema.TryGetProperty(new SettingKey(name), out property))
+            {
+                var commentLines = GetCommentLines(property.Description, jsonTextWriter.CurrentDepth * jsonTextWriter.Indentation);
+
+                // Only do the custom formatting when there are comments to write.
+                if (commentLines.Any())
+                {
+                    // Prepare by doing a manual auto-completion of a previous value.
+                    if (!isFirst)
+                    {
+                        // Write the value delimiter here already, and suppress it the next time it's called.
+                        // This happens in WritePropertyName().
+                        jsonTextWriter._WriteValueDelimiter();
+                        jsonTextWriter.suppressNextValueDelimiter = true;
+                        jsonTextWriter.WriteWhitespace(newLine);
+                    }
+
+                    foreach (string commentLine in commentLines)
+                    {
+                        jsonTextWriter._WriteIndent();
+                        // The base WriteComment wraps comments in /*-*/ delimiters,
+                        // so generate raw comments starting with // instead.
+                        jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
+                        jsonTextWriter.WriteRaw(" ");
+                        jsonTextWriter.WriteRaw(commentLine);
+                    }
+                }
+            }
+
+            // This assumes that all default setting values fit on one line.
+            jsonTextWriter.commentOutNextToken = commentOutProperties;
+            jsonTextWriter.WritePropertyName(name);
+            jsonTextWriter.commentOutNextToken = false;
         }
 
         public override void VisitBoolean(PBoolean value)
@@ -247,7 +244,7 @@ namespace Sandra.UI.WF.Storage
             bool first = true;
             foreach (var kv in value)
             {
-                jsonTextWriter.WriteSettingPropertyName(kv.Key, first);
+                WriteSettingPropertyName(kv.Key, first);
                 first = false;
                 Visit(kv.Value);
             }
@@ -267,6 +264,8 @@ namespace Sandra.UI.WF.Storage
         /// </returns>
         public string Output()
         {
+            // End files with a newline character.
+            jsonTextWriter.WriteWhitespace(newLine);
             jsonTextWriter.Close();
             return outputBuilder.ToString();
         }
