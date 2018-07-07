@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using System.Globalization;
 using System.Text;
 
 namespace Sandra.UI.WF.Storage
@@ -29,6 +30,12 @@ namespace Sandra.UI.WF.Storage
     internal class CompactSettingWriter : PValueVisitor
     {
         private readonly StringBuilder outputBuilder = new StringBuilder();
+
+        public override void VisitBoolean(PBoolean value)
+            => outputBuilder.Append(value.Value ? JsonValue.True : JsonValue.False);
+
+        public override void VisitInteger(PInteger value)
+            => outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
 
         public string Output() => outputBuilder.ToString();
     }
