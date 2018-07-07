@@ -185,8 +185,13 @@ namespace Sandra.UI.WF.Storage
                 jsonTextWriter.WriteRaw(commentLine);
 
                 // Do this at the end to generate a line-break.
-                jsonTextWriter._WriteIndent();
+                WriteIndent();
             }
+        }
+
+        private void WriteIndent()
+        {
+            jsonTextWriter._WriteIndent();
         }
 
         public void WriteSettingPropertyName(string name, bool isFirst)
@@ -211,7 +216,7 @@ namespace Sandra.UI.WF.Storage
 
                     foreach (string commentLine in commentLines)
                     {
-                        jsonTextWriter._WriteIndent();
+                        WriteIndent();
                         // The base WriteComment wraps comments in /*-*/ delimiters,
                         // so generate raw comments starting with // instead.
                         jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
