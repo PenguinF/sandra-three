@@ -251,9 +251,11 @@ namespace Sandra.UI.WF.Storage
         /// </summary>
         public static bool CharacterMustBeEscaped(char c)
         {
-            return char.IsControl(c)
-                || c == QuoteCharacter
+            return c == QuoteCharacter
                 || c == EscapeCharacter
+                //https://www.compart.com/en/unicode/category/Cc
+                || c < ' '
+                || ('\u007f' <= c && c <= '\u009f')
                 //https://www.compart.com/en/unicode/category/Zl - line separator
                 || c == '\u2028'
                 //https://www.compart.com/en/unicode/category/Zp - paragraph separator
