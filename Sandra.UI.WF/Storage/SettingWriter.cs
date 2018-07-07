@@ -162,10 +162,11 @@ namespace Sandra.UI.WF.Storage
 
         private List<string> GetCommentLines(SettingComment comment)
         {
-            int indent = currentDepth * Indentation;
             List<string> lines = new List<string>();
             if (comment != null)
             {
+                int indent = currentDepth * Indentation;
+
                 bool first = true;
                 foreach (var paragraph in comment.Paragraphs)
                 {
