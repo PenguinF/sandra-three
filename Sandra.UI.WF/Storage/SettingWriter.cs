@@ -155,7 +155,9 @@ namespace Sandra.UI.WF.Storage
             bool first = true;
             foreach (var element in value)
             {
-                if (first) first = false; else outputBuilder.Append(',');
+                if (first) first = false;
+                else outputBuilder.Append(JsonComma.CommaCharacter);
+
                 Visit(element);
             }
 
@@ -173,7 +175,7 @@ namespace Sandra.UI.WF.Storage
             {
                 if (!first)
                 {
-                    outputBuilder.Append(',');
+                    outputBuilder.Append(JsonComma.CommaCharacter);
                     outputBuilder.AppendLine();
                 }
                 else first = false;
@@ -193,9 +195,10 @@ namespace Sandra.UI.WF.Storage
                 {
                     outputBuilder.Append(JsonComment.SingleLineCommentStart);
                 }
-                AppendString(outputBuilder, name);
 
-                outputBuilder.Append(": ");
+                AppendString(name);
+                outputBuilder.Append(JsonColon.ColonCharacter);
+                outputBuilder.Append(' ');
                 Visit(kv.Value);
             }
 
