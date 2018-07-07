@@ -253,7 +253,11 @@ namespace Sandra.UI.WF.Storage
         {
             return char.IsControl(c)
                 || c == QuoteCharacter
-                || c == EscapeCharacter;
+                || c == EscapeCharacter
+                //https://www.compart.com/en/unicode/category/Zl - line separator
+                || c == '\u2028'
+                //https://www.compart.com/en/unicode/category/Zp - paragraph separator
+                || c == '\u2029';
         }
 
         public string Value { get; }
