@@ -151,8 +151,6 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public int CurrentDepth => Top;
-
             public void _WriteIndent() => WriteIndent();
             public void _WriteValueDelimiter() => WriteValueDelimiter();
         }
