@@ -29,6 +29,13 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class CompactSettingWriter : PValueVisitor
     {
+        public static string ConvertToJson(PMap map)
+        {
+            var writer = new CompactSettingWriter();
+            writer.Visit(map);
+            return writer.outputBuilder.ToString();
+        }
+
         protected readonly StringBuilder outputBuilder = new StringBuilder();
         protected int currentDepth;
 
@@ -121,7 +128,5 @@ namespace Sandra.UI.WF.Storage
             currentDepth--;
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
-
-        public virtual string Output() => outputBuilder.ToString();
     }
 }

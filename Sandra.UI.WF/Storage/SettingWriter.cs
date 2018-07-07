@@ -202,11 +202,11 @@ namespace Sandra.UI.WF.Storage
         /// <returns>
         /// The generated output.
         /// </returns>
-        public override string Output()
+        public string Output()
         {
             // End files with a newline character.
             outputBuilder.AppendLine();
-            return base.Output();
+            return outputBuilder.ToString();
         }
     }
 }
