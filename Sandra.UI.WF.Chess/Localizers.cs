@@ -264,7 +264,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Chessboard, "Schaakbord" },
                 { LocalizedStringKeys.Copy, "Kopiëren" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
-                { LocalizedStringKeys.Credits, "Dankwoord tonen (Engels)" },
+                { LocalizedStringKeys.Credits, "Dankwoord (Engels)" },
                 { LocalizedStringKeys.Cut, "Knippen" },
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
