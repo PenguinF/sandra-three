@@ -251,7 +251,9 @@ namespace Sandra.UI.WF.Storage
         /// </summary>
         public static bool CharacterMustBeEscaped(char c)
         {
-            return char.IsControl(c);
+            return char.IsControl(c)
+                || c == QuoteCharacter
+                || c == EscapeCharacter;
         }
 
         public string Value { get; }
