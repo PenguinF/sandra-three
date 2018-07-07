@@ -31,7 +31,7 @@ namespace Sandra.UI.WF.Storage
     {
         private readonly StringBuilder outputBuilder = new StringBuilder();
 
-        private void AppendString(string value)
+        internal static void AppendString(StringBuilder outputBuilder, string value)
         {
             outputBuilder.Append(JsonString.QuoteCharacter);
 
@@ -81,7 +81,7 @@ namespace Sandra.UI.WF.Storage
             => outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
 
         public override void VisitString(PString value)
-            => AppendString(value.Value);
+            => AppendString(outputBuilder, value.Value);
 
         public override void VisitList(PList value)
         {
@@ -109,7 +109,7 @@ namespace Sandra.UI.WF.Storage
                 if (first) first = false;
                 else outputBuilder.Append(JsonComma.CommaCharacter);
 
-                AppendString(kv.Key);
+                AppendString(outputBuilder, kv.Key);
                 outputBuilder.Append(JsonColon.ColonCharacter);
                 Visit(kv.Value);
             }
