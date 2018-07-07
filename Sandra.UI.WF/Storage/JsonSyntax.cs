@@ -240,6 +240,8 @@ namespace Sandra.UI.WF.Storage
                 case '\r': return "\\r";
                 case '\t': return "\\t";
                 case '\v': return "\\v";
+                case QuoteCharacter: return "\\\"";
+                case EscapeCharacter: return "\\\\";
                 default: return $"\\u{((int)c).ToString("x4")}";
             }
         }
