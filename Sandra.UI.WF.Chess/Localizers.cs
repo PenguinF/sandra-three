@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Localizers.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.UI.WF.Storage;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,10 +27,12 @@ namespace Sandra.UI.WF
 {
     internal static class LocalizedStringKeys
     {
+        internal static readonly LocalizedStringKey About = new LocalizedStringKey(nameof(About));
         internal static readonly LocalizedStringKey BreakAtCurrentPosition = new LocalizedStringKey(nameof(BreakAtCurrentPosition));
         internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
         internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
+        internal static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
         internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
@@ -41,6 +46,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
         internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
         internal static readonly LocalizedStringKey GoTo = new LocalizedStringKey(nameof(GoTo));
+        internal static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
         internal static readonly LocalizedStringKey Moves = new LocalizedStringKey(nameof(Moves));
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
@@ -169,10 +175,12 @@ namespace Sandra.UI.WF
         {
             englishDictionary = new Dictionary<LocalizedStringKey, string>
             {
+                { LocalizedStringKeys.About, "About SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Break at current position" },
                 { LocalizedStringKeys.Chessboard, "Chessboard" },
                 { LocalizedStringKeys.Copy, "Copy" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Copy diagram to clipboard" },
+                { LocalizedStringKeys.Credits, "Show credits" },
                 { LocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
@@ -186,6 +194,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.FlipBoard, "Flip board" },
                 { LocalizedStringKeys.Game, "Game" },
                 { LocalizedStringKeys.GoTo, "Go to" },
+                { LocalizedStringKeys.Help, "Help" },
                 { LocalizedStringKeys.LastMove, "Last move" },
                 { LocalizedStringKeys.Moves, "Moves" },
                 { LocalizedStringKeys.NewGame, "New game" },
@@ -250,10 +259,12 @@ namespace Sandra.UI.WF
         {
             dutchDictionary = new Dictionary<LocalizedStringKey, string>
             {
+                { LocalizedStringKeys.About, "Over SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Afbreken in huidige stelling" },
                 { LocalizedStringKeys.Chessboard, "Schaakbord" },
                 { LocalizedStringKeys.Copy, "Kopiëren" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
+                { LocalizedStringKeys.Credits, "Dankwoord (Engels)" },
                 { LocalizedStringKeys.Cut, "Knippen" },
                 { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
                 { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
@@ -267,6 +278,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.FlipBoard, "Bord omkeren" },
                 { LocalizedStringKeys.Game, "Partij" },
                 { LocalizedStringKeys.GoTo, "Navigeren" },
+                { LocalizedStringKeys.Help, "Help" },
                 { LocalizedStringKeys.LastMove, "Laatste zet" },
                 { LocalizedStringKeys.Moves, "Zetten" },
                 { LocalizedStringKeys.NewGame, "Nieuwe partij" },
