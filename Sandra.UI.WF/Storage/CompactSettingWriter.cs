@@ -29,7 +29,7 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class CompactSettingWriter : PValueVisitor
     {
-        private readonly StringBuilder outputBuilder = new StringBuilder();
+        protected readonly StringBuilder outputBuilder = new StringBuilder();
 
         internal static void AppendString(StringBuilder outputBuilder, string value)
         {
@@ -117,6 +117,6 @@ namespace Sandra.UI.WF.Storage
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
 
-        public string Output() => outputBuilder.ToString();
+        public virtual string Output() => outputBuilder.ToString();
     }
 }

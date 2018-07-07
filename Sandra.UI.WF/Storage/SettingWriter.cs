@@ -20,7 +20,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Sandra.UI.WF.Storage
@@ -28,7 +27,7 @@ namespace Sandra.UI.WF.Storage
     /// <summary>
     /// Represents a single iteration of writing settings to a file.
     /// </summary>
-    internal class SettingWriter : PValueVisitor
+    internal class SettingWriter : CompactSettingWriter
     {
         public const int Indentation = 2;
         private const int maxLineLength = 80;
@@ -100,15 +99,12 @@ namespace Sandra.UI.WF.Storage
         }
 
         private readonly SettingSchema schema;
-        private readonly StringBuilder outputBuilder;
 
         private readonly bool commentOutProperties;
         private int currentDepth;
 
         public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
-            outputBuilder = new StringBuilder();
-
             this.schema = schema;
             this.commentOutProperties = commentOutProperties;
 
@@ -149,16 +145,6 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
             }
-        }
-
-        public override void VisitBoolean(PBoolean value)
-        {
-            outputBuilder.Append(value.Value ? JsonValue.True : JsonValue.False);
-        }
-
-        public override void VisitInteger(PInteger value)
-        {
-            outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         public override void VisitList(PList value)
@@ -207,7 +193,7 @@ namespace Sandra.UI.WF.Storage
                 {
                     outputBuilder.Append(JsonComment.SingleLineCommentStart);
                 }
-                CompactSettingWriter.AppendString(outputBuilder, name);
+                AppendString(outputBuilder, name);
 
                 outputBuilder.Append(": ");
                 Visit(kv.Value);
@@ -226,22 +212,17 @@ namespace Sandra.UI.WF.Storage
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
 
-        public override void VisitString(PString value)
-        {
-            CompactSettingWriter.AppendString(outputBuilder, value.Value);
-        }
-
         /// <summary>
         /// Closes the <see cref="SettingWriter"/> and returns the output.
         /// </summary>
         /// <returns>
         /// The generated output.
         /// </returns>
-        public string Output()
+        public override string Output()
         {
             // End files with a newline character.
             outputBuilder.AppendLine();
-            return outputBuilder.ToString();
+            return base.Output();
         }
     }
 }
