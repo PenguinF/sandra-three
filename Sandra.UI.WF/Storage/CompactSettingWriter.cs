@@ -99,6 +99,24 @@ namespace Sandra.UI.WF.Storage
             outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
         }
 
+        public override void VisitMap(PMap value)
+        {
+            outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
+
+            bool first = true;
+            foreach (var kv in value)
+            {
+                if (first) first = false;
+                else outputBuilder.Append(JsonComma.CommaCharacter);
+
+                AppendString(kv.Key);
+                outputBuilder.Append(JsonColon.ColonCharacter);
+                Visit(kv.Value);
+            }
+
+            outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
+        }
+
         public string Output() => outputBuilder.ToString();
     }
 }
