@@ -31,11 +31,57 @@ namespace Sandra.UI.WF.Storage
     {
         private readonly StringBuilder outputBuilder = new StringBuilder();
 
+        private void AppendString(string value)
+        {
+            outputBuilder.Append(JsonString.QuoteCharacter);
+
+            if (value != null)
+            {
+                // Save on Append() operations by appending escape-char-less substrings
+                // that are as large as possible.
+                int firstNonEscapedCharPosition = 0;
+
+                for (int i = 0; i < value.Length; i++)
+                {
+                    char c = value[i];
+                    if (JsonString.CharacterMustBeEscaped(c))
+                    {
+                        // Non-empty substring between this character and the last?
+                        if (firstNonEscapedCharPosition < i)
+                        {
+                            outputBuilder.Append(
+                                value,
+                                firstNonEscapedCharPosition,
+                                i - firstNonEscapedCharPosition);
+                        }
+
+                        // Append the escape sequence.
+                        outputBuilder.Append(JsonString.EscapedCharacterString(c));
+
+                        firstNonEscapedCharPosition = i + 1;
+                    }
+                }
+
+                if (firstNonEscapedCharPosition < value.Length)
+                {
+                    outputBuilder.Append(
+                        value,
+                        firstNonEscapedCharPosition,
+                        value.Length - firstNonEscapedCharPosition);
+                }
+            }
+
+            outputBuilder.Append(JsonString.QuoteCharacter);
+        }
+
         public override void VisitBoolean(PBoolean value)
             => outputBuilder.Append(value.Value ? JsonValue.True : JsonValue.False);
 
         public override void VisitInteger(PInteger value)
             => outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
+
+        public override void VisitString(PString value)
+            => AppendString(value.Value);
 
         public string Output() => outputBuilder.ToString();
     }
