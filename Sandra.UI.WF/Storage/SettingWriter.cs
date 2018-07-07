@@ -283,7 +283,6 @@ namespace Sandra.UI.WF.Storage
         {
             // End files with a newline character.
             jsonTextWriter.WriteWhitespace(newLine);
-            jsonTextWriter.Close();
             return outputBuilder.ToString();
         }
     }
