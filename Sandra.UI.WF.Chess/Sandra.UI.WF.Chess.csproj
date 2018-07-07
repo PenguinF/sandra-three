@@ -118,6 +118,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\globe.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>

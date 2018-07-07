@@ -138,7 +138,7 @@ namespace Sandra.UI.WF
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
-                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Program.LoadImage("globe"));
+                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
                 mainMenuActionHandler.RootMenuNode.Nodes.Add(langMenu);
                 bindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
