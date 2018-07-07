@@ -36,7 +36,6 @@ namespace Sandra.UI.WF.Storage
         private class JsonPrettyPrinter : JsonTextWriter
         {
             private const int maxLineLength = 80;
-            private const string startComment = "// ";
 
             private static IEnumerable<string> GetCommentLines(string commentText, int indent)
             {
@@ -142,7 +141,8 @@ namespace Sandra.UI.WF.Storage
                 {
                     // The base WriteComment wraps comments in /*-*/ delimiters,
                     // so generate raw comments starting with // instead.
-                    WriteRaw(startComment);
+                    WriteRaw(JsonComment.SingleLineCommentStart);
+                    WriteRaw(" ");
                     WriteRaw(commentLine);
 
                     // Do this at the end to generate a line-break.
@@ -181,7 +181,8 @@ namespace Sandra.UI.WF.Storage
                             WriteIndent();
                             // The base WriteComment wraps comments in /*-*/ delimiters,
                             // so generate raw comments starting with // instead.
-                            WriteRaw(startComment);
+                            WriteRaw(JsonComment.SingleLineCommentStart);
+                            WriteRaw(" ");
                             WriteRaw(commentLine);
                         }
                     }
