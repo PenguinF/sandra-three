@@ -10,7 +10,7 @@ Thief, my favorite other chess client:
 World Chess Network, for their beautiful piece set:
     https://en.wikipedia.org/wiki/World_Chess_Network
 
-Snap sensitivity calculation - Jevgenij Pankov, 2004:
+Snap sensitivity calculation - Yevgeny Pankov, 2004:
     http://www.codeproject.com/Articles/6338/SnapFormExtender-a-magnet-for-your-MDI-child-forms
 
 Enumerating MDI children in z-order, in particular Alan N's post:
