@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\globe.png" />
+    <None Include="Properties\settings.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
