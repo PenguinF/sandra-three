@@ -19,11 +19,9 @@
  *********************************************************************************/
 #endregion
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Globalization;
 using System.Text;
 
 namespace Sandra.UI.WF.Storage
@@ -102,54 +100,18 @@ namespace Sandra.UI.WF.Storage
             return lines;
         }
 
-        private class JsonPrettyPrinter : JsonTextWriter
-        {
-            internal bool commentOutNextToken;
-            internal bool suppressNextValueDelimiter;
-
-            public JsonPrettyPrinter(TextWriter writer) : base(writer)
-            {
-                Formatting = Formatting.Indented;
-            }
-
-            protected override void WriteValueDelimiter()
-            {
-                if (suppressNextValueDelimiter) suppressNextValueDelimiter = false;
-                else base.WriteValueDelimiter();
-            }
-
-            protected override void WriteIndent()
-            {
-                base.WriteIndent();
-
-                if (commentOutNextToken)
-                {
-                    WriteRaw(JsonComment.SingleLineCommentStart);
-                }
-            }
-
-            public void _WriteIndent() => WriteIndent();
-            public void _WriteValueDelimiter() => WriteValueDelimiter();
-        }
-
         private readonly SettingSchema schema;
         private readonly StringBuilder outputBuilder;
-        private readonly JsonPrettyPrinter jsonTextWriter;
 
-        private readonly string newLine;
         private readonly bool commentOutProperties;
         private int currentDepth;
 
         public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
             outputBuilder = new StringBuilder();
-            var stringWriter = new StringWriter(outputBuilder);
-            stringWriter.NewLine = Environment.NewLine;
 
             this.schema = schema;
             this.commentOutProperties = commentOutProperties;
-            newLine = stringWriter.NewLine;
-            jsonTextWriter = new JsonPrettyPrinter(stringWriter);
 
             // Write schema description, if any.
             AppendCommentLines(schema.Description);
@@ -157,27 +119,7 @@ namespace Sandra.UI.WF.Storage
 
         private void WriteIndent()
         {
-            jsonTextWriter._WriteIndent();
-        }
-
-        private List<string> GetCommentLines(SettingComment comment)
-        {
-            List<string> lines = new List<string>();
-            if (comment != null)
-            {
-                int indent = currentDepth * Indentation;
-
-                bool first = true;
-                foreach (var paragraph in comment.Paragraphs)
-                {
-                    if (!first) lines.Add(string.Empty);
-                    first = false;
-
-                    // Add one extra indent because of the space between '//' and the text.
-                    lines.AddRange(GetCommentLines(paragraph, indent + 1));
-                }
-            }
-            return lines;
+            outputBuilder.Append(' ', currentDepth * Indentation);
         }
 
         private void AppendCommentLines(SettingComment comment)
@@ -210,83 +152,73 @@ namespace Sandra.UI.WF.Storage
 
         public override void VisitBoolean(PBoolean value)
         {
-            jsonTextWriter.WriteValue(value.Value);
+            outputBuilder.Append(value.Value ? JsonValue.True : JsonValue.False);
         }
 
         public override void VisitInteger(PInteger value)
         {
-            jsonTextWriter.WriteValue(value.Value);
+            outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
         }
 
         public override void VisitList(PList value)
         {
-            jsonTextWriter.WriteStartArray();
+            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
             currentDepth++;
 
+            bool first = true;
             foreach (var element in value)
             {
+                if (first) first = false; else outputBuilder.Append(',');
                 Visit(element);
             }
 
             currentDepth--;
-            jsonTextWriter.WriteEndArray();
+            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            jsonTextWriter.WriteStartObject();
+            outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
             foreach (var kv in value)
             {
+                if (!first)
+                {
+                    outputBuilder.Append(',');
+                    outputBuilder.AppendLine();
+                }
+
+                outputBuilder.AppendLine();
+
                 string name = kv.Key;
                 SettingProperty property;
                 if (schema.TryGetProperty(new SettingKey(name), out property))
                 {
-                    var commentLines = GetCommentLines(property.Description);
-
-                    // Only do the custom formatting when there are comments to write.
-                    if (commentLines.Any())
-                    {
-                        // Prepare by doing a manual auto-completion of a previous value.
-                        if (!first)
-                        {
-                            // Write the value delimiter here already, and suppress it the next time it's called.
-                            // This happens in WritePropertyName().
-                            jsonTextWriter._WriteValueDelimiter();
-                            jsonTextWriter.suppressNextValueDelimiter = true;
-                            jsonTextWriter.WriteWhitespace(newLine);
-                        }
-
-                        foreach (string commentLine in commentLines)
-                        {
-                            WriteIndent();
-                            // The base WriteComment wraps comments in /*-*/ delimiters,
-                            // so generate raw comments starting with // instead.
-                            jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
-                            jsonTextWriter.WriteRaw(" ");
-                            jsonTextWriter.WriteRaw(commentLine);
-                        }
-                    }
+                    AppendCommentLines(property.Description);
                 }
 
                 // This assumes that all default setting values fit on one line.
-                jsonTextWriter.commentOutNextToken = commentOutProperties;
-                jsonTextWriter.WritePropertyName(name);
-                jsonTextWriter.commentOutNextToken = false;
+                WriteIndent();
+                if (commentOutProperties)
+                {
+                    outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                }
+                CompactSettingWriter.AppendString(outputBuilder, name);
 
                 first = false;
+                outputBuilder.Append(": ");
                 Visit(kv.Value);
             }
 
             currentDepth--;
-            jsonTextWriter.WriteEndObject();
+            outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
 
         public override void VisitString(PString value)
         {
-            jsonTextWriter.WriteValue(value.Value);
+            CompactSettingWriter.AppendString(outputBuilder, value.Value);
         }
 
         /// <summary>
@@ -298,7 +230,7 @@ namespace Sandra.UI.WF.Storage
         public string Output()
         {
             // End files with a newline character.
-            jsonTextWriter.WriteWhitespace(newLine);
+            outputBuilder.AppendLine();
             return outputBuilder.ToString();
         }
     }
