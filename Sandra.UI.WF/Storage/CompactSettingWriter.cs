@@ -19,6 +19,8 @@
  *********************************************************************************/
 #endregion
 
+using System.Text;
+
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
@@ -26,5 +28,8 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class CompactSettingWriter : PValueVisitor
     {
+        private readonly StringBuilder outputBuilder = new StringBuilder();
+
+        public string Output() => outputBuilder.ToString();
     }
 }
