@@ -188,14 +188,10 @@ namespace Sandra.UI.WF.Storage
         {
             foreach (string commentLine in GetCommentLines(comment))
             {
-                // The base WriteComment wraps comments in /*-*/ delimiters,
-                // so generate raw comments starting with // instead.
-                jsonTextWriter.WriteRaw(JsonComment.SingleLineCommentStart);
-                jsonTextWriter.WriteRaw(" ");
-                jsonTextWriter.WriteRaw(commentLine);
-
-                // Do this at the end to generate a line-break.
-                WriteIndent();
+                outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                outputBuilder.Append(' ');
+                outputBuilder.Append(commentLine);
+                outputBuilder.AppendLine();
             }
         }
 
