@@ -30,6 +30,8 @@ namespace Sandra.UI.WF.Storage
     internal class SettingWriter : CompactSettingWriter
     {
         public const int Indentation = 2;
+        public const char SpaceChar = ' ';
+
         private const int maxLineLength = 80;
 
         private static IEnumerable<string> GetCommentLines(string commentText, int indent)
@@ -111,9 +113,9 @@ namespace Sandra.UI.WF.Storage
             AppendCommentLines(schema.Description);
         }
 
-        private void WriteIndent()
+        private void AppendIndent()
         {
-            outputBuilder.Append(' ', currentDepth * Indentation);
+            outputBuilder.Append(SpaceChar, currentDepth * Indentation);
         }
 
         private void AppendCommentLines(SettingComment comment)
@@ -127,7 +129,7 @@ namespace Sandra.UI.WF.Storage
                     if (!first)
                     {
                         // Extra line with empty single line comment to separate paragraphs.
-                        WriteIndent();
+                        AppendIndent();
                         outputBuilder.Append(JsonComment.SingleLineCommentStart);
                         outputBuilder.AppendLine();
                     }
@@ -136,9 +138,9 @@ namespace Sandra.UI.WF.Storage
                     // Add one extra indent because of the space between '//' and the text.
                     foreach (string commentLine in GetCommentLines(paragraph, indent + 1))
                     {
-                        WriteIndent();
+                        AppendIndent();
                         outputBuilder.Append(JsonComment.SingleLineCommentStart);
-                        outputBuilder.Append(' ');
+                        outputBuilder.Append(SpaceChar);
                         outputBuilder.Append(commentLine);
                         outputBuilder.AppendLine();
                     }
@@ -171,7 +173,7 @@ namespace Sandra.UI.WF.Storage
                 }
 
                 // This assumes that all default setting values fit on one line.
-                WriteIndent();
+                AppendIndent();
                 if (commentOutProperties)
                 {
                     outputBuilder.Append(JsonComment.SingleLineCommentStart);
@@ -179,7 +181,7 @@ namespace Sandra.UI.WF.Storage
 
                 AppendString(name);
                 outputBuilder.Append(JsonColon.ColonCharacter);
-                outputBuilder.Append(' ');
+                outputBuilder.Append(SpaceChar);
                 Visit(kv.Value);
             }
 
@@ -190,7 +192,7 @@ namespace Sandra.UI.WF.Storage
                 // Do this after decreasing currentDepth, so the closing bracket
                 // is in the same x-position as the opening bracket.
                 outputBuilder.AppendLine();
-                WriteIndent();
+                AppendIndent();
             }
 
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
