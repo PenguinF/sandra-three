@@ -182,12 +182,29 @@ namespace Sandra.UI.WF.Storage
 
         private void AppendCommentLines(SettingComment comment)
         {
-            foreach (string commentLine in GetCommentLines(comment))
+            if (comment != null)
             {
-                outputBuilder.Append(JsonComment.SingleLineCommentStart);
-                outputBuilder.Append(' ');
-                outputBuilder.Append(commentLine);
-                outputBuilder.AppendLine();
+                int indent = currentDepth * Indentation;
+                bool first = true;
+                foreach (var paragraph in comment.Paragraphs)
+                {
+                    if (!first)
+                    {
+                        // Extra line with empty single line comment to separate paragraphs.
+                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.AppendLine();
+                    }
+                    else first = false;
+
+                    // Add one extra indent because of the space between '//' and the text.
+                    foreach (string commentLine in GetCommentLines(paragraph, indent + 1))
+                    {
+                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.Append(' ');
+                        outputBuilder.Append(commentLine);
+                        outputBuilder.AppendLine();
+                    }
+                }
             }
         }
 
