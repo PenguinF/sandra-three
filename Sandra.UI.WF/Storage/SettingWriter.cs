@@ -101,7 +101,6 @@ namespace Sandra.UI.WF.Storage
         private readonly SettingSchema schema;
 
         private readonly bool commentOutProperties;
-        private int currentDepth;
 
         public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
@@ -145,24 +144,6 @@ namespace Sandra.UI.WF.Storage
                     }
                 }
             }
-        }
-
-        public override void VisitList(PList value)
-        {
-            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
-            currentDepth++;
-
-            bool first = true;
-            foreach (var element in value)
-            {
-                if (first) first = false;
-                else outputBuilder.Append(JsonComma.CommaCharacter);
-
-                Visit(element);
-            }
-
-            currentDepth--;
-            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)

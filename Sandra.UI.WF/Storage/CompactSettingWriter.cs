@@ -30,6 +30,7 @@ namespace Sandra.UI.WF.Storage
     internal class CompactSettingWriter : PValueVisitor
     {
         protected readonly StringBuilder outputBuilder = new StringBuilder();
+        protected int currentDepth;
 
         internal void AppendString(string value)
         {
@@ -86,6 +87,7 @@ namespace Sandra.UI.WF.Storage
         public override void VisitList(PList value)
         {
             outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+            currentDepth++;
 
             bool first = true;
             foreach (var element in value)
@@ -96,12 +98,14 @@ namespace Sandra.UI.WF.Storage
                 Visit(element);
             }
 
+            currentDepth--;
             outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
             outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
+            currentDepth++;
 
             bool first = true;
             foreach (var kv in value)
@@ -114,6 +118,7 @@ namespace Sandra.UI.WF.Storage
                 Visit(kv.Value);
             }
 
+            currentDepth--;
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
 
