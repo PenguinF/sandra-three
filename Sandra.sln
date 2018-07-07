@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF.Chess", "Sandr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF.Tests", "Sandra.UI.WF\Tests\Sandra.UI.WF.Tests.csproj", "{E87BD8F7-E4DB-4509-A2F0-327C3A01D07D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bin", "Bin", "{CC73C019-791D-49A0-BE2D-9FE7E00FBAA0}"
+	ProjectSection(SolutionItems) = preProject
+		Bin\Credits.txt = Bin\Credits.txt
+		Bin\README.txt = Bin\README.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
