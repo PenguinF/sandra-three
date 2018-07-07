@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
@@ -266,6 +267,64 @@ namespace Sandra.UI.WF
             return UIActionVisibility.Enabled;
         }
 
+        private Form CreateReadOnlyTextForm(string fileName, int width, int height)
+        {
+            string text;
+            try
+            {
+                text = File.ReadAllText(fileName);
+            }
+            catch (Exception exception)
+            {
+                // Just ignore and do nothing.
+                exception.Trace();
+                return null;
+            }
+
+            var textBox = new RichTextBoxBase
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.None,
+                ScrollBars = RichTextBoxScrollBars.Vertical,
+                DetectUrls = true,
+
+                ForeColor = Color.FromArgb(32, 32, 32),
+                BackColor = Color.LightGray,
+                Font = new Font("Consolas", 10),
+
+                Text = text,
+                ReadOnly = true,
+            };
+
+            textBox.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, textBox.TryZoomIn },
+                { SharedUIAction.ZoomOut, textBox.TryZoomOut },
+
+                { RichTextBoxBase.CutSelectionToClipBoard, textBox.TryCutSelectionToClipBoard },
+                { RichTextBoxBase.CopySelectionToClipBoard, textBox.TryCopySelectionToClipBoard },
+                { RichTextBoxBase.PasteSelectionFromClipBoard, textBox.TryPasteSelectionFromClipBoard },
+                { RichTextBoxBase.SelectAllText, textBox.TrySelectAllText },
+            });
+
+            UIMenu.AddTo(textBox);
+
+            var readOnlyTextForm = new UIActionForm()
+            {
+                Owner = this,
+                ClientSize = new Size(width, height),
+                ShowIcon = false,
+                ShowInTaskbar = false,
+                StartPosition = FormStartPosition.CenterScreen,
+                Text = Path.GetFileName(fileName),
+                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+            };
+
+            readOnlyTextForm.Controls.Add(textBox);
+
+            return readOnlyTextForm;
+        }
+
         public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenAbout)),
             new UIActionBinding()
@@ -276,6 +335,27 @@ namespace Sandra.UI.WF
 
         public UIActionState TryOpenAbout(bool perform)
         {
+            // Assume file exists, is distributed with executable.
+            // File.Exists() is too expensive to call hundreds of times.
+            if (perform)
+            {
+                if (openAboutForm == null)
+                {
+                    openAboutForm = CreateReadOnlyTextForm("README.txt", 600, 300);
+
+                    if (openAboutForm != null)
+                    {
+                        openAboutForm.FormClosed += (_, __) => openAboutForm = null;
+                    }
+                }
+
+                if (openAboutForm != null && !openAboutForm.ContainsFocus)
+                {
+                    openAboutForm.Visible = true;
+                    openAboutForm.Activate();
+                }
+            }
+
             return UIActionVisibility.Enabled;
         }
 
@@ -289,6 +369,27 @@ namespace Sandra.UI.WF
 
         public UIActionState TryShowCredits(bool perform)
         {
+            // Assume file exists, is distributed with executable.
+            // File.Exists() is too expensive to call hundreds of times.
+            if (perform)
+            {
+                if (openCreditsForm == null)
+                {
+                    openCreditsForm = CreateReadOnlyTextForm("Credits.txt", 700, 600);
+
+                    if (openCreditsForm != null)
+                    {
+                        openCreditsForm.FormClosed += (_, __) => openCreditsForm = null;
+                    }
+                }
+
+                if (openCreditsForm != null && !openCreditsForm.ContainsFocus)
+                {
+                    openCreditsForm.Visible = true;
+                    openCreditsForm.Activate();
+                }
+            }
+
             return UIActionVisibility.Enabled;
         }
     }

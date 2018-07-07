@@ -38,6 +38,8 @@ namespace Sandra.UI.WF
 
         private Form openLocalSettingsForm;
         private Form openDefaultSettingsForm;
+        private Form openAboutForm;
+        private Form openCreditsForm;
 
         public MdiContainerForm()
         {
