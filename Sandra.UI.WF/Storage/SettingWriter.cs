@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -191,6 +190,7 @@ namespace Sandra.UI.WF.Storage
                     outputBuilder.Append(',');
                     outputBuilder.AppendLine();
                 }
+                else first = false;
 
                 outputBuilder.AppendLine();
 
@@ -209,12 +209,20 @@ namespace Sandra.UI.WF.Storage
                 }
                 CompactSettingWriter.AppendString(outputBuilder, name);
 
-                first = false;
                 outputBuilder.Append(": ");
                 Visit(kv.Value);
             }
 
             currentDepth--;
+
+            if (!first)
+            {
+                // Do this after decreasing currentDepth, so the closing bracket
+                // is in the same x-position as the opening bracket.
+                outputBuilder.AppendLine();
+                WriteIndent();
+            }
+
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
 
