@@ -246,20 +246,37 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
+        private const char HighestControlCharacter = '\u009f';
+        private const int ControlCharacterIndexLength = HighestControlCharacter + 1;
+
+        // An index in memory is as fast as it gets for determining whether or not a character should be escaped.
+        private static readonly bool[] characterMustBeEscapedIndex;
+
+        static JsonString()
+        {
+            // Will be initialized with all false values.
+            characterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];
+
+            //https://www.compart.com/en/unicode/category/Cc
+            for (int i = 0; i < ' '; i++) characterMustBeEscapedIndex[i] = true;
+            for (int i = '\u007f'; i <= HighestControlCharacter; i++) characterMustBeEscapedIndex[i] = true;
+
+            // Individual characters.
+            characterMustBeEscapedIndex[QuoteCharacter] = true;
+            characterMustBeEscapedIndex[EscapeCharacter] = true;
+        }
+
         /// <summary>
         /// Returns whether or not a character must be escaped when in a JSON string.
         /// </summary>
         public static bool CharacterMustBeEscaped(char c)
         {
-            return c == QuoteCharacter
-                || c == EscapeCharacter
-                //https://www.compart.com/en/unicode/category/Cc
-                || c < ' '
-                || ('\u007f' <= c && c <= '\u009f')
-                //https://www.compart.com/en/unicode/category/Zl - line separator
-                || c == '\u2028'
-                //https://www.compart.com/en/unicode/category/Zp - paragraph separator
-                || c == '\u2029';
+            if (c < ControlCharacterIndexLength) return characterMustBeEscapedIndex[c];
+
+            // Express this as two inequality conditions so second condition may not have to be evaluated.
+            //https://www.compart.com/en/unicode/category/Zl - line separator
+            //https://www.compart.com/en/unicode/category/Zp - paragraph separator
+            return c >= '\u2028' && c <= '\u2029';
         }
 
         public string Value { get; }
