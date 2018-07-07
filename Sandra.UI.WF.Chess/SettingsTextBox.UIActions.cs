@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingsTextBox.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.IO;
 
@@ -33,6 +36,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.Save,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
+                MenuIcon = Properties.Resources.save,
             });
 
         public UIActionState TrySaveToFile(bool perform)

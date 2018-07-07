@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * StandardChessBoardForm.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -34,6 +37,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.FlipBoard,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+                MenuIcon = Properties.Resources.flip,
             });
 
         public UIActionState TryFlipBoard(bool perform)

@@ -37,6 +37,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.Cut,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
+                MenuIcon = Properties.Resources.cut,
             });
 
         public UIActionState TryCutSelectionToClipBoard(bool perform)
@@ -54,6 +55,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.Copy,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                MenuIcon = Properties.Resources.copy,
             });
 
         public UIActionState TryCopySelectionToClipBoard(bool perform)
@@ -70,6 +72,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.Paste,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
+                MenuIcon = Properties.Resources.paste,
             });
 
         public UIActionState TryPasteSelectionFromClipBoard(bool perform)

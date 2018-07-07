@@ -21,6 +21,13 @@ Version 1.0 will be released when all abovementioned works-in-progress have been
 
 ***
 
+Icons used in this application came from:
+
+* https://iconpharm.com/
+* https://www.iconfinder.com/icons/186398/globe_online_world_icon
+
+***
+
 Sandra 1 was coded in Delphi in 2004-2005.
 Sandra 2 was a dead end research project.
 

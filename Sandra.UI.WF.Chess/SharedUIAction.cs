@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SharedUIAction.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
 namespace Sandra.UI.WF
@@ -32,6 +35,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomIn,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+                MenuIcon = Properties.Resources.zoom_in,
             });
 
         public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
@@ -41,6 +45,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomOut,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+                MenuIcon = Properties.Resources.zoom_out,
             });
     }
 }

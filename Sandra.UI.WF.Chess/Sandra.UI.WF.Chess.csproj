@@ -118,6 +118,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\copy.png" />
+    <None Include="Properties\cut.png" />
+    <None Include="Properties\flip.png" />
+    <None Include="Properties\globe.png" />
+    <None Include="Properties\paste.png" />
+    <None Include="Properties\save.png" />
+    <None Include="Properties\settings.png" />
+    <None Include="Properties\zoom_in.png" />
+    <None Include="Properties\zoom_out.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>

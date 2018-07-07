@@ -56,6 +56,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
+                MenuIcon = Properties.Resources.settings,
             });
 
         private Form CreateSettingsForm(bool isReadOnly,
