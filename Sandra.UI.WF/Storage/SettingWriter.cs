@@ -34,6 +34,16 @@ namespace Sandra.UI.WF.Storage
 
         private const int maxLineLength = 80;
 
+        public static string ConvertToJson(PMap map, SettingSchema schema, bool commentOutProperties)
+        {
+            SettingWriter writer = new SettingWriter(schema, commentOutProperties);
+            writer.Visit(map);
+
+            // End files with a newline character.
+            writer.outputBuilder.AppendLine();
+            return writer.outputBuilder.ToString();
+        }
+
         private static IEnumerable<string> GetCommentLines(string commentText, int availableWidth)
         {
             List<string> lines = new List<string>();
@@ -199,19 +209,6 @@ namespace Sandra.UI.WF.Storage
             }
 
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
-        }
-
-        /// <summary>
-        /// Closes the <see cref="SettingWriter"/> and returns the output.
-        /// </summary>
-        /// <returns>
-        /// The generated output.
-        /// </returns>
-        public string Output()
-        {
-            // End files with a newline character.
-            outputBuilder.AppendLine();
-            return outputBuilder.ToString();
         }
     }
 }

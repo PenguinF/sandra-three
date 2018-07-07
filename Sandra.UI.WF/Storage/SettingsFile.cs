@@ -292,11 +292,14 @@ namespace Sandra.UI.WF.Storage
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
 
-            SettingWriter writer = new SettingWriter(schema: settings.Schema, commentOutProperties: commentOutProperties);
-            writer.Visit(settings.Map);
             try
             {
-                File.WriteAllText(absoluteFilePath, writer.Output());
+                string json = SettingWriter.ConvertToJson(
+                    settings.Map,
+                    schema: settings.Schema,
+                    commentOutProperties: commentOutProperties);
+
+                File.WriteAllText(absoluteFilePath, json);
                 return null;
             }
             catch (Exception exception)
