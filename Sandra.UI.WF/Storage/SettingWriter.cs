@@ -102,24 +102,6 @@ namespace Sandra.UI.WF.Storage
             return lines;
         }
 
-        private static List<string> GetCommentLines(SettingComment comment, int indent)
-        {
-            List<string> lines = new List<string>();
-            if (comment != null)
-            {
-                bool first = true;
-                foreach (var paragraph in comment.Paragraphs)
-                {
-                    if (!first) lines.Add(string.Empty);
-                    first = false;
-
-                    // Add one extra indent because of the space between '//' and the text.
-                    lines.AddRange(GetCommentLines(paragraph, indent + 1));
-                }
-            }
-            return lines;
-        }
-
         private class JsonPrettyPrinter : JsonTextWriter
         {
             internal bool commentOutNextToken;
@@ -181,7 +163,20 @@ namespace Sandra.UI.WF.Storage
         private List<string> GetCommentLines(SettingComment comment)
         {
             int indent = currentDepth * Indentation;
-            return GetCommentLines(comment, indent);
+            List<string> lines = new List<string>();
+            if (comment != null)
+            {
+                bool first = true;
+                foreach (var paragraph in comment.Paragraphs)
+                {
+                    if (!first) lines.Add(string.Empty);
+                    first = false;
+
+                    // Add one extra indent because of the space between '//' and the text.
+                    lines.AddRange(GetCommentLines(paragraph, indent + 1));
+                }
+            }
+            return lines;
         }
 
         private void AppendCommentLines(SettingComment comment)
