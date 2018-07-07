@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -250,28 +251,29 @@ namespace Sandra.UI.WF.Storage
         private const int ControlCharacterIndexLength = HighestControlCharacter + 1;
 
         // An index in memory is as fast as it gets for determining whether or not a character should be escaped.
-        private static readonly bool[] characterMustBeEscapedIndex;
+        public static readonly bool[] CharacterMustBeEscapedIndex;
 
         static JsonString()
         {
             // Will be initialized with all false values.
-            characterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];
+            CharacterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];
 
             //https://www.compart.com/en/unicode/category/Cc
-            for (int i = 0; i < ' '; i++) characterMustBeEscapedIndex[i] = true;
-            for (int i = '\u007f'; i <= HighestControlCharacter; i++) characterMustBeEscapedIndex[i] = true;
+            for (int i = 0; i < ' '; i++) CharacterMustBeEscapedIndex[i] = true;
+            for (int i = '\u007f'; i <= HighestControlCharacter; i++) CharacterMustBeEscapedIndex[i] = true;
 
             // Individual characters.
-            characterMustBeEscapedIndex[QuoteCharacter] = true;
-            characterMustBeEscapedIndex[EscapeCharacter] = true;
+            CharacterMustBeEscapedIndex[QuoteCharacter] = true;
+            CharacterMustBeEscapedIndex[EscapeCharacter] = true;
         }
 
         /// <summary>
         /// Returns whether or not a character must be escaped when in a JSON string.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CharacterMustBeEscaped(char c)
         {
-            if (c < ControlCharacterIndexLength) return characterMustBeEscapedIndex[c];
+            if (c < ControlCharacterIndexLength) return CharacterMustBeEscapedIndex[c];
 
             // Express this as two inequality conditions so second condition may not have to be evaluated.
             //https://www.compart.com/en/unicode/category/Zl - line separator
