@@ -33,26 +33,7 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
-        private abstract class CustomJsonTextWriter : JsonTextWriter
-        {
-            public CustomJsonTextWriter(TextWriter writer) : base(writer)
-            {
-            }
-
-            public abstract void WriteSettingPropertyName(string name, bool isFirst);
-        }
-
-        private class JsonCompactWriter : CustomJsonTextWriter
-        {
-            public JsonCompactWriter(TextWriter writer) : base(writer)
-            {
-            }
-
-            public override void WriteSettingPropertyName(string name, bool isFirst)
-                => WritePropertyName(name);
-        }
-
-        private class JsonPrettyPrinter : CustomJsonTextWriter
+        private class JsonPrettyPrinter : JsonTextWriter
         {
             private const int maxLineLength = 80;
             private const string startComment = "// ";
@@ -173,7 +154,7 @@ namespace Sandra.UI.WF.Storage
                 else base.WriteValueDelimiter();
             }
 
-            public override void WriteSettingPropertyName(string name, bool isFirst)
+            public void WriteSettingPropertyName(string name, bool isFirst)
             {
                 SettingProperty property;
                 if (schema.TryGetProperty(new SettingKey(name), out property))
@@ -229,16 +210,15 @@ namespace Sandra.UI.WF.Storage
         }
 
         private readonly StringBuilder outputBuilder;
-        private readonly CustomJsonTextWriter jsonTextWriter;
+        private readonly JsonPrettyPrinter jsonTextWriter;
 
-        public SettingWriter(SettingSchema schema, bool compact, bool commentOutProperties)
+        public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
             outputBuilder = new StringBuilder();
             var stringWriter = new StringWriter(outputBuilder);
             stringWriter.NewLine = Environment.NewLine;
 
-            if (compact) jsonTextWriter = new JsonCompactWriter(stringWriter);
-            else jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema, commentOutProperties);
+            jsonTextWriter = new JsonPrettyPrinter(stringWriter, schema, commentOutProperties);
         }
 
         public override void VisitBoolean(PBoolean value)
