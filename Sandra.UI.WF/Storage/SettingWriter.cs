@@ -133,6 +133,7 @@ namespace Sandra.UI.WF.Storage
                     if (!first)
                     {
                         // Extra line with empty single line comment to separate paragraphs.
+                        WriteIndent();
                         outputBuilder.Append(JsonComment.SingleLineCommentStart);
                         outputBuilder.AppendLine();
                     }
@@ -141,6 +142,7 @@ namespace Sandra.UI.WF.Storage
                     // Add one extra indent because of the space between '//' and the text.
                     foreach (string commentLine in GetCommentLines(paragraph, indent + 1))
                     {
+                        WriteIndent();
                         outputBuilder.Append(JsonComment.SingleLineCommentStart);
                         outputBuilder.Append(' ');
                         outputBuilder.Append(commentLine);
