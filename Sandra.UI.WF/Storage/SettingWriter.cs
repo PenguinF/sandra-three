@@ -119,6 +119,12 @@ namespace Sandra.UI.WF.Storage
             return lines;
         }
 
+        private List<string> GetCommentLines(SettingComment comment)
+        {
+            int indent = jsonTextWriter.CurrentDepth * jsonTextWriter.Indentation;
+            return GetCommentLines(comment, indent);
+        }
+
         private class JsonPrettyPrinter : JsonTextWriter
         {
             internal bool commentOutNextToken;
@@ -170,7 +176,7 @@ namespace Sandra.UI.WF.Storage
             jsonTextWriter = new JsonPrettyPrinter(stringWriter);
 
             // Write schema description, if any.
-            foreach (string commentLine in GetCommentLines(schema.Description, 0))
+            foreach (string commentLine in GetCommentLines(schema.Description))
             {
                 // The base WriteComment wraps comments in /*-*/ delimiters,
                 // so generate raw comments starting with // instead.
@@ -188,7 +194,7 @@ namespace Sandra.UI.WF.Storage
             SettingProperty property;
             if (schema.TryGetProperty(new SettingKey(name), out property))
             {
-                var commentLines = GetCommentLines(property.Description, jsonTextWriter.CurrentDepth * jsonTextWriter.Indentation);
+                var commentLines = GetCommentLines(property.Description);
 
                 // Only do the custom formatting when there are comments to write.
                 if (commentLines.Any())
