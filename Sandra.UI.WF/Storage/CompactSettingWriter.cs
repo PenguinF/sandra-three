@@ -83,6 +83,22 @@ namespace Sandra.UI.WF.Storage
         public override void VisitString(PString value)
             => AppendString(value.Value);
 
+        public override void VisitList(PList value)
+        {
+            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+
+            bool first = true;
+            foreach (var element in value)
+            {
+                if (first) first = false;
+                else outputBuilder.Append(JsonComma.CommaCharacter);
+
+                Visit(element);
+            }
+
+            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
+        }
+
         public string Output() => outputBuilder.ToString();
     }
 }
