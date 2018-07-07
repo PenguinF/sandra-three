@@ -246,6 +246,14 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
+        /// <summary>
+        /// Returns whether or not a character must be escaped when in a JSON string.
+        /// </summary>
+        public static bool CharacterMustBeEscaped(char c)
+        {
+            return char.IsControl(c);
+        }
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;

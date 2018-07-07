@@ -343,7 +343,7 @@ namespace Sandra.UI.WF.Storage
                         }
                         break;
                     default:
-                        if (char.IsControl(c))
+                        if (JsonString.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
                             errors.Add(TextErrorInfo.IllegalControlCharacterInString(
