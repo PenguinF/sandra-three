@@ -37,6 +37,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.FlipBoard,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+                MenuIcon = Properties.Resources.flip,
             });
 
         public UIActionState TryFlipBoard(bool perform)
