@@ -35,6 +35,7 @@ namespace Sandra.UI.WF
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomIn,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+                MenuIcon = Properties.Resources.zoom_in,
             });
 
         public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
@@ -44,6 +45,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomOut,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+                MenuIcon = Properties.Resources.zoom_out,
             });
     }
 }
