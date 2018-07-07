@@ -1,7 +1,7 @@
 // There are generally two copies of this file, one in the directory where
 // SandraChess.exe is located (Default.settings), and one that lives in the
 // local application data folder.
-// 
+//
 // Preferences in the latter file override those that are specified in the
 // default. In the majority of cases, only the latter file is changed, while the
 // default settings serve as a template.
