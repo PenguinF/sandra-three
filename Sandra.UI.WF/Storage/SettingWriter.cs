@@ -33,6 +33,7 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     internal class SettingWriter : PValueVisitor
     {
+        public const int Indentation = 2;
         private const int maxLineLength = 80;
 
         private static IEnumerable<string> GetCommentLines(string commentText, int indent)
@@ -121,7 +122,7 @@ namespace Sandra.UI.WF.Storage
 
         private List<string> GetCommentLines(SettingComment comment)
         {
-            int indent = currentDepth * jsonTextWriter.Indentation;
+            int indent = currentDepth * Indentation;
             return GetCommentLines(comment, indent);
         }
 
