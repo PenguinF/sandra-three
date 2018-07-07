@@ -121,7 +121,7 @@ namespace Sandra.UI.WF.Storage
 
         private List<string> GetCommentLines(SettingComment comment)
         {
-            int indent = jsonTextWriter.CurrentDepth * jsonTextWriter.Indentation;
+            int indent = currentDepth * jsonTextWriter.Indentation;
             return GetCommentLines(comment, indent);
         }
 
@@ -163,6 +163,7 @@ namespace Sandra.UI.WF.Storage
 
         private readonly string newLine;
         private readonly bool commentOutProperties;
+        private int currentDepth;
 
         public SettingWriter(SettingSchema schema, bool commentOutProperties)
         {
@@ -240,13 +241,22 @@ namespace Sandra.UI.WF.Storage
         public override void VisitList(PList value)
         {
             jsonTextWriter.WriteStartArray();
-            value.ForEach(Visit);
+            currentDepth++;
+
+            foreach (var element in value)
+            {
+                Visit(element);
+            }
+
+            currentDepth--;
             jsonTextWriter.WriteEndArray();
         }
 
         public override void VisitMap(PMap value)
         {
             jsonTextWriter.WriteStartObject();
+            currentDepth++;
+
             bool first = true;
             foreach (var kv in value)
             {
@@ -254,6 +264,8 @@ namespace Sandra.UI.WF.Storage
                 first = false;
                 Visit(kv.Value);
             }
+
+            currentDepth--;
             jsonTextWriter.WriteEndObject();
         }
 
