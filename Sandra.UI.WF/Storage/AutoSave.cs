@@ -366,8 +366,7 @@ namespace Sandra.UI.WF.Storage
 
                     try
                     {
-                        var writer = new SettingWriter(schema: remoteSettings.Schema, compact: true, commentOutProperties: false);
-                        writer.Visit(remoteSettings.Map);
+                        string output = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
@@ -392,7 +391,7 @@ namespace Sandra.UI.WF.Storage
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        WriteToFile(writer.Output(), writefileStream);
+                        WriteToFile(output, writefileStream);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.

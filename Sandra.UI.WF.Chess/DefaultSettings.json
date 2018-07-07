@@ -1,7 +1,7 @@
 // There are generally two copies of this file, one in the directory where
 // SandraChess.exe is located (Default.settings), and one that lives in the
 // local application data folder.
-// 
+//
 // Preferences in the latter file override those that are specified in the
 // default. In the majority of cases, only the latter file is changed, while the
 // default settings serve as a template.
@@ -11,9 +11,9 @@
   "version": 1,
 
   // Subfolder of %APPDATA%/Local which should be used to store persistent data.
-  // This includes the auto-save file, or e.g. a preferences file. Use forward
-  // slashes to separate directories, an unrecognized escape sequence such as in
-  // "Test\Test" renders the whole file unusable.
+  // This includes the auto-save file, or e.g. a preferences file. Backward
+  // slashes ('\') must be escaped in json strings (e.g. "C:\\Temp\\temp.txt").
+  // Instead, forward slashes ('/') can be used to separate directories as well.
   "app_data_sub_folder_name": "SandraChess",
 
   // File name in the %APPDATA%/Local subfolder which contains the user-specific

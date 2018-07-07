@@ -146,39 +146,39 @@ namespace Sandra.UI.WF.Storage
                     {
                         switch (c)
                         {
-                            case '{':
+                            case JsonCurlyOpen.CurlyOpenCharacter:
                                 yield return new JsonCurlyOpen(json, currentIndex);
                                 break;
-                            case '}':
+                            case JsonCurlyClose.CurlyCloseCharacter:
                                 yield return new JsonCurlyClose(json, currentIndex);
                                 break;
-                            case '[':
+                            case JsonSquareBracketOpen.SquareBracketOpenCharacter:
                                 yield return new JsonSquareBracketOpen(json, currentIndex);
                                 break;
-                            case ']':
+                            case JsonSquareBracketClose.SquareBracketCloseCharacter:
                                 yield return new JsonSquareBracketClose(json, currentIndex);
                                 break;
-                            case ':':
+                            case JsonColon.ColonCharacter:
                                 yield return new JsonColon(json, currentIndex);
                                 break;
-                            case ',':
+                            case JsonComma.CommaCharacter:
                                 yield return new JsonComma(json, currentIndex);
                                 break;
-                            case '"':
+                            case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
                                 yield break;
-                            case '/':
+                            case JsonComment.CommentStartFirstCharacter:
                                 // Look ahead 1 character to see if this is the start of a comment.
                                 // In all other cases, treat as an unexpected symbol.
                                 if (currentIndex + 1 < length)
                                 {
                                     char secondChar = json[currentIndex + 1];
-                                    if (secondChar == '/')
+                                    if (secondChar == JsonComment.SingleLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InSingleLineComment;
                                         yield break;
                                     }
-                                    else if (secondChar == '*')
+                                    else if (secondChar == JsonComment.MultiLineCommentStartSecondCharacter)
                                     {
                                         currentTokenizer = InMultiLineComment;
                                         yield break;
@@ -224,7 +224,7 @@ namespace Sandra.UI.WF.Storage
                 char c = json[currentIndex];
                 switch (c)
                 {
-                    case '"':
+                    case JsonString.QuoteCharacter:
                         currentIndex++;
                         if (errors.Count > 0)
                         {
@@ -247,7 +247,7 @@ namespace Sandra.UI.WF.Storage
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
-                    case '\\':
+                    case JsonString.EscapeCharacter:
                         // Escape sequence.
                         int escapeSequenceStart = currentIndex;
                         currentIndex++;
@@ -256,8 +256,8 @@ namespace Sandra.UI.WF.Storage
                             char escapedChar = json[currentIndex];
                             switch (escapedChar)
                             {
-                                case '"':
-                                case '\\':
+                                case JsonString.QuoteCharacter:
+                                case JsonString.EscapeCharacter:
                                 case '/':  // Weird one, but it's in the specification.
                                     valueBuilder.Append(escapedChar);
                                     break;
@@ -343,23 +343,12 @@ namespace Sandra.UI.WF.Storage
                         }
                         break;
                     default:
-                        if (char.IsControl(c))
+                        if (JsonString.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
-                            string displayCharValue;
-                            switch (c)
-                            {
-                                case '\0': displayCharValue = "\\0"; break;
-                                case '\b': displayCharValue = "\\b"; break;
-                                case '\f': displayCharValue = "\\f"; break;
-                                case '\n': displayCharValue = "\\n"; break;
-                                case '\r': displayCharValue = "\\r"; break;
-                                case '\t': displayCharValue = "\\t"; break;
-                                case '\v': displayCharValue = "\\v"; break;
-                                default: displayCharValue = $"\\u{((int)c).ToString("x4")}"; break;
-                            }
-
-                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(displayCharValue, currentIndex));
+                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(
+                                JsonString.EscapedCharacterString(c),
+                                currentIndex));
                         }
                         else
                         {

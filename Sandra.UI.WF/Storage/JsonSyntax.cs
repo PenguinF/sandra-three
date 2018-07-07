@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -92,6 +93,13 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComment : JsonTerminalSymbol
     {
+        public const char CommentStartFirstCharacter = '/';
+        public const char SingleLineCommentStartSecondCharacter = '/';
+        public const char MultiLineCommentStartSecondCharacter = '*';
+
+        public static readonly string SingleLineCommentStart
+            = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
+
         public override bool IsBackground => true;
 
         public JsonComment(string json, int start, int length) : base(json, start, length) { }
@@ -120,6 +128,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonCurlyOpen : JsonTerminalSymbol
     {
+        public const char CurlyOpenCharacter = '{';
+
         public override bool IsValueStartSymbol => true;
 
         public JsonCurlyOpen(string json, int start) : base(json, start, 1) { }
@@ -130,6 +140,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonCurlyClose : JsonTerminalSymbol
     {
+        public const char CurlyCloseCharacter = '}';
+
         public JsonCurlyClose(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
@@ -138,6 +150,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonSquareBracketOpen : JsonTerminalSymbol
     {
+        public const char SquareBracketOpenCharacter = '[';
+
         public override bool IsValueStartSymbol => true;
 
         public JsonSquareBracketOpen(string json, int start) : base(json, start, 1) { }
@@ -148,6 +162,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonSquareBracketClose : JsonTerminalSymbol
     {
+        public const char SquareBracketCloseCharacter = ']';
+
         public JsonSquareBracketClose(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
@@ -156,6 +172,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonColon : JsonTerminalSymbol
     {
+        public const char ColonCharacter = ':';
+
         public JsonColon(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
@@ -164,6 +182,8 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonComma : JsonTerminalSymbol
     {
+        public const char CommaCharacter = ',';
+
         public JsonComma(string json, int start) : base(json, start, 1) { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
@@ -191,6 +211,9 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonValue : JsonTerminalSymbol
     {
+        public static readonly string True = "true";
+        public static readonly string False = "false";
+
         public override bool IsValueStartSymbol => true;
 
         public JsonValue(string json, int start, int length) : base(json, start, length) { }
@@ -201,6 +224,63 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonString : JsonTerminalSymbol
     {
+        public const char QuoteCharacter = '"';
+        public const char EscapeCharacter = '\\';
+
+        /// <summary>
+        /// Generates the escape sequence string for a character.
+        /// </summary>
+        public static string EscapedCharacterString(char c)
+        {
+            switch (c)
+            {
+                case '\0': return "\\0";
+                case '\b': return "\\b";
+                case '\f': return "\\f";
+                case '\n': return "\\n";
+                case '\r': return "\\r";
+                case '\t': return "\\t";
+                case '\v': return "\\v";
+                case QuoteCharacter: return "\\\"";
+                case EscapeCharacter: return "\\\\";
+                default: return $"\\u{((int)c).ToString("x4")}";
+            }
+        }
+
+        private const char HighestControlCharacter = '\u009f';
+        private const int ControlCharacterIndexLength = HighestControlCharacter + 1;
+
+        // An index in memory is as fast as it gets for determining whether or not a character should be escaped.
+        public static readonly bool[] CharacterMustBeEscapedIndex;
+
+        static JsonString()
+        {
+            // Will be initialized with all false values.
+            CharacterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];
+
+            //https://www.compart.com/en/unicode/category/Cc
+            for (int i = 0; i < ' '; i++) CharacterMustBeEscapedIndex[i] = true;
+            for (int i = '\u007f'; i <= HighestControlCharacter; i++) CharacterMustBeEscapedIndex[i] = true;
+
+            // Individual characters.
+            CharacterMustBeEscapedIndex[QuoteCharacter] = true;
+            CharacterMustBeEscapedIndex[EscapeCharacter] = true;
+        }
+
+        /// <summary>
+        /// Returns whether or not a character must be escaped when in a JSON string.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool CharacterMustBeEscaped(char c)
+        {
+            if (c < ControlCharacterIndexLength) return CharacterMustBeEscapedIndex[c];
+
+            // Express this as two inequality conditions so second condition may not have to be evaluated.
+            //https://www.compart.com/en/unicode/category/Zl - line separator
+            //https://www.compart.com/en/unicode/category/Zp - paragraph separator
+            return c >= '\u2028' && c <= '\u2029';
+        }
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;

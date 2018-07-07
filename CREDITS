@@ -37,6 +37,9 @@ Roslyn compiler for their sensible visitor implementation, among other things:
 xUnit.net, for their principled and well thought out unit testing framework:
     https://xunit.github.io/
 
+Json.NET, which has been invaluably useful as a control Json parser and writer.
+    https://www.newtonsoft.com/json
+
 
 There is also no way I could have done this without proper tools and documentation:
 
