@@ -90,34 +90,9 @@ namespace SysExtensions.SyntaxRenderer
             }
         }
 
-        public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, string text)
-        {
-            if (terminal == null) throw new ArgumentNullException(nameof(terminal));
-            if (isSlave) throw new InvalidOperationException("Slave syntax renderers should not append text.");
-            if (text == null) throw new ArgumentNullException(nameof(text));
-
-            int length = text.Length;
-            if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
-
-            int start = elementIndexes.Count;
-            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
-
-            var textElement = new TextElement<TTerminal>(this)
-            {
-                TerminalSymbol = terminal,
-                Start = start,
-                Length = length,
-            };
-
-            elements.Add(textElement);
-            assertInvariants();
-            return textElement;
-        }
-
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, int length)
         {
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
-            if (!isSlave) throw new InvalidOperationException("Non-slave syntax renderers should not be modified without changing the text too.");
             if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
 
             int start = elementIndexes.Count;
