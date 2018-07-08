@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
-using SysExtensions.TextIndex;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -56,6 +55,8 @@ namespace Sandra.UI.WF
             ForeColor = Color.WhiteSmoke,
             Font = new Font("Consolas", 10),
         };
+
+        protected override TextElementStyle DefaultStyle => defaultStyle;
 
         private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
         private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
@@ -94,34 +95,6 @@ namespace Sandra.UI.WF
         private readonly SettingsFile settingsFile;
 
         private readonly UpdatableRichTextBox errorsTextBox;
-
-        private void applyDefaultStyle()
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                BackColor = defaultStyle.BackColor;
-                ForeColor = defaultStyle.ForeColor;
-                Font = defaultStyle.Font;
-                SelectAll();
-                SelectionBackColor = defaultStyle.BackColor;
-                SelectionColor = defaultStyle.ForeColor;
-                SelectionFont = defaultStyle.Font;
-            }
-        }
-
-        private void applyStyle(TextElement<JsonTerminalSymbol> element, TextElementStyle style)
-        {
-            if (style != null)
-            {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    Select(element.Start, element.Length);
-                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
-                    if (style.HasForeColor) SelectionColor = style.ForeColor;
-                    if (style.HasFont) SelectionFont = style.Font;
-                }
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
@@ -162,7 +135,7 @@ namespace Sandra.UI.WF
         {
             lastParsedText = json;
 
-            applyDefaultStyle();
+            ApplyDefaultStyle();
 
             int firstUnusedIndex = 0;
 
@@ -196,7 +169,7 @@ namespace Sandra.UI.WF
 
             foreach (var textElement in TextIndex.Elements)
             {
-                applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
+                ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
             PMap dummy;

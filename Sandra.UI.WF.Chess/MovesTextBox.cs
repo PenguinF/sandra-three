@@ -44,6 +44,8 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10),
         };
 
+        protected override TextElementStyle DefaultStyle => defaultStyle;
+
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
         {
             HasForeColor = true,
@@ -58,7 +60,7 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
-            applyDefaultStyle();
+            ApplyDefaultStyle();
 
             CaretPosition.ValueChanged += BringIntoView;
             CaretPosition.ValueChanged += caretPositionChanged;
@@ -72,31 +74,6 @@ namespace Sandra.UI.WF
                     updateMoveFormatter();
                 }
             };
-        }
-
-        private void applyDefaultStyle()
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                BackColor = defaultStyle.BackColor;
-                ForeColor = defaultStyle.ForeColor;
-                Font = defaultStyle.Font;
-                SelectAll();
-                SelectionBackColor = defaultStyle.BackColor;
-                SelectionColor = defaultStyle.ForeColor;
-                SelectionFont = defaultStyle.Font;
-            }
-        }
-
-        private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                Select(element.Start, element.Length);
-                if (style.HasBackColor) SelectionBackColor = style.BackColor;
-                if (style.HasForeColor) SelectionColor = style.ForeColor;
-                if (style.HasFont) SelectionFont = style.Font;
-            }
         }
 
         protected override void Dispose(bool disposing)
@@ -326,7 +303,7 @@ namespace Sandra.UI.WF
             using (var updateToken = BeginUpdate())
             {
                 // Reset any markup.
-                applyDefaultStyle();
+                ApplyDefaultStyle();
                 currentActiveMoveStyleElement = null;
 
                 if (agreeIndex < existingElementCount)
@@ -366,7 +343,7 @@ namespace Sandra.UI.WF
                 {
                     // Make the active move bold.
                     currentActiveMoveStyleElement = newActiveMoveElement;
-                    applyStyle(newActiveMoveElement, activeMoveStyle);
+                    ApplyStyle(newActiveMoveElement, activeMoveStyle);
 
                     // Also update the caret so the active move is in view.
                     CaretPosition.Value = newActiveMoveElement.End;
@@ -412,7 +389,7 @@ namespace Sandra.UI.WF
                         // Reset markup of the previously active move element.
                         if (currentActiveMoveStyleElement != null)
                         {
-                            applyStyle(currentActiveMoveStyleElement, defaultStyle);
+                            ApplyStyle(currentActiveMoveStyleElement, defaultStyle);
                             currentActiveMoveStyleElement = null;
                         }
 
@@ -427,7 +404,7 @@ namespace Sandra.UI.WF
                             if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                             {
                                 currentActiveMoveStyleElement = textElement;
-                                applyStyle(textElement, activeMoveStyle);
+                                ApplyStyle(textElement, activeMoveStyle);
                                 break;
                             }
                         }

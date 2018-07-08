@@ -44,6 +44,8 @@ namespace Sandra.UI.WF
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
+        protected abstract TextElementStyle DefaultStyle { get; }
+
         public SyntaxEditor()
         {
             TextIndex = new TextIndex<TTerminal>();
@@ -52,6 +54,39 @@ namespace Sandra.UI.WF
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+            }
+        }
+
+        protected void ApplyDefaultStyle()
+        {
+            var defaultStyle = DefaultStyle;
+
+            if (defaultStyle != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    BackColor = defaultStyle.BackColor;
+                    ForeColor = defaultStyle.ForeColor;
+                    Font = defaultStyle.Font;
+                    SelectAll();
+                    SelectionBackColor = defaultStyle.BackColor;
+                    SelectionColor = defaultStyle.ForeColor;
+                    SelectionFont = defaultStyle.Font;
+                }
+            }
+        }
+
+        protected void ApplyStyle(TextElement<TTerminal> element, TextElementStyle style)
+        {
+            if (style != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    Select(element.Start, element.Length);
+                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
+                    if (style.HasForeColor) SelectionColor = style.ForeColor;
+                    if (style.HasFont) SelectionFont = style.Font;
+                }
             }
         }
 
