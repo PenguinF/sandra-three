@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace SysExtensions.TextIndex
@@ -35,8 +34,6 @@ namespace SysExtensions.TextIndex
     /// </typeparam>
     public class TextIndex<TTerminal>
     {
-        private readonly List<int> elementIndexes = new List<int>();
-
         private readonly List<TextElement<TTerminal>> elements = new List<TextElement<TTerminal>>();
 
         /// <summary>
@@ -67,18 +64,15 @@ namespace SysExtensions.TextIndex
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length), "Cannot append empty (lambda) terminals.");
 
-            int start = elementIndexes.Count;
-            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
-
             var textElement = new TextElement<TTerminal>(this)
             {
                 TerminalSymbol = terminal,
-                Start = start,
+                Start = Size,
                 Length = length,
             };
 
+            Size += textElement.Length;
             elements.Add(textElement);
-            assertInvariants();
             return textElement;
         }
 
@@ -87,10 +81,9 @@ namespace SysExtensions.TextIndex
         /// </summary>
         public void Clear()
         {
-            elementIndexes.Clear();
+            Size = 0;
             elements.ForEach(e => e.Detach());
             elements.Clear();
-            assertInvariants();
         }
 
         /// <summary>
@@ -101,56 +94,52 @@ namespace SysExtensions.TextIndex
         /// </param>
         public void RemoveFrom(int start)
         {
-            int textStart = elements[start].Start;
-            int textLength = elementIndexes.Count - textStart;
-
-            elementIndexes.RemoveRange(textStart, textLength);
+            Size = elements[start].Start;
             elements.Skip(start).ForEach(e => e.Detach());
             elements.RemoveRange(start, elements.Count - start);
-
-            assertInvariants();
         }
 
         /// <summary>
         /// Gets the size of the index.
         /// </summary>
-        public int Size => elementIndexes.Count;
+        public int Size { get; private set; }
 
         /// <summary>
         /// Returns the text element before the given position. Returns null if the position is at the start of the text.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="Size"/>.
-        /// </exception>
         public TextElement<TTerminal> GetElementBefore(int position)
-            => position == 0 ? null : elements[elementIndexes[position - 1]];
+            => position == 0 ? null : GetElementAfter(position - 1);
 
         /// <summary>
         /// Returns the text element after the given position. Returns null if the position is at the end of the text.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="Size"/>.
-        /// </exception>
         public TextElement<TTerminal> GetElementAfter(int position)
-            => position == elementIndexes.Count ? null : elements[elementIndexes[position]];
-
-        [Conditional("DEBUG")]
-        private void assertInvariants()
         {
-            // Assert invariants about lengths being equal.
-            int textLength = elementIndexes.Count;
-            if (textLength == 0)
-            {
-                Debug.Assert(elements.Count == 0);
-            }
-            else
-            {
-                var lastElementIndex = elementIndexes[textLength - 1];
-                Debug.Assert(lastElementIndex + 1 == elements.Count);
-                var lastElement = elements[lastElementIndex];
-                Debug.Assert(lastElement.End == textLength);
-            }
-        }
+            int minIndex = 0;
+            int maxIndex = elements.Count - 1;
 
+            while (minIndex <= maxIndex)
+            {
+                int index = (minIndex + maxIndex) / 2;
+                TextElement<TTerminal> element = elements[index];
+
+                if (position < element.Start)
+                {
+                    // Exclude higher part.
+                    maxIndex = index - 1;
+                }
+                else if (element.End <= position)
+                {
+                    // Exclude lower part.
+                    minIndex = index + 1;
+                }
+                else
+                {
+                    return element;
+                }
+            }
+
+            return null;
+        }
     }
 }
