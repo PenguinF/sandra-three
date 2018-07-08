@@ -35,6 +35,17 @@ namespace Sandra.UI.WF.Storage
             if (symbol == null) throw new ArgumentNullException(nameof(symbol));
             TerminalSymbol = symbol;
         }
+
+        public string Json => TerminalSymbol.Json;
+        public int Start => TerminalSymbol.Start;
+        public int Length => TerminalSymbol.Length;
+
+        public bool IsBackground => TerminalSymbol.IsBackground;
+        public bool IsValueStartSymbol => TerminalSymbol.IsValueStartSymbol;
+        public IEnumerable<TextErrorInfo> Errors => TerminalSymbol.Errors;
+
+        public void Accept(JsonTerminalSymbolVisitor visitor) => TerminalSymbol.Accept(visitor);
+        public TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => TerminalSymbol.Accept(visitor);
     }
 
     public abstract class JsonTerminalSymbol
