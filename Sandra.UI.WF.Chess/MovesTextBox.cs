@@ -60,11 +60,12 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
-            CaretPosition.ValueChanged += BringIntoView;
             syntaxRenderer = new SyntaxRenderer<PGNTerminalSymbol>();
-            CaretPosition.ValueChanged += TryInvokeCaretPositionChanged;
 
             applyDefaultStyle();
+
+            CaretPosition.ValueChanged += BringIntoView;
+            CaretPosition.ValueChanged += caretPositionChanged;
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
@@ -377,10 +378,13 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void caretPositionChanged(TextElement<PGNTerminalSymbol> elementBefore, TextElement<PGNTerminalSymbol> elementAfter)
+        private void caretPositionChanged(int selectionStart)
         {
             if (game != null)
             {
+                TextElement<PGNTerminalSymbol> elementBefore = syntaxRenderer.GetElementBefore(selectionStart);
+                TextElement<PGNTerminalSymbol> elementAfter = syntaxRenderer.GetElementAfter(selectionStart);
+
                 TextElement<PGNTerminalSymbol> activeElement = elementBefore;
                 PGNPly pgnPly;
 
@@ -466,13 +470,6 @@ namespace Sandra.UI.WF
                 Select(caretPosition, 0);
                 ScrollToCaret();
             }
-        }
-
-        private void TryInvokeCaretPositionChanged(int selectionStart)
-        {
-            TextElement<PGNTerminalSymbol> elementBefore = syntaxRenderer.GetElementBefore(selectionStart);
-            TextElement<PGNTerminalSymbol> elementAfter = syntaxRenderer.GetElementAfter(selectionStart);
-            caretPositionChanged(elementBefore, elementAfter);
         }
     }
 }
