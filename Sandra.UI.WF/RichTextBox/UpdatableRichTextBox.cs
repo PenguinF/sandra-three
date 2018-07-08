@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using SysExtensions;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -146,30 +145,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
-
-        public void BringIntoView(int caretPosition)
-        {
-            if (SelectionStart != caretPosition)
-            {
-                Select(caretPosition, 0);
-                ScrollToCaret();
-            }
-        }
-
-        protected override void OnSelectionChanged(EventArgs e)
-        {
-            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
-            // This is only to detect caret updates by interacting with the control.
-            // Also check SelectionLength so the event is not raised for non-empty selections.
-            if (!IsUpdating && SelectionLength == 0)
-            {
-                CaretPosition.Value = SelectionStart;
-            }
-
-            base.OnSelectionChanged(e);
-        }
-
         public void InsertText(int textPosition, string text)
         {
             if (textPosition < 0) textPosition = 0;
@@ -203,11 +178,6 @@ namespace Sandra.UI.WF
             if (wasReadOnly) ReadOnly = false;
             SelectedText = string.Empty;
             if (wasReadOnly) ReadOnly = true;
-        }
-
-        public UpdatableRichTextBox()
-        {
-            CaretPosition.ValueChanged += BringIntoView;
         }
     }
 }

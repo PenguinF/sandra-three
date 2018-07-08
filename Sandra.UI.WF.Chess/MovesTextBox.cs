@@ -53,11 +53,14 @@ namespace Sandra.UI.WF
 
         private readonly SyntaxRenderer<PGNTerminalSymbol> syntaxRenderer;
 
+        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
+
         public MovesTextBox()
         {
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
+            CaretPosition.ValueChanged += BringIntoView;
             syntaxRenderer = new SyntaxRenderer<PGNTerminalSymbol>();
             CaretPosition.ValueChanged += syntaxRenderer.TryInvokeCaretPositionChanged;
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
@@ -442,6 +445,28 @@ namespace Sandra.UI.WF
             }
 
             base.OnMouseWheel(e);
+        }
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!IsUpdating && SelectionLength == 0)
+            {
+                CaretPosition.Value = SelectionStart;
+    }
+
+            base.OnSelectionChanged(e);
+}
+
+        private void BringIntoView(int caretPosition)
+        {
+            if (SelectionStart != caretPosition)
+            {
+                Select(caretPosition, 0);
+                ScrollToCaret();
+            }
         }
     }
 }

@@ -216,15 +216,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected override void OnSelectionChanged(EventArgs e)
-        {
-            // Swallow updates to the caret position.
-            using (var updateToken = BeginUpdate())
-            {
-                base.OnSelectionChanged(e);
-            }
-        }
-
         private string lastParsedText;
 
         private void SettingsTextBox_TextChanged(object sender, EventArgs e)
