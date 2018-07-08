@@ -41,8 +41,6 @@ namespace Sandra.UI.WF
         {
             public override bool IsBackground => true;
 
-            public JsonWhitespace(string json, int start, int length) { }
-
             public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
@@ -148,11 +146,14 @@ namespace Sandra.UI.WF
                 {
                     // Since whitespace is not returned from TokenizeAll().
                     int length = x.Start - firstUnusedIndex;
-                    TextIndex.AppendTerminalSymbol(
-                        new JsonWhitespace(json, firstUnusedIndex, length),
-                        length);
+                    TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                        new JsonWhitespace(),
+                        json,
+                        firstUnusedIndex,
+                        length));
                 }
-                TextIndex.AppendTerminalSymbol(x.TerminalSymbol, x.Length);
+
+                TextIndex.AppendTerminalSymbol(x);
                 firstUnusedIndex = x.Start + x.Length;
             });
 
@@ -160,9 +161,11 @@ namespace Sandra.UI.WF
             {
                 // Since whitespace is not returned from TokenizeAll().
                 int length = json.Length - firstUnusedIndex;
-                TextIndex.AppendTerminalSymbol(
-                    new JsonWhitespace(json, firstUnusedIndex, length),
-                    length);
+                TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                    new JsonWhitespace(),
+                    json,
+                    firstUnusedIndex,
+                    length));
             }
 
             var styleSelector = new StyleSelector();
