@@ -216,11 +216,6 @@ namespace Sandra.UI.WF
                     errorsTextBox.BackColor = defaultStyle.BackColor;
                     errorsTextBox.ForeColor = noErrorsForeColor;
                     errorsTextBox.Font = noErrorsFont;
-                    errorsTextBox.SelectAll();
-                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
-                    errorsTextBox.SelectionColor = noErrorsForeColor;
-                    errorsTextBox.SelectionFont = noErrorsFont;
-                    errorsTextBox.Select(0, 0);
                 }
             }
         }
@@ -244,11 +239,6 @@ namespace Sandra.UI.WF
                     errorsTextBox.BackColor = defaultStyle.BackColor;
                     errorsTextBox.ForeColor = defaultStyle.ForeColor;
                     errorsTextBox.Font = errorsFont;
-                    errorsTextBox.SelectAll();
-                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
-                    errorsTextBox.SelectionColor = defaultStyle.ForeColor;
-                    errorsTextBox.SelectionFont = errorsFont;
-                    errorsTextBox.Select(0, 0);
                 }
             }
         }
