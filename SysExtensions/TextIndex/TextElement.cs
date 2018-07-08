@@ -39,7 +39,22 @@ namespace SysExtensions.TextIndex
         /// <summary>
         /// Gets the terminal symbol associated with this element.
         /// </summary>
-        public TTerminal TerminalSymbol { get; internal set; }
+        public TTerminal TerminalSymbol { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="TextElement{TTerminal}"/>.
+        /// </summary>
+        /// <param name="terminalSymbol">
+        /// The terminal symbol associated with this element.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="terminalSymbol"/> is negative.
+        /// </exception>
+        public TextElement(TTerminal terminalSymbol)
+        {
+            if (terminalSymbol == null) throw new ArgumentNullException(nameof(terminalSymbol));
+            TerminalSymbol = terminalSymbol;
+        }
 
         /// <summary>
         /// Gets the start position of this element.

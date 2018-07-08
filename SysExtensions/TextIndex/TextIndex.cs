@@ -62,9 +62,8 @@ namespace SysExtensions.TextIndex
         {
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
 
-            var textElement = new TextElement<TTerminal>()
+            var textElement = new TextElement<TTerminal>(terminal)
             {
-                TerminalSymbol = terminal,
                 Length = length,
             };
 

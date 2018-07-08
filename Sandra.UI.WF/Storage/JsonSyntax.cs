@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions.TextIndex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,28 +27,23 @@ using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
-    public class JsonTextElement
+    public class JsonTextElement : TextElement<JsonTerminalSymbol>
     {
-        public JsonTerminalSymbol TerminalSymbol { get; }
         public string Json { get; }
-        public int Start { get; }
-        public int Length { get; }
 
         public JsonTextElement(JsonTerminalSymbol symbol, string json, int start)
             : this(symbol, json, start, 1)
         {
         }
 
-        public JsonTextElement(JsonTerminalSymbol symbol, string json, int start, int length)
+        public JsonTextElement(JsonTerminalSymbol symbol, string json, int start, int length) : base(symbol)
         {
-            if (symbol == null) throw new ArgumentNullException(nameof(symbol));
             if (json == null) throw new ArgumentNullException(nameof(json));
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (json.Length < start) throw new ArgumentOutOfRangeException(nameof(start));
             if (json.Length < start + length) throw new ArgumentOutOfRangeException(nameof(length));
 
-            TerminalSymbol = symbol;
             Json = json;
             Start = start;
             Length = length;
