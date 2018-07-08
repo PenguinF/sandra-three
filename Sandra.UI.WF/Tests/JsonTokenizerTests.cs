@@ -393,7 +393,7 @@ namespace Sandra.UI.WF.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, TextErrorInfo[] expectedErrors)
         {
-            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(x => x.Errors);
+            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(x => x.TerminalSymbol.Errors);
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<TextErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);

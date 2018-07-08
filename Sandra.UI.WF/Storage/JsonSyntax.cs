@@ -48,13 +48,6 @@ namespace Sandra.UI.WF.Storage
             Start = start;
             Length = length;
         }
-
-        public bool IsBackground => TerminalSymbol.IsBackground;
-        public bool IsValueStartSymbol => TerminalSymbol.IsValueStartSymbol;
-        public IEnumerable<TextErrorInfo> Errors => TerminalSymbol.Errors;
-
-        public void Accept(JsonTerminalSymbolVisitor visitor) => TerminalSymbol.Accept(visitor);
-        public TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => TerminalSymbol.Accept(visitor);
     }
 
     public abstract class JsonTerminalSymbol

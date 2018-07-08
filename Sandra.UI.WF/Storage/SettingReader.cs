@@ -69,8 +69,8 @@ namespace Sandra.UI.WF.Storage
                 while (currentTokenIndex < tokens.Count)
                 {
                     JsonTextElement current = tokens[currentTokenIndex];
-                    if (!current.IsBackground) return current;
-                    Errors.AddRange(current.Errors);
+                    if (!current.TerminalSymbol.IsBackground) return current;
+                    Errors.AddRange(current.TerminalSymbol.Errors);
                     currentTokenIndex++;
                 }
                 return null;
@@ -82,9 +82,9 @@ namespace Sandra.UI.WF.Storage
                 while (currentTokenIndex < tokens.Count)
                 {
                     JsonTextElement current = tokens[currentTokenIndex];
-                    Errors.AddRange(current.Errors);
+                    Errors.AddRange(current.TerminalSymbol.Errors);
                     currentTokenIndex++;
-                    if (!current.IsBackground) return current;
+                    if (!current.TerminalSymbol.IsBackground) return current;
                 }
                 return null;
             }
@@ -266,7 +266,7 @@ namespace Sandra.UI.WF.Storage
                 firstValueSymbol = default(JsonTextElement);
 
                 JsonTextElement symbol = PeekSkipComments();
-                if (symbol == null || !symbol.IsValueStartSymbol) return false;
+                if (symbol == null || !symbol.TerminalSymbol.IsValueStartSymbol) return false;
 
                 firstValueSymbol = symbol;
                 bool hasValue = false;
@@ -278,11 +278,11 @@ namespace Sandra.UI.WF.Storage
 
                     if (!hasValue)
                     {
-                        if (symbol.Errors.Any()) firstValue = PConstantValue.Undefined;
+                        if (symbol.TerminalSymbol.Errors.Any()) firstValue = PConstantValue.Undefined;
                         else firstValue = Visit(symbol.TerminalSymbol);
                         hasValue = true;
                     }
-                    else if (!symbol.Errors.Any())
+                    else if (!symbol.TerminalSymbol.Errors.Any())
                     {
                         // Make sure consecutive symbols are parsed as if they were valid.
                         // Discard the result.
@@ -292,7 +292,7 @@ namespace Sandra.UI.WF.Storage
                     // Peek at the next symbol.
                     // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
                     symbol = PeekSkipComments();
-                    if (symbol == null || !symbol.IsValueStartSymbol) return true;
+                    if (symbol == null || !symbol.TerminalSymbol.IsValueStartSymbol) return true;
 
                     // Two or more consecutive values not allowed.
                     Errors.Add(new TextErrorInfo(multipleValuesMessage, symbol.Start, symbol.Length));
