@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * WinAPI.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -119,6 +122,34 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
+    /// From: https://referencesource.microsoft.com/#System.Windows.Forms/winforms/Managed/System/WinForms/NativeMethods.cs
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    internal class CHARFORMAT2A
+    {
+        public int cbSize = Marshal.SizeOf(typeof(CHARFORMAT2A));
+        public int dwMask = 0;
+        public int dwEffects = 0;
+        public int yHeight = 0;
+        public int yOffset = 0;
+        public int crTextColor = 0;
+        public byte bCharSet = 0;
+        public byte bPitchAndFamily = 0;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+        public byte[] szFaceName = new byte[32];
+        public short wWeight = 0;
+        public short sSpacing = 0;
+        public int crBackColor = 0;
+        public int lcid = 0;
+        public int dwReserved = 0;
+        public short sStyle = 0;
+        public short wKerning = 0;
+        public byte bUnderlineType = 0;
+        public byte bAnimation = 0;
+        public byte bRevAuthor = 0;
+    }
+
+    /// <summary>
     /// Contains P/Invoke definitions for the Windows API.
     /// </summary>
     internal static class WinAPI
@@ -147,6 +178,9 @@ namespace Sandra.UI.WF
 
         [DllImport(User32, CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport(User32, CharSet = CharSet.Auto)]
+        public static extern IntPtr SendMessage(HandleRef hWnd, int msg, int wParam, [In, Out, MarshalAs(UnmanagedType.LPStruct)] CHARFORMAT2A lParam);
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool ShowCaret(HandleRef hWnd);

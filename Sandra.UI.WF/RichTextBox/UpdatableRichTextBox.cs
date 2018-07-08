@@ -31,6 +31,12 @@ namespace Sandra.UI.WF
     /// </summary>
     public class UpdatableRichTextBox : RichTextBox
     {
+        private const int WM_SETREDRAW = 0x0b;
+        private const int EM_SETCHARFORMAT = 0x0444;
+        private const int SCF_SELECTION = 0x0001;
+        private const int CFM_UNDERLINETYPE = 0x800000;
+        private const byte WAVY_RED = 0x58;
+
         /// <summary>
         /// Represents a unique update token returned from <see cref="BeginUpdate"/>().
         /// Repainting of the <see cref="UpdatableRichTextBox"/> is suspended until <see cref="Dispose()"/> is called.
@@ -78,8 +84,6 @@ namespace Sandra.UI.WF
         /// Gets if the <see cref="UpdatableRichTextBox"/> is currently being updated.
         /// </summary>
         public bool IsUpdating => blockingUpdateTokenCount > 0;
-
-        const int WM_SETREDRAW = 0x0b;
 
         private UpdateToken beginUpdate(bool restore)
         {
@@ -178,6 +182,40 @@ namespace Sandra.UI.WF
             if (wasReadOnly) ReadOnly = false;
             SelectedText = string.Empty;
             if (wasReadOnly) ReadOnly = true;
+        }
+
+        /// <summary>
+        /// Underlines the current selection with a red wavy line.
+        /// </summary>
+        /// <summary>
+        /// From: https://referencesource.microsoft.com/#System.Windows.Forms/winforms/Managed/System/WinForms/RichTextBox.cs
+        /// </summary>
+        public void SetErrorUnderline()
+        {
+            if (IsHandleCreated)
+            {
+                CHARFORMAT2A cf2 = new CHARFORMAT2A();
+                cf2.dwMask = CFM_UNDERLINETYPE;
+                cf2.bUnderlineType = WAVY_RED;
+                WinAPI.SendMessage(new HandleRef(this, Handle), EM_SETCHARFORMAT, SCF_SELECTION, cf2);
+            }
+        }
+
+        /// <summary>
+        /// Removes any underline from the current selection.
+        /// </summary>
+        /// <summary>
+        /// From: https://referencesource.microsoft.com/#System.Windows.Forms/winforms/Managed/System/WinForms/RichTextBox.cs
+        /// </summary>
+        public void ClearErrorUnderline()
+        {
+            if (IsHandleCreated)
+            {
+                CHARFORMAT2A cf2 = new CHARFORMAT2A();
+                cf2.dwMask = CFM_UNDERLINETYPE;
+                cf2.bUnderlineType = 0;
+                WinAPI.SendMessage(new HandleRef(this, Handle), EM_SETCHARFORMAT, SCF_SELECTION, cf2);
+            }
         }
     }
 }
