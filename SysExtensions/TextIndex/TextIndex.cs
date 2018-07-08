@@ -65,13 +65,29 @@ namespace SysExtensions.TextIndex
             var textElement = new TextElement<TTerminal>()
             {
                 TerminalSymbol = terminal,
-                Start = Size,
                 Length = length,
             };
 
+            AppendTerminalSymbol(textElement);
+            return textElement;
+        }
+
+        /// <summary>
+        /// Appends a terminal symbol to the end of the index, and updates its <see cref="TextElement{TTerminal}.Start"/> property.
+        /// </summary>
+        /// <param name="textElement">
+        /// The text element to append.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="textElement"/> is null.
+        /// </exception>
+        public void AppendTerminalSymbol(TextElement<TTerminal> textElement)
+        {
+            if (textElement == null) throw new ArgumentNullException(nameof(textElement));
+
+            textElement.Start = Size;
             Size += textElement.Length;
             elements.Add(textElement);
-            return textElement;
         }
 
         /// <summary>
