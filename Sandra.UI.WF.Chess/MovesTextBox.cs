@@ -21,7 +21,7 @@
 
 using Sandra.PGN;
 using SysExtensions;
-using SysExtensions.SyntaxRenderer;
+using SysExtensions.TextIndex;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : SyntaxEditor
+    public partial class MovesTextBox : SyntaxEditor<PGNTerminalSymbol>
     {
         private readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
@@ -44,6 +44,8 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10),
         };
 
+        protected override TextElementStyle DefaultStyle => defaultStyle;
+
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
         {
             HasForeColor = true,
@@ -51,17 +53,17 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
-        private readonly SyntaxRenderer<PGNTerminalSymbol> syntaxRenderer;
+        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
 
         public MovesTextBox()
         {
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
-            syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this, isSlave: false);
-            syntaxRenderer.CaretPositionChanged += caretPositionChanged;
+            ApplyDefaultStyle();
 
-            applyDefaultStyle();
+            CaretPosition.ValueChanged += BringIntoView;
+            CaretPosition.ValueChanged += caretPositionChanged;
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
@@ -72,31 +74,6 @@ namespace Sandra.UI.WF
                     updateMoveFormatter();
                 }
             };
-        }
-
-        private void applyDefaultStyle()
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                BackColor = defaultStyle.BackColor;
-                ForeColor = defaultStyle.ForeColor;
-                Font = defaultStyle.Font;
-                SelectAll();
-                SelectionBackColor = defaultStyle.BackColor;
-                SelectionColor = defaultStyle.ForeColor;
-                SelectionFont = defaultStyle.Font;
-            }
-        }
-
-        private void applyStyle(TextElement<PGNTerminalSymbol> element, TextElementStyle style)
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                Select(element.Start, element.Length);
-                if (style.HasBackColor) SelectionBackColor = style.BackColor;
-                if (style.HasForeColor) SelectionColor = style.ForeColor;
-                if (style.HasFont) SelectionFont = style.Font;
-            }
         }
 
         protected override void Dispose(bool disposing)
@@ -284,7 +261,8 @@ namespace Sandra.UI.WF
                 // Clear and build the entire text anew by clearing the old element list.
                 using (var updateToken = BeginUpdate())
                 {
-                    syntaxRenderer.Clear();
+                    RemoveText(0, TextIndex.Size);
+                    TextIndex.Clear();
                     updateText();
                 }
             }
@@ -294,7 +272,7 @@ namespace Sandra.UI.WF
         {
             List<PGNTerminalSymbol> updatedTerminalSymbols = generatePGNTerminalSymbols().ToList();
 
-            int existingElementCount = syntaxRenderer.Elements.Count;
+            int existingElementCount = TextIndex.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
             PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
@@ -305,7 +283,7 @@ namespace Sandra.UI.WF
             int agreeIndex = 0;
             while (agreeIndex < minLength)
             {
-                var existingElement = syntaxRenderer.Elements[agreeIndex];
+                var existingElement = TextIndex.Elements[agreeIndex];
                 var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
                 if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
@@ -325,13 +303,15 @@ namespace Sandra.UI.WF
             using (var updateToken = BeginUpdate())
             {
                 // Reset any markup.
-                applyDefaultStyle();
+                ApplyDefaultStyle();
                 currentActiveMoveStyleElement = null;
 
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
-                    syntaxRenderer.RemoveFrom(agreeIndex);
+                    int textStart = TextIndex.Elements[agreeIndex].Start;
+                    RemoveText(textStart, TextIndex.Size - textStart);
+                    TextIndex.RemoveFrom(agreeIndex);
                 }
 
                 // Append new element texts.
@@ -339,8 +319,9 @@ namespace Sandra.UI.WF
                 while (agreeIndex < updatedElementCount)
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol,
-                                                                         textGenerator.Visit(updatedTerminalSymbol));
+                    var text = textGenerator.Visit(updatedTerminalSymbol);
+                    InsertText(TextIndex.Size, text);
+                    var newElement = TextIndex.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
 
                     if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
@@ -353,28 +334,31 @@ namespace Sandra.UI.WF
                 if (game == null || game.Game.IsFirstMove)
                 {
                     // If there's no active move, go to before the first move.
-                    if (syntaxRenderer.Elements.Count > 0)
+                    if (TextIndex.Elements.Count > 0)
                     {
-                        syntaxRenderer.Elements[0].BringIntoViewBefore();
+                        CaretPosition.Value = TextIndex.Elements[0].Start;
                     }
                 }
                 else if (newActiveMoveElement != null)
                 {
                     // Make the active move bold.
                     currentActiveMoveStyleElement = newActiveMoveElement;
-                    applyStyle(newActiveMoveElement, activeMoveStyle);
+                    ApplyStyle(newActiveMoveElement, activeMoveStyle);
 
                     // Also update the caret so the active move is in view.
-                    newActiveMoveElement.BringIntoViewAfter();
+                    CaretPosition.Value = newActiveMoveElement.End;
                 }
             }
         }
 
-        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
+        private void caretPositionChanged(int selectionStart)
         {
             if (game != null)
             {
-                TextElement<PGNTerminalSymbol> activeElement = e.ElementBefore;
+                TextElement<PGNTerminalSymbol> elementBefore = TextIndex.GetElementBefore(selectionStart);
+                TextElement<PGNTerminalSymbol> elementAfter = TextIndex.GetElementAfter(selectionStart);
+
+                TextElement<PGNTerminalSymbol> activeElement = elementBefore;
                 PGNPly pgnPly;
 
                 if (activeElement == null)
@@ -387,9 +371,9 @@ namespace Sandra.UI.WF
                     // Prefer to attach to a non-space element.
                     // Use assumption that the terminal symbol list nowhere contains two adjacent SpaceSymbols.
                     // Also use assumption that the terminal symbol list neither starts nor ends with a SpaceSymbol.
-                    if (activeElement.TerminalSymbol is SpaceSymbol && e.ElementAfter != null)
+                    if (activeElement.TerminalSymbol is SpaceSymbol && elementAfter != null)
                     {
-                        activeElement = e.ElementAfter;
+                        activeElement = elementAfter;
                     }
 
                     pgnPly = new PGNActivePlyDetector().Visit(activeElement.TerminalSymbol);
@@ -405,7 +389,7 @@ namespace Sandra.UI.WF
                         // Reset markup of the previously active move element.
                         if (currentActiveMoveStyleElement != null)
                         {
-                            applyStyle(currentActiveMoveStyleElement, defaultStyle);
+                            ApplyStyle(currentActiveMoveStyleElement, defaultStyle);
                             currentActiveMoveStyleElement = null;
                         }
 
@@ -415,12 +399,12 @@ namespace Sandra.UI.WF
 
                         // Search for the current active move element to set its font.
                         PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-                        foreach (TextElement<PGNTerminalSymbol> textElement in syntaxRenderer.Elements)
+                        foreach (TextElement<PGNTerminalSymbol> textElement in TextIndex.Elements)
                         {
                             if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                             {
                                 currentActiveMoveStyleElement = textElement;
-                                applyStyle(textElement, activeMoveStyle);
+                                ApplyStyle(textElement, activeMoveStyle);
                                 break;
                             }
                         }
@@ -437,6 +421,28 @@ namespace Sandra.UI.WF
             }
 
             base.OnMouseWheel(e);
+        }
+
+        protected override void OnSelectionChanged(EventArgs e)
+        {
+            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
+            // This is only to detect caret updates by interacting with the control.
+            // Also check SelectionLength so the event is not raised for non-empty selections.
+            if (!IsUpdating && SelectionLength == 0)
+            {
+                CaretPosition.Value = SelectionStart;
+            }
+
+            base.OnSelectionChanged(e);
+        }
+
+        private void BringIntoView(int caretPosition)
+        {
+            if (SelectionStart != caretPosition)
+            {
+                Select(caretPosition, 0);
+                ScrollToCaret();
+            }
         }
     }
 }

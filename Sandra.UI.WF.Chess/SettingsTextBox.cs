@@ -20,7 +20,6 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
-using SysExtensions.SyntaxRenderer;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -33,7 +32,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : SyntaxEditor
+    public partial class SettingsTextBox : SyntaxEditor<JsonTerminalSymbol>
     {
         /// <summary>
         /// Because the syntax renderer does not support discontinuous terminal symbols.
@@ -56,6 +55,8 @@ namespace Sandra.UI.WF
             ForeColor = Color.WhiteSmoke,
             Font = new Font("Consolas", 10),
         };
+
+        protected override TextElementStyle DefaultStyle => defaultStyle;
 
         private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
         private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
@@ -93,37 +94,7 @@ namespace Sandra.UI.WF
 
         private readonly SettingsFile settingsFile;
 
-        private readonly SyntaxRenderer<JsonTerminalSymbol> syntaxRenderer;
-
         private readonly UpdatableRichTextBox errorsTextBox;
-
-        private void applyDefaultStyle()
-        {
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                BackColor = defaultStyle.BackColor;
-                ForeColor = defaultStyle.ForeColor;
-                Font = defaultStyle.Font;
-                SelectAll();
-                SelectionBackColor = defaultStyle.BackColor;
-                SelectionColor = defaultStyle.ForeColor;
-                SelectionFont = defaultStyle.Font;
-            }
-        }
-
-        private void applyStyle(TextElement<JsonTerminalSymbol> element, TextElementStyle style)
-        {
-            if (style != null)
-            {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    Select(element.Start, element.Length);
-                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
-                    if (style.HasForeColor) SelectionColor = style.ForeColor;
-                    if (style.HasFont) SelectionFont = style.Font;
-                }
-            }
-        }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
@@ -144,10 +115,10 @@ namespace Sandra.UI.WF
             this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
-            syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            // Replace with UNIX newlines because the RichTextBox will do that too.
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath).Replace("\r\n", "\n");
             parseAndApplySyntaxHighlighting(Text);
 
             TextChanged += SettingsTextBox_TextChanged;
@@ -164,11 +135,11 @@ namespace Sandra.UI.WF
         {
             lastParsedText = json;
 
-            applyDefaultStyle();
+            ApplyDefaultStyle();
 
             int firstUnusedIndex = 0;
 
-            syntaxRenderer.Clear();
+            TextIndex.Clear();
 
             var parser = new SettingReader(json);
             parser.Tokens.ForEach(x =>
@@ -177,11 +148,11 @@ namespace Sandra.UI.WF
                 {
                     // Since whitespace is not returned from TokenizeAll().
                     int length = x.Start - firstUnusedIndex;
-                    syntaxRenderer.AppendTerminalSymbol(
+                    TextIndex.AppendTerminalSymbol(
                         new JsonWhitespace(json, firstUnusedIndex, length),
                         length);
                 }
-                syntaxRenderer.AppendTerminalSymbol(x, x.Length);
+                TextIndex.AppendTerminalSymbol(x, x.Length);
                 firstUnusedIndex = x.Start + x.Length;
             });
 
@@ -189,16 +160,16 @@ namespace Sandra.UI.WF
             {
                 // Since whitespace is not returned from TokenizeAll().
                 int length = json.Length - firstUnusedIndex;
-                syntaxRenderer.AppendTerminalSymbol(
+                TextIndex.AppendTerminalSymbol(
                     new JsonWhitespace(json, firstUnusedIndex, length),
                     length);
             }
 
             var styleSelector = new StyleSelector();
 
-            foreach (var textElement in syntaxRenderer.Elements)
+            foreach (var textElement in TextIndex.Elements)
             {
-                applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
+                ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
             PMap dummy;
@@ -212,15 +183,6 @@ namespace Sandra.UI.WF
             else
             {
                 displayErrors(errors);
-            }
-        }
-
-        protected override void OnSelectionChanged(EventArgs e)
-        {
-            // Swallow updates to the caret position.
-            using (var updateToken = BeginUpdate())
-            {
-                base.OnSelectionChanged(e);
             }
         }
 
@@ -254,11 +216,6 @@ namespace Sandra.UI.WF
                     errorsTextBox.BackColor = defaultStyle.BackColor;
                     errorsTextBox.ForeColor = noErrorsForeColor;
                     errorsTextBox.Font = noErrorsFont;
-                    errorsTextBox.SelectAll();
-                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
-                    errorsTextBox.SelectionColor = noErrorsForeColor;
-                    errorsTextBox.SelectionFont = noErrorsFont;
-                    errorsTextBox.Select(0, 0);
                 }
             }
         }
@@ -282,11 +239,6 @@ namespace Sandra.UI.WF
                     errorsTextBox.BackColor = defaultStyle.BackColor;
                     errorsTextBox.ForeColor = defaultStyle.ForeColor;
                     errorsTextBox.Font = errorsFont;
-                    errorsTextBox.SelectAll();
-                    errorsTextBox.SelectionBackColor = defaultStyle.BackColor;
-                    errorsTextBox.SelectionColor = defaultStyle.ForeColor;
-                    errorsTextBox.SelectionFont = errorsFont;
-                    errorsTextBox.Select(0, 0);
                 }
             }
         }

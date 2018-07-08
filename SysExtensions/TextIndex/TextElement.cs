@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * TextElement.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,34 +17,53 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
-namespace SysExtensions.SyntaxRenderer
+namespace SysExtensions.TextIndex
 {
     /// <summary>
-    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer{TTerminal}"/>,
+    /// Represents an element of formatted text indexed by a <see cref="TextIndex{TTerminal}"/>,
     /// which maps to exactly one terminal symbol.
     /// </summary>
     /// <typeparam name="TTerminal">
-    /// The type of terminal symbols to format.
+    /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
     public sealed class TextElement<TTerminal>
     {
-        private SyntaxRenderer<TTerminal> renderer;
+        private TextIndex<TTerminal> textIndex;
 
-        internal TextElement(SyntaxRenderer<TTerminal> renderer)
+        internal TextElement(TextIndex<TTerminal> textIndex)
         {
-            this.renderer = renderer;
+            this.textIndex = textIndex;
         }
 
+        /// <summary>
+        /// Gets the terminal symbol associated with this element.
+        /// </summary>
         public TTerminal TerminalSymbol { get; internal set; }
+
+        /// <summary>
+        /// Gets the start position of this element.
+        /// </summary>
         public int Start { get; internal set; }
+
+        /// <summary>
+        /// Gets the length of this element.
+        /// </summary>
         public int Length { get; internal set; }
+
+        /// <summary>
+        /// Gets the end position of this element, which is <see cref="Length"/> added to <see cref="Start"/>.
+        /// The end position is exclusive; the range of included characters is [<see cref="Start"/>..<see cref="End"/>-1].
+        /// </summary>
+        public int End => Start + Length;
 
         private void throwIfNoRenderer()
         {
-            if (renderer == null)
+            if (textIndex == null)
             {
                 throw new InvalidOperationException($"{nameof(TextElement<TTerminal>)} has no renderer.");
             }
@@ -53,53 +73,29 @@ namespace SysExtensions.SyntaxRenderer
         /// Returns the text element before this element. Returns null if this is the first text element.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
+        /// This element has been removed from a text index.
         /// </exception>
         public TextElement<TTerminal> GetPreviousElement()
         {
             throwIfNoRenderer();
-            return renderer.GetElementBefore(Start);
+            return textIndex.GetElementBefore(Start);
         }
 
         /// <summary>
         /// Returns the text element before this element. Returns null if this is the first text element.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
+        /// This element has been removed from a text index.
         /// </exception>
         public TextElement<TTerminal> GetNextElement()
         {
             throwIfNoRenderer();
-            return renderer.GetElementAfter(Start + Length);
-        }
-
-        /// <summary>
-        /// Sets the caret directly before this text element and brings it into view.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
-        /// </exception>
-        public void BringIntoViewBefore()
-        {
-            throwIfNoRenderer();
-            renderer.RenderTarget.CaretPosition.Value = Start;
-        }
-
-        /// <summary>
-        /// Sets the caret directly after this text element and brings it into view.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
-        /// </exception>
-        public void BringIntoViewAfter()
-        {
-            throwIfNoRenderer();
-            renderer.RenderTarget.CaretPosition.Value = Start + Length;
+            return textIndex.GetElementAfter(End);
         }
 
         internal void Detach()
         {
-            renderer = null;
+            textIndex = null;
         }
     }
 }

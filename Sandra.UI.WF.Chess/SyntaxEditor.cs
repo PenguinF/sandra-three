@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions.TextIndex;
 using System.Drawing;
 
 namespace Sandra.UI.WF
@@ -27,7 +28,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box with syntax highlighting.
     /// </summary>
-    public class SyntaxEditor : RichTextBoxBase
+    public abstract class SyntaxEditor<TTerminal> : RichTextBoxBase
     {
         protected sealed class TextElementStyle
         {
@@ -41,12 +42,51 @@ namespace Sandra.UI.WF
             public Font Font { get; set; }
         }
 
+        protected readonly TextIndex<TTerminal> TextIndex;
+
+        protected abstract TextElementStyle DefaultStyle { get; }
+
         public SyntaxEditor()
         {
+            TextIndex = new TextIndex<TTerminal>();
+
             int zoomFactor;
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+            }
+        }
+
+        protected void ApplyDefaultStyle()
+        {
+            var defaultStyle = DefaultStyle;
+
+            if (defaultStyle != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    BackColor = defaultStyle.BackColor;
+                    ForeColor = defaultStyle.ForeColor;
+                    Font = defaultStyle.Font;
+                    SelectAll();
+                    SelectionBackColor = defaultStyle.BackColor;
+                    SelectionColor = defaultStyle.ForeColor;
+                    SelectionFont = defaultStyle.Font;
+                }
+            }
+        }
+
+        protected void ApplyStyle(TextElement<TTerminal> element, TextElementStyle style)
+        {
+            if (style != null)
+            {
+                using (var updateToken = BeginUpdateRememberState())
+                {
+                    Select(element.Start, element.Length);
+                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
+                    if (style.HasForeColor) SelectionColor = style.ForeColor;
+                    if (style.HasFont) SelectionFont = style.Font;
+                }
             }
         }
 
