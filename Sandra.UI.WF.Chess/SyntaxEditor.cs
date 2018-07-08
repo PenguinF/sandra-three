@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions.TextIndex;
 using System.Drawing;
 
 namespace Sandra.UI.WF
@@ -27,7 +28,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box with syntax highlighting.
     /// </summary>
-    public class SyntaxEditor : RichTextBoxBase
+    public abstract class SyntaxEditor<TTerminal> : RichTextBoxBase
     {
         protected sealed class TextElementStyle
         {
@@ -41,8 +42,12 @@ namespace Sandra.UI.WF
             public Font Font { get; set; }
         }
 
+        protected readonly TextIndex<TTerminal> TextIndex;
+
         public SyntaxEditor()
         {
+            TextIndex = new TextIndex<TTerminal>();
+
             int zoomFactor;
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
             {

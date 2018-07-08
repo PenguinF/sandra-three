@@ -33,7 +33,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : SyntaxEditor
+    public partial class SettingsTextBox : SyntaxEditor<JsonTerminalSymbol>
     {
         /// <summary>
         /// Because the syntax renderer does not support discontinuous terminal symbols.
@@ -93,8 +93,6 @@ namespace Sandra.UI.WF
 
         private readonly SettingsFile settingsFile;
 
-        private readonly TextIndex<JsonTerminalSymbol> textIndex;
-
         private readonly UpdatableRichTextBox errorsTextBox;
 
         private void applyDefaultStyle()
@@ -144,7 +142,6 @@ namespace Sandra.UI.WF
             this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
-            textIndex = new TextIndex<JsonTerminalSymbol>();
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             // Replace with UNIX newlines because the RichTextBox will do that too.
@@ -169,7 +166,7 @@ namespace Sandra.UI.WF
 
             int firstUnusedIndex = 0;
 
-            textIndex.Clear();
+            TextIndex.Clear();
 
             var parser = new SettingReader(json);
             parser.Tokens.ForEach(x =>
@@ -178,11 +175,11 @@ namespace Sandra.UI.WF
                 {
                     // Since whitespace is not returned from TokenizeAll().
                     int length = x.Start - firstUnusedIndex;
-                    textIndex.AppendTerminalSymbol(
+                    TextIndex.AppendTerminalSymbol(
                         new JsonWhitespace(json, firstUnusedIndex, length),
                         length);
                 }
-                textIndex.AppendTerminalSymbol(x, x.Length);
+                TextIndex.AppendTerminalSymbol(x, x.Length);
                 firstUnusedIndex = x.Start + x.Length;
             });
 
@@ -190,14 +187,14 @@ namespace Sandra.UI.WF
             {
                 // Since whitespace is not returned from TokenizeAll().
                 int length = json.Length - firstUnusedIndex;
-                textIndex.AppendTerminalSymbol(
+                TextIndex.AppendTerminalSymbol(
                     new JsonWhitespace(json, firstUnusedIndex, length),
                     length);
             }
 
             var styleSelector = new StyleSelector();
 
-            foreach (var textElement in textIndex.Elements)
+            foreach (var textElement in TextIndex.Elements)
             {
                 applyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
