@@ -339,8 +339,9 @@ namespace Sandra.UI.WF
                 while (agreeIndex < updatedElementCount)
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol,
-                                                                         textGenerator.Visit(updatedTerminalSymbol));
+                    var text = textGenerator.Visit(updatedTerminalSymbol);
+                    InsertText(syntaxRenderer.TextLength, text);
+                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, text);
 
                     if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {

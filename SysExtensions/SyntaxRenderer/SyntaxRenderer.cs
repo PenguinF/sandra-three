@@ -100,7 +100,6 @@ namespace SysExtensions.SyntaxRenderer
             if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
 
             int start = elementIndexes.Count;
-            RenderTarget.InsertText(start, text);
             elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
 
             var textElement = new TextElement<TTerminal>(this)
