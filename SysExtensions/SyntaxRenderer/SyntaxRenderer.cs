@@ -45,13 +45,11 @@ namespace SysExtensions.SyntaxRenderer
         /// True if the renderer should not update the render target but assume it is always in sync; false otherwise.
         /// </param>
         public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget, bool isSlave)
-            => new SyntaxRenderer<TTerminal>(renderTarget, isSlave);
+            => new SyntaxRenderer<TTerminal>(renderTarget);
 
-        private SyntaxRenderer(ISyntaxRenderTarget renderTarget, bool isSlave)
+        private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
-            RenderTarget = renderTarget;
-            this.isSlave = isSlave;
 
             Elements = elements;
 
@@ -61,10 +59,6 @@ namespace SysExtensions.SyntaxRenderer
 
             assertInvariants();
         }
-
-        internal readonly ISyntaxRenderTarget RenderTarget;
-
-        private readonly bool isSlave;
 
         private readonly List<int> elementIndexes = new List<int>();
 
