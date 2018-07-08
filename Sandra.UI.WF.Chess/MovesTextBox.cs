@@ -332,6 +332,8 @@ namespace Sandra.UI.WF
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
+                    int textStart = syntaxRenderer.Elements[agreeIndex].Start;
+                    RemoveText(textStart, syntaxRenderer.TextLength - textStart);
                     syntaxRenderer.RemoveFrom(agreeIndex);
                 }
 

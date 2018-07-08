@@ -126,11 +126,6 @@ namespace SysExtensions.SyntaxRenderer
             int textStart = elements[index].Start;
             int textLength = elementIndexes.Count - textStart;
 
-            if (!isSlave)
-            {
-                RenderTarget.RemoveText(textStart, textLength);
-            }
-
             elementIndexes.RemoveRange(textStart, textLength);
             elements.Skip(index).ForEach(e => e.Detach());
             elements.RemoveRange(index, elements.Count - index);
