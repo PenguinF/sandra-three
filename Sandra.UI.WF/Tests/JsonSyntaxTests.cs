@@ -171,14 +171,14 @@ namespace Sandra.UI.WF.Tests
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
-            yield return new object[] { new JsonComment(), typeof(JsonComment) };
+            yield return new object[] { JsonComment.Value, typeof(JsonComment) };
             yield return new object[] { new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
-            yield return new object[] { new JsonCurlyOpen(), typeof(JsonCurlyOpen) };
-            yield return new object[] { new JsonCurlyClose(), typeof(JsonCurlyClose) };
-            yield return new object[] { new JsonSquareBracketOpen(), typeof(JsonSquareBracketOpen) };
-            yield return new object[] { new JsonSquareBracketClose(), typeof(JsonSquareBracketClose) };
-            yield return new object[] { new JsonColon(), typeof(JsonColon) };
-            yield return new object[] { new JsonComma(), typeof(JsonComma) };
+            yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
+            yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
+            yield return new object[] { JsonSquareBracketOpen.Value, typeof(JsonSquareBracketOpen) };
+            yield return new object[] { JsonSquareBracketClose.Value, typeof(JsonSquareBracketClose) };
+            yield return new object[] { JsonColon.Value, typeof(JsonColon) };
+            yield return new object[] { JsonComma.Value, typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };

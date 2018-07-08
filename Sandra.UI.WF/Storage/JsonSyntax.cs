@@ -105,6 +105,10 @@ namespace Sandra.UI.WF.Storage
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
 
+        public static readonly JsonComment Value = new JsonComment();
+
+        private JsonComment() { }
+
         public override bool IsBackground => true;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
@@ -133,6 +137,10 @@ namespace Sandra.UI.WF.Storage
     {
         public const char CurlyOpenCharacter = '{';
 
+        public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
+
+        private JsonCurlyOpen() { }
+
         public override bool IsValueStartSymbol => true;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
@@ -143,6 +151,10 @@ namespace Sandra.UI.WF.Storage
     {
         public const char CurlyCloseCharacter = '}';
 
+        public static readonly JsonCurlyClose Value = new JsonCurlyClose();
+
+        private JsonCurlyClose() { }
+
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
     }
@@ -150,6 +162,10 @@ namespace Sandra.UI.WF.Storage
     public class JsonSquareBracketOpen : JsonTerminalSymbol
     {
         public const char SquareBracketOpenCharacter = '[';
+
+        public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
+
+        private JsonSquareBracketOpen() { }
 
         public override bool IsValueStartSymbol => true;
 
@@ -161,6 +177,10 @@ namespace Sandra.UI.WF.Storage
     {
         public const char SquareBracketCloseCharacter = ']';
 
+        public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
+
+        private JsonSquareBracketClose() { }
+
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
     }
@@ -169,6 +189,10 @@ namespace Sandra.UI.WF.Storage
     {
         public const char ColonCharacter = ':';
 
+        public static readonly JsonColon Value = new JsonColon();
+
+        private JsonColon() { }
+
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
     }
@@ -176,6 +200,10 @@ namespace Sandra.UI.WF.Storage
     public class JsonComma : JsonTerminalSymbol
     {
         public const char CommaCharacter = ',';
+
+        public static readonly JsonComma Value = new JsonComma();
+
+        private JsonComma() { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
