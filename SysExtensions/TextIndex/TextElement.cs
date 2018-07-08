@@ -19,8 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using System;
-
 namespace SysExtensions.TextIndex
 {
     /// <summary>
@@ -31,15 +29,8 @@ namespace SysExtensions.TextIndex
     /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
-    public sealed class TextElement<TTerminal>
+    public class TextElement<TTerminal>
     {
-        private TextIndex<TTerminal> textIndex;
-
-        internal TextElement(TextIndex<TTerminal> textIndex)
-        {
-            this.textIndex = textIndex;
-        }
-
         /// <summary>
         /// Gets the terminal symbol associated with this element.
         /// </summary>
@@ -60,42 +51,5 @@ namespace SysExtensions.TextIndex
         /// The end position is exclusive; the range of included characters is [<see cref="Start"/>..<see cref="End"/>-1].
         /// </summary>
         public int End => Start + Length;
-
-        private void throwIfNoRenderer()
-        {
-            if (textIndex == null)
-            {
-                throw new InvalidOperationException($"{nameof(TextElement<TTerminal>)} has no renderer.");
-            }
-        }
-
-        /// <summary>
-        /// Returns the text element before this element. Returns null if this is the first text element.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a text index.
-        /// </exception>
-        public TextElement<TTerminal> GetPreviousElement()
-        {
-            throwIfNoRenderer();
-            return textIndex.GetElementBefore(Start);
-        }
-
-        /// <summary>
-        /// Returns the text element before this element. Returns null if this is the first text element.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a text index.
-        /// </exception>
-        public TextElement<TTerminal> GetNextElement()
-        {
-            throwIfNoRenderer();
-            return textIndex.GetElementAfter(End);
-        }
-
-        internal void Detach()
-        {
-            textIndex = null;
-        }
     }
 }

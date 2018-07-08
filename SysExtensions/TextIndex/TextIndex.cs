@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SysExtensions.TextIndex
 {
@@ -64,7 +63,7 @@ namespace SysExtensions.TextIndex
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length), "Cannot append empty (lambda) terminals.");
 
-            var textElement = new TextElement<TTerminal>(this)
+            var textElement = new TextElement<TTerminal>()
             {
                 TerminalSymbol = terminal,
                 Start = Size,
@@ -82,7 +81,6 @@ namespace SysExtensions.TextIndex
         public void Clear()
         {
             Size = 0;
-            elements.ForEach(e => e.Detach());
             elements.Clear();
         }
 
@@ -95,7 +93,6 @@ namespace SysExtensions.TextIndex
         public void RemoveFrom(int start)
         {
             Size = elements[start].Start;
-            elements.Skip(start).ForEach(e => e.Detach());
             elements.RemoveRange(start, elements.Count - start);
         }
 
