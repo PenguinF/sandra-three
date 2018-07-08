@@ -61,14 +61,14 @@ namespace SysExtensions.TextIndex
         /// Gets the length of this element.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="Length"/> is 0 or negative.
+        /// <paramref name="Length"/> is negative.
         /// </exception>
         public int Length
         {
             get { return length; }
             set
             {
-                if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
                 length = value;
             }
         }
