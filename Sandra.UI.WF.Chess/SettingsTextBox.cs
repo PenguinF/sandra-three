@@ -147,7 +147,8 @@ namespace Sandra.UI.WF
             syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            // Replace with UNIX newlines because the RichTextBox will do that too.
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath).Replace("\r\n", "\n");
             parseAndApplySyntaxHighlighting(Text);
 
             TextChanged += SettingsTextBox_TextChanged;
