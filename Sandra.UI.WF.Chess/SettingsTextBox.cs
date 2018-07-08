@@ -119,11 +119,7 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            // Replace with UNIX newlines because the RichTextBox will do that too.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath).Replace("\r\n", "\n");
-            parseAndApplySyntaxHighlighting(Text);
-
-            TextChanged += SettingsTextBox_TextChanged;
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
 
             if (errorsTextBox != null)
             {
@@ -131,6 +127,14 @@ namespace Sandra.UI.WF
                 errorsTextBox.Click += ErrorsTextBox_Click;
                 errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
             }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+
+            parseAndApplySyntaxHighlighting(Text);
+            TextChanged += SettingsTextBox_TextChanged;
         }
 
         private void parseAndApplySyntaxHighlighting(string json)
