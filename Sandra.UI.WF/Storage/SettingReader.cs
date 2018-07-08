@@ -139,7 +139,7 @@ namespace Sandra.UI.WF.Storage
 
                     // Loop parsing values until encountering a non ':'.
                     bool gotColon = false;
-                    while (symbol.TerminalSymbol is JsonColon)
+                    while (symbol != null && symbol.TerminalSymbol is JsonColon)
                     {
                         if (gotColon)
                         {
@@ -160,8 +160,8 @@ namespace Sandra.UI.WF.Storage
                         gotColon = true;
                     }
 
-                    bool isComma = symbol.TerminalSymbol is JsonComma;
-                    bool isCurlyClose = symbol.TerminalSymbol is JsonCurlyClose;
+                    bool isComma = symbol != null && symbol.TerminalSymbol is JsonComma;
+                    bool isCurlyClose = symbol != null && symbol.TerminalSymbol is JsonCurlyClose;
 
                     // '}' directly following a ',' should not report errors.
                     // '..., : }' however misses both a key and a value.
@@ -210,7 +210,7 @@ namespace Sandra.UI.WF.Storage
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                     JsonTextElement symbol = ReadSkipComments();
-                    if (symbol.TerminalSymbol is JsonComma)
+                    if (symbol != null && symbol.TerminalSymbol is JsonComma)
                     {
                         if (!gotValue)
                         {
