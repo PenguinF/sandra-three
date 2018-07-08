@@ -196,7 +196,7 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public JsonUnknownSymbol(string json, int start, TextErrorInfo error) : base(json, start, 1)
+        public JsonUnknownSymbol(TextErrorInfo error, string json, int start) : base(json, start, 1)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
@@ -283,7 +283,7 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public JsonString(string json, int start, int length, string value) : base(json, start, length)
+        public JsonString(string value, string json, int start, int length) : base(json, start, length)
         {
             Value = value;
         }
@@ -297,14 +297,14 @@ namespace Sandra.UI.WF.Storage
         public override IEnumerable<TextErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
 
-        public JsonErrorString(string json, int start, int length, params TextErrorInfo[] errors)
+        public JsonErrorString(TextErrorInfo[] errors, string json, int start, int length)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors;
         }
 
-        public JsonErrorString(string json, int start, int length, IEnumerable<TextErrorInfo> errors)
+        public JsonErrorString(IEnumerable<TextErrorInfo> errors, string json, int start, int length)
             : base(json, start, length)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));

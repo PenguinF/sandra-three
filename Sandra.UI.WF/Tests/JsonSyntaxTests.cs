@@ -77,8 +77,8 @@ namespace Sandra.UI.WF.Tests
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (TextErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<TextErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((TextErrorInfo[])null, "", 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<TextErrorInfo>)null, "", 0, 0));
         }
 
         [Theory]
@@ -94,7 +94,7 @@ namespace Sandra.UI.WF.Tests
             var errorInfo3 = new TextErrorInfo(message + message + message, start + 2, length * 3);
 
             Assert.Collection(
-                new JsonErrorString("", 0, 0, errorInfo1, errorInfo2, errorInfo3).Errors,
+                new JsonErrorString(new[] { errorInfo1, errorInfo2, errorInfo3 }, "", 0, 0).Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
@@ -102,7 +102,7 @@ namespace Sandra.UI.WF.Tests
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
             var errorList = new List<TextErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new JsonErrorString("", 0, 0, errorList);
+            var errorString = new JsonErrorString(errorList, "", 0, 0);
             Assert.NotSame(errorString.Errors, errorList);
 
             // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
@@ -118,7 +118,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullErrorInUnexpectedSymbolShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol("*", 0, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null, "*", 0));
         }
 
         [Theory]
@@ -127,7 +127,7 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
             var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, 0);
-            var symbol = new JsonUnknownSymbol(displayCharValue, 0, error);
+            var symbol = new JsonUnknownSymbol(error, displayCharValue, 0);
             Assert.Same(error, symbol.Error);
         }
 
@@ -156,10 +156,10 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonSquareBracketClose("]", 0), typeof(JsonSquareBracketClose) };
             yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
             yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol("*", 0, TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol("*", 0), "*", 0), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
-            yield return new object[] { new JsonString("\"\"", 0, 2, string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString("\"", 0, 1, TextErrorInfo.UnterminatedString(0, 1)), typeof(JsonErrorString) };
+            yield return new object[] { new JsonString(string.Empty, "\"\"", 0, 2), typeof(JsonString) };
+            yield return new object[] { new JsonErrorString(new[] { TextErrorInfo.UnterminatedString(0, 1) }, "\"", 0, 1), typeof(JsonErrorString) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor

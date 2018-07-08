@@ -190,9 +190,9 @@ namespace Sandra.UI.WF.Storage
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
                                 yield return new JsonUnknownSymbol(
+                                    TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex),
                                     json,
-                                    currentIndex,
-                                    TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex));
+                                    currentIndex);
                                 break;
                         }
                     }
@@ -229,19 +229,19 @@ namespace Sandra.UI.WF.Storage
                         if (errors.Count > 0)
                         {
                             yield return new JsonErrorString(
+                                errors,
                                 json,
                                 firstUnusedIndex,
-                                currentIndex - firstUnusedIndex,
-                                errors);
+                                currentIndex - firstUnusedIndex);
                             errors.Clear();
                         }
                         else
                         {
                             yield return new JsonString(
+                                valueBuilder.ToString(),
                                 json,
                                 firstUnusedIndex,
-                                currentIndex - firstUnusedIndex,
-                                valueBuilder.ToString());
+                                currentIndex - firstUnusedIndex);
                         }
                         valueBuilder.Clear();
                         firstUnusedIndex = currentIndex;
@@ -363,10 +363,10 @@ namespace Sandra.UI.WF.Storage
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             errors.Add(TextErrorInfo.UnterminatedString(firstUnusedIndex, length - firstUnusedIndex));
             yield return new JsonErrorString(
+                errors,
                 json,
                 firstUnusedIndex,
-                length - firstUnusedIndex,
-                errors);
+                length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
