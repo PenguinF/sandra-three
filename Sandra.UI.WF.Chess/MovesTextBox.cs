@@ -62,8 +62,7 @@ namespace Sandra.UI.WF
 
             CaretPosition.ValueChanged += BringIntoView;
             syntaxRenderer = new SyntaxRenderer<PGNTerminalSymbol>();
-            CaretPosition.ValueChanged += syntaxRenderer.TryInvokeCaretPositionChanged;
-            syntaxRenderer.CaretPositionChanged += caretPositionChanged;
+            CaretPosition.ValueChanged += TryInvokeCaretPositionChanged;
 
             applyDefaultStyle();
 
@@ -378,11 +377,11 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void caretPositionChanged(SyntaxRenderer<PGNTerminalSymbol> sender, CaretPositionChangedEventArgs<PGNTerminalSymbol> e)
+        private void caretPositionChanged(TextElement<PGNTerminalSymbol> elementBefore, TextElement<PGNTerminalSymbol> elementAfter)
         {
             if (game != null)
             {
-                TextElement<PGNTerminalSymbol> activeElement = e.ElementBefore;
+                TextElement<PGNTerminalSymbol> activeElement = elementBefore;
                 PGNPly pgnPly;
 
                 if (activeElement == null)
@@ -395,9 +394,9 @@ namespace Sandra.UI.WF
                     // Prefer to attach to a non-space element.
                     // Use assumption that the terminal symbol list nowhere contains two adjacent SpaceSymbols.
                     // Also use assumption that the terminal symbol list neither starts nor ends with a SpaceSymbol.
-                    if (activeElement.TerminalSymbol is SpaceSymbol && e.ElementAfter != null)
+                    if (activeElement.TerminalSymbol is SpaceSymbol && elementAfter != null)
                     {
-                        activeElement = e.ElementAfter;
+                        activeElement = elementAfter;
                     }
 
                     pgnPly = new PGNActivePlyDetector().Visit(activeElement.TerminalSymbol);
@@ -455,10 +454,10 @@ namespace Sandra.UI.WF
             if (!IsUpdating && SelectionLength == 0)
             {
                 CaretPosition.Value = SelectionStart;
-    }
+            }
 
             base.OnSelectionChanged(e);
-}
+        }
 
         private void BringIntoView(int caretPosition)
         {
@@ -467,6 +466,13 @@ namespace Sandra.UI.WF
                 Select(caretPosition, 0);
                 ScrollToCaret();
             }
+        }
+
+        private void TryInvokeCaretPositionChanged(int selectionStart)
+        {
+            TextElement<PGNTerminalSymbol> elementBefore = syntaxRenderer.GetElementBefore(selectionStart);
+            TextElement<PGNTerminalSymbol> elementAfter = syntaxRenderer.GetElementAfter(selectionStart);
+            caretPositionChanged(elementBefore, elementAfter);
         }
     }
 }
