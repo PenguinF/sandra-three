@@ -159,7 +159,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullErrorInUnterminatedMultiLineCommentShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnterminatedMultiLineComment("/*", 0, 2, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnterminatedMultiLineComment(null, "/*", 0, 2));
         }
 
         [Theory]
@@ -167,14 +167,14 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
             var error = TextErrorInfo.UnterminatedMultiLineComment(0, commentText.Length);
-            var symbol = new JsonUnterminatedMultiLineComment(commentText, 0, commentText.Length, error);
+            var symbol = new JsonUnterminatedMultiLineComment(error, commentText, 0, commentText.Length);
             Assert.Same(error, symbol.Error);
         }
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(0, 2), "/*", 0, 2), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
             yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
             yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };

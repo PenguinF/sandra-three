@@ -465,10 +465,10 @@ namespace Sandra.UI.WF.Storage
             }
 
             yield return new JsonUnterminatedMultiLineComment(
+                TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex),
                 json,
                 firstUnusedIndex,
-                length - firstUnusedIndex,
-                TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex));
+                length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
