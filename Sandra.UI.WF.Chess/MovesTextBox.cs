@@ -288,7 +288,7 @@ namespace Sandra.UI.WF
                 // Clear and build the entire text anew by clearing the old element list.
                 using (var updateToken = BeginUpdate())
                 {
-                    RemoveText(0, syntaxRenderer.TextLength);
+                    RemoveText(0, syntaxRenderer.Size);
                     syntaxRenderer.Clear();
                     updateText();
                 }
@@ -337,7 +337,7 @@ namespace Sandra.UI.WF
                 {
                     // Clear existing tail part.
                     int textStart = syntaxRenderer.Elements[agreeIndex].Start;
-                    RemoveText(textStart, syntaxRenderer.TextLength - textStart);
+                    RemoveText(textStart, syntaxRenderer.Size - textStart);
                     syntaxRenderer.RemoveFrom(agreeIndex);
                 }
 
@@ -347,7 +347,7 @@ namespace Sandra.UI.WF
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
                     var text = textGenerator.Visit(updatedTerminalSymbol);
-                    InsertText(syntaxRenderer.TextLength, text);
+                    InsertText(syntaxRenderer.Size, text);
                     var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
 
                     if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))

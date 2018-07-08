@@ -27,28 +27,112 @@ using System.Linq;
 namespace SysExtensions.SyntaxRenderer
 {
     /// <summary>
-    /// Changes the behavior of a <see cref="ISyntaxRenderTarget"/> so it shows a read-only list of formatted text elements.
+    /// Manages an index of terminal symbols wrapped in <see cref="TextElement{TTerminal}"/> instances.
     /// </summary>
     /// <typeparam name="TTerminal">
-    /// The type of terminal symbols to format.
+    /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
-    /// <remarks>
-    /// This component is work in progress.
-    /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
-        public SyntaxRenderer()
-        {
-            Elements = elements;
-            assertInvariants();
-        }
-
         private readonly List<int> elementIndexes = new List<int>();
 
         private readonly List<TextElement<TTerminal>> elements = new List<TextElement<TTerminal>>();
 
-        public readonly IReadOnlyList<TextElement<TTerminal>> Elements;
+        /// <summary>
+        /// Gets a reference to the list of <see cref="TextElement{TTerminal}"/> instances.
+        /// </summary>
+        public IReadOnlyList<TextElement<TTerminal>> Elements => elements;
+
+        /// <summary>
+        /// Appends a terminal symbol to the end of the index.
+        /// </summary>
+        /// <param name="terminal">
+        /// The terminal symbol to append.
+        /// </param>
+        /// <param name="length">
+        /// The length of the terminal symbol to append.
+        /// </param>
+        /// <returns>
+        /// The created <see cref="TextElement{TTerminal}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="terminal"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or negative.
+        /// </exception>
+        public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, int length)
+        {
+            if (terminal == null) throw new ArgumentNullException(nameof(terminal));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length), "Cannot append empty (lambda) terminals.");
+
+            int start = elementIndexes.Count;
+            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
+
+            var textElement = new TextElement<TTerminal>(this)
+            {
+                TerminalSymbol = terminal,
+                Start = start,
+                Length = length,
+            };
+
+            elements.Add(textElement);
+            assertInvariants();
+            return textElement;
+        }
+
+        /// <summary>
+        /// Clears all elements from the index.
+        /// </summary>
+        public void Clear()
+        {
+            elementIndexes.Clear();
+            elements.ForEach(e => e.Detach());
+            elements.Clear();
+            assertInvariants();
+        }
+
+        /// <summary>
+        /// Removes the range of elements from a start index to the end.
+        /// </summary>
+        /// <param name="start">
+        /// The start index of the first element to remove.
+        /// </param>
+        public void RemoveFrom(int start)
+        {
+            int textStart = elements[start].Start;
+            int textLength = elementIndexes.Count - textStart;
+
+            elementIndexes.RemoveRange(textStart, textLength);
+            elements.Skip(start).ForEach(e => e.Detach());
+            elements.RemoveRange(start, elements.Count - start);
+
+            assertInvariants();
+        }
+
+        /// <summary>
+        /// Gets the size of the index.
+        /// </summary>
+        public int Size => elementIndexes.Count;
+
+        /// <summary>
+        /// Returns the text element before the given position. Returns null if the position is at the start of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="Size"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementBefore(int position)
+            => position == 0 ? null : elements[elementIndexes[position - 1]];
+
+        /// <summary>
+        /// Returns the text element after the given position. Returns null if the position is at the end of the text.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="Size"/>.
+        /// </exception>
+        public TextElement<TTerminal> GetElementAfter(int position)
+            => position == elementIndexes.Count ? null : elements[elementIndexes[position]];
 
         [Conditional("DEBUG")]
         private void assertInvariants()
@@ -68,70 +152,5 @@ namespace SysExtensions.SyntaxRenderer
             }
         }
 
-        public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, int length)
-        {
-            if (terminal == null) throw new ArgumentNullException(nameof(terminal));
-            if (length == 0) throw new NotImplementedException("Cannot append empty (lambda) terminals yet.");
-
-            int start = elementIndexes.Count;
-            elementIndexes.AddRange(Enumerable.Repeat(elements.Count, length));
-
-            var textElement = new TextElement<TTerminal>(this)
-            {
-                TerminalSymbol = terminal,
-                Start = start,
-                Length = length,
-            };
-
-            elements.Add(textElement);
-            assertInvariants();
-            return textElement;
-        }
-
-        /// <summary>
-        /// Clears all syntax from the renderer.
-        /// </summary>
-        public void Clear()
-        {
-            elementIndexes.Clear();
-            elements.ForEach(e => e.Detach());
-            elements.Clear();
-            assertInvariants();
-        }
-
-        public void RemoveFrom(int index)
-        {
-            int textStart = elements[index].Start;
-            int textLength = elementIndexes.Count - textStart;
-
-            elementIndexes.RemoveRange(textStart, textLength);
-            elements.Skip(index).ForEach(e => e.Detach());
-            elements.RemoveRange(index, elements.Count - index);
-
-            assertInvariants();
-        }
-
-        /// <summary>
-        /// Gets the length of the generated text.
-        /// </summary>
-        public int TextLength => elementIndexes.Count;
-
-        /// <summary>
-        /// Returns the text element before the given position. Returns null if the position is at the start of the text.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
-        /// </exception>
-        public TextElement<TTerminal> GetElementBefore(int position)
-            => position == 0 ? null : elements[elementIndexes[position - 1]];
-
-        /// <summary>
-        /// Returns the text element after the given position. Returns null if the position is at the end of the text.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="position"/> is less than 0 or greater than or equal to <see cref="TextLength"/>.
-        /// </exception>
-        public TextElement<TTerminal> GetElementAfter(int position)
-            => position == elementIndexes.Count ? null : elements[elementIndexes[position]];
     }
 }
