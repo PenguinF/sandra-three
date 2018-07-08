@@ -50,13 +50,7 @@ namespace SysExtensions.SyntaxRenderer
         private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
         {
             if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
-
             Elements = elements;
-
-            // Remove all text from the render target.
-            renderTarget.RemoveText(0, int.MaxValue);
-            renderTarget.CaretPosition.ValueChanged += tryInvokeCaretPositionChanged;
-
             assertInvariants();
         }
 
@@ -155,7 +149,7 @@ namespace SysExtensions.SyntaxRenderer
         /// </summary>
         public event Action<SyntaxRenderer<TTerminal>, CaretPositionChangedEventArgs<TTerminal>> CaretPositionChanged;
 
-        private void tryInvokeCaretPositionChanged(int selectionStart)
+        public void TryInvokeCaretPositionChanged(int selectionStart)
         {
             TextElement<TTerminal> elementBefore = GetElementBefore(selectionStart);
             TextElement<TTerminal> elementAfter = GetElementAfter(selectionStart);

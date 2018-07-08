@@ -59,6 +59,7 @@ namespace Sandra.UI.WF
             ReadOnly = true;
 
             syntaxRenderer = SyntaxRenderer<PGNTerminalSymbol>.AttachTo(this, isSlave: false);
+            CaretPosition.ValueChanged += syntaxRenderer.TryInvokeCaretPositionChanged;
             syntaxRenderer.CaretPositionChanged += caretPositionChanged;
 
             applyDefaultStyle();
