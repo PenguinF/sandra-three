@@ -28,7 +28,7 @@ namespace Sandra.UI.WF.Storage
 {
     public class JsonTextElement
     {
-        public JsonTerminalSymbol TerminalSymbol;
+        public JsonTerminalSymbol TerminalSymbol { get; }
 
         public JsonTextElement(JsonTerminalSymbol symbol)
         {

@@ -68,10 +68,10 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\r\n", 0, 2)]
         public void UnchangedParameters(string json, int start, int length)
         {
-            var terminalSymbol = new JsonTestSymbol(json, start, length);
-            Assert.Equal(json, terminalSymbol.Json);
-            Assert.Equal(start, terminalSymbol.Start);
-            Assert.Equal(length, terminalSymbol.Length);
+            var textElement = new JsonTextElement(new JsonTestSymbol(json, start, length));
+            Assert.Equal(json, textElement.Json);
+            Assert.Equal(start, textElement.Start);
+            Assert.Equal(length, textElement.Length);
         }
 
         [Fact]
