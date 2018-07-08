@@ -49,8 +49,6 @@ namespace Sandra.UI.WF.Storage
         public virtual bool IsValueStartSymbol => false;
         public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
 
-        public string GetText() => Json.Substring(Start, Length);
-
         public abstract void Accept(JsonTerminalSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
     }
