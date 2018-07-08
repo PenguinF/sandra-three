@@ -38,18 +38,8 @@ namespace SysExtensions.SyntaxRenderer
     /// </remarks>
     public class SyntaxRenderer<TTerminal>
     {
-        /// <summary>
-        /// Attaches a syntax renderer to a render target.
-        /// </summary>
-        /// <param name="isSlave">
-        /// True if the renderer should not update the render target but assume it is always in sync; false otherwise.
-        /// </param>
-        public static SyntaxRenderer<TTerminal> AttachTo(ISyntaxRenderTarget renderTarget, bool isSlave)
-            => new SyntaxRenderer<TTerminal>(renderTarget);
-
-        private SyntaxRenderer(ISyntaxRenderTarget renderTarget)
+        public SyntaxRenderer()
         {
-            if (renderTarget == null) throw new ArgumentNullException(nameof(renderTarget));
             Elements = elements;
             assertInvariants();
         }

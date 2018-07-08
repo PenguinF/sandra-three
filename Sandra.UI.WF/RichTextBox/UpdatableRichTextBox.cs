@@ -20,7 +20,6 @@
 #endregion
 
 using SysExtensions;
-using SysExtensions.SyntaxRenderer;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -31,7 +30,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Standard Windows <see cref="RichTextBox"/> with a <see cref="BeginUpdate"/> method to suspend repainting of the <see cref="RichTextBox"/>. 
     /// </summary>
-    public class UpdatableRichTextBox : RichTextBox, ISyntaxRenderTarget
+    public class UpdatableRichTextBox : RichTextBox
     {
         /// <summary>
         /// Represents a unique update token returned from <see cref="BeginUpdate"/>().

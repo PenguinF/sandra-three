@@ -144,7 +144,7 @@ namespace Sandra.UI.WF
             this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
-            syntaxRenderer = SyntaxRenderer<JsonTerminalSymbol>.AttachTo(this, isSlave: true);
+            syntaxRenderer = new SyntaxRenderer<JsonTerminalSymbol>();
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             // Replace with UNIX newlines because the RichTextBox will do that too.
