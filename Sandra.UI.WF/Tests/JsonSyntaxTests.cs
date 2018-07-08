@@ -74,6 +74,28 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Fact]
+        public void NullValueShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonString(null, string.Empty, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonValue(null, string.Empty, 0, 0));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("{}")]
+        // No newline conversions.
+        [InlineData("\n")]
+        [InlineData("\r\n")]
+        public void UnchangedValueParameter(string value)
+        {
+            var jsonString = new JsonString(value, string.Empty, 0, 0);
+            Assert.Equal(value, jsonString.Value);
+
+            var jsonValue = new JsonValue(value, string.Empty, 0, 0);
+            Assert.Equal(value, jsonString.Value);
+        }
+
+        [Fact]
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
@@ -157,7 +179,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
             yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol("*", 0), "*", 0), typeof(JsonUnknownSymbol) };
-            yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
+            yield return new object[] { new JsonValue("true", "true", 0, 4), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty, "\"\"", 0, 2), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(new[] { TextErrorInfo.UnterminatedString(0, 1) }, "\"", 0, 1), typeof(JsonErrorString) };
         }

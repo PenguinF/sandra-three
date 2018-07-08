@@ -212,9 +212,15 @@ namespace Sandra.UI.WF.Storage
         public static readonly string True = "true";
         public static readonly string False = "false";
 
+        public string Value { get; }
+
         public override bool IsValueStartSymbol => true;
 
-        public JsonValue(string json, int start, int length) : base(json, start, length) { }
+        public JsonValue(string value, string json, int start, int length) : base(json, start, length)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            Value = value;
+        }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
@@ -285,6 +291,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonString(string value, string json, int start, int length) : base(json, start, length)
         {
+            if (value == null) throw new ArgumentNullException(nameof(value));
             Value = value;
         }
 

@@ -134,6 +134,7 @@ namespace Sandra.UI.WF.Storage
                     if (firstUnusedIndex < currentIndex)
                     {
                         yield return new JsonValue(
+                            json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex),
                             json,
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
@@ -206,6 +207,7 @@ namespace Sandra.UI.WF.Storage
             if (firstUnusedIndex < currentIndex)
             {
                 yield return new JsonValue(
+                    json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex),
                     json,
                     firstUnusedIndex,
                     currentIndex - firstUnusedIndex);
