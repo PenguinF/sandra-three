@@ -41,7 +41,7 @@ namespace Sandra.UI.WF
         {
             public override bool IsBackground => true;
 
-            public JsonWhitespace(string json, int start, int length) : base(json, start, length) { }
+            public JsonWhitespace(string json, int start, int length) { }
 
             public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
@@ -152,7 +152,7 @@ namespace Sandra.UI.WF
                         new JsonWhitespace(json, firstUnusedIndex, length),
                         length);
                 }
-                TextIndex.AppendTerminalSymbol(x, x.Length);
+                TextIndex.AppendTerminalSymbol(x.TerminalSymbol, x.Length);
                 firstUnusedIndex = x.Start + x.Length;
             });
 

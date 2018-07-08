@@ -63,10 +63,10 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                var commentSymbol = Assert.IsType<JsonComment>(symbol);
-                Assert.Equal(0, commentSymbol.Start);
-                Assert.Equal(expectedCommentText.Length, commentSymbol.Length);
-                Assert.Equal(expectedCommentText, commentSymbol.Json.Substring(commentSymbol.Start, commentSymbol.Length));
+                Assert.IsType<JsonComment>(symbol.TerminalSymbol);
+                Assert.Equal(0, symbol.Start);
+                Assert.Equal(expectedCommentText.Length, symbol.Length);
+                Assert.Equal(expectedCommentText, symbol.Json.Substring(symbol.Start, symbol.Length));
             });
         }
 
@@ -107,7 +107,7 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType(tokenType, symbol);
+                Assert.IsType(tokenType, symbol.TerminalSymbol);
                 Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
@@ -153,11 +153,12 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                var valueSymbol = Assert.IsType<JsonValue>(symbol);
+                var valueSymbol = Assert.IsType<JsonValue>(symbol.TerminalSymbol);
                 Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, valueSymbol.Json.Substring(valueSymbol.Start, valueSymbol.Length));
+                Assert.Equal(json, symbol.Json.Substring(symbol.Start, symbol.Length));
+                Assert.Equal(json, valueSymbol.Value);
             });
         }
 
@@ -185,10 +186,10 @@ namespace Sandra.UI.WF.Tests
             Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
             {
                 Assert.NotNull(symbol);
-                var stringSymbol = Assert.IsType<JsonString>(symbol);
-                Assert.Equal(json, stringSymbol.Json);
-                Assert.Equal(0, stringSymbol.Start);
-                Assert.Equal(json.Length, stringSymbol.Length);
+                var stringSymbol = Assert.IsType<JsonString>(symbol.TerminalSymbol);
+                Assert.Equal(json, symbol.Json);
+                Assert.Equal(0, symbol.Start);
+                Assert.Equal(json.Length, symbol.Length);
                 Assert.Equal(expectedValue, stringSymbol.Value);
             });
         }
@@ -263,7 +264,7 @@ namespace Sandra.UI.WF.Tests
                     Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1);
+                        Assert.IsType(type1, symbol1.TerminalSymbol);
                         Assert.Equal(expectedSymbol1Start, symbol1.Start);
                         Assert.Equal(expectedSymbol2Start + expectedSymbol2Length - expectedSymbol1Start, symbol1.Length);
                     });
@@ -279,13 +280,13 @@ namespace Sandra.UI.WF.Tests
                     Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1);
+                        Assert.IsType(type1, symbol1.TerminalSymbol);
                         Assert.Equal(expectedSymbol1Start, symbol1.Start);
                         Assert.Equal(expectedSymbol1Length, symbol1.Length);
                     }, symbol2 =>
                     {
                         Assert.NotNull(symbol2);
-                        Assert.IsType(type2, symbol2);
+                        Assert.IsType(type2, symbol2.TerminalSymbol);
                         Assert.Equal(expectedSymbol2Start, symbol2.Start);
                         Assert.Equal(expectedSymbol2Length, symbol2.Length);
                     });
