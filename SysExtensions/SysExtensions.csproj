@@ -42,8 +42,8 @@
     <Compile Include="LinqExtensions.cs" />
     <Compile Include="ObservableValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SyntaxRenderer\SyntaxRenderer.cs" />
-    <Compile Include="SyntaxRenderer\TextElement.cs" />
+    <Compile Include="TextIndex\TextElement.cs" />
+    <Compile Include="TextIndex\TextIndex.cs" />
     <Compile Include="Union.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="_void.cs" />

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SyntaxRenderer.cs
+ * TextIndex.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace SysExtensions.SyntaxRenderer
+namespace SysExtensions.TextIndex
 {
     /// <summary>
     /// Manages an index of terminal symbols wrapped in <see cref="TextElement{TTerminal}"/> instances.
@@ -33,7 +33,7 @@ namespace SysExtensions.SyntaxRenderer
     /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
-    public class SyntaxRenderer<TTerminal>
+    public class TextIndex<TTerminal>
     {
         private readonly List<int> elementIndexes = new List<int>();
 

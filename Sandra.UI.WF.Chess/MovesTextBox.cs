@@ -21,7 +21,7 @@
 
 using Sandra.PGN;
 using SysExtensions;
-using SysExtensions.SyntaxRenderer;
+using SysExtensions.TextIndex;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -51,7 +51,7 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
-        private readonly SyntaxRenderer<PGNTerminalSymbol> syntaxRenderer;
+        private readonly TextIndex<PGNTerminalSymbol> textIndex;
 
         public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
 
@@ -60,7 +60,7 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
-            syntaxRenderer = new SyntaxRenderer<PGNTerminalSymbol>();
+            textIndex = new TextIndex<PGNTerminalSymbol>();
 
             applyDefaultStyle();
 
@@ -288,8 +288,8 @@ namespace Sandra.UI.WF
                 // Clear and build the entire text anew by clearing the old element list.
                 using (var updateToken = BeginUpdate())
                 {
-                    RemoveText(0, syntaxRenderer.Size);
-                    syntaxRenderer.Clear();
+                    RemoveText(0, textIndex.Size);
+                    textIndex.Clear();
                     updateText();
                 }
             }
@@ -299,7 +299,7 @@ namespace Sandra.UI.WF
         {
             List<PGNTerminalSymbol> updatedTerminalSymbols = generatePGNTerminalSymbols().ToList();
 
-            int existingElementCount = syntaxRenderer.Elements.Count;
+            int existingElementCount = textIndex.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
             PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
@@ -310,7 +310,7 @@ namespace Sandra.UI.WF
             int agreeIndex = 0;
             while (agreeIndex < minLength)
             {
-                var existingElement = syntaxRenderer.Elements[agreeIndex];
+                var existingElement = textIndex.Elements[agreeIndex];
                 var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
                 if (updatedTerminalSymbol.Equals(existingElement.TerminalSymbol))
                 {
@@ -336,9 +336,9 @@ namespace Sandra.UI.WF
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
-                    int textStart = syntaxRenderer.Elements[agreeIndex].Start;
-                    RemoveText(textStart, syntaxRenderer.Size - textStart);
-                    syntaxRenderer.RemoveFrom(agreeIndex);
+                    int textStart = textIndex.Elements[agreeIndex].Start;
+                    RemoveText(textStart, textIndex.Size - textStart);
+                    textIndex.RemoveFrom(agreeIndex);
                 }
 
                 // Append new element texts.
@@ -347,8 +347,8 @@ namespace Sandra.UI.WF
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
                     var text = textGenerator.Visit(updatedTerminalSymbol);
-                    InsertText(syntaxRenderer.Size, text);
-                    var newElement = syntaxRenderer.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
+                    InsertText(textIndex.Size, text);
+                    var newElement = textIndex.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
 
                     if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
                     {
@@ -361,9 +361,9 @@ namespace Sandra.UI.WF
                 if (game == null || game.Game.IsFirstMove)
                 {
                     // If there's no active move, go to before the first move.
-                    if (syntaxRenderer.Elements.Count > 0)
+                    if (textIndex.Elements.Count > 0)
                     {
-                        CaretPosition.Value = syntaxRenderer.Elements[0].Start;
+                        CaretPosition.Value = textIndex.Elements[0].Start;
                     }
                 }
                 else if (newActiveMoveElement != null)
@@ -382,8 +382,8 @@ namespace Sandra.UI.WF
         {
             if (game != null)
             {
-                TextElement<PGNTerminalSymbol> elementBefore = syntaxRenderer.GetElementBefore(selectionStart);
-                TextElement<PGNTerminalSymbol> elementAfter = syntaxRenderer.GetElementAfter(selectionStart);
+                TextElement<PGNTerminalSymbol> elementBefore = textIndex.GetElementBefore(selectionStart);
+                TextElement<PGNTerminalSymbol> elementAfter = textIndex.GetElementAfter(selectionStart);
 
                 TextElement<PGNTerminalSymbol> activeElement = elementBefore;
                 PGNPly pgnPly;
@@ -426,7 +426,7 @@ namespace Sandra.UI.WF
 
                         // Search for the current active move element to set its font.
                         PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-                        foreach (TextElement<PGNTerminalSymbol> textElement in syntaxRenderer.Elements)
+                        foreach (TextElement<PGNTerminalSymbol> textElement in textIndex.Elements)
                         {
                             if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                             {

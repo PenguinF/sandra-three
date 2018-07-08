@@ -21,23 +21,23 @@
 
 using System;
 
-namespace SysExtensions.SyntaxRenderer
+namespace SysExtensions.TextIndex
 {
     /// <summary>
-    /// Represents an element of formatted text displayed by a <see cref="SyntaxRenderer{TTerminal}"/>,
+    /// Represents an element of formatted text indexed by a <see cref="TextIndex{TTerminal}"/>,
     /// which maps to exactly one terminal symbol.
     /// </summary>
     /// <typeparam name="TTerminal">
-    /// The type of terminal symbols to format.
+    /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
     public sealed class TextElement<TTerminal>
     {
-        private SyntaxRenderer<TTerminal> renderer;
+        private TextIndex<TTerminal> textIndex;
 
-        internal TextElement(SyntaxRenderer<TTerminal> renderer)
+        internal TextElement(TextIndex<TTerminal> textIndex)
         {
-            this.renderer = renderer;
+            this.textIndex = textIndex;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace SysExtensions.SyntaxRenderer
 
         private void throwIfNoRenderer()
         {
-            if (renderer == null)
+            if (textIndex == null)
             {
                 throw new InvalidOperationException($"{nameof(TextElement<TTerminal>)} has no renderer.");
             }
@@ -73,29 +73,29 @@ namespace SysExtensions.SyntaxRenderer
         /// Returns the text element before this element. Returns null if this is the first text element.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
+        /// This element has been removed from a text index.
         /// </exception>
         public TextElement<TTerminal> GetPreviousElement()
         {
             throwIfNoRenderer();
-            return renderer.GetElementBefore(Start);
+            return textIndex.GetElementBefore(Start);
         }
 
         /// <summary>
         /// Returns the text element before this element. Returns null if this is the first text element.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
+        /// This element has been removed from a text index.
         /// </exception>
         public TextElement<TTerminal> GetNextElement()
         {
             throwIfNoRenderer();
-            return renderer.GetElementAfter(End);
+            return textIndex.GetElementAfter(End);
         }
 
         internal void Detach()
         {
-            renderer = null;
+            textIndex = null;
         }
     }
 }
