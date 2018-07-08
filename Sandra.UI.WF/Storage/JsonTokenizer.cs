@@ -148,22 +148,22 @@ namespace Sandra.UI.WF.Storage
                         switch (c)
                         {
                             case JsonCurlyOpen.CurlyOpenCharacter:
-                                yield return new JsonTextElement(JsonCurlyOpen.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonCurlyOpen.Value, json, currentIndex, 1);
                                 break;
                             case JsonCurlyClose.CurlyCloseCharacter:
-                                yield return new JsonTextElement(JsonCurlyClose.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonCurlyClose.Value, json, currentIndex, 1);
                                 break;
                             case JsonSquareBracketOpen.SquareBracketOpenCharacter:
-                                yield return new JsonTextElement(JsonSquareBracketOpen.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonSquareBracketOpen.Value, json, currentIndex, 1);
                                 break;
                             case JsonSquareBracketClose.SquareBracketCloseCharacter:
-                                yield return new JsonTextElement(JsonSquareBracketClose.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonSquareBracketClose.Value, json, currentIndex, 1);
                                 break;
                             case JsonColon.ColonCharacter:
-                                yield return new JsonTextElement(JsonColon.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonColon.Value, json, currentIndex, 1);
                                 break;
                             case JsonComma.CommaCharacter:
-                                yield return new JsonTextElement(JsonComma.Value, json, currentIndex);
+                                yield return new JsonTextElement(JsonComma.Value, json, currentIndex, 1);
                                 break;
                             case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
@@ -193,7 +193,8 @@ namespace Sandra.UI.WF.Storage
                                 yield return new JsonTextElement(
                                     new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex)),
                                     json,
-                                    currentIndex);
+                                    currentIndex,
+                                    1);
                                 break;
                         }
                     }
