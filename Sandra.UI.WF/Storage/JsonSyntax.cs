@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions.TextIndex;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,13 +27,11 @@ using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
-    public abstract class JsonTerminalSymbol
+    public class JsonTextElement : TextElement<JsonTerminalSymbol>
     {
         public string Json { get; }
-        public int Start { get; }
-        public int Length { get; }
 
-        public JsonTerminalSymbol(string json, int start, int length)
+        public JsonTextElement(JsonTerminalSymbol symbol, string json, int start, int length) : base(symbol)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
@@ -44,12 +43,13 @@ namespace Sandra.UI.WF.Storage
             Start = start;
             Length = length;
         }
+    }
 
+    public abstract class JsonTerminalSymbol
+    {
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
         public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
-
-        public string GetText() => Json.Substring(Start, Length);
 
         public abstract void Accept(JsonTerminalSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
@@ -100,9 +100,11 @@ namespace Sandra.UI.WF.Storage
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
 
-        public override bool IsBackground => true;
+        public static readonly JsonComment Value = new JsonComment();
 
-        public JsonComment(string json, int start, int length) : base(json, start, length) { }
+        private JsonComment() { }
+
+        public override bool IsBackground => true;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
@@ -115,7 +117,7 @@ namespace Sandra.UI.WF.Storage
         public override bool IsBackground => true;
         public override IEnumerable<TextErrorInfo> Errors { get; }
 
-        public JsonUnterminatedMultiLineComment(string json, int start, int length, TextErrorInfo error) : base(json, start, length)
+        public JsonUnterminatedMultiLineComment(TextErrorInfo error)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
@@ -130,9 +132,11 @@ namespace Sandra.UI.WF.Storage
     {
         public const char CurlyOpenCharacter = '{';
 
-        public override bool IsValueStartSymbol => true;
+        public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
 
-        public JsonCurlyOpen(string json, int start) : base(json, start, 1) { }
+        private JsonCurlyOpen() { }
+
+        public override bool IsValueStartSymbol => true;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
@@ -142,7 +146,9 @@ namespace Sandra.UI.WF.Storage
     {
         public const char CurlyCloseCharacter = '}';
 
-        public JsonCurlyClose(string json, int start) : base(json, start, 1) { }
+        public static readonly JsonCurlyClose Value = new JsonCurlyClose();
+
+        private JsonCurlyClose() { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
@@ -152,9 +158,11 @@ namespace Sandra.UI.WF.Storage
     {
         public const char SquareBracketOpenCharacter = '[';
 
-        public override bool IsValueStartSymbol => true;
+        public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
 
-        public JsonSquareBracketOpen(string json, int start) : base(json, start, 1) { }
+        private JsonSquareBracketOpen() { }
+
+        public override bool IsValueStartSymbol => true;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
@@ -164,7 +172,9 @@ namespace Sandra.UI.WF.Storage
     {
         public const char SquareBracketCloseCharacter = ']';
 
-        public JsonSquareBracketClose(string json, int start) : base(json, start, 1) { }
+        public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
+
+        private JsonSquareBracketClose() { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
@@ -174,7 +184,9 @@ namespace Sandra.UI.WF.Storage
     {
         public const char ColonCharacter = ':';
 
-        public JsonColon(string json, int start) : base(json, start, 1) { }
+        public static readonly JsonColon Value = new JsonColon();
+
+        private JsonColon() { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
@@ -184,7 +196,9 @@ namespace Sandra.UI.WF.Storage
     {
         public const char CommaCharacter = ',';
 
-        public JsonComma(string json, int start) : base(json, start, 1) { }
+        public static readonly JsonComma Value = new JsonComma();
+
+        private JsonComma() { }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
@@ -198,7 +212,7 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public JsonUnknownSymbol(string json, int start, TextErrorInfo error) : base(json, start, 1)
+        public JsonUnknownSymbol(TextErrorInfo error)
         {
             if (error == null) throw new ArgumentNullException(nameof(error));
             Error = error;
@@ -214,9 +228,15 @@ namespace Sandra.UI.WF.Storage
         public static readonly string True = "true";
         public static readonly string False = "false";
 
+        public string Value { get; }
+
         public override bool IsValueStartSymbol => true;
 
-        public JsonValue(string json, int start, int length) : base(json, start, length) { }
+        public JsonValue(string value)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            Value = value;
+        }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
@@ -285,8 +305,9 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public JsonString(string json, int start, int length, string value) : base(json, start, length)
+        public JsonString(string value)
         {
+            if (value == null) throw new ArgumentNullException(nameof(value));
             Value = value;
         }
 
@@ -299,15 +320,13 @@ namespace Sandra.UI.WF.Storage
         public override IEnumerable<TextErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
 
-        public JsonErrorString(string json, int start, int length, params TextErrorInfo[] errors)
-            : base(json, start, length)
+        public JsonErrorString(params TextErrorInfo[] errors)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors;
         }
 
-        public JsonErrorString(string json, int start, int length, IEnumerable<TextErrorInfo> errors)
-            : base(json, start, length)
+        public JsonErrorString(IEnumerable<TextErrorInfo> errors)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors.ToArray();

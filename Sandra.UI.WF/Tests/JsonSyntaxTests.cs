@@ -33,16 +33,15 @@ namespace Sandra.UI.WF.Tests
         /// </summary>
         private class JsonTestSymbol : JsonTerminalSymbol
         {
-            public JsonTestSymbol(string json, int start, int length) : base(json, start, length) { }
-
             public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
         [Fact]
-        public void NullJsonShouldThrow()
+        public void NullSymbolOrJsonShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonTestSymbol(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonTextElement(null, string.Empty, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonTextElement(new JsonTestSymbol(), null, 0, 0));
         }
 
         [Theory]
@@ -56,7 +55,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(" ", 2, 0, "start")]
         public void OutOfRangeArguments(string json, int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTestSymbol(json, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTextElement(new JsonTestSymbol(), json, start, length));
         }
 
         [Theory]
@@ -67,18 +66,42 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\r\n", 0, 2)]
         public void UnchangedParameters(string json, int start, int length)
         {
-            var terminalSymbol = new JsonTestSymbol(json, start, length);
-            Assert.Equal(json, terminalSymbol.Json);
-            Assert.Equal(start, terminalSymbol.Start);
-            Assert.Equal(length, terminalSymbol.Length);
+            var testSymbol = new JsonTestSymbol();
+            var textElement = new JsonTextElement(testSymbol, json, start, length);
+            Assert.Equal(json, textElement.Json);
+            Assert.Equal(start, textElement.Start);
+            Assert.Equal(length, textElement.Length);
+            Assert.Same(testSymbol, textElement.TerminalSymbol);
+        }
+
+        [Fact]
+        public void NullValueShouldThrow()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonString(null));
+            Assert.Throws<ArgumentNullException>(() => new JsonValue(null));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("{}")]
+        // No newline conversions.
+        [InlineData("\n")]
+        [InlineData("\r\n")]
+        public void UnchangedValueParameter(string value)
+        {
+            var jsonString = new JsonString(value);
+            Assert.Equal(value, jsonString.Value);
+
+            var jsonValue = new JsonValue(value);
+            Assert.Equal(value, jsonString.Value);
         }
 
         [Fact]
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (TextErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString("", 0, 0, (IEnumerable<TextErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((TextErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<TextErrorInfo>)null));
         }
 
         [Theory]
@@ -94,7 +117,7 @@ namespace Sandra.UI.WF.Tests
             var errorInfo3 = new TextErrorInfo(message + message + message, start + 2, length * 3);
 
             Assert.Collection(
-                new JsonErrorString("", 0, 0, errorInfo1, errorInfo2, errorInfo3).Errors,
+                new JsonErrorString(errorInfo1, errorInfo2, errorInfo3).Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
@@ -102,7 +125,7 @@ namespace Sandra.UI.WF.Tests
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
             var errorList = new List<TextErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new JsonErrorString("", 0, 0, errorList);
+            var errorString = new JsonErrorString(errorList);
             Assert.NotSame(errorString.Errors, errorList);
 
             // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
@@ -118,7 +141,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullErrorInUnexpectedSymbolShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol("*", 0, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null));
         }
 
         [Theory]
@@ -127,14 +150,14 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
             var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, 0);
-            var symbol = new JsonUnknownSymbol(displayCharValue, 0, error);
+            var symbol = new JsonUnknownSymbol(error);
             Assert.Same(error, symbol.Error);
         }
 
         [Fact]
         public void NullErrorInUnterminatedMultiLineCommentShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnterminatedMultiLineComment("/*", 0, 2, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnterminatedMultiLineComment(null));
         }
 
         [Theory]
@@ -142,24 +165,24 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
             var error = TextErrorInfo.UnterminatedMultiLineComment(0, commentText.Length);
-            var symbol = new JsonUnterminatedMultiLineComment(commentText, 0, commentText.Length, error);
+            var symbol = new JsonUnterminatedMultiLineComment(error);
             Assert.Same(error, symbol.Error);
         }
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
-            yield return new object[] { new JsonComment("//", 0, 2), typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment("/*", 0, 2, TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
-            yield return new object[] { new JsonCurlyOpen("{", 0), typeof(JsonCurlyOpen) };
-            yield return new object[] { new JsonCurlyClose("}", 0), typeof(JsonCurlyClose) };
-            yield return new object[] { new JsonSquareBracketOpen("[", 0), typeof(JsonSquareBracketOpen) };
-            yield return new object[] { new JsonSquareBracketClose("]", 0), typeof(JsonSquareBracketClose) };
-            yield return new object[] { new JsonColon(":", 0), typeof(JsonColon) };
-            yield return new object[] { new JsonComma(",", 0), typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol("*", 0, TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
-            yield return new object[] { new JsonValue("true", 0, 4), typeof(JsonValue) };
-            yield return new object[] { new JsonString("\"\"", 0, 2, string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString("\"", 0, 1, TextErrorInfo.UnterminatedString(0, 1)), typeof(JsonErrorString) };
+            yield return new object[] { JsonComment.Value, typeof(JsonComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
+            yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
+            yield return new object[] { JsonSquareBracketOpen.Value, typeof(JsonSquareBracketOpen) };
+            yield return new object[] { JsonSquareBracketClose.Value, typeof(JsonSquareBracketClose) };
+            yield return new object[] { JsonColon.Value, typeof(JsonColon) };
+            yield return new object[] { JsonComma.Value, typeof(JsonComma) };
+            yield return new object[] { new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
+            yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };
+            yield return new object[] { new JsonErrorString(new[] { TextErrorInfo.UnterminatedString(0, 1) }), typeof(JsonErrorString) };
         }
 
         private sealed class TestVisitor1 : JsonTerminalSymbolVisitor

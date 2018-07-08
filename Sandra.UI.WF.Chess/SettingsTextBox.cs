@@ -39,9 +39,11 @@ namespace Sandra.UI.WF
         /// </summary>
         private class JsonWhitespace : JsonTerminalSymbol
         {
-            public override bool IsBackground => true;
+            public static readonly JsonWhitespace Value = new JsonWhitespace();
 
-            public JsonWhitespace(string json, int start, int length) : base(json, start, length) { }
+            private JsonWhitespace() { }
+
+            public override bool IsBackground => true;
 
             public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
@@ -148,11 +150,14 @@ namespace Sandra.UI.WF
                 {
                     // Since whitespace is not returned from TokenizeAll().
                     int length = x.Start - firstUnusedIndex;
-                    TextIndex.AppendTerminalSymbol(
-                        new JsonWhitespace(json, firstUnusedIndex, length),
-                        length);
+                    TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                        JsonWhitespace.Value,
+                        json,
+                        firstUnusedIndex,
+                        length));
                 }
-                TextIndex.AppendTerminalSymbol(x, x.Length);
+
+                TextIndex.AppendTerminalSymbol(x);
                 firstUnusedIndex = x.Start + x.Length;
             });
 
@@ -160,9 +165,11 @@ namespace Sandra.UI.WF
             {
                 // Since whitespace is not returned from TokenizeAll().
                 int length = json.Length - firstUnusedIndex;
-                TextIndex.AppendTerminalSymbol(
-                    new JsonWhitespace(json, firstUnusedIndex, length),
-                    length);
+                TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                    JsonWhitespace.Value,
+                    json,
+                    firstUnusedIndex,
+                    length));
             }
 
             var styleSelector = new StyleSelector();

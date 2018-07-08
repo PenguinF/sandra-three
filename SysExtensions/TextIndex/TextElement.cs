@@ -31,71 +31,67 @@ namespace SysExtensions.TextIndex
     /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
-    public sealed class TextElement<TTerminal>
+    public class TextElement<TTerminal>
     {
-        private TextIndex<TTerminal> textIndex;
-
-        internal TextElement(TextIndex<TTerminal> textIndex)
-        {
-            this.textIndex = textIndex;
-        }
+        private int start;
+        private int length;
 
         /// <summary>
         /// Gets the terminal symbol associated with this element.
         /// </summary>
-        public TTerminal TerminalSymbol { get; internal set; }
+        public TTerminal TerminalSymbol { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="TextElement{TTerminal}"/>.
+        /// </summary>
+        /// <param name="terminalSymbol">
+        /// The terminal symbol associated with this element.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="terminalSymbol"/> is negative.
+        /// </exception>
+        public TextElement(TTerminal terminalSymbol)
+        {
+            if (terminalSymbol == null) throw new ArgumentNullException(nameof(terminalSymbol));
+            TerminalSymbol = terminalSymbol;
+        }
 
         /// <summary>
         /// Gets the start position of this element.
         /// </summary>
-        public int Start { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="Start"/> is negative.
+        /// </exception>
+        public int Start
+        {
+            get { return start; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+                start = value;
+            }
+        }
 
         /// <summary>
         /// Gets the length of this element.
         /// </summary>
-        public int Length { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="Length"/> is negative.
+        /// </exception>
+        public int Length
+        {
+            get { return length; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+                length = value;
+            }
+        }
 
         /// <summary>
         /// Gets the end position of this element, which is <see cref="Length"/> added to <see cref="Start"/>.
         /// The end position is exclusive; the range of included characters is [<see cref="Start"/>..<see cref="End"/>-1].
         /// </summary>
         public int End => Start + Length;
-
-        private void throwIfNoRenderer()
-        {
-            if (textIndex == null)
-            {
-                throw new InvalidOperationException($"{nameof(TextElement<TTerminal>)} has no renderer.");
-            }
-        }
-
-        /// <summary>
-        /// Returns the text element before this element. Returns null if this is the first text element.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a text index.
-        /// </exception>
-        public TextElement<TTerminal> GetPreviousElement()
-        {
-            throwIfNoRenderer();
-            return textIndex.GetElementBefore(Start);
-        }
-
-        /// <summary>
-        /// Returns the text element before this element. Returns null if this is the first text element.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a text index.
-        /// </exception>
-        public TextElement<TTerminal> GetNextElement()
-        {
-            throwIfNoRenderer();
-            return textIndex.GetElementAfter(End);
-        }
-
-        internal void Detach()
-        {
-            textIndex = null;
-        }
     }
 }

@@ -41,7 +41,7 @@ namespace Sandra.UI.WF.Storage
         // Current state.
         private int currentIndex;
         private int firstUnusedIndex;
-        private Func<IEnumerable<JsonTerminalSymbol>> currentTokenizer;
+        private Func<IEnumerable<JsonTextElement>> currentTokenizer;
 
         /// <summary>
         /// Gets the JSON which is tokenized.
@@ -64,7 +64,7 @@ namespace Sandra.UI.WF.Storage
             currentTokenizer = Default;
         }
 
-        private IEnumerable<JsonTerminalSymbol> Default()
+        private IEnumerable<JsonTextElement> Default()
         {
             while (currentIndex < length)
             {
@@ -133,7 +133,8 @@ namespace Sandra.UI.WF.Storage
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
-                        yield return new JsonValue(
+                        yield return new JsonTextElement(
+                            new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
                             json,
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
@@ -147,22 +148,22 @@ namespace Sandra.UI.WF.Storage
                         switch (c)
                         {
                             case JsonCurlyOpen.CurlyOpenCharacter:
-                                yield return new JsonCurlyOpen(json, currentIndex);
+                                yield return new JsonTextElement(JsonCurlyOpen.Value, json, currentIndex, 1);
                                 break;
                             case JsonCurlyClose.CurlyCloseCharacter:
-                                yield return new JsonCurlyClose(json, currentIndex);
+                                yield return new JsonTextElement(JsonCurlyClose.Value, json, currentIndex, 1);
                                 break;
                             case JsonSquareBracketOpen.SquareBracketOpenCharacter:
-                                yield return new JsonSquareBracketOpen(json, currentIndex);
+                                yield return new JsonTextElement(JsonSquareBracketOpen.Value, json, currentIndex, 1);
                                 break;
                             case JsonSquareBracketClose.SquareBracketCloseCharacter:
-                                yield return new JsonSquareBracketClose(json, currentIndex);
+                                yield return new JsonTextElement(JsonSquareBracketClose.Value, json, currentIndex, 1);
                                 break;
                             case JsonColon.ColonCharacter:
-                                yield return new JsonColon(json, currentIndex);
+                                yield return new JsonTextElement(JsonColon.Value, json, currentIndex, 1);
                                 break;
                             case JsonComma.CommaCharacter:
-                                yield return new JsonComma(json, currentIndex);
+                                yield return new JsonTextElement(JsonComma.Value, json, currentIndex, 1);
                                 break;
                             case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
@@ -189,10 +190,11 @@ namespace Sandra.UI.WF.Storage
                                 string displayCharValue = category == UnicodeCategory.OtherNotAssigned
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
-                                yield return new JsonUnknownSymbol(
+                                yield return new JsonTextElement(
+                                    new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex)),
                                     json,
                                     currentIndex,
-                                    TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex));
+                                    1);
                                 break;
                         }
                     }
@@ -205,7 +207,8 @@ namespace Sandra.UI.WF.Storage
 
             if (firstUnusedIndex < currentIndex)
             {
-                yield return new JsonValue(
+                yield return new JsonTextElement(
+                    new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
                     json,
                     firstUnusedIndex,
                     currentIndex - firstUnusedIndex);
@@ -214,7 +217,7 @@ namespace Sandra.UI.WF.Storage
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonTerminalSymbol> InString()
+        private IEnumerable<JsonTextElement> InString()
         {
             // Eat " character, but leave firstUnusedIndex unchanged.
             currentIndex++;
@@ -228,20 +231,20 @@ namespace Sandra.UI.WF.Storage
                         currentIndex++;
                         if (errors.Count > 0)
                         {
-                            yield return new JsonErrorString(
+                            yield return new JsonTextElement(
+                                new JsonErrorString(errors),
                                 json,
                                 firstUnusedIndex,
-                                currentIndex - firstUnusedIndex,
-                                errors);
+                                currentIndex - firstUnusedIndex);
                             errors.Clear();
                         }
                         else
                         {
-                            yield return new JsonString(
+                            yield return new JsonTextElement(
+                                new JsonString(valueBuilder.ToString()),
                                 json,
                                 firstUnusedIndex,
-                                currentIndex - firstUnusedIndex,
-                                valueBuilder.ToString());
+                                currentIndex - firstUnusedIndex);
                         }
                         valueBuilder.Clear();
                         firstUnusedIndex = currentIndex;
@@ -362,16 +365,16 @@ namespace Sandra.UI.WF.Storage
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             errors.Add(TextErrorInfo.UnterminatedString(firstUnusedIndex, length - firstUnusedIndex));
-            yield return new JsonErrorString(
+            yield return new JsonTextElement(
+                new JsonErrorString(errors),
                 json,
                 firstUnusedIndex,
-                length - firstUnusedIndex,
-                errors);
+                length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonTerminalSymbol> InSingleLineComment()
+        private IEnumerable<JsonTextElement> InSingleLineComment()
         {
             // Eat both / characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -392,7 +395,8 @@ namespace Sandra.UI.WF.Storage
                             char secondChar = json[currentIndex];
                             if (secondChar == '\n')
                             {
-                                yield return new JsonComment(
+                                yield return new JsonTextElement(
+                                    JsonComment.Value,
                                     json,
                                     firstUnusedIndex,
                                     currentIndex - firstUnusedIndex - 1);
@@ -406,7 +410,8 @@ namespace Sandra.UI.WF.Storage
                         }
                         break;
                     case '\n':
-                        yield return new JsonComment(
+                        yield return new JsonTextElement(
+                            JsonComment.Value,
                             json,
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
@@ -421,7 +426,8 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            yield return new JsonComment(
+            yield return new JsonTextElement(
+                JsonComment.Value,
                 json,
                 firstUnusedIndex,
                 currentIndex - firstUnusedIndex);
@@ -429,7 +435,7 @@ namespace Sandra.UI.WF.Storage
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonTerminalSymbol> InMultiLineComment()
+        private IEnumerable<JsonTextElement> InMultiLineComment()
         {
             // Eat /* characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -447,7 +453,8 @@ namespace Sandra.UI.WF.Storage
                             // Increment so the closing '*/' is regarded as part of the comment.
                             currentIndex += 2;
 
-                            yield return new JsonComment(
+                            yield return new JsonTextElement(
+                                JsonComment.Value,
                                 json,
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex);
@@ -462,11 +469,11 @@ namespace Sandra.UI.WF.Storage
                 currentIndex++;
             }
 
-            yield return new JsonUnterminatedMultiLineComment(
+            yield return new JsonTextElement(
+                new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex)),
                 json,
                 firstUnusedIndex,
-                length - firstUnusedIndex,
-                TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex));
+                length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
@@ -477,7 +484,7 @@ namespace Sandra.UI.WF.Storage
         /// <returns>
         /// An enumeration of <see cref="JsonTerminalSymbol"/> instances.
         /// </returns>
-        public IEnumerable<JsonTerminalSymbol> TokenizeAll()
+        public IEnumerable<JsonTextElement> TokenizeAll()
         {
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.
