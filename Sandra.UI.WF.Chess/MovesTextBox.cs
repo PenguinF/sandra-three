@@ -365,7 +365,7 @@ namespace Sandra.UI.WF
                     applyStyle(newActiveMoveElement, activeMoveStyle);
 
                     // Also update the caret so the active move is in view.
-                    CaretPosition.Value = newActiveMoveElement.Start + newActiveMoveElement.Length;
+                    CaretPosition.Value = newActiveMoveElement.End;
                 }
             }
         }

@@ -86,7 +86,7 @@ namespace SysExtensions.SyntaxRenderer
                 var lastElementIndex = elementIndexes[textLength - 1];
                 Debug.Assert(lastElementIndex + 1 == elements.Count);
                 var lastElement = elements[lastElementIndex];
-                Debug.Assert(lastElement.Start + lastElement.Length == textLength);
+                Debug.Assert(lastElement.End == textLength);
             }
         }
 

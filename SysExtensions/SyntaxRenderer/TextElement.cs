@@ -40,9 +40,26 @@ namespace SysExtensions.SyntaxRenderer
             this.renderer = renderer;
         }
 
+        /// <summary>
+        /// Gets the terminal symbol associated with this element.
+        /// </summary>
         public TTerminal TerminalSymbol { get; internal set; }
+
+        /// <summary>
+        /// Gets the start position of this element.
+        /// </summary>
         public int Start { get; internal set; }
+
+        /// <summary>
+        /// Gets the length of this element.
+        /// </summary>
         public int Length { get; internal set; }
+
+        /// <summary>
+        /// Gets the end position of this element, which is <see cref="Length"/> added to <see cref="Start"/>.
+        /// The end position is exclusive; the range of included characters is [<see cref="Start"/>..<see cref="End"/>-1].
+        /// </summary>
+        public int End => Start + Length;
 
         private void throwIfNoRenderer()
         {
@@ -73,7 +90,7 @@ namespace SysExtensions.SyntaxRenderer
         public TextElement<TTerminal> GetNextElement()
         {
             throwIfNoRenderer();
-            return renderer.GetElementAfter(Start + Length);
+            return renderer.GetElementAfter(End);
         }
 
         internal void Detach()
