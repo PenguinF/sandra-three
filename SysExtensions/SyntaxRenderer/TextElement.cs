@@ -76,30 +76,6 @@ namespace SysExtensions.SyntaxRenderer
             return renderer.GetElementAfter(Start + Length);
         }
 
-        /// <summary>
-        /// Sets the caret directly before this text element and brings it into view.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
-        /// </exception>
-        public void BringIntoViewBefore()
-        {
-            throwIfNoRenderer();
-            renderer.RenderTarget.CaretPosition.Value = Start;
-        }
-
-        /// <summary>
-        /// Sets the caret directly after this text element and brings it into view.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// This element has been removed from a renderer.
-        /// </exception>
-        public void BringIntoViewAfter()
-        {
-            throwIfNoRenderer();
-            renderer.RenderTarget.CaretPosition.Value = Start + Length;
-        }
-
         internal void Detach()
         {
             renderer = null;

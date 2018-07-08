@@ -355,7 +355,7 @@ namespace Sandra.UI.WF
                     // If there's no active move, go to before the first move.
                     if (syntaxRenderer.Elements.Count > 0)
                     {
-                        syntaxRenderer.Elements[0].BringIntoViewBefore();
+                        CaretPosition.Value = syntaxRenderer.Elements[0].Start;
                     }
                 }
                 else if (newActiveMoveElement != null)
@@ -365,7 +365,7 @@ namespace Sandra.UI.WF
                     applyStyle(newActiveMoveElement, activeMoveStyle);
 
                     // Also update the caret so the active move is in view.
-                    newActiveMoveElement.BringIntoViewAfter();
+                    CaretPosition.Value = newActiveMoveElement.Start + newActiveMoveElement.Length;
                 }
             }
         }
