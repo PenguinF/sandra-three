@@ -131,7 +131,7 @@ namespace Sandra.UI.WF.Storage
                     }
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonTextElement symbol = ReadSkipComments();
+                    JsonTextElement textElement = ReadSkipComments();
                     PValue parsedValue = default(PValue);
 
                     // If gotValue remains false, a missing value error will be reported.
@@ -139,12 +139,12 @@ namespace Sandra.UI.WF.Storage
 
                     // Loop parsing values until encountering a non ':'.
                     bool gotColon = false;
-                    while (symbol != null && symbol.TerminalSymbol is JsonColon)
+                    while (textElement != null && textElement.TerminalSymbol is JsonColon)
                     {
                         if (gotColon)
                         {
                             // Multiple ':' without a ','.
-                            Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, textElement.Start, textElement.Length));
                         }
 
                         JsonTextElement firstValueSymbol;
@@ -156,12 +156,12 @@ namespace Sandra.UI.WF.Storage
                             mapBuilder.Add(propertyKey, parsedValue);
                         }
 
-                        symbol = ReadSkipComments();
+                        textElement = ReadSkipComments();
                         gotColon = true;
                     }
 
-                    bool isComma = symbol != null && symbol.TerminalSymbol is JsonComma;
-                    bool isCurlyClose = symbol != null && symbol.TerminalSymbol is JsonCurlyClose;
+                    bool isComma = textElement != null && textElement.TerminalSymbol is JsonComma;
+                    bool isCurlyClose = textElement != null && textElement.TerminalSymbol is JsonCurlyClose;
 
                     // '}' directly following a ',' should not report errors.
                     // '..., : }' however misses both a key and a value.
@@ -170,25 +170,25 @@ namespace Sandra.UI.WF.Storage
                         // Report missing property key and/or value.
                         if (!gotKey)
                         {
-                            Errors.Add(new TextErrorInfo(EmptyKeyMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(EmptyKeyMessage, textElement.Start, textElement.Length));
                         }
 
                         if (!gotValue)
                         {
-                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, textElement.Start, textElement.Length));
                         }
                     }
 
                     if (!isComma)
                     {
                         // Assume missing closing bracket '}' on EOF or control symbol.
-                        if (symbol == null)
+                        if (textElement == null)
                         {
                             Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength - 1, 1));
                         }
                         else if (!isCurlyClose)
                         {
-                            Errors.Add(new TextErrorInfo(ControlSymbolInObjectMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(ControlSymbolInObjectMessage, textElement.Start, textElement.Length));
                         }
 
                         return new PMap(mapBuilder);
@@ -209,26 +209,26 @@ namespace Sandra.UI.WF.Storage
                     if (gotValue) listBuilder.Add(parsedValue);
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonTextElement symbol = ReadSkipComments();
-                    if (symbol != null && symbol.TerminalSymbol is JsonComma)
+                    JsonTextElement textElement = ReadSkipComments();
+                    if (textElement != null && textElement.TerminalSymbol is JsonComma)
                     {
                         if (!gotValue)
                         {
                             // Two commas or '[,': add an empty PErrorValue.
-                            Errors.Add(new TextErrorInfo(EmptyValueMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(EmptyValueMessage, textElement.Start, textElement.Length));
                             listBuilder.Add(PConstantValue.Undefined);
                         }
                     }
                     else
                     {
                         // Assume missing closing bracket ']' on EOF or control symbol.
-                        if (symbol == null)
+                        if (textElement == null)
                         {
                             Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength - 1, 1));
                         }
-                        else if (!(symbol.TerminalSymbol is JsonSquareBracketClose))
+                        else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
                         {
-                            Errors.Add(new TextErrorInfo(ControlSymbolInArrayMessage, symbol.Start, symbol.Length));
+                            Errors.Add(new TextErrorInfo(ControlSymbolInArrayMessage, textElement.Start, textElement.Length));
                         }
 
                         return new PList(listBuilder);
@@ -265,51 +265,51 @@ namespace Sandra.UI.WF.Storage
                 firstValue = default(PValue);
                 firstValueSymbol = default(JsonTextElement);
 
-                JsonTextElement symbol = PeekSkipComments();
-                if (symbol == null || !symbol.TerminalSymbol.IsValueStartSymbol) return false;
+                JsonTextElement textElement = PeekSkipComments();
+                if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return false;
 
-                firstValueSymbol = symbol;
+                firstValueSymbol = textElement;
                 bool hasValue = false;
 
                 for (;;)
                 {
                     // Read the same symbol again but now eat it.
-                    symbol = ReadSkipComments();
+                    textElement = ReadSkipComments();
 
                     if (!hasValue)
                     {
-                        if (symbol.TerminalSymbol.Errors.Any()) firstValue = PConstantValue.Undefined;
-                        else firstValue = Visit(symbol.TerminalSymbol);
+                        if (textElement.TerminalSymbol.Errors.Any()) firstValue = PConstantValue.Undefined;
+                        else firstValue = Visit(textElement.TerminalSymbol);
                         hasValue = true;
                     }
-                    else if (!symbol.TerminalSymbol.Errors.Any())
+                    else if (!textElement.TerminalSymbol.Errors.Any())
                     {
                         // Make sure consecutive symbols are parsed as if they were valid.
                         // Discard the result.
-                        Visit(symbol.TerminalSymbol);
+                        Visit(textElement.TerminalSymbol);
                     }
 
                     // Peek at the next symbol.
                     // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                    symbol = PeekSkipComments();
-                    if (symbol == null || !symbol.TerminalSymbol.IsValueStartSymbol) return true;
+                    textElement = PeekSkipComments();
+                    if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return true;
 
                     // Two or more consecutive values not allowed.
-                    Errors.Add(new TextErrorInfo(multipleValuesMessage, symbol.Start, symbol.Length));
+                    Errors.Add(new TextErrorInfo(multipleValuesMessage, textElement.Start, textElement.Length));
                 }
             }
 
             public bool TryParse(out PMap map)
             {
                 PValue rootValue;
-                JsonTextElement symbol;
+                JsonTextElement textElement;
 
-                bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out symbol);
+                bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out textElement);
 
-                JsonTextElement extraSymbol = ReadSkipComments();
-                if (extraSymbol != null)
+                JsonTextElement extraElement = ReadSkipComments();
+                if (extraElement != null)
                 {
-                    Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraSymbol.Start, extraSymbol.Length));
+                    Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraElement.Start, extraElement.Length));
                 }
 
                 if (hasRootValue)
@@ -317,7 +317,7 @@ namespace Sandra.UI.WF.Storage
                     bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
                     if (!validMap)
                     {
-                        Errors.Add(new TextErrorInfo(NoPMapMessage, symbol.Start, symbol.Length));
+                        Errors.Add(new TextErrorInfo(NoPMapMessage, textElement.Start, textElement.Length));
                     }
 
                     return validMap;
