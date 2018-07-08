@@ -19,6 +19,8 @@
  *********************************************************************************/
 #endregion
 
+using System;
+
 namespace SysExtensions.TextIndex
 {
     /// <summary>
@@ -31,6 +33,9 @@ namespace SysExtensions.TextIndex
     /// </typeparam>
     public class TextElement<TTerminal>
     {
+        private int start;
+        private int length;
+
         /// <summary>
         /// Gets the terminal symbol associated with this element.
         /// </summary>
@@ -39,12 +44,34 @@ namespace SysExtensions.TextIndex
         /// <summary>
         /// Gets the start position of this element.
         /// </summary>
-        public int Start { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="Start"/> is negative.
+        /// </exception>
+        public int Start
+        {
+            get { return start; }
+            set
+            {
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));
+                start = value;
+            }
+        }
 
         /// <summary>
         /// Gets the length of this element.
         /// </summary>
-        public int Length { get; internal set; }
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="Length"/> is 0 or negative.
+        /// </exception>
+        public int Length
+        {
+            get { return length; }
+            set
+            {
+                if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+                length = value;
+            }
+        }
 
         /// <summary>
         /// Gets the end position of this element, which is <see cref="Length"/> added to <see cref="Start"/>.

@@ -61,7 +61,6 @@ namespace SysExtensions.TextIndex
         public TextElement<TTerminal> AppendTerminalSymbol(TTerminal terminal, int length)
         {
             if (terminal == null) throw new ArgumentNullException(nameof(terminal));
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length), "Cannot append empty (lambda) terminals.");
 
             var textElement = new TextElement<TTerminal>()
             {
