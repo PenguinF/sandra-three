@@ -115,11 +115,6 @@ namespace SysExtensions.SyntaxRenderer
         /// </summary>
         public void Clear()
         {
-            if (!isSlave)
-            {
-                RenderTarget.RemoveText(0, elementIndexes.Count);
-            }
-
             elementIndexes.Clear();
             elements.ForEach(e => e.Detach());
             elements.Clear();
