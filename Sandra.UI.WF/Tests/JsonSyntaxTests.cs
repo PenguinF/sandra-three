@@ -40,8 +40,9 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Fact]
-        public void NullJsonShouldThrow()
+        public void NullSymbolOrJsonShouldThrow()
         {
+            Assert.Throws<ArgumentNullException>(() => new JsonTextElement(null));
             Assert.Throws<ArgumentNullException>(() => new JsonTestSymbol(null, 0, 0));
         }
 

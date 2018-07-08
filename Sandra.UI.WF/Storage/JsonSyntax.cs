@@ -26,6 +26,17 @@ using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
+    public class JsonTextElement
+    {
+        public JsonTerminalSymbol TerminalSymbol;
+
+        public JsonTextElement(JsonTerminalSymbol symbol)
+        {
+            if (symbol == null) throw new ArgumentNullException(nameof(symbol));
+            TerminalSymbol = symbol;
+        }
+    }
+
     public abstract class JsonTerminalSymbol
     {
         public string Json { get; }
