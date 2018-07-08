@@ -248,7 +248,11 @@ namespace Sandra.UI.WF.Storage
                     return new PInteger(integerValue);
                 }
 
-                Errors.Add(new TextErrorInfo(string.Format(UnrecognizedValueMessage, value), symbol.Start, symbol.Length));
+                Errors.Add(new TextErrorInfo(
+                    string.Format(UnrecognizedValueMessage, value),
+                    tokens[currentTokenIndex - 1].Start,
+                    value.Length));
+
                 return PConstantValue.Undefined;
             }
 
