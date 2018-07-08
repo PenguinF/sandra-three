@@ -133,7 +133,11 @@ namespace Sandra.UI.WF
         {
             base.OnHandleCreated(e);
 
-            parseAndApplySyntaxHighlighting(Text);
+            using (var updateToken = BeginUpdateRememberState())
+            {
+                parseAndApplySyntaxHighlighting(Text);
+            }
+
             TextChanged += SettingsTextBox_TextChanged;
         }
 
@@ -237,6 +241,12 @@ namespace Sandra.UI.WF
             {
                 currentErrors = errors;
                 currentSelectedError = null;
+
+                foreach (var error in errors)
+                {
+                    Select(error.Start, error.Length);
+                    SetErrorUnderline();
+                }
 
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
