@@ -73,16 +73,7 @@ namespace Sandra.UI.WF
                 ScrollBars = RichTextBoxScrollBars.Vertical,
             };
 
-            errorsTextBox.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.ZoomIn, errorsTextBox.TryZoomIn },
-                { SharedUIAction.ZoomOut, errorsTextBox.TryZoomOut },
-
-                { RichTextBoxBase.CutSelectionToClipBoard, errorsTextBox.TryCutSelectionToClipBoard },
-                { RichTextBoxBase.CopySelectionToClipBoard, errorsTextBox.TryCopySelectionToClipBoard },
-                { RichTextBoxBase.PasteSelectionFromClipBoard, errorsTextBox.TryPasteSelectionFromClipBoard },
-                { RichTextBoxBase.SelectAllText, errorsTextBox.TrySelectAllText },
-            });
+            errorsTextBox.BindStandardEditUIActions();
 
             UIMenu.AddTo(errorsTextBox);
 
@@ -97,15 +88,9 @@ namespace Sandra.UI.WF
             settingsTextBox.BindActions(new UIActionBindings
             {
                 { SettingsTextBox.SaveToFile, settingsTextBox.TrySaveToFile },
-
-                { SharedUIAction.ZoomIn, settingsTextBox.TryZoomIn },
-                { SharedUIAction.ZoomOut, settingsTextBox.TryZoomOut },
-
-                { RichTextBoxBase.CutSelectionToClipBoard, settingsTextBox.TryCutSelectionToClipBoard },
-                { RichTextBoxBase.CopySelectionToClipBoard, settingsTextBox.TryCopySelectionToClipBoard },
-                { RichTextBoxBase.PasteSelectionFromClipBoard, settingsTextBox.TryPasteSelectionFromClipBoard },
-                { RichTextBoxBase.SelectAllText, settingsTextBox.TrySelectAllText },
             });
+
+            settingsTextBox.BindStandardEditUIActions();
 
             UIMenu.AddTo(settingsTextBox);
 
@@ -297,16 +282,7 @@ namespace Sandra.UI.WF
                 ReadOnly = true,
             };
 
-            textBox.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.ZoomIn, textBox.TryZoomIn },
-                { SharedUIAction.ZoomOut, textBox.TryZoomOut },
-
-                { RichTextBoxBase.CutSelectionToClipBoard, textBox.TryCutSelectionToClipBoard },
-                { RichTextBoxBase.CopySelectionToClipBoard, textBox.TryCopySelectionToClipBoard },
-                { RichTextBoxBase.PasteSelectionFromClipBoard, textBox.TryPasteSelectionFromClipBoard },
-                { RichTextBoxBase.SelectAllText, textBox.TrySelectAllText },
-            });
+            textBox.BindStandardEditUIActions();
 
             UIMenu.AddTo(textBox);
 

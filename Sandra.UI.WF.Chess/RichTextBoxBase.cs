@@ -63,6 +63,23 @@ namespace Sandra.UI.WF
         {
             ZoomFactorChanged?.Invoke(this, e);
         }
+
+        /// <summary>
+        /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
+        /// </summary>
+        public void BindStandardEditUIActions()
+        {
+            this.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, TryZoomIn },
+                { SharedUIAction.ZoomOut, TryZoomOut },
+
+                { CutSelectionToClipBoard, TryCutSelectionToClipBoard },
+                { CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+                { PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
+                { SelectAllText, TrySelectAllText },
+            });
+        }
     }
 
     /// <summary>
