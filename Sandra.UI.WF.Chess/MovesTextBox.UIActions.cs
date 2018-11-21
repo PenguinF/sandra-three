@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * MovesTextBox.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 namespace Sandra.UI.WF
 {
     public partial class MovesTextBox
@@ -24,7 +27,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding UsePGNPieceSymbols = new DefaultUIActionBinding(
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -48,7 +51,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding UseLongAlgebraicNotation = new DefaultUIActionBinding(
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UseLongAlgebraicNotation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,

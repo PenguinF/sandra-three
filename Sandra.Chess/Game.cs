@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Game.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System;
 using System.Collections.Generic;
@@ -29,17 +32,19 @@ namespace Sandra.Chess
     public class Game
     {
         private readonly Position initialPosition;
-        private readonly MoveTree moveTree;
-
         private Position currentPosition;
-        private MoveTree activeTree;
+
+        /// <summary>
+        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
+        /// </summary>
+        public MoveTree MoveTree { get; }
 
         private Game(Position initialPosition, MoveTree moveTree)
         {
             this.initialPosition = initialPosition;
             currentPosition = initialPosition.Copy();
-            this.moveTree = moveTree;
-            activeTree = moveTree;
+            MoveTree = moveTree;
+            ActiveTree = moveTree;
         }
 
         /// <summary>
@@ -54,7 +59,7 @@ namespace Sandra.Chess
         /// Returns a copy of this game, with the same initial <see cref="Position"/> and shared <see cref="Chess.MoveTree"/>,
         /// but in which <see cref="ActiveTree"/> can be manipulated independently.
         /// </summary>
-        public Game Copy() => new Game(initialPosition, moveTree);
+        public Game Copy() => new Game(initialPosition, MoveTree);
 
         /// <summary>
         /// Gets the initial position of this game.
@@ -67,11 +72,6 @@ namespace Sandra.Chess
         public Color InitialSideToMove => initialPosition.SideToMove;
 
         /// <summary>
-        /// Gets a reference to the root of the <see cref="Chess.MoveTree"/> of this <see cref="Game"/>.
-        /// </summary>
-        public MoveTree MoveTree => moveTree;
-
-        /// <summary>
         /// Gets the current position of this game.
         /// </summary>
         public Position CurrentPosition => currentPosition.Copy();
@@ -79,7 +79,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets the move tree which is currently active.
         /// </summary>
-        public MoveTree ActiveTree => activeTree;
+        public MoveTree ActiveTree { get; private set; }
 
         private void setActiveTree(MoveTree value)
         {
@@ -94,7 +94,7 @@ namespace Sandra.Chess
             }
 
             // 'value' should be embedded somewhere inside this.moveTree.
-            if (current != moveTree)
+            if (current != MoveTree)
             {
                 throw new ArgumentException(nameof(value), "value is not embedded in Game.MoveTree.");
             }
@@ -106,7 +106,7 @@ namespace Sandra.Chess
             }
 
             currentPosition = newPosition;
-            activeTree = newActiveTree;
+            ActiveTree = newActiveTree;
         }
 
         public void SetActiveTree(MoveTree value)
@@ -116,15 +116,15 @@ namespace Sandra.Chess
                 throw new ArgumentNullException(nameof(value));
             }
 
-            if (activeTree != value)
+            if (ActiveTree != value)
             {
                 setActiveTree(value);
             }
         }
 
-        public bool IsFirstMove => activeTree.ParentVariation == null;
-        public bool IsLastMove => activeTree.MainLine == null;
-        public Move PreviousMove() => activeTree.ParentVariation.Move;
+        public bool IsFirstMove => ActiveTree.ParentVariation == null;
+        public bool IsLastMove => ActiveTree.MainLine == null;
+        public Move PreviousMove() => ActiveTree.ParentVariation.Move;
 
         public void Backward()
         {
@@ -132,7 +132,7 @@ namespace Sandra.Chess
             if (IsFirstMove) return;
 
             // Replay until the previous move.
-            setActiveTree(activeTree.ParentVariation.ParentTree);
+            setActiveTree(ActiveTree.ParentVariation.ParentTree);
         }
 
         public void Forward()
@@ -140,8 +140,8 @@ namespace Sandra.Chess
             // No effect if last move.
             if (IsLastMove) return;
 
-            currentPosition.FastMakeMove(activeTree.MainLine.Move);
-            activeTree = activeTree.MainLine.MoveTree;
+            currentPosition.FastMakeMove(ActiveTree.MainLine.Move);
+            ActiveTree = ActiveTree.MainLine.MoveTree;
         }
 
         /// <summary>
@@ -155,15 +155,17 @@ namespace Sandra.Chess
         public ColoredPiece? GetColoredPiece(Square square)
         {
             ulong squareVector = square.ToVector();
-            Piece piece;
-            if (EnumHelper<Piece>.AllValues.Any(x => currentPosition.GetVector(x).Test(squareVector), out piece))
+
+            if (EnumHelper<Piece>.AllValues.Any(x => currentPosition.GetVector(x).Test(squareVector), out Piece piece))
             {
                 if (currentPosition.GetVector(Color.White).Test(squareVector))
                 {
                     return piece.Combine(Color.White);
                 }
+
                 return piece.Combine(Color.Black);
             }
+
             return null;
         }
 
@@ -201,8 +203,8 @@ namespace Sandra.Chess
             if (make && moveInfo.Result == MoveCheckResult.OK)
             {
                 // Move to an existing variation, or create a new one.
-                Variation variation = activeTree.GetOrAddVariation(move);
-                activeTree = variation.MoveTree;
+                Variation variation = ActiveTree.GetOrAddVariation(move);
+                ActiveTree = variation.MoveTree;
             }
             return move;
         }

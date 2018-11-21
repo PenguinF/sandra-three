@@ -274,11 +274,9 @@ namespace Sandra.UI.WF
         {
             foreach (ToolStripMenuItem item in collection.OfType<ToolStripMenuItem>())
             {
-                UIActionToolStripMenuItem actionItem = item as UIActionToolStripMenuItem;
-                if (actionItem != null)
+                if (item is UIActionToolStripMenuItem actionItem)
                 {
-                    FocusDependentUIActionState state;
-                    if (focusDependentUIActions.TryGetValue(actionItem.Action, out state))
+                    if (focusDependentUIActions.TryGetValue(actionItem.Action, out FocusDependentUIActionState state))
                     {
                         state.IsDirty = true;
                         state.MenuItem = actionItem;

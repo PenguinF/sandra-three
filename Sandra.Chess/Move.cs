@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Move.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
 namespace Sandra.Chess
@@ -42,12 +45,10 @@ namespace Sandra.Chess
         /// Returns if both move info structures are equal while ignoring their results.
         /// </summary>
         public bool InputEquals(MoveInfo other)
-        {
-            return MoveType == other.MoveType
-                && SourceSquare == other.SourceSquare
-                && TargetSquare == other.TargetSquare
-                && PromoteTo == other.PromoteTo;
-        }
+            => MoveType == other.MoveType
+            && SourceSquare == other.SourceSquare
+            && TargetSquare == other.TargetSquare
+            && PromoteTo == other.PromoteTo;
 
         public void ThrowWhenOutOfRange()
         {
@@ -84,7 +85,7 @@ namespace Sandra.Chess
 
         public MoveInfo CreateMoveInfo()
         {
-            return new MoveInfo()
+            return new MoveInfo
             {
                 MoveType = MoveType,
                 SourceSquare = SourceSquare,

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PMap.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -145,8 +148,7 @@ namespace Sandra.UI.WF.Storage
 
             // Both key sets need to match exactly, but if Counts are equal a unidirectional check is sufficient.
             PValueEqualityComparer eq = PValueEqualityComparer.Instance;
-            PValue otherValue;
-            return map.All(kv => other.map.TryGetValue(kv.Key, out otherValue)
+            return map.All(kv => other.map.TryGetValue(kv.Key, out PValue otherValue)
                               && eq.AreEqual(kv.Value, otherValue));
         }
 

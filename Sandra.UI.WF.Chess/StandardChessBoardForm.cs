@@ -46,10 +46,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public EnumIndexedArray<Chess.ColoredPiece, Image> PieceImages
         {
-            get
-            {
-                return pieceImages;
-            }
+            get => pieceImages;
             set
             {
                 pieceImages = value;
@@ -61,7 +58,7 @@ namespace Sandra.UI.WF
 
         public InteractiveGame Game
         {
-            get { return game; }
+            get => game;
             set
             {
                 if (game != value)
@@ -79,7 +76,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public bool IsBoardFlipped
         {
-            get { return isBoardFlipped; }
+            get => isBoardFlipped;
             set
             {
                 if (isBoardFlipped != value)
@@ -113,18 +110,12 @@ namespace Sandra.UI.WF
         }
 
         private Chess.Square toSquare(SquareLocation squareLocation)
-        {
-            return isBoardFlipped
-                 ? (7 - (Chess.File)squareLocation.X).Combine((Chess.Rank)squareLocation.Y)
-                 : ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
-        }
+            => isBoardFlipped ? (7 - (Chess.File)squareLocation.X).Combine((Chess.Rank)squareLocation.Y)
+                              : ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
 
         private SquareLocation toSquareLocation(Chess.Square square)
-        {
-            return isBoardFlipped
-                 ? new SquareLocation(7 - square.X(), square.Y())
-                 : new SquareLocation(square.X(), 7 - square.Y());
-        }
+            => isBoardFlipped ? new SquareLocation(7 - square.X(), square.Y())
+                              : new SquareLocation(square.X(), 7 - square.Y());
 
         private void copyPositionToBoard()
         {
@@ -557,7 +548,7 @@ namespace Sandra.UI.WF
                 : Color.Empty;
 
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.
-            Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+            Chess.MoveInfo moveInfo = new Chess.MoveInfo
             {
                 SourceSquare = moveStartSquare,
             };
@@ -701,7 +692,7 @@ namespace Sandra.UI.WF
             if (targetSquare != null)
             {
                 // Move piece from source to destination.
-                Chess.MoveInfo moveInfo = new Chess.MoveInfo()
+                Chess.MoveInfo moveInfo = new Chess.MoveInfo
                 {
                     SourceSquare = moveStartSquare,
                     TargetSquare = toSquare(targetSquare),
@@ -985,7 +976,7 @@ namespace Sandra.UI.WF
             RECT windowRect;
             if (targetSquareSize == null || targetSquareSize.Value <= 0)
             {
-                windowRect = new RECT()
+                windowRect = new RECT
                 {
                     Left = Left,
                     Right = Right,
@@ -999,7 +990,7 @@ namespace Sandra.UI.WF
                 targetSize.Width += widthDifference;
                 targetSize.Height += heightDifference;
 
-                windowRect = new RECT()
+                windowRect = new RECT
                 {
                     Left = Left,
                     Right = Left + targetSize.Width,

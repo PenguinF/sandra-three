@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * WeakEventInvocationException.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections;
 
@@ -64,8 +67,8 @@ namespace Sandra.UI.WF
         /// </returns>
         public override string HelpLink
         {
-            get { return InnerException.HelpLink; }
-            set { InnerException.HelpLink = value; }
+            get => InnerException.HelpLink;
+            set => InnerException.HelpLink = value;
         }
 
         /// <summary>
@@ -87,8 +90,8 @@ namespace Sandra.UI.WF
         /// </exception>
         public override string Source
         {
-            get { return InnerException.Source; }
-            set { InnerException.Source = value; }
+            get => InnerException.Source;
+            set => InnerException.Source = value;
         }
 
         /// <summary>

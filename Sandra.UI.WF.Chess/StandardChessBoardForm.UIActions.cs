@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -48,7 +48,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,

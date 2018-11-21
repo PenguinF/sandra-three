@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SnappingMdiChildForm.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -91,8 +94,7 @@ namespace Sandra.UI.WF
         /// Gets or sets the maximum distance between form edges within which they will be sensitive to snapping together. The default value is <see cref="DefaultMaxSnapDistance"/> (4).
         /// </summary>
         [DefaultValue(DefaultMaxSnapDistance)]
-        public int MaxSnapDistance { get { return m_maxSnapDistance; } set { m_maxSnapDistance = value; } }
-        int m_maxSnapDistance = DefaultMaxSnapDistance;
+        public int MaxSnapDistance { get; set; } = DefaultMaxSnapDistance;
 
         /// <summary>
         /// Gets the default value for the <see cref="InsensitiveBorderEndLength"/> property.
@@ -103,8 +105,7 @@ namespace Sandra.UI.WF
         /// Gets or sets the length of the ends of the borders of this form that are insensitive to snapping. The default value is <see cref="DefaultInsensitiveBorderEndLength"/> (16).
         /// </summary>
         [DefaultValue(DefaultInsensitiveBorderEndLength)]
-        public int InsensitiveBorderEndLength { get { return m_insensitiveBorderEndLength; } set { m_insensitiveBorderEndLength = value; } }
-        int m_insensitiveBorderEndLength = DefaultInsensitiveBorderEndLength;
+        public int InsensitiveBorderEndLength { get; set; } = DefaultInsensitiveBorderEndLength;
 
         // Size/move precalculated information.
         bool m_canSnap;                                // Guard boolean, which is only true if the window is sizing/moving and has an MDI parent.
@@ -130,8 +131,8 @@ namespace Sandra.UI.WF
 
                 // Calculate segments for this MDI child, and start with initial full segments.
                 List<LineSegment> childSegments = isVertical
-                    ? getVerticalBorders(ref mdiChildRectangle, m_insensitiveBorderEndLength)
-                    : getHorizontalBorders(ref mdiChildRectangle, m_insensitiveBorderEndLength);
+                    ? getVerticalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength)
+                    : getHorizontalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength);
 
                 // Loop over MDI child rectangles that are higher in the z-order, since they can overlap.
                 for (int overlappingRectangleIndex = mdiChildRectangleIndex - 1; overlappingRectangleIndex >= 0; --overlappingRectangleIndex)
@@ -145,15 +146,15 @@ namespace Sandra.UI.WF
                     {
                         overlappingRectanglePositionMin = overlappingRectangle.Left;
                         overlappingRectanglePositionMax = overlappingRectangle.Right;
-                        minInflated = overlappingRectangle.Top - m_insensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Bottom + m_insensitiveBorderEndLength;
+                        minInflated = overlappingRectangle.Top - InsensitiveBorderEndLength;
+                        maxInflated = overlappingRectangle.Bottom + InsensitiveBorderEndLength;
                     }
                     else
                     {
                         overlappingRectanglePositionMin = overlappingRectangle.Top;
                         overlappingRectanglePositionMax = overlappingRectangle.Bottom;
-                        minInflated = overlappingRectangle.Left - m_insensitiveBorderEndLength;
-                        maxInflated = overlappingRectangle.Right + m_insensitiveBorderEndLength;
+                        minInflated = overlappingRectangle.Left - InsensitiveBorderEndLength;
+                        maxInflated = overlappingRectangle.Right + InsensitiveBorderEndLength;
                     }
 
                     // Start with the end of the list and work back to the beginning, because segments that are split in two by this overlapping rectangle don't need to be checked again.
@@ -200,7 +201,7 @@ namespace Sandra.UI.WF
         void prepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
-            RECT mdiClientRectangle = new RECT()
+            RECT mdiClientRectangle = new RECT
             {
                 Left = m_currentMdiClientScreenRectangle.Left,
                 Right = m_currentMdiClientScreenRectangle.Right,
@@ -214,13 +215,12 @@ namespace Sandra.UI.WF
             for (int mdiChildIndex = 0; mdiChildIndex < mdiChildCount; ++mdiChildIndex)
             {
                 Control child = mdiChildren[mdiChildIndex];
-                Form mdiChildForm = child as Form;
-                if (mdiChildForm != null && mdiChildForm.Visible && mdiChildForm.WindowState == FormWindowState.Normal)
+                if (child is Form mdiChildForm && mdiChildForm.Visible && mdiChildForm.WindowState == FormWindowState.Normal)
                 {
                     // Convert the bounds of this MDI child to screen coordinates.
                     Rectangle mdiChildBounds = mdiChildForm.Bounds;
                     mdiChildBounds.Offset(mdiClientRectangle.Left, mdiClientRectangle.Top);
-                    RECT mdiChildRectangle = new RECT()
+                    RECT mdiChildRectangle = new RECT
                     {
                         Left = mdiChildBounds.Left,
                         Right = mdiChildBounds.Right,
@@ -306,13 +306,13 @@ namespace Sandra.UI.WF
             // Evaluate left/right borders, then top/bottom borders.
 
             // Create line segments for each border of this window.
-            LineSegment leftBorder = getLeftBorder(ref moveRect, m_insensitiveBorderEndLength);
-            LineSegment rightBorder = getRightBorder(ref moveRect, m_insensitiveBorderEndLength);
+            LineSegment leftBorder = getLeftBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment rightBorder = getRightBorder(ref moveRect, InsensitiveBorderEndLength);
 
             if (null != leftBorder && null != rightBorder)
             {
                 // Initialize snap threshold.
-                int snapThresholdX = m_maxSnapDistance + 1;
+                int snapThresholdX = MaxSnapDistance + 1;
 
                 // Preserve original width of the window.
                 int originalWidth = m_rectangleBeforeSizeMove.Right - m_rectangleBeforeSizeMove.Left;
@@ -336,13 +336,13 @@ namespace Sandra.UI.WF
             }
 
             // Create line segments for each border of this window.
-            LineSegment topBorder = getTopBorder(ref moveRect, m_insensitiveBorderEndLength);
-            LineSegment bottomBorder = getBottomBorder(ref moveRect, m_insensitiveBorderEndLength);
+            LineSegment topBorder = getTopBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment bottomBorder = getBottomBorder(ref moveRect, InsensitiveBorderEndLength);
 
             if (null != topBorder && null != bottomBorder)
             {
                 // Initialize snap threshold.
-                int snapThresholdY = m_maxSnapDistance + 1;
+                int snapThresholdY = MaxSnapDistance + 1;
 
                 // Preserve original height of the window.
                 int originalHeight = m_rectangleBeforeSizeMove.Bottom - m_rectangleBeforeSizeMove.Top;
@@ -377,14 +377,14 @@ namespace Sandra.UI.WF
             // Evaluate left/right borders, then top/bottom borders.
 
             // Initialize snap threshold.
-            int snapThresholdX = m_maxSnapDistance + 1;
+            int snapThresholdX = MaxSnapDistance + 1;
 
             switch (resizeMode)
             {
                 case ResizeMode.Left:
                 case ResizeMode.TopLeft:
                 case ResizeMode.BottomLeft:
-                    LineSegment leftBorder = getLeftBorder(ref resizeRect, m_insensitiveBorderEndLength);
+                    LineSegment leftBorder = getLeftBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != leftBorder)
                     {
                         foreach (LineSegment verticalSegment in m_verticalSegments)
@@ -401,7 +401,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Right:
                 case ResizeMode.TopRight:
                 case ResizeMode.BottomRight:
-                    LineSegment rightBorder = getRightBorder(ref resizeRect, m_insensitiveBorderEndLength);
+                    LineSegment rightBorder = getRightBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != rightBorder)
                     {
                         foreach (LineSegment verticalSegment in m_verticalSegments)
@@ -418,14 +418,14 @@ namespace Sandra.UI.WF
             }
 
             // Initialize snap threshold.
-            int snapThresholdY = m_maxSnapDistance + 1;
+            int snapThresholdY = MaxSnapDistance + 1;
 
             switch (resizeMode)
             {
                 case ResizeMode.Top:
                 case ResizeMode.TopLeft:
                 case ResizeMode.TopRight:
-                    LineSegment topBorder = getTopBorder(ref resizeRect, m_insensitiveBorderEndLength);
+                    LineSegment topBorder = getTopBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != topBorder)
                     {
                         foreach (LineSegment horizontalSegment in m_horizontalSegments)
@@ -442,7 +442,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Bottom:
                 case ResizeMode.BottomLeft:
                 case ResizeMode.BottomRight:
-                    LineSegment bottomBorder = getBottomBorder(ref resizeRect, m_insensitiveBorderEndLength);
+                    LineSegment bottomBorder = getBottomBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != bottomBorder)
                     {
                         foreach (LineSegment horizontalSegment in m_horizontalSegments)

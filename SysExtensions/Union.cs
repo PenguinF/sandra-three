@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Union.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
 namespace SysExtensions
@@ -100,7 +103,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption1 != null) whenOption1(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -108,7 +111,7 @@ namespace SysExtensions
                 Func<T2, TResult> whenOption2 = null,
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -127,7 +130,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption2 != null) whenOption2(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -135,7 +138,7 @@ namespace SysExtensions
                 Func<T2, TResult> whenOption2 = null,
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
     }
@@ -239,7 +242,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption1 != null) whenOption1(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -248,7 +251,7 @@ namespace SysExtensions
                 Func<T3, TResult> whenOption3 = null,
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -268,7 +271,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption2 != null) whenOption2(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -277,7 +280,7 @@ namespace SysExtensions
                 Func<T3, TResult> whenOption3 = null,
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -297,7 +300,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption3 != null) whenOption3(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -306,7 +309,7 @@ namespace SysExtensions
                 Func<T3, TResult> whenOption3 = null,
                 Func<TResult> otherwise = null)
                 => whenOption3 != null ? whenOption3(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
     }
@@ -427,7 +430,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption1 != null) whenOption1(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -437,7 +440,7 @@ namespace SysExtensions
                 Func<T4, TResult> whenOption4 = null,
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -458,7 +461,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption2 != null) whenOption2(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -468,7 +471,7 @@ namespace SysExtensions
                 Func<T4, TResult> whenOption4 = null,
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -489,7 +492,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption3 != null) whenOption3(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -499,7 +502,7 @@ namespace SysExtensions
                 Func<T4, TResult> whenOption4 = null,
                 Func<TResult> otherwise = null)
                 => whenOption3 != null ? whenOption3(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
 
@@ -520,7 +523,7 @@ namespace SysExtensions
                 Action otherwise = null)
             {
                 if (whenOption4 != null) whenOption4(Value);
-                else if (otherwise != null) otherwise();
+                else otherwise?.Invoke();
             }
 
             public override TResult Match<TResult>(
@@ -530,7 +533,7 @@ namespace SysExtensions
                 Func<T4, TResult> whenOption4 = null,
                 Func<TResult> otherwise = null)
                 => whenOption4 != null ? whenOption4(Value)
-                : (otherwise != null) ? otherwise()
+                : otherwise != null ? otherwise()
                 : default(TResult);
         }
     }

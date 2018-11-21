@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingKey.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Diagnostics;
 using System.Text;
@@ -38,8 +41,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public SettingKey(string key)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
-            Key = key;
+            Key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         public bool Equals(SettingKey other) => other != null && Key == other.Key;

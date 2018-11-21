@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PType.Base.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Numerics;
 
@@ -89,14 +92,12 @@ namespace Sandra.UI.WF.Storage
             /// </exception>
             protected Derived(PType<TBase> baseType)
             {
-                if (baseType == null) throw new ArgumentNullException(nameof(baseType));
-                BaseType = baseType;
+                BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
             }
 
             public override sealed bool TryGetValidValue(PValue value, out T targetValue)
             {
-                TBase baseValue;
-                if (BaseType.TryGetValidValue(value, out baseValue)
+                if (BaseType.TryGetValidValue(value, out TBase baseValue)
                     && TryGetTargetValue(baseValue, out targetValue))
                 {
                     return true;

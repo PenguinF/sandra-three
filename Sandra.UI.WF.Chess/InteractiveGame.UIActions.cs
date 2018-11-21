@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * InteractiveGame.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using Sandra.Chess;
 using SysExtensions;
 using System;
@@ -32,7 +35,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoChessBoardForm = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoChessBoardForm)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.Chessboard,
@@ -45,10 +48,13 @@ namespace Sandra.UI.WF
             {
                 if (chessBoardForm == null)
                 {
-                    StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm();
-                    newChessBoardForm.MdiParent = OwnerForm;
-                    newChessBoardForm.Game = this;
-                    newChessBoardForm.PieceImages = OwnerForm.PieceImages;
+                    StandardChessBoardForm newChessBoardForm = new StandardChessBoardForm
+                    {
+                        MdiParent = OwnerForm,
+                        Game = this,
+                        PieceImages = OwnerForm.PieceImages
+                    };
+
                     newChessBoardForm.PlayingBoard.ForegroundImageRelativeSize = 0.9f;
 
                     if (movesForm != null && movesForm.WindowState == FormWindowState.Normal)
@@ -122,7 +128,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoMovesForm = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 MenuCaptionKey = LocalizedStringKeys.Moves,
                 Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
@@ -217,7 +223,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoStart = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoStart)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -239,7 +245,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.FirstMove,
@@ -266,7 +272,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding FastNavigateBackward = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateBackward)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.FastBackward,
@@ -291,7 +297,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.PreviousMove,
@@ -316,7 +322,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.NextMove,
@@ -353,7 +359,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding FastNavigateForward = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateForward)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.FastForward,
@@ -378,7 +384,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoLastMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoLastMove)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.LastMove,
@@ -399,7 +405,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoEnd = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoEnd)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.EndOfGame,
@@ -426,7 +432,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoPreviousVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -460,7 +466,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding GotoNextVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.NextLine,
@@ -490,7 +496,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding PromoteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(PromoteActiveVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -524,7 +530,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding DemoteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(DemoteActiveVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.DemoteLine,
@@ -562,7 +568,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding BreakActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(BreakActiveVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
@@ -584,7 +590,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding DeleteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(DeleteActiveVariation)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.DeleteLine,

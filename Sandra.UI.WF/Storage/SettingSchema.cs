@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingSchema.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -142,8 +145,7 @@ namespace Sandra.UI.WF.Storage
         {
             if (property == null) throw new ArgumentNullException(nameof(property));
 
-            SettingProperty propertyInDictionary;
-            return properties.TryGetValue(property.Name.Key, out propertyInDictionary)
+            return properties.TryGetValue(property.Name.Key, out SettingProperty propertyInDictionary)
                 && property == propertyInDictionary;
         }
 

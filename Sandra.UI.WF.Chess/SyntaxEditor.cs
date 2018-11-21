@@ -50,8 +50,7 @@ namespace Sandra.UI.WF
         {
             TextIndex = new TextIndex<TTerminal>();
 
-            int zoomFactor;
-            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out zoomFactor))
+            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
             {
                 ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingProperty.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
 namespace Sandra.UI.WF.Storage
@@ -49,9 +52,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public SettingProperty(SettingKey name, SettingComment description)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-
-            Name = name;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
             Description = description;
         }
 
@@ -113,8 +114,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public SettingProperty(SettingKey name, PType<T> pType, SettingComment description) : base(name, description)
         {
-            if (pType == null) throw new ArgumentNullException(nameof(pType));
-            PType = pType;
+            PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
 
         /// <summary>
@@ -133,9 +133,6 @@ namespace Sandra.UI.WF.Storage
             => PType.TryGetValidValue(value, out targetValue);
 
         public override bool IsValidValue(PValue value)
-        {
-            T targetValue;
-            return TryGetValidValue(value, out targetValue);
-        }
+            => TryGetValidValue(value, out T targetValue);
     }
 }

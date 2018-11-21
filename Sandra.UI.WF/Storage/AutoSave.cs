@@ -333,7 +333,7 @@ namespace Sandra.UI.WF.Storage
 
         private async Task autoSaveLoop(CancellationToken ct)
         {
-            for (;;)
+            for (; ; )
             {
                 // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
                 if (!ct.IsCancellationRequested)
@@ -351,8 +351,7 @@ namespace Sandra.UI.WF.Storage
                 // Empty the queue, take the latest update from it.
                 SettingCopy latestUpdate = null;
 
-                SettingCopy update;
-                while (updateQueue.TryDequeue(out update)) latestUpdate = update;
+                while (updateQueue.TryDequeue(out SettingCopy update)) latestUpdate = update;
 
                 // Only return if the queue is empty and saved.
                 if (latestUpdate == null && ct.IsCancellationRequested)
@@ -436,7 +435,7 @@ namespace Sandra.UI.WF.Storage
             StringBuilder sb = new StringBuilder();
 
             // Loop until the entire file is read.
-            for (;;)
+            for (; ; )
             {
                 int bytes = autoSaveFileStream.Read(inputBuffer, 0, CharBufferSize);
                 if (bytes == 0) break;
@@ -464,7 +463,7 @@ namespace Sandra.UI.WF.Storage
             int charactersCopied = 0;
 
             // Fill up the character buffer before doing any writing.
-            for (;;)
+            for (; ; )
             {
                 // Determine number of characters to write.
                 // AutoSave.CharBufferSize is known to be equal to buffer.Length.

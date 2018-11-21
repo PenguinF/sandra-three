@@ -119,8 +119,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonUnterminatedMultiLineComment(TextErrorInfo error)
         {
-            if (error == null) throw new ArgumentNullException(nameof(error));
-            Error = error;
+            Error = error ?? throw new ArgumentNullException(nameof(error));
             Errors = new[] { error };
         }
 
@@ -214,8 +213,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonUnknownSymbol(TextErrorInfo error)
         {
-            if (error == null) throw new ArgumentNullException(nameof(error));
-            Error = error;
+            Error = error ?? throw new ArgumentNullException(nameof(error));
             Errors = new[] { error };
         }
 
@@ -234,8 +232,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonValue(string value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            Value = value;
+            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
@@ -307,8 +304,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonString(string value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
-            Value = value;
+            Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitString(this);
@@ -322,8 +318,7 @@ namespace Sandra.UI.WF.Storage
 
         public JsonErrorString(params TextErrorInfo[] errors)
         {
-            if (errors == null) throw new ArgumentNullException(nameof(errors));
-            Errors = errors;
+            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
 
         public JsonErrorString(IEnumerable<TextErrorInfo> errors)

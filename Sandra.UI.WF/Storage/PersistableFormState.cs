@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PersistableFormState.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -38,16 +41,13 @@ namespace Sandra.UI.WF.Storage
         {
             public override bool TryGetValidValue(PValue value, out PersistableFormState targetValue)
             {
-                PList windowBoundsList = value as PList;
-                bool maximized;
-                int left, top, width, height;
-                if (windowBoundsList != null
+                if (value is PList windowBoundsList
                     && windowBoundsList.Count == 5
-                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0], out maximized)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1], out left)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2], out top)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3], out width)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4], out height))
+                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0], out bool maximized)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1], out int left)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2], out int top)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3], out int width)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4], out int height))
                 {
                     targetValue = new PersistableFormState(maximized, new Rectangle(left, top, width, height));
                     return true;
@@ -70,46 +70,42 @@ namespace Sandra.UI.WF.Storage
 
         private Form form;
 
-        private bool maximized;
-
-        private Rectangle bounds;
-
         public PersistableFormState(bool maximized, Rectangle bounds)
         {
-            this.maximized = maximized;
-            this.bounds = bounds;
+            Maximized = maximized;
+            Bounds = bounds;
         }
 
         /// <summary>
         /// Gets if the <see cref="Form"/> is currently maximized.
         /// </summary>
-        public bool Maximized => maximized;
+        public bool Maximized { get; private set; }
 
         /// <summary>
         /// Gets the current location of the <see cref="Form"/>,
         /// or the location of the <see cref="Form"/> before it was maximized.
         /// </summary>
-        public Rectangle Bounds => bounds;
+        public Rectangle Bounds { get; private set; }
 
         private void Update()
         {
             // Remember settings before changing them.
-            bool oldMaximized = maximized;
-            Rectangle oldBounds = bounds;
+            bool oldMaximized = Maximized;
+            Rectangle oldBounds = Bounds;
 
             // Don't store anything if the form is minimized.
             // If the application is then closed and reopened, it will restore to the state before it was minimized.
             if (form.WindowState == FormWindowState.Maximized)
             {
-                maximized = true;
+                Maximized = true;
             }
             else if (form.WindowState == FormWindowState.Normal)
             {
-                maximized = false;
-                bounds = form.Bounds;
+                Maximized = false;
+                Bounds = form.Bounds;
             }
 
-            if (oldMaximized != maximized || oldBounds != bounds)
+            if (oldMaximized != Maximized || oldBounds != Bounds)
             {
                 // Raise event if change is detected.
                 OnChanged(EventArgs.Empty);

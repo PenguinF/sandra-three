@@ -1,3 +1,4 @@
+#region License
 /*********************************************************************************
  * UIAction.cs
  * 
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Diagnostics;
 
@@ -34,8 +37,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public UIAction(string key)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
-            Key = key;
+            Key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         public bool Equals(UIAction other) => other != null && Key == other.Key;

@@ -96,11 +96,9 @@ namespace Sandra.UI.WF.Storage
                 // Maintain a separate set of keys to aid error reporting on duplicate keys.
                 HashSet<string> foundKeys = new HashSet<string>();
 
-                for (;;)
+                for (; ; )
                 {
-                    PValue parsedKey;
-                    JsonTextElement first;
-                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out parsedKey, out first);
+                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out PValue parsedKey, out JsonTextElement first);
 
                     bool validKey = false;
                     string propertyKey = default(string);
@@ -147,8 +145,7 @@ namespace Sandra.UI.WF.Storage
                             Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, textElement.Start, textElement.Length));
                         }
 
-                        JsonTextElement firstValueSymbol;
-                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstValueSymbol);
+                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out JsonTextElement firstValueSymbol);
 
                         // Only the first value can be valid, even if it's undefined.
                         if (validKey && !gotColon && gotValue)
@@ -200,12 +197,10 @@ namespace Sandra.UI.WF.Storage
             {
                 List<PValue> listBuilder = new List<PValue>();
 
-                for (;;)
+                for (; ; )
                 {
-                    PValue parsedValue;
-                    JsonTextElement firstSymbol;
 
-                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out parsedValue, out firstSymbol);
+                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out PValue parsedValue, out JsonTextElement firstSymbol);
                     if (gotValue) listBuilder.Add(parsedValue);
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
@@ -242,8 +237,7 @@ namespace Sandra.UI.WF.Storage
                 if (value == JsonValue.True) return PConstantValue.True;
                 if (value == JsonValue.False) return PConstantValue.False;
 
-                BigInteger integerValue;
-                if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out integerValue))
+                if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
                 {
                     return new PInteger(integerValue);
                 }
@@ -271,7 +265,7 @@ namespace Sandra.UI.WF.Storage
                 firstValueSymbol = textElement;
                 bool hasValue = false;
 
-                for (;;)
+                for (; ; )
                 {
                     // Read the same symbol again but now eat it.
                     textElement = ReadSkipComments();
@@ -301,10 +295,10 @@ namespace Sandra.UI.WF.Storage
 
             public bool TryParse(out PMap map)
             {
-                PValue rootValue;
-                JsonTextElement textElement;
-
-                bool hasRootValue = ParseMultiValue(FileShouldHaveEndedAlreadyMessage, out rootValue, out textElement);
+                bool hasRootValue = ParseMultiValue(
+                    FileShouldHaveEndedAlreadyMessage,
+                    out PValue rootValue,
+                    out JsonTextElement textElement);
 
                 JsonTextElement extraElement = ReadSkipComments();
                 if (extraElement != null)
@@ -336,8 +330,7 @@ namespace Sandra.UI.WF.Storage
 
         public SettingReader(string json)
         {
-            if (json == null) throw new ArgumentNullException(nameof(json));
-            this.json = json;
+            this.json = json ?? throw new ArgumentNullException(nameof(json));
             tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
 
@@ -356,15 +349,11 @@ namespace Sandra.UI.WF.Storage
         {
             var parser = new SettingReader(json);
 
-            PMap map;
-            List<TextErrorInfo> errors;
-
-            if (parser.TryParse(out map, out errors))
+            if (parser.TryParse(out PMap map, out List<TextErrorInfo> errors))
             {
                 foreach (var kv in map)
                 {
-                    SettingProperty property;
-                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out property))
+                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
                     {
                         workingCopy.AddOrReplaceRaw(property, kv.Value);
                     }

@@ -35,7 +35,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class MovesTextBox : SyntaxEditor<PGNTerminalSymbol>
     {
-        private readonly TextElementStyle defaultStyle = new TextElementStyle()
+        private readonly TextElementStyle defaultStyle = new TextElementStyle
         {
             HasBackColor = true,
             BackColor = Color.White,
@@ -46,7 +46,7 @@ namespace Sandra.UI.WF
 
         protected override TextElementStyle DefaultStyle => defaultStyle;
 
-        private readonly TextElementStyle activeMoveStyle = new TextElementStyle()
+        private readonly TextElementStyle activeMoveStyle = new TextElementStyle
         {
             HasForeColor = true,
             ForeColor = Color.DarkRed,
@@ -118,8 +118,7 @@ namespace Sandra.UI.WF
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                MFOSettingValue mfoSettingValue;
-                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out mfoSettingValue))
+                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out MFOSettingValue mfoSettingValue))
                 {
                     moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }
@@ -179,7 +178,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public InteractiveGame Game
         {
-            get { return game; }
+            get => game;
             set
             {
                 if (game != value)
@@ -200,7 +199,7 @@ namespace Sandra.UI.WF
 
         private PGNLine generatePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
         {
-            for (;;)
+            for (; ; )
             {
                 // Remember the game's active tree because it's the starting point of side lines.
                 Chess.MoveTree current = game.ActiveTree;
