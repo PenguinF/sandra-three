@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * MoveFormatter.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System.Linq;
 using System.Text;
@@ -226,7 +229,7 @@ namespace Sandra.Chess
             else
             {
                 // Disambiguate source square.
-                MoveInfo testMoveInfo = new MoveInfo()
+                MoveInfo testMoveInfo = new MoveInfo
                 {
                     TargetSquare = move.TargetSquare,
                 };

@@ -129,7 +129,7 @@ namespace Sandra.UI.WF
         {
             SwitchToLangUIActionBinding = new DefaultUIActionBinding(
                 new UIAction(nameof(Localizers) + "." + LanguageName),
-                new UIActionBinding()
+                new UIActionBinding
                 {
                     ShowInMenu = true,
                     MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
@@ -160,16 +160,8 @@ namespace Sandra.UI.WF
         public override string FlagIconFileName => "flag-uk";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
-        {
-            string displayText;
-
-            if (englishDictionary.TryGetValue(localizedStringKey, out displayText))
-            {
-                return displayText;
-            }
-
-            return Default.Localize(localizedStringKey);
-        }
+            => englishDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            : Default.Localize(localizedStringKey);
 
         public EnglishLocalizer()
         {
@@ -244,16 +236,8 @@ namespace Sandra.UI.WF
         public override string FlagIconFileName => "flag-nl";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
-        {
-            string displayText;
-
-            if (dutchDictionary.TryGetValue(localizedStringKey, out displayText))
-            {
-                return displayText;
-            }
-
-            return Default.Localize(localizedStringKey);
-        }
+            => dutchDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            : Default.Localize(localizedStringKey);
 
         public DutchLocalizer()
         {

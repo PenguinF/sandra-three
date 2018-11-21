@@ -38,7 +38,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -54,7 +54,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(EditPreferencesFile)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
@@ -94,7 +94,7 @@ namespace Sandra.UI.WF
 
             UIMenu.AddTo(settingsTextBox);
 
-            var settingsForm = new UIActionForm()
+            var settingsForm = new UIActionForm
             {
                 Owner = this,
                 ClientSize = new Size(600, 600),
@@ -120,8 +120,7 @@ namespace Sandra.UI.WF
             {
                 Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
-                int targetErrorHeight;
-                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out targetErrorHeight))
+                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
                 {
                     targetErrorHeight = defaultErrorHeight;
                 }
@@ -157,11 +156,8 @@ namespace Sandra.UI.WF
                         var defaultSettingsObject = Program.DefaultSettings.Settings;
                         foreach (var property in localSettingsExample.Schema.AllProperties)
                         {
-                            // Copy by property name.
-                            SettingProperty defaultSettingProperty;
-                            PValue sourceValue;
-                            if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out defaultSettingProperty)
-                                && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out sourceValue))
+                            if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
+                                && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out PValue sourceValue))
                             {
                                 localSettingsExample.AddOrReplaceRaw(property, sourceValue);
                             }
@@ -202,7 +198,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(ShowDefaultSettingsFile)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
@@ -240,7 +236,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.NewGame,
@@ -294,7 +290,7 @@ namespace Sandra.UI.WF
                 if (process != null) process.Dispose();
             };
 
-            var readOnlyTextForm = new UIActionForm()
+            var readOnlyTextForm = new UIActionForm
             {
                 Owner = this,
                 ClientSize = new Size(width, height),
@@ -312,7 +308,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenAbout)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.About,
@@ -346,7 +342,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(ShowCredits)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.Credits,

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Position.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System;
 using System.Collections.Generic;
@@ -29,12 +32,9 @@ namespace Sandra.Chess
     /// </summary>
     public class Position
     {
-        private Color sideToMove;
-
         private EnumIndexedArray<Color, ulong> colorVectors;
         private EnumIndexedArray<Piece, ulong> pieceVectors;
         private ulong enPassantVector;
-        private ulong enPassantCaptureVector;
         private ulong castlingRightsVector;
 
         private Position() { }
@@ -72,8 +72,8 @@ namespace Sandra.Chess
             if (!blackKing.IsMaxOneBit()) return false;
 
             // The enemy king cannot be in check.
-            Square enemyKing = FindKing(sideToMove.Opposite());
-            if (IsSquareUnderAttack(enemyKing, sideToMove.Opposite())) return false;
+            Square enemyKing = FindKing(SideToMove.Opposite());
+            if (IsSquareUnderAttack(enemyKing, SideToMove.Opposite())) return false;
 
             // Pawns cannot be on the back rank.
             if (pieceVectors[Piece.Pawn].Test(Constants.Rank1 | Constants.Rank8)) return false;
@@ -103,30 +103,30 @@ namespace Sandra.Chess
             // En passant invariants.
             if (!enPassantVector.Test())
             {
-                if (enPassantCaptureVector.Test()) return false;
+                if (EnPassantCaptureVector.Test()) return false;
             }
             else
             {
                 // enPassantVector must be empty.
                 if (occupied.Test(enPassantVector)) return false;
 
-                if (Constants.Rank4.Test(enPassantCaptureVector))
+                if (Constants.Rank4.Test(EnPassantCaptureVector))
                 {
                     // There must be a white pawn on the en passant capture square.
-                    if (!enPassantCaptureVector.Test(colorVectors[Color.White] & pieceVectors[Piece.Pawn])) return false;
+                    if (!EnPassantCaptureVector.Test(colorVectors[Color.White] & pieceVectors[Piece.Pawn])) return false;
                     // enPassantVector must be directly south.
-                    if (enPassantCaptureVector.South() != enPassantVector) return false;
+                    if (EnPassantCaptureVector.South() != enPassantVector) return false;
                     // Starting square must be empty.
-                    if (occupied.Test(enPassantCaptureVector.South().South())) return false;
+                    if (occupied.Test(EnPassantCaptureVector.South().South())) return false;
                 }
-                else if (Constants.Rank5.Test(enPassantCaptureVector))
+                else if (Constants.Rank5.Test(EnPassantCaptureVector))
                 {
                     // There must be a black pawn on the en passant capture square.
-                    if (!enPassantCaptureVector.Test(colorVectors[Color.Black] & pieceVectors[Piece.Pawn])) return false;
+                    if (!EnPassantCaptureVector.Test(colorVectors[Color.Black] & pieceVectors[Piece.Pawn])) return false;
                     // enPassantVector must be directly north.
-                    if (enPassantCaptureVector.North() != enPassantVector) return false;
+                    if (EnPassantCaptureVector.North() != enPassantVector) return false;
                     // Starting square must be empty.
-                    if (occupied.Test(enPassantCaptureVector.North().North())) return false;
+                    if (occupied.Test(EnPassantCaptureVector.North().North())) return false;
                 }
                 else
                 {
@@ -140,7 +140,7 @@ namespace Sandra.Chess
         /// <summary>
         /// Gets the <see cref="Color"/> of the side to move.
         /// </summary>
-        public Color SideToMove => sideToMove;
+        public Color SideToMove { get; private set; }
 
         /// <summary>
         /// Gets a vector which is true for all squares that contain the given color.
@@ -167,8 +167,7 @@ namespace Sandra.Chess
         /// <summary>
         /// If a pawn can be captured en passant in this position, returns the vector which is true for the square of that pawn.
         /// </summary>
-        public ulong EnPassantCaptureVector => enPassantCaptureVector;
-
+        public ulong EnPassantCaptureVector { get; private set; }
 
         /// <summary>
         /// Returns the standard initial position.
@@ -177,7 +176,7 @@ namespace Sandra.Chess
         {
             var initialPosition = new Position();
 
-            initialPosition.sideToMove = Color.White;
+            initialPosition.SideToMove = Color.White;
 
             initialPosition.colorVectors = EnumIndexedArray<Color, ulong>.New();
             initialPosition.colorVectors[Color.White] = Constants.WhiteInStartPosition;
@@ -201,21 +200,16 @@ namespace Sandra.Chess
         /// <summary>
         /// Creates an exact copy of this position and returns it.
         /// </summary>
-        public Position Copy()
+        public Position Copy() => new Position
         {
-            var copiedPosition = new Position();
+            SideToMove = SideToMove,
+            colorVectors = colorVectors.Copy(),
+            pieceVectors = pieceVectors.Copy(),
 
-            copiedPosition.sideToMove = sideToMove;
-            copiedPosition.colorVectors = colorVectors.Copy();
-            copiedPosition.pieceVectors = pieceVectors.Copy();
-
-            copiedPosition.enPassantCaptureVector = enPassantCaptureVector;
-            copiedPosition.enPassantVector = enPassantVector;
-            copiedPosition.castlingRightsVector = castlingRightsVector;
-
-            return copiedPosition;
-        }
-
+            EnPassantCaptureVector = EnPassantCaptureVector,
+            enPassantVector = enPassantVector,
+            castlingRightsVector = castlingRightsVector
+        };
 
         /// <summary>
         /// Returns if the given square is attacked by a piece of the opposite color.
@@ -241,9 +235,7 @@ namespace Sandra.Chess
         /// Returns the position of the king of the given color.
         /// </summary>
         public Square FindKing(Color color)
-        {
-            return (colorVectors[color] & pieceVectors[Piece.King]).GetSingleSquare();
-        }
+            => (colorVectors[color] & pieceVectors[Piece.King]).GetSingleSquare();
 
         private static ulong revokedCastlingRights(ulong moveDelta)
         {
@@ -333,8 +325,8 @@ namespace Sandra.Chess
             ulong sourceVector = move.SourceSquare.ToVector();
             ulong targetVector = move.TargetSquare.ToVector();
 
-            ulong sideToMoveVector = colorVectors[sideToMove];
-            ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
+            ulong sideToMoveVector = colorVectors[SideToMove];
+            ulong oppositeColorVector = colorVectors[SideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
 
             // Reset result before returning or checking anything.
@@ -374,9 +366,9 @@ namespace Sandra.Chess
             {
                 case Piece.Pawn:
                     ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
-                                              & Constants.PawnCaptures[sideToMove, move.SourceSquare];
+                                              & Constants.PawnCaptures[SideToMove, move.SourceSquare];
                     ulong legalMoveToSquares = ~occupied
-                                             & Constants.PawnMoves[sideToMove, move.SourceSquare]
+                                             & Constants.PawnMoves[SideToMove, move.SourceSquare]
                                              & Constants.ReachableSquaresStraight(move.SourceSquare, occupied);
 
                     if ((legalCaptureSquares | legalMoveToSquares).Test(targetVector))
@@ -401,7 +393,7 @@ namespace Sandra.Chess
                         {
                             move.MoveType = MoveType.EnPassant;
                         }
-                        else if (Constants.PawnTwoSquaresAhead[sideToMove, move.SourceSquare].Test(targetVector))
+                        else if (Constants.PawnTwoSquaresAhead[SideToMove, move.SourceSquare].Test(targetVector))
                         {
                             move.IsPawnTwoSquaresAheadMove = true;
                         }
@@ -441,15 +433,15 @@ namespace Sandra.Chess
                     {
                         // Castling moves. If castlingRightsVectors[sideToMove] is true somewhere, the king must be in its starting position.
                         ulong castlingTargets = castlingRightsVector
-                                              & (sideToMove == Color.White ? Constants.Rank1 : Constants.Rank8);
+                                              & (SideToMove == Color.White ? Constants.Rank1 : Constants.Rank8);
 
                         if (castlingTargets.Test(targetVector))
                         {
                             bool isKingSide = Constants.KingsideCastlingTargetSquares.Test(targetVector);
 
                             var rookDelta = isKingSide
-                                          ? Constants.CastleKingsideRookDelta[sideToMove]
-                                          : Constants.CastleQueensideRookDelta[sideToMove];
+                                          ? Constants.CastleKingsideRookDelta[SideToMove]
+                                          : Constants.CastleQueensideRookDelta[SideToMove];
 
                             // All squares between the king and rook must be empty.
                             if ((rookDelta & Constants.ReachableSquaresStraight(move.SourceSquare, occupied)) == rookDelta)
@@ -457,8 +449,8 @@ namespace Sandra.Chess
                                 if (isKingSide)
                                 {
                                     move.MoveType = MoveType.CastleKingside;
-                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
-                                        || IsSquareUnderAttack(move.SourceSquare + 1, sideToMove))
+                                    if (IsSquareUnderAttack(move.SourceSquare, SideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare + 1, SideToMove))
                                     {
                                         // Not allowed to castle out of or over a check.
                                         moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
@@ -467,8 +459,8 @@ namespace Sandra.Chess
                                 else
                                 {
                                     move.MoveType = MoveType.CastleQueenside;
-                                    if (IsSquareUnderAttack(move.SourceSquare, sideToMove)
-                                        || IsSquareUnderAttack(move.SourceSquare - 1, sideToMove))
+                                    if (IsSquareUnderAttack(move.SourceSquare, SideToMove)
+                                        || IsSquareUnderAttack(move.SourceSquare - 1, SideToMove))
                                     {
                                         // Not allowed to castle out of or over a check.
                                         moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
@@ -495,7 +487,7 @@ namespace Sandra.Chess
                 if (move.MoveType == MoveType.EnPassant)
                 {
                     // Don't capture on the target square, but capture the pawn instead.
-                    captureVector = enPassantCaptureVector;
+                    captureVector = EnPassantCaptureVector;
                     move.CapturedPiece = Piece.Pawn;
                     move.IsCapture = true;
                 }
@@ -509,20 +501,20 @@ namespace Sandra.Chess
                 // Remove whatever was captured.
                 if (move.IsCapture)
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                    colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ captureVector;
                     pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ captureVector;
                 }
 
                 // Move from source to target.
                 ulong moveDelta = sourceVector | targetVector;
-                colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                colorVectors[SideToMove] = colorVectors[SideToMove] ^ moveDelta;
                 pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
 
                 // Find the king in the resulting position.
-                Square friendlyKing = FindKing(sideToMove);
+                Square friendlyKing = FindKing(SideToMove);
 
                 // See if the friendly king is now under attack.
-                if (IsSquareUnderAttack(friendlyKing, sideToMove))
+                if (IsSquareUnderAttack(friendlyKing, SideToMove))
                 {
                     moveInfo.Result |= MoveCheckResult.FriendlyKingInCheck;
                 }
@@ -533,14 +525,14 @@ namespace Sandra.Chess
                     {
                         // If the moving piece was a pawn on its starting square and moved two steps ahead,
                         // it can be captured en passant on the next move.
-                        enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
-                        enPassantCaptureVector = targetVector;
+                        enPassantVector = Constants.EnPassantSquares[SideToMove, move.SourceSquare];
+                        EnPassantCaptureVector = targetVector;
                     }
                     else
                     {
                         // Reset en passant vectors.
                         enPassantVector = 0;
-                        enPassantCaptureVector = 0;
+                        EnPassantCaptureVector = 0;
                     }
 
                     if (move.MoveType == MoveType.Promotion)
@@ -552,15 +544,15 @@ namespace Sandra.Chess
                     else if (move.MoveType == MoveType.CastleQueenside)
                     {
                         // Move the rooks as well when castling.
-                        var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
-                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                        var rookDelta = Constants.CastleQueensideRookDelta[SideToMove];
+                        colorVectors[SideToMove] = colorVectors[SideToMove] ^ rookDelta;
                         pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                     }
                     else if (move.MoveType == MoveType.CastleKingside)
                     {
                         // Move the rooks as well when castling.
-                        var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
-                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                        var rookDelta = Constants.CastleKingsideRookDelta[SideToMove];
+                        colorVectors[SideToMove] = colorVectors[SideToMove] ^ rookDelta;
                         pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
                     }
 
@@ -571,16 +563,16 @@ namespace Sandra.Chess
                         castlingRightsVector &= ~revokedCastlingRights(moveDelta);
                     }
 
-                    sideToMove = sideToMove.Opposite();
+                    SideToMove = SideToMove.Opposite();
                 }
                 else
                 {
                     // Reverse move.
-                    colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                    colorVectors[SideToMove] = colorVectors[SideToMove] ^ moveDelta;
                     pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
                     if (move.IsCapture)
                     {
-                        colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                        colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ captureVector;
                         pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ captureVector;
                     }
                 }
@@ -609,20 +601,20 @@ namespace Sandra.Chess
             {
                 if (move.MoveType != MoveType.EnPassant)
                 {
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ targetVector;
+                    colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ targetVector;
                     pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ targetVector;
                 }
                 else
                 {
                     // Don't capture on the target square, but capture the pawn instead.
-                    colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ enPassantCaptureVector;
-                    pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ enPassantCaptureVector;
+                    colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ EnPassantCaptureVector;
+                    pieceVectors[move.CapturedPiece] = pieceVectors[move.CapturedPiece] ^ EnPassantCaptureVector;
                 }
             }
 
             // Move from source to target.
             ulong moveDelta = move.SourceSquare.ToVector() | targetVector;
-            colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+            colorVectors[SideToMove] = colorVectors[SideToMove] ^ moveDelta;
             pieceVectors[move.MovingPiece] = pieceVectors[move.MovingPiece] ^ moveDelta;
 
             // Update en passant vectors.
@@ -630,14 +622,14 @@ namespace Sandra.Chess
             {
                 // If the moving piece was a pawn on its starting square and moved two steps ahead,
                 // it can be captured en passant on the next move.
-                enPassantVector = Constants.EnPassantSquares[sideToMove, move.SourceSquare];
-                enPassantCaptureVector = targetVector;
+                enPassantVector = Constants.EnPassantSquares[SideToMove, move.SourceSquare];
+                EnPassantCaptureVector = targetVector;
             }
             else
             {
                 // Reset en passant vectors.
                 enPassantVector = 0;
-                enPassantCaptureVector = 0;
+                EnPassantCaptureVector = 0;
             }
 
             if (move.MoveType == MoveType.Promotion)
@@ -649,15 +641,15 @@ namespace Sandra.Chess
             else if (move.MoveType == MoveType.CastleQueenside)
             {
                 // Move the rooks as well when castling.
-                var rookDelta = Constants.CastleQueensideRookDelta[sideToMove];
-                colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                var rookDelta = Constants.CastleQueensideRookDelta[SideToMove];
+                colorVectors[SideToMove] = colorVectors[SideToMove] ^ rookDelta;
                 pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
             }
             else if (move.MoveType == MoveType.CastleKingside)
             {
                 // Move the rooks as well when castling.
-                var rookDelta = Constants.CastleKingsideRookDelta[sideToMove];
-                colorVectors[sideToMove] = colorVectors[sideToMove] ^ rookDelta;
+                var rookDelta = Constants.CastleKingsideRookDelta[SideToMove];
+                colorVectors[SideToMove] = colorVectors[SideToMove] ^ rookDelta;
                 pieceVectors[Piece.Rook] = pieceVectors[Piece.Rook] ^ rookDelta;
             }
 
@@ -668,7 +660,7 @@ namespace Sandra.Chess
                 castlingRightsVector &= ~revokedCastlingRights(moveDelta);
             }
 
-            sideToMove = sideToMove.Opposite();
+            SideToMove = SideToMove.Opposite();
 
             Debug.Assert(checkInvariants());
         }
@@ -680,14 +672,14 @@ namespace Sandra.Chess
         {
             Debug.Assert(checkInvariants());
 
-            ulong sideToMoveVector = colorVectors[sideToMove];
-            ulong oppositeColorVector = colorVectors[sideToMove.Opposite()];
+            ulong sideToMoveVector = colorVectors[SideToMove];
+            ulong oppositeColorVector = colorVectors[SideToMove.Opposite()];
             ulong occupied = sideToMoveVector | oppositeColorVector;
 
             foreach (var movingPiece in EnumHelper<Piece>.AllValues)
             {
                 // Enumerate over all squares occupied by this piece.
-                ulong coloredPieceVector = pieceVectors[movingPiece] & colorVectors[sideToMove];
+                ulong coloredPieceVector = pieceVectors[movingPiece] & colorVectors[SideToMove];
                 foreach (var sourceSquare in coloredPieceVector.AllSquares())
                 {
                     // Initialize possible target squares of the moving piece.
@@ -696,9 +688,9 @@ namespace Sandra.Chess
                     {
                         case Piece.Pawn:
                             ulong legalCaptureSquares = (oppositeColorVector | enPassantVector)
-                                                      & Constants.PawnCaptures[sideToMove, sourceSquare];
+                                                      & Constants.PawnCaptures[SideToMove, sourceSquare];
                             ulong legalMoveToSquares = ~occupied
-                                                     & Constants.PawnMoves[sideToMove, sourceSquare]
+                                                     & Constants.PawnMoves[SideToMove, sourceSquare]
                                                      & Constants.ReachableSquaresStraight(sourceSquare, occupied);
 
                             targetSquares = legalCaptureSquares | legalMoveToSquares;
@@ -739,7 +731,7 @@ namespace Sandra.Chess
                         {
                             // Don't capture on the target square, but capture the pawn instead.
                             move.MoveType = MoveType.EnPassant;
-                            captureVector = enPassantCaptureVector;
+                            captureVector = EnPassantCaptureVector;
                             capturedPiece = Piece.Pawn;
                             isCapture = true;
                         }
@@ -753,24 +745,24 @@ namespace Sandra.Chess
                         // Remove whatever was captured.
                         if (isCapture)
                         {
-                            colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                            colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ captureVector;
                             pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                         }
 
                         // Move from source to target.
                         ulong moveDelta = sourceSquare.ToVector() | targetVector;
-                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                        colorVectors[SideToMove] = colorVectors[SideToMove] ^ moveDelta;
                         pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
 
                         // See if the friendly king is now under attack.
-                        bool kingInCheck = IsSquareUnderAttack(FindKing(sideToMove), sideToMove);
+                        bool kingInCheck = IsSquareUnderAttack(FindKing(SideToMove), SideToMove);
 
                         // Move must be reversed before continuing.
-                        colorVectors[sideToMove] = colorVectors[sideToMove] ^ moveDelta;
+                        colorVectors[SideToMove] = colorVectors[SideToMove] ^ moveDelta;
                         pieceVectors[movingPiece] = pieceVectors[movingPiece] ^ moveDelta;
                         if (isCapture)
                         {
-                            colorVectors[sideToMove.Opposite()] = colorVectors[sideToMove.Opposite()] ^ captureVector;
+                            colorVectors[SideToMove.Opposite()] = colorVectors[SideToMove.Opposite()] ^ captureVector;
                             pieceVectors[capturedPiece] = pieceVectors[capturedPiece] ^ captureVector;
                         }
 

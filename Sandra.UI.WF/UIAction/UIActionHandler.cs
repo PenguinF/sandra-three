@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * UIActionHandler.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +45,6 @@ namespace Sandra.UI.WF
     {
         private readonly Dictionary<UIAction, UIActionHandlerFunc> handlers = new Dictionary<UIAction, UIActionHandlerFunc>();
         private readonly List<KeyUIActionMapping> keyMappings = new List<KeyUIActionMapping>();
-        private readonly UIMenuNode.Container rootMenuNode = new UIMenuNode.Container(null);
 
         /// <summary>
         /// Enumerates all non-empty <see cref="ShortcutKeys"/> which are bound to this handler.
@@ -52,7 +54,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the top level node of a <see cref="UIMenuNode"/> tree.
         /// </summary>
-        public UIMenuNode.Container RootMenuNode => rootMenuNode;
+        public UIMenuNode.Container RootMenuNode { get; } = new UIMenuNode.Container(null);
 
         /// <summary>
         /// Binds a handler function for a <see cref="UIAction"/> to this <see cref="UIActionHandler"/>,
@@ -84,7 +86,7 @@ namespace Sandra.UI.WF
 
             if (binding.ShowInMenu)
             {
-                (binding.MenuContainer ?? rootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding));
+                (binding.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding));
             }
         }
 
@@ -118,8 +120,7 @@ namespace Sandra.UI.WF
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
 
-            UIActionHandlerFunc handler;
-            if (handlers.TryGetValue(action, out handler))
+            if (handlers.TryGetValue(action, out UIActionHandlerFunc handler))
             {
                 // Call the handler.
                 UIActionState result = handler(perform);
@@ -149,8 +150,7 @@ namespace Sandra.UI.WF
             Control control = startControl;
             while (control != null)
             {
-                IUIActionHandlerProvider provider = control as IUIActionHandlerProvider;
-                if (provider != null && provider.ActionHandler != null)
+                if (control is IUIActionHandlerProvider provider && provider.ActionHandler != null)
                 {
                     yield return provider.ActionHandler;
                 }

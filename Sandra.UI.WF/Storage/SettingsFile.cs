@@ -79,7 +79,7 @@ namespace Sandra.UI.WF.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.settings = settingsFile.Load();
+            settingsFile.Settings = settingsFile.Load();
             return settingsFile;
         }
 
@@ -96,9 +96,7 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Gets the most recent version of the settings.
         /// </summary>
-        public SettingObject Settings => settings;
-
-        private SettingObject settings;
+        public SettingObject Settings { get; private set; }
 
         private readonly FileWatcher watcher;
 
@@ -173,7 +171,7 @@ namespace Sandra.UI.WF.Storage
         {
             try
             {
-                for (;;)
+                for (; ; )
                 {
                     // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
                     fileChangeSignalWaitHandle.WaitOne();
@@ -181,8 +179,7 @@ namespace Sandra.UI.WF.Storage
 
                     bool hasChanges = false;
                     bool disconnected = false;
-                    FileChangeType fileChangeType;
-                    while (fileChangeQueue.TryDequeue(out fileChangeType))
+                    while (fileChangeQueue.TryDequeue(out FileChangeType fileChangeType))
                     {
                         hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
                         disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
@@ -214,11 +211,11 @@ namespace Sandra.UI.WF.Storage
         {
             PValueEqualityComparer eq = PValueEqualityComparer.Instance;
 
-            foreach (var property in settings.Schema.AllProperties)
+            foreach (var property in Settings.Schema.AllProperties)
             {
                 // Change if added, updated or deleted.
-                PValue oldValue, newValue;
-                if (settings.TryGetRawValue(property, out oldValue))
+                PValue newValue;
+                if (Settings.TryGetRawValue(property, out PValue oldValue))
                 {
                     if (newSettings.TryGetRawValue(property, out newValue))
                     {
@@ -249,10 +246,9 @@ namespace Sandra.UI.WF.Storage
             foreach (var property in ChangedProperties(newSettings))
             {
                 // Update settings if at least one property changed.
-                settings = newSettings;
+                Settings = newSettings;
 
-                WeakEvent<object, EventArgs> keyedEvent;
-                if (settingsChangedEvents.TryGetValue(property.Name, out keyedEvent))
+                if (settingsChangedEvents.TryGetValue(property.Name, out WeakEvent<object, EventArgs> keyedEvent))
                 {
                     keyedEvent.Raise(this, EventArgs.Empty);
                 }

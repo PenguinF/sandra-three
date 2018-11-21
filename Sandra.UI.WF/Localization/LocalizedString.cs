@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * LocalizedString.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using SysExtensions;
 using System;
 using System.Diagnostics;
@@ -45,9 +48,8 @@ namespace Sandra.UI.WF
 
         private LocalizedStringKey(string key, string displayText)
         {
-            if (displayText == null) throw new ArgumentNullException(nameof(displayText));
             Key = key;
-            DisplayText = displayText;
+            DisplayText = displayText ?? throw new ArgumentNullException(nameof(displayText));
         }
 
         /// <summary>
@@ -55,8 +57,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public LocalizedStringKey(string key)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
-            Key = key;
+            Key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         public bool Equals(LocalizedStringKey other) => other != null
@@ -99,9 +100,7 @@ namespace Sandra.UI.WF
 
         public LocalizedString(LocalizedStringKey key)
         {
-            if (key == null) throw new ArgumentNullException(nameof(key));
-
-            Key = key;
+            Key = key ?? throw new ArgumentNullException(nameof(key));
             DisplayText.Value = Localizer.Current.Localize(Key);
 
             Localizer.CurrentChanged += Localizer_CurrentChanged;

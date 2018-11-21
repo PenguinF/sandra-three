@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(RichTextBoxBaseUIActionPrefix + nameof(CutSelectionToClipBoard)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -50,7 +50,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(RichTextBoxBaseUIActionPrefix + nameof(CopySelectionToClipBoard)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.Copy,
@@ -67,7 +67,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
             new UIAction(RichTextBoxBaseUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.Paste,
@@ -85,7 +85,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
             new UIAction(RichTextBoxBaseUIActionPrefix + nameof(SelectAllText)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,

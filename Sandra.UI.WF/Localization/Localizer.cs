@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * Localizer.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 
 namespace Sandra.UI.WF
@@ -50,13 +53,12 @@ namespace Sandra.UI.WF
         /// </exception>
         public static Localizer Current
         {
-            get { return current; }
+            get => current;
             set
             {
                 if (current != value)
                 {
-                    if (value == null) throw new ArgumentNullException(nameof(value));
-                    current = value;
+                    current = value ?? throw new ArgumentNullException(nameof(value));
                     event_CurrentChanged.Raise(null, EventArgs.Empty);
                 }
             }
@@ -66,8 +68,8 @@ namespace Sandra.UI.WF
 
         internal static event Action<object, EventArgs> CurrentChanged
         {
-            add { event_CurrentChanged.AddListener(value); }
-            remove { event_CurrentChanged.RemoveListener(value); }
+            add => event_CurrentChanged.AddListener(value);
+            remove => event_CurrentChanged.RemoveListener(value);
         }
 
         /// <summary>

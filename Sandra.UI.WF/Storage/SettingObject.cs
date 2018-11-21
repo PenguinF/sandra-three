@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingObject.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -91,8 +94,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
-            PValue pValue;
-            if (TryGetRawValue(property, out pValue)
+            if (TryGetRawValue(property, out PValue pValue)
                 && property.TryGetValidValue(pValue, out value))
             {
                 return true;
@@ -128,8 +130,7 @@ namespace Sandra.UI.WF.Storage
                 throw new KeyNotFoundException($"Key {property.Name} does not exist in the {nameof(SettingObject)}.");
             }
 
-            TValue value;
-            if (!TryGetValue(property, out value))
+            if (!TryGetValue(property, out TValue value))
             {
                 throw new ArgumentException($"The value of {property.Name} is not of the target type {typeof(TValue).FullName}.");
             }

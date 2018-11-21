@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * ObservableValue.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -57,12 +60,7 @@ namespace SysExtensions
         /// </exception>
         public ObservableValue(IEqualityComparer<TValue> equalityComparer)
         {
-            if (equalityComparer == null)
-            {
-                throw new ArgumentNullException(nameof(equalityComparer));
-            }
-
-            this.equalityComparer = equalityComparer;
+            this.equalityComparer = equalityComparer ?? throw new ArgumentNullException(nameof(equalityComparer));
         }
 
         /// <summary>
@@ -81,10 +79,7 @@ namespace SysExtensions
         /// </summary>
         public TValue Value
         {
-            get
-            {
-                return value;
-            }
+            get => value;
             set
             {
                 if (!equalityComparer.Equals(this.value, value))

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PGNSyntax.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -114,11 +117,9 @@ namespace Sandra.PGN
 
         public PGNPly(int plyCount, string notation, Chess.Variation variation)
         {
-            if (notation == null) throw new ArgumentNullException(nameof(notation));
-            if (variation == null) throw new ArgumentNullException(nameof(variation));
             PlyCount = plyCount;
-            Notation = notation;
-            Variation = variation;
+            Notation = notation ?? throw new ArgumentNullException(nameof(notation));
+            Variation = variation ?? throw new ArgumentNullException(nameof(variation));
         }
 
         public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
@@ -230,8 +231,7 @@ namespace Sandra.PGN
 
         public BlackToMoveEllipsisSymbol(PGNPly ply)
         {
-            if (ply == null) throw new ArgumentNullException(nameof(ply));
-            Ply = ply;
+            Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
         public bool Equals(PGNTerminalSymbol other)
@@ -248,8 +248,7 @@ namespace Sandra.PGN
 
         public MoveCounterSymbol(PGNPly ply)
         {
-            if (ply == null) throw new ArgumentNullException(nameof(ply));
-            Ply = ply;
+            Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
         public bool Equals(PGNTerminalSymbol other)
@@ -266,8 +265,7 @@ namespace Sandra.PGN
 
         public FormattedMoveSymbol(PGNPly ply)
         {
-            if (ply == null) throw new ArgumentNullException(nameof(ply));
-            Ply = ply;
+            Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
         public bool Equals(PGNTerminalSymbol other)

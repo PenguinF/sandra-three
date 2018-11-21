@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * UIMenu.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -61,8 +64,7 @@ namespace Sandra.UI.WF
 
             public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaptionKey, binding.MenuIcon)
             {
-                if (action == null) throw new ArgumentNullException(nameof(action));
-                Action = action;
+                Action = action ?? throw new ArgumentNullException(nameof(action));
                 if (binding.Shortcuts != null) Shortcut = binding.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
                 IsFirstInGroup = binding.IsFirstInGroup;
             }

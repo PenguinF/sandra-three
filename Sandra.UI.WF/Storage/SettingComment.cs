@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * SettingComment.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,8 +40,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public SettingComment(string text)
         {
-            if (text == null) throw new ArgumentNullException(nameof(text));
-            Paragraphs = new string[] { text };
+            Paragraphs = new string[] { text ?? throw new ArgumentNullException(nameof(text)) };
         }
 
         /// <summary>

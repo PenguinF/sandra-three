@@ -50,9 +50,7 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public SettingCopy(SettingSchema schema)
         {
-            if (schema == null) throw new ArgumentNullException(nameof(schema));
-
-            Schema = schema;
+            Schema = schema ?? throw new ArgumentNullException(nameof(schema));
             KeyValueMapping = new Dictionary<SettingKey, PValue>();
         }
 

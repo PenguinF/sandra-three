@@ -64,21 +64,21 @@ namespace Sandra.UI.WF
         private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
         private static readonly Font errorsFont = new Font("Calibri", 10f);
 
-        private static readonly TextElementStyle commentStyle = new TextElementStyle()
+        private static readonly TextElementStyle commentStyle = new TextElementStyle
         {
             HasForeColor = true,
             ForeColor = Color.FromArgb(128, 220, 220),
             Font = new Font("Consolas", 10, FontStyle.Italic),
         };
 
-        private static readonly TextElementStyle valueStyle = new TextElementStyle()
+        private static readonly TextElementStyle valueStyle = new TextElementStyle
         {
             HasForeColor = true,
             ForeColor = Color.FromArgb(255, 255, 60),
             Font = new Font("Consolas", 10, FontStyle.Bold),
         };
 
-        private static readonly TextElementStyle stringStyle = new TextElementStyle()
+        private static readonly TextElementStyle stringStyle = new TextElementStyle
         {
             HasForeColor = true,
             ForeColor = Color.FromArgb(255, 192, 144),
@@ -111,8 +111,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public SettingsTextBox(SettingsFile settingsFile, UpdatableRichTextBox errorsTextBox)
         {
-            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
-            this.settingsFile = settingsFile;
+            this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
             this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
@@ -185,10 +184,7 @@ namespace Sandra.UI.WF
             {
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
-
-            PMap dummy;
-            List<TextErrorInfo> errors;
-            parser.TryParse(out dummy, out errors);
+            parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
 
             if (errors.Count == 0)
             {

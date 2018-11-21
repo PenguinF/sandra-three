@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * OpaqueColorType.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System.Drawing;
 using System.Globalization;
 
@@ -36,8 +39,7 @@ namespace Sandra.UI.WF.Storage
             if (value != null && value.Length == 7 && value[0] == '#')
             {
                 string hexString = value.Substring(1);
-                int rgb;
-                if (int.TryParse(hexString, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out rgb))
+                if (int.TryParse(hexString, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out int rgb))
                 {
                     targetValue = Color.FromArgb(255, Color.FromArgb(rgb));
                     return true;

@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,
@@ -40,7 +40,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomOut)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomOut,

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * WeakEvent.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,14 +59,10 @@ namespace Sandra.UI.WF
             }
 
             bool isInvalid(object target)
-            {
                 // Null or disposed controls are invalid.
-                if (target == null) return true;
-                IWeakEventTarget weakEventTarget = target as IWeakEventTarget;
-                if (weakEventTarget != null && weakEventTarget.IsDisposed) return true;
-                Control targetControl = target as Control;
-                return targetControl != null && targetControl.IsDisposed;
-            }
+                => target == null
+                || target is IWeakEventTarget weakEventTarget && weakEventTarget.IsDisposed
+                || target is Control targetControl && targetControl.IsDisposed;
 
             internal void IfValidTarget(Action<object> targetAction)
             {

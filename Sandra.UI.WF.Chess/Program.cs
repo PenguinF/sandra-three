@@ -79,8 +79,7 @@ namespace Sandra.UI.WF
 
             Chess.Constants.ForceInitialize();
 
-            Localizer localizer;
-            if (TryGetAutoSaveValue(Localizers.LangSetting, out localizer))
+            if (TryGetAutoSaveValue(Localizers.LangSetting, out Localizer localizer))
             {
                 Localizer.Current = localizer;
             }
@@ -98,8 +97,7 @@ namespace Sandra.UI.WF
 
         internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
         {
-            TValue result;
-            return LocalSettings.Settings.TryGetValue(property, out result)
+            return LocalSettings.Settings.TryGetValue(property, out TValue result)
                 ? result
                 : GetDefaultSetting(property);
         }
@@ -114,8 +112,7 @@ namespace Sandra.UI.WF
         {
             bool boundsInitialized = false;
 
-            PersistableFormState formState;
-            if (TryGetAutoSaveValue(property, out formState))
+            if (TryGetAutoSaveValue(property, out PersistableFormState formState))
             {
                 Rectangle targetBounds = formState.Bounds;
 

@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * UtilityExtensions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -80,8 +83,7 @@ namespace SysExtensions
             if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
             if (constructor == null) throw new ArgumentNullException(nameof(constructor));
 
-            TValue value;
-            if (dictionary.TryGetValue(key, out value)) return value;
+            if (dictionary.TryGetValue(key, out TValue value)) return value;
             value = constructor(key);
             dictionary.Add(key, value);
             return value;

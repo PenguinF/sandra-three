@@ -30,7 +30,7 @@ namespace Sandra.UI.WF
 
         public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
             new UIAction(SettingsTextBoxUIActionPrefix + nameof(SaveToFile)),
-            new UIActionBinding()
+            new UIActionBinding
             {
                 ShowInMenu = true,
                 IsFirstInGroup = true,

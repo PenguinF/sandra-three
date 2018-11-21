@@ -179,8 +179,7 @@ namespace Sandra.UI.WF.Storage
                 outputBuilder.AppendLine();
 
                 string name = kv.Key;
-                SettingProperty property;
-                if (schema.TryGetProperty(new SettingKey(name), out property))
+                if (schema.TryGetProperty(new SettingKey(name), out SettingProperty property))
                 {
                     AppendCommentLines(property.Description);
                 }
