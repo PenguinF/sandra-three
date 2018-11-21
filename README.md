@@ -31,6 +31,6 @@ Icons used in this application came from:
 Sandra 1 was coded in Delphi in 2004-2005.
 Sandra 2 was a dead end research project.
 
-Sandra 3 targets the .NET framework 4.5.2, and is coded in C# 6.
+Sandra 3 targets the .NET framework 4.7.2, and is coded in C# 7.
 
 Sandra is that mysterious woman who became a member of chess club SV Drienerlo. Everybody secretly admires her, and everyone wants to play with her. There are rumours about beer tournaments just to decide who gets a game with her in the club competition. Not me, of course.
