@@ -300,10 +300,6 @@ namespace Sandra.UI.WF
 
             using (var updateToken = BeginUpdate())
             {
-                // Reset any markup.
-                ApplyDefaultStyle();
-                currentActiveMoveStyleElement = null;
-
                 if (agreeIndex < existingElementCount)
                 {
                     // Clear existing tail part.
@@ -314,6 +310,16 @@ namespace Sandra.UI.WF
                     ReadOnly = true;
 
                     TextIndex.RemoveFrom(agreeIndex);
+                }
+
+                if (currentActiveMoveStyleElement != null)
+                {
+                    if (currentActiveMoveStyleElement.Start + currentActiveMoveStyleElement.Length <= TextLength)
+                    {
+                        ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
+                    }
+
+                    currentActiveMoveStyleElement = null;
                 }
 
                 // Append new element texts.
