@@ -46,7 +46,7 @@ namespace Sandra.UI.WF
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
-        protected abstract TextElementStyle DefaultStyle { get; }
+        protected TextElementStyle DefaultStyle { get; } = new TextElementStyle();
 
         public SyntaxEditor()
         {

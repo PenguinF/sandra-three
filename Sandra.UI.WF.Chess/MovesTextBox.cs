@@ -42,15 +42,6 @@ namespace Sandra.UI.WF
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
-        private readonly TextElementStyle defaultStyle = new TextElementStyle
-        {
-            BackColor = defaultBackColor,
-            ForeColor = defaultForeColor,
-            Font = defaultFont,
-        };
-
-        protected override TextElementStyle DefaultStyle => defaultStyle;
-
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle
         {
             ForeColor = activeMoveForeColor,
@@ -64,6 +55,9 @@ namespace Sandra.UI.WF
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
 
+            DefaultStyle.BackColor = defaultBackColor;
+            DefaultStyle.ForeColor = defaultForeColor;
+            DefaultStyle.Font = defaultFont;
             ApplyDefaultStyle();
 
             // DisplayTextChanged handlers are called immediately upon registration.
@@ -415,7 +409,7 @@ namespace Sandra.UI.WF
                         // Reset markup of the previously active move element.
                         if (currentActiveMoveStyleElement != null)
                         {
-                            ApplyStyle(currentActiveMoveStyleElement, defaultStyle);
+                            ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
                             currentActiveMoveStyleElement = null;
                         }
 

@@ -66,15 +66,6 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private static readonly TextElementStyle defaultStyle = new TextElementStyle()
-        {
-            BackColor = defaultBackColor,
-            ForeColor = defaultForeColor,
-            Font = defaultFont,
-        };
-
-        protected override TextElementStyle DefaultStyle => defaultStyle;
-
         private static readonly TextElementStyle commentStyle = new TextElementStyle
         {
             ForeColor = commentForeColor,
@@ -125,6 +116,10 @@ namespace Sandra.UI.WF
             errorsTextBox.HideSelection = false;
 
             BorderStyle = BorderStyle.None;
+
+            DefaultStyle.BackColor = defaultBackColor;
+            DefaultStyle.ForeColor = defaultForeColor;
+            DefaultStyle.Font = defaultFont;
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
