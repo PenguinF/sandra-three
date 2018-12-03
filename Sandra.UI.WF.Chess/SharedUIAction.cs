@@ -34,7 +34,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomIn,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                 MenuIcon = Properties.Resources.zoom_in,
             });
 
@@ -44,7 +44,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomOut,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                 MenuIcon = Properties.Resources.zoom_out,
             });
 
