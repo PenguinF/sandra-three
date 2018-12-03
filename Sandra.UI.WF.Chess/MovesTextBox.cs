@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
             Font = new Font("Candara", 10, FontStyle.Bold),
         };
 
-        public ObservableValue<int> CaretPosition { get; } = new ObservableValue<int>();
+        private int CaretPosition;
 
         public MovesTextBox()
         {
@@ -61,9 +61,6 @@ namespace Sandra.UI.WF
             ReadOnly = true;
 
             ApplyDefaultStyle();
-
-            CaretPosition.ValueChanged += BringIntoView;
-            CaretPosition.ValueChanged += caretPositionChanged;
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
@@ -345,7 +342,13 @@ namespace Sandra.UI.WF
                     // If there's no active move, go to before the first move.
                     if (TextIndex.Elements.Count > 0)
                     {
-                        CaretPosition.Value = TextIndex.Elements[0].Start;
+                        int newCaretPosition = TextIndex.Elements[0].Start;
+                        if (CaretPosition != newCaretPosition)
+                        {
+                            CaretPosition = newCaretPosition;
+                            BringIntoView(newCaretPosition);
+                            caretPositionChanged(newCaretPosition);
+                        }
                     }
                 }
                 else if (newActiveMoveElement != null)
@@ -355,7 +358,13 @@ namespace Sandra.UI.WF
                     ApplyStyle(newActiveMoveElement, activeMoveStyle);
 
                     // Also update the caret so the active move is in view.
-                    CaretPosition.Value = newActiveMoveElement.End;
+                    int newCaretPosition = newActiveMoveElement.End;
+                    if (CaretPosition != newCaretPosition)
+                    {
+                        CaretPosition = newCaretPosition;
+                        BringIntoView(newCaretPosition);
+                        caretPositionChanged(newCaretPosition);
+                    }
                 }
             }
         }
@@ -439,7 +448,13 @@ namespace Sandra.UI.WF
             // Also check SelectionLength so the event is not raised for non-empty selections.
             if (!IsUpdating && SelectionLength == 0)
             {
-                CaretPosition.Value = SelectionStart;
+                int newCaretPosition = SelectionStart;
+                if (CaretPosition != newCaretPosition)
+                {
+                    CaretPosition = newCaretPosition;
+                    BringIntoView(newCaretPosition);
+                    caretPositionChanged(newCaretPosition);
+                }
             }
 
             base.OnSelectionChanged(e);
