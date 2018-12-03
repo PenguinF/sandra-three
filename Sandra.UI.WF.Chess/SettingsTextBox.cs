@@ -114,6 +114,8 @@ namespace Sandra.UI.WF
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
             this.errorsTextBox = errorsTextBox;
 
+            errorsTextBox.HideSelection = false;
+
             BorderStyle = BorderStyle.None;
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
@@ -133,13 +135,13 @@ namespace Sandra.UI.WF
 
             using (var updateToken = BeginUpdateRememberState())
             {
-                parseAndApplySyntaxHighlighting(Text);
+                ParseAndApplySyntaxHighlighting(Text);
             }
 
             TextChanged += SettingsTextBox_TextChanged;
         }
 
-        private void parseAndApplySyntaxHighlighting(string json)
+        private void ParseAndApplySyntaxHighlighting(string json)
         {
             lastParsedText = json;
 
@@ -188,11 +190,11 @@ namespace Sandra.UI.WF
 
             if (errors.Count == 0)
             {
-                displayNoErrors();
+                DisplayNoErrors();
             }
             else
             {
-                displayErrors(errors);
+                DisplayErrors(errors);
             }
         }
 
@@ -206,19 +208,19 @@ namespace Sandra.UI.WF
             {
                 using (var updateToken = BeginUpdateRememberState())
                 {
-                    parseAndApplySyntaxHighlighting(newText);
+                    ParseAndApplySyntaxHighlighting(newText);
                 }
             }
         }
 
         private List<TextErrorInfo> currentErrors;
 
-        private void displayNoErrors()
+        private void DisplayNoErrors()
         {
+            currentErrors = null;
+
             if (errorsTextBox != null)
             {
-                currentErrors = null;
-
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     errorsTextBox.Text = "(No errors)";
@@ -229,24 +231,24 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void displayErrors(List<TextErrorInfo> errors)
+        private void DisplayErrors(List<TextErrorInfo> errors)
         {
+            currentErrors = errors;
+
+            foreach (var error in errors)
+            {
+                Select(error.Start, error.Length);
+                SetErrorUnderline();
+            }
+
             if (errorsTextBox != null)
             {
-                currentErrors = errors;
-
-                foreach (var error in errors)
-                {
-                    Select(error.Start, error.Length);
-                    SetErrorUnderline();
-                }
-
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     var errorMessages = from error in errors
                                         let lineIndex = GetLineFromCharIndex(error.Start)
                                         let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
-                                        select $"{error.Message} at line {lineIndex}, position {position}";
+                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
                     errorsTextBox.Text = string.Join("\n", errorMessages);
 
@@ -257,7 +259,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void bringErrorIntoView(int charIndex)
+        private void BringErrorIntoView(int charIndex)
         {
             // Select the text that generated the error.
             if (currentErrors != null)
@@ -268,30 +270,30 @@ namespace Sandra.UI.WF
                     // Determine how many lines are visible in the top half of the control.
                     int firstVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
                     int bottomVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1)));
-
-                    // Don't include the bottom line, it's likely not completely visible.
                     int visibleLines = bottomVisibleLine - firstVisibleLine;
 
                     // Then calculate which line should become the first visible line
                     // so the error line ends up in the middle of the control.
                     var hotError = currentErrors[lineIndex];
                     int hotErrorLine = GetLineFromCharIndex(hotError.Start);
-                    int targetTopVisibleLine = hotErrorLine - visibleLines / 2;
-                    if (targetTopVisibleLine < 0) targetTopVisibleLine = 0;
 
                     // Delay repaints while fooling around with SelectionStart.
                     using (var updateToken = BeginUpdate())
                     {
                         // hotErrorLine in view?
+                        // Don't include the bottom line, it's likely not completely visible.
                         if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                         {
+                            int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                            if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+
                             Select(TextLength, 0);
                             ScrollToCaret();
-                            Select(GetFirstCharIndexFromLine(targetTopVisibleLine), 0);
+                            Select(GetFirstCharIndexFromLine(targetFirstVisibleLine), 0);
                             ScrollToCaret();
                         }
 
-                        Select(hotError.Start, 0);
+                        Select(hotError.Start, hotError.Length);
                     }
 
                     Focus();
@@ -301,14 +303,14 @@ namespace Sandra.UI.WF
 
         private void ErrorsTextBox_DoubleClick(object sender, EventArgs e)
         {
-            bringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
+            BringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
         }
 
         private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Enter)
             {
-                bringErrorIntoView(errorsTextBox.SelectionStart);
+                BringErrorIntoView(errorsTextBox.SelectionStart);
             }
         }
     }
