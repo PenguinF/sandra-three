@@ -215,10 +215,10 @@ namespace Sandra.UI.WF
 
         private void DisplayNoErrors()
         {
+            currentErrors = null;
+
             if (errorsTextBox != null)
             {
-                currentErrors = null;
-
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     errorsTextBox.Text = "(No errors)";
@@ -231,16 +231,16 @@ namespace Sandra.UI.WF
 
         private void DisplayErrors(List<TextErrorInfo> errors)
         {
+            currentErrors = errors;
+
+            foreach (var error in errors)
+            {
+                Select(error.Start, error.Length);
+                SetErrorUnderline();
+            }
+
             if (errorsTextBox != null)
             {
-                currentErrors = errors;
-
-                foreach (var error in errors)
-                {
-                    Select(error.Start, error.Length);
-                    SetErrorUnderline();
-                }
-
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     var errorMessages = from error in errors
