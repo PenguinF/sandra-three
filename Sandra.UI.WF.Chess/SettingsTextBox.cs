@@ -293,7 +293,7 @@ namespace Sandra.UI.WF
                             ScrollToCaret();
                         }
 
-                        Select(hotError.Start, 0);
+                        Select(hotError.Start, hotError.Length);
                     }
 
                     Focus();
