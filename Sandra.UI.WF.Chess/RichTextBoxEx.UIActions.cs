@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * RichTextBoxBase.UIActions.cs
+ * RichTextBoxEx.UIActions.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -24,9 +24,9 @@ using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
-    public partial class RichTextBoxBase
+    public partial class RichTextBoxEx
     {
-        public const string RichTextBoxBaseUIActionPrefix = nameof(RichTextBoxBase) + ".";
+        public const string RichTextBoxBaseUIActionPrefix = nameof(RichTextBoxEx) + ".";
 
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {

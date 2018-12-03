@@ -28,7 +28,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box with syntax highlighting.
     /// </summary>
-    public abstract class SyntaxEditor<TTerminal> : RichTextBoxBase
+    public abstract class SyntaxEditor<TTerminal> : RichTextBoxEx
     {
         protected sealed class TextElementStyle
         {

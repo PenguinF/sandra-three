@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * RichTextBoxBase.cs
+ * RichTextBoxEx.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -29,7 +29,7 @@ namespace Sandra.UI.WF
     /// Represents a Windows rich text box with a number of application-wide features
     /// such as <see cref="UIAction"/> hooks and a mouse-wheel event handler.
     /// </summary>
-    public partial class RichTextBoxBase : UpdatableRichTextBox, IUIActionHandlerProvider
+    public partial class RichTextBoxEx : UpdatableRichTextBox, IUIActionHandlerProvider
     {
         /// <summary>
         /// Gets the action handler for this control.
@@ -83,7 +83,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="RichTextBoxBase.ZoomFactorChanged"/> event.
+    /// Provides data for the <see cref="RichTextBoxEx.ZoomFactorChanged"/> event.
     /// </summary>
     public class ZoomFactorChangedEventArgs : EventArgs
     {

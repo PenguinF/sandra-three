@@ -74,11 +74,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RichTextBoxBase.cs">
+    <Compile Include="RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RichTextBoxBase.UIActions.cs">
-      <DependentUpon>RichTextBoxBase.cs</DependentUpon>
+    <Compile Include="RichTextBoxEx.UIActions.cs">
+      <DependentUpon>RichTextBoxEx.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />

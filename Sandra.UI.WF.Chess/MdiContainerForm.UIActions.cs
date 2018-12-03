@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting)
         {
-            var errorsTextBox = new RichTextBoxBase
+            var errorsTextBox = new RichTextBoxEx
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
@@ -263,7 +263,7 @@ namespace Sandra.UI.WF
                 return null;
             }
 
-            var textBox = new RichTextBoxBase
+            var textBox = new RichTextBoxEx
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
