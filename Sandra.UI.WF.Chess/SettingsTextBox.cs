@@ -270,26 +270,26 @@ namespace Sandra.UI.WF
                     // Determine how many lines are visible in the top half of the control.
                     int firstVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
                     int bottomVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1)));
-
-                    // Don't include the bottom line, it's likely not completely visible.
                     int visibleLines = bottomVisibleLine - firstVisibleLine;
 
                     // Then calculate which line should become the first visible line
                     // so the error line ends up in the middle of the control.
                     var hotError = currentErrors[lineIndex];
                     int hotErrorLine = GetLineFromCharIndex(hotError.Start);
-                    int targetTopVisibleLine = hotErrorLine - visibleLines / 2;
-                    if (targetTopVisibleLine < 0) targetTopVisibleLine = 0;
 
                     // Delay repaints while fooling around with SelectionStart.
                     using (var updateToken = BeginUpdate())
                     {
                         // hotErrorLine in view?
+                        // Don't include the bottom line, it's likely not completely visible.
                         if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                         {
+                            int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                            if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+
                             Select(TextLength, 0);
                             ScrollToCaret();
-                            Select(GetFirstCharIndexFromLine(targetTopVisibleLine), 0);
+                            Select(GetFirstCharIndexFromLine(targetFirstVisibleLine), 0);
                             ScrollToCaret();
                         }
 
