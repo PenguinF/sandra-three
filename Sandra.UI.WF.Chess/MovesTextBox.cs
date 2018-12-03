@@ -306,7 +306,7 @@ namespace Sandra.UI.WF
                     int textStart = TextIndex.Elements[agreeIndex].Start;
 
                     ReadOnly = false;
-                    RemoveText(textStart, TextIndex.Size - textStart);
+                    DeleteRange(textStart, TextLength - textStart);
                     ReadOnly = true;
 
                     TextIndex.RemoveFrom(agreeIndex);

@@ -148,7 +148,7 @@ namespace Sandra.UI.WF
             });
         }
 
-        public void RemoveText(int textStart, int textLength)
+        public void DeleteRange(int textStart, int textLength)
         {
             if (textStart >= TextLength || textLength <= 0) return;
 
