@@ -74,10 +74,10 @@ namespace Sandra.UI.WF
                 { SharedUIAction.ZoomIn, TryZoomIn },
                 { SharedUIAction.ZoomOut, TryZoomOut },
 
-                { CutSelectionToClipBoard, TryCutSelectionToClipBoard },
-                { CopySelectionToClipBoard, TryCopySelectionToClipBoard },
-                { PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
-                { SelectAllText, TrySelectAllText },
+                { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
+                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+                { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
+                { SharedUIAction.SelectAllText, TrySelectAllText },
             });
         }
     }
