@@ -34,13 +34,8 @@ namespace Sandra.UI.WF
     {
         protected sealed class TextElementStyle
         {
-            public bool HasBackColor { get; set; }
             public Color BackColor { get; set; }
-
-            public bool HasForeColor { get; set; }
             public Color ForeColor { get; set; }
-
-            public bool HasFont => Font != null;
             public Font Font { get; set; }
         }
 
@@ -89,9 +84,9 @@ namespace Sandra.UI.WF
                 using (var updateToken = BeginUpdateRememberState())
                 {
                     Select(element.Start, element.Length);
-                    if (style.HasBackColor) SelectionBackColor = style.BackColor;
-                    if (style.HasForeColor) SelectionColor = style.ForeColor;
-                    if (style.HasFont) SelectionFont = style.Font;
+                    if (style.BackColor.A > 0) SelectionBackColor = style.BackColor;
+                    if (style.ForeColor.A > 0) SelectionColor = style.ForeColor;
+                    if (style.Font != null) SelectionFont = style.Font;
                 }
             }
         }

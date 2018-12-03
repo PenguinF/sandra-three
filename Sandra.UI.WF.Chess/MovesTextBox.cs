@@ -37,9 +37,7 @@ namespace Sandra.UI.WF
     {
         private readonly TextElementStyle defaultStyle = new TextElementStyle
         {
-            HasBackColor = true,
             BackColor = Color.White,
-            HasForeColor = true,
             ForeColor = Color.Black,
             Font = new Font("Candara", 10),
         };
@@ -48,7 +46,6 @@ namespace Sandra.UI.WF
 
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle
         {
-            HasForeColor = true,
             ForeColor = Color.DarkRed,
             Font = new Font("Candara", 10, FontStyle.Bold),
         };

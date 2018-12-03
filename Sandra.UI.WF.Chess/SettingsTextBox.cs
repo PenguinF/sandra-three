@@ -51,9 +51,7 @@ namespace Sandra.UI.WF
 
         private static readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
-            HasBackColor = true,
             BackColor = Color.FromArgb(16, 16, 16),
-            HasForeColor = true,
             ForeColor = Color.WhiteSmoke,
             Font = new Font("Consolas", 10),
         };
@@ -66,21 +64,18 @@ namespace Sandra.UI.WF
 
         private static readonly TextElementStyle commentStyle = new TextElementStyle
         {
-            HasForeColor = true,
             ForeColor = Color.FromArgb(128, 220, 220),
             Font = new Font("Consolas", 10, FontStyle.Italic),
         };
 
         private static readonly TextElementStyle valueStyle = new TextElementStyle
         {
-            HasForeColor = true,
             ForeColor = Color.FromArgb(255, 255, 60),
             Font = new Font("Consolas", 10, FontStyle.Bold),
         };
 
         private static readonly TextElementStyle stringStyle = new TextElementStyle
         {
-            HasForeColor = true,
             ForeColor = Color.FromArgb(255, 192, 144),
         };
 
