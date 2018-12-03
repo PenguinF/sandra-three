@@ -352,7 +352,7 @@ namespace Sandra.UI.WF
                         if (CaretPosition != newCaretPosition)
                         {
                             CaretPosition = newCaretPosition;
-                            BringIntoView(newCaretPosition);
+                            GotoPosition(newCaretPosition);
                         }
                     }
                 }
@@ -366,7 +366,7 @@ namespace Sandra.UI.WF
                     if (CaretPosition != newCaretPosition)
                     {
                         CaretPosition = newCaretPosition;
-                        BringIntoView(newCaretPosition);
+                        GotoPosition(newCaretPosition);
                     }
                 }
             }
@@ -460,12 +460,6 @@ namespace Sandra.UI.WF
             }
 
             base.OnSelectionChanged(e);
-        }
-
-        private void BringIntoView(int caretPosition)
-        {
-            Select(caretPosition, 0);
-            ScrollToCaret();
         }
     }
 }

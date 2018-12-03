@@ -158,6 +158,12 @@ namespace Sandra.UI.WF
             Select(textStart, textLength);
             SelectedText = string.Empty;
         }
+
+        public void GotoPosition(int caretPosition)
+        {
+            Select(caretPosition, 0);
+            ScrollToCaret();
+        }
     }
 
     /// <summary>
