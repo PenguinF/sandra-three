@@ -43,7 +43,7 @@ namespace Sandra.UI.WF
                     ? MoveFormattingOption.UseLocalizedShortAlgebraic
                     : MoveFormattingOption.UsePGN;
 
-                updateMoveFormatter();
+                UpdateMoveFormatter();
             }
 
             return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UsePGN);
@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
                     ? MoveFormattingOption.UseLocalizedShortAlgebraic
                     : MoveFormattingOption.UseLocalizedLongAlgebraic;
 
-                updateMoveFormatter();
+                UpdateMoveFormatter();
             }
 
             return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UseLocalizedLongAlgebraic);

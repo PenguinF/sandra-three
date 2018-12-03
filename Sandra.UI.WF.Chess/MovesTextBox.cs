@@ -68,7 +68,7 @@ namespace Sandra.UI.WF
             {
                 if (moveFormatter == null || moveFormattingOption != MoveFormattingOption.UsePGN)
                 {
-                    updateMoveFormatter();
+                    UpdateMoveFormatter();
                 }
             };
         }
@@ -110,7 +110,7 @@ namespace Sandra.UI.WF
 
         private Chess.IMoveFormatter moveFormatter;
 
-        private void updateMoveFormatter()
+        private void UpdateMoveFormatter()
         {
             if (moveFormatter == null)
             {
@@ -165,7 +165,7 @@ namespace Sandra.UI.WF
                 moveFormatter = new Chess.ShortAlgebraicMoveFormatter(pgnPieceSymbolArray);
             }
 
-            refreshText();
+            RefreshText();
         }
 
         private InteractiveGame game;
@@ -181,7 +181,7 @@ namespace Sandra.UI.WF
                 if (game != value)
                 {
                     game = value;
-                    refreshText();
+                    RefreshText();
                 }
             }
         }
@@ -190,11 +190,11 @@ namespace Sandra.UI.WF
         {
             if (!IsUpdating)
             {
-                updateText();
+                UpdateText();
             }
         }
 
-        private PGNLine generatePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
+        private PGNLine GeneratePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
         {
             for (; ; )
             {
@@ -208,7 +208,7 @@ namespace Sandra.UI.WF
                     if (sideLines == null) sideLines = new List<PGNLine>();
 
                     // Add the first ply of the side line to the list, then generate the rest of the side line.
-                    sideLines.Add(generatePGNLine(game, new List<PGNPlyWithSidelines>
+                    sideLines.Add(GeneratePGNLine(game, new List<PGNPlyWithSidelines>
                     {
                         new PGNPlyWithSidelines(new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
                     }));
@@ -235,14 +235,14 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> generatePGNTerminalSymbols()
+        private IEnumerable<PGNTerminalSymbol> GeneratePGNTerminalSymbols()
         {
             if (game != null)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return generatePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
+                return GeneratePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
             return Enumerable.Empty<PGNTerminalSymbol>();
@@ -250,7 +250,7 @@ namespace Sandra.UI.WF
 
         private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
 
-        private void refreshText()
+        private void RefreshText()
         {
             if (game != null)
             {
@@ -261,14 +261,14 @@ namespace Sandra.UI.WF
                     Clear();
                     ReadOnly = true;
                     TextIndex.Clear();
-                    updateText();
+                    UpdateText();
                 }
             }
         }
 
-        private void updateText()
+        private void UpdateText()
         {
-            List<PGNTerminalSymbol> updatedTerminalSymbols = generatePGNTerminalSymbols().ToList();
+            List<PGNTerminalSymbol> updatedTerminalSymbols = GeneratePGNTerminalSymbols().ToList();
 
             int existingElementCount = TextIndex.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
@@ -372,7 +372,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void caretPositionChanged(int selectionStart)
+        private void CaretPositionChanged(int selectionStart)
         {
             if (game != null)
             {
@@ -455,7 +455,7 @@ namespace Sandra.UI.WF
                 if (CaretPosition != newCaretPosition)
                 {
                     CaretPosition = newCaretPosition;
-                    caretPositionChanged(newCaretPosition);
+                    CaretPositionChanged(newCaretPosition);
                 }
             }
 
