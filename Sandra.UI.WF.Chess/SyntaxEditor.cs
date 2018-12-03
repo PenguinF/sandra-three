@@ -97,7 +97,7 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Occurs when the zoom factor of this <see cref="RichTextBox"/> is updated.
+        /// Occurs when the zoom factor of this <see cref="SyntaxEditor{TTerminal}"/> is updated.
         /// </summary>
         public event EventHandler<ZoomFactorChangedEventArgs> ZoomFactorChanged;
 
@@ -161,7 +161,7 @@ namespace Sandra.UI.WF
     }
 
     /// <summary>
-    /// Provides data for the <see cref="RichTextBoxEx.ZoomFactorChanged"/> event.
+    /// Provides data for the <see cref="SyntaxEditor{TTerminal}.ZoomFactorChanged"/> event.
     /// </summary>
     public class ZoomFactorChangedEventArgs : EventArgs
     {
