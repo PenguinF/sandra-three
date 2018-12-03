@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * RichTextBoxBase.cs
+ * SyntaxEditor.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -21,14 +21,16 @@
 
 using Sandra.UI.WF.Storage;
 using SysExtensions.TextIndex;
+using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
     /// Represents a Windows rich text box with syntax highlighting.
     /// </summary>
-    public abstract class SyntaxEditor<TTerminal> : RichTextBoxEx
+    public abstract partial class SyntaxEditor<TTerminal> : UpdatableRichTextBox, IUIActionHandlerProvider
     {
         protected sealed class TextElementStyle
         {
@@ -41,6 +43,11 @@ namespace Sandra.UI.WF
             public bool HasFont => Font != null;
             public Font Font { get; set; }
         }
+
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
@@ -89,10 +96,56 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
+        /// <summary>
+        /// Occurs when the zoom factor of this <see cref="RichTextBox"/> is updated.
+        /// </summary>
+        public event EventHandler<ZoomFactorChangedEventArgs> ZoomFactorChanged;
+
+        /// <summary>
+        /// Raises the <see cref="ZoomFactorChanged"/> event.
+        /// </summary>
+        /// <param name="e">
+        /// The data for the event.
+        /// </param>
+        protected virtual void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
         {
-            base.OnZoomFactorChanged(e);
+            ZoomFactorChanged?.Invoke(this, e);
+        }
+
+        private void RaiseZoomFactorChanged(ZoomFactorChangedEventArgs e)
+        {
+            // Not only raise the event, but also save the zoom factor setting.
+            OnZoomFactorChanged(e);
             Program.AutoSave.Persist(SettingKeys.Zoom, e.ZoomFactor);
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            if (ModifierKeys.HasFlag(Keys.Control))
+            {
+                // ZoomFactor isn't updated yet, so predict here what it's going to be.
+                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta);
+                RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
+            }
+        }
+
+        /// <summary>
+        /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
+        /// </summary>
+        public void BindStandardEditUIActions()
+        {
+            this.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.ZoomIn, TryZoomIn },
+                { SharedUIAction.ZoomOut, TryZoomOut },
+
+                { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
+                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+                { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
+                { SharedUIAction.SelectAllText, TrySelectAllText },
+            });
         }
     }
 }
