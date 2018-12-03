@@ -133,13 +133,13 @@ namespace Sandra.UI.WF
 
             using (var updateToken = BeginUpdateRememberState())
             {
-                parseAndApplySyntaxHighlighting(Text);
+                ParseAndApplySyntaxHighlighting(Text);
             }
 
             TextChanged += SettingsTextBox_TextChanged;
         }
 
-        private void parseAndApplySyntaxHighlighting(string json)
+        private void ParseAndApplySyntaxHighlighting(string json)
         {
             lastParsedText = json;
 
@@ -188,11 +188,11 @@ namespace Sandra.UI.WF
 
             if (errors.Count == 0)
             {
-                displayNoErrors();
+                DisplayNoErrors();
             }
             else
             {
-                displayErrors(errors);
+                DisplayErrors(errors);
             }
         }
 
@@ -206,14 +206,14 @@ namespace Sandra.UI.WF
             {
                 using (var updateToken = BeginUpdateRememberState())
                 {
-                    parseAndApplySyntaxHighlighting(newText);
+                    ParseAndApplySyntaxHighlighting(newText);
                 }
             }
         }
 
         private List<TextErrorInfo> currentErrors;
 
-        private void displayNoErrors()
+        private void DisplayNoErrors()
         {
             if (errorsTextBox != null)
             {
@@ -229,7 +229,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void displayErrors(List<TextErrorInfo> errors)
+        private void DisplayErrors(List<TextErrorInfo> errors)
         {
             if (errorsTextBox != null)
             {
@@ -257,7 +257,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void bringErrorIntoView(int charIndex)
+        private void BringErrorIntoView(int charIndex)
         {
             // Select the text that generated the error.
             if (currentErrors != null)
@@ -301,14 +301,14 @@ namespace Sandra.UI.WF
 
         private void ErrorsTextBox_DoubleClick(object sender, EventArgs e)
         {
-            bringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
+            BringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
         }
 
         private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Enter)
             {
-                bringErrorIntoView(errorsTextBox.SelectionStart);
+                BringErrorIntoView(errorsTextBox.SelectionStart);
             }
         }
     }
