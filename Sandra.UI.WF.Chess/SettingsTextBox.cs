@@ -66,30 +66,24 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private static readonly TextElementStyle commentStyle = new TextElementStyle
-        {
-            ForeColor = commentForeColor,
-            Font = commentFont,
-        };
-
-        private static readonly TextElementStyle valueStyle = new TextElementStyle
-        {
-            ForeColor = valueForeColor,
-            Font = valueFont,
-        };
-
-        private static readonly TextElementStyle stringStyle = new TextElementStyle
-        {
-            ForeColor = stringForeColor,
-        };
+        private readonly TextElementStyle CommentStyle = new TextElementStyle();
+        private readonly TextElementStyle ValueStyle = new TextElementStyle();
+        private readonly TextElementStyle StringStyle = new TextElementStyle();
 
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
         {
-            public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
-            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => stringStyle;
-            public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
-            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => commentStyle;
-            public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
+            private readonly SettingsTextBox owner;
+
+            public StyleSelector(SettingsTextBox owner)
+            {
+                this.owner = owner;
+            }
+
+            public override TextElementStyle VisitComment(JsonComment symbol) => owner.CommentStyle;
+            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
+            public override TextElementStyle VisitString(JsonString symbol) => owner.StringStyle;
+            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.CommentStyle;
+            public override TextElementStyle VisitValue(JsonValue symbol) => owner.ValueStyle;
         }
 
         private readonly SettingsFile settingsFile;
@@ -120,6 +114,14 @@ namespace Sandra.UI.WF
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
             DefaultStyle.Font = defaultFont;
+
+            CommentStyle.ForeColor = commentForeColor;
+            CommentStyle.Font = commentFont;
+
+            ValueStyle.ForeColor = valueForeColor;
+            ValueStyle.Font = valueFont;
+
+            StringStyle.ForeColor = stringForeColor;
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
@@ -183,12 +185,13 @@ namespace Sandra.UI.WF
                     length));
             }
 
-            var styleSelector = new StyleSelector();
+            var styleSelector = new StyleSelector(this);
 
             foreach (var textElement in TextIndex.Elements)
             {
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
+
             parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
 
             if (errors.Count == 0)

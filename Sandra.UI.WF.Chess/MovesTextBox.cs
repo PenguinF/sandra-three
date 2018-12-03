@@ -42,11 +42,7 @@ namespace Sandra.UI.WF
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
-        private readonly TextElementStyle activeMoveStyle = new TextElementStyle
-        {
-            ForeColor = activeMoveForeColor,
-            Font = activeMoveFont,
-        };
+        private readonly TextElementStyle ActiveMoveStyle = new TextElementStyle();
 
         private int CaretPosition;
 
@@ -59,6 +55,9 @@ namespace Sandra.UI.WF
             DefaultStyle.ForeColor = defaultForeColor;
             DefaultStyle.Font = defaultFont;
             ApplyDefaultStyle();
+
+            ActiveMoveStyle.ForeColor = activeMoveForeColor;
+            ActiveMoveStyle.Font = activeMoveFont;
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.
@@ -358,7 +357,7 @@ namespace Sandra.UI.WF
                 else if (newActiveMoveElement != null)
                 {
                     currentActiveMoveStyleElement = newActiveMoveElement;
-                    ApplyStyle(newActiveMoveElement, activeMoveStyle);
+                    ApplyStyle(newActiveMoveElement, ActiveMoveStyle);
 
                     // Also update the caret so the active move is in view.
                     int newCaretPosition = newActiveMoveElement.End;
@@ -433,7 +432,7 @@ namespace Sandra.UI.WF
                             if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                             {
                                 currentActiveMoveStyleElement = textElement;
-                                ApplyStyle(textElement, activeMoveStyle);
+                                ApplyStyle(textElement, ActiveMoveStyle);
                                 break;
                             }
                         }
