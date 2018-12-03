@@ -149,25 +149,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        public void InsertText(int textPosition, string text)
-        {
-            if (textPosition < 0) textPosition = 0;
-            if (textPosition > TextLength) textPosition = TextLength;
-
-            if (textPosition == TextLength)
-            {
-                AppendText(text);
-            }
-            else
-            {
-                Select(textPosition, 0);
-                // This only works if not read-only, so temporarily turn it off.
-                ReadOnly = false;
-                SelectedText = text;
-                ReadOnly = true;
-            }
-        }
-
         public void RemoveText(int textStart, int textLength)
         {
             if (textStart >= TextLength || textLength <= 0) return;

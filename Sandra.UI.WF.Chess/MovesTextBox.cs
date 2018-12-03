@@ -319,7 +319,11 @@ namespace Sandra.UI.WF
                 {
                     var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
                     var text = textGenerator.Visit(updatedTerminalSymbol);
-                    InsertText(TextIndex.Size, text);
+
+                    ReadOnly = false;
+                    AppendText(text);
+                    ReadOnly = true;
+
                     var newElement = TextIndex.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
 
                     if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
