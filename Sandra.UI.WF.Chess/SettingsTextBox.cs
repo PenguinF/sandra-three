@@ -246,7 +246,7 @@ namespace Sandra.UI.WF
                     var errorMessages = from error in errors
                                         let lineIndex = GetLineFromCharIndex(error.Start)
                                         let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
-                                        select $"{error.Message} at line {lineIndex}, position {position}";
+                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
                     errorsTextBox.Text = string.Join("\n", errorMessages);
 
