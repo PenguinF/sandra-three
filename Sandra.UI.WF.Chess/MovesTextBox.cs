@@ -260,7 +260,9 @@ namespace Sandra.UI.WF
                 // Clear and build the entire text anew by clearing the old element list.
                 using (var updateToken = BeginUpdate())
                 {
-                    RemoveText(0, TextIndex.Size);
+                    ReadOnly = false;
+                    Clear();
+                    ReadOnly = true;
                     TextIndex.Clear();
                     updateText();
                 }
@@ -309,7 +311,11 @@ namespace Sandra.UI.WF
                 {
                     // Clear existing tail part.
                     int textStart = TextIndex.Elements[agreeIndex].Start;
+
+                    ReadOnly = false;
                     RemoveText(textStart, TextIndex.Size - textStart);
+                    ReadOnly = true;
+
                     TextIndex.RemoveFrom(agreeIndex);
                 }
 

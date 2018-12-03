@@ -147,6 +147,17 @@ namespace Sandra.UI.WF
                 { SharedUIAction.SelectAllText, TrySelectAllText },
             });
         }
+
+        public void RemoveText(int textStart, int textLength)
+        {
+            if (textStart >= TextLength || textLength <= 0) return;
+
+            if (textStart < 0) textStart = 0;
+            if (textLength > TextLength) textLength = TextLength;
+
+            Select(textStart, textLength);
+            SelectedText = string.Empty;
+        }
     }
 
     /// <summary>

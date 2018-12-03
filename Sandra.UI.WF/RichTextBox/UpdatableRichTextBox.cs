@@ -149,22 +149,6 @@ namespace Sandra.UI.WF
             }
         }
 
-        public void RemoveText(int textStart, int textLength)
-        {
-            if (textStart >= TextLength || textLength <= 0) return;
-
-            if (textStart < 0) textStart = 0;
-            if (textLength > TextLength) textLength = TextLength;
-
-            Select(textStart, textLength);
-
-            // This only works if not read-only, so temporarily turn it off.
-            bool wasReadOnly = ReadOnly;
-            if (wasReadOnly) ReadOnly = false;
-            SelectedText = string.Empty;
-            if (wasReadOnly) ReadOnly = true;
-        }
-
         /// <summary>
         /// Underlines the current selection with a red wavy line.
         /// </summary>
