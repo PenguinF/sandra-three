@@ -26,8 +26,6 @@ namespace Sandra.UI.WF
 {
     public partial class RichTextBoxEx
     {
-        public const string RichTextBoxBaseUIActionPrefix = nameof(RichTextBoxEx) + ".";
-
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
