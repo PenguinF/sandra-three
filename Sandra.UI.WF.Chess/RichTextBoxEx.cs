@@ -19,15 +19,10 @@
  *********************************************************************************/
 #endregion
 
-using Sandra.UI.WF.Storage;
-using System;
-using System.Windows.Forms;
-
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a Windows rich text box with a number of application-wide features
-    /// such as <see cref="UIAction"/> hooks and a mouse-wheel event handler.
+    /// Represents a Windows rich text box which exposes a number of <see cref="UIAction"/> hooks.
     /// </summary>
     public partial class RichTextBoxEx : UpdatableRichTextBox, IUIActionHandlerProvider
     {
@@ -35,34 +30,6 @@ namespace Sandra.UI.WF
         /// Gets the action handler for this control.
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
-
-        protected override void OnMouseWheel(MouseEventArgs e)
-        {
-            base.OnMouseWheel(e);
-
-            if (ModifierKeys.HasFlag(Keys.Control))
-            {
-                // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta);
-                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
-            }
-        }
-
-        /// <summary>
-        /// Occurs when the zoom factor of this <see cref="RichTextBox"/> is updated.
-        /// </summary>
-        public event EventHandler<ZoomFactorChangedEventArgs> ZoomFactorChanged;
-
-        /// <summary>
-        /// Raises the <see cref="ZoomFactorChanged"/> event.
-        /// </summary>
-        /// <param name="e">
-        /// The data for the event.
-        /// </param>
-        protected virtual void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
-        {
-            ZoomFactorChanged?.Invoke(this, e);
-        }
 
         /// <summary>
         /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
@@ -79,28 +46,6 @@ namespace Sandra.UI.WF
                 { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
                 { SharedUIAction.SelectAllText, TrySelectAllText },
             });
-        }
-    }
-
-    /// <summary>
-    /// Provides data for the <see cref="RichTextBoxEx.ZoomFactorChanged"/> event.
-    /// </summary>
-    public class ZoomFactorChangedEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Gets the new zoom factor, represented as an integer in the range [-9..649].
-        /// </summary>
-        public int ZoomFactor { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ZoomFactorChangedEventArgs"/> class.
-        /// </summary>
-        /// <param name="zoomFactor">
-        /// The new zoom factor, represented as an integer in the range [-9..649].
-        /// </param>
-        public ZoomFactorChangedEventArgs(int zoomFactor)
-        {
-            ZoomFactor = zoomFactor;
         }
     }
 }

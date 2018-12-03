@@ -148,4 +148,26 @@ namespace Sandra.UI.WF
             });
         }
     }
+
+    /// <summary>
+    /// Provides data for the <see cref="RichTextBoxEx.ZoomFactorChanged"/> event.
+    /// </summary>
+    public class ZoomFactorChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the new zoom factor, represented as an integer in the range [-9..649].
+        /// </summary>
+        public int ZoomFactor { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ZoomFactorChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="zoomFactor">
+        /// The new zoom factor, represented as an integer in the range [-9..649].
+        /// </param>
+        public ZoomFactorChangedEventArgs(int zoomFactor)
+        {
+            ZoomFactor = zoomFactor;
+        }
+    }
 }
