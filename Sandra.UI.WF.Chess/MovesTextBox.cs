@@ -186,9 +186,12 @@ namespace Sandra.UI.WF
             }
         }
 
+        private bool UpdatingGame;
+
         internal void GameUpdated()
         {
-            if (!IsUpdating)
+            // Prevent re-entrancy if only the active move changed.
+            if (!UpdatingGame)
             {
                 UpdateText();
             }
@@ -414,8 +417,17 @@ namespace Sandra.UI.WF
                             currentActiveMoveStyleElement = null;
                         }
 
-                        game.Game.SetActiveTree(newActiveTree);
-                        game.ActiveMoveTreeUpdated();
+                        UpdatingGame = true;
+                        try
+                        {
+                            game.Game.SetActiveTree(newActiveTree);
+                            game.ActiveMoveTreeUpdated();
+                        }
+                        finally
+                        {
+                            UpdatingGame = false;
+                        }
+
                         ActionHandler.Invalidate();
 
                         // Search for the current active move element to set its font.
@@ -438,7 +450,15 @@ namespace Sandra.UI.WF
         {
             if (!ModifierKeys.HasFlag(Keys.Control) && game != null)
             {
-                game.HandleMouseWheelEvent(e.Delta);
+                UpdatingGame = true;
+                try
+                {
+                    game.HandleMouseWheelEvent(e.Delta);
+                }
+                finally
+                {
+                    UpdatingGame = false;
+                }
             }
 
             base.OnMouseWheel(e);
