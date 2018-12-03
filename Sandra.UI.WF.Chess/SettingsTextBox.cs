@@ -114,6 +114,8 @@ namespace Sandra.UI.WF
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
             this.errorsTextBox = errorsTextBox;
 
+            errorsTextBox.HideSelection = false;
+
             BorderStyle = BorderStyle.None;
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
