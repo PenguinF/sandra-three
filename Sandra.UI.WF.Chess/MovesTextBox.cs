@@ -35,19 +35,26 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class MovesTextBox : SyntaxEditor<PGNTerminalSymbol>
     {
+        private static readonly Color defaultBackColor = Color.White;
+        private static readonly Color defaultForeColor = Color.Black;
+        private static readonly Font defaultFont = new Font("Candara", 10);
+
+        private static readonly Color activeMoveForeColor = Color.DarkRed;
+        private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
+
         private readonly TextElementStyle defaultStyle = new TextElementStyle
         {
-            BackColor = Color.White,
-            ForeColor = Color.Black,
-            Font = new Font("Candara", 10),
+            BackColor = defaultBackColor,
+            ForeColor = defaultForeColor,
+            Font = defaultFont,
         };
 
         protected override TextElementStyle DefaultStyle => defaultStyle;
 
         private readonly TextElementStyle activeMoveStyle = new TextElementStyle
         {
-            ForeColor = Color.DarkRed,
-            Font = new Font("Candara", 10, FontStyle.Bold),
+            ForeColor = activeMoveForeColor,
+            Font = activeMoveFont,
         };
 
         private int CaretPosition;
@@ -75,8 +82,6 @@ namespace Sandra.UI.WF
             if (disposing)
             {
                 localizedPieceSymbols.Dispose();
-                defaultStyle.Font.Dispose();
-                activeMoveStyle.Font.Dispose();
             }
             base.Dispose(disposing);
         }

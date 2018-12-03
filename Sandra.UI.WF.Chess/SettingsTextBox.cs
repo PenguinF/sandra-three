@@ -49,34 +49,47 @@ namespace Sandra.UI.WF
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
+        private static readonly Color defaultBackColor = Color.FromArgb(16, 16, 16);
+        private static readonly Color defaultForeColor = Color.WhiteSmoke;
+        private static readonly Font defaultFont = new Font("Consolas", 10);
+
+        private static readonly Color noErrorsForeColor = Color.FromArgb(176, 176, 176);
+        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
+
+        private static readonly Font errorsFont = new Font("Calibri", 10);
+
+        private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
+        private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
+
+        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
+        private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
+
+        private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
+
         private static readonly TextElementStyle defaultStyle = new TextElementStyle()
         {
-            BackColor = Color.FromArgb(16, 16, 16),
-            ForeColor = Color.WhiteSmoke,
-            Font = new Font("Consolas", 10),
+            BackColor = defaultBackColor,
+            ForeColor = defaultForeColor,
+            Font = defaultFont,
         };
 
         protected override TextElementStyle DefaultStyle => defaultStyle;
 
-        private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
-        private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
-        private static readonly Font errorsFont = new Font("Calibri", 10f);
-
         private static readonly TextElementStyle commentStyle = new TextElementStyle
         {
-            ForeColor = Color.FromArgb(128, 220, 220),
-            Font = new Font("Consolas", 10, FontStyle.Italic),
+            ForeColor = commentForeColor,
+            Font = commentFont,
         };
 
         private static readonly TextElementStyle valueStyle = new TextElementStyle
         {
-            ForeColor = Color.FromArgb(255, 255, 60),
-            Font = new Font("Consolas", 10, FontStyle.Bold),
+            ForeColor = valueForeColor,
+            Font = valueFont,
         };
 
         private static readonly TextElementStyle stringStyle = new TextElementStyle
         {
-            ForeColor = Color.FromArgb(255, 192, 144),
+            ForeColor = stringForeColor,
         };
 
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
@@ -219,7 +232,7 @@ namespace Sandra.UI.WF
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     errorsTextBox.Text = "(No errors)";
-                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.BackColor = defaultBackColor;
                     errorsTextBox.ForeColor = noErrorsForeColor;
                     errorsTextBox.Font = noErrorsFont;
                 }
@@ -247,8 +260,8 @@ namespace Sandra.UI.WF
 
                     errorsTextBox.Text = string.Join("\n", errorMessages);
 
-                    errorsTextBox.BackColor = defaultStyle.BackColor;
-                    errorsTextBox.ForeColor = defaultStyle.ForeColor;
+                    errorsTextBox.BackColor = defaultBackColor;
+                    errorsTextBox.ForeColor = defaultForeColor;
                     errorsTextBox.Font = errorsFont;
                 }
             }
