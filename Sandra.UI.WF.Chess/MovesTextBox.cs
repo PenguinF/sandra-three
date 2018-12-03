@@ -347,13 +347,11 @@ namespace Sandra.UI.WF
                         {
                             CaretPosition = newCaretPosition;
                             BringIntoView(newCaretPosition);
-                            caretPositionChanged(newCaretPosition);
                         }
                     }
                 }
                 else if (newActiveMoveElement != null)
                 {
-                    // Make the active move bold.
                     currentActiveMoveStyleElement = newActiveMoveElement;
                     ApplyStyle(newActiveMoveElement, activeMoveStyle);
 
@@ -363,7 +361,6 @@ namespace Sandra.UI.WF
                     {
                         CaretPosition = newCaretPosition;
                         BringIntoView(newCaretPosition);
-                        caretPositionChanged(newCaretPosition);
                     }
                 }
             }
@@ -452,7 +449,6 @@ namespace Sandra.UI.WF
                 if (CaretPosition != newCaretPosition)
                 {
                     CaretPosition = newCaretPosition;
-                    BringIntoView(newCaretPosition);
                     caretPositionChanged(newCaretPosition);
                 }
             }
@@ -462,11 +458,8 @@ namespace Sandra.UI.WF
 
         private void BringIntoView(int caretPosition)
         {
-            if (SelectionStart != caretPosition)
-            {
-                Select(caretPosition, 0);
-                ScrollToCaret();
-            }
+            Select(caretPosition, 0);
+            ScrollToCaret();
         }
     }
 }
