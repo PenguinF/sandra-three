@@ -48,6 +48,9 @@ namespace Sandra.UI.WF
         {
             TextIndex = new TextIndex<TTerminal>();
 
+            HScrollBar = false;
+            VScrollBar = true;
+
             Margins.ForEach(x => x.Width = 0);
 
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
