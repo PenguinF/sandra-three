@@ -148,15 +148,12 @@ namespace Sandra.UI.WF
             }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            TextChanged += SettingsTextBox_TextChanged;
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
             EmptyUndoBuffer();
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)
         {
-            lastParsedText = json;
-
             int firstUnusedIndex = 0;
 
             TextIndex.Clear();
@@ -211,16 +208,11 @@ namespace Sandra.UI.WF
             }
         }
 
-        private string lastParsedText;
-
-        private void SettingsTextBox_TextChanged(object sender, EventArgs e)
+        protected override void OnTextChanged(EventArgs e)
         {
-            // Only parse and analyze errors if the text actually changed, not just the style.
-            string newText = Text;
-            if (lastParsedText != newText)
-            {
-                ParseAndApplySyntaxHighlighting(newText);
-            }
+            base.OnTextChanged(e);
+
+            ParseAndApplySyntaxHighlighting(Text);
         }
 
         private List<TextErrorInfo> currentErrors;
