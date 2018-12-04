@@ -150,7 +150,7 @@ namespace Sandra.UI.WF
         {
             lastParsedText = json;
 
-            ApplyDefaultStyle();
+            StyleClearAll();
 
             int firstUnusedIndex = 0;
 

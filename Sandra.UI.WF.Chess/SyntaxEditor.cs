@@ -58,7 +58,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected void ApplyDefaultStyle()
+        protected void StyleClearAll()
         {
             var defaultStyle = DefaultStyle;
 
