@@ -117,7 +117,7 @@ namespace Sandra.UI.WF
 
         public static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
-            PType.RichTextZoomFactor.Instance);
+            ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
             = "The number of plies (=half moves) to move forward of backward in a game for fast navigation. "

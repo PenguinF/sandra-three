@@ -36,7 +36,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.FlipBoard,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
                 MenuIcon = Properties.Resources.flip,
             });
 
@@ -53,7 +53,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
             });
 
         public UIActionState TryTakeScreenshot(bool perform)

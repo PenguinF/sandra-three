@@ -34,7 +34,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomIn,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                 MenuIcon = Properties.Resources.zoom_in,
             });
 
@@ -44,8 +44,49 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.ZoomOut,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                 MenuIcon = Properties.Resources.zoom_out,
+            });
+
+        public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Cut,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
+                MenuIcon = Properties.Resources.cut,
+            });
+
+        public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.Copy,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                MenuIcon = Properties.Resources.copy,
+            });
+
+        public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.Paste,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
+                MenuIcon = Properties.Resources.paste,
+            });
+
+        public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(SelectAllText)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.SelectAll,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
             });
     }
 }

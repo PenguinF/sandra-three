@@ -181,7 +181,7 @@ namespace Sandra.UI.WF.Storage
                         // Assume missing closing bracket '}' on EOF or control symbol.
                         if (textElement == null)
                         {
-                            Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength - 1, 1));
+                            Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength, 0));
                         }
                         else if (!isCurlyClose)
                         {
@@ -219,7 +219,7 @@ namespace Sandra.UI.WF.Storage
                         // Assume missing closing bracket ']' on EOF or control symbol.
                         if (textElement == null)
                         {
-                            Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength - 1, 1));
+                            Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength, 0));
                         }
                         else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
                         {

@@ -40,6 +40,10 @@
     <StartupObject>Sandra.UI.WF.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ScintillaNET, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\jacobslusser.ScintillaNET.3.6.3\lib\net40\ScintillaNET.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -74,11 +78,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RichTextBoxBase.cs">
+    <Compile Include="RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RichTextBoxBase.UIActions.cs">
-      <DependentUpon>RichTextBoxBase.cs</DependentUpon>
+    <Compile Include="RichTextBoxEx.UIActions.cs">
+      <DependentUpon>RichTextBoxEx.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
@@ -100,6 +104,10 @@
     <Compile Include="SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="SyntaxEditor.UIActions.cs">
+      <SubType>Component</SubType>
+      <DependentUpon>SyntaxEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,6 +127,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Properties\copy.png" />
     <None Include="Properties\cut.png" />
     <None Include="Properties\flip.png" />

@@ -43,7 +43,7 @@ namespace Sandra.UI.WF
                 ShowInMenu = true,
                 IsFirstInGroup = true,
                 MenuCaptionKey = LocalizedStringKeys.Exit,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
             });
 
         public UIActionState TryExit(bool perform)
@@ -66,7 +66,7 @@ namespace Sandra.UI.WF
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting)
         {
-            var errorsTextBox = new RichTextBoxBase
+            var errorsTextBox = new RichTextBoxEx
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
@@ -81,8 +81,6 @@ namespace Sandra.UI.WF
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
-                WordWrap = false,
-                ScrollBars = RichTextBoxScrollBars.Both,
             };
 
             settingsTextBox.BindActions(new UIActionBindings
@@ -240,7 +238,7 @@ namespace Sandra.UI.WF
             {
                 ShowInMenu = true,
                 MenuCaptionKey = LocalizedStringKeys.NewGame,
-                Shortcuts = new ShortcutKeys[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
             });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)
@@ -263,7 +261,7 @@ namespace Sandra.UI.WF
                 return null;
             }
 
-            var textBox = new RichTextBoxBase
+            var textBox = new RichTextBoxEx
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,

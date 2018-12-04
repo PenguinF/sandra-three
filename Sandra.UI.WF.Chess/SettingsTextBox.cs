@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -49,48 +50,52 @@ namespace Sandra.UI.WF
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
-        private static readonly TextElementStyle defaultStyle = new TextElementStyle()
+        private const int commentStyleIndex = 8;
+        private const int valueStyleIndex = 9;
+        private const int stringStyleIndex = 10;
+        private const int errorIndicatorIndex = 8;
+
+        private static readonly Color defaultBackColor = Color.FromArgb(16, 16, 16);
+        private static readonly Color defaultForeColor = Color.WhiteSmoke;
+        private static readonly Font defaultFont = new Font("Consolas", 10);
+
+        private static readonly Color noErrorsForeColor = Color.FromArgb(176, 176, 176);
+        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
+
+        private static readonly Font errorsFont = new Font("Calibri", 10);
+
+        private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
+        private static readonly Font callTipFont = new Font("Segoe UI", 10);
+
+        private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
+        private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
+
+        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
+        private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
+
+        private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
+
+        private Style CallTipStyle => Styles[Style.CallTip];
+        private Style LineNumberStyle => Styles[Style.LineNumber];
+        private Style CommentStyle => Styles[commentStyleIndex];
+        private Style ValueStyle => Styles[valueStyleIndex];
+        private Style StringStyle => Styles[stringStyleIndex];
+
+        private sealed class StyleSelector : JsonTerminalSymbolVisitor<Style>
         {
-            HasBackColor = true,
-            BackColor = Color.FromArgb(16, 16, 16),
-            HasForeColor = true,
-            ForeColor = Color.WhiteSmoke,
-            Font = new Font("Consolas", 10),
-        };
+            private readonly SettingsTextBox owner;
 
-        protected override TextElementStyle DefaultStyle => defaultStyle;
+            public StyleSelector(SettingsTextBox owner)
+            {
+                this.owner = owner;
+            }
 
-        private static readonly Color noErrorsForeColor = Color.FromArgb(255, 176, 176, 176);
-        private static readonly Font noErrorsFont = new Font("Calibri", 10f, FontStyle.Italic);
-        private static readonly Font errorsFont = new Font("Calibri", 10f);
-
-        private static readonly TextElementStyle commentStyle = new TextElementStyle
-        {
-            HasForeColor = true,
-            ForeColor = Color.FromArgb(128, 220, 220),
-            Font = new Font("Consolas", 10, FontStyle.Italic),
-        };
-
-        private static readonly TextElementStyle valueStyle = new TextElementStyle
-        {
-            HasForeColor = true,
-            ForeColor = Color.FromArgb(255, 255, 60),
-            Font = new Font("Consolas", 10, FontStyle.Bold),
-        };
-
-        private static readonly TextElementStyle stringStyle = new TextElementStyle
-        {
-            HasForeColor = true,
-            ForeColor = Color.FromArgb(255, 192, 144),
-        };
-
-        private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
-        {
-            public override TextElementStyle VisitComment(JsonComment symbol) => commentStyle;
-            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => stringStyle;
-            public override TextElementStyle VisitString(JsonString symbol) => stringStyle;
-            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => commentStyle;
-            public override TextElementStyle VisitValue(JsonValue symbol) => valueStyle;
+            public override Style DefaultVisit(JsonTerminalSymbol symbol) => owner.DefaultStyle;
+            public override Style VisitComment(JsonComment symbol) => owner.CommentStyle;
+            public override Style VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
+            public override Style VisitString(JsonString symbol) => owner.StringStyle;
+            public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.CommentStyle;
+            public override Style VisitValue(JsonValue symbol) => owner.ValueStyle;
         }
 
         private readonly SettingsFile settingsFile;
@@ -118,8 +123,42 @@ namespace Sandra.UI.WF
 
             BorderStyle = BorderStyle.None;
 
-            // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            StyleResetDefault();
+            DefaultStyle.BackColor = defaultBackColor;
+            DefaultStyle.ForeColor = defaultForeColor;
+            DefaultStyle.ApplyFont(defaultFont);
+            StyleClearAll();
+
+            SetSelectionBackColor(true, defaultForeColor);
+            SetSelectionForeColor(true, defaultBackColor);
+
+            LineNumberStyle.BackColor = defaultBackColor;
+            LineNumberStyle.ForeColor = noErrorsForeColor;
+            LineNumberStyle.ApplyFont(defaultFont);
+
+            CallTipStyle.BackColor = callTipBackColor;
+            CallTipStyle.ForeColor = defaultForeColor;
+            CallTipStyle.ApplyFont(callTipFont);
+
+            CommentStyle.ForeColor = commentForeColor;
+            CommentStyle.ApplyFont(commentFont);
+
+            ValueStyle.ForeColor = valueForeColor;
+            ValueStyle.ApplyFont(valueFont);
+
+            StringStyle.ForeColor = stringForeColor;
+
+            Indicators[errorIndicatorIndex].Style = IndicatorStyle.Squiggle;
+            Indicators[errorIndicatorIndex].ForeColor = Color.Red;
+            IndicatorCurrent = errorIndicatorIndex;
+
+            Margins[0].BackColor = defaultBackColor;
+            Margins[1].BackColor = defaultBackColor;
+
+            CaretForeColor = defaultForeColor;
+
+            // Enable dwell events.
+            MouseDwellTime = SystemInformation.MouseHoverTime;
 
             if (errorsTextBox != null)
             {
@@ -127,25 +166,21 @@ namespace Sandra.UI.WF
                 errorsTextBox.DoubleClick += ErrorsTextBox_DoubleClick;
                 errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
             }
-        }
 
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                ParseAndApplySyntaxHighlighting(Text);
-            }
-
-            TextChanged += SettingsTextBox_TextChanged;
+            // Set the Text property and use that as input, because it will not exactly match the json string.
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            EmptyUndoBuffer();
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)
         {
-            lastParsedText = json;
-
-            ApplyDefaultStyle();
+            int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
+            if (displayedMaxLineNumberLength != maxLineNumberLength)
+            {
+                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
+                Margins[1].Width = TextWidth(Style.LineNumber, "0");
+                displayedMaxLineNumberLength = maxLineNumberLength;
+            }
 
             int firstUnusedIndex = 0;
 
@@ -180,13 +215,16 @@ namespace Sandra.UI.WF
                     length));
             }
 
-            var styleSelector = new StyleSelector();
+            var styleSelector = new StyleSelector(this);
 
             foreach (var textElement in TextIndex.Elements)
             {
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
+
             parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
+
+            IndicatorClearRange(0, TextLength);
 
             if (errors.Count == 0)
             {
@@ -198,19 +236,24 @@ namespace Sandra.UI.WF
             }
         }
 
-        private string lastParsedText;
+        private int displayedMaxLineNumberLength;
 
-        private void SettingsTextBox_TextChanged(object sender, EventArgs e)
+        private int GetMaxLineNumberLength(int maxLineNumberToDisplay)
         {
-            // Only parse and analyze errors if the text actually changed, not just the style.
-            string newText = Text;
-            if (lastParsedText != newText)
-            {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    ParseAndApplySyntaxHighlighting(newText);
-                }
-            }
+            if (maxLineNumberToDisplay <= 9) return 1;
+            if (maxLineNumberToDisplay <= 99) return 2;
+            if (maxLineNumberToDisplay <= 999) return 3;
+            if (maxLineNumberToDisplay <= 9999) return 4;
+            return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
+        }
+
+        protected override void OnTextChanged(EventArgs e)
+        {
+            CallTipCancel();
+
+            base.OnTextChanged(e);
+
+            ParseAndApplySyntaxHighlighting(Text);
         }
 
         private List<TextErrorInfo> currentErrors;
@@ -224,7 +267,7 @@ namespace Sandra.UI.WF
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     errorsTextBox.Text = "(No errors)";
-                    errorsTextBox.BackColor = defaultStyle.BackColor;
+                    errorsTextBox.BackColor = defaultBackColor;
                     errorsTextBox.ForeColor = noErrorsForeColor;
                     errorsTextBox.Font = noErrorsFont;
                 }
@@ -237,8 +280,7 @@ namespace Sandra.UI.WF
 
             foreach (var error in errors)
             {
-                Select(error.Start, error.Length);
-                SetErrorUnderline();
+                IndicatorFillRange(error.Start, error.Length);
             }
 
             if (errorsTextBox != null)
@@ -246,14 +288,14 @@ namespace Sandra.UI.WF
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     var errorMessages = from error in errors
-                                        let lineIndex = GetLineFromCharIndex(error.Start)
-                                        let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
+                                        let lineIndex = LineFromPosition(error.Start)
+                                        let position = GetColumn(error.Start)
                                         select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
                     errorsTextBox.Text = string.Join("\n", errorMessages);
 
-                    errorsTextBox.BackColor = defaultStyle.BackColor;
-                    errorsTextBox.ForeColor = defaultStyle.ForeColor;
+                    errorsTextBox.BackColor = defaultBackColor;
+                    errorsTextBox.ForeColor = defaultForeColor;
                     errorsTextBox.Font = errorsFont;
                 }
             }
@@ -268,32 +310,28 @@ namespace Sandra.UI.WF
                 if (0 <= lineIndex && lineIndex < currentErrors.Count)
                 {
                     // Determine how many lines are visible in the top half of the control.
-                    int firstVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
-                    int bottomVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1)));
-                    int visibleLines = bottomVisibleLine - firstVisibleLine;
+                    int firstVisibleLine = FirstVisibleLine;
+                    int visibleLines = LinesOnScreen;
+                    int bottomVisibleLine = firstVisibleLine + visibleLines;
 
                     // Then calculate which line should become the first visible line
                     // so the error line ends up in the middle of the control.
                     var hotError = currentErrors[lineIndex];
-                    int hotErrorLine = GetLineFromCharIndex(hotError.Start);
+                    int hotErrorLine = LineFromPosition(hotError.Start);
 
-                    // Delay repaints while fooling around with SelectionStart.
-                    using (var updateToken = BeginUpdate())
+                    // hotErrorLine in view?
+                    // Don't include the bottom line, it's likely not completely visible.
+                    if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                     {
-                        // hotErrorLine in view?
-                        // Don't include the bottom line, it's likely not completely visible.
-                        if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
-                        {
-                            int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
-                            if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                        int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                        if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                        FirstVisibleLine = targetFirstVisibleLine;
+                    }
 
-                            Select(TextLength, 0);
-                            ScrollToCaret();
-                            Select(GetFirstCharIndexFromLine(targetFirstVisibleLine), 0);
-                            ScrollToCaret();
-                        }
-
-                        Select(hotError.Start, hotError.Length);
+                    GotoPosition(hotError.Start);
+                    if (hotError.Length > 0)
+                    {
+                        SelectionEnd = hotError.Start + hotError.Length;
                     }
 
                     Focus();
@@ -312,6 +350,43 @@ namespace Sandra.UI.WF
             {
                 BringErrorIntoView(errorsTextBox.SelectionStart);
             }
+        }
+
+        private IEnumerable<string> ActiveErrorMessages(int textPosition)
+        {
+            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
+            {
+                foreach (var error in currentErrors)
+                {
+                    if (error.Start <= textPosition && textPosition < error.Start + error.Length)
+                    {
+                        yield return error.Message;
+                    }
+                }
+            }
+        }
+
+        protected override void OnDwellStart(DwellEventArgs e)
+        {
+            base.OnDwellStart(e);
+
+            int textPosition = e.Position;
+            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
+
+            if (toolTipText.Length > 0)
+            {
+                CallTipShow(textPosition, toolTipText);
+            }
+            else
+            {
+                CallTipCancel();
+            }
+        }
+
+        protected override void OnDwellEnd(DwellEventArgs e)
+        {
+            CallTipCancel();
+            base.OnDwellEnd(e);
         }
     }
 }
