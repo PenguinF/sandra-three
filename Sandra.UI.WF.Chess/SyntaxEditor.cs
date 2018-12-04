@@ -36,7 +36,9 @@ namespace Sandra.UI.WF
         {
             public Color BackColor { get; set; }
             public Color ForeColor { get; set; }
-            public Font Font { get; set; }
+            public Font Font { get; private set; }
+
+            public void ApplyFont(Font value) => Font = value;
         }
 
         /// <summary>

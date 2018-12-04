@@ -113,14 +113,14 @@ namespace Sandra.UI.WF
 
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
-            DefaultStyle.Font = defaultFont;
+            DefaultStyle.ApplyFont(defaultFont);
             StyleClearAll();
 
             CommentStyle.ForeColor = commentForeColor;
-            CommentStyle.Font = commentFont;
+            CommentStyle.ApplyFont(commentFont);
 
             ValueStyle.ForeColor = valueForeColor;
-            ValueStyle.Font = valueFont;
+            ValueStyle.ApplyFont(valueFont);
 
             StringStyle.ForeColor = stringForeColor;
 
