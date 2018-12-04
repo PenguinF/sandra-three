@@ -94,9 +94,13 @@ namespace Sandra.UI.WF
 
             if (ModifierKeys.HasFlag(Keys.Control))
             {
-                // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom) + Math.Sign(e.Delta);
-                RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
+                // Zoom isn't updated yet, so predict here what it's going to be.
+                int newZoomFactorPrediction = Zoom + Math.Sign(e.Delta);
+                if (ScintillaZoomFactor.MinDiscreteValue <= newZoomFactorPrediction
+                    && newZoomFactorPrediction <= ScintillaZoomFactor.MaxDiscreteValue)
+                {
+                    RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
+                }
             }
         }
 
@@ -136,7 +140,7 @@ namespace Sandra.UI.WF
     public class ZoomFactorChangedEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets the new zoom factor, represented as an integer in the range [-9..649].
+        /// Gets the new zoom factor, represented as an integer in the range [-10..20].
         /// </summary>
         public int ZoomFactor { get; }
 
@@ -144,11 +148,38 @@ namespace Sandra.UI.WF
         /// Initializes a new instance of the <see cref="ZoomFactorChangedEventArgs"/> class.
         /// </summary>
         /// <param name="zoomFactor">
-        /// The new zoom factor, represented as an integer in the range [-9..649].
+        /// The new zoom factor, represented as an integer in the range [-10..20].
         /// </param>
         public ZoomFactorChangedEventArgs(int zoomFactor)
         {
             ZoomFactor = zoomFactor;
         }
+    }
+
+    public sealed class ScintillaZoomFactor : PType.Derived<PInteger, int>
+    {
+        /// <summary>
+        /// Returns the minimum recommended value for the zoom factor
+        /// of a <see cref="Scintilla"/> control which is between -10 and 20, endpoints included.
+        /// </summary>
+        public static readonly int MinDiscreteValue = -10;
+
+        /// <summary>
+        /// Returns the maximum recommended value for the zoom factor
+        /// of a <see cref="Scintilla"/> control which is between -10 and 20, endpoints included.
+        /// </summary>
+        public static readonly int MaxDiscreteValue = 20;
+
+        public static readonly ScintillaZoomFactor Instance = new ScintillaZoomFactor();
+
+        private ScintillaZoomFactor() : base(new PType.RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
+
+        public override bool TryGetTargetValue(PInteger integer, out int targetValue)
+        {
+            targetValue = (int)integer.Value;
+            return true;
+        }
+
+        public override PInteger GetBaseValue(int value) => new PInteger(value);
     }
 }

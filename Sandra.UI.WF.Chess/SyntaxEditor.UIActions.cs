@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using Sandra.UI.WF.Storage;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -58,8 +57,8 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomIn(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom);
-            if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = Zoom;
+            if (zoomFactor >= ScintillaZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor++;
@@ -71,8 +70,8 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomOut(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom);
-            if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = Zoom;
+            if (zoomFactor <= ScintillaZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor--;
