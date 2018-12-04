@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
 {
     static class Program
     {
-        internal const string DefaultSettingsFileName = "Default.settings";
+        internal const string DefaultSettingsFileName = "DefaultSettings.json";
 
         internal static string ExecutableFolder { get; private set; }
 
