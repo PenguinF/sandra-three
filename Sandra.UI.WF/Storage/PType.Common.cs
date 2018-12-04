@@ -72,45 +72,6 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public sealed class RichTextZoomFactor : Derived<PInteger, int>
-        {
-            /// <summary>
-            /// Returns the minimum discrete integer value which when converted with
-            /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
-            /// of a <see cref="System.Windows.Forms.RichTextBox"/> which is between 1/64 and 64,
-            /// endpoints not included.
-            /// </summary>
-            public static readonly int MinDiscreteValue = -9;
-
-            /// <summary>
-            /// Returns the maximum discrete integer value which when converted with
-            /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
-            /// of a <see cref="System.Windows.Forms.RichTextBox"/> which is between 1/64 and 64,
-            /// endpoints not included.
-            /// </summary>
-            public static readonly int MaxDiscreteValue = 649;
-
-            public static float FromDiscreteZoomFactor(int zoomFactor)
-                => (zoomFactor + 10) / 10f;
-
-            public static int ToDiscreteZoomFactor(float zoomFactor)
-                // Assume discrete deltas of 0.1f.
-                // Set 0 to be the default, so 1.0f should map to 0.
-                => (int)Math.Round(zoomFactor * 10f) - 10;
-
-            public static readonly RichTextZoomFactor Instance = new RichTextZoomFactor();
-
-            private RichTextZoomFactor() : base(new RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
-
-            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
-            {
-                targetValue = (int)integer.Value;
-                return true;
-            }
-
-            public override PInteger GetBaseValue(int value) => new PInteger(value);
-        }
-
         public sealed class Enumeration<TEnum> : Derived<string, TEnum> where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();

@@ -19,7 +19,7 @@
  *********************************************************************************/
 #endregion
 
-using Sandra.UI.WF.Storage;
+using System;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -58,26 +58,51 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomIn(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor >= RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor++;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                ZoomFactor = RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryZoomOut(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
-            if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor <= RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor--;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                ZoomFactor = RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
         }
+    }
+
+    public static class RichTextZoomFactor
+    {
+        /// <summary>
+        /// Returns the minimum discrete integer value which when converted with
+        /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
+        /// of a <see cref="RichTextBox"/> which is between 1/64 and 64, endpoints not included.
+        /// </summary>
+        public static readonly int MinDiscreteValue = -9;
+
+        /// <summary>
+        /// Returns the maximum discrete integer value which when converted with
+        /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
+        /// of a <see cref="RichTextBox"/> which is between 1/64 and 64, endpoints not included.
+        /// </summary>
+        public static readonly int MaxDiscreteValue = 649;
+
+        public static float FromDiscreteZoomFactor(int zoomFactor)
+            => (zoomFactor + 10) / 10f;
+
+        public static int ToDiscreteZoomFactor(float zoomFactor)
+            // Assume discrete deltas of 0.1f.
+            // Set 0 to be the default, so 1.0f should map to 0.
+            => (int)Math.Round(zoomFactor * 10f) - 10;
     }
 }
