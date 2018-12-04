@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF", "Sandra.UI.WF\Sandra.UI.WF.csproj", "{77DA1D85-0062-4CAA-AF31-49D9A0B16BB2}"
 EndProject
@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bin", "Bin", "{CC73C019-791
 		Bin\Credits.txt = Bin\Credits.txt
 		Bin\README.txt = Bin\README.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysExtensions.Tests", "SysExtensions\Tests\SysExtensions.Tests.csproj", "{9D87C20F-6102-4D6E-AAA1-21A0340BCE0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,8 +53,15 @@ Global
 		{E87BD8F7-E4DB-4509-A2F0-327C3A01D07D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E87BD8F7-E4DB-4509-A2F0-327C3A01D07D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E87BD8F7-E4DB-4509-A2F0-327C3A01D07D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D87C20F-6102-4D6E-AAA1-21A0340BCE0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D87C20F-6102-4D6E-AAA1-21A0340BCE0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D87C20F-6102-4D6E-AAA1-21A0340BCE0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D87C20F-6102-4D6E-AAA1-21A0340BCE0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1EEFDD4-BF03-460B-965E-F7156FDB1094}
 	EndGlobalSection
 EndGlobal
