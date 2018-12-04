@@ -28,11 +28,11 @@ using System.Numerics;
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Temporary class which parses a list of <see cref="JsonTerminalSymbol"/>s directly into a <see cref="PValue"/> result.
+    /// Temporary class which parses a list of <see cref="JsonSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
     public class SettingReader
     {
-        private class ParseRun : JsonTerminalSymbolVisitor<PValue>
+        private class ParseRun : JsonSymbolVisitor<PValue>
         {
             private const string EmptyKeyMessage = "Missing property key";
             private const string EmptyValueMessage = "Missing value";

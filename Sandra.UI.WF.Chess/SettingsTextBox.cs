@@ -33,12 +33,12 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : SyntaxEditor<JsonTerminalSymbol>
+    public partial class SettingsTextBox : SyntaxEditor<JsonSymbol>
     {
         /// <summary>
         /// Because the syntax renderer does not support discontinuous terminal symbols.
         /// </summary>
-        private class JsonWhitespace : JsonTerminalSymbol
+        private class JsonWhitespace : JsonSymbol
         {
             public static readonly JsonWhitespace Value = new JsonWhitespace();
 
@@ -46,8 +46,8 @@ namespace Sandra.UI.WF
 
             public override bool IsBackground => true;
 
-            public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
-            public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+            public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
+            public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
         private const int commentStyleIndex = 8;
@@ -81,7 +81,7 @@ namespace Sandra.UI.WF
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
 
-        private sealed class StyleSelector : JsonTerminalSymbolVisitor<Style>
+        private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
             private readonly SettingsTextBox owner;
 
@@ -90,7 +90,7 @@ namespace Sandra.UI.WF
                 this.owner = owner;
             }
 
-            public override Style DefaultVisit(JsonTerminalSymbol symbol) => owner.DefaultStyle;
+            public override Style DefaultVisit(JsonSymbol symbol) => owner.DefaultStyle;
             public override Style VisitComment(JsonComment symbol) => owner.CommentStyle;
             public override Style VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
             public override Style VisitString(JsonString symbol) => owner.StringStyle;

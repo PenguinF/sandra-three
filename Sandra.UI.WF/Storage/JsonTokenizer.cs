@@ -470,7 +470,7 @@ namespace Sandra.UI.WF.Storage
         /// Tokenizes the source <see cref="Json"/> from start to end.
         /// </summary>
         /// <returns>
-        /// An enumeration of <see cref="JsonTerminalSymbol"/> instances.
+        /// An enumeration of <see cref="JsonSymbol"/> instances.
         /// </returns>
         public IEnumerable<JsonTextElement> TokenizeAll()
         {

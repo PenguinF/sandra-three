@@ -27,27 +27,27 @@ using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
-    public class JsonTextElement : TextElement<JsonTerminalSymbol>
+    public class JsonTextElement : TextElement<JsonSymbol>
     {
-        public JsonTextElement(JsonTerminalSymbol symbol, int start, int length) : base(symbol, start, length)
+        public JsonTextElement(JsonSymbol symbol, int start, int length) : base(symbol, start, length)
         {
         }
     }
 
-    public abstract class JsonTerminalSymbol
+    public abstract class JsonSymbol
     {
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
         public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
 
-        public abstract void Accept(JsonTerminalSymbolVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor);
+        public abstract void Accept(JsonSymbolVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
     }
 
-    public abstract class JsonTerminalSymbolVisitor
+    public abstract class JsonSymbolVisitor
     {
-        public virtual void DefaultVisit(JsonTerminalSymbol symbol) { }
-        public virtual void Visit(JsonTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void DefaultVisit(JsonSymbol symbol) { }
+        public virtual void Visit(JsonSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual void VisitComma(JsonComma symbol) => DefaultVisit(symbol);
         public virtual void VisitComment(JsonComment symbol) => DefaultVisit(symbol);
@@ -62,10 +62,10 @@ namespace Sandra.UI.WF.Storage
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
-    public abstract class JsonTerminalSymbolVisitor<TResult>
+    public abstract class JsonSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonTerminalSymbol symbol) => default(TResult);
-        public virtual TResult Visit(JsonTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult DefaultVisit(JsonSymbol symbol) => default(TResult);
+        public virtual TResult Visit(JsonSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
         public virtual TResult VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComma(JsonComma symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComment(JsonComment symbol) => DefaultVisit(symbol);
@@ -80,7 +80,7 @@ namespace Sandra.UI.WF.Storage
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
-    public class JsonComment : JsonTerminalSymbol
+    public class JsonComment : JsonSymbol
     {
         public const char CommentStartFirstCharacter = '/';
         public const char SingleLineCommentStartSecondCharacter = '/';
@@ -95,11 +95,11 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsBackground => true;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComment(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComment(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
     }
 
-    public class JsonUnterminatedMultiLineComment : JsonTerminalSymbol
+    public class JsonUnterminatedMultiLineComment : JsonSymbol
     {
         public TextErrorInfo Error { get; }
 
@@ -112,11 +112,11 @@ namespace Sandra.UI.WF.Storage
             Errors = new[] { error };
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineComment(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineComment(this);
     }
 
-    public class JsonCurlyOpen : JsonTerminalSymbol
+    public class JsonCurlyOpen : JsonSymbol
     {
         public const char CurlyOpenCharacter = '{';
 
@@ -126,11 +126,11 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
     }
 
-    public class JsonCurlyClose : JsonTerminalSymbol
+    public class JsonCurlyClose : JsonSymbol
     {
         public const char CurlyCloseCharacter = '}';
 
@@ -138,11 +138,11 @@ namespace Sandra.UI.WF.Storage
 
         private JsonCurlyClose() { }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
     }
 
-    public class JsonSquareBracketOpen : JsonTerminalSymbol
+    public class JsonSquareBracketOpen : JsonSymbol
     {
         public const char SquareBracketOpenCharacter = '[';
 
@@ -152,11 +152,11 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
     }
 
-    public class JsonSquareBracketClose : JsonTerminalSymbol
+    public class JsonSquareBracketClose : JsonSymbol
     {
         public const char SquareBracketCloseCharacter = ']';
 
@@ -164,11 +164,11 @@ namespace Sandra.UI.WF.Storage
 
         private JsonSquareBracketClose() { }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
     }
 
-    public class JsonColon : JsonTerminalSymbol
+    public class JsonColon : JsonSymbol
     {
         public const char ColonCharacter = ':';
 
@@ -176,11 +176,11 @@ namespace Sandra.UI.WF.Storage
 
         private JsonColon() { }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColon(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
     }
 
-    public class JsonComma : JsonTerminalSymbol
+    public class JsonComma : JsonSymbol
     {
         public const char CommaCharacter = ',';
 
@@ -188,11 +188,11 @@ namespace Sandra.UI.WF.Storage
 
         private JsonComma() { }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComma(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
     }
 
-    public class JsonUnknownSymbol : JsonTerminalSymbol
+    public class JsonUnknownSymbol : JsonSymbol
     {
         public TextErrorInfo Error { get; }
 
@@ -206,11 +206,11 @@ namespace Sandra.UI.WF.Storage
             Errors = new[] { error };
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbol(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbol(this);
     }
 
-    public class JsonValue : JsonTerminalSymbol
+    public class JsonValue : JsonSymbol
     {
         public static readonly string True = "true";
         public static readonly string False = "false";
@@ -224,11 +224,11 @@ namespace Sandra.UI.WF.Storage
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitValue(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
     }
 
-    public class JsonString : JsonTerminalSymbol
+    public class JsonString : JsonSymbol
     {
         public const char QuoteCharacter = '"';
         public const char EscapeCharacter = '\\';
@@ -296,11 +296,11 @@ namespace Sandra.UI.WF.Storage
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitString(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitString(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitString(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitString(this);
     }
 
-    public class JsonErrorString : JsonTerminalSymbol
+    public class JsonErrorString : JsonSymbol
     {
         public override IEnumerable<TextErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
@@ -316,7 +316,7 @@ namespace Sandra.UI.WF.Storage
             Errors = errors.ToArray();
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitErrorString(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorString(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
     }
 }

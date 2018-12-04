@@ -31,10 +31,10 @@ namespace Sandra.UI.WF.Tests
         /// <summary>
         /// For testing JsonTerminalSymbols in general.
         /// </summary>
-        private class JsonTestSymbol : JsonTerminalSymbol
+        private class JsonTestSymbol : JsonSymbol
         {
-            public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.DefaultVisit(this);
-            public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+            public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
+            public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
         [Fact]
@@ -177,17 +177,17 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { new JsonErrorString(new[] { TextErrorInfo.UnterminatedString(0, 1) }), typeof(JsonErrorString) };
         }
 
-        private sealed class TestVisitor1 : JsonTerminalSymbolVisitor
+        private sealed class TestVisitor1 : JsonSymbolVisitor
         {
             public bool DefaultVisited;
 
-            public override void DefaultVisit(JsonTerminalSymbol symbol) => DefaultVisited = true;
+            public override void DefaultVisit(JsonSymbol symbol) => DefaultVisited = true;
         }
 
         [Theory]
         [MemberData(nameof(TerminalSymbolsOfEachType))]
 #pragma warning disable xUnit1026 // otherwise 2 generate methods are necessary.
-        public void DefaultVisitVoid(JsonTerminalSymbol symbol, Type symbolType)
+        public void DefaultVisitVoid(JsonSymbol symbol, Type symbolType)
 #pragma warning restore xUnit1026
         {
             var testVisitor = new TestVisitor1();
@@ -195,24 +195,24 @@ namespace Sandra.UI.WF.Tests
             Assert.True(testVisitor.DefaultVisited);
         }
 
-        private sealed class TestVisitor2 : JsonTerminalSymbolVisitor<int>
+        private sealed class TestVisitor2 : JsonSymbolVisitor<int>
         {
             public const int ReturnValue = 1;
 
-            public override int DefaultVisit(JsonTerminalSymbol symbol) => ReturnValue;
+            public override int DefaultVisit(JsonSymbol symbol) => ReturnValue;
         }
 
         [Theory]
         [MemberData(nameof(TerminalSymbolsOfEachType))]
 #pragma warning disable xUnit1026 // otherwise 2 generate methods are necessary.
-        public void DefaultVisitInt(JsonTerminalSymbol symbol, Type symbolType)
+        public void DefaultVisitInt(JsonSymbol symbol, Type symbolType)
 #pragma warning restore xUnit1026
         {
             var testVisitor = new TestVisitor2();
             Assert.Equal(TestVisitor2.ReturnValue, testVisitor.Visit(symbol));
         }
 
-        private sealed class TestVisitor3 : JsonTerminalSymbolVisitor
+        private sealed class TestVisitor3 : JsonSymbolVisitor
         {
             public Type VisitedType;
 
@@ -229,7 +229,7 @@ namespace Sandra.UI.WF.Tests
             public override void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => VisitedType = typeof(JsonUnterminatedMultiLineComment);
             public override void VisitValue(JsonValue symbol) => VisitedType = typeof(JsonValue);
 
-            public override void DefaultVisit(JsonTerminalSymbol symbol)
+            public override void DefaultVisit(JsonSymbol symbol)
             {
                 throw new InvalidOperationException("DefaultVisit should not have been called");
             }
@@ -237,14 +237,14 @@ namespace Sandra.UI.WF.Tests
 
         [Theory]
         [MemberData(nameof(TerminalSymbolsOfEachType))]
-        public void NonDefaultVisitVoid(JsonTerminalSymbol symbol, Type symbolType)
+        public void NonDefaultVisitVoid(JsonSymbol symbol, Type symbolType)
         {
             var testVisitor = new TestVisitor3();
             testVisitor.Visit(symbol);
             Assert.Equal(symbolType, testVisitor.VisitedType);
         }
 
-        private sealed class TestVisitor4 : JsonTerminalSymbolVisitor<Type>
+        private sealed class TestVisitor4 : JsonSymbolVisitor<Type>
         {
             public override Type VisitColon(JsonColon symbol) => typeof(JsonColon);
             public override Type VisitComma(JsonComma symbol) => typeof(JsonComma);
@@ -259,7 +259,7 @@ namespace Sandra.UI.WF.Tests
             public override Type VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => typeof(JsonUnterminatedMultiLineComment);
             public override Type VisitValue(JsonValue symbol) => typeof(JsonValue);
 
-            public override Type DefaultVisit(JsonTerminalSymbol symbol)
+            public override Type DefaultVisit(JsonSymbol symbol)
             {
                 throw new InvalidOperationException("DefaultVisit should not have been called");
             }
@@ -267,7 +267,7 @@ namespace Sandra.UI.WF.Tests
 
         [Theory]
         [MemberData(nameof(TerminalSymbolsOfEachType))]
-        public void NonDefaultVisit(JsonTerminalSymbol symbol, Type symbolType)
+        public void NonDefaultVisit(JsonSymbol symbol, Type symbolType)
         {
             var testVisitor = new TestVisitor4();
             Assert.Equal(symbolType, testVisitor.Visit(symbol));
