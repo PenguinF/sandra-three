@@ -150,6 +150,7 @@ namespace Sandra.UI.WF
             // Set the Text property and use that as input, because it will not exactly match the json string.
             TextChanged += SettingsTextBox_TextChanged;
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            EmptyUndoBuffer();
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)
