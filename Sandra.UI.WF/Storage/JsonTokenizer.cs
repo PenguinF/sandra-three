@@ -190,7 +190,7 @@ namespace Sandra.UI.WF.Storage
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
                                 yield return new TextElement<JsonSymbol>(
-                                    new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex)),
+                                    new JsonUnknownSymbol(JsonUnknownSymbol.CreateError(displayCharValue, currentIndex)),
                                     currentIndex,
                                     1);
                                 break;
@@ -327,13 +327,13 @@ namespace Sandra.UI.WF.Storage
                                     else
                                     {
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
-                                        errors.Add(TextErrorInfo.UnrecognizedUnicodeEscapeSequence(
+                                        errors.Add(JsonErrorString.UnrecognizedUnicodeEscapeSequence(
                                             json.Substring(escapeSequenceStart, escapeSequenceLength),
                                             escapeSequenceStart, escapeSequenceLength));
                                     }
                                     break;
                                 default:
-                                    errors.Add(TextErrorInfo.UnrecognizedEscapeSequence(
+                                    errors.Add(JsonErrorString.UnrecognizedEscapeSequence(
                                         json.Substring(escapeSequenceStart, 2),
                                         escapeSequenceStart));
                                     break;
@@ -344,7 +344,7 @@ namespace Sandra.UI.WF.Storage
                         if (JsonString.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
-                            errors.Add(TextErrorInfo.IllegalControlCharacterInString(
+                            errors.Add(JsonErrorString.IllegalControlCharacter(
                                 JsonString.EscapedCharacterString(c),
                                 currentIndex));
                         }
@@ -359,7 +359,7 @@ namespace Sandra.UI.WF.Storage
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            errors.Add(TextErrorInfo.UnterminatedString(firstUnusedIndex, length - firstUnusedIndex));
+            errors.Add(JsonErrorString.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
             yield return new TextElement<JsonSymbol>(
                 new JsonErrorString(errors),
                 firstUnusedIndex,
@@ -460,7 +460,7 @@ namespace Sandra.UI.WF.Storage
             }
 
             yield return new TextElement<JsonSymbol>(
-                new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex)),
+                new JsonUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment.CreateError(firstUnusedIndex, length - firstUnusedIndex)),
                 firstUnusedIndex,
                 length - firstUnusedIndex);
 

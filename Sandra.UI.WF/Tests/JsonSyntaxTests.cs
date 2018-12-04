@@ -142,7 +142,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
-            var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, 0);
+            var error = JsonUnknownSymbol.CreateError(displayCharValue, 0);
             var symbol = new JsonUnknownSymbol(error);
             Assert.Same(error, symbol.Error);
         }
@@ -157,7 +157,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var error = TextErrorInfo.UnterminatedMultiLineComment(0, commentText.Length);
+            var error = JsonUnterminatedMultiLineComment.CreateError(0, commentText.Length);
             var symbol = new JsonUnterminatedMultiLineComment(error);
             Assert.Same(error, symbol.Error);
         }
@@ -165,17 +165,17 @@ namespace Sandra.UI.WF.Tests
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { JsonComment.Value, typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment.CreateError(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
             yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
             yield return new object[] { JsonSquareBracketOpen.Value, typeof(JsonSquareBracketOpen) };
             yield return new object[] { JsonSquareBracketClose.Value, typeof(JsonSquareBracketClose) };
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol("*", 0)), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol(JsonUnknownSymbol.CreateError("*", 0)), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString(new[] { TextErrorInfo.UnterminatedString(0, 1) }), typeof(JsonErrorString) };
+            yield return new object[] { new JsonErrorString(new[] { JsonErrorString.Unterminated(0, 1) }), typeof(JsonErrorString) };
         }
 
         private sealed class TestVisitor1 : JsonSymbolVisitor

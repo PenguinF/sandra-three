@@ -64,7 +64,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("▓", 200)]
         public void UnexpectedSymbolMessage(string displayCharValue, int position)
         {
-            var error = TextErrorInfo.UnexpectedSymbol(displayCharValue, position);
+            var error = JsonUnknownSymbol.CreateError(displayCharValue, position);
             Assert.NotNull(error);
             Assert.Equal($"Unexpected symbol '{displayCharValue}'", error.Message);
             Assert.Equal(position, error.Start);
@@ -77,7 +77,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedMultiLineCommentMessage(int start, int length)
         {
-            var error = TextErrorInfo.UnterminatedMultiLineComment(start, length);
+            var error = JsonUnterminatedMultiLineComment.CreateError(start, length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated multi-line comment", error.Message);
             Assert.Equal(start, error.Start);
@@ -90,7 +90,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedStringMessage(int start, int length)
         {
-            var error = TextErrorInfo.UnterminatedString(start, length);
+            var error = JsonErrorString.Unterminated(start, length);
             Assert.NotNull(error);
             Assert.Equal("Unterminated string", error.Message);
             Assert.Equal(start, error.Start);
@@ -103,7 +103,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\0", 1)]
         public void IllegalControlCharacterInStringMessage(string displayCharValue, int position)
         {
-            var error = TextErrorInfo.IllegalControlCharacterInString(displayCharValue, position);
+            var error = JsonErrorString.IllegalControlCharacter(displayCharValue, position);
             Assert.Equal($"Illegal control character '{displayCharValue}' in string", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
@@ -114,7 +114,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\0", 1)]
         public void UnrecognizedEscapeSequenceMessage(string displayCharValue, int position)
         {
-            var error = TextErrorInfo.UnrecognizedEscapeSequence(displayCharValue, position);
+            var error = JsonErrorString.UnrecognizedEscapeSequence(displayCharValue, position);
             Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(2, error.Length);
@@ -126,7 +126,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData("\\uffff", 1)]
         public void UnrecognizedUnicodeEscapeSequenceMessage(string displayCharValue, int position)
         {
-            var error = TextErrorInfo.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
+            var error = JsonErrorString.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
             Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
             Assert.Equal(position, error.Start);
             Assert.Equal(displayCharValue.Length, error.Length);

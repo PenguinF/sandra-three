@@ -93,6 +93,18 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnterminatedMultiLineComment : JsonSymbol
     {
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for unterminated multiline comments.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the unterminated comment.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unterminated comment.
+        /// </param>
+        public static TextErrorInfo CreateError(int start, int length)
+            => new TextErrorInfo("Unterminated multi-line comment", start, length);
+
         public TextErrorInfo Error { get; }
 
         public override bool IsBackground => true;
@@ -186,6 +198,12 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonUnknownSymbol : JsonSymbol
     {
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for unexpected symbol characters.
+        /// </summary>
+        public static TextErrorInfo CreateError(string displayCharValue, int position)
+            => new TextErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
+
         public TextErrorInfo Error { get; }
 
         public override IEnumerable<TextErrorInfo> Errors { get; }
@@ -294,6 +312,36 @@ namespace Sandra.UI.WF.Storage
 
     public class JsonErrorString : JsonSymbol
     {
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the unterminated string.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unterminated string.
+        /// </param>
+        public static TextErrorInfo Unterminated(int start, int length)
+            => new TextErrorInfo("Unterminated string", start, length);
+
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for unrecognized escape sequences.
+        /// </summary>
+        public static TextErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
+            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
+
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for unrecognized Unicode escape sequences.
+        /// </summary>
+        public static TextErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
+            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
+
+        /// <summary>
+        /// Creates a <see cref="TextErrorInfo"/> for illegal control characters inside string literals.
+        /// </summary>
+        public static TextErrorInfo IllegalControlCharacter(string displayCharValue, int start)
+            => new TextErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
+
         public override IEnumerable<TextErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
 
