@@ -190,7 +190,7 @@ namespace Sandra.UI.WF.Storage
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
                                 yield return new TextElement<JsonSymbol>(
-                                    new JsonUnknownSymbol(JsonUnknownSymbol.CreateError(displayCharValue, currentIndex)),
+                                    new JsonUnknownSymbol(displayCharValue, currentIndex),
                                     currentIndex,
                                     1);
                                 break;

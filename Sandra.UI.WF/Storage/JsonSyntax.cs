@@ -210,10 +210,10 @@ namespace Sandra.UI.WF.Storage
 
         public override bool IsValueStartSymbol => true;
 
-        public JsonUnknownSymbol(TextErrorInfo error)
+        public JsonUnknownSymbol(string displayCharValue, int position)
         {
-            Error = error ?? throw new ArgumentNullException(nameof(error));
-            Errors = new[] { error };
+            Error = CreateError(displayCharValue, position);
+            Errors = new[] { Error };
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);

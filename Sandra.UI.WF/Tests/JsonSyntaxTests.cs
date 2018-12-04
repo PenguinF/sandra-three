@@ -131,20 +131,14 @@ namespace Sandra.UI.WF.Tests
                 error3 => Assert.Same(errorInfo3, error3));
         }
 
-        [Fact]
-        public void NullErrorInUnexpectedSymbolShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null));
-        }
-
         [Theory]
         [InlineData("*")]
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
             var error = JsonUnknownSymbol.CreateError(displayCharValue, 0);
-            var symbol = new JsonUnknownSymbol(error);
-            Assert.Same(error, symbol.Error);
+            var symbol = new JsonUnknownSymbol(displayCharValue, 0);
+            Assert.True(error.EqualTo(symbol.Error));
         }
 
         [Fact]
@@ -248,7 +242,7 @@ namespace Sandra.UI.WF.Tests
             yield return new object[] { JsonSquareBracketClose.Value, typeof(JsonSquareBracketClose) };
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol(JsonUnknownSymbol.CreateError("*", 0)), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol("*", 0), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(new[] { JsonErrorString.Unterminated(0, 1) }), typeof(JsonErrorString) };
