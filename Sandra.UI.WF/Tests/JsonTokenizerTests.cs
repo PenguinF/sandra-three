@@ -36,17 +36,6 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData("{}")]
-        // No newline conversions.
-        [InlineData("\n")]
-        [InlineData("\r\n")]
-        public void JsonIsUnchanged(string json)
-        {
-            Assert.Equal(json, new JsonTokenizer(json).Json);
-        }
-
-        [Theory]
         [InlineData("//", null)]
         [InlineData("//\n", "//")]
         [InlineData("//\r\n", "//")]
