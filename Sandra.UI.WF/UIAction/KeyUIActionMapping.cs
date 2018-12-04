@@ -160,12 +160,7 @@ namespace Sandra.UI.WF
         {
             if (shortcutKeys.IsEmpty) return false;
 
-            Keys equivalentShortcut = (Keys)shortcutKeys.Key;
-
-            KeyModifiers code = shortcutKeys.Modifiers;
-            if (code.HasFlag(KeyModifiers.Shift)) equivalentShortcut |= Keys.Shift;
-            if (code.HasFlag(KeyModifiers.Control)) equivalentShortcut |= Keys.Control;
-            if (code.HasFlag(KeyModifiers.Alt)) equivalentShortcut |= Keys.Alt;
+            Keys equivalentShortcut = ToKeys(shortcutKeys);
 
             if (shortcut == equivalentShortcut) return true;
 
@@ -219,6 +214,18 @@ namespace Sandra.UI.WF
             }
 
             return false;
+        }
+
+        public static Keys ToKeys(ShortcutKeys shortcutKeys)
+        {
+            Keys equivalentShortcut = (Keys)shortcutKeys.Key;
+
+            KeyModifiers code = shortcutKeys.Modifiers;
+            if (code.HasFlag(KeyModifiers.Shift)) equivalentShortcut |= Keys.Shift;
+            if (code.HasFlag(KeyModifiers.Control)) equivalentShortcut |= Keys.Control;
+            if (code.HasFlag(KeyModifiers.Alt)) equivalentShortcut |= Keys.Alt;
+
+            return equivalentShortcut;
         }
 
         /// <summary>
