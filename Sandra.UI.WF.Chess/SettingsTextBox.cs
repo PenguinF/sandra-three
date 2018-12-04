@@ -123,15 +123,15 @@ namespace Sandra.UI.WF
 
             StringStyle.ForeColor = stringForeColor;
 
-            // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
-
             if (errorsTextBox != null)
             {
                 errorsTextBox.ReadOnly = true;
                 errorsTextBox.DoubleClick += ErrorsTextBox_DoubleClick;
                 errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
             }
+
+            // Set the Text property and use that as input, because it will not exactly match the json string.
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
         }
 
         protected override void OnHandleCreated(EventArgs e)
