@@ -85,6 +85,7 @@ namespace Sandra.UI.WF
                 this.owner = owner;
             }
 
+            public override Style DefaultVisit(JsonTerminalSymbol symbol) => owner.DefaultStyle;
             public override Style VisitComment(JsonComment symbol) => owner.CommentStyle;
             public override Style VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
             public override Style VisitString(JsonString symbol) => owner.StringStyle;
