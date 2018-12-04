@@ -31,7 +31,7 @@ namespace Sandra.UI.WF
     {
         public static readonly string DefaultAppDataSubFolderName = "SandraChess";
 
-        public static readonly string DefaultLocalPreferencesFileName = "Preferences.settings";
+        public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
 
         private static string localApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :

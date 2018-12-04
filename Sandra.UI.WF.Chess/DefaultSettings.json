@@ -18,7 +18,7 @@
 
   // File name in the %APPDATA%/Local subfolder which contains the user-specific
   // preferences.
-  "local_preferences_file_name": "Preferences.settings",
+  "local_preferences_file_name": "Preferences.json",
 
   // The color of the dark squares. This value must be in the HTML color format,
   // for example "#808000" is the Olive color.
