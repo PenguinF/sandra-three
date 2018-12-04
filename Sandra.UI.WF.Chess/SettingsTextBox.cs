@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -49,6 +50,11 @@ namespace Sandra.UI.WF
             public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
         }
 
+        private const int commentStyleIndex = 8;
+        private const int valueStyleIndex = 9;
+        private const int stringStyleIndex = 10;
+        private const int errorIndicatorIndex = 8;
+
         private static readonly Color defaultBackColor = Color.FromArgb(16, 16, 16);
         private static readonly Color defaultForeColor = Color.WhiteSmoke;
         private static readonly Font defaultFont = new Font("Consolas", 10);
@@ -66,9 +72,9 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private readonly Style CommentStyle = new Style();
-        private readonly Style ValueStyle = new Style();
-        private readonly Style StringStyle = new Style();
+        private Style CommentStyle => Styles[commentStyleIndex];
+        private Style ValueStyle => Styles[valueStyleIndex];
+        private Style StringStyle => Styles[stringStyleIndex];
 
         private sealed class StyleSelector : JsonTerminalSymbolVisitor<Style>
         {
@@ -111,6 +117,7 @@ namespace Sandra.UI.WF
 
             BorderStyle = BorderStyle.None;
 
+            StyleResetDefault();
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
             DefaultStyle.ApplyFont(defaultFont);
@@ -124,6 +131,10 @@ namespace Sandra.UI.WF
 
             StringStyle.ForeColor = stringForeColor;
 
+            Indicators[errorIndicatorIndex].Style = IndicatorStyle.Squiggle;
+            Indicators[errorIndicatorIndex].ForeColor = Color.Red;
+            IndicatorCurrent = errorIndicatorIndex;
+
             if (errorsTextBox != null)
             {
                 errorsTextBox.ReadOnly = true;
@@ -132,19 +143,8 @@ namespace Sandra.UI.WF
             }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-
-            using (var updateToken = BeginUpdateRememberState())
-            {
-                ParseAndApplySyntaxHighlighting(Text);
-            }
-
             TextChanged += SettingsTextBox_TextChanged;
+            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)
@@ -193,6 +193,8 @@ namespace Sandra.UI.WF
 
             parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
 
+            IndicatorClearRange(0, TextLength);
+
             if (errors.Count == 0)
             {
                 DisplayNoErrors();
@@ -211,11 +213,7 @@ namespace Sandra.UI.WF
             string newText = Text;
             if (lastParsedText != newText)
             {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    StyleClearAll();
-                    ParseAndApplySyntaxHighlighting(newText);
-                }
+                ParseAndApplySyntaxHighlighting(newText);
             }
         }
 
@@ -243,8 +241,7 @@ namespace Sandra.UI.WF
 
             foreach (var error in errors)
             {
-                Select(error.Start, error.Length);
-                SetErrorUnderline();
+                IndicatorFillRange(error.Start, error.Length);
             }
 
             if (errorsTextBox != null)
@@ -283,23 +280,19 @@ namespace Sandra.UI.WF
                     var hotError = currentErrors[lineIndex];
                     int hotErrorLine = LineFromPosition(hotError.Start);
 
-                    // Delay repaints while fooling around with SelectionStart.
-                    using (var updateToken = BeginUpdate())
+                    // hotErrorLine in view?
+                    // Don't include the bottom line, it's likely not completely visible.
+                    if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                     {
-                        // hotErrorLine in view?
-                        // Don't include the bottom line, it's likely not completely visible.
-                        if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
-                        {
-                            int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
-                            if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
-                            FirstVisibleLine = targetFirstVisibleLine;
-                        }
+                        int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                        if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                        FirstVisibleLine = targetFirstVisibleLine;
+                    }
 
-                        GotoPosition(hotError.Start);
-                        if (hotError.Length > 0)
-                        {
-                            SelectionEnd = hotError.Start + hotError.Length;
-                        }
+                    GotoPosition(hotError.Start);
+                    if (hotError.Length > 0)
+                    {
+                        SelectionEnd = hotError.Start + hotError.Length;
                     }
 
                     Focus();

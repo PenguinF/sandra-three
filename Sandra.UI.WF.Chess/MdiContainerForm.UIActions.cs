@@ -81,8 +81,6 @@ namespace Sandra.UI.WF
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
-                WordWrap = false,
-                ScrollBars = RichTextBoxScrollBars.Both,
             };
 
             settingsTextBox.BindActions(new UIActionBindings

@@ -63,7 +63,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 zoomFactor++;
-                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                Zoom = zoomFactor;
                 RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;
@@ -76,7 +76,7 @@ namespace Sandra.UI.WF
             if (perform)
             {
                 zoomFactor--;
-                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                Zoom = zoomFactor;
                 RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;

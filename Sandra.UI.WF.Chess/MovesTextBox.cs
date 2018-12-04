@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.PGN;
+using ScintillaNET;
 using SysExtensions;
 using SysExtensions.TextIndex;
 using System;
@@ -35,6 +36,8 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class MovesTextBox : SyntaxEditor<PGNTerminalSymbol>
     {
+        private const int activeMoveStyleIndex = 8;
+
         private static readonly Color defaultBackColor = Color.White;
         private static readonly Color defaultForeColor = Color.Black;
         private static readonly Font defaultFont = new Font("Candara", 10);
@@ -42,7 +45,7 @@ namespace Sandra.UI.WF
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
-        private readonly Style ActiveMoveStyle = new Style();
+        private Style ActiveMoveStyle => Styles[activeMoveStyleIndex];
 
         private int CaretPosition;
 
@@ -50,7 +53,9 @@ namespace Sandra.UI.WF
         {
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
+            WrapMode = WrapMode.Whitespace;
 
+            StyleResetDefault();
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
             DefaultStyle.ApplyFont(defaultFont);
@@ -253,14 +258,11 @@ namespace Sandra.UI.WF
             if (game != null)
             {
                 // Clear and build the entire text anew by clearing the old element list.
-                using (var updateToken = BeginUpdate())
-                {
-                    ReadOnly = false;
-                    ClearAll();
-                    ReadOnly = true;
-                    TextIndex.Clear();
-                    UpdateText();
-                }
+                ReadOnly = false;
+                ClearAll();
+                ReadOnly = true;
+                TextIndex.Clear();
+                UpdateText();
             }
         }
 
@@ -296,76 +298,73 @@ namespace Sandra.UI.WF
                 }
             }
 
-            using (var updateToken = BeginUpdate())
+            if (agreeIndex < existingElementCount)
             {
-                if (agreeIndex < existingElementCount)
+                // Clear existing tail part.
+                int textStart = TextIndex.Elements[agreeIndex].Start;
+
+                ReadOnly = false;
+                DeleteRange(textStart, TextLength - textStart);
+                ReadOnly = true;
+
+                TextIndex.RemoveFrom(agreeIndex);
+            }
+
+            if (currentActiveMoveStyleElement != null)
+            {
+                if (currentActiveMoveStyleElement.Start + currentActiveMoveStyleElement.Length <= TextLength)
                 {
-                    // Clear existing tail part.
-                    int textStart = TextIndex.Elements[agreeIndex].Start;
-
-                    ReadOnly = false;
-                    DeleteRange(textStart, TextLength - textStart);
-                    ReadOnly = true;
-
-                    TextIndex.RemoveFrom(agreeIndex);
+                    ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
                 }
 
-                if (currentActiveMoveStyleElement != null)
-                {
-                    if (currentActiveMoveStyleElement.Start + currentActiveMoveStyleElement.Length <= TextLength)
-                    {
-                        ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
-                    }
+                currentActiveMoveStyleElement = null;
+            }
 
-                    currentActiveMoveStyleElement = null;
+            // Append new element texts.
+            PGNTerminalSymbolTextGenerator textGenerator = new PGNTerminalSymbolTextGenerator();
+            while (agreeIndex < updatedElementCount)
+            {
+                var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
+                var text = textGenerator.Visit(updatedTerminalSymbol);
+
+                ReadOnly = false;
+                AppendText(text);
+                ReadOnly = true;
+
+                var newElement = TextIndex.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
+
+                if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
+                {
+                    newActiveMoveElement = newElement;
                 }
 
-                // Append new element texts.
-                PGNTerminalSymbolTextGenerator textGenerator = new PGNTerminalSymbolTextGenerator();
-                while (agreeIndex < updatedElementCount)
+                ++agreeIndex;
+            }
+
+            if (game == null || game.Game.IsFirstMove)
+            {
+                // If there's no active move, go to before the first move.
+                if (TextIndex.Elements.Count > 0)
                 {
-                    var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
-                    var text = textGenerator.Visit(updatedTerminalSymbol);
-
-                    ReadOnly = false;
-                    AppendText(text);
-                    ReadOnly = true;
-
-                    var newElement = TextIndex.AppendTerminalSymbol(updatedTerminalSymbol, text.Length);
-
-                    if (newActiveMoveElement == null && activeTreeSearcher.Visit(updatedTerminalSymbol))
-                    {
-                        newActiveMoveElement = newElement;
-                    }
-
-                    ++agreeIndex;
-                }
-
-                if (game == null || game.Game.IsFirstMove)
-                {
-                    // If there's no active move, go to before the first move.
-                    if (TextIndex.Elements.Count > 0)
-                    {
-                        int newCaretPosition = TextIndex.Elements[0].Start;
-                        if (CaretPosition != newCaretPosition)
-                        {
-                            CaretPosition = newCaretPosition;
-                            GotoPosition(newCaretPosition);
-                        }
-                    }
-                }
-                else if (newActiveMoveElement != null)
-                {
-                    currentActiveMoveStyleElement = newActiveMoveElement;
-                    ApplyStyle(newActiveMoveElement, ActiveMoveStyle);
-
-                    // Also update the caret so the active move is in view.
-                    int newCaretPosition = newActiveMoveElement.End;
+                    int newCaretPosition = TextIndex.Elements[0].Start;
                     if (CaretPosition != newCaretPosition)
                     {
                         CaretPosition = newCaretPosition;
                         GotoPosition(newCaretPosition);
                     }
+                }
+            }
+            else if (newActiveMoveElement != null)
+            {
+                currentActiveMoveStyleElement = newActiveMoveElement;
+                ApplyStyle(newActiveMoveElement, ActiveMoveStyle);
+
+                // Also update the caret so the active move is in view.
+                int newCaretPosition = newActiveMoveElement.End;
+                if (CaretPosition != newCaretPosition)
+                {
+                    CaretPosition = newCaretPosition;
+                    GotoPosition(newCaretPosition);
                 }
             }
         }
@@ -403,38 +402,35 @@ namespace Sandra.UI.WF
                 // Update the active move index in the game.
                 if (game.Game.ActiveTree != newActiveTree)
                 {
-                    using (var updateToken = BeginUpdateRememberState())
+                    // Reset markup of the previously active move element.
+                    if (currentActiveMoveStyleElement != null)
                     {
-                        // Reset markup of the previously active move element.
-                        if (currentActiveMoveStyleElement != null)
-                        {
-                            ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
-                            currentActiveMoveStyleElement = null;
-                        }
+                        ApplyStyle(currentActiveMoveStyleElement, DefaultStyle);
+                        currentActiveMoveStyleElement = null;
+                    }
 
-                        UpdatingGame = true;
-                        try
-                        {
-                            game.Game.SetActiveTree(newActiveTree);
-                            game.ActiveMoveTreeUpdated();
-                        }
-                        finally
-                        {
-                            UpdatingGame = false;
-                        }
+                    UpdatingGame = true;
+                    try
+                    {
+                        game.Game.SetActiveTree(newActiveTree);
+                        game.ActiveMoveTreeUpdated();
+                    }
+                    finally
+                    {
+                        UpdatingGame = false;
+                    }
 
-                        ActionHandler.Invalidate();
+                    ActionHandler.Invalidate();
 
-                        // Search for the current active move element to set its font.
-                        PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-                        foreach (TextElement<PGNTerminalSymbol> textElement in TextIndex.Elements)
+                    // Search for the current active move element to set its font.
+                    PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
+                    foreach (TextElement<PGNTerminalSymbol> textElement in TextIndex.Elements)
+                    {
+                        if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                         {
-                            if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
-                            {
-                                currentActiveMoveStyleElement = textElement;
-                                ApplyStyle(textElement, ActiveMoveStyle);
-                                break;
-                            }
+                            currentActiveMoveStyleElement = textElement;
+                            ApplyStyle(textElement, ActiveMoveStyle);
+                            break;
                         }
                     }
                 }
@@ -459,12 +455,10 @@ namespace Sandra.UI.WF
             base.OnMouseWheel(e);
         }
 
-        protected override void OnSelectionChanged(EventArgs e)
+        protected override void OnUpdateUI(UpdateUIEventArgs e)
         {
-            // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
-            // This is only to detect caret updates by interacting with the control.
-            // Also check SelectionLength so the event is not raised for non-empty selections.
-            if (!IsUpdating && SelectionStart == SelectionEnd)
+            // Check SelectionLength so the active move is not updated for non-empty selections.
+            if ((e.Change & UpdateChange.Selection) != 0 && SelectionStart == SelectionEnd)
             {
                 int newCaretPosition = SelectionStart;
                 if (CaretPosition != newCaretPosition)
@@ -474,7 +468,7 @@ namespace Sandra.UI.WF
                 }
             }
 
-            base.OnSelectionChanged(e);
+            base.OnUpdateUI(e);
         }
     }
 }

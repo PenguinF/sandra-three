@@ -20,27 +20,21 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using ScintillaNET;
 using SysExtensions.TextIndex;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
     /// <summary>
-    /// Represents a Windows rich text box with syntax highlighting.
+    /// Represents a <see cref="Scintilla"/> control with syntax highlighting, a number of <see cref="UIAction"/> hooks,
+    /// and a mouse-wheel event handler.
     /// </summary>
-    public abstract partial class SyntaxEditor<TTerminal> : UpdatableRichTextBox, IUIActionHandlerProvider
+    public abstract partial class SyntaxEditor<TTerminal> : Scintilla, IUIActionHandlerProvider
     {
-        protected sealed class Style
-        {
-            public Color BackColor { get; set; }
-            public Color ForeColor { get; set; }
-            public Font Font { get; private set; }
-
-            public void ApplyFont(Font value) => Font = value;
-        }
-
         /// <summary>
         /// Gets the action handler for this control.
         /// </summary>
@@ -48,34 +42,17 @@ namespace Sandra.UI.WF
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
-        protected Style DefaultStyle { get; } = new Style();
+        protected Style DefaultStyle => Styles[Style.Default];
 
         public SyntaxEditor()
         {
             TextIndex = new TextIndex<TTerminal>();
 
+            Margins.ForEach(x => x.Width = 0);
+
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
             {
-                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
-            }
-        }
-
-        protected void StyleClearAll()
-        {
-            var defaultStyle = DefaultStyle;
-
-            if (defaultStyle != null)
-            {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    BackColor = defaultStyle.BackColor;
-                    ForeColor = defaultStyle.ForeColor;
-                    Font = defaultStyle.Font;
-                    SelectAll();
-                    SelectionBackColor = defaultStyle.BackColor;
-                    SelectionColor = defaultStyle.ForeColor;
-                    SelectionFont = defaultStyle.Font;
-                }
+                Zoom = zoomFactor;
             }
         }
 
@@ -83,13 +60,8 @@ namespace Sandra.UI.WF
         {
             if (style != null)
             {
-                using (var updateToken = BeginUpdateRememberState())
-                {
-                    Select(element.Start, element.Length);
-                    if (style.BackColor.A > 0) SelectionBackColor = style.BackColor;
-                    if (style.ForeColor.A > 0) SelectionColor = style.ForeColor;
-                    if (style.Font != null) SelectionFont = style.Font;
-                }
+                StartStyling(element.Start);
+                SetStyling(element.Length, style.Index);
             }
         }
 
@@ -144,49 +116,18 @@ namespace Sandra.UI.WF
                 { SharedUIAction.SelectAllText, TrySelectAllText },
             });
         }
+    }
 
-        public void DeleteRange(int textStart, int textLength)
+    public static class ScintillaExtensions
+    {
+        public static void ApplyFont(this Style style, Font font)
         {
-            if (textStart >= TextLength || textLength <= 0) return;
-
-            if (textStart < 0) textStart = 0;
-            if (textLength > TextLength) textLength = TextLength;
-
-            Select(textStart, textLength);
-            SelectedText = string.Empty;
+            style.Font = font.FontFamily.Name;
+            style.SizeF = font.Size;
+            style.Bold = font.Bold;
+            style.Italic = font.Italic;
+            style.Underline = font.Underline;
         }
-
-        public void GotoPosition(int caretPosition)
-        {
-            Select(caretPosition, 0);
-            ScrollToCaret();
-        }
-
-        public void ClearAll() => Clear();
-
-        public int SelectionEnd
-        {
-            get => SelectionStart + SelectionLength;
-            set => Select(SelectionStart, value - SelectionStart);
-        }
-
-        public int LineFromPosition(int position) => GetLineFromCharIndex(position);
-
-        public int FirstVisibleLine
-        {
-            get => GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
-            set
-            {
-                GotoPosition(TextLength);
-                GotoPosition(GetFirstCharIndexFromLine(value));
-            }
-        }
-
-        public int LinesOnScreen => GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1))) - FirstVisibleLine;
-
-        public int GetColumn(int position) => position - GetFirstCharIndexFromLine(GetLineFromCharIndex(position));
-
-        public float Zoom { get => ZoomFactor; set => ZoomFactor = value; }
     }
 
     /// <summary>
