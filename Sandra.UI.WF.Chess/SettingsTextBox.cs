@@ -123,6 +123,9 @@ namespace Sandra.UI.WF
             DefaultStyle.ApplyFont(defaultFont);
             StyleClearAll();
 
+            SetSelectionBackColor(true, defaultForeColor);
+            SetSelectionForeColor(true, defaultBackColor);
+
             CommentStyle.ForeColor = commentForeColor;
             CommentStyle.ApplyFont(commentFont);
 
