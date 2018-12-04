@@ -21,7 +21,7 @@
 
 using System;
 
-namespace Sandra.UI.WF.Storage
+namespace SysExtensions.Text
 {
     /// <summary>
     /// Reports an error at a certain location in a source text.

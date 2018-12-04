@@ -68,8 +68,6 @@
     <Compile Include="Storage\CompactSettingWriter.cs" />
     <Compile Include="Storage\FileNameType.cs" />
     <Compile Include="Storage\FileWatcher.cs" />
-    <Compile Include="Storage\JsonSyntax.cs" />
-    <Compile Include="Storage\JsonTokenizer.cs" />
     <Compile Include="Storage\OpaqueColorType.cs" />
     <Compile Include="Storage\PersistableFormState.cs" />
     <Compile Include="Storage\PList.cs" />
@@ -88,7 +86,6 @@
     <Compile Include="Storage\SettingsFile.cs" />
     <Compile Include="Storage\SettingWriter.cs" />
     <Compile Include="Storage\SubFolderNameType.cs" />
-    <Compile Include="Storage\TextErrorInfo.cs" />
     <Compile Include="UIAction\KeyUIActionMapping.cs" />
     <Compile Include="UIAction\UIAction.cs" />
     <Compile Include="UIAction\UIActionBinding.cs" />

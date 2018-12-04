@@ -19,13 +19,12 @@
  *********************************************************************************/
 #endregion
 
-using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace Sandra.UI.WF.Storage
+namespace SysExtensions.Text.Json
 {
     /// <summary>
     /// Based on https://www.json.org/.
@@ -68,7 +67,7 @@ namespace Sandra.UI.WF.Storage
                 bool isSeparator = false;
                 bool isSymbol = false;
 
-                var category = char.GetUnicodeCategory(c);
+                var category = CharUnicodeInfo.GetUnicodeCategory(c);
                 switch (category)
                 {
                     case UnicodeCategory.UppercaseLetter:

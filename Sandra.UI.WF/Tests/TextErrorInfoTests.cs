@@ -19,7 +19,7 @@
  *********************************************************************************/
 #endregion
 
-using Sandra.UI.WF.Storage;
+using SysExtensions.Text;
 using System;
 using Xunit;
 
