@@ -57,6 +57,36 @@ namespace SysExtensions.Text
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="TextElement{TTerminal}"/>.
+        /// </summary>
+        /// <param name="terminalSymbol">
+        /// The terminal symbol associated with this element.
+        /// </param>
+        /// <param name="start">
+        /// The initial value for the <see cref="Start"/> property.
+        /// </param>
+        /// <param name="length">
+        /// The initial value for the <see cref="Length"/> property.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="terminalSymbol"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="start"/> is negative.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is negative.
+        /// </exception>
+        public TextElement(TTerminal terminalSymbol, int start, int length) : this(terminalSymbol)
+        {
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            this.start = start;
+            this.length = length;
+        }
+
+        /// <summary>
         /// Gets the start position of this element.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
