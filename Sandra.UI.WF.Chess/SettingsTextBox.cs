@@ -64,6 +64,9 @@ namespace Sandra.UI.WF
 
         private static readonly Font errorsFont = new Font("Calibri", 10);
 
+        private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
+        private static readonly Font callTipFont = new Font("Segoe UI", 10);
+
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
 
@@ -72,6 +75,7 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
+        private Style CallTipStyle => Styles[Style.CallTip];
         private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
@@ -132,6 +136,10 @@ namespace Sandra.UI.WF
             LineNumberStyle.ForeColor = noErrorsForeColor;
             LineNumberStyle.ApplyFont(defaultFont);
 
+            CallTipStyle.BackColor = callTipBackColor;
+            CallTipStyle.ForeColor = defaultForeColor;
+            CallTipStyle.ApplyFont(callTipFont);
+
             CommentStyle.ForeColor = commentForeColor;
             CommentStyle.ApplyFont(commentFont);
 
@@ -148,6 +156,9 @@ namespace Sandra.UI.WF
             Margins[1].BackColor = defaultBackColor;
 
             CaretForeColor = defaultForeColor;
+
+            // Enable dwell events.
+            MouseDwellTime = SystemInformation.MouseHoverTime;
 
             if (errorsTextBox != null)
             {
@@ -238,6 +249,8 @@ namespace Sandra.UI.WF
 
         protected override void OnTextChanged(EventArgs e)
         {
+            CallTipCancel();
+
             base.OnTextChanged(e);
 
             ParseAndApplySyntaxHighlighting(Text);
@@ -337,6 +350,43 @@ namespace Sandra.UI.WF
             {
                 BringErrorIntoView(errorsTextBox.SelectionStart);
             }
+        }
+
+        private IEnumerable<string> ActiveErrorMessages(int textPosition)
+        {
+            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
+            {
+                foreach (var error in currentErrors)
+                {
+                    if (error.Start <= textPosition && textPosition < error.Start + error.Length)
+                    {
+                        yield return error.Message;
+                    }
+                }
+            }
+        }
+
+        protected override void OnDwellStart(DwellEventArgs e)
+        {
+            base.OnDwellStart(e);
+
+            int textPosition = e.Position;
+            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
+
+            if (toolTipText.Length > 0)
+            {
+                CallTipShow(textPosition, toolTipText);
+            }
+            else
+            {
+                CallTipCancel();
+            }
+        }
+
+        protected override void OnDwellEnd(DwellEventArgs e)
+        {
+            CallTipCancel();
+            base.OnDwellEnd(e);
         }
     }
 }
