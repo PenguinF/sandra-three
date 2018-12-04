@@ -131,6 +131,18 @@ namespace Sandra.UI.WF.Tests
                 error3 => Assert.Same(errorInfo3, error3));
         }
 
+        [Fact]
+        public void UnexpectedSymbolShouldBeNotNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null, 0));
+        }
+
+        [Fact]
+        public void UnexpectedSymbolShouldBeNonEmpty()
+        {
+            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty, 0));
+        }
+
         [Theory]
         [InlineData("*")]
         [InlineData("€")]

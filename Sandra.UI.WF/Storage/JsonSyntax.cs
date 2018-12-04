@@ -212,6 +212,9 @@ namespace Sandra.UI.WF.Storage
 
         public JsonUnknownSymbol(string displayCharValue, int position)
         {
+            if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
+            if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
+
             Error = CreateError(displayCharValue, position);
             Errors = new[] { Error };
         }
