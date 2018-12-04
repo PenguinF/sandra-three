@@ -66,7 +66,7 @@ namespace Sandra.UI.WF.Tests
                 Assert.IsType<JsonComment>(symbol.TerminalSymbol);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
-                Assert.Equal(expectedCommentText, symbol.Json.Substring(symbol.Start, symbol.Length));
+                Assert.Equal(expectedCommentText, json.Substring(symbol.Start, symbol.Length));
             });
         }
 
@@ -108,7 +108,6 @@ namespace Sandra.UI.WF.Tests
             {
                 Assert.NotNull(symbol);
                 Assert.IsType(tokenType, symbol.TerminalSymbol);
-                Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
             });
@@ -154,10 +153,9 @@ namespace Sandra.UI.WF.Tests
             {
                 Assert.NotNull(symbol);
                 var valueSymbol = Assert.IsType<JsonValue>(symbol.TerminalSymbol);
-                Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, symbol.Json.Substring(symbol.Start, symbol.Length));
+                Assert.Equal(json, json.Substring(symbol.Start, symbol.Length));
                 Assert.Equal(json, valueSymbol.Value);
             });
         }
@@ -187,7 +185,6 @@ namespace Sandra.UI.WF.Tests
             {
                 Assert.NotNull(symbol);
                 var stringSymbol = Assert.IsType<JsonString>(symbol.TerminalSymbol);
-                Assert.Equal(json, symbol.Json);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(json.Length, symbol.Length);
                 Assert.Equal(expectedValue, stringSymbol.Value);

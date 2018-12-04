@@ -68,7 +68,6 @@ namespace Sandra.UI.WF.Tests
         {
             var testSymbol = new JsonTestSymbol();
             var textElement = new JsonTextElement(testSymbol, json, start, length);
-            Assert.Equal(json, textElement.Json);
             Assert.Equal(start, textElement.Start);
             Assert.Equal(length, textElement.Length);
             Assert.Same(testSymbol, textElement.TerminalSymbol);
