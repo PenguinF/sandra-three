@@ -29,15 +29,8 @@ namespace Sandra.UI.WF.Storage
 {
     public class JsonTextElement : TextElement<JsonTerminalSymbol>
     {
-        public string Json { get; }
-
-        public JsonTextElement(JsonTerminalSymbol symbol, string json, int start, int length) : base(symbol, start, length)
+        public JsonTextElement(JsonTerminalSymbol symbol, int start, int length) : base(symbol, start, length)
         {
-            if (json == null) throw new ArgumentNullException(nameof(json));
-            if (json.Length < start) throw new ArgumentOutOfRangeException(nameof(start));
-            if (json.Length < start + length) throw new ArgumentOutOfRangeException(nameof(length));
-
-            Json = json;
         }
     }
 

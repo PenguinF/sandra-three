@@ -195,7 +195,6 @@ namespace Sandra.UI.WF
                     int length = x.Start - firstUnusedIndex;
                     TextIndex.AppendTerminalSymbol(new JsonTextElement(
                         JsonWhitespace.Value,
-                        json,
                         firstUnusedIndex,
                         length));
                 }
@@ -210,7 +209,6 @@ namespace Sandra.UI.WF
                 int length = json.Length - firstUnusedIndex;
                 TextIndex.AppendTerminalSymbol(new JsonTextElement(
                     JsonWhitespace.Value,
-                    json,
                     firstUnusedIndex,
                     length));
             }

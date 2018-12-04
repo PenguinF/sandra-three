@@ -134,7 +134,6 @@ namespace Sandra.UI.WF.Storage
                     {
                         yield return new JsonTextElement(
                             new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                            json,
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
 
@@ -147,22 +146,22 @@ namespace Sandra.UI.WF.Storage
                         switch (c)
                         {
                             case JsonCurlyOpen.CurlyOpenCharacter:
-                                yield return new JsonTextElement(JsonCurlyOpen.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonCurlyOpen.Value, currentIndex, 1);
                                 break;
                             case JsonCurlyClose.CurlyCloseCharacter:
-                                yield return new JsonTextElement(JsonCurlyClose.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonCurlyClose.Value, currentIndex, 1);
                                 break;
                             case JsonSquareBracketOpen.SquareBracketOpenCharacter:
-                                yield return new JsonTextElement(JsonSquareBracketOpen.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonSquareBracketOpen.Value, currentIndex, 1);
                                 break;
                             case JsonSquareBracketClose.SquareBracketCloseCharacter:
-                                yield return new JsonTextElement(JsonSquareBracketClose.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonSquareBracketClose.Value, currentIndex, 1);
                                 break;
                             case JsonColon.ColonCharacter:
-                                yield return new JsonTextElement(JsonColon.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonColon.Value, currentIndex, 1);
                                 break;
                             case JsonComma.CommaCharacter:
-                                yield return new JsonTextElement(JsonComma.Value, json, currentIndex, 1);
+                                yield return new JsonTextElement(JsonComma.Value, currentIndex, 1);
                                 break;
                             case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
@@ -191,7 +190,6 @@ namespace Sandra.UI.WF.Storage
                                     : Convert.ToString(c);
                                 yield return new JsonTextElement(
                                     new JsonUnknownSymbol(TextErrorInfo.UnexpectedSymbol(displayCharValue, currentIndex)),
-                                    json,
                                     currentIndex,
                                     1);
                                 break;
@@ -208,7 +206,6 @@ namespace Sandra.UI.WF.Storage
             {
                 yield return new JsonTextElement(
                     new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                    json,
                     firstUnusedIndex,
                     currentIndex - firstUnusedIndex);
             }
@@ -232,7 +229,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             yield return new JsonTextElement(
                                 new JsonErrorString(errors),
-                                json,
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex);
                             errors.Clear();
@@ -241,7 +237,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             yield return new JsonTextElement(
                                 new JsonString(valueBuilder.ToString()),
-                                json,
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex);
                         }
@@ -366,7 +361,6 @@ namespace Sandra.UI.WF.Storage
             errors.Add(TextErrorInfo.UnterminatedString(firstUnusedIndex, length - firstUnusedIndex));
             yield return new JsonTextElement(
                 new JsonErrorString(errors),
-                json,
                 firstUnusedIndex,
                 length - firstUnusedIndex);
 
@@ -396,7 +390,6 @@ namespace Sandra.UI.WF.Storage
                             {
                                 yield return new JsonTextElement(
                                     JsonComment.Value,
-                                    json,
                                     firstUnusedIndex,
                                     currentIndex - firstUnusedIndex - 1);
 
@@ -411,7 +404,6 @@ namespace Sandra.UI.WF.Storage
                     case '\n':
                         yield return new JsonTextElement(
                             JsonComment.Value,
-                            json,
                             firstUnusedIndex,
                             currentIndex - firstUnusedIndex);
 
@@ -427,7 +419,6 @@ namespace Sandra.UI.WF.Storage
 
             yield return new JsonTextElement(
                 JsonComment.Value,
-                json,
                 firstUnusedIndex,
                 currentIndex - firstUnusedIndex);
 
@@ -454,7 +445,6 @@ namespace Sandra.UI.WF.Storage
 
                             yield return new JsonTextElement(
                                 JsonComment.Value,
-                                json,
                                 firstUnusedIndex,
                                 currentIndex - firstUnusedIndex);
 
@@ -470,7 +460,6 @@ namespace Sandra.UI.WF.Storage
 
             yield return new JsonTextElement(
                 new JsonUnterminatedMultiLineComment(TextErrorInfo.UnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex)),
-                json,
                 firstUnusedIndex,
                 length - firstUnusedIndex);
 
