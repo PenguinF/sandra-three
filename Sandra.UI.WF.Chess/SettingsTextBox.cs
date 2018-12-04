@@ -21,6 +21,7 @@
 
 using Sandra.UI.WF.Storage;
 using ScintillaNET;
+using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -193,7 +194,7 @@ namespace Sandra.UI.WF
                 {
                     // Since whitespace is not returned from TokenizeAll().
                     int length = x.Start - firstUnusedIndex;
-                    TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                    TextIndex.AppendTerminalSymbol(new TextElement<JsonSymbol>(
                         JsonWhitespace.Value,
                         firstUnusedIndex,
                         length));
@@ -207,7 +208,7 @@ namespace Sandra.UI.WF
             {
                 // Since whitespace is not returned from TokenizeAll().
                 int length = json.Length - firstUnusedIndex;
-                TextIndex.AppendTerminalSymbol(new JsonTextElement(
+                TextIndex.AppendTerminalSymbol(new TextElement<JsonSymbol>(
                     JsonWhitespace.Value,
                     firstUnusedIndex,
                     length));

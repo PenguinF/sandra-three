@@ -19,7 +19,6 @@
  *********************************************************************************/
 #endregion
 
-using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,13 +26,6 @@ using System.Runtime.CompilerServices;
 
 namespace Sandra.UI.WF.Storage
 {
-    public class JsonTextElement : TextElement<JsonSymbol>
-    {
-        public JsonTextElement(JsonSymbol symbol, int start, int length) : base(symbol, start, length)
-        {
-        }
-    }
-
     public abstract class JsonSymbol
     {
         public virtual bool IsBackground => false;

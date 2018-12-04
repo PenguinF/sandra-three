@@ -20,6 +20,7 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -40,7 +41,7 @@ namespace Sandra.UI.WF.Tests
         [Fact]
         public void NullSymbolShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonTextElement(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new TextElement<JsonSymbol>(null, 0, 0));
         }
 
         [Theory]
@@ -49,7 +50,7 @@ namespace Sandra.UI.WF.Tests
         [InlineData(0, -1, "length")]
         public void OutOfRangeArguments(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTextElement(new JsonTestSymbol(), start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new TextElement<JsonSymbol>(new JsonTestSymbol(), start, length));
         }
 
         [Theory]
@@ -60,7 +61,7 @@ namespace Sandra.UI.WF.Tests
         public void UnchangedParameters(int start, int length)
         {
             var testSymbol = new JsonTestSymbol();
-            var textElement = new JsonTextElement(testSymbol, start, length);
+            var textElement = new TextElement<JsonSymbol>(testSymbol, start, length);
             Assert.Equal(start, textElement.Start);
             Assert.Equal(length, textElement.Length);
             Assert.Same(testSymbol, textElement.TerminalSymbol);
