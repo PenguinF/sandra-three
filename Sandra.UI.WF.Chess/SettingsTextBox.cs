@@ -114,6 +114,7 @@ namespace Sandra.UI.WF
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
             DefaultStyle.Font = defaultFont;
+            StyleClearAll();
 
             CommentStyle.ForeColor = commentForeColor;
             CommentStyle.Font = commentFont;
@@ -149,8 +150,6 @@ namespace Sandra.UI.WF
         private void ParseAndApplySyntaxHighlighting(string json)
         {
             lastParsedText = json;
-
-            StyleClearAll();
 
             int firstUnusedIndex = 0;
 
@@ -214,6 +213,7 @@ namespace Sandra.UI.WF
             {
                 using (var updateToken = BeginUpdateRememberState())
                 {
+                    StyleClearAll();
                     ParseAndApplySyntaxHighlighting(newText);
                 }
             }
