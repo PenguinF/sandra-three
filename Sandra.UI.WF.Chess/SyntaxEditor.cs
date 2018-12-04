@@ -56,6 +56,16 @@ namespace Sandra.UI.WF
 
             Margins.ForEach(x => x.Width = 0);
 
+            //https://notepad-plus-plus.org/community/topic/12576/list-of-all-assigned-keyboard-shortcuts/8
+            //https://scintilla.org/CommandValues.html
+            //https://sourceforge.net/p/scintilla/code/ci/default/tree/src/KeyMap.h
+            //https://sourceforge.net/p/scintilla/code/ci/default/tree/src/KeyMap.cxx
+            ClearCmdKey(Keys.Control | Keys.F);
+            ClearCmdKey(Keys.Control | Keys.H);
+            ClearCmdKey(Keys.Control | Keys.L);
+            ClearCmdKey(Keys.Control | Keys.R);
+            ClearCmdKey(Keys.Control | Keys.U);
+
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
             {
                 Zoom = zoomFactor;
@@ -115,7 +125,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public void BindStandardEditUIActions()
         {
-            this.BindActions(new UIActionBindings
+            var editBindings = new UIActionBindings
             {
                 { SharedUIAction.ZoomIn, TryZoomIn },
                 { SharedUIAction.ZoomOut, TryZoomOut },
@@ -124,7 +134,18 @@ namespace Sandra.UI.WF
                 { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
                 { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
                 { SharedUIAction.SelectAllText, TrySelectAllText },
-            });
+            };
+
+            editBindings
+                .Where(x => x.Binding.DefaultBinding.Shortcuts != null)
+                .SelectMany(x => x.Binding.DefaultBinding.Shortcuts)
+                .Select(KeyUtils.ToKeys)
+                .ForEach(ClearCmdKey);
+
+            ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
+            ClearCmdKey(Keys.OemMinus | Keys.Control);
+
+            this.BindActions(editBindings);
         }
     }
 
