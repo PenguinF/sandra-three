@@ -72,6 +72,7 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
+        private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
@@ -127,6 +128,10 @@ namespace Sandra.UI.WF
             SetSelectionBackColor(true, defaultForeColor);
             SetSelectionForeColor(true, defaultBackColor);
 
+            LineNumberStyle.BackColor = defaultBackColor;
+            LineNumberStyle.ForeColor = noErrorsForeColor;
+            LineNumberStyle.ApplyFont(defaultFont);
+
             CommentStyle.ForeColor = commentForeColor;
             CommentStyle.ApplyFont(commentFont);
 
@@ -138,6 +143,9 @@ namespace Sandra.UI.WF
             Indicators[errorIndicatorIndex].Style = IndicatorStyle.Squiggle;
             Indicators[errorIndicatorIndex].ForeColor = Color.Red;
             IndicatorCurrent = errorIndicatorIndex;
+
+            Margins[0].BackColor = defaultBackColor;
+            Margins[1].BackColor = defaultBackColor;
 
             CaretForeColor = defaultForeColor;
 
@@ -155,6 +163,14 @@ namespace Sandra.UI.WF
 
         private void ParseAndApplySyntaxHighlighting(string json)
         {
+            int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
+            if (displayedMaxLineNumberLength != maxLineNumberLength)
+            {
+                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
+                Margins[1].Width = TextWidth(Style.LineNumber, "0");
+                displayedMaxLineNumberLength = maxLineNumberLength;
+            }
+
             int firstUnusedIndex = 0;
 
             TextIndex.Clear();
@@ -207,6 +223,17 @@ namespace Sandra.UI.WF
             {
                 DisplayErrors(errors);
             }
+        }
+
+        private int displayedMaxLineNumberLength;
+
+        private int GetMaxLineNumberLength(int maxLineNumberToDisplay)
+        {
+            if (maxLineNumberToDisplay <= 9) return 1;
+            if (maxLineNumberToDisplay <= 99) return 2;
+            if (maxLineNumberToDisplay <= 999) return 3;
+            if (maxLineNumberToDisplay <= 9999) return 4;
+            return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
         protected override void OnTextChanged(EventArgs e)
