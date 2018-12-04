@@ -21,7 +21,7 @@
 
 using System;
 
-namespace SysExtensions.TextIndex
+namespace SysExtensions.Text
 {
     /// <summary>
     /// Represents an element of formatted text indexed by a <see cref="TextIndex{TTerminal}"/>,

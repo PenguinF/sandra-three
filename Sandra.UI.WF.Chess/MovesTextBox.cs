@@ -22,7 +22,7 @@
 using Sandra.PGN;
 using ScintillaNET;
 using SysExtensions;
-using SysExtensions.TextIndex;
+using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
