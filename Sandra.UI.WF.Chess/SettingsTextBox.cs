@@ -135,6 +135,8 @@ namespace Sandra.UI.WF
             Indicators[errorIndicatorIndex].ForeColor = Color.Red;
             IndicatorCurrent = errorIndicatorIndex;
 
+            CaretForeColor = defaultForeColor;
+
             if (errorsTextBox != null)
             {
                 errorsTextBox.ReadOnly = true;
