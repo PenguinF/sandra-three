@@ -23,7 +23,7 @@ using SysExtensions.Text;
 using System;
 using Xunit;
 
-namespace Sandra.UI.WF.Tests
+namespace SysExtensions.Tests
 {
     public class TextErrorInfoTests
     {

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Sandra.UI.WF.Tests
+namespace SysExtensions.Tests
 {
     public class JsonTokenizerTests
     {

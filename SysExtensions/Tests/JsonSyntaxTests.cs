@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Sandra.UI.WF.Tests
+namespace SysExtensions.Tests
 {
     public class JsonSyntaxTests
     {
