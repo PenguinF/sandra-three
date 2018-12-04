@@ -48,6 +48,9 @@ namespace Sandra.UI.WF
         {
             TextIndex = new TextIndex<TTerminal>();
 
+            BufferedDraw = false;
+            Technology = Technology.DirectWrite;
+
             HScrollBar = false;
             VScrollBar = true;
 
