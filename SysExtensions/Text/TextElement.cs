@@ -48,7 +48,7 @@ namespace SysExtensions.Text
         /// The terminal symbol associated with this element.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="terminalSymbol"/> is negative.
+        /// <paramref name="terminalSymbol"/> is null.
         /// </exception>
         public TextElement(TTerminal terminalSymbol)
         {
