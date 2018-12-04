@@ -38,36 +38,29 @@ namespace Sandra.UI.WF.Tests
         }
 
         [Fact]
-        public void NullSymbolOrJsonShouldThrow()
+        public void NullSymbolShouldThrow()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonTextElement(null, string.Empty, 0, 0));
-            Assert.Throws<ArgumentNullException>(() => new JsonTextElement(new JsonTestSymbol(), null, 0, 0));
         }
 
         [Theory]
-        [InlineData("", -1, 0, "start")]
-        [InlineData("", -1, -1, "start")]
-        [InlineData("", 0, -1, "length")]
-        [InlineData("", 1, 0, "start")]
-        [InlineData("", 0, 1, "length")]
-        [InlineData(" ", 0, 2, "length")]
-        [InlineData(" ", 1, 1, "length")]
-        [InlineData(" ", 2, 0, "start")]
-        public void OutOfRangeArguments(string json, int start, int length, string parameterName)
+        [InlineData(-1, 0, "start")]
+        [InlineData(-1, -1, "start")]
+        [InlineData(0, -1, "length")]
+        public void OutOfRangeArguments(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTextElement(new JsonTestSymbol(), json, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonTextElement(new JsonTestSymbol(), string.Empty, start, length));
         }
 
         [Theory]
-        [InlineData("", 0, 0)]
-        [InlineData("{}", 0, 1)]
-        // No newline conversions.
-        [InlineData("\n", 1, 0)]
-        [InlineData("\r\n", 0, 2)]
-        public void UnchangedParameters(string json, int start, int length)
+        [InlineData(0, 0)]
+        [InlineData(0, 1)]
+        [InlineData(1, 0)]
+        [InlineData(0, 2)]
+        public void UnchangedParameters(int start, int length)
         {
             var testSymbol = new JsonTestSymbol();
-            var textElement = new JsonTextElement(testSymbol, json, start, length);
+            var textElement = new JsonTextElement(testSymbol, "  ", start, length);
             Assert.Equal(start, textElement.Start);
             Assert.Equal(length, textElement.Length);
             Assert.Same(testSymbol, textElement.TerminalSymbol);
