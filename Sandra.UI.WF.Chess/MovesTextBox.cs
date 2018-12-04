@@ -42,7 +42,7 @@ namespace Sandra.UI.WF
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
-        private readonly TextElementStyle ActiveMoveStyle = new TextElementStyle();
+        private readonly Style ActiveMoveStyle = new Style();
 
         private int CaretPosition;
 

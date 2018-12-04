@@ -66,11 +66,11 @@ namespace Sandra.UI.WF
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private readonly TextElementStyle CommentStyle = new TextElementStyle();
-        private readonly TextElementStyle ValueStyle = new TextElementStyle();
-        private readonly TextElementStyle StringStyle = new TextElementStyle();
+        private readonly Style CommentStyle = new Style();
+        private readonly Style ValueStyle = new Style();
+        private readonly Style StringStyle = new Style();
 
-        private sealed class StyleSelector : JsonTerminalSymbolVisitor<TextElementStyle>
+        private sealed class StyleSelector : JsonTerminalSymbolVisitor<Style>
         {
             private readonly SettingsTextBox owner;
 
@@ -79,11 +79,11 @@ namespace Sandra.UI.WF
                 this.owner = owner;
             }
 
-            public override TextElementStyle VisitComment(JsonComment symbol) => owner.CommentStyle;
-            public override TextElementStyle VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
-            public override TextElementStyle VisitString(JsonString symbol) => owner.StringStyle;
-            public override TextElementStyle VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.CommentStyle;
-            public override TextElementStyle VisitValue(JsonValue symbol) => owner.ValueStyle;
+            public override Style VisitComment(JsonComment symbol) => owner.CommentStyle;
+            public override Style VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
+            public override Style VisitString(JsonString symbol) => owner.StringStyle;
+            public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.CommentStyle;
+            public override Style VisitValue(JsonValue symbol) => owner.ValueStyle;
         }
 
         private readonly SettingsFile settingsFile;

@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
     /// </summary>
     public abstract partial class SyntaxEditor<TTerminal> : UpdatableRichTextBox, IUIActionHandlerProvider
     {
-        protected sealed class TextElementStyle
+        protected sealed class Style
         {
             public Color BackColor { get; set; }
             public Color ForeColor { get; set; }
@@ -48,7 +48,7 @@ namespace Sandra.UI.WF
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
-        protected TextElementStyle DefaultStyle { get; } = new TextElementStyle();
+        protected Style DefaultStyle { get; } = new Style();
 
         public SyntaxEditor()
         {
@@ -79,7 +79,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        protected void ApplyStyle(TextElement<TTerminal> element, TextElementStyle style)
+        protected void ApplyStyle(TextElement<TTerminal> element, Style style)
         {
             if (style != null)
             {
