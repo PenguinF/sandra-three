@@ -460,7 +460,7 @@ namespace Sandra.UI.WF.Storage
             }
 
             yield return new TextElement<JsonSymbol>(
-                new JsonUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment.CreateError(firstUnusedIndex, length - firstUnusedIndex)),
+                new JsonUnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex),
                 firstUnusedIndex,
                 length - firstUnusedIndex);
 

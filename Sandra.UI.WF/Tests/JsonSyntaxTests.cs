@@ -153,19 +153,13 @@ namespace Sandra.UI.WF.Tests
             Assert.True(error.EqualTo(symbol.Error));
         }
 
-        [Fact]
-        public void NullErrorInUnterminatedMultiLineCommentShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnterminatedMultiLineComment(null));
-        }
-
         [Theory]
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
             var error = JsonUnterminatedMultiLineComment.CreateError(0, commentText.Length);
-            var symbol = new JsonUnterminatedMultiLineComment(error);
-            Assert.Same(error, symbol.Error);
+            var symbol = new JsonUnterminatedMultiLineComment(0, commentText.Length);
+            Assert.True(error.EqualTo(symbol.Error));
         }
 
         [Theory]
@@ -247,7 +241,7 @@ namespace Sandra.UI.WF.Tests
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { JsonComment.Value, typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment.CreateError(0, 2)), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment(0, 2), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
             yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
             yield return new object[] { JsonSquareBracketOpen.Value, typeof(JsonSquareBracketOpen) };

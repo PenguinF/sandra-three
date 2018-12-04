@@ -110,10 +110,10 @@ namespace Sandra.UI.WF.Storage
         public override bool IsBackground => true;
         public override IEnumerable<TextErrorInfo> Errors { get; }
 
-        public JsonUnterminatedMultiLineComment(TextErrorInfo error)
+        public JsonUnterminatedMultiLineComment(int start, int length)
         {
-            Error = error ?? throw new ArgumentNullException(nameof(error));
-            Errors = new[] { error };
+            Error = CreateError(start, length);
+            Errors = new[] { Error };
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
