@@ -48,6 +48,8 @@ namespace Sandra.UI.WF
         {
             TextIndex = new TextIndex<TTerminal>();
 
+            UsePopup(false);
+
             BufferedDraw = false;
             Technology = Technology.DirectWrite;
 
