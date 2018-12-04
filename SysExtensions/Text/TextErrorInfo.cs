@@ -21,7 +21,7 @@
 
 using System;
 
-namespace Sandra.UI.WF.Storage
+namespace SysExtensions.Text
 {
     /// <summary>
     /// Reports an error at a certain location in a source text.
@@ -86,53 +86,5 @@ namespace Sandra.UI.WF.Storage
                 && Length == other.Length
                 && Message == other.Message;
         }
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unexpected symbol characters.
-        /// </summary>
-        public static TextErrorInfo UnexpectedSymbol(string displayCharValue, int position)
-            => new TextErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unterminated multiline comments.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated comment.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated comment.
-        /// </param>
-        public static TextErrorInfo UnterminatedMultiLineComment(int start, int length)
-            => new TextErrorInfo("Unterminated multi-line comment", start, length);
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated string.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated string.
-        /// </param>
-        public static TextErrorInfo UnterminatedString(int start, int length)
-            => new TextErrorInfo("Unterminated string", start, length);
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unrecognized escape sequences.
-        /// </summary>
-        public static TextErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unrecognized Unicode escape sequences.
-        /// </summary>
-        public static TextErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
-
-        /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for illegal control characters inside string literals.
-        /// </summary>
-        public static TextErrorInfo IllegalControlCharacterInString(string displayCharValue, int start)
-            => new TextErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
     }
 }

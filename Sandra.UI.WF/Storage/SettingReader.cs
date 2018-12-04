@@ -19,6 +19,8 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions.Text;
+using SysExtensions.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -28,11 +30,11 @@ using System.Numerics;
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Temporary class which parses a list of <see cref="JsonTerminalSymbol"/>s directly into a <see cref="PValue"/> result.
+    /// Temporary class which parses a list of <see cref="JsonSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
     public class SettingReader
     {
-        private class ParseRun : JsonTerminalSymbolVisitor<PValue>
+        private class ParseRun : JsonSymbolVisitor<PValue>
         {
             private const string EmptyKeyMessage = "Missing property key";
             private const string EmptyValueMessage = "Missing value";
@@ -49,26 +51,26 @@ namespace Sandra.UI.WF.Storage
             private const string NoPMapMessage = "Expected json object at root";
             private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
-            private readonly List<JsonTextElement> tokens;
+            private readonly List<TextElement<JsonSymbol>> tokens;
             private readonly int sourceLength;
 
             public readonly List<TextErrorInfo> Errors = new List<TextErrorInfo>();
 
             private int currentTokenIndex;
 
-            public ParseRun(List<JsonTextElement> tokens, int sourceLength)
+            public ParseRun(List<TextElement<JsonSymbol>> tokens, int sourceLength)
             {
                 this.tokens = tokens;
                 this.sourceLength = sourceLength;
                 currentTokenIndex = 0;
             }
 
-            private JsonTextElement PeekSkipComments()
+            private TextElement<JsonSymbol> PeekSkipComments()
             {
                 // Skip comments until encountering something meaningful.
                 while (currentTokenIndex < tokens.Count)
                 {
-                    JsonTextElement current = tokens[currentTokenIndex];
+                    TextElement<JsonSymbol> current = tokens[currentTokenIndex];
                     if (!current.TerminalSymbol.IsBackground) return current;
                     Errors.AddRange(current.TerminalSymbol.Errors);
                     currentTokenIndex++;
@@ -76,12 +78,12 @@ namespace Sandra.UI.WF.Storage
                 return null;
             }
 
-            private JsonTextElement ReadSkipComments()
+            private TextElement<JsonSymbol> ReadSkipComments()
             {
                 // Skip comments until encountering something meaningful.
                 while (currentTokenIndex < tokens.Count)
                 {
-                    JsonTextElement current = tokens[currentTokenIndex];
+                    TextElement<JsonSymbol> current = tokens[currentTokenIndex];
                     Errors.AddRange(current.TerminalSymbol.Errors);
                     currentTokenIndex++;
                     if (!current.TerminalSymbol.IsBackground) return current;
@@ -98,7 +100,7 @@ namespace Sandra.UI.WF.Storage
 
                 for (; ; )
                 {
-                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out PValue parsedKey, out JsonTextElement first);
+                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out PValue parsedKey, out TextElement<JsonSymbol> first);
 
                     bool validKey = false;
                     string propertyKey = default(string);
@@ -129,7 +131,7 @@ namespace Sandra.UI.WF.Storage
                     }
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonTextElement textElement = ReadSkipComments();
+                    TextElement<JsonSymbol> textElement = ReadSkipComments();
                     PValue parsedValue = default(PValue);
 
                     // If gotValue remains false, a missing value error will be reported.
@@ -145,7 +147,7 @@ namespace Sandra.UI.WF.Storage
                             Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, textElement.Start, textElement.Length));
                         }
 
-                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out JsonTextElement firstValueSymbol);
+                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out TextElement<JsonSymbol> firstValueSymbol);
 
                         // Only the first value can be valid, even if it's undefined.
                         if (validKey && !gotColon && gotValue)
@@ -200,11 +202,11 @@ namespace Sandra.UI.WF.Storage
                 for (; ; )
                 {
 
-                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out PValue parsedValue, out JsonTextElement firstSymbol);
+                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out PValue parsedValue, out TextElement<JsonSymbol> firstSymbol);
                     if (gotValue) listBuilder.Add(parsedValue);
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonTextElement textElement = ReadSkipComments();
+                    TextElement<JsonSymbol> textElement = ReadSkipComments();
                     if (textElement != null && textElement.TerminalSymbol is JsonComma)
                     {
                         if (!gotValue)
@@ -254,12 +256,12 @@ namespace Sandra.UI.WF.Storage
 
             private bool ParseMultiValue(string multipleValuesMessage,
                                          out PValue firstValue,
-                                         out JsonTextElement firstValueSymbol)
+                                         out TextElement<JsonSymbol> firstValueSymbol)
             {
                 firstValue = default(PValue);
-                firstValueSymbol = default(JsonTextElement);
+                firstValueSymbol = default(TextElement<JsonSymbol>);
 
-                JsonTextElement textElement = PeekSkipComments();
+                TextElement<JsonSymbol> textElement = PeekSkipComments();
                 if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return false;
 
                 firstValueSymbol = textElement;
@@ -298,9 +300,9 @@ namespace Sandra.UI.WF.Storage
                 bool hasRootValue = ParseMultiValue(
                     FileShouldHaveEndedAlreadyMessage,
                     out PValue rootValue,
-                    out JsonTextElement textElement);
+                    out TextElement<JsonSymbol> textElement);
 
-                JsonTextElement extraElement = ReadSkipComments();
+                TextElement<JsonSymbol> extraElement = ReadSkipComments();
                 if (extraElement != null)
                 {
                     Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraElement.Start, extraElement.Length));
@@ -324,9 +326,9 @@ namespace Sandra.UI.WF.Storage
 
         private readonly string json;
 
-        private readonly List<JsonTextElement> tokens;
+        private readonly List<TextElement<JsonSymbol>> tokens;
 
-        public IReadOnlyList<JsonTextElement> Tokens => tokens.AsReadOnly();
+        public IReadOnlyList<TextElement<JsonSymbol>> Tokens => tokens.AsReadOnly();
 
         public SettingReader(string json)
         {
