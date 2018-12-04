@@ -252,8 +252,8 @@ namespace Sandra.UI.WF
                 using (var updateToken = errorsTextBox.BeginUpdate())
                 {
                     var errorMessages = from error in errors
-                                        let lineIndex = GetLineFromCharIndex(error.Start)
-                                        let position = error.Start - GetFirstCharIndexFromLine(lineIndex)
+                                        let lineIndex = LineFromPosition(error.Start)
+                                        let position = GetColumn(error.Start)
                                         select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
                     errorsTextBox.Text = string.Join("\n", errorMessages);
@@ -274,14 +274,14 @@ namespace Sandra.UI.WF
                 if (0 <= lineIndex && lineIndex < currentErrors.Count)
                 {
                     // Determine how many lines are visible in the top half of the control.
-                    int firstVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
-                    int bottomVisibleLine = GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1)));
-                    int visibleLines = bottomVisibleLine - firstVisibleLine;
+                    int firstVisibleLine = FirstVisibleLine;
+                    int visibleLines = LinesOnScreen;
+                    int bottomVisibleLine = firstVisibleLine + visibleLines;
 
                     // Then calculate which line should become the first visible line
                     // so the error line ends up in the middle of the control.
                     var hotError = currentErrors[lineIndex];
-                    int hotErrorLine = GetLineFromCharIndex(hotError.Start);
+                    int hotErrorLine = LineFromPosition(hotError.Start);
 
                     // Delay repaints while fooling around with SelectionStart.
                     using (var updateToken = BeginUpdate())
@@ -292,14 +292,14 @@ namespace Sandra.UI.WF
                         {
                             int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
                             if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
-
-                            Select(TextLength, 0);
-                            ScrollToCaret();
-                            Select(GetFirstCharIndexFromLine(targetFirstVisibleLine), 0);
-                            ScrollToCaret();
+                            FirstVisibleLine = targetFirstVisibleLine;
                         }
 
-                        Select(hotError.Start, hotError.Length);
+                        GotoPosition(hotError.Start);
+                        if (hotError.Length > 0)
+                        {
+                            SelectionEnd = hotError.Start + hotError.Length;
+                        }
                     }
 
                     Focus();

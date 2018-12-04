@@ -54,7 +54,7 @@ namespace Sandra.UI.WF
 
             if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
             {
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
         }
 
@@ -121,7 +121,7 @@ namespace Sandra.UI.WF
             if (ModifierKeys.HasFlag(Keys.Control))
             {
                 // ZoomFactor isn't updated yet, so predict here what it's going to be.
-                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor) + Math.Sign(e.Delta);
+                int newZoomFactorPrediction = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom) + Math.Sign(e.Delta);
                 RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
             }
         }
@@ -159,6 +159,32 @@ namespace Sandra.UI.WF
             Select(caretPosition, 0);
             ScrollToCaret();
         }
+
+        public void ClearAll() => Clear();
+
+        public int SelectionEnd
+        {
+            get => SelectionStart + SelectionLength;
+            set => Select(SelectionStart, value - SelectionStart);
+        }
+
+        public int LineFromPosition(int position) => GetLineFromCharIndex(position);
+
+        public int FirstVisibleLine
+        {
+            get => GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
+            set
+            {
+                GotoPosition(TextLength);
+                GotoPosition(GetFirstCharIndexFromLine(value));
+            }
+        }
+
+        public int LinesOnScreen => GetLineFromCharIndex(GetCharIndexFromPosition(new Point(0, ClientSize.Height - 1))) - FirstVisibleLine;
+
+        public int GetColumn(int position) => position - GetFirstCharIndexFromLine(GetLineFromCharIndex(position));
+
+        public float Zoom { get => ZoomFactor; set => ZoomFactor = value; }
     }
 
     /// <summary>

@@ -256,7 +256,7 @@ namespace Sandra.UI.WF
                 using (var updateToken = BeginUpdate())
                 {
                     ReadOnly = false;
-                    Clear();
+                    ClearAll();
                     ReadOnly = true;
                     TextIndex.Clear();
                     UpdateText();
@@ -464,7 +464,7 @@ namespace Sandra.UI.WF
             // Ignore updates as a result of all kinds of calls to Select()/SelectAll().
             // This is only to detect caret updates by interacting with the control.
             // Also check SelectionLength so the event is not raised for non-empty selections.
-            if (!IsUpdating && SelectionLength == 0)
+            if (!IsUpdating && SelectionStart == SelectionEnd)
             {
                 int newCaretPosition = SelectionStart;
                 if (CaretPosition != newCaretPosition)

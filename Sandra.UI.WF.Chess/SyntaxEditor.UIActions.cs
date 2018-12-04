@@ -29,14 +29,14 @@ namespace Sandra.UI.WF
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
-            if (SelectionLength == 0) return UIActionVisibility.Disabled;
+            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
             if (perform) Cut();
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryCopySelectionToClipBoard(bool perform)
         {
-            if (SelectionLength == 0) return UIActionVisibility.Disabled;
+            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
             if (perform) Copy();
             return UIActionVisibility.Enabled;
         }
@@ -58,12 +58,12 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomIn(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom);
             if (zoomFactor >= PType.RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor++;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
                 RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;
@@ -71,12 +71,12 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomOut(bool perform)
         {
-            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            int zoomFactor = PType.RichTextZoomFactor.ToDiscreteZoomFactor(Zoom);
             if (zoomFactor <= PType.RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor--;
-                ZoomFactor = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
+                Zoom = PType.RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
                 RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
             return UIActionVisibility.Enabled;
