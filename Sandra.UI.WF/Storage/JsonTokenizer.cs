@@ -45,11 +45,6 @@ namespace Sandra.UI.WF.Storage
         private Func<IEnumerable<TextElement<JsonSymbol>>> currentTokenizer;
 
         /// <summary>
-        /// Gets the JSON which is tokenized.
-        /// </summary>
-        public string Json => json;
-
-        /// <summary>
         /// Initializes a new instance of <see cref="JsonTokenizer"/>.
         /// </summary>
         /// <param name="json">
@@ -468,7 +463,7 @@ namespace Sandra.UI.WF.Storage
         }
 
         /// <summary>
-        /// Tokenizes the source <see cref="Json"/> from start to end.
+        /// Tokenizes the source Json from start to end.
         /// </summary>
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
