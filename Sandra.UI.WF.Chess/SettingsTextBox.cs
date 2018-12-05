@@ -299,54 +299,54 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void BringErrorIntoView(int charIndex)
+        public void BringErrorIntoView(int errorIndex)
         {
             // Select the text that generated the error.
-            if (currentErrors != null)
+            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
             {
-                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                if (0 <= lineIndex && lineIndex < currentErrors.Count)
+                // Determine how many lines are visible in the top half of the control.
+                int firstVisibleLine = FirstVisibleLine;
+                int visibleLines = LinesOnScreen;
+                int bottomVisibleLine = firstVisibleLine + visibleLines;
+
+                // Then calculate which line should become the first visible line
+                // so the error line ends up in the middle of the control.
+                var hotError = currentErrors[errorIndex];
+                int hotErrorLine = LineFromPosition(hotError.Start);
+
+                // hotErrorLine in view?
+                // Don't include the bottom line, it's likely not completely visible.
+                if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                 {
-                    // Determine how many lines are visible in the top half of the control.
-                    int firstVisibleLine = FirstVisibleLine;
-                    int visibleLines = LinesOnScreen;
-                    int bottomVisibleLine = firstVisibleLine + visibleLines;
-
-                    // Then calculate which line should become the first visible line
-                    // so the error line ends up in the middle of the control.
-                    var hotError = currentErrors[lineIndex];
-                    int hotErrorLine = LineFromPosition(hotError.Start);
-
-                    // hotErrorLine in view?
-                    // Don't include the bottom line, it's likely not completely visible.
-                    if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
-                    {
-                        int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
-                        if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
-                        FirstVisibleLine = targetFirstVisibleLine;
-                    }
-
-                    GotoPosition(hotError.Start);
-                    if (hotError.Length > 0)
-                    {
-                        SelectionEnd = hotError.Start + hotError.Length;
-                    }
-
-                    Focus();
+                    int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                    if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                    FirstVisibleLine = targetFirstVisibleLine;
                 }
+
+                GotoPosition(hotError.Start);
+                if (hotError.Length > 0)
+                {
+                    SelectionEnd = hotError.Start + hotError.Length;
+                }
+
+                Focus();
             }
         }
 
         private void ErrorsTextBox_DoubleClick(object sender, EventArgs e)
         {
-            BringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
+            int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
+            int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+            BringErrorIntoView(lineIndex);
         }
 
         private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Enter)
             {
-                BringErrorIntoView(errorsTextBox.SelectionStart);
+                int charIndex = errorsTextBox.SelectionStart;
+                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                BringErrorIntoView(lineIndex);
             }
         }
 
