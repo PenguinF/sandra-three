@@ -96,7 +96,7 @@ namespace Sandra.UI.WF
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
             SplitContainer splitter = null;
-            RichTextBoxEx errorsTextBox = null;
+            ListBoxEx errorsTextBox = null;
 
             if (settingsTextBox.ReadOnly && settingsTextBox.CurrentErrorCount == 0)
             {
@@ -105,16 +105,16 @@ namespace Sandra.UI.WF
             }
             else
             {
-                errorsTextBox = new RichTextBoxEx
+                errorsTextBox = new ListBoxEx
                 {
                     Dock = DockStyle.Fill,
                     BorderStyle = BorderStyle.None,
-                    ScrollBars = RichTextBoxScrollBars.Vertical,
-                    HideSelection = false,
-                    ReadOnly = true,
+                    HorizontalScrollbar = false,
+                    ItemHeight = 14,
+                    SelectionMode = SelectionMode.MultiExtended,
                 };
 
-                errorsTextBox.BindStandardEditUIActions();
+                errorsTextBox.BindStandardCopySelectUIActions();
 
                 UIMenu.AddTo(errorsTextBox);
 
@@ -130,6 +130,10 @@ namespace Sandra.UI.WF
 
                 splitter.Panel1.Controls.Add(settingsTextBox);
                 splitter.Panel2.Controls.Add(errorsTextBox);
+
+                // Copy background color.
+                errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
+                splitter.Panel2.BackColor = settingsTextBox.NoStyleBackColor;
 
                 settingsForm.Controls.Add(splitter);
             }
@@ -165,11 +169,8 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Sets up error interaction between a syntax editor with an errors UpdatableRichTextBox.
         /// </summary>
-        private void InitializeErrorInteraction(SettingsTextBox settingsTextBox, UpdatableRichTextBox errorsTextBox)
+        private void InitializeErrorInteraction(SettingsTextBox settingsTextBox, ListBoxEx errorsTextBox)
         {
-            // Copy background color.
-            errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
-
             // Interaction between settingsTextBox and errorsTextBox.
             settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors(settingsTextBox, errorsTextBox);
 
@@ -178,49 +179,48 @@ namespace Sandra.UI.WF
 
             errorsTextBox.DoubleClick += (_, __) =>
             {
-                int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
-                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                settingsTextBox.ActivateError(lineIndex);
+                var index = errorsTextBox.SelectedIndex;
+                if (0 <= index && index < errorsTextBox.Items.Count)
+                {
+                    settingsTextBox.ActivateError(index);
+                }
             };
 
             errorsTextBox.KeyDown += (_, e) =>
             {
                 if (e.KeyData == Keys.Enter)
                 {
-                    int charIndex = errorsTextBox.SelectionStart;
-                    int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                    settingsTextBox.ActivateError(lineIndex);
+                    var index = errorsTextBox.SelectedIndex;
+                    if (0 <= index && index < errorsTextBox.Items.Count)
+                    {
+                        settingsTextBox.ActivateError(index);
+                    }
                 }
             };
         }
 
-        private void DisplayErrors(SettingsTextBox settingsTextBox, UpdatableRichTextBox errorsTextBox)
+        private void DisplayErrors(SettingsTextBox settingsTextBox, ListBoxEx errorsTextBox)
         {
+            errorsTextBox.Items.Clear();
+
             if (settingsTextBox.CurrentErrorCount == 0)
             {
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    errorsTextBox.Text = "(No errors)";
-                    errorsTextBox.ForeColor = settingsTextBox.LineNumberForeColor;
-                    errorsTextBox.Font = noErrorsFont;
-                }
+                errorsTextBox.Items.Add("(No errors)");
+                errorsTextBox.ForeColor = settingsTextBox.LineNumberForeColor;
+                errorsTextBox.Font = noErrorsFont;
             }
             else
             {
                 var errors = settingsTextBox.CurrentErrors;
 
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    var errorMessages = from error in errors
-                                        let lineIndex = settingsTextBox.LineFromPosition(error.Start)
-                                        let position = settingsTextBox.GetColumn(error.Start)
-                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
+                var errorMessages = from error in errors
+                                    let lineIndex = settingsTextBox.LineFromPosition(error.Start)
+                                    let position = settingsTextBox.GetColumn(error.Start)
+                                    select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
-                    errorsTextBox.Text = string.Join("\n", errorMessages);
-
-                    errorsTextBox.ForeColor = settingsTextBox.NoStyleForeColor;
-                    errorsTextBox.Font = errorsFont;
-                }
+                errorsTextBox.Items.AddRange(errorMessages.ToArray());
+                errorsTextBox.ForeColor = settingsTextBox.NoStyleForeColor;
+                errorsTextBox.Font = errorsFont;
             }
         }
 

@@ -19,6 +19,30 @@
  *********************************************************************************/
 #endregion
 
+using System.Windows.Forms;
+
 namespace Sandra.UI.WF
 {
+    /// <summary>
+    /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.
+    /// </summary>
+    public partial class ListBoxEx : ListBox, IUIActionHandlerProvider
+    {
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        /// <summary>
+        /// Binds the regular copy/select-all UIActions to this listbox.
+        /// </summary>
+        public void BindStandardCopySelectUIActions()
+        {
+            this.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+                { SharedUIAction.SelectAllText, TrySelectAllText },
+            });
+        }
+    }
 }

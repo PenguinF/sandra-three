@@ -19,6 +19,40 @@
  *********************************************************************************/
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Windows.Forms;
+
 namespace Sandra.UI.WF
 {
+    public partial class ListBoxEx
+    {
+        public UIActionState TryCopySelectionToClipBoard(bool perform)
+        {
+            if (SelectedItems.Count == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Copy to a list explictly first because SelectedObjectCollection only has a non-generic enumerator.
+                List<object> selectedItems = new List<object>();
+                foreach (object item in SelectedItems) selectedItems.Add(item);
+                Clipboard.SetText(string.Join(Environment.NewLine, selectedItems) + Environment.NewLine);
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TrySelectAllText(bool perform)
+        {
+            if (Items.Count == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                SelectedIndices.Clear();
+                for (int i = 0; i < Items.Count; i++) SelectedIndices.Add(i);
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+    }
 }
