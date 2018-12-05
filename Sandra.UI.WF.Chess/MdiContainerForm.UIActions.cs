@@ -71,6 +71,7 @@ namespace Sandra.UI.WF
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
+                HideSelection = false,
             };
 
             errorsTextBox.BindStandardEditUIActions();

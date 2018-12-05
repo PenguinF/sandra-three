@@ -121,8 +121,6 @@ namespace Sandra.UI.WF
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
             this.errorsTextBox = errorsTextBox;
 
-            errorsTextBox.HideSelection = false;
-
             BorderStyle = BorderStyle.None;
 
             StyleResetDefault();
