@@ -160,13 +160,6 @@ namespace Sandra.UI.WF
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
-            if (errorsTextBox != null)
-            {
-                errorsTextBox.ReadOnly = true;
-                errorsTextBox.DoubleClick += ErrorsTextBox_DoubleClick;
-                errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
-            }
-
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
             EmptyUndoBuffer();
@@ -330,23 +323,6 @@ namespace Sandra.UI.WF
                 }
 
                 Focus();
-            }
-        }
-
-        private void ErrorsTextBox_DoubleClick(object sender, EventArgs e)
-        {
-            int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
-            int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-            BringErrorIntoView(lineIndex);
-        }
-
-        private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Enter)
-            {
-                int charIndex = errorsTextBox.SelectionStart;
-                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                BringErrorIntoView(lineIndex);
             }
         }
 

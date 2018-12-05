@@ -72,6 +72,7 @@ namespace Sandra.UI.WF
                 BorderStyle = BorderStyle.None,
                 ScrollBars = RichTextBoxScrollBars.Vertical,
                 HideSelection = false,
+                ReadOnly = true,
             };
 
             errorsTextBox.BindStandardEditUIActions();
@@ -92,6 +93,24 @@ namespace Sandra.UI.WF
             settingsTextBox.BindStandardEditUIActions();
 
             UIMenu.AddTo(settingsTextBox);
+
+            // Interaction between settingsTextBox and errorsTextBox.
+            errorsTextBox.DoubleClick += (_, __) =>
+            {
+                int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
+                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                settingsTextBox.BringErrorIntoView(lineIndex);
+            };
+
+            errorsTextBox.KeyDown += (_, e) =>
+            {
+                if (e.KeyData == Keys.Enter)
+                {
+                    int charIndex = errorsTextBox.SelectionStart;
+                    int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                    settingsTextBox.BringErrorIntoView(lineIndex);
+                }
+            };
 
             var settingsForm = new UIActionForm
             {
