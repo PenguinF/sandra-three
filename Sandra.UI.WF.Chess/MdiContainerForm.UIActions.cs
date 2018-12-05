@@ -95,31 +95,7 @@ namespace Sandra.UI.WF
 
             UIMenu.AddTo(settingsTextBox);
 
-            // Copy background color.
-            errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
-
-            // Interaction between settingsTextBox and errorsTextBox.
-            settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors(settingsTextBox, errorsTextBox);
-
-            // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
-            DisplayErrors(settingsTextBox, errorsTextBox);
-
-            errorsTextBox.DoubleClick += (_, __) =>
-            {
-                int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
-                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                settingsTextBox.BringErrorIntoView(lineIndex);
-            };
-
-            errorsTextBox.KeyDown += (_, e) =>
-            {
-                if (e.KeyData == Keys.Enter)
-                {
-                    int charIndex = errorsTextBox.SelectionStart;
-                    int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                    settingsTextBox.BringErrorIntoView(lineIndex);
-                }
-            };
+            InitializeErrorInteraction(settingsTextBox, errorsTextBox);
 
             var settingsForm = new UIActionForm
             {
@@ -170,7 +146,39 @@ namespace Sandra.UI.WF
         private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
         private static readonly Font errorsFont = new Font("Calibri", 10);
 
-        private void DisplayErrors(SettingsTextBox settingsTextBox, RichTextBoxEx errorsTextBox)
+        /// <summary>
+        /// Sets up error interaction between a syntax editor with an errors UpdatableRichTextBox.
+        /// </summary>
+        private void InitializeErrorInteraction(SettingsTextBox settingsTextBox, UpdatableRichTextBox errorsTextBox)
+        {
+            // Copy background color.
+            errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
+
+            // Interaction between settingsTextBox and errorsTextBox.
+            settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors(settingsTextBox, errorsTextBox);
+
+            // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
+            DisplayErrors(settingsTextBox, errorsTextBox);
+
+            errorsTextBox.DoubleClick += (_, __) =>
+            {
+                int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
+                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                settingsTextBox.BringErrorIntoView(lineIndex);
+            };
+
+            errorsTextBox.KeyDown += (_, e) =>
+            {
+                if (e.KeyData == Keys.Enter)
+                {
+                    int charIndex = errorsTextBox.SelectionStart;
+                    int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
+                    settingsTextBox.BringErrorIntoView(lineIndex);
+                }
+            };
+        }
+
+        private void DisplayErrors(SettingsTextBox settingsTextBox, UpdatableRichTextBox errorsTextBox)
         {
             if (settingsTextBox.CurrentErrorCount == 0)
             {
