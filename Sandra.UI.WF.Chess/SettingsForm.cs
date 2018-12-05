@@ -138,24 +138,43 @@ namespace Sandra.UI.WF
 
             try
             {
-                errorsListBox.Items.Clear();
-
                 if (settingsTextBox.CurrentErrorCount == 0)
                 {
+                    errorsListBox.Items.Clear();
                     errorsListBox.Items.Add("(No errors)");
                     errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
                     errorsListBox.Font = noErrorsFont;
                 }
                 else
                 {
-                    var errors = settingsTextBox.CurrentErrors;
+                    var errorMessages = (from error in settingsTextBox.CurrentErrors
+                                         let lineIndex = settingsTextBox.LineFromPosition(error.Start)
+                                         let position = settingsTextBox.GetColumn(error.Start)
+                                         select $"{error.Message} at line {lineIndex + 1}, position {position + 1}").ToArray();
 
-                    var errorMessages = from error in errors
-                                        let lineIndex = settingsTextBox.LineFromPosition(error.Start)
-                                        let position = settingsTextBox.GetColumn(error.Start)
-                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
+                    int oldItemCount = errorsListBox.Items.Count;
+                    var newErrorCount = errorMessages.Length;
+                    int index = 0;
 
-                    errorsListBox.Items.AddRange(errorMessages.ToArray());
+                    while (index < errorsListBox.Items.Count && index < newErrorCount)
+                    {
+                        // Copy to existing index so scroll position is maintained.
+                        errorsListBox.Items[index] = errorMessages[index];
+                        index++;
+                    }
+
+                    // Remove excess old items.
+                    for (int k = oldItemCount - 1; index <= k; k--)
+                    {
+                        errorsListBox.Items.RemoveAt(k);
+                    }
+
+                    while (index < newErrorCount)
+                    {
+                        errorsListBox.Items.Add(errorMessages[index]);
+                        index++;
+                    }
+
                     errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
                     errorsListBox.Font = errorsFont;
                 }
