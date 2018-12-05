@@ -272,7 +272,7 @@ namespace Sandra.UI.WF
             CurrentErrorsChanged?.Invoke(this, e);
         }
 
-        public void BringErrorIntoView(int errorIndex)
+        public void ActivateError(int errorIndex)
         {
             // Select the text that generated the error.
             if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)

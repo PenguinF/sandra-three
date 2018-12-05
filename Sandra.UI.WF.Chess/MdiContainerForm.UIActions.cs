@@ -180,7 +180,7 @@ namespace Sandra.UI.WF
             {
                 int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
                 int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                settingsTextBox.BringErrorIntoView(lineIndex);
+                settingsTextBox.ActivateError(lineIndex);
             };
 
             errorsTextBox.KeyDown += (_, e) =>
@@ -189,7 +189,7 @@ namespace Sandra.UI.WF
                 {
                     int charIndex = errorsTextBox.SelectionStart;
                     int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                    settingsTextBox.BringErrorIntoView(lineIndex);
+                    settingsTextBox.ActivateError(lineIndex);
                 }
             };
         }
