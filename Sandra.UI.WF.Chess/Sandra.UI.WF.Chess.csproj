@@ -56,6 +56,10 @@
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
+    <Compile Include="ListBoxEx.cs" />
+    <Compile Include="ListBoxEx.UIActions.cs">
+      <DependentUpon>ListBoxEx.cs</DependentUpon>
+    </Compile>
     <Compile Include="Localizers.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
