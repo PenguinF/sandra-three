@@ -100,7 +100,11 @@ namespace Sandra.UI.WF.Storage
 
                 for (; ; )
                 {
-                    bool gotKey = ParseMultiValue(MultiplePropertyKeysMessage, out PValue parsedKey, out TextElement<JsonSymbol> first);
+                    bool gotKey = ParseMultiValue(
+                        JsonErrorCode.MultiplePropertyKeys,
+                        MultiplePropertyKeysMessage,
+                        out PValue parsedKey,
+                        out TextElement<JsonSymbol> first);
 
                     bool validKey = false;
                     string propertyKey = default(string);
@@ -121,12 +125,20 @@ namespace Sandra.UI.WF.Storage
                             }
                             else
                             {
-                                Errors.Add(new TextErrorInfo(string.Format(DuplicateKeyMessage, propertyKey), first.Start, first.Length));
+                                Errors.Add(new JsonErrorInfo(
+                                    JsonErrorCode.PropertyKeyAlreadyExists,
+                                    string.Format(DuplicateKeyMessage, propertyKey),
+                                    first.Start,
+                                    first.Length));
                             }
                         }
                         else
                         {
-                            Errors.Add(new TextErrorInfo(InvalidKeyMessage, first.Start, first.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.InvalidPropertyKey,
+                                InvalidKeyMessage,
+                                first.Start,
+                                first.Length));
                         }
                     }
 
@@ -144,10 +156,18 @@ namespace Sandra.UI.WF.Storage
                         if (gotColon)
                         {
                             // Multiple ':' without a ','.
-                            Errors.Add(new TextErrorInfo(MultipleKeySectionsMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.MultiplePropertyKeySections,
+                                MultipleKeySectionsMessage,
+                                textElement.Start,
+                                textElement.Length));
                         }
 
-                        gotValue |= ParseMultiValue(MultipleValuesMessage, out parsedValue, out TextElement<JsonSymbol> firstValueSymbol);
+                        gotValue |= ParseMultiValue(
+                            JsonErrorCode.MultiplePropertyValues,
+                            MultipleValuesMessage,
+                            out parsedValue,
+                            out TextElement<JsonSymbol> firstValueSymbol);
 
                         // Only the first value can be valid, even if it's undefined.
                         if (validKey && !gotColon && gotValue)
@@ -169,12 +189,20 @@ namespace Sandra.UI.WF.Storage
                         // Report missing property key and/or value.
                         if (!gotKey)
                         {
-                            Errors.Add(new TextErrorInfo(EmptyKeyMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.MissingPropertyKey,
+                                EmptyKeyMessage,
+                                textElement.Start,
+                                textElement.Length));
                         }
 
                         if (!gotValue)
                         {
-                            Errors.Add(new TextErrorInfo(EmptyValueMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.MissingPropertyValue,
+                                EmptyValueMessage,
+                                textElement.Start,
+                                textElement.Length));
                         }
                     }
 
@@ -183,11 +211,19 @@ namespace Sandra.UI.WF.Storage
                         // Assume missing closing bracket '}' on EOF or control symbol.
                         if (textElement == null)
                         {
-                            Errors.Add(new TextErrorInfo(EofInObjectMessage, sourceLength, 0));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.UnexpectedEofInObject,
+                                EofInObjectMessage,
+                                sourceLength,
+                                0));
                         }
                         else if (!isCurlyClose)
                         {
-                            Errors.Add(new TextErrorInfo(ControlSymbolInObjectMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.ControlSymbolInObject,
+                                ControlSymbolInObjectMessage,
+                                textElement.Start,
+                                textElement.Length));
                         }
 
                         return new PMap(mapBuilder);
@@ -202,7 +238,12 @@ namespace Sandra.UI.WF.Storage
                 for (; ; )
                 {
 
-                    bool gotValue = ParseMultiValue(MultipleValuesMessage, out PValue parsedValue, out TextElement<JsonSymbol> firstSymbol);
+                    bool gotValue = ParseMultiValue(
+                        JsonErrorCode.MultiplePropertyValues,
+                        MultipleValuesMessage,
+                        out PValue parsedValue,
+                        out TextElement<JsonSymbol> firstSymbol);
+
                     if (gotValue) listBuilder.Add(parsedValue);
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
@@ -212,7 +253,12 @@ namespace Sandra.UI.WF.Storage
                         if (!gotValue)
                         {
                             // Two commas or '[,': add an empty PErrorValue.
-                            Errors.Add(new TextErrorInfo(EmptyValueMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.MissingPropertyValue,
+                                EmptyValueMessage,
+                                textElement.Start,
+                                textElement.Length));
+
                             listBuilder.Add(PConstantValue.Undefined);
                         }
                     }
@@ -221,11 +267,19 @@ namespace Sandra.UI.WF.Storage
                         // Assume missing closing bracket ']' on EOF or control symbol.
                         if (textElement == null)
                         {
-                            Errors.Add(new TextErrorInfo(EofInArrayMessage, sourceLength, 0));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.UnexpectedEofInArray,
+                                EofInArrayMessage,
+                                sourceLength,
+                                0));
                         }
                         else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
                         {
-                            Errors.Add(new TextErrorInfo(ControlSymbolInArrayMessage, textElement.Start, textElement.Length));
+                            Errors.Add(new JsonErrorInfo(
+                                JsonErrorCode.ControlSymbolInArray,
+                                ControlSymbolInArrayMessage,
+                                textElement.Start,
+                                textElement.Length));
                         }
 
                         return new PList(listBuilder);
@@ -244,7 +298,8 @@ namespace Sandra.UI.WF.Storage
                     return new PInteger(integerValue);
                 }
 
-                Errors.Add(new TextErrorInfo(
+                Errors.Add(new JsonErrorInfo(
+                    JsonErrorCode.UnrecognizedValue,
                     string.Format(UnrecognizedValueMessage, value),
                     tokens[currentTokenIndex - 1].Start,
                     value.Length));
@@ -254,7 +309,8 @@ namespace Sandra.UI.WF.Storage
 
             public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
 
-            private bool ParseMultiValue(string multipleValuesMessage,
+            private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
+                                         string multipleValuesMessage,
                                          out PValue firstValue,
                                          out TextElement<JsonSymbol> firstValueSymbol)
             {
@@ -291,13 +347,18 @@ namespace Sandra.UI.WF.Storage
                     if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return true;
 
                     // Two or more consecutive values not allowed.
-                    Errors.Add(new TextErrorInfo(multipleValuesMessage, textElement.Start, textElement.Length));
+                    Errors.Add(new JsonErrorInfo(
+                        multipleValuesErrorCode,
+                        multipleValuesMessage,
+                        textElement.Start,
+                        textElement.Length));
                 }
             }
 
             public bool TryParse(out PMap map)
             {
                 bool hasRootValue = ParseMultiValue(
+                    JsonErrorCode.ExpectedEof,
                     FileShouldHaveEndedAlreadyMessage,
                     out PValue rootValue,
                     out TextElement<JsonSymbol> textElement);
@@ -305,7 +366,11 @@ namespace Sandra.UI.WF.Storage
                 TextElement<JsonSymbol> extraElement = ReadSkipComments();
                 if (extraElement != null)
                 {
-                    Errors.Add(new TextErrorInfo(FileShouldHaveEndedAlreadyMessage, extraElement.Start, extraElement.Length));
+                    Errors.Add(new JsonErrorInfo(
+                        JsonErrorCode.ExpectedEof,
+                        FileShouldHaveEndedAlreadyMessage,
+                        extraElement.Start,
+                        extraElement.Length));
                 }
 
                 if (hasRootValue)
@@ -313,7 +378,11 @@ namespace Sandra.UI.WF.Storage
                     bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
                     if (!validMap)
                     {
-                        Errors.Add(new TextErrorInfo(NoPMapMessage, textElement.Start, textElement.Length));
+                        Errors.Add(new JsonErrorInfo(
+                            JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
+                            NoPMapMessage,
+                            textElement.Start,
+                            textElement.Length));
                     }
 
                     return validMap;

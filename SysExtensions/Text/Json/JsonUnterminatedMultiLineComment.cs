@@ -34,8 +34,8 @@ namespace SysExtensions.Text.Json
         /// <param name="length">
         /// The length of the unterminated comment.
         /// </param>
-        public static TextErrorInfo CreateError(int start, int length)
-            => new TextErrorInfo("Unterminated multi-line comment", start, length);
+        public static JsonErrorInfo CreateError(int start, int length)
+            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, "Unterminated multi-line comment", start, length);
 
         public TextErrorInfo Error { get; }
 

@@ -29,8 +29,8 @@ namespace SysExtensions.Text.Json
         /// <summary>
         /// Creates a <see cref="TextErrorInfo"/> for unexpected symbol characters.
         /// </summary>
-        public static TextErrorInfo CreateError(string displayCharValue, int position)
-            => new TextErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
+        public static JsonErrorInfo CreateError(string displayCharValue, int position)
+            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, $"Unexpected symbol '{displayCharValue}'", position, 1);
 
         public TextErrorInfo Error { get; }
 
