@@ -46,6 +46,8 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
         internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
         internal static readonly LocalizedStringKey GoTo = new LocalizedStringKey(nameof(GoTo));
+        internal static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
+        internal static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
         internal static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
         internal static readonly LocalizedStringKey Moves = new LocalizedStringKey(nameof(Moves));
@@ -186,6 +188,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.FlipBoard, "Flip board" },
                 { LocalizedStringKeys.Game, "Game" },
                 { LocalizedStringKeys.GoTo, "Go to" },
+                { LocalizedStringKeys.GoToNextLocation, "Go to next location" },
+                { LocalizedStringKeys.GoToPreviousLocation, "Go to previous location" },
                 { LocalizedStringKeys.Help, "Help" },
                 { LocalizedStringKeys.LastMove, "Last move" },
                 { LocalizedStringKeys.Moves, "Moves" },
@@ -262,6 +266,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.FlipBoard, "Bord omkeren" },
                 { LocalizedStringKeys.Game, "Partij" },
                 { LocalizedStringKeys.GoTo, "Navigeren" },
+                { LocalizedStringKeys.GoToNextLocation, "Ga naar volgende locatie" },
+                { LocalizedStringKeys.GoToPreviousLocation, "Ga naar vorige locatie" },
                 { LocalizedStringKeys.Help, "Help" },
                 { LocalizedStringKeys.LastMove, "Laatste zet" },
                 { LocalizedStringKeys.Moves, "Zetten" },

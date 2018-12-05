@@ -27,14 +27,14 @@ namespace SysExtensions.Text.Json
     public class JsonUnknownSymbol : JsonSymbol
     {
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unexpected symbol characters.
+        /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
         /// </summary>
-        public static TextErrorInfo CreateError(string displayCharValue, int position)
-            => new TextErrorInfo($"Unexpected symbol '{displayCharValue}'", position, 1);
+        public static JsonErrorInfo CreateError(string displayCharValue, int position)
+            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, $"Unexpected symbol '{displayCharValue}'", position, 1);
 
-        public TextErrorInfo Error { get; }
+        public JsonErrorInfo Error { get; }
 
-        public override IEnumerable<TextErrorInfo> Errors { get; }
+        public override IEnumerable<JsonErrorInfo> Errors { get; }
 
         public override bool IsValueStartSymbol => true;
 

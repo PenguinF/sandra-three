@@ -65,78 +65,15 @@ namespace Sandra.UI.WF
                                         SettingsFile settingsFile,
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting)
-        {
-            var errorsTextBox = new RichTextBoxEx
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.None,
-                ScrollBars = RichTextBoxScrollBars.Vertical,
-            };
-
-            errorsTextBox.BindStandardEditUIActions();
-
-            UIMenu.AddTo(errorsTextBox);
-
-            var settingsTextBox = new SettingsTextBox(settingsFile, errorsTextBox)
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = isReadOnly,
-            };
-
-            settingsTextBox.BindActions(new UIActionBindings
-            {
-                { SettingsTextBox.SaveToFile, settingsTextBox.TrySaveToFile },
-            });
-
-            settingsTextBox.BindStandardEditUIActions();
-
-            UIMenu.AddTo(settingsTextBox);
-
-            var settingsForm = new UIActionForm
+            => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
             {
                 Owner = this,
                 ClientSize = new Size(600, 600),
                 ShowIcon = false,
                 ShowInTaskbar = false,
                 StartPosition = FormStartPosition.CenterScreen,
-                Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
-
-            var splitter = new SplitContainer
-            {
-                Dock = DockStyle.Fill,
-                SplitterWidth = 4,
-                FixedPanel = FixedPanel.Panel2,
-                Orientation = Orientation.Horizontal,
-            };
-
-            // Default value shows about 2 errors at default zoom level.
-            const int defaultErrorHeight = 34;
-
-            settingsForm.Load += (_, __) =>
-            {
-                Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
-
-                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
-                {
-                    targetErrorHeight = defaultErrorHeight;
-                }
-
-                // Calculate target splitter distance which will restore the target error height exactly.
-                int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
-                if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
-
-                splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
-            };
-
-            splitter.Panel1.Controls.Add(settingsTextBox);
-            splitter.Panel2.Controls.Add(errorsTextBox);
-
-            settingsForm.Controls.Add(splitter);
-
-            return settingsForm;
-        }
 
         public UIActionState TryEditPreferencesFile(bool perform)
         {

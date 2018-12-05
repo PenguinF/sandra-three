@@ -322,7 +322,7 @@ namespace SysExtensions.Tests
             yield return new object[] { "\"\u007f\"", new[] { JsonErrorString.IllegalControlCharacter("\\u007f", 1) } };
 
             // Multiple errors.
-            yield return new object[] { " ∙\"∙\"\"", new TextErrorInfo[] {
+            yield return new object[] { " ∙\"∙\"\"", new JsonErrorInfo[] {
                 JsonUnknownSymbol.CreateError("∙", 1),
                 JsonErrorString.Unterminated(5, 1) } };
             yield return new object[] { "\"\r\n\"", new[] {
@@ -378,12 +378,13 @@ namespace SysExtensions.Tests
 
         [Theory]
         [MemberData(nameof(GetErrorStrings))]
-        public void Errors(string json, TextErrorInfo[] expectedErrors)
+        public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
             var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(x => x.TerminalSymbol.Errors);
-            Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<TextErrorInfo>(generatedError =>
+            Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);
+                Assert.Equal(expectedError.ErrorCode, generatedError.ErrorCode);
                 Assert.Equal(expectedError.Message, generatedError.Message);
                 Assert.Equal(expectedError.Start, generatedError.Start);
                 Assert.Equal(expectedError.Length, generatedError.Length);

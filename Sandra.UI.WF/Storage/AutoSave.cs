@@ -20,7 +20,7 @@
 #endregion
 
 using SysExtensions;
-using SysExtensions.Text;
+using SysExtensions.Text.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -213,7 +213,7 @@ namespace Sandra.UI.WF.Storage
                     : autoSaveFileStream1;
 
                 // Load remote settings.
-                List<TextErrorInfo> errors;
+                List<JsonErrorInfo> errors;
                 bool tryOtherAutoSaveStream = false;
                 try
                 {
@@ -430,7 +430,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<TextErrorInfo> errors)
+        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<JsonErrorInfo> errors)
         {
             // Reuse one string builder to build keys and values.
             StringBuilder sb = new StringBuilder();

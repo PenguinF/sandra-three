@@ -28,7 +28,7 @@ namespace SysExtensions.Text.Json
     public class JsonErrorString : JsonSymbol
     {
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unterminated strings.
+        /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
         /// </summary>
         /// <param name="start">
         /// The start position of the unterminated string.
@@ -36,36 +36,36 @@ namespace SysExtensions.Text.Json
         /// <param name="length">
         /// The length of the unterminated string.
         /// </param>
-        public static TextErrorInfo Unterminated(int start, int length)
-            => new TextErrorInfo("Unterminated string", start, length);
+        public static JsonErrorInfo Unterminated(int start, int length)
+            => new JsonErrorInfo(JsonErrorCode.UnterminatedString, "Unterminated string", start, length);
 
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unrecognized escape sequences.
+        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
         /// </summary>
-        public static TextErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
+        public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
+            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, $"Unrecognized escape sequence ('{displayCharValue}')", start, 2);
 
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unrecognized Unicode escape sequences.
+        /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
         /// </summary>
-        public static TextErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new TextErrorInfo($"Unrecognized escape sequence ('{displayCharValue}')", start, length);
+        public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
+            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, $"Unrecognized escape sequence ('{displayCharValue}')", start, length);
 
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for illegal control characters inside string literals.
+        /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
         /// </summary>
-        public static TextErrorInfo IllegalControlCharacter(string displayCharValue, int start)
-            => new TextErrorInfo($"Illegal control character '{displayCharValue}' in string", start, 1);
+        public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
+            => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, $"Illegal control character '{displayCharValue}' in string", start, 1);
 
-        public override IEnumerable<TextErrorInfo> Errors { get; }
+        public override IEnumerable<JsonErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
 
-        public JsonErrorString(params TextErrorInfo[] errors)
+        public JsonErrorString(params JsonErrorInfo[] errors)
         {
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
 
-        public JsonErrorString(IEnumerable<TextErrorInfo> errors)
+        public JsonErrorString(IEnumerable<JsonErrorInfo> errors)
         {
             if (errors == null) throw new ArgumentNullException(nameof(errors));
             Errors = errors.ToArray();

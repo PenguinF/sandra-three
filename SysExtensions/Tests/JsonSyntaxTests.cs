@@ -93,21 +93,21 @@ namespace SysExtensions.Tests
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((TextErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<TextErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((JsonErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<JsonErrorInfo>)null));
         }
 
         [Theory]
-        [InlineData("", 0, 0)]
-        [InlineData("Error!", 0, 1)]
+        [InlineData(JsonErrorCode.Custom, "", 0, 0)]
+        [InlineData(JsonErrorCode.Unspecified, "Error!", 0, 1)]
         // No newline conversions.
-        [InlineData("\n", 1, 0)]
-        [InlineData("Error!\r\n", 0, 2)]
-        public void UnchangedParametersInErrorString(string message, int start, int length)
+        [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 0)]
+        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "Error!\r\n", 0, 2)]
+        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string message, int start, int length)
         {
-            var errorInfo1 = new TextErrorInfo(message, start, length);
-            var errorInfo2 = new TextErrorInfo(message + message, start + 1, length * 2);
-            var errorInfo3 = new TextErrorInfo(message + message + message, start + 2, length * 3);
+            var errorInfo1 = new JsonErrorInfo(errorCode, message, start, length);
+            var errorInfo2 = new JsonErrorInfo(errorCode, message + message, start + 1, length * 2);
+            var errorInfo3 = new JsonErrorInfo(errorCode, message + message + message, start + 2, length * 3);
 
             Assert.Collection(
                 new JsonErrorString(errorInfo1, errorInfo2, errorInfo3).Errors,
@@ -117,7 +117,7 @@ namespace SysExtensions.Tests
 
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
-            var errorList = new List<TextErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
+            var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
             var errorString = new JsonErrorString(errorList);
             Assert.NotSame(errorString.Errors, errorList);
 

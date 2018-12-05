@@ -28,7 +28,7 @@ namespace SysExtensions.Text.Json
     {
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
-        public virtual IEnumerable<TextErrorInfo> Errors => Enumerable.Empty<TextErrorInfo>();
+        public virtual IEnumerable<JsonErrorInfo> Errors => Enumerable.Empty<JsonErrorInfo>();
 
         public abstract void Accept(JsonSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);

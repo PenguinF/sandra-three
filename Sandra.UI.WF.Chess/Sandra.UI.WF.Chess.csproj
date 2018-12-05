@@ -56,6 +56,13 @@
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
+    <Compile Include="ListBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ListBoxEx.UIActions.cs">
+      <DependentUpon>ListBoxEx.cs</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Localizers.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
@@ -86,6 +93,13 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForm.UIActions.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SettingsTextBox.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -61,10 +61,7 @@ namespace Sandra.UI.WF
         private static readonly Color defaultForeColor = Color.WhiteSmoke;
         private static readonly Font defaultFont = new Font("Consolas", 10);
 
-        private static readonly Color noErrorsForeColor = Color.FromArgb(176, 176, 176);
-        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
-
-        private static readonly Font errorsFont = new Font("Calibri", 10);
+        private static readonly Color lineNumberForeColor = Color.FromArgb(176, 176, 176);
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
@@ -82,6 +79,11 @@ namespace Sandra.UI.WF
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
+
+        /// <summary>
+        /// Gets the fore color used for displaying line numbers in this syntax editor.
+        /// </summary>
+        public Color LineNumberForeColor => LineNumberStyle.ForeColor;
 
         private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
@@ -102,26 +104,18 @@ namespace Sandra.UI.WF
 
         private readonly SettingsFile settingsFile;
 
-        private readonly UpdatableRichTextBox errorsTextBox;
-
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
-        /// <param name="errorsTextBox">
-        /// An optional <see cref="UpdatableRichTextBox"/> which displays JSON parse errors.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public SettingsTextBox(SettingsFile settingsFile, UpdatableRichTextBox errorsTextBox)
+        public SettingsTextBox(SettingsFile settingsFile)
         {
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
-            this.errorsTextBox = errorsTextBox;
-
-            errorsTextBox.HideSelection = false;
 
             BorderStyle = BorderStyle.None;
 
@@ -135,7 +129,7 @@ namespace Sandra.UI.WF
             SetSelectionForeColor(true, defaultBackColor);
 
             LineNumberStyle.BackColor = defaultBackColor;
-            LineNumberStyle.ForeColor = noErrorsForeColor;
+            LineNumberStyle.ForeColor = lineNumberForeColor;
             LineNumberStyle.ApplyFont(defaultFont);
 
             CallTipStyle.BackColor = callTipBackColor;
@@ -161,13 +155,6 @@ namespace Sandra.UI.WF
 
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
-
-            if (errorsTextBox != null)
-            {
-                errorsTextBox.ReadOnly = true;
-                errorsTextBox.DoubleClick += ErrorsTextBox_DoubleClick;
-                errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
-            }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
@@ -222,18 +209,34 @@ namespace Sandra.UI.WF
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
+            parser.TryParse(out PMap dummy, out List<JsonErrorInfo> errors);
 
             IndicatorClearRange(0, TextLength);
 
             if (errors.Count == 0)
             {
-                DisplayNoErrors();
+                currentErrors = null;
             }
             else
             {
-                DisplayErrors(errors);
+                errors.Sort((x, y)
+                    => x.Start < y.Start ? -1
+                    : x.Start > y.Start ? 1
+                    : x.Length < y.Length ? -1
+                    : x.Length > y.Length ? 1
+                    : x.ErrorCode < y.ErrorCode ? -1
+                    : x.ErrorCode > y.ErrorCode ? 1
+                    : 0);
+
+                currentErrors = errors;
+
+                foreach (var error in errors)
+                {
+                    IndicatorFillRange(error.Start, error.Length);
+                }
             }
+
+            OnCurrentErrorsChanged(EventArgs.Empty);
         }
 
         private int displayedMaxLineNumberLength;
@@ -256,99 +259,52 @@ namespace Sandra.UI.WF
             ParseAndApplySyntaxHighlighting(Text);
         }
 
-        private List<TextErrorInfo> currentErrors;
+        private List<JsonErrorInfo> currentErrors;
 
-        private void DisplayNoErrors()
+        public int CurrentErrorCount
+            => currentErrors == null ? 0 : currentErrors.Count;
+
+        public IEnumerable<JsonErrorInfo> CurrentErrors
+            => currentErrors == null ? Enumerable.Empty<JsonErrorInfo>() : currentErrors.Enumerate();
+
+        public event EventHandler CurrentErrorsChanged;
+
+        protected virtual void OnCurrentErrorsChanged(EventArgs e)
         {
-            currentErrors = null;
-
-            if (errorsTextBox != null)
-            {
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    errorsTextBox.Text = "(No errors)";
-                    errorsTextBox.BackColor = defaultBackColor;
-                    errorsTextBox.ForeColor = noErrorsForeColor;
-                    errorsTextBox.Font = noErrorsFont;
-                }
-            }
+            CurrentErrorsChanged?.Invoke(this, e);
         }
 
-        private void DisplayErrors(List<TextErrorInfo> errors)
-        {
-            currentErrors = errors;
-
-            foreach (var error in errors)
-            {
-                IndicatorFillRange(error.Start, error.Length);
-            }
-
-            if (errorsTextBox != null)
-            {
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    var errorMessages = from error in errors
-                                        let lineIndex = LineFromPosition(error.Start)
-                                        let position = GetColumn(error.Start)
-                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
-
-                    errorsTextBox.Text = string.Join("\n", errorMessages);
-
-                    errorsTextBox.BackColor = defaultBackColor;
-                    errorsTextBox.ForeColor = defaultForeColor;
-                    errorsTextBox.Font = errorsFont;
-                }
-            }
-        }
-
-        private void BringErrorIntoView(int charIndex)
+        public void ActivateError(int errorIndex)
         {
             // Select the text that generated the error.
-            if (currentErrors != null)
+            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
             {
-                int lineIndex = errorsTextBox.GetLineFromCharIndex(charIndex);
-                if (0 <= lineIndex && lineIndex < currentErrors.Count)
+                // Determine how many lines are visible in the top half of the control.
+                int firstVisibleLine = FirstVisibleLine;
+                int visibleLines = LinesOnScreen;
+                int bottomVisibleLine = firstVisibleLine + visibleLines;
+
+                // Then calculate which line should become the first visible line
+                // so the error line ends up in the middle of the control.
+                var hotError = currentErrors[errorIndex];
+                int hotErrorLine = LineFromPosition(hotError.Start);
+
+                // hotErrorLine in view?
+                // Don't include the bottom line, it's likely not completely visible.
+                if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
                 {
-                    // Determine how many lines are visible in the top half of the control.
-                    int firstVisibleLine = FirstVisibleLine;
-                    int visibleLines = LinesOnScreen;
-                    int bottomVisibleLine = firstVisibleLine + visibleLines;
-
-                    // Then calculate which line should become the first visible line
-                    // so the error line ends up in the middle of the control.
-                    var hotError = currentErrors[lineIndex];
-                    int hotErrorLine = LineFromPosition(hotError.Start);
-
-                    // hotErrorLine in view?
-                    // Don't include the bottom line, it's likely not completely visible.
-                    if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
-                    {
-                        int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
-                        if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
-                        FirstVisibleLine = targetFirstVisibleLine;
-                    }
-
-                    GotoPosition(hotError.Start);
-                    if (hotError.Length > 0)
-                    {
-                        SelectionEnd = hotError.Start + hotError.Length;
-                    }
-
-                    Focus();
+                    int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                    if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                    FirstVisibleLine = targetFirstVisibleLine;
                 }
-            }
-        }
 
-        private void ErrorsTextBox_DoubleClick(object sender, EventArgs e)
-        {
-            BringErrorIntoView(errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition)));
-        }
+                GotoPosition(hotError.Start);
+                if (hotError.Length > 0)
+                {
+                    SelectionEnd = hotError.Start + hotError.Length;
+                }
 
-        private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == Keys.Enter)
-            {
-                BringErrorIntoView(errorsTextBox.SelectionStart);
+                Focus();
             }
         }
 
