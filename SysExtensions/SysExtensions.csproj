@@ -48,6 +48,7 @@
     <Compile Include="Text\Json\JsonCurlyClose.cs" />
     <Compile Include="Text\Json\JsonCurlyOpen.cs" />
     <Compile Include="Text\Json\JsonErrorCode.cs" />
+    <Compile Include="Text\Json\JsonErrorInfo.cs" />
     <Compile Include="Text\Json\JsonErrorString.cs" />
     <Compile Include="Text\Json\JsonSquareBracketClose.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpen.cs" />
