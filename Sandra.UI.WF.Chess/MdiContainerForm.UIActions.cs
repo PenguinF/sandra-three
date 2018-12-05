@@ -67,19 +67,6 @@ namespace Sandra.UI.WF
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting)
         {
-            var errorsTextBox = new RichTextBoxEx
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.None,
-                ScrollBars = RichTextBoxScrollBars.Vertical,
-                HideSelection = false,
-                ReadOnly = true,
-            };
-
-            errorsTextBox.BindStandardEditUIActions();
-
-            UIMenu.AddTo(errorsTextBox);
-
             var settingsTextBox = new SettingsTextBox(settingsFile)
             {
                 Dock = DockStyle.Fill,
@@ -95,8 +82,6 @@ namespace Sandra.UI.WF
 
             UIMenu.AddTo(settingsTextBox);
 
-            InitializeErrorInteraction(settingsTextBox, errorsTextBox);
-
             var settingsForm = new UIActionForm
             {
                 Owner = this,
@@ -108,13 +93,46 @@ namespace Sandra.UI.WF
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
 
-            var splitter = new SplitContainer
+            // If there is no errorsTextBox, splitter will remain null,
+            // and no splitter distance needs to be restored or auto-saved.
+            SplitContainer splitter = null;
+            RichTextBoxEx errorsTextBox = null;
+
+            if (settingsTextBox.ReadOnly && settingsTextBox.CurrentErrorCount == 0)
             {
-                Dock = DockStyle.Fill,
-                SplitterWidth = 4,
-                FixedPanel = FixedPanel.Panel2,
-                Orientation = Orientation.Horizontal,
-            };
+                // No errors while read-only: do not display an errors textbox.
+                settingsForm.Controls.Add(settingsTextBox);
+            }
+            else
+            {
+                errorsTextBox = new RichTextBoxEx
+                {
+                    Dock = DockStyle.Fill,
+                    BorderStyle = BorderStyle.None,
+                    ScrollBars = RichTextBoxScrollBars.Vertical,
+                    HideSelection = false,
+                    ReadOnly = true,
+                };
+
+                errorsTextBox.BindStandardEditUIActions();
+
+                UIMenu.AddTo(errorsTextBox);
+
+                InitializeErrorInteraction(settingsTextBox, errorsTextBox);
+
+                splitter = new SplitContainer
+                {
+                    Dock = DockStyle.Fill,
+                    SplitterWidth = 4,
+                    FixedPanel = FixedPanel.Panel2,
+                    Orientation = Orientation.Horizontal,
+                };
+
+                splitter.Panel1.Controls.Add(settingsTextBox);
+                splitter.Panel2.Controls.Add(errorsTextBox);
+
+                settingsForm.Controls.Add(splitter);
+            }
 
             // Default value shows about 2 errors at default zoom level.
             const int defaultErrorHeight = 34;
@@ -123,22 +141,20 @@ namespace Sandra.UI.WF
             {
                 Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
 
-                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
+                if (splitter != null && errorsTextBox != null)
                 {
-                    targetErrorHeight = defaultErrorHeight;
+                    if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
+                    {
+                        targetErrorHeight = defaultErrorHeight;
+                    }
+
+                    // Calculate target splitter distance which will restore the target error height exactly.
+                    int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
+                    if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
+
+                    splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
                 }
-
-                // Calculate target splitter distance which will restore the target error height exactly.
-                int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
-                if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
-
-                splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
             };
-
-            splitter.Panel1.Controls.Add(settingsTextBox);
-            splitter.Panel2.Controls.Add(errorsTextBox);
-
-            settingsForm.Controls.Add(splitter);
 
             return settingsForm;
         }
