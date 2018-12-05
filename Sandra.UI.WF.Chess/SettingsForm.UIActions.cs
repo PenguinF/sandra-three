@@ -25,11 +25,41 @@ namespace Sandra.UI.WF
     {
         public UIActionState TryGoToPreviousLocation(bool perform)
         {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = settingsTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to previous or last position.
+                int targetIndex = errorsListBox.SelectedIndex - 1;
+                if (targetIndex < 0) targetIndex = errorCount - 1;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryGoToNextLocation(bool perform)
         {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = settingsTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to next or first position.
+                int targetIndex = errorsListBox.SelectedIndex + 1;
+                if (targetIndex >= errorCount) targetIndex = 0;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
             return UIActionVisibility.Enabled;
         }
     }
