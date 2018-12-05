@@ -102,7 +102,7 @@ namespace SysExtensions.Text.Json
         MissingValue,
 
         /// <summary>
-        /// Occurs when a property value is not recognized.
+        /// Occurs when a value is not recognized.
         /// </summary>
         UnrecognizedValue,
 
