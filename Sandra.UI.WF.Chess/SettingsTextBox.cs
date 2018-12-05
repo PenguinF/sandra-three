@@ -224,6 +224,8 @@ namespace Sandra.UI.WF
                     : x.Start > y.Start ? 1
                     : x.Length < y.Length ? -1
                     : x.Length > y.Length ? 1
+                    : x.ErrorCode < y.ErrorCode ? -1
+                    : x.ErrorCode > y.ErrorCode ? 1
                     : 0);
 
                 currentErrors = errors;
