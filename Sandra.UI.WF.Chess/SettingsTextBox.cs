@@ -61,10 +61,7 @@ namespace Sandra.UI.WF
         private static readonly Color defaultForeColor = Color.WhiteSmoke;
         private static readonly Font defaultFont = new Font("Consolas", 10);
 
-        private static readonly Color noErrorsForeColor = Color.FromArgb(176, 176, 176);
-        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
-
-        private static readonly Font errorsFont = new Font("Calibri", 10);
+        private static readonly Color lineNumberForeColor = Color.FromArgb(176, 176, 176);
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
@@ -82,6 +79,11 @@ namespace Sandra.UI.WF
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
+
+        /// <summary>
+        /// Gets the fore color used for displaying line numbers in this syntax editor.
+        /// </summary>
+        public Color LineNumberForeColor => LineNumberStyle.ForeColor;
 
         private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
@@ -133,7 +135,7 @@ namespace Sandra.UI.WF
             SetSelectionForeColor(true, defaultBackColor);
 
             LineNumberStyle.BackColor = defaultBackColor;
-            LineNumberStyle.ForeColor = noErrorsForeColor;
+            LineNumberStyle.ForeColor = lineNumberForeColor;
             LineNumberStyle.ApplyFont(defaultFont);
 
             CallTipStyle.BackColor = callTipBackColor;
@@ -231,14 +233,7 @@ namespace Sandra.UI.WF
                 }
             }
 
-            if (CurrentErrorCount == 0)
-            {
-                DisplayNoErrors();
-            }
-            else
-            {
-                DisplayErrors(CurrentErrors);
-            }
+            OnCurrentErrorsChanged(EventArgs.Empty);
         }
 
         private int displayedMaxLineNumberLength;
@@ -269,38 +264,11 @@ namespace Sandra.UI.WF
         public IEnumerable<TextErrorInfo> CurrentErrors
             => currentErrors == null ? Enumerable.Empty<TextErrorInfo>() : currentErrors.Enumerate();
 
-        private void DisplayNoErrors()
+        public event EventHandler CurrentErrorsChanged;
+
+        protected virtual void OnCurrentErrorsChanged(EventArgs e)
         {
-            if (errorsTextBox != null)
-            {
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    errorsTextBox.Text = "(No errors)";
-                    errorsTextBox.BackColor = defaultBackColor;
-                    errorsTextBox.ForeColor = noErrorsForeColor;
-                    errorsTextBox.Font = noErrorsFont;
-                }
-            }
-        }
-
-        private void DisplayErrors(IEnumerable<TextErrorInfo> errors)
-        {
-            if (errorsTextBox != null)
-            {
-                using (var updateToken = errorsTextBox.BeginUpdate())
-                {
-                    var errorMessages = from error in errors
-                                        let lineIndex = LineFromPosition(error.Start)
-                                        let position = GetColumn(error.Start)
-                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
-
-                    errorsTextBox.Text = string.Join("\n", errorMessages);
-
-                    errorsTextBox.BackColor = defaultBackColor;
-                    errorsTextBox.ForeColor = defaultForeColor;
-                    errorsTextBox.Font = errorsFont;
-                }
-            }
+            CurrentErrorsChanged?.Invoke(this, e);
         }
 
         public void BringErrorIntoView(int errorIndex)

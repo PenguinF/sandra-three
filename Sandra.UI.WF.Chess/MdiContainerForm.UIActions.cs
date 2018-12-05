@@ -25,6 +25,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -94,7 +95,15 @@ namespace Sandra.UI.WF
 
             UIMenu.AddTo(settingsTextBox);
 
+            // Copy background color.
+            errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
+
             // Interaction between settingsTextBox and errorsTextBox.
+            settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors(settingsTextBox, errorsTextBox);
+
+            // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
+            DisplayErrors(settingsTextBox, errorsTextBox);
+
             errorsTextBox.DoubleClick += (_, __) =>
             {
                 int charIndex = errorsTextBox.GetCharIndexFromPosition(errorsTextBox.PointToClient(MousePosition));
@@ -156,6 +165,39 @@ namespace Sandra.UI.WF
             settingsForm.Controls.Add(splitter);
 
             return settingsForm;
+        }
+
+        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
+        private static readonly Font errorsFont = new Font("Calibri", 10);
+
+        private void DisplayErrors(SettingsTextBox settingsTextBox, RichTextBoxEx errorsTextBox)
+        {
+            if (settingsTextBox.CurrentErrorCount == 0)
+            {
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    errorsTextBox.Text = "(No errors)";
+                    errorsTextBox.ForeColor = settingsTextBox.LineNumberForeColor;
+                    errorsTextBox.Font = noErrorsFont;
+                }
+            }
+            else
+            {
+                var errors = settingsTextBox.CurrentErrors;
+
+                using (var updateToken = errorsTextBox.BeginUpdate())
+                {
+                    var errorMessages = from error in errors
+                                        let lineIndex = settingsTextBox.LineFromPosition(error.Start)
+                                        let position = settingsTextBox.GetColumn(error.Start)
+                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
+
+                    errorsTextBox.Text = string.Join("\n", errorMessages);
+
+                    errorsTextBox.ForeColor = settingsTextBox.NoStyleForeColor;
+                    errorsTextBox.Font = errorsFont;
+                }
+            }
         }
 
         public UIActionState TryEditPreferencesFile(bool perform)
