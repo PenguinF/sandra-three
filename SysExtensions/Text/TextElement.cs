@@ -72,10 +72,7 @@ namespace SysExtensions.Text
         /// <paramref name="terminalSymbol"/> is null.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="start"/> is negative.
-        /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="length"/> is negative.
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
         /// </exception>
         public TextElement(TTerminal terminalSymbol, int start, int length) : this(terminalSymbol)
         {

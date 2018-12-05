@@ -55,6 +55,12 @@ namespace SysExtensions.Text
         /// <param name="length">
         /// The length of the text span where the error occurred.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="message"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
         public TextErrorInfo(string message, int start, int length)
         {
             Message = message ?? throw new ArgumentNullException(nameof(message));
