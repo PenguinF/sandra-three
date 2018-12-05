@@ -219,6 +219,13 @@ namespace Sandra.UI.WF
             }
             else
             {
+                errors.Sort((x, y)
+                    => x.Start < y.Start ? -1
+                    : x.Start > y.Start ? 1
+                    : x.Length < y.Length ? -1
+                    : x.Length > y.Length ? 1
+                    : 0);
+
                 currentErrors = errors;
 
                 foreach (var error in errors)
