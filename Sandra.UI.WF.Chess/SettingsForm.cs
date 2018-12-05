@@ -106,7 +106,7 @@ namespace Sandra.UI.WF
                 DisplayErrors();
 
                 errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
-                errorsListBox.KeyDown += ErrorsTextBox_KeyDown;
+                errorsListBox.KeyDown += ErrorsListBox_KeyDown;
 
                 splitter = new SplitContainer
                 {
@@ -127,7 +127,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void ErrorsTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == Keys.Enter)
             {
