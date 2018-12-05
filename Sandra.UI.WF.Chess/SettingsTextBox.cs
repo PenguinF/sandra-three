@@ -104,24 +104,18 @@ namespace Sandra.UI.WF
 
         private readonly SettingsFile settingsFile;
 
-        private readonly UpdatableRichTextBox errorsTextBox;
-
         /// <summary>
         /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
-        /// <param name="errorsTextBox">
-        /// An optional <see cref="UpdatableRichTextBox"/> which displays JSON parse errors.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public SettingsTextBox(SettingsFile settingsFile, UpdatableRichTextBox errorsTextBox)
+        public SettingsTextBox(SettingsFile settingsFile)
         {
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
-            this.errorsTextBox = errorsTextBox;
 
             BorderStyle = BorderStyle.None;
 

@@ -80,7 +80,7 @@ namespace Sandra.UI.WF
 
             UIMenu.AddTo(errorsTextBox);
 
-            var settingsTextBox = new SettingsTextBox(settingsFile, errorsTextBox)
+            var settingsTextBox = new SettingsTextBox(settingsFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
