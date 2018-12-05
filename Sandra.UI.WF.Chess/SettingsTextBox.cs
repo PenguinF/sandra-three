@@ -219,11 +219,25 @@ namespace Sandra.UI.WF
 
             if (errors.Count == 0)
             {
+                currentErrors = null;
+            }
+            else
+            {
+                currentErrors = errors;
+
+                foreach (var error in errors)
+                {
+                    IndicatorFillRange(error.Start, error.Length);
+                }
+            }
+
+            if (CurrentErrorCount == 0)
+            {
                 DisplayNoErrors();
             }
             else
             {
-                DisplayErrors(errors);
+                DisplayErrors(CurrentErrors);
             }
         }
 
@@ -249,10 +263,14 @@ namespace Sandra.UI.WF
 
         private List<TextErrorInfo> currentErrors;
 
+        public int CurrentErrorCount
+            => currentErrors == null ? 0 : currentErrors.Count;
+
+        public IEnumerable<TextErrorInfo> CurrentErrors
+            => currentErrors == null ? Enumerable.Empty<TextErrorInfo>() : currentErrors.Enumerate();
+
         private void DisplayNoErrors()
         {
-            currentErrors = null;
-
             if (errorsTextBox != null)
             {
                 using (var updateToken = errorsTextBox.BeginUpdate())
@@ -265,15 +283,8 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void DisplayErrors(List<TextErrorInfo> errors)
+        private void DisplayErrors(IEnumerable<TextErrorInfo> errors)
         {
-            currentErrors = errors;
-
-            foreach (var error in errors)
-            {
-                IndicatorFillRange(error.Start, error.Length);
-            }
-
             if (errorsTextBox != null)
             {
                 using (var updateToken = errorsTextBox.BeginUpdate())
