@@ -97,9 +97,9 @@ namespace SysExtensions.Text.Json
         MissingPropertyKey,
 
         /// <summary>
-        /// Occurs when a property value is missing after a ':' or ',' symbol.
+        /// Occurs when a value is missing after a ':' or ',' symbol.
         /// </summary>
-        MissingPropertyValue,
+        MissingValue,
 
         /// <summary>
         /// Occurs when a property value is not recognized.
@@ -119,7 +119,7 @@ namespace SysExtensions.Text.Json
         /// <summary>
         /// Occurs when multiple values are defined within an object or array.
         /// </summary>
-        MultiplePropertyValues,
+        MultipleValues,
 
         /// <summary>
         /// Minimum error code value for custom error messages.

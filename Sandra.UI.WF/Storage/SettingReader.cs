@@ -164,7 +164,7 @@ namespace Sandra.UI.WF.Storage
                         }
 
                         gotValue |= ParseMultiValue(
-                            JsonErrorCode.MultiplePropertyValues,
+                            JsonErrorCode.MultipleValues,
                             MultipleValuesMessage,
                             out parsedValue,
                             out TextElement<JsonSymbol> firstValueSymbol);
@@ -199,7 +199,7 @@ namespace Sandra.UI.WF.Storage
                         if (!gotValue)
                         {
                             Errors.Add(new JsonErrorInfo(
-                                JsonErrorCode.MissingPropertyValue,
+                                JsonErrorCode.MissingValue,
                                 EmptyValueMessage,
                                 textElement.Start,
                                 textElement.Length));
@@ -239,7 +239,7 @@ namespace Sandra.UI.WF.Storage
                 {
 
                     bool gotValue = ParseMultiValue(
-                        JsonErrorCode.MultiplePropertyValues,
+                        JsonErrorCode.MultipleValues,
                         MultipleValuesMessage,
                         out PValue parsedValue,
                         out TextElement<JsonSymbol> firstSymbol);
@@ -254,7 +254,7 @@ namespace Sandra.UI.WF.Storage
                         {
                             // Two commas or '[,': add an empty PErrorValue.
                             Errors.Add(new JsonErrorInfo(
-                                JsonErrorCode.MissingPropertyValue,
+                                JsonErrorCode.MissingValue,
                                 EmptyValueMessage,
                                 textElement.Start,
                                 textElement.Length));
