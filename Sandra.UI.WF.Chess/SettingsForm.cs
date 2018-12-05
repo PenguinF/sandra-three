@@ -37,7 +37,7 @@ namespace Sandra.UI.WF
         private readonly SettingProperty<int> errorHeightSetting;
 
         private readonly SplitContainer splitter;
-        private readonly ListBoxEx errorsTextBox;
+        private readonly ListBoxEx errorsListBox;
         private readonly SettingsTextBox settingsTextBox;
 
         public SettingsForm(bool isReadOnly,
@@ -74,7 +74,7 @@ namespace Sandra.UI.WF
             }
             else
             {
-                errorsTextBox = new ListBoxEx
+                errorsListBox = new ListBoxEx
                 {
                     Dock = DockStyle.Fill,
                     BorderStyle = BorderStyle.None,
@@ -83,9 +83,9 @@ namespace Sandra.UI.WF
                     SelectionMode = SelectionMode.MultiExtended,
                 };
 
-                errorsTextBox.BindStandardCopySelectUIActions();
+                errorsListBox.BindStandardCopySelectUIActions();
 
-                UIMenu.AddTo(errorsTextBox);
+                UIMenu.AddTo(errorsListBox);
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -93,8 +93,8 @@ namespace Sandra.UI.WF
                 // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
                 DisplayErrors();
 
-                errorsTextBox.DoubleClick += (_, __) => ActivateSelectedError();
-                errorsTextBox.KeyDown += ErrorsTextBox_KeyDown;
+                errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
+                errorsListBox.KeyDown += ErrorsTextBox_KeyDown;
 
                 splitter = new SplitContainer
                 {
@@ -105,10 +105,10 @@ namespace Sandra.UI.WF
                 };
 
                 splitter.Panel1.Controls.Add(settingsTextBox);
-                splitter.Panel2.Controls.Add(errorsTextBox);
+                splitter.Panel2.Controls.Add(errorsListBox);
 
                 // Copy background color.
-                errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
+                errorsListBox.BackColor = settingsTextBox.NoStyleBackColor;
                 splitter.Panel2.BackColor = settingsTextBox.NoStyleBackColor;
 
                 Controls.Add(splitter);
@@ -125,8 +125,8 @@ namespace Sandra.UI.WF
 
         private void ActivateSelectedError()
         {
-            var index = errorsTextBox.SelectedIndex;
-            if (0 <= index && index < errorsTextBox.Items.Count)
+            var index = errorsListBox.SelectedIndex;
+            if (0 <= index && index < errorsListBox.Items.Count)
             {
                 settingsTextBox.ActivateError(index);
             }
@@ -134,13 +134,13 @@ namespace Sandra.UI.WF
 
         private void DisplayErrors()
         {
-            errorsTextBox.Items.Clear();
+            errorsListBox.Items.Clear();
 
             if (settingsTextBox.CurrentErrorCount == 0)
             {
-                errorsTextBox.Items.Add("(No errors)");
-                errorsTextBox.ForeColor = settingsTextBox.LineNumberForeColor;
-                errorsTextBox.Font = noErrorsFont;
+                errorsListBox.Items.Add("(No errors)");
+                errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
+                errorsListBox.Font = noErrorsFont;
             }
             else
             {
@@ -151,9 +151,9 @@ namespace Sandra.UI.WF
                                     let position = settingsTextBox.GetColumn(error.Start)
                                     select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
 
-                errorsTextBox.Items.AddRange(errorMessages.ToArray());
-                errorsTextBox.ForeColor = settingsTextBox.NoStyleForeColor;
-                errorsTextBox.Font = errorsFont;
+                errorsListBox.Items.AddRange(errorMessages.ToArray());
+                errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
+                errorsListBox.Font = errorsFont;
             }
         }
 
@@ -164,7 +164,7 @@ namespace Sandra.UI.WF
 
             Program.AttachFormStateAutoSaver(this, formStateSetting, null);
 
-            if (splitter != null && errorsTextBox != null)
+            if (splitter != null && errorsListBox != null)
             {
                 if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
                 {
@@ -175,7 +175,7 @@ namespace Sandra.UI.WF
                 int splitterDistance = ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
                 if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
 
-                splitter.SplitterMoved += (_, __) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
+                splitter.SplitterMoved += (_, __) => Program.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
             }
         }
     }
