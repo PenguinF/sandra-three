@@ -134,26 +134,35 @@ namespace Sandra.UI.WF
 
         private void DisplayErrors()
         {
-            errorsListBox.Items.Clear();
+            errorsListBox.BeginUpdate();
 
-            if (settingsTextBox.CurrentErrorCount == 0)
+            try
             {
-                errorsListBox.Items.Add("(No errors)");
-                errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
-                errorsListBox.Font = noErrorsFont;
+                errorsListBox.Items.Clear();
+
+                if (settingsTextBox.CurrentErrorCount == 0)
+                {
+                    errorsListBox.Items.Add("(No errors)");
+                    errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
+                    errorsListBox.Font = noErrorsFont;
+                }
+                else
+                {
+                    var errors = settingsTextBox.CurrentErrors;
+
+                    var errorMessages = from error in errors
+                                        let lineIndex = settingsTextBox.LineFromPosition(error.Start)
+                                        let position = settingsTextBox.GetColumn(error.Start)
+                                        select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
+
+                    errorsListBox.Items.AddRange(errorMessages.ToArray());
+                    errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
+                    errorsListBox.Font = errorsFont;
+                }
             }
-            else
+            finally
             {
-                var errors = settingsTextBox.CurrentErrors;
-
-                var errorMessages = from error in errors
-                                    let lineIndex = settingsTextBox.LineFromPosition(error.Start)
-                                    let position = settingsTextBox.GetColumn(error.Start)
-                                    select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
-
-                errorsListBox.Items.AddRange(errorMessages.ToArray());
-                errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
-                errorsListBox.Font = errorsFont;
+                errorsListBox.EndUpdate();
             }
         }
 
