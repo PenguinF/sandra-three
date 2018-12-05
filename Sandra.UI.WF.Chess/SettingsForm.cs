@@ -28,7 +28,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
-    public class SettingsForm : UIActionForm
+    public partial class SettingsForm : UIActionForm
     {
         private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
         private static readonly Font errorsFont = new Font("Calibri", 10);
@@ -63,6 +63,12 @@ namespace Sandra.UI.WF
 
             settingsTextBox.BindStandardEditUIActions();
 
+            settingsTextBox.BindActions(new UIActionBindings
+            {
+                { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
+                { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
+            });
+
             UIMenu.AddTo(settingsTextBox);
 
             // If there is no errorsTextBox, splitter will remain null,
@@ -84,6 +90,12 @@ namespace Sandra.UI.WF
                 };
 
                 errorsListBox.BindStandardCopySelectUIActions();
+
+                errorsListBox.BindActions(new UIActionBindings
+                {
+                    { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
+                    { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
+                });
 
                 UIMenu.AddTo(errorsListBox);
 

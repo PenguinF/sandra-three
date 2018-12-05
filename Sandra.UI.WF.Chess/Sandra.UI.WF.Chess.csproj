@@ -96,6 +96,10 @@
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SettingsForm.UIActions.cs">
+      <DependentUpon>SettingsForm.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SettingsTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
