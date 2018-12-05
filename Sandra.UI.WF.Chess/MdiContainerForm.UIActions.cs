@@ -25,7 +25,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -66,163 +65,15 @@ namespace Sandra.UI.WF
                                         SettingsFile settingsFile,
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting)
-        {
-            var settingsTextBox = new SettingsTextBox(settingsFile)
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = isReadOnly,
-            };
-
-            settingsTextBox.BindActions(new UIActionBindings
-            {
-                { SettingsTextBox.SaveToFile, settingsTextBox.TrySaveToFile },
-            });
-
-            settingsTextBox.BindStandardEditUIActions();
-
-            UIMenu.AddTo(settingsTextBox);
-
-            var settingsForm = new UIActionForm
+            => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
             {
                 Owner = this,
                 ClientSize = new Size(600, 600),
                 ShowIcon = false,
                 ShowInTaskbar = false,
                 StartPosition = FormStartPosition.CenterScreen,
-                Text = Path.GetFileName(settingsFile.AbsoluteFilePath),
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
-
-            // If there is no errorsTextBox, splitter will remain null,
-            // and no splitter distance needs to be restored or auto-saved.
-            SplitContainer splitter = null;
-            ListBoxEx errorsTextBox = null;
-
-            if (settingsTextBox.ReadOnly && settingsTextBox.CurrentErrorCount == 0)
-            {
-                // No errors while read-only: do not display an errors textbox.
-                settingsForm.Controls.Add(settingsTextBox);
-            }
-            else
-            {
-                errorsTextBox = new ListBoxEx
-                {
-                    Dock = DockStyle.Fill,
-                    BorderStyle = BorderStyle.None,
-                    HorizontalScrollbar = false,
-                    ItemHeight = 14,
-                    SelectionMode = SelectionMode.MultiExtended,
-                };
-
-                errorsTextBox.BindStandardCopySelectUIActions();
-
-                UIMenu.AddTo(errorsTextBox);
-
-                InitializeErrorInteraction(settingsTextBox, errorsTextBox);
-
-                splitter = new SplitContainer
-                {
-                    Dock = DockStyle.Fill,
-                    SplitterWidth = 4,
-                    FixedPanel = FixedPanel.Panel2,
-                    Orientation = Orientation.Horizontal,
-                };
-
-                splitter.Panel1.Controls.Add(settingsTextBox);
-                splitter.Panel2.Controls.Add(errorsTextBox);
-
-                // Copy background color.
-                errorsTextBox.BackColor = settingsTextBox.NoStyleBackColor;
-                splitter.Panel2.BackColor = settingsTextBox.NoStyleBackColor;
-
-                settingsForm.Controls.Add(splitter);
-            }
-
-            // Default value shows about 2 errors at default zoom level.
-            const int defaultErrorHeight = 34;
-
-            settingsForm.Load += (_, __) =>
-            {
-                Program.AttachFormStateAutoSaver(settingsForm, formStateSetting, null);
-
-                if (splitter != null && errorsTextBox != null)
-                {
-                    if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
-                    {
-                        targetErrorHeight = defaultErrorHeight;
-                    }
-
-                    // Calculate target splitter distance which will restore the target error height exactly.
-                    int splitterDistance = settingsForm.ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
-                    if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
-
-                    splitter.SplitterMoved += (___, ____) => Program.AutoSave.Persist(errorHeightSetting, errorsTextBox.Height);
-                }
-            };
-
-            return settingsForm;
-        }
-
-        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
-        private static readonly Font errorsFont = new Font("Calibri", 10);
-
-        /// <summary>
-        /// Sets up error interaction between a syntax editor with an errors UpdatableRichTextBox.
-        /// </summary>
-        private void InitializeErrorInteraction(SettingsTextBox settingsTextBox, ListBoxEx errorsTextBox)
-        {
-            // Interaction between settingsTextBox and errorsTextBox.
-            settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors(settingsTextBox, errorsTextBox);
-
-            // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
-            DisplayErrors(settingsTextBox, errorsTextBox);
-
-            errorsTextBox.DoubleClick += (_, __) =>
-            {
-                var index = errorsTextBox.SelectedIndex;
-                if (0 <= index && index < errorsTextBox.Items.Count)
-                {
-                    settingsTextBox.ActivateError(index);
-                }
-            };
-
-            errorsTextBox.KeyDown += (_, e) =>
-            {
-                if (e.KeyData == Keys.Enter)
-                {
-                    var index = errorsTextBox.SelectedIndex;
-                    if (0 <= index && index < errorsTextBox.Items.Count)
-                    {
-                        settingsTextBox.ActivateError(index);
-                    }
-                }
-            };
-        }
-
-        private void DisplayErrors(SettingsTextBox settingsTextBox, ListBoxEx errorsTextBox)
-        {
-            errorsTextBox.Items.Clear();
-
-            if (settingsTextBox.CurrentErrorCount == 0)
-            {
-                errorsTextBox.Items.Add("(No errors)");
-                errorsTextBox.ForeColor = settingsTextBox.LineNumberForeColor;
-                errorsTextBox.Font = noErrorsFont;
-            }
-            else
-            {
-                var errors = settingsTextBox.CurrentErrors;
-
-                var errorMessages = from error in errors
-                                    let lineIndex = settingsTextBox.LineFromPosition(error.Start)
-                                    let position = settingsTextBox.GetColumn(error.Start)
-                                    select $"{error.Message} at line {lineIndex + 1}, position {position + 1}";
-
-                errorsTextBox.Items.AddRange(errorMessages.ToArray());
-                errorsTextBox.ForeColor = settingsTextBox.NoStyleForeColor;
-                errorsTextBox.Font = errorsFont;
-            }
-        }
 
         public UIActionState TryEditPreferencesFile(bool perform)
         {
