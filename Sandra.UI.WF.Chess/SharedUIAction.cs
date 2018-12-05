@@ -88,5 +88,24 @@ namespace Sandra.UI.WF
                 MenuCaptionKey = LocalizedStringKeys.SelectAll,
                 Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
             });
+
+        public static readonly DefaultUIActionBinding GoToPreviousLocation = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.GoToPreviousLocation,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
+            });
+
+        public static readonly DefaultUIActionBinding GoToNextLocation = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(GoToNextLocation)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.GoToNextLocation,
+                Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
+            });
     }
 }
