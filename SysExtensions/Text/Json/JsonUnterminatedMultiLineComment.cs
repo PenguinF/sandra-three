@@ -26,7 +26,7 @@ namespace SysExtensions.Text.Json
     public class JsonUnterminatedMultiLineComment : JsonSymbol
     {
         /// <summary>
-        /// Creates a <see cref="TextErrorInfo"/> for unterminated multiline comments.
+        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
         /// </summary>
         /// <param name="start">
         /// The start position of the unterminated comment.
@@ -37,10 +37,10 @@ namespace SysExtensions.Text.Json
         public static JsonErrorInfo CreateError(int start, int length)
             => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, "Unterminated multi-line comment", start, length);
 
-        public TextErrorInfo Error { get; }
+        public JsonErrorInfo Error { get; }
 
         public override bool IsBackground => true;
-        public override IEnumerable<TextErrorInfo> Errors { get; }
+        public override IEnumerable<JsonErrorInfo> Errors { get; }
 
         public JsonUnterminatedMultiLineComment(int start, int length)
         {

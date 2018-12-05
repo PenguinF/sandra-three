@@ -35,7 +35,7 @@ namespace SysExtensions.Text.Json
         private readonly int length;
 
         // Reusable fields for building terminal symbols.
-        private readonly List<TextErrorInfo> errors = new List<TextErrorInfo>();
+        private readonly List<JsonErrorInfo> errors = new List<JsonErrorInfo>();
         private readonly StringBuilder valueBuilder = new StringBuilder();
 
         // Current state.

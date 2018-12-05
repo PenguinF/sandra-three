@@ -209,7 +209,7 @@ namespace Sandra.UI.WF
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            parser.TryParse(out PMap dummy, out List<TextErrorInfo> errors);
+            parser.TryParse(out PMap dummy, out List<JsonErrorInfo> errors);
 
             IndicatorClearRange(0, TextLength);
 
@@ -257,13 +257,13 @@ namespace Sandra.UI.WF
             ParseAndApplySyntaxHighlighting(Text);
         }
 
-        private List<TextErrorInfo> currentErrors;
+        private List<JsonErrorInfo> currentErrors;
 
         public int CurrentErrorCount
             => currentErrors == null ? 0 : currentErrors.Count;
 
-        public IEnumerable<TextErrorInfo> CurrentErrors
-            => currentErrors == null ? Enumerable.Empty<TextErrorInfo>() : currentErrors.Enumerate();
+        public IEnumerable<JsonErrorInfo> CurrentErrors
+            => currentErrors == null ? Enumerable.Empty<JsonErrorInfo>() : currentErrors.Enumerate();
 
         public event EventHandler CurrentErrorsChanged;
 

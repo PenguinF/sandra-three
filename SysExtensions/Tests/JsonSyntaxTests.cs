@@ -93,8 +93,8 @@ namespace SysExtensions.Tests
         public void NullErrorsShouldThrow()
         {
             // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((TextErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<TextErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((JsonErrorInfo[])null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<JsonErrorInfo>)null));
         }
 
         [Theory]

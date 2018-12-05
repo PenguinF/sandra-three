@@ -54,7 +54,7 @@ namespace Sandra.UI.WF.Storage
             private readonly List<TextElement<JsonSymbol>> tokens;
             private readonly int sourceLength;
 
-            public readonly List<TextErrorInfo> Errors = new List<TextErrorInfo>();
+            public readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
             private int currentTokenIndex;
 
@@ -405,7 +405,7 @@ namespace Sandra.UI.WF.Storage
             tokens = new JsonTokenizer(json).TokenizeAll().ToList();
         }
 
-        public bool TryParse(out PMap map, out List<TextErrorInfo> errors)
+        public bool TryParse(out PMap map, out List<JsonErrorInfo> errors)
         {
             ParseRun parseRun = new ParseRun(tokens, json.Length);
             var validMap = parseRun.TryParse(out map);
@@ -416,11 +416,11 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Loads settings from a file into a <see cref="SettingCopy"/>.
         /// </summary>
-        internal static List<TextErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
+        internal static List<JsonErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
         {
             var parser = new SettingReader(json);
 
-            if (parser.TryParse(out PMap map, out List<TextErrorInfo> errors))
+            if (parser.TryParse(out PMap map, out List<JsonErrorInfo> errors))
             {
                 foreach (var kv in map)
                 {
