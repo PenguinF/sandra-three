@@ -64,10 +64,12 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
+        internal static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
         internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
+        internal static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
         internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
@@ -332,12 +334,14 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
+                { LocalizedStringKeys.Redo, "Redo" },
                 { LocalizedStringKeys.Save, "Save" },
                 { LocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
+                { LocalizedStringKeys.Undo, "Undo" },
                 { LocalizedStringKeys.View, "View" },
                 { LocalizedStringKeys.ZoomIn, "Zoom in" },
                 { LocalizedStringKeys.ZoomOut, "Zoom out" },

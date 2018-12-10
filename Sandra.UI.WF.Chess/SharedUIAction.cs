@@ -27,6 +27,27 @@ namespace Sandra.UI.WF
     {
         public const string SharedUIActionPrefix = nameof(SharedUIAction) + ".";
 
+        public static readonly DefaultUIActionBinding Undo = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(Undo)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                IsFirstInGroup = true,
+                MenuCaptionKey = LocalizedStringKeys.Undo,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
+                MenuIcon = Properties.Resources.undo,
+            });
+
+        public static readonly DefaultUIActionBinding Redo = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(Redo)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.Redo,
+                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
+                MenuIcon = Properties.Resources.redo,
+            });
+
         public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
             new UIActionBinding
