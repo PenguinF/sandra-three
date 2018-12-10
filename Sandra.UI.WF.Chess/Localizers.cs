@@ -123,37 +123,89 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes the available localizers.
         /// </summary>
-        public static void Register()
+        public static void ScanLocalizers(string defaultLangDirectory)
         {
+            var languageFileSchema = CreateLanguageFileSchema();
+
+            try
+            {
+                DirectoryInfo defaultDir = new DirectoryInfo(defaultLangDirectory);
+
+                if (defaultDir.Exists)
+                {
+                    foreach (var fileInfo in defaultDir.EnumerateFiles("*.json"))
+                    {
+                        try
+                        {
+                            var languageFile = SettingsFile.Create(fileInfo.FullName, new SettingCopy(languageFileSchema));
+                            languageFile.Settings.TryGetValue(FlagIconFile, out string flagIconFileName);
+
+                            registered.Add(
+                                Path.GetFileNameWithoutExtension(fileInfo.Name),
+                                new FileLocalizer(languageFile));
+                        }
+                        catch (Exception exc)
+                        {
+                            exc.Trace();
+                        }
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                exc.Trace();
+            }
+
             LangSetting = new SettingProperty<FileLocalizer>(
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registered));
 
-            // Use built-in localizer if none is provided.
-            Localizer.Current = BuiltInEnglishLocalizer.Instance;
+            if (registered.Count == 0)
+            {
+                // Use built-in localizer if none is provided.
+                Localizer.Current = BuiltInEnglishLocalizer.Instance;
+            }
+            else
+            {
+                Localizer.Current = registered.First().Value;
+            }
         }
     }
 
     /// <summary>
-    /// Apart from being a <see cref="Localizer"/>, contains abstract properties
+    /// Apart from being a <see cref="Localizer"/>, contains properties
     /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
     /// </summary>
-    public abstract class FileLocalizer : Localizer
+    public sealed class FileLocalizer : Localizer
     {
+        /// <summary>
+        /// Gets the settings file from which this localizer is loaded.
+        /// </summary>
+        public SettingsFile LanguageFile { get; }
+
         /// <summary>
         /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
         /// </summary>
-        public abstract string LanguageName { get; }
-
-        /// <summary>
-        /// Gets the value of the <see cref="Localizers.LangSetting"/> in the auto-save file.
-        /// </summary>
-        public abstract string AutoSaveSettingValue { get; }
+        public string LanguageName { get; }
 
         /// <summary>
         /// Gets the file name without extension of the flag icon.
         /// </summary>
-        public abstract string FlagIconFileName { get; }
+        public string FlagIconFileName { get; }
+
+        public Dictionary<LocalizedStringKey, string> Dictionary { get; private set; }
+
+        public FileLocalizer(SettingsFile languageFile)
+        {
+            LanguageFile = languageFile;
+            LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
+            FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
+            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
+        }
+
+        public override string Localize(LocalizedStringKey localizedStringKey)
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            : Default.Localize(localizedStringKey);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;
 

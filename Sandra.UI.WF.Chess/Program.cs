@@ -68,7 +68,9 @@ namespace Sandra.UI.WF
             GenerateJsonConfigurationFiles();
 #endif
 
-            Localizers.Register();
+            // Scan Languages subdirectory to load localizers.
+            var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
+            Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
 
