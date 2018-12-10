@@ -68,7 +68,7 @@ namespace Sandra.UI.WF
             GenerateJsonConfigurationFiles();
 #endif
 
-            Localizers.Register(BuiltInEnglishLocalizer.Instance, new DutchLocalizer());
+            Localizers.Register(BuiltInEnglishLocalizer.Instance);
 
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
 
