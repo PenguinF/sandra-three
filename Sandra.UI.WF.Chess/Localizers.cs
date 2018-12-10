@@ -252,7 +252,7 @@ namespace Sandra.UI.WF
                     {
                         if (!string.IsNullOrEmpty(FlagIconFileName))
                         {
-                            menuIcon = Image.FromFile(Path.Combine(Program.ExecutableFolder, "Images", FlagIconFileName));
+                            menuIcon = Image.FromFile(Path.Combine(Path.GetDirectoryName(LanguageFile.AbsoluteFilePath), FlagIconFileName));
                         }
                     }
                     catch (Exception exc)
