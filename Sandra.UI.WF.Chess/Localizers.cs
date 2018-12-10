@@ -78,9 +78,10 @@ namespace Sandra.UI.WF
     {
         public static readonly string LangSettingKey = "lang";
 
-        private static FileLocalizer[] registered;
+        private static readonly Dictionary<string, FileLocalizer> registered
+            = new Dictionary<string, FileLocalizer>(StringComparer.OrdinalIgnoreCase);
 
-        public static IEnumerable<FileLocalizer> Registered => registered.Enumerate();
+        public static IEnumerable<FileLocalizer> Registered => registered.Select(kv => kv.Value);
 
         /// <summary>
         /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
@@ -124,8 +125,6 @@ namespace Sandra.UI.WF
         /// </summary>
         public static void Register()
         {
-            registered = new FileLocalizer[0];
-
             LangSetting = new SettingProperty<Localizer>(
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
