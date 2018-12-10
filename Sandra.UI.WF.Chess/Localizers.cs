@@ -20,7 +20,11 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 
 namespace Sandra.UI.WF
@@ -165,13 +169,23 @@ namespace Sandra.UI.WF
             {
                 if (switchToLangUIActionBinding == null)
                 {
+                    Image menuIcon = null;
+                    try
+                    {
+                        menuIcon = Image.FromFile(Path.Combine(Program.ExecutableFolder, "Images", FlagIconFileName + ".png"));
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.Trace();
+                    }
+
                     switchToLangUIActionBinding = new DefaultUIActionBinding(
                         new UIAction(nameof(Localizers) + "." + LanguageName),
                         new UIActionBinding
                         {
                             ShowInMenu = true,
                             MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                            MenuIcon = Program.LoadImage(FlagIconFileName),
+                            MenuIcon = menuIcon,
                         });
                 }
 
