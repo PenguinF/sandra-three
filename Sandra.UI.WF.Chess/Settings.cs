@@ -33,6 +33,8 @@ namespace Sandra.UI.WF
 
         public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
 
+        public static readonly string DefaultLangFolderName = "Languages";
+
         private static string localApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
             $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
@@ -90,6 +92,16 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
+
+        private static readonly string LangFolderNameDescription
+            = "Subfolder of the application directory which is scanned for language files. "
+            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
+            + "Instead, forward slashes ('/') can be used to separate directories as well.";
+
+        public static readonly SettingProperty<string> LangFolderName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LangFolderName))),
+            SubFolderNameType.Instance,
+            new SettingComment(LangFolderNameDescription));
 
         public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
@@ -213,6 +225,7 @@ namespace Sandra.UI.WF
                 SettingKeys.Version,
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
+                SettingKeys.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
@@ -240,6 +253,7 @@ namespace Sandra.UI.WF
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
+            defaultSettings.AddOrReplace(SettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
             defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);

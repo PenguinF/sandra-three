@@ -35,6 +35,8 @@ namespace Sandra.UI.WF
 
         internal static string ExecutableFolder { get; private set; }
 
+        internal static string AppDataSubFolder { get; private set; }
+
         internal static SettingsFile DefaultSettings { get; private set; }
 
         internal static SettingsFile LocalSettings { get; private set; }
@@ -55,14 +57,21 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
+            // Save name of APPDATA subfolder for persistent files.
+            var appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
+            AppDataSubFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                appDataSubFolderName);
+
 #if DEBUG
-            // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
-            WriteToSourceDefaultSettingFile();
+            // In debug mode, generate default json configuration files from hard coded settings.
+            GenerateJsonConfigurationFiles();
 #endif
 
-            Localizers.Register(new EnglishLocalizer(), new DutchLocalizer());
+            // Scan Languages subdirectory to load localizers.
+            var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
+            Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
-            string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
 
             // After creating the auto-save file, look for a local preferences file.
@@ -71,15 +80,12 @@ namespace Sandra.UI.WF
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
-                Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    appDataSubFolderName,
-                    GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
                 localSettingsCopy);
 
             Chess.Constants.ForceInitialize();
 
-            if (TryGetAutoSaveValue(Localizers.LangSetting, out Localizer localizer))
+            if (TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
             {
                 Localizer.Current = localizer;
             }
@@ -159,12 +165,25 @@ namespace Sandra.UI.WF
         }
 
 #if DEBUG
-        private static void WriteToSourceDefaultSettingFile()
+        /// <summary>
+        /// Generates DefaultSettings.json from the loaded default settings in memory,
+        /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
+        /// </summary>
+        private static void GenerateJsonConfigurationFiles()
         {
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
 
-            SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"), false);
+            SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"));
+
+            var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
+            settingCopy.AddOrReplace(Localizers.NativeName, "English");
+            settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
+            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+            SettingsFile.WriteToFile(
+                settingCopy.Commit(),
+                Path.Combine(exeDir.FullName, "Languages", "en.json"),
+                SettingWriterOptions.SuppressSettingComments);
         }
 #endif
     }

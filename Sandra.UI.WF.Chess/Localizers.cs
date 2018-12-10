@@ -20,7 +20,12 @@
 #endregion
 
 using Sandra.UI.WF.Storage;
+using SysExtensions;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 
 namespace Sandra.UI.WF
@@ -72,71 +77,201 @@ namespace Sandra.UI.WF
 
     internal static class Localizers
     {
-        public static readonly string SettingKey = "lang";
+        public static readonly string LangSettingKey = "lang";
 
-        private static KeyedLocalizer[] registered;
+        private static readonly Dictionary<string, FileLocalizer> registered
+            = new Dictionary<string, FileLocalizer>(StringComparer.OrdinalIgnoreCase);
 
-        public static IEnumerable<KeyedLocalizer> Registered => registered.Enumerate();
+        public static IEnumerable<FileLocalizer> Registered => registered.Select(kv => kv.Value);
 
         /// <summary>
         /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
         /// </summary>
-        public static SettingProperty<Localizer> LangSetting { get; private set; }
+        public static SettingProperty<FileLocalizer> LangSetting { get; private set; }
+
+        private static readonly string NativeNameDescription
+            = "Name of the language in the language itself. This property is mandatory.";
+
+        public static readonly SettingProperty<string> NativeName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(NativeName))),
+            TrimmedStringType.Instance,
+            new SettingComment(NativeNameDescription));
+
+        private static readonly string FlagIconFileDescription
+            = "File name of the flag icon to display in the menu.";
+
+        public static readonly SettingProperty<string> FlagIconFile = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(FlagIconFile))),
+            FileNameType.Instance,
+            new SettingComment(FlagIconFileDescription));
+
+        private static readonly string TranslationsDescription
+            = "List of translations.";
+
+        public static readonly SettingProperty<Dictionary<LocalizedStringKey, string>> Translations = new SettingProperty<Dictionary<LocalizedStringKey, string>>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Translations))),
+            TranslationDictionaryType.Instance,
+            new SettingComment(TranslationsDescription));
+
+        public static SettingSchema CreateLanguageFileSchema()
+        {
+            return new SettingSchema(
+                NativeName,
+                FlagIconFile,
+                Translations);
+        }
+
+        private static IEnumerable<string> LocalizerKeyCandidates(CultureInfo uiCulture)
+        {
+            yield return uiCulture.NativeName;
+            yield return uiCulture.Name;
+            yield return uiCulture.ThreeLetterISOLanguageName;
+            yield return uiCulture.TwoLetterISOLanguageName;
+            yield return uiCulture.LCID.ToString();
+
+            // Recursively check parents, stop at the invariant culture which has no name.
+            if (uiCulture.Parent.Name.Length > 0)
+            {
+                foreach (var candidateKey in LocalizerKeyCandidates(uiCulture.Parent))
+                {
+                    yield return candidateKey;
+                }
+            }
+        }
 
         /// <summary>
-        /// Registers a set of localizers. The first localizer will be set as the current localizer.
+        /// Initializes the available localizers.
         /// </summary>
-        public static void Register(params KeyedLocalizer[] localizers)
+        /// <param name="defaultLangDirectory">
+        /// Path to the directory to scan for language files.
+        /// </param>
+        public static void ScanLocalizers(string defaultLangDirectory)
         {
-            if (localizers == null || localizers.Length == 0)
+            var languageFileSchema = CreateLanguageFileSchema();
+
+            try
             {
-                // Use built-in localizer if none is provided.
-                localizers = new KeyedLocalizer[] { new EnglishLocalizer() };
+                DirectoryInfo defaultDir = new DirectoryInfo(defaultLangDirectory);
+
+                if (defaultDir.Exists)
+                {
+                    foreach (var fileInfo in defaultDir.EnumerateFiles("*.json"))
+                    {
+                        try
+                        {
+                            var languageFile = SettingsFile.Create(fileInfo.FullName, new SettingCopy(languageFileSchema));
+                            languageFile.Settings.TryGetValue(FlagIconFile, out string flagIconFileName);
+
+                            registered.Add(
+                                Path.GetFileNameWithoutExtension(fileInfo.Name),
+                                new FileLocalizer(languageFile));
+                        }
+                        catch (Exception exc)
+                        {
+                            exc.Trace();
+                        }
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                exc.Trace();
             }
 
-            registered = localizers;
+            LangSetting = new SettingProperty<FileLocalizer>(
+                new SettingKey(LangSettingKey),
+                new PType.KeyedSet<FileLocalizer>(registered));
 
-            LangSetting = new SettingProperty<Localizer>(
-                new SettingKey(SettingKey),
-                new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
+            if (registered.Count == 0)
+            {
+                // Use built-in localizer if none is provided.
+                Localizer.Current = BuiltInEnglishLocalizer.Instance;
+            }
+            else
+            {
+                // Try keys based on CurrentUICulture.
+                foreach (var candidateKey in LocalizerKeyCandidates(CultureInfo.CurrentUICulture))
+                {
+                    if (registered.TryGetValue(candidateKey, out FileLocalizer localizerMatch))
+                    {
+                        Localizer.Current = localizerMatch;
+                        return;
+                    }
+                }
 
-            Localizer.Current = Registered.First();
+                Localizer.Current = registered.First().Value;
+            }
         }
     }
 
     /// <summary>
-    /// Apart from being a <see cref="Localizer"/>, contains abstract properties
+    /// Apart from being a <see cref="Localizer"/>, contains properties
     /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
     /// </summary>
-    public abstract class KeyedLocalizer : Localizer
+    public sealed class FileLocalizer : Localizer
     {
+        /// <summary>
+        /// Gets the settings file from which this localizer is loaded.
+        /// </summary>
+        public SettingsFile LanguageFile { get; }
+
         /// <summary>
         /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
         /// </summary>
-        public abstract string LanguageName { get; }
-
-        /// <summary>
-        /// Gets the value of the <see cref="Localizers.LangSetting"/> in the auto-save file.
-        /// </summary>
-        public abstract string AutoSaveSettingValue { get; }
+        public string LanguageName { get; }
 
         /// <summary>
         /// Gets the file name without extension of the flag icon.
         /// </summary>
-        public abstract string FlagIconFileName { get; }
+        public string FlagIconFileName { get; }
 
-        public readonly DefaultUIActionBinding SwitchToLangUIActionBinding;
+        public Dictionary<LocalizedStringKey, string> Dictionary { get; private set; }
 
-        protected KeyedLocalizer()
+        public FileLocalizer(SettingsFile languageFile)
         {
-            SwitchToLangUIActionBinding = new DefaultUIActionBinding(
-                new UIAction(nameof(Localizers) + "." + LanguageName),
-                new UIActionBinding
+            LanguageFile = languageFile;
+            LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
+            FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
+            Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
+        }
+
+        public override string Localize(LocalizedStringKey localizedStringKey)
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            : Default.Localize(localizedStringKey);
+
+        private DefaultUIActionBinding switchToLangUIActionBinding;
+
+        public DefaultUIActionBinding SwitchToLangUIActionBinding
+        {
+            get
+            {
+                if (switchToLangUIActionBinding == null)
                 {
-                    ShowInMenu = true,
-                    MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                    MenuIcon = Program.LoadImage(FlagIconFileName),
-                });
+                    Image menuIcon = null;
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(FlagIconFileName))
+                        {
+                            menuIcon = Image.FromFile(Path.Combine(Path.GetDirectoryName(LanguageFile.AbsoluteFilePath), FlagIconFileName));
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        exc.Trace();
+                    }
+
+                    switchToLangUIActionBinding = new DefaultUIActionBinding(
+                        new UIAction(nameof(Localizers) + "." + LanguageName),
+                        new UIActionBinding
+                        {
+                            ShowInMenu = true,
+                            MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                            MenuIcon = menuIcon,
+                        });
+                }
+
+                return switchToLangUIActionBinding;
+            }
         }
 
         public UIActionState TrySwitchToLang(bool perform)
@@ -151,23 +286,19 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class EnglishLocalizer : KeyedLocalizer
+    internal sealed class BuiltInEnglishLocalizer : Localizer
     {
-        private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
+        public static readonly BuiltInEnglishLocalizer Instance = new BuiltInEnglishLocalizer();
 
-        public override string LanguageName => "English";
-
-        public override string AutoSaveSettingValue => "en";
-
-        public override string FlagIconFileName => "flag-uk";
+        public readonly Dictionary<LocalizedStringKey, string> Dictionary;
 
         public override string Localize(LocalizedStringKey localizedStringKey)
-            => englishDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
             : Default.Localize(localizedStringKey);
 
-        public EnglishLocalizer()
+        private BuiltInEnglishLocalizer()
         {
-            englishDictionary = new Dictionary<LocalizedStringKey, string>
+            Dictionary = new Dictionary<LocalizedStringKey, string>
             {
                 { LocalizedStringKeys.About, "About SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Break at current position" },
@@ -178,9 +309,9 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
+                { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
                 { LocalizedStringKeys.Exit, "Exit" },
-                { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },
                 { LocalizedStringKeys.File, "File" },
@@ -229,81 +360,64 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class DutchLocalizer : KeyedLocalizer
+    public sealed class TrimmedStringType : PType.Derived<string, string>
     {
-        private readonly Dictionary<LocalizedStringKey, string> dutchDictionary;
+        public static TrimmedStringType Instance = new TrimmedStringType();
 
-        public override string LanguageName => "Nederlands";
+        private TrimmedStringType() : base(PType.CLR.String) { }
 
-        public override string AutoSaveSettingValue => "nl";
+        public override string GetBaseValue(string value) => value;
 
-        public override string FlagIconFileName => "flag-nl";
-
-        public override string Localize(LocalizedStringKey localizedStringKey)
-            => dutchDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
-            : Default.Localize(localizedStringKey);
-
-        public DutchLocalizer()
+        public override bool TryGetTargetValue(string value, out string targetValue)
         {
-            dutchDictionary = new Dictionary<LocalizedStringKey, string>
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                { LocalizedStringKeys.About, "Over SandraChess" },
-                { LocalizedStringKeys.BreakAtCurrentPosition, "Afbreken in huidige stelling" },
-                { LocalizedStringKeys.Chessboard, "Schaakbord" },
-                { LocalizedStringKeys.Copy, "Kopiëren" },
-                { LocalizedStringKeys.CopyDiagramToClipboard, "Diagram naar klembord kopiëren" },
-                { LocalizedStringKeys.Credits, "Dankwoord (Engels)" },
-                { LocalizedStringKeys.Cut, "Knippen" },
-                { LocalizedStringKeys.DeleteLine, "Variant verwijderen" },
-                { LocalizedStringKeys.DemoteLine, "Variant degraderen" },
-                { LocalizedStringKeys.EditPreferencesFile, "Wijzig voorkeuren" },
-                { LocalizedStringKeys.Exit, "Afsluiten" },
-                { LocalizedStringKeys.EndOfGame, "Naar einde partij" },
-                { LocalizedStringKeys.FastBackward, "Snel achterwaarts" },
-                { LocalizedStringKeys.FastForward, "Snel voorwaarts" },
-                { LocalizedStringKeys.File, "Bestand" },
-                { LocalizedStringKeys.FirstMove, "Eerste zet" },
-                { LocalizedStringKeys.FlipBoard, "Bord omkeren" },
-                { LocalizedStringKeys.Game, "Partij" },
-                { LocalizedStringKeys.GoTo, "Navigeren" },
-                { LocalizedStringKeys.GoToNextLocation, "Ga naar volgende locatie" },
-                { LocalizedStringKeys.GoToPreviousLocation, "Ga naar vorige locatie" },
-                { LocalizedStringKeys.Help, "Help" },
-                { LocalizedStringKeys.LastMove, "Laatste zet" },
-                { LocalizedStringKeys.Moves, "Zetten" },
-                { LocalizedStringKeys.NewGame, "Nieuwe partij" },
-                { LocalizedStringKeys.NextLine, "Volgende variant" },
-                { LocalizedStringKeys.NextMove, "Volgende zet" },
-                { LocalizedStringKeys.Paste, "Plakken" },
-                { LocalizedStringKeys.PieceSymbols, "PLTDK" },
-                { LocalizedStringKeys.PreviousLine, "Vorige variant" },
-                { LocalizedStringKeys.PreviousMove, "Vorige zet" },
-                { LocalizedStringKeys.PromoteLine, "Variant promoveren" },
-                { LocalizedStringKeys.Save, "Opslaan" },
-                { LocalizedStringKeys.SelectAll, "Alles selecteren" },
-                { LocalizedStringKeys.ShowDefaultSettingsFile, "Standaard instellingen tonen" },
-                { LocalizedStringKeys.StartOfGame, "Naar begin partij" },
-                { LocalizedStringKeys.UseLongAlgebraicNotation, "Lange notatie gebruiken" },
-                { LocalizedStringKeys.UsePGNPieceSymbols, "PGN notatie gebruiken" },
-                { LocalizedStringKeys.View, "Weergave" },
-                { LocalizedStringKeys.ZoomIn, "Inzoomen" },
-                { LocalizedStringKeys.ZoomOut, "Uitzoomen" },
+                targetValue = value.Trim();
+                return true;
+            }
 
-                { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
-                { LocalizedConsoleKeys.ConsoleKeyShift, "Shift" },
-                { LocalizedConsoleKeys.ConsoleKeyAlt, "Alt" },
+            targetValue = default(string);
+            return false;
+        }
+    }
 
-                { LocalizedConsoleKeys.ConsoleKeyLeftArrow, "Pijl Links" },
-                { LocalizedConsoleKeys.ConsoleKeyRightArrow, "Pijl Rechts" },
-                { LocalizedConsoleKeys.ConsoleKeyUpArrow, "Pijl Omhoog" },
-                { LocalizedConsoleKeys.ConsoleKeyDownArrow, "Pijl Omlaag" },
+    public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
+    {
+        public static TranslationDictionaryType Instance = new TranslationDictionaryType();
 
-                { LocalizedConsoleKeys.ConsoleKeyDelete, "Del" },
-                { LocalizedConsoleKeys.ConsoleKeyHome, "Home" },
-                { LocalizedConsoleKeys.ConsoleKeyEnd, "End" },
-                { LocalizedConsoleKeys.ConsoleKeyPageDown, "PageDown" },
-                { LocalizedConsoleKeys.ConsoleKeyPageUp, "PageUp" },
-            };
+        private TranslationDictionaryType() : base(PType.Map) { }
+
+        public override PMap GetBaseValue(Dictionary<LocalizedStringKey, string> value)
+        {
+            Dictionary<string, PValue> dictionary = new Dictionary<string, PValue>();
+
+            if (value != null)
+            {
+                foreach (var kv in value)
+                {
+                    dictionary.Add(kv.Key.Key, new PString(kv.Value));
+                }
+            }
+
+            return new PMap(dictionary);
+        }
+
+        public override bool TryGetTargetValue(PMap value, out Dictionary<LocalizedStringKey, string> targetValue)
+        {
+            targetValue = new Dictionary<LocalizedStringKey, string>();
+
+            foreach (var kv in value)
+            {
+                if (!PType.String.TryGetValidValue(kv.Value, out PString stringValue))
+                {
+                    targetValue = default(Dictionary<LocalizedStringKey, string>);
+                    return false;
+                }
+
+                targetValue.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
+            }
+
+            return true;
         }
     }
 }

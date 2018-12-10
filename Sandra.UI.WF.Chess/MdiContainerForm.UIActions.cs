@@ -101,7 +101,7 @@ namespace Sandra.UI.WF
                         exception = SettingsFile.WriteToFile(
                             localSettingsExample.Commit(),
                             Program.LocalSettings.AbsoluteFilePath,
-                            commentOutProperties: true);
+                            SettingWriterOptions.CommentOutProperties);
                     }
 
                     if (exception != null)
