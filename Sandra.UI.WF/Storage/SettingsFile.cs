@@ -262,7 +262,8 @@ namespace Sandra.UI.WF.Storage
         /// Null if the operation was successful;
         /// otherwise the <see cref="Exception"/> which caused the operation to fail.
         /// </returns>
-        public Exception WriteToFile() => WriteToFile(Settings, AbsoluteFilePath, false);
+        public Exception WriteToFile()
+            => WriteToFile(Settings, AbsoluteFilePath, SettingWriterOptions.Default);
 
         /// <summary>
         /// Attempts to overwrite a file with the current values in a settings object.
@@ -273,8 +274,27 @@ namespace Sandra.UI.WF.Storage
         /// <param name="absoluteFilePath">
         /// The target file to write to. If the file already exists, it is overwritten.
         /// </param>
-        /// <param name="commentOutProperties">
-        /// True if the properties must be commented out, otherwise false.
+        /// <returns>
+        /// Null if the operation was successful;
+        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
+        /// </exception>
+        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath)
+            => WriteToFile(settings, absoluteFilePath, SettingWriterOptions.Default);
+
+        /// <summary>
+        /// Attempts to overwrite a file with the current values in a settings object.
+        /// </summary>
+        /// <param name="settings">
+        /// The settings to write.
+        /// </param>
+        /// <param name="absoluteFilePath">
+        /// The target file to write to. If the file already exists, it is overwritten.
+        /// </param>
+        /// <param name="options">
+        /// Specifies options for writing the settings.
         /// </param>
         /// <returns>
         /// Null if the operation was successful;
@@ -283,7 +303,7 @@ namespace Sandra.UI.WF.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
         /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, bool commentOutProperties)
+        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, SettingWriterOptions options)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
@@ -293,7 +313,7 @@ namespace Sandra.UI.WF.Storage
                 string json = SettingWriter.ConvertToJson(
                     settings.Map,
                     schema: settings.Schema,
-                    options: commentOutProperties ? SettingWriterOptions.CommentOutProperties : SettingWriterOptions.Default);
+                    options: options);
 
                 File.WriteAllText(absoluteFilePath, json);
                 return null;
