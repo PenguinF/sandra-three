@@ -39,7 +39,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Gets the string representation of this <see cref="LocalizedStringKey"/>. 
         /// </summary>
-        internal readonly string Key;
+        public readonly string Key;
 
         /// <summary>
         /// For untranslatable keys, returns the display text.

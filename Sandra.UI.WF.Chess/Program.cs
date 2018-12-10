@@ -163,12 +163,25 @@ namespace Sandra.UI.WF
         }
 
 #if DEBUG
+        /// <summary>
+        /// Generates DefaultSettings.json from the loaded default settings in memory,
+        /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
+        /// </summary>
         private static void GenerateJsonConfigurationFiles()
         {
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
 
             SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"));
+
+            var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
+            settingCopy.AddOrReplace(Localizers.NativeName, "English");
+            settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
+            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+            SettingsFile.WriteToFile(
+                settingCopy.Commit(),
+                Path.Combine(exeDir.FullName, "Languages", "en.json"),
+                SettingWriterOptions.SuppressSettingComments);
         }
 #endif
     }

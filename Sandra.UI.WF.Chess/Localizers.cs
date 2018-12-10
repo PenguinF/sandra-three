@@ -83,6 +83,38 @@ namespace Sandra.UI.WF
         /// </summary>
         public static SettingProperty<Localizer> LangSetting { get; private set; }
 
+        private static readonly string NativeNameDescription
+            = "Name of the language in the language itself. This property is mandatory.";
+
+        public static readonly SettingProperty<string> NativeName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(NativeName))),
+            TrimmedStringType.Instance,
+            new SettingComment(NativeNameDescription));
+
+        private static readonly string FlagIconFileDescription
+            = "File name of the flag icon to display in the menu.";
+
+        public static readonly SettingProperty<string> FlagIconFile = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(FlagIconFile))),
+            FileNameType.Instance,
+            new SettingComment(FlagIconFileDescription));
+
+        private static readonly string TranslationsDescription
+            = "List of translations.";
+
+        public static readonly SettingProperty<Dictionary<LocalizedStringKey, string>> Translations = new SettingProperty<Dictionary<LocalizedStringKey, string>>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(Translations))),
+            TranslationDictionaryType.Instance,
+            new SettingComment(TranslationsDescription));
+
+        public static SettingSchema CreateLanguageFileSchema()
+        {
+            return new SettingSchema(
+                NativeName,
+                FlagIconFile,
+                Translations);
+        }
+
         /// <summary>
         /// Registers a set of localizers. The first localizer will be set as the current localizer.
         /// </summary>
@@ -155,7 +187,7 @@ namespace Sandra.UI.WF
     {
         public static readonly BuiltInEnglishLocalizer Instance = new BuiltInEnglishLocalizer();
 
-        private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
+        public readonly Dictionary<LocalizedStringKey, string> Dictionary;
 
         public override string LanguageName => "English";
 
@@ -164,12 +196,12 @@ namespace Sandra.UI.WF
         public override string FlagIconFileName => "flag-uk";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
-            => englishDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
             : Default.Localize(localizedStringKey);
 
         private BuiltInEnglishLocalizer()
         {
-            englishDictionary = new Dictionary<LocalizedStringKey, string>
+            Dictionary = new Dictionary<LocalizedStringKey, string>
             {
                 { LocalizedStringKeys.About, "About SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Break at current position" },
@@ -228,6 +260,67 @@ namespace Sandra.UI.WF
                 { LocalizedConsoleKeys.ConsoleKeyPageDown, "PageDown" },
                 { LocalizedConsoleKeys.ConsoleKeyPageUp, "PageUp" },
             };
+        }
+    }
+
+    public sealed class TrimmedStringType : PType.Derived<string, string>
+    {
+        public static TrimmedStringType Instance = new TrimmedStringType();
+
+        private TrimmedStringType() : base(PType.CLR.String) { }
+
+        public override string GetBaseValue(string value) => value;
+
+        public override bool TryGetTargetValue(string value, out string targetValue)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                targetValue = value.Trim();
+                return true;
+            }
+
+            targetValue = default(string);
+            return false;
+        }
+    }
+
+    public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
+    {
+        public static TranslationDictionaryType Instance = new TranslationDictionaryType();
+
+        private TranslationDictionaryType() : base(PType.Map) { }
+
+        public override PMap GetBaseValue(Dictionary<LocalizedStringKey, string> value)
+        {
+            Dictionary<string, PValue> dictionary = new Dictionary<string, PValue>();
+
+            if (value != null)
+            {
+                foreach (var kv in value)
+                {
+                    dictionary.Add(kv.Key.Key, new PString(kv.Value));
+                }
+            }
+
+            return new PMap(dictionary);
+        }
+
+        public override bool TryGetTargetValue(PMap value, out Dictionary<LocalizedStringKey, string> targetValue)
+        {
+            targetValue = new Dictionary<LocalizedStringKey, string>();
+
+            foreach (var kv in value)
+            {
+                if (!PType.String.TryGetValidValue(kv.Value, out PString stringValue))
+                {
+                    targetValue = default(Dictionary<LocalizedStringKey, string>);
+                    return false;
+                }
+
+                targetValue.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
+            }
+
+            return true;
         }
     }
 
