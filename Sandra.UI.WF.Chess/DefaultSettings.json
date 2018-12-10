@@ -20,6 +20,12 @@
   // preferences.
   "local_preferences_file_name": "Preferences.json",
 
+  // Subfolder of the application directory which is scanned for language files.
+  // Backward slashes ('\') must be escaped in json strings (e.g.
+  // "C:\\Temp\\temp.txt"). Instead, forward slashes ('/') can be used to
+  // separate directories as well.
+  "lang_folder_name": "Languages",
+
   // The color of the dark squares. This value must be in the HTML color format,
   // for example "#808000" is the Olive color.
   "dark_square_color": "#ADD8E6",
