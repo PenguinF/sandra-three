@@ -78,9 +78,9 @@ namespace Sandra.UI.WF
     {
         public static readonly string LangSettingKey = "lang";
 
-        private static KeyedLocalizer[] registered;
+        private static FileLocalizer[] registered;
 
-        public static IEnumerable<KeyedLocalizer> Registered => registered.Enumerate();
+        public static IEnumerable<FileLocalizer> Registered => registered.Enumerate();
 
         /// <summary>
         /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
@@ -124,7 +124,7 @@ namespace Sandra.UI.WF
         /// </summary>
         public static void Register()
         {
-            registered = new KeyedLocalizer[0];
+            registered = new FileLocalizer[0];
 
             LangSetting = new SettingProperty<Localizer>(
                 new SettingKey(LangSettingKey),
@@ -139,7 +139,7 @@ namespace Sandra.UI.WF
     /// Apart from being a <see cref="Localizer"/>, contains abstract properties
     /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
     /// </summary>
-    public abstract class KeyedLocalizer : Localizer
+    public abstract class FileLocalizer : Localizer
     {
         /// <summary>
         /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
