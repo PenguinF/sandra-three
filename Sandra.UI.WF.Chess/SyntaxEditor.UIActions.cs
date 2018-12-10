@@ -25,6 +25,22 @@ namespace Sandra.UI.WF
 {
     public partial class SyntaxEditor<TTerminal>
     {
+        public UIActionState TryUndo(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CanUndo) return UIActionVisibility.Disabled;
+            if (perform) Undo();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryRedo(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CanRedo) return UIActionVisibility.Disabled;
+            if (perform) Redo();
+            return UIActionVisibility.Enabled;
+        }
+
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
