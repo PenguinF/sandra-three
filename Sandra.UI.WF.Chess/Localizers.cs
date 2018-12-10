@@ -91,7 +91,7 @@ namespace Sandra.UI.WF
             if (localizers == null || localizers.Length == 0)
             {
                 // Use built-in localizer if none is provided.
-                localizers = new KeyedLocalizer[] { new BuiltInEnglishLocalizer() };
+                localizers = new KeyedLocalizer[] { BuiltInEnglishLocalizer.Instance };
             }
 
             registered = localizers;
@@ -153,6 +153,8 @@ namespace Sandra.UI.WF
 
     internal sealed class BuiltInEnglishLocalizer : KeyedLocalizer
     {
+        public static readonly BuiltInEnglishLocalizer Instance = new BuiltInEnglishLocalizer();
+
         private readonly Dictionary<LocalizedStringKey, string> englishDictionary;
 
         public override string LanguageName => "English";
@@ -165,7 +167,7 @@ namespace Sandra.UI.WF
             => englishDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
             : Default.Localize(localizedStringKey);
 
-        public BuiltInEnglishLocalizer()
+        private BuiltInEnglishLocalizer()
         {
             englishDictionary = new Dictionary<LocalizedStringKey, string>
             {

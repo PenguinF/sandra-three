@@ -60,7 +60,7 @@ namespace Sandra.UI.WF
             WriteToSourceDefaultSettingFile();
 #endif
 
-            Localizers.Register(new BuiltInEnglishLocalizer(), new DutchLocalizer());
+            Localizers.Register(BuiltInEnglishLocalizer.Instance, new DutchLocalizer());
 
             string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
