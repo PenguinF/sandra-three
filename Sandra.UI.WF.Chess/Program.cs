@@ -35,6 +35,8 @@ namespace Sandra.UI.WF
 
         internal static string ExecutableFolder { get; private set; }
 
+        internal static string AppDataSubFolder { get; private set; }
+
         internal static SettingsFile DefaultSettings { get; private set; }
 
         internal static SettingsFile LocalSettings { get; private set; }
@@ -55,6 +57,12 @@ namespace Sandra.UI.WF
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 Settings.CreateBuiltIn());
 
+            // Save name of APPDATA subfolder for persistent files.
+            var appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
+            AppDataSubFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                appDataSubFolderName);
+
 #if DEBUG
             // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
             WriteToSourceDefaultSettingFile();
@@ -62,7 +70,6 @@ namespace Sandra.UI.WF
 
             Localizers.Register(BuiltInEnglishLocalizer.Instance, new DutchLocalizer());
 
-            string appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
 
             // After creating the auto-save file, look for a local preferences file.
@@ -71,10 +78,7 @@ namespace Sandra.UI.WF
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
-                Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    appDataSubFolderName,
-                    GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
                 localSettingsCopy);
 
             Chess.Constants.ForceInitialize();
