@@ -120,23 +120,18 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Registers a set of localizers. The first localizer will be set as the current localizer.
+        /// Initializes the available localizers.
         /// </summary>
-        public static void Register(params KeyedLocalizer[] localizers)
+        public static void Register()
         {
-            if (localizers == null || localizers.Length == 0)
-            {
-                // Use built-in localizer if none is provided.
-                localizers = new KeyedLocalizer[] { BuiltInEnglishLocalizer.Instance };
-            }
-
-            registered = localizers;
+            registered = new KeyedLocalizer[0];
 
             LangSetting = new SettingProperty<Localizer>(
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
 
-            Localizer.Current = Registered.First();
+            // Use built-in localizer if none is provided.
+            Localizer.Current = BuiltInEnglishLocalizer.Instance;
         }
     }
 
@@ -208,17 +203,11 @@ namespace Sandra.UI.WF
         }
     }
 
-    internal sealed class BuiltInEnglishLocalizer : KeyedLocalizer
+    internal sealed class BuiltInEnglishLocalizer : Localizer
     {
         public static readonly BuiltInEnglishLocalizer Instance = new BuiltInEnglishLocalizer();
 
         public readonly Dictionary<LocalizedStringKey, string> Dictionary;
-
-        public override string LanguageName => "English";
-
-        public override string AutoSaveSettingValue => "en";
-
-        public override string FlagIconFileName => "flag-uk.png";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
