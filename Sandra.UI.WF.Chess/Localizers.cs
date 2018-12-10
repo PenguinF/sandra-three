@@ -172,7 +172,10 @@ namespace Sandra.UI.WF
                     Image menuIcon = null;
                     try
                     {
-                        menuIcon = Image.FromFile(Path.Combine(Program.ExecutableFolder, "Images", FlagIconFileName + ".png"));
+                        if (!string.IsNullOrEmpty(FlagIconFileName))
+                        {
+                            menuIcon = Image.FromFile(Path.Combine(Program.ExecutableFolder, "Images", FlagIconFileName));
+                        }
                     }
                     catch (Exception exc)
                     {
@@ -215,7 +218,7 @@ namespace Sandra.UI.WF
 
         public override string AutoSaveSettingValue => "en";
 
-        public override string FlagIconFileName => "flag-uk";
+        public override string FlagIconFileName => "flag-uk.png";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
@@ -354,7 +357,7 @@ namespace Sandra.UI.WF
 
         public override string AutoSaveSettingValue => "nl";
 
-        public override string FlagIconFileName => "flag-nl";
+        public override string FlagIconFileName => "flag-nl.png";
 
         public override string Localize(LocalizedStringKey localizedStringKey)
             => dutchDictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
