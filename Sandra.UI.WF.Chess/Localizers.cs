@@ -24,6 +24,7 @@ using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -120,6 +121,24 @@ namespace Sandra.UI.WF
                 Translations);
         }
 
+        private static IEnumerable<string> LocalizerKeyCandidates(CultureInfo uiCulture)
+        {
+            yield return uiCulture.NativeName;
+            yield return uiCulture.Name;
+            yield return uiCulture.ThreeLetterISOLanguageName;
+            yield return uiCulture.TwoLetterISOLanguageName;
+            yield return uiCulture.LCID.ToString();
+
+            // Recursively check parents, stop at the invariant culture which has no name.
+            if (uiCulture.Parent.Name.Length > 0)
+            {
+                foreach (var candidateKey in LocalizerKeyCandidates(uiCulture.Parent))
+                {
+                    yield return candidateKey;
+                }
+            }
+        }
+
         /// <summary>
         /// Initializes the available localizers.
         /// </summary>
@@ -167,6 +186,16 @@ namespace Sandra.UI.WF
             }
             else
             {
+                // Try keys based on CurrentUICulture.
+                foreach (var candidateKey in LocalizerKeyCandidates(CultureInfo.CurrentUICulture))
+                {
+                    if (registered.TryGetValue(candidateKey, out FileLocalizer localizerMatch))
+                    {
+                        Localizer.Current = localizerMatch;
+                        return;
+                    }
+                }
+
                 Localizer.Current = registered.First().Value;
             }
         }
