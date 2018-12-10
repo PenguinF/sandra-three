@@ -72,7 +72,7 @@ namespace Sandra.UI.WF
 
     internal static class Localizers
     {
-        public static readonly string SettingKey = "lang";
+        public static readonly string LangSettingKey = "lang";
 
         private static KeyedLocalizer[] registered;
 
@@ -97,7 +97,7 @@ namespace Sandra.UI.WF
             registered = localizers;
 
             LangSetting = new SettingProperty<Localizer>(
-                new SettingKey(SettingKey),
+                new SettingKey(LangSettingKey),
                 new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
 
             Localizer.Current = Registered.First();
