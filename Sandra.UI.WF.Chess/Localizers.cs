@@ -157,18 +157,26 @@ namespace Sandra.UI.WF
         /// </summary>
         public abstract string FlagIconFileName { get; }
 
-        public readonly DefaultUIActionBinding SwitchToLangUIActionBinding;
+        private DefaultUIActionBinding switchToLangUIActionBinding;
 
-        protected KeyedLocalizer()
+        public DefaultUIActionBinding SwitchToLangUIActionBinding
         {
-            SwitchToLangUIActionBinding = new DefaultUIActionBinding(
-                new UIAction(nameof(Localizers) + "." + LanguageName),
-                new UIActionBinding
+            get
+            {
+                if (switchToLangUIActionBinding == null)
                 {
-                    ShowInMenu = true,
-                    MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                    MenuIcon = Program.LoadImage(FlagIconFileName),
-                });
+                    switchToLangUIActionBinding = new DefaultUIActionBinding(
+                        new UIAction(nameof(Localizers) + "." + LanguageName),
+                        new UIActionBinding
+                        {
+                            ShowInMenu = true,
+                            MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                            MenuIcon = Program.LoadImage(FlagIconFileName),
+                        });
+                }
+
+                return switchToLangUIActionBinding;
+            }
         }
 
         public UIActionState TrySwitchToLang(bool perform)
