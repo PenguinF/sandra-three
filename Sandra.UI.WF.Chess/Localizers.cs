@@ -142,6 +142,9 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Initializes the available localizers.
         /// </summary>
+        /// <param name="defaultLangDirectory">
+        /// Path to the directory to scan for language files.
+        /// </param>
         public static void ScanLocalizers(string defaultLangDirectory)
         {
             var languageFileSchema = CreateLanguageFileSchema();
