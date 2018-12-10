@@ -64,8 +64,8 @@ namespace Sandra.UI.WF
                 appDataSubFolderName);
 
 #if DEBUG
-            // In debug mode, make sure that DefaultSettings.json matches what's read from the file.
-            WriteToSourceDefaultSettingFile();
+            // In debug mode, generate default json configuration files from hard coded settings.
+            GenerateJsonConfigurationFiles();
 #endif
 
             Localizers.Register(BuiltInEnglishLocalizer.Instance, new DutchLocalizer());
@@ -163,7 +163,7 @@ namespace Sandra.UI.WF
         }
 
 #if DEBUG
-        private static void WriteToSourceDefaultSettingFile()
+        private static void GenerateJsonConfigurationFiles()
         {
             DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
             DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
