@@ -171,18 +171,24 @@ namespace Sandra.UI.WF.Storage
             bool first = true;
             foreach (var kv in value)
             {
+                bool extraNewLineBeforeComment = !first;
+
                 if (!first)
                 {
                     outputBuilder.Append(JsonComma.CommaCharacter);
-                    outputBuilder.AppendLine();
                 }
-                else first = false;
+                else
+                {
+                    first = false;
+                }
 
                 outputBuilder.AppendLine();
 
                 string name = kv.Key;
-                if (schema.TryGetProperty(new SettingKey(name), out SettingProperty property))
+                if ((options & SettingWriterOptions.SuppressSettingComments) == 0
+                    && schema.TryGetProperty(new SettingKey(name), out SettingProperty property))
                 {
+                    if (extraNewLineBeforeComment) outputBuilder.AppendLine();
                     AppendCommentLines(property.Description);
                 }
 
@@ -217,6 +223,15 @@ namespace Sandra.UI.WF.Storage
     public enum SettingWriterOptions
     {
         Default,
+
+        /// <summary>
+        /// Generates all properties but comments them out.
+        /// </summary>
         CommentOutProperties = 1,
+
+        /// <summary>
+        /// Suppresses generation of comments before setting properties.
+        /// </summary>
+        SuppressSettingComments = 2,
     }
 }
