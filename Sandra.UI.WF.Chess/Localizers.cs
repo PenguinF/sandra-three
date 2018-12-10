@@ -86,7 +86,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
         /// </summary>
-        public static SettingProperty<Localizer> LangSetting { get; private set; }
+        public static SettingProperty<FileLocalizer> LangSetting { get; private set; }
 
         private static readonly string NativeNameDescription
             = "Name of the language in the language itself. This property is mandatory.";
@@ -125,9 +125,9 @@ namespace Sandra.UI.WF
         /// </summary>
         public static void Register()
         {
-            LangSetting = new SettingProperty<Localizer>(
+            LangSetting = new SettingProperty<FileLocalizer>(
                 new SettingKey(LangSettingKey),
-                new PType.KeyedSet<Localizer>(Registered.Select(x => new KeyValuePair<string, Localizer>(x.AutoSaveSettingValue, x))));
+                new PType.KeyedSet<FileLocalizer>(registered));
 
             // Use built-in localizer if none is provided.
             Localizer.Current = BuiltInEnglishLocalizer.Instance;

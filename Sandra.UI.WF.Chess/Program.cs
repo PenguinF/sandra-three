@@ -83,7 +83,7 @@ namespace Sandra.UI.WF
 
             Chess.Constants.ForceInitialize();
 
-            if (TryGetAutoSaveValue(Localizers.LangSetting, out Localizer localizer))
+            if (TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
             {
                 Localizer.Current = localizer;
             }
