@@ -293,7 +293,7 @@ namespace Sandra.UI.WF.Storage
                 string json = SettingWriter.ConvertToJson(
                     settings.Map,
                     schema: settings.Schema,
-                    commentOutProperties: commentOutProperties);
+                    options: commentOutProperties ? SettingWriterOptions.CommentOutProperties : SettingWriterOptions.Default);
 
                 File.WriteAllText(absoluteFilePath, json);
                 return null;

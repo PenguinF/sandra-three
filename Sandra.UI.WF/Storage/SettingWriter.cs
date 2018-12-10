@@ -20,6 +20,7 @@
 #endregion
 
 using SysExtensions.Text.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -35,9 +36,9 @@ namespace Sandra.UI.WF.Storage
 
         private const int maxLineLength = 80;
 
-        public static string ConvertToJson(PMap map, SettingSchema schema, bool commentOutProperties)
+        public static string ConvertToJson(PMap map, SettingSchema schema, SettingWriterOptions options)
         {
-            SettingWriter writer = new SettingWriter(schema, commentOutProperties);
+            SettingWriter writer = new SettingWriter(schema, options);
             writer.Visit(map);
 
             // End files with a newline character.
@@ -111,12 +112,12 @@ namespace Sandra.UI.WF.Storage
 
         private readonly SettingSchema schema;
 
-        private readonly bool commentOutProperties;
+        private readonly SettingWriterOptions options;
 
-        public SettingWriter(SettingSchema schema, bool commentOutProperties)
+        public SettingWriter(SettingSchema schema, SettingWriterOptions options)
         {
             this.schema = schema;
-            this.commentOutProperties = commentOutProperties;
+            this.options = options;
 
             // Write schema description, if any.
             AppendCommentLines(schema.Description);
@@ -187,7 +188,7 @@ namespace Sandra.UI.WF.Storage
 
                 // This assumes that all default setting values fit on one line.
                 AppendIndent();
-                if (commentOutProperties)
+                if ((options & SettingWriterOptions.CommentOutProperties) != 0)
                 {
                     outputBuilder.Append(JsonComment.SingleLineCommentStart);
                 }
@@ -210,5 +211,12 @@ namespace Sandra.UI.WF.Storage
 
             outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
         }
+    }
+
+    [Flags]
+    public enum SettingWriterOptions
+    {
+        Default,
+        CommentOutProperties = 1,
     }
 }
