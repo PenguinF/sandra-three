@@ -139,6 +139,9 @@ namespace Sandra.UI.WF
         {
             var editBindings = new UIActionBindings
             {
+                { SharedUIAction.Undo, TryUndo },
+                { SharedUIAction.Redo, TryRedo },
+
                 { SharedUIAction.ZoomIn, TryZoomIn },
                 { SharedUIAction.ZoomOut, TryZoomOut },
 

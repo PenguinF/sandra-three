@@ -151,6 +151,8 @@
     <None Include="Properties\settings.png" />
     <None Include="Properties\zoom_in.png" />
     <None Include="Properties\zoom_out.png" />
+    <None Include="Properties\redo.png" />
+    <None Include="Properties\undo.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
