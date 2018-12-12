@@ -60,12 +60,17 @@ namespace SysExtensions.Text.Json
 
         private IEnumerable<TextElement<JsonSymbol>> Default()
         {
+            const int symbolClassValueChar = 0;
+            const int symbolClassWhitespace = 1;
+            const int symbolClassSymbol = 2;
+
+            int inSymbolClass = symbolClassWhitespace;
+
             while (currentIndex < length)
             {
                 char c = json[currentIndex];
 
-                bool isSeparator = false;
-                bool isSymbol = false;
+                int symbolClass;
 
                 var category = CharUnicodeInfo.GetUnicodeCategory(c);
                 switch (category)
@@ -85,6 +90,7 @@ namespace SysExtensions.Text.Json
                     case UnicodeCategory.ConnectorPunctuation:  // underscore-like characters
                     case UnicodeCategory.DashPunctuation:
                         // Treat as part of a value.
+                        symbolClass = symbolClassValueChar;
                         break;
                     case UnicodeCategory.OpenPunctuation:
                     case UnicodeCategory.ClosePunctuation:
@@ -94,22 +100,13 @@ namespace SysExtensions.Text.Json
                     case UnicodeCategory.ModifierSymbol:
                     case UnicodeCategory.OtherSymbol:
                     case UnicodeCategory.OtherNotAssigned:
-                        isSymbol = true;
-                        isSeparator = true;
+                        symbolClass = symbolClassSymbol;
                         break;
                     case UnicodeCategory.OtherPunctuation:
-                        if (c != '.')
-                        {
-                            isSymbol = true;
-                            isSeparator = true;
-                        }
+                        symbolClass = c == '.' ? symbolClassValueChar : symbolClassSymbol;
                         break;
                     case UnicodeCategory.MathSymbol:
-                        if (c != '+')
-                        {
-                            isSymbol = true;
-                            isSeparator = true;
-                        }
+                        symbolClass = c == '+' ? symbolClassValueChar : symbolClassSymbol;
                         break;
                     case UnicodeCategory.SpaceSeparator:
                     case UnicodeCategory.LineSeparator:
@@ -119,24 +116,34 @@ namespace SysExtensions.Text.Json
                     case UnicodeCategory.PrivateUse:
                     default:
                         // Whitespace is a separator.
-                        isSeparator = true;
+                        symbolClass = symbolClassWhitespace;
                         break;
                 }
 
-                if (isSeparator)
+                // Possibly yield a text element, or choose a different tokenization mode if the symbol class changed.
+                if (symbolClass != inSymbolClass)
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
-                        yield return new TextElement<JsonSymbol>(
-                            new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                            firstUnusedIndex,
-                            currentIndex - firstUnusedIndex);
+                        if (inSymbolClass == symbolClassValueChar)
+                        {
+                            yield return new TextElement<JsonSymbol>(
+                                new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
+                                firstUnusedIndex,
+                                currentIndex - firstUnusedIndex);
+                        }
+                        else
+                        {
+                            yield return new TextElement<JsonSymbol>(
+                                JsonWhitespace.Value,
+                                firstUnusedIndex,
+                                currentIndex - firstUnusedIndex);
+                        }
 
-                        // Important not to increment firstUnusedIndex here already, in case of a '"'.
                         firstUnusedIndex = currentIndex;
                     }
 
-                    if (isSymbol)
+                    if (symbolClass == symbolClassSymbol)
                     {
                         switch (c)
                         {
@@ -189,9 +196,15 @@ namespace SysExtensions.Text.Json
                                     1);
                                 break;
                         }
-                    }
 
-                    firstUnusedIndex++;
+                        // Increment to indicate the current character has been yielded.
+                        firstUnusedIndex++;
+                    }
+                    else
+                    {
+                        // Never set inSymbolClass to symbolClassSymbol, or it will miss symbols.
+                        inSymbolClass = symbolClass;
+                    }
                 }
 
                 currentIndex++;
@@ -199,10 +212,20 @@ namespace SysExtensions.Text.Json
 
             if (firstUnusedIndex < currentIndex)
             {
-                yield return new TextElement<JsonSymbol>(
-                    new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                    firstUnusedIndex,
-                    currentIndex - firstUnusedIndex);
+                if (inSymbolClass == symbolClassValueChar)
+                {
+                    yield return new TextElement<JsonSymbol>(
+                        new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
+                        firstUnusedIndex,
+                        currentIndex - firstUnusedIndex);
+                }
+                else
+                {
+                    yield return new TextElement<JsonSymbol>(
+                        JsonWhitespace.Value,
+                        firstUnusedIndex,
+                        currentIndex - firstUnusedIndex);
+                }
             }
 
             currentTokenizer = null;
@@ -386,11 +409,11 @@ namespace SysExtensions.Text.Json
                                 yield return new TextElement<JsonSymbol>(
                                     JsonComment.Value,
                                     firstUnusedIndex,
-                                    currentIndex - firstUnusedIndex - 1);
+                                    currentIndex - 1 - firstUnusedIndex);
 
                                 // Eat the second whitespace character.
+                                firstUnusedIndex = currentIndex - 1;
                                 currentIndex++;
-                                firstUnusedIndex = currentIndex;
                                 currentTokenizer = Default;
                                 yield break;
                             }
@@ -403,8 +426,8 @@ namespace SysExtensions.Text.Json
                             currentIndex - firstUnusedIndex);
 
                         // Eat the '\n'.
-                        currentIndex++;
                         firstUnusedIndex = currentIndex;
+                        currentIndex++;
                         currentTokenizer = Default;
                         yield break;
                 }
@@ -475,7 +498,10 @@ namespace SysExtensions.Text.Json
             {
                 foreach (var symbol in currentTokenizer())
                 {
-                    yield return symbol;
+                    if (symbol.TerminalSymbol != JsonWhitespace.Value)
+                    {
+                        yield return symbol;
+                    }
                 }
             }
         }
