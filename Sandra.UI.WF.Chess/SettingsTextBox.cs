@@ -37,21 +37,6 @@ namespace Sandra.UI.WF
     /// </summary>
     public partial class SettingsTextBox : SyntaxEditor<JsonSymbol>
     {
-        /// <summary>
-        /// Because the syntax renderer does not support discontinuous terminal symbols.
-        /// </summary>
-        private class JsonWhitespace : JsonSymbol
-        {
-            public static readonly JsonWhitespace Value = new JsonWhitespace();
-
-            private JsonWhitespace() { }
-
-            public override bool IsBackground => true;
-
-            public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
-            public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
-        }
-
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
         private const int stringStyleIndex = 10;

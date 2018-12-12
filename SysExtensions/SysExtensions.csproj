@@ -59,6 +59,7 @@
     <Compile Include="Text\Json\JsonUnknownSymbol.cs" />
     <Compile Include="Text\Json\JsonUnterminatedMultiLineComment.cs" />
     <Compile Include="Text\Json\JsonValue.cs" />
+    <Compile Include="Text\Json\JsonWhitespace.cs" />
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextErrorInfo.cs" />
     <Compile Include="Text\TextIndex.cs" />
