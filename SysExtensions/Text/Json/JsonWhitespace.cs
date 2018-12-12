@@ -29,7 +29,7 @@ namespace SysExtensions.Text.Json
 
         public override bool IsBackground => true;
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespace(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespace(this);
     }
 }
