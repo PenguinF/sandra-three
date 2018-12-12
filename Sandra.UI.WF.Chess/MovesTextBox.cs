@@ -19,7 +19,7 @@
  *********************************************************************************/
 #endregion
 
-using Sandra.PGN;
+using Sandra.PGN.Temp;
 using ScintillaNET;
 using SysExtensions;
 using SysExtensions.Text;

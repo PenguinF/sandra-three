@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Sandra.PGN
+namespace Sandra.PGN.Temp
 {
     public sealed class PGNLine
     {
