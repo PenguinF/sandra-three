@@ -122,7 +122,7 @@ namespace Sandra.UI.WF
             StyleResetDefault();
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
-            DefaultStyle.ApplyFont(defaultFont);
+            defaultFont.CopyTo(DefaultStyle);
             StyleClearAll();
 
             SetSelectionBackColor(true, defaultForeColor);
@@ -130,17 +130,17 @@ namespace Sandra.UI.WF
 
             LineNumberStyle.BackColor = defaultBackColor;
             LineNumberStyle.ForeColor = lineNumberForeColor;
-            LineNumberStyle.ApplyFont(defaultFont);
+            defaultFont.CopyTo(LineNumberStyle);
 
             CallTipStyle.BackColor = callTipBackColor;
             CallTipStyle.ForeColor = defaultForeColor;
-            CallTipStyle.ApplyFont(callTipFont);
+            callTipFont.CopyTo(CallTipStyle);
 
             CommentStyle.ForeColor = commentForeColor;
-            CommentStyle.ApplyFont(commentFont);
+            commentFont.CopyTo(CommentStyle);
 
             ValueStyle.ForeColor = valueForeColor;
-            ValueStyle.ApplyFont(valueFont);
+            valueFont.CopyTo(ValueStyle);
 
             StringStyle.ForeColor = stringForeColor;
 

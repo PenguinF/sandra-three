@@ -58,11 +58,11 @@ namespace Sandra.UI.WF
             StyleResetDefault();
             DefaultStyle.BackColor = defaultBackColor;
             DefaultStyle.ForeColor = defaultForeColor;
-            DefaultStyle.ApplyFont(defaultFont);
+            defaultFont.CopyTo(DefaultStyle);
             StyleClearAll();
 
             ActiveMoveStyle.ForeColor = activeMoveForeColor;
-            ActiveMoveStyle.ApplyFont(activeMoveFont);
+            activeMoveFont.CopyTo(ActiveMoveStyle);
 
             // DisplayTextChanged handlers are called immediately upon registration.
             // This initializes moveFormatter.

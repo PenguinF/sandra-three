@@ -164,9 +164,24 @@ namespace Sandra.UI.WF
         }
     }
 
+    /// <summary>
+    /// Contains extension methods to interface between standard System.Windows.Forms and Scintilla classes.
+    /// </summary>
     public static class ScintillaExtensions
     {
-        public static void ApplyFont(this Style style, Font font)
+        /// <summary>
+        /// Copies a <see cref="Font"/> definition to a Scintilla <see cref="Style"/>.
+        /// </summary>
+        /// <param name="font">
+        /// The font to copy.
+        /// </param>
+        /// <param name="style">
+        /// The style to copy to.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="font"/> and/or <paramref name="style"/> are null.
+        /// </exception>
+        public static void CopyTo(this Font font, Style style)
         {
             style.Font = font.FontFamily.Name;
             style.SizeF = font.Size;
