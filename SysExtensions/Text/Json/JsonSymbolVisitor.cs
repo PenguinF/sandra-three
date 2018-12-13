@@ -37,6 +37,7 @@ namespace SysExtensions.Text.Json
         public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
+        public virtual void VisitWhitespace(JsonWhitespace symbol) => DefaultVisit(symbol);
     }
 
     public abstract class JsonSymbolVisitor<TResult>
@@ -55,5 +56,6 @@ namespace SysExtensions.Text.Json
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitWhitespace(JsonWhitespace symbol) => DefaultVisit(symbol);
     }
 }

@@ -252,6 +252,7 @@ namespace SysExtensions.Tests
             yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(new[] { JsonErrorString.Unterminated(0, 1) }), typeof(JsonErrorString) };
+            yield return new object[] { JsonWhitespace.Value, typeof(JsonWhitespace) };
         }
 
         private sealed class TestVisitor1 : JsonSymbolVisitor
@@ -305,6 +306,7 @@ namespace SysExtensions.Tests
             public override void VisitUnknownSymbol(JsonUnknownSymbol symbol) => VisitedType = typeof(JsonUnknownSymbol);
             public override void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => VisitedType = typeof(JsonUnterminatedMultiLineComment);
             public override void VisitValue(JsonValue symbol) => VisitedType = typeof(JsonValue);
+            public override void VisitWhitespace(JsonWhitespace symbol) => VisitedType = typeof(JsonWhitespace);
 
             public override void DefaultVisit(JsonSymbol symbol)
             {
@@ -335,6 +337,7 @@ namespace SysExtensions.Tests
             public override Type VisitUnknownSymbol(JsonUnknownSymbol symbol) => typeof(JsonUnknownSymbol);
             public override Type VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => typeof(JsonUnterminatedMultiLineComment);
             public override Type VisitValue(JsonValue symbol) => typeof(JsonValue);
+            public override Type VisitWhitespace(JsonWhitespace symbol) => typeof(JsonWhitespace);
 
             public override Type DefaultVisit(JsonSymbol symbol)
             {
