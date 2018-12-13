@@ -50,18 +50,39 @@ namespace SysExtensions.Tests
         public void Comment(string json, string alternativeCommentText)
         {
             string expectedCommentText = alternativeCommentText ?? json;
-            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
+
+            Action<TextElement<JsonSymbol>> firstTokenAssert = symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType<JsonComment>(symbol.TerminalSymbol);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
                 Assert.Equal(expectedCommentText, json.Substring(symbol.Start, symbol.Length));
-            });
+            };
+
+            if (alternativeCommentText == null)
+            {
+                Assert.Collection(
+                    new JsonTokenizer(json).TokenizeAll(),
+                    firstTokenAssert);
+            }
+            else
+            {
+                // Expect some whitespace at the end.
+                Assert.Collection(
+                    new JsonTokenizer(json).TokenizeAll(),
+                    firstTokenAssert,
+                    symbol => Assert.IsType<JsonWhitespace>(symbol.TerminalSymbol));
+            }
+        }
+
+        [Fact]
+        public void EmptyStringNoTokens()
+        {
+            Assert.False(new JsonTokenizer("").TokenizeAll().Any());
         }
 
         [Theory]
-        [InlineData("")]
         [InlineData("\0")]
         [InlineData("                              ")]
         [InlineData("\n")]
@@ -72,7 +93,8 @@ namespace SysExtensions.Tests
         [InlineData("\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000")]
         public void WhiteSpace(string ws)
         {
-            Assert.False(new JsonTokenizer(ws).TokenizeAll().Any());
+            // Exactly one whitespace token.
+            Assert.Collection(new JsonTokenizer(ws).TokenizeAll(), x => Assert.IsType<JsonWhitespace>(x.TerminalSymbol));
         }
 
         [Theory]
@@ -248,7 +270,7 @@ namespace SysExtensions.Tests
                 // so assert that this is indeed what happens.
                 if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
                 {
-                    Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
+                    Assert.Collection(new JsonTokenizer(json).TokenizeAll().Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1.TerminalSymbol);
@@ -264,7 +286,7 @@ namespace SysExtensions.Tests
                         expectedSymbol2Length++;
                     }
 
-                    Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol1 =>
+                    Assert.Collection(new JsonTokenizer(json).TokenizeAll().Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1.TerminalSymbol);

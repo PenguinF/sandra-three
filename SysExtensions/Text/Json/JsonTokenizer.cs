@@ -498,10 +498,7 @@ namespace SysExtensions.Text.Json
             {
                 foreach (var symbol in currentTokenizer())
                 {
-                    if (symbol.TerminalSymbol != JsonWhitespace.Value)
-                    {
-                        yield return symbol;
-                    }
+                    yield return symbol;
                 }
             }
         }
