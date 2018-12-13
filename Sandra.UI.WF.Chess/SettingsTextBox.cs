@@ -21,7 +21,6 @@
 
 using Sandra.UI.WF.Storage;
 using ScintillaNET;
-using SysExtensions.Text;
 using SysExtensions.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -156,36 +155,10 @@ namespace Sandra.UI.WF
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            int firstUnusedIndex = 0;
-
             TextIndex.Clear();
 
             var parser = new SettingReader(json);
-            parser.Tokens.ForEach(x =>
-            {
-                if (firstUnusedIndex < x.Start)
-                {
-                    // Since whitespace is not returned from TokenizeAll().
-                    int length = x.Start - firstUnusedIndex;
-                    TextIndex.AppendTerminalSymbol(new TextElement<JsonSymbol>(
-                        JsonWhitespace.Value,
-                        firstUnusedIndex,
-                        length));
-                }
-
-                TextIndex.AppendTerminalSymbol(x);
-                firstUnusedIndex = x.Start + x.Length;
-            });
-
-            if (firstUnusedIndex < json.Length)
-            {
-                // Since whitespace is not returned from TokenizeAll().
-                int length = json.Length - firstUnusedIndex;
-                TextIndex.AppendTerminalSymbol(new TextElement<JsonSymbol>(
-                    JsonWhitespace.Value,
-                    firstUnusedIndex,
-                    length));
-            }
+            parser.Tokens.ForEach(TextIndex.AppendTerminalSymbol);
 
             var styleSelector = new StyleSelector(this);
 
