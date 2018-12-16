@@ -24,7 +24,6 @@ using SysExtensions;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF
@@ -171,10 +170,9 @@ namespace Sandra.UI.WF
         /// </summary>
         private static void GenerateJsonConfigurationFiles()
         {
-            DirectoryInfo exeDir = new DirectoryInfo(ExecutableFolder);
-            DirectoryInfo devDir = exeDir.Parent.GetDirectories("Sandra.UI.WF.Chess", SearchOption.TopDirectoryOnly).First();
-
-            SettingsFile.WriteToFile(DefaultSettings.Settings, Path.Combine(devDir.FullName, "DefaultSettings.json"));
+            SettingsFile.WriteToFile(
+                DefaultSettings.Settings,
+                Path.Combine(ExecutableFolder, "DefaultSettings.json"));
 
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
@@ -182,7 +180,7 @@ namespace Sandra.UI.WF
             settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
             SettingsFile.WriteToFile(
                 settingCopy.Commit(),
-                Path.Combine(exeDir.FullName, "Languages", "en.json"),
+                Path.Combine(ExecutableFolder, "Languages", "en.json"),
                 SettingWriterOptions.SuppressSettingComments);
         }
 #endif

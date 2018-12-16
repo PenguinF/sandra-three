@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bin", "Bin", "{CC73C019-791D-49A0-BE2D-9FE7E00FBAA0}"
 	ProjectSection(SolutionItems) = preProject
 		Bin\Credits.txt = Bin\Credits.txt
+		Bin\DefaultSettings.json = Bin\DefaultSettings.json
 		Bin\README.txt = Bin\README.txt
 	EndProjectSection
 EndProject
