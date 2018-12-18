@@ -145,9 +145,12 @@ namespace Sandra.UI.WF
             {
                 if (openDefaultSettingsForm == null)
                 {
-                    // Before opening the possibly non-existent file, write to it.
-                    // Ignore exceptions, may be caused by insufficient access rights.
-                    Program.DefaultSettings.WriteToFile();
+                    if (!File.Exists(Program.DefaultSettings.AbsoluteFilePath))
+                    {
+                        // Before opening the possibly non-existent file, write to it.
+                        // Ignore exceptions, may be caused by insufficient access rights.
+                        Program.DefaultSettings.WriteToFile();
+                    }
 
                     // Rely on exception handler in call stack, so no try-catch here.
                     openDefaultSettingsForm = CreateSettingsForm(
