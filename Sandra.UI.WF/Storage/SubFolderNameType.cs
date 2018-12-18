@@ -21,6 +21,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -31,12 +32,18 @@ namespace Sandra.UI.WF.Storage
     {
         public static SubFolderNameType Instance = new SubFolderNameType();
 
-        private SubFolderNameType() : base(PType.CLR.String) { }
+        private readonly char[] InvalidRelativeFolderChars;
+
+        private SubFolderNameType() : base(PType.CLR.String)
+        {
+            // Wildcard characters '?' and '*' are not returned from Path.GetInvalidPathChars() but are still illegal.
+            InvalidRelativeFolderChars = Path.GetInvalidPathChars().Union(new[] { '?', '*' }).ToArray();
+        }
 
         public override bool IsValid(string folderPath)
         {
             if (!string.IsNullOrEmpty(folderPath)
-                && folderPath.IndexOfAny(Path.GetInvalidPathChars()) < 0
+                && folderPath.IndexOfAny(InvalidRelativeFolderChars) < 0
                 && !Path.IsPathRooted(folderPath))
             {
                 var localApplicationFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
@@ -48,6 +55,7 @@ namespace Sandra.UI.WF.Storage
                     if (localApplicationFolder.FullName == parentFolder.FullName) return true;
                 }
             }
+
             return false;
         }
     }
