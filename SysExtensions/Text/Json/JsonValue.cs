@@ -28,6 +28,8 @@ namespace SysExtensions.Text.Json
         public static readonly string True = "true";
         public static readonly string False = "false";
 
+        public static string BoolSymbol(bool boolValue) => boolValue ? True : False;
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
