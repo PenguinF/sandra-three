@@ -36,6 +36,7 @@ namespace SysExtensions.Tests
         {
             public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
+            public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.DefaultVisit(this, arg);
         }
 
         [Fact]
@@ -351,6 +352,37 @@ namespace SysExtensions.Tests
         {
             var testVisitor = new TestVisitor4();
             Assert.Equal(symbolType, testVisitor.Visit(symbol));
+        }
+
+        private sealed class TestVisitor5 : JsonSymbolVisitor<string, string>
+        {
+            public override string VisitColon(JsonColon symbol, string x) => typeof(JsonColon).Name + x;
+            public override string VisitComma(JsonComma symbol, string x) => typeof(JsonComma).Name + x;
+            public override string VisitComment(JsonComment symbol, string x) => typeof(JsonComment).Name + x;
+            public override string VisitCurlyClose(JsonCurlyClose symbol, string x) => typeof(JsonCurlyClose).Name + x;
+            public override string VisitCurlyOpen(JsonCurlyOpen symbol, string x) => typeof(JsonCurlyOpen).Name + x;
+            public override string VisitErrorString(JsonErrorString symbol, string x) => typeof(JsonErrorString).Name + x;
+            public override string VisitSquareBracketClose(JsonSquareBracketClose symbol, string x) => typeof(JsonSquareBracketClose).Name + x;
+            public override string VisitSquareBracketOpen(JsonSquareBracketOpen symbol, string x) => typeof(JsonSquareBracketOpen).Name + x;
+            public override string VisitString(JsonString symbol, string x) => typeof(JsonString).Name + x;
+            public override string VisitUnknownSymbol(JsonUnknownSymbol symbol, string x) => typeof(JsonUnknownSymbol).Name + x;
+            public override string VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, string x) => typeof(JsonUnterminatedMultiLineComment).Name + x;
+            public override string VisitValue(JsonValue symbol, string x) => typeof(JsonValue).Name + x;
+            public override string VisitWhitespace(JsonWhitespace symbol, string x) => typeof(JsonWhitespace).Name + x;
+
+            public override string DefaultVisit(JsonSymbol symbol, string x)
+            {
+                throw new InvalidOperationException("DefaultVisit should not have been called");
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TerminalSymbolsOfEachType))]
+        public void NonDefaultVisitWithArg(JsonSymbol symbol, Type symbolType)
+        {
+            var testVisitor = new TestVisitor5();
+            var name = symbolType.Name;
+            Assert.Equal(name + name, testVisitor.Visit(symbol, name));
         }
     }
 }
