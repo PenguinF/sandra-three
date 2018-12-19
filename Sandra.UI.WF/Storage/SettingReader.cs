@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using SysExtensions.Text;
 using SysExtensions.Text.Json;
 using System;
@@ -51,14 +52,14 @@ namespace Sandra.UI.WF.Storage
             private const string NoPMapMessage = "Expected json object at root";
             private const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
-            private readonly List<TextElement<JsonSymbol>> tokens;
+            private readonly ReadOnlyList<TextElement<JsonSymbol>> tokens;
             private readonly int sourceLength;
 
             public readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
             private int currentTokenIndex;
 
-            public ParseRun(List<TextElement<JsonSymbol>> tokens, int sourceLength)
+            public ParseRun(ReadOnlyList<TextElement<JsonSymbol>> tokens, int sourceLength)
             {
                 this.tokens = tokens;
                 this.sourceLength = sourceLength;
@@ -395,19 +396,17 @@ namespace Sandra.UI.WF.Storage
 
         private readonly string json;
 
-        private readonly List<TextElement<JsonSymbol>> tokens;
-
-        public IReadOnlyList<TextElement<JsonSymbol>> Tokens => tokens.AsReadOnly();
+        public ReadOnlyList<TextElement<JsonSymbol>> Tokens { get; }
 
         public SettingReader(string json)
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
-            tokens = new JsonTokenizer(json).TokenizeAll().ToList();
+            Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
         }
 
         public bool TryParse(out PMap map, out List<JsonErrorInfo> errors)
         {
-            ParseRun parseRun = new ParseRun(tokens, json.Length);
+            ParseRun parseRun = new ParseRun(Tokens, json.Length);
             var validMap = parseRun.TryParse(out map);
             errors = parseRun.Errors;
             return validMap;
