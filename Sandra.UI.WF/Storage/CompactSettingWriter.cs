@@ -84,7 +84,7 @@ namespace Sandra.UI.WF.Storage
         }
 
         public override void VisitBoolean(PBoolean value)
-            => outputBuilder.Append(value.Value ? JsonValue.True : JsonValue.False);
+            => outputBuilder.Append(JsonValue.BoolSymbol(value.Value));
 
         public override void VisitInteger(PInteger value)
             => outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
