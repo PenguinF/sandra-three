@@ -47,6 +47,36 @@ namespace SysExtensions
         public static Union<T1, T2> Option2(T2 value) => new ValueOfType2(value);
 
         /// <summary>
+        /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the first type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the first type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1(out T1 value)
+        {
+            value = default(T1);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the second type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the second type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2(out T2 value)
+        {
+            value = default(T2);
+            return false;
+        }
+
+        /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
         /// </summary>
         /// <param name="whenOption1">
@@ -97,6 +127,12 @@ namespace SysExtensions
                 Value = value;
             }
 
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -122,6 +158,12 @@ namespace SysExtensions
             public ValueOfType2(T2 value)
             {
                 Value = value;
+            }
+
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
             }
 
             public override void Match(
@@ -173,6 +215,51 @@ namespace SysExtensions
         /// Creates a new <see cref="Union{T1, T2, T3}"/> with a value of the third type.
         /// </summary>
         public static Union<T1, T2, T3> Option3(T3 value) => new ValueOfType3(value);
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the first type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1(out T1 value)
+        {
+            value = default(T1);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the second type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the second type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2(out T2 value)
+        {
+            value = default(T2);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the third type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the third type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the third type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption3(out T3 value)
+        {
+            value = default(T3);
+            return false;
+        }
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -235,6 +322,12 @@ namespace SysExtensions
                 Value = value;
             }
 
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -264,6 +357,12 @@ namespace SysExtensions
                 Value = value;
             }
 
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
+            }
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -291,6 +390,12 @@ namespace SysExtensions
             public ValueOfType3(T3 value)
             {
                 Value = value;
+            }
+
+            public override bool IsOption3(out T3 value)
+            {
+                value = Value;
+                return true;
             }
 
             public override void Match(
@@ -352,6 +457,66 @@ namespace SysExtensions
         /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the fourth type.
         /// </summary>
         public static Union<T1, T2, T3, T4> Option4(T4 value) => new ValueOfType4(value);
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the first type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1(out T1 value)
+        {
+            value = default(T1);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the second type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the second type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2(out T2 value)
+        {
+            value = default(T2);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the third type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the third type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the third type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption3(out T3 value)
+        {
+            value = default(T3);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the fourth type.
+        /// </summary>
+        /// <param name="value">
+        /// The value of the fourth type, if this function returns true; otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the fourth type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption4(out T4 value)
+        {
+            value = default(T4);
+            return false;
+        }
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -422,6 +587,12 @@ namespace SysExtensions
                 Value = value;
             }
 
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -451,6 +622,12 @@ namespace SysExtensions
             public ValueOfType2(T2 value)
             {
                 Value = value;
+            }
+
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
             }
 
             public override void Match(
@@ -484,6 +661,12 @@ namespace SysExtensions
                 Value = value;
             }
 
+            public override bool IsOption3(out T3 value)
+            {
+                value = Value;
+                return true;
+            }
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -513,6 +696,12 @@ namespace SysExtensions
             public ValueOfType4(T4 value)
             {
                 Value = value;
+            }
+
+            public override bool IsOption4(out T4 value)
+            {
+                value = Value;
+                return true;
             }
 
             public override void Match(
