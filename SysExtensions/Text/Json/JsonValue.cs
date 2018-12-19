@@ -41,5 +41,6 @@ namespace SysExtensions.Text.Json
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
     }
 }

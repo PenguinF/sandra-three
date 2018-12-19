@@ -33,5 +33,6 @@ namespace SysExtensions.Text.Json
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpen(this, arg);
     }
 }

@@ -58,4 +58,23 @@ namespace SysExtensions.Text.Json
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
         public virtual TResult VisitWhitespace(JsonWhitespace symbol) => DefaultVisit(symbol);
     }
+
+    public abstract class JsonSymbolVisitor<T, TResult>
+    {
+        public virtual TResult DefaultVisit(JsonSymbol symbol, T arg) => default(TResult);
+        public virtual TResult Visit(JsonSymbol symbol, T arg) => symbol == null ? default(TResult) : symbol.Accept(this, arg);
+        public virtual TResult VisitColon(JsonColon symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitComma(JsonComma symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitComment(JsonComment symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitCurlyClose(JsonCurlyClose symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitErrorString(JsonErrorString symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitSquareBracketClose(JsonSquareBracketClose symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitString(JsonString symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitValue(JsonValue symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitWhitespace(JsonWhitespace symbol, T arg) => DefaultVisit(symbol, arg);
+    }
 }

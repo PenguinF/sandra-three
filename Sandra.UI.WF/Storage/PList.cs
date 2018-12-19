@@ -1,4 +1,5 @@
-﻿/*********************************************************************************
+﻿#region License
+/*********************************************************************************
  * PList.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
@@ -16,6 +17,8 @@
  *    limitations under the License.
  * 
  *********************************************************************************/
+#endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,9 +47,9 @@ namespace Sandra.UI.WF.Storage
         /// <param name="list">
         /// The list which contains the values to construct this <see cref="PList"/> with.
         /// </param>
-        public PList(IList<PValue> list)
+        public PList(IEnumerable<PValue> list)
         {
-            array = list != null && list.Count > 0
+            array = list != null && list.Any()
                 ? list.ToArray()
                 : emptyArray;
         }
@@ -113,5 +116,6 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitList(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitList(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitList(this, arg);
     }
 }
