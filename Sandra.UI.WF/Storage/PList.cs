@@ -47,9 +47,9 @@ namespace Sandra.UI.WF.Storage
         /// <param name="list">
         /// The list which contains the values to construct this <see cref="PList"/> with.
         /// </param>
-        public PList(IList<PValue> list)
+        public PList(IEnumerable<PValue> list)
         {
-            array = list != null && list.Count > 0
+            array = list != null && list.Any()
                 ? list.ToArray()
                 : emptyArray;
         }
