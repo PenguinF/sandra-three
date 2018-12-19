@@ -116,5 +116,6 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitList(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitList(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitList(this, arg);
     }
 }

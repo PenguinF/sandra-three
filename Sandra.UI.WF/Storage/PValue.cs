@@ -30,6 +30,7 @@ namespace Sandra.UI.WF.Storage
     {
         void Accept(PValueVisitor visitor);
         TResult Accept<TResult>(PValueVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg);
     }
 
     /// <summary>
@@ -65,6 +66,22 @@ namespace Sandra.UI.WF.Storage
     }
 
     /// <summary>
+    /// Represents a visitor that visits a single <see cref="PValue"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
+    public abstract class PValueVisitor<T, TResult>
+    {
+        public virtual TResult DefaultVisit(PValue value, T arg) => default(TResult);
+        public virtual TResult Visit(PValue value, T arg) => value == null ? default(TResult) : value.Accept(this, arg);
+        public virtual TResult VisitBoolean(PBoolean value, T arg) => DefaultVisit(value, arg);
+        public virtual TResult VisitInteger(PInteger value, T arg) => DefaultVisit(value, arg);
+        public virtual TResult VisitList(PList value, T arg) => DefaultVisit(value, arg);
+        public virtual TResult VisitMap(PMap value, T arg) => DefaultVisit(value, arg);
+        public virtual TResult VisitString(PString value, T arg) => DefaultVisit(value, arg);
+        public virtual TResult VisitUndefined(PUndefined value, T arg) => DefaultVisit(value, arg);
+    }
+
+    /// <summary>
     /// Represents a <see cref="bool"/> persistent value.
     /// </summary>
     public struct PBoolean : PValue
@@ -75,6 +92,7 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitBoolean(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitBoolean(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitBoolean(this, arg);
     }
 
     /// <summary>
@@ -88,6 +106,7 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitInteger(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInteger(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitInteger(this, arg);
     }
 
     /// <summary>
@@ -101,6 +120,7 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitString(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitString(this, arg);
     }
 
     /// <summary>
@@ -112,6 +132,7 @@ namespace Sandra.UI.WF.Storage
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitUndefined(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitUndefined(this);
+        TResult PValue.Accept<T, TResult>(PValueVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefined(this, arg);
     }
 
     /// <summary>
