@@ -39,37 +39,38 @@ namespace SysExtensions
 
         private readonly T[] array;
 
+        private static T[] GetArray(IEnumerable<T> elements)
+        {
+            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
+            if (elements != null)
+            {
+                if (elements is ICollection<T> collection)
+                {
+                    var length = collection.Count;
+                    if (length > 0)
+                    {
+                        T[] array = new T[length];
+                        collection.CopyTo(array, 0);
+                        return array;
+                    }
+                }
+                else if (elements.Any())
+                {
+                    return elements.ToArray();
+                }
+            }
+
+            // Default case if null or empty.
+            return emptyArray;
+        }
+
         /// <summary>
         /// Initializes a new instance of <see cref="ReadOnlyList{T}"/>.
         /// </summary>
         /// <param name="elements">
         /// The elements of the list.
         /// </param>
-        public ReadOnlyList(IEnumerable<T> elements)
-        {
-            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
-            if (elements is ICollection<T> collection)
-            {
-                var length = collection.Count;
-                if (length == 0)
-                {
-                    array = emptyArray;
-                }
-                else
-                {
-                    array = new T[length];
-                    collection.CopyTo(array, 0);
-                }
-            }
-            else if (elements == null || !elements.Any())
-            {
-                array = emptyArray;
-            }
-            else
-            {
-                array = elements.ToArray();
-            }
-        }
+        public ReadOnlyList(IEnumerable<T> elements) => array = GetArray(elements);
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.
