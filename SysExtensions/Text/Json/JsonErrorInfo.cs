@@ -19,9 +19,14 @@
  *********************************************************************************/
 #endregion
 
+using System;
+
 namespace SysExtensions.Text.Json
 {
-    public class JsonErrorInfo : TextErrorInfo
+    /// <summary>
+    /// Reports an error at a certain location in a source text.
+    /// </summary>
+    public class JsonErrorInfo
     {
         /// <summary>
         /// Gets the error code.
@@ -29,13 +34,25 @@ namespace SysExtensions.Text.Json
         public JsonErrorCode ErrorCode { get; }
 
         /// <summary>
+        /// Gets the start position of the text span where the error occurred.
+        /// </summary>
+        public int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span where the error occurred.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Gets the list of parameters.
+        /// </summary>
+        public string[] Parameters { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
         /// </summary>
         /// <param name="errorCode">
         /// The error code.
-        /// </param>
-        /// <param name="message">
-        /// The error message.
         /// </param>
         /// <param name="start">
         /// The start position of the text span where the error occurred.
@@ -43,16 +60,41 @@ namespace SysExtensions.Text.Json
         /// <param name="length">
         /// The length of the text span where the error occurred.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="message"/> is null.
-        /// </exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
         /// </exception>
-        public JsonErrorInfo(JsonErrorCode errorCode, string message, int start, int length)
-            : base(message, start, length)
+        public JsonErrorInfo(JsonErrorCode errorCode, int start, int length)
+            : this(errorCode, start, length, null)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
+        /// </summary>
+        /// <param name="errorCode">
+        /// The error code.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the text span where the error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the error occurred.
+        /// </param>
+        /// <param name="parameters">
+        /// Parameters of the error.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
+        public JsonErrorInfo(JsonErrorCode errorCode, int start, int length, string[] parameters)
+        {
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
             ErrorCode = errorCode;
+            Start = start;
+            Length = length;
+            Parameters = parameters;
         }
     }
 }

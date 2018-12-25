@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * TextErrorInfoTests.cs
+ * JsonErrorInfoTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -19,41 +19,37 @@
  *********************************************************************************/
 #endregion
 
-using SysExtensions.Text;
+using SysExtensions.Text.Json;
 using System;
 using Xunit;
 
 namespace SysExtensions.Tests
 {
-    public class TextErrorInfoTests
+    public class JsonErrorInfoTests
     {
-        [Fact]
-        public void NullMessageShouldThrowInError()
-        {
-            Assert.Throws<ArgumentNullException>(() => new TextErrorInfo(null, 0, 0));
-        }
-
         [Theory]
         [InlineData(-1, 0, "start")]
         [InlineData(-1, -1, "start")]
         [InlineData(0, -1, "length")]
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new TextErrorInfo(string.Empty, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.Unspecified, start, length));
         }
 
         [Theory]
-        [InlineData("", 0, 0)]
-        [InlineData("Error!", 0, 1)]
-        // No newline conversions.
-        [InlineData("\n", 1, 0)]
-        [InlineData("Error!\r\n", 0, 2)]
-        public void UnchangedParametersInError(string message, int start, int length)
+        [InlineData(JsonErrorCode.Unspecified, 0, 0, null)]
+        [InlineData(JsonErrorCode.Custom, 0, 1, new string[0])]
+        [InlineData(JsonErrorCode.ExpectedEof, 1, 0, new[] { "\n", "" })]
+        [InlineData(JsonErrorCode.Custom + 999, 0, 2, new[] { "Aa" })]
+        public void UnchangedParametersInError(JsonErrorCode errorCode, int start, int length, string[] parameters)
         {
-            var errorInfo = new TextErrorInfo(message, start, length);
-            Assert.Equal(message, errorInfo.Message);
+            var errorInfo = new JsonErrorInfo(errorCode, start, length, parameters);
+            Assert.Equal(errorCode, errorInfo.ErrorCode);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
+
+            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+            Assert.Equal<string>(parameters, errorInfo.Parameters);
         }
     }
 }

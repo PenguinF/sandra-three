@@ -162,7 +162,7 @@ namespace Sandra.UI.WF
                     var errorMessages = (from error in settingsTextBox.CurrentErrors
                                          let lineIndex = settingsTextBox.LineFromPosition(error.Start)
                                          let position = settingsTextBox.GetColumn(error.Start)
-                                         select $"{error.Message} at line {lineIndex + 1}, position {position + 1}").ToArray();
+                                         select $"{error.Message()} at line {lineIndex + 1}, position {position + 1}").ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

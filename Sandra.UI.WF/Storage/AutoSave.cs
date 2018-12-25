@@ -220,7 +220,7 @@ namespace Sandra.UI.WF.Storage
                     remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                     if (errors.Count > 0)
                     {
-                        errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                         tryOtherAutoSaveStream = true;
                     }
                 }
@@ -244,7 +244,7 @@ namespace Sandra.UI.WF.Storage
                         remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                         if (errors.Count > 0)
                         {
-                            errors.ForEach(x => new AutoSaveFileParseException(x.Message, x.Start, x.Length).Trace());
+                            errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                             remoteSettings = localSettings;
                         }
                     }
@@ -507,7 +507,19 @@ namespace Sandra.UI.WF.Storage
 
     internal class AutoSaveFileParseException : Exception
     {
-        public AutoSaveFileParseException(string message, int start, int length)
-            : base($"{message} at position {start}, length {length}") { }
+        public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
+        {
+            string errorMessage = jsonErrorInfo.ErrorCode.ToString();
+
+            if (jsonErrorInfo.Parameters != null && jsonErrorInfo.Parameters.Length > 0)
+            {
+                errorMessage += "(" + string.Join(", ", jsonErrorInfo.Parameters) + ")";
+            }
+
+            return $"{errorMessage} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
+        }
+
+        public AutoSaveFileParseException(JsonErrorInfo jsonErrorInfo)
+            : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
     }
 }

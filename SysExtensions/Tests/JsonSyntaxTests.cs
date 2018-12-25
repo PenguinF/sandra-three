@@ -100,15 +100,17 @@ namespace SysExtensions.Tests
 
         [Theory]
         [InlineData(JsonErrorCode.Custom, "", 0, 0)]
-        [InlineData(JsonErrorCode.Unspecified, "Error!", 0, 1)]
+        [InlineData(JsonErrorCode.Unspecified, null, 0, 1)]
         // No newline conversions.
         [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 0)]
-        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "Error!\r\n", 0, 2)]
-        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string message, int start, int length)
+        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "\\u00", 0, 2)]
+        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string errorParameter, int start, int length)
         {
-            var errorInfo1 = new JsonErrorInfo(errorCode, message, start, length);
-            var errorInfo2 = new JsonErrorInfo(errorCode, message + message, start + 1, length * 2);
-            var errorInfo3 = new JsonErrorInfo(errorCode, message + message + message, start + 2, length * 3);
+            string[] parameters = errorParameter == null ? null : new[] { errorParameter };
+
+            var errorInfo1 = new JsonErrorInfo(errorCode, start, length, parameters);
+            var errorInfo2 = new JsonErrorInfo(errorCode, start + 1, length * 2, parameters);
+            var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
 
             Assert.Collection(
                 new JsonErrorString(errorInfo1, errorInfo2, errorInfo3).Errors,
@@ -144,6 +146,16 @@ namespace SysExtensions.Tests
             Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty, 0));
         }
 
+        private static void AssertErrorEqual(JsonErrorInfo expected, JsonErrorInfo actual)
+        {
+            Assert.Equal(expected.Start, actual.Start);
+            Assert.Equal(expected.Length, actual.Length);
+            Assert.Equal(expected.ErrorCode, actual.ErrorCode);
+
+            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+            Assert.Equal<string>(expected.Parameters, actual.Parameters);
+        }
+
         [Theory]
         [InlineData("*")]
         [InlineData("€")]
@@ -151,7 +163,7 @@ namespace SysExtensions.Tests
         {
             var error = JsonUnknownSymbol.CreateError(displayCharValue, 0);
             var symbol = new JsonUnknownSymbol(displayCharValue, 0);
-            Assert.True(error.EqualTo(symbol.Error));
+            AssertErrorEqual(error, symbol.Error);
         }
 
         [Theory]
@@ -160,7 +172,7 @@ namespace SysExtensions.Tests
         {
             var error = JsonUnterminatedMultiLineComment.CreateError(0, commentText.Length);
             var symbol = new JsonUnterminatedMultiLineComment(0, commentText.Length);
-            Assert.True(error.EqualTo(symbol.Error));
+            AssertErrorEqual(error, symbol.Error);
         }
 
         [Theory]
@@ -169,11 +181,12 @@ namespace SysExtensions.Tests
         [InlineData("≥", 0)]
 
         [InlineData("▓", 200)]
-        public void UnexpectedSymbolMessage(string displayCharValue, int position)
+        public void UnexpectedSymbolError(string displayCharValue, int position)
         {
             var error = JsonUnknownSymbol.CreateError(displayCharValue, position);
             Assert.NotNull(error);
-            Assert.Equal($"Unexpected symbol '{displayCharValue}'", error.Message);
+            Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
+            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -182,11 +195,12 @@ namespace SysExtensions.Tests
         [InlineData(0, 0)]
         [InlineData(2999, 3000)]
         [InlineData(0, int.MaxValue)]
-        public void UnterminatedMultiLineCommentMessage(int start, int length)
+        public void UnterminatedMultiLineCommentError(int start, int length)
         {
             var error = JsonUnterminatedMultiLineComment.CreateError(start, length);
             Assert.NotNull(error);
-            Assert.Equal("Unterminated multi-line comment", error.Message);
+            Assert.Equal(JsonErrorCode.UnterminatedMultiLineComment, error.ErrorCode);
+            Assert.Null(error.Parameters);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -195,11 +209,12 @@ namespace SysExtensions.Tests
         [InlineData(0, 0)]
         [InlineData(2999, 3000)]
         [InlineData(0, int.MaxValue)]
-        public void UnterminatedStringMessage(int start, int length)
+        public void UnterminatedStringError(int start, int length)
         {
             var error = JsonErrorString.Unterminated(start, length);
             Assert.NotNull(error);
-            Assert.Equal("Unterminated string", error.Message);
+            Assert.Equal(JsonErrorCode.UnterminatedString, error.ErrorCode);
+            Assert.Null(error.Parameters);
             Assert.Equal(start, error.Start);
             Assert.Equal(length, error.Length);
         }
@@ -208,10 +223,11 @@ namespace SysExtensions.Tests
         [InlineData("\\u007f", 1)]
         [InlineData("\\n", 70)]
         [InlineData("\\0", 1)]
-        public void IllegalControlCharacterInStringMessage(string displayCharValue, int position)
+        public void IllegalControlCharacterInStringError(string displayCharValue, int position)
         {
             var error = JsonErrorString.IllegalControlCharacter(displayCharValue, position);
-            Assert.Equal($"Illegal control character '{displayCharValue}' in string", error.Message);
+            Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
+            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
         }
@@ -219,10 +235,11 @@ namespace SysExtensions.Tests
         [Theory]
         [InlineData("\\ ", 2)]
         [InlineData("\\0", 1)]
-        public void UnrecognizedEscapeSequenceMessage(string displayCharValue, int position)
+        public void UnrecognizedEscapeSequenceError(string displayCharValue, int position)
         {
             var error = JsonErrorString.UnrecognizedEscapeSequence(displayCharValue, position);
-            Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
+            Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
+            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(2, error.Length);
         }
@@ -231,10 +248,11 @@ namespace SysExtensions.Tests
         [InlineData("\\u", 0)]
         [InlineData("\\u00", 1)]
         [InlineData("\\uffff", 1)]
-        public void UnrecognizedUnicodeEscapeSequenceMessage(string displayCharValue, int position)
+        public void UnrecognizedUnicodeEscapeSequenceError(string displayCharValue, int position)
         {
             var error = JsonErrorString.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
-            Assert.Equal($"Unrecognized escape sequence ('{displayCharValue}')", error.Message);
+            Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
+            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(displayCharValue.Length, error.Length);
         }
