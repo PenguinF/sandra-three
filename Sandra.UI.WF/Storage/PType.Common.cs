@@ -80,8 +80,19 @@ namespace Sandra.UI.WF.Storage
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
 
+            /// <summary>
+            /// Initializes a new instance of an <see cref="Enumeration{TEnum}"/> <see cref="PType"/>.
+            /// </summary>
+            /// <param name="enumValues">
+            /// The list of distinct enumeration values.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// <paramref name="enumValues"/> is null.
+            /// </exception>
             public Enumeration(IEnumerable<TEnum> enumValues) : base(CLR.String)
             {
+                if (enumValues == null) throw new ArgumentNullException(nameof(enumValues));
+
                 Type enumType = typeof(TEnum);
                 foreach (var enumValue in enumValues)
                 {
