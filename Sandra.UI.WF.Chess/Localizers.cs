@@ -415,11 +415,11 @@ namespace Sandra.UI.WF
         }
 
         /// <summary>
-        /// Gets the error message.
+        /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
         /// </summary>
-        public static string Message(this JsonErrorInfo jsonErrorInfo)
+        public static string Message(this JsonErrorInfo jsonErrorInfo, Localizer localizer)
         {
-            return Localizer.Current.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+            return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
         }
 
         /// <summary>

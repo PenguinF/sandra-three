@@ -274,7 +274,7 @@ namespace Sandra.UI.WF
                 {
                     if (error.Start <= textPosition && textPosition < error.Start + error.Length)
                     {
-                        yield return error.Message();
+                        yield return error.Message(Localizer.Current);
                     }
                 }
             }
