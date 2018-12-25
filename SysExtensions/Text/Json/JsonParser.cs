@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace SysExtensions.Text.Json
 
         public JsonParser(ReadOnlyList<TextElement<JsonSymbol>> tokens, int sourceLength)
         {
-            Tokens = tokens;
+            Tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
             SourceLength = sourceLength;
             CurrentTokenIndex = 0;
         }
@@ -54,6 +55,7 @@ namespace SysExtensions.Text.Json
                 Errors.AddRange(current.TerminalSymbol.Errors);
                 CurrentTokenIndex++;
             }
+
             return null;
         }
 
@@ -67,6 +69,7 @@ namespace SysExtensions.Text.Json
                 CurrentTokenIndex++;
                 if (!current.TerminalSymbol.IsBackground) return current;
             }
+
             return null;
         }
 
