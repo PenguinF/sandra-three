@@ -27,12 +27,6 @@ namespace SysExtensions.Tests
 {
     public class JsonErrorInfoTests
     {
-        [Fact]
-        public void NullMessageShouldThrowInError()
-        {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorInfo(JsonErrorCode.Unspecified, null, 0, 0));
-        }
-
         [Theory]
         [InlineData(-1, 0, "start")]
         [InlineData(-1, -1, "start")]
