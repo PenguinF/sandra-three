@@ -30,7 +30,7 @@ namespace SysExtensions.Text.Json
         /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
         /// </summary>
         public static JsonErrorInfo CreateError(string displayCharValue, int position)
-            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnexpectedSymbol, new[] { displayCharValue }), position, 1);
+            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, position, 1, new[] { displayCharValue });
 
         public JsonErrorInfo Error { get; }
 

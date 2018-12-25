@@ -112,9 +112,9 @@ namespace Sandra.UI.WF.Storage
                             {
                                 Errors.Add(new JsonErrorInfo(
                                     JsonErrorCode.PropertyKeyAlreadyExists,
-                                    JsonErrorInfo.FormatErrorMessage(JsonErrorCode.PropertyKeyAlreadyExists, new[] { propertyKey }),
                                     first.Start,
-                                    first.Length));
+                                    first.Length,
+                                    new[] { propertyKey }));
                             }
                         }
                         else
@@ -273,9 +273,9 @@ namespace Sandra.UI.WF.Storage
 
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.UnrecognizedValue,
-                    JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnrecognizedValue, new[] { value }),
                     tokens[currentTokenIndex - 1].Start,
-                    value.Length));
+                    value.Length,
+                    new[] { value }));
 
                 return PConstantValue.Undefined;
             }

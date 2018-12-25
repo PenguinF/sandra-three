@@ -43,19 +43,19 @@ namespace SysExtensions.Text.Json
         /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.
         /// </summary>
         public static JsonErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnrecognizedEscapeSequence, new[] { displayCharValue }), start, 2);
+            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, start, 2, new[] { displayCharValue });
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unrecognized Unicode escape sequences.
         /// </summary>
         public static JsonErrorInfo UnrecognizedUnicodeEscapeSequence(string displayCharValue, int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnrecognizedEscapeSequence, new[] { displayCharValue }), start, length);
+            => new JsonErrorInfo(JsonErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for illegal control characters inside string literals.
         /// </summary>
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
-            => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.IllegalControlCharacterInString, new[] { displayCharValue }), start, 1);
+            => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
 
         public override IEnumerable<JsonErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
