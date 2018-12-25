@@ -146,20 +146,12 @@ namespace SysExtensions.Text.Json
         /// <param name="parameters">
         /// Parameters of the error.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="message"/> is null.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
         /// </exception>
         public JsonErrorInfo(JsonErrorCode errorCode, int start, int length, string[] parameters)
-            : this(errorCode, FormatErrorMessage(errorCode, parameters), start, length)
         {
-        }
-
-        public JsonErrorInfo(JsonErrorCode errorCode, string message, int start, int length)
-        {
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            Message = FormatErrorMessage(errorCode, parameters);
 
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
