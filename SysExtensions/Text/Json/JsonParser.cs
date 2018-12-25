@@ -30,7 +30,7 @@ namespace SysExtensions.Text.Json
     /// <summary>
     /// Represents a single parse of a list of json tokens.
     /// </summary>
-    public class JsonParser : JsonSymbolVisitor<JsonSyntaxNode>
+    public class JsonParser : JsonSymbolVisitor<TextElement<JsonSymbol>, JsonSyntaxNode>
     {
         private readonly ReadOnlyList<TextElement<JsonSymbol>> Tokens;
         private readonly int SourceLength;
@@ -73,7 +73,7 @@ namespace SysExtensions.Text.Json
             return null;
         }
 
-        public override JsonSyntaxNode VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+        public override JsonSyntaxNode VisitCurlyOpen(JsonCurlyOpen curlyOpen, TextElement<JsonSymbol> visitedToken)
         {
             Dictionary<string, JsonSyntaxNode> mapBuilder = new Dictionary<string, JsonSyntaxNode>();
 
@@ -205,7 +205,7 @@ namespace SysExtensions.Text.Json
             }
         }
 
-        public override JsonSyntaxNode VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
+        public override JsonSyntaxNode VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen, TextElement<JsonSymbol> visitedToken)
         {
             List<JsonSyntaxNode> listBuilder = new List<JsonSyntaxNode>();
 
@@ -256,7 +256,7 @@ namespace SysExtensions.Text.Json
             }
         }
 
-        public override JsonSyntaxNode VisitValue(JsonValue symbol)
+        public override JsonSyntaxNode VisitValue(JsonValue symbol, TextElement<JsonSymbol> visitedToken)
         {
             string value = symbol.Value;
             if (value == JsonValue.True) return new JsonBooleanLiteralSyntax(true);
@@ -276,7 +276,8 @@ namespace SysExtensions.Text.Json
             return new JsonUndefinedValueSyntax();
         }
 
-        public override JsonSyntaxNode VisitString(JsonString symbol) => new JsonStringLiteralSyntax(symbol.Value);
+        public override JsonSyntaxNode VisitString(JsonString symbol, TextElement<JsonSymbol> visitedToken)
+            => new JsonStringLiteralSyntax(symbol.Value);
 
         private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
                                      out JsonSyntaxNode firstValue,
@@ -299,14 +300,14 @@ namespace SysExtensions.Text.Json
                 if (!hasValue)
                 {
                     if (textElement.TerminalSymbol.Errors.Any()) firstValue = new JsonUndefinedValueSyntax();
-                    else firstValue = Visit(textElement.TerminalSymbol);
+                    else firstValue = Visit(textElement.TerminalSymbol, textElement);
                     hasValue = true;
                 }
                 else if (!textElement.TerminalSymbol.Errors.Any())
                 {
                     // Make sure consecutive symbols are parsed as if they were valid.
                     // Discard the result.
-                    Visit(textElement.TerminalSymbol);
+                    Visit(textElement.TerminalSymbol, textElement);
                 }
 
                 // Peek at the next symbol.
