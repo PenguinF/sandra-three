@@ -269,8 +269,8 @@ namespace SysExtensions.Text.Json
 
             Errors.Add(new JsonErrorInfo(
                 JsonErrorCode.UnrecognizedValue,
-                Tokens[CurrentTokenIndex - 1].Start,
-                value.Length,
+                visitedToken.Start,
+                visitedToken.Length,
                 new[] { value }));
 
             return new JsonUndefinedValueSyntax();
