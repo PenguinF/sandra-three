@@ -244,6 +244,14 @@ namespace SysExtensions.Tests
             }
         }
 
+        private static int ExpectedSymbolLength(string singleJsonSymbol)
+        {
+            // Exception for end-of-line comment "//\n".
+            int expectedLength = singleJsonSymbol.Length;
+            if (singleJsonSymbol[singleJsonSymbol.Length - 1] == '\n') expectedLength--;
+            return expectedLength;
+        }
+
         [Theory]
         [MemberData(nameof(TwoSymbolsOfEachType))]
         public void Transition(string json1, Type type1, string json2, Type type2)
@@ -258,11 +266,8 @@ namespace SysExtensions.Tests
                 int expectedSymbol1Start = (i & 1) != 0 ? 1 : 0;
                 int expectedSymbol2Start = expectedSymbol1Start + json1.Length + ((i & 2) != 0 ? 1 : 0);
 
-                // Exception for end-of-line comment "//\n".
-                int expectedSymbol1Length = json1.Length;
-                if (json1[json1.Length - 1] == '\n') expectedSymbol1Length--;
-                int expectedSymbol2Length = json2.Length;
-                if (json2[json2.Length - 1] == '\n') expectedSymbol2Length--;
+                int expectedSymbol1Length = ExpectedSymbolLength(json1);
+                int expectedSymbol2Length = ExpectedSymbolLength(json2);
 
                 var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
 
@@ -301,6 +306,30 @@ namespace SysExtensions.Tests
                     });
                 }
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(TwoSymbolsOfEachType))]
+        public void RepeatableTokenization(string json1, Type type1, string json2, Type type2)
+        {
+            var json = $"{json1} {json2}";
+
+            // Create the tokenizer, tokenize twice, and assert that the result is the same.
+            var tokenizer = new JsonTokenizer(json);
+
+            // First tokenization creates the element inspectors for the second tokenization.
+            // The first tokenization generates the 'expected' values here.
+            var elementInspectors = tokenizer.TokenizeAll().Select(x => new Action<TextElement<JsonSymbol>>(y =>
+            {
+                Assert.NotNull(x);
+                Assert.NotNull(y);
+                Assert.Equal(x.Start, y.Start);
+                Assert.Equal(x.Length, y.Length);
+                Assert.IsType(x.TerminalSymbol.GetType(), y.TerminalSymbol);
+
+            })).ToArray();
+
+            Assert.Collection(tokenizer.TokenizeAll(), elementInspectors);
         }
 
         public static IEnumerable<object[]> GetErrorStrings()
