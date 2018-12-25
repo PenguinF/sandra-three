@@ -99,7 +99,7 @@ namespace SysExtensions.Text.Json
         /// <summary>
         /// Gets the error message.
         /// </summary>
-        public string Message { get; }
+        public string Message => FormatErrorMessage(ErrorCode, Parameters);
 
         /// <summary>
         /// Gets the start position of the text span where the error occurred.
@@ -110,6 +110,11 @@ namespace SysExtensions.Text.Json
         /// Gets the length of the text span where the error occurred.
         /// </summary>
         public int Length { get; }
+
+        /// <summary>
+        /// Gets the list of parameters.
+        /// </summary>
+        public string[] Parameters { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
@@ -151,14 +156,13 @@ namespace SysExtensions.Text.Json
         /// </exception>
         public JsonErrorInfo(JsonErrorCode errorCode, int start, int length, string[] parameters)
         {
-            Message = FormatErrorMessage(errorCode, parameters);
-
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 
             ErrorCode = errorCode;
             Start = start;
             Length = length;
+            Parameters = parameters;
         }
     }
 }
