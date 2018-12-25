@@ -43,6 +43,54 @@ namespace SysExtensions.Text.Json
         public const string NoPMapMessage = "Expected json object at root";
         public const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
 
+        public static string FormatErrorMessage(JsonErrorCode errorCode, string[] parameters = null)
+        {
+            switch (errorCode)
+            {
+                case JsonErrorCode.UnexpectedSymbol:
+                    return string.Format("Unexpected symbol '{0}'", parameters);
+                case JsonErrorCode.UnterminatedMultiLineComment:
+                    return "Unterminated multi-line comment";
+                case JsonErrorCode.UnterminatedString:
+                    return "Unterminated string";
+                case JsonErrorCode.UnrecognizedEscapeSequence:
+                    return string.Format("Unrecognized escape sequence ('{0}')", parameters);
+                case JsonErrorCode.IllegalControlCharacterInString:
+                    return string.Format("Illegal control character '{0}' in string", parameters);
+                case JsonErrorCode.ExpectedEof:
+                    return FileShouldHaveEndedAlreadyMessage;
+                case JsonErrorCode.UnexpectedEofInObject:
+                    return EofInObjectMessage;
+                case JsonErrorCode.UnexpectedEofInArray:
+                    return EofInArrayMessage;
+                case JsonErrorCode.ControlSymbolInObject:
+                    return ControlSymbolInObjectMessage;
+                case JsonErrorCode.ControlSymbolInArray:
+                    return ControlSymbolInArrayMessage;
+                case JsonErrorCode.InvalidPropertyKey:
+                    return InvalidKeyMessage;
+                case JsonErrorCode.PropertyKeyAlreadyExists:
+                    return string.Format(DuplicateKeyMessage, parameters);
+                case JsonErrorCode.MissingPropertyKey:
+                    return EmptyKeyMessage;
+                case JsonErrorCode.MissingValue:
+                    return EmptyValueMessage;
+                case JsonErrorCode.UnrecognizedValue:
+                    return string.Format(UnrecognizedValueMessage, parameters);
+                case JsonErrorCode.MultiplePropertyKeySections:
+                    return MultipleKeySectionsMessage;
+                case JsonErrorCode.MultiplePropertyKeys:
+                    return MultiplePropertyKeysMessage;
+                case JsonErrorCode.MultipleValues:
+                    return MultipleValuesMessage;
+                case JsonErrorCode.Custom:
+                    return NoPMapMessage;
+                case JsonErrorCode.Unspecified:
+                default:
+                    return "Unspecified error";
+            }
+        }
+
         /// <summary>
         /// Gets the error code.
         /// </summary>
