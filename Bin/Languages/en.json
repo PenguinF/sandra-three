@@ -75,6 +75,6 @@
     "JsonErrorMultiplePropertyKeySections": "Unexpected ':', expected ',' or '}'",
     "JsonErrorMultiplePropertyKeys": "':' expected",
     "JsonErrorMultipleValues": "',' expected",
-    "RootValueShouldBeObjectTypeError": "Expected json object at root"
+    "RootValueShouldBeObjectTypeError": "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')"
   }
 }

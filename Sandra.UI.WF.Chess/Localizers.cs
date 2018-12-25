@@ -383,7 +383,7 @@ namespace Sandra.UI.WF
                 { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
                 { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
 
-                { JsonErrorInfoExtensions.RootValueShouldBeObjectTypeError, "Expected json object at root" },
+                { JsonErrorInfoExtensions.RootValueShouldBeObjectTypeError, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             };
         }
     }
