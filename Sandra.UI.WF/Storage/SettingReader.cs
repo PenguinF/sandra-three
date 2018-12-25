@@ -43,7 +43,7 @@ namespace Sandra.UI.WF.Storage
             Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
         }
 
-        public bool TryParse(out PMap map, out List<JsonErrorInfo> errors)
+        public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)
         {
             JsonParser parser = new JsonParser(Tokens, json.Length);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
@@ -74,7 +74,7 @@ namespace Sandra.UI.WF.Storage
         {
             var parser = new SettingReader(json);
 
-            if (parser.TryParse(out PMap map, out List<JsonErrorInfo> errors))
+            if (parser.TryParse(workingCopy.Schema, out PMap map, out List<JsonErrorInfo> errors))
             {
                 foreach (var kv in map)
                 {
