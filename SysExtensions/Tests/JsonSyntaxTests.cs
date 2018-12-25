@@ -100,15 +100,17 @@ namespace SysExtensions.Tests
 
         [Theory]
         [InlineData(JsonErrorCode.Custom, "", 0, 0)]
-        [InlineData(JsonErrorCode.Unspecified, "Error!", 0, 1)]
+        [InlineData(JsonErrorCode.Unspecified, null, 0, 1)]
         // No newline conversions.
         [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 0)]
-        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "Error!\r\n", 0, 2)]
-        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string message, int start, int length)
+        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "\\u00", 0, 2)]
+        public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string errorParameter, int start, int length)
         {
-            var errorInfo1 = new JsonErrorInfo(errorCode, message, start, length);
-            var errorInfo2 = new JsonErrorInfo(errorCode, message + message, start + 1, length * 2);
-            var errorInfo3 = new JsonErrorInfo(errorCode, message + message + message, start + 2, length * 3);
+            string[] parameters = errorParameter == null ? null : new[] { errorParameter };
+
+            var errorInfo1 = new JsonErrorInfo(errorCode, start, length, parameters);
+            var errorInfo2 = new JsonErrorInfo(errorCode, start + 1, length * 2, parameters);
+            var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
 
             Assert.Collection(
                 new JsonErrorString(errorInfo1, errorInfo2, errorInfo3).Errors,
