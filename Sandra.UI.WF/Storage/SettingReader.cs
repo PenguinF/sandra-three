@@ -326,12 +326,12 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public bool TryParse(out PMap map)
+            public bool TryParse(out PValue rootValue, out TextElement<JsonSymbol> textElement)
             {
                 bool hasRootValue = ParseMultiValue(
                     JsonErrorCode.ExpectedEof,
-                    out PValue rootValue,
-                    out TextElement<JsonSymbol> textElement);
+                    out rootValue,
+                    out textElement);
 
                 TextElement<JsonSymbol> extraElement = ReadSkipComments();
                 if (extraElement != null)
@@ -342,22 +342,7 @@ namespace Sandra.UI.WF.Storage
                         extraElement.Length));
                 }
 
-                if (hasRootValue)
-                {
-                    bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
-                    if (!validMap)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
-                            textElement.Start,
-                            textElement.Length));
-                    }
-
-                    return validMap;
-                }
-
-                map = default(PMap);
-                return false;
+                return hasRootValue;
             }
         }
 
@@ -371,10 +356,32 @@ namespace Sandra.UI.WF.Storage
             Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
         }
 
+        private static bool TryParse(ParseRun parseRun, out PMap map)
+        {
+            bool hasRootValue = parseRun.TryParse(out PValue rootValue, out TextElement<JsonSymbol> textElement);
+
+            if (hasRootValue)
+            {
+                bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
+                if (!validMap)
+                {
+                    parseRun.Errors.Add(new JsonErrorInfo(
+                        JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
+                        textElement.Start,
+                        textElement.Length));
+                }
+
+                return validMap;
+            }
+
+            map = default(PMap);
+            return false;
+        }
+
         public bool TryParse(out PMap map, out List<JsonErrorInfo> errors)
         {
             ParseRun parseRun = new ParseRun(Tokens, json.Length);
-            var validMap = parseRun.TryParse(out map);
+            var validMap = TryParse(parseRun, out map);
             errors = parseRun.Errors;
             return validMap;
         }
