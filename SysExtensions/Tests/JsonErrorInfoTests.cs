@@ -19,7 +19,7 @@
  *********************************************************************************/
 #endregion
 
-using SysExtensions.Text;
+using SysExtensions.Text.Json;
 using System;
 using Xunit;
 
@@ -30,7 +30,7 @@ namespace SysExtensions.Tests
         [Fact]
         public void NullMessageShouldThrowInError()
         {
-            Assert.Throws<ArgumentNullException>(() => new TextErrorInfo(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorInfo(JsonErrorCode.Unspecified, null, 0, 0));
         }
 
         [Theory]
@@ -39,18 +39,19 @@ namespace SysExtensions.Tests
         [InlineData(0, -1, "length")]
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new TextErrorInfo(string.Empty, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.Unspecified, string.Empty, start, length));
         }
 
         [Theory]
-        [InlineData("", 0, 0)]
-        [InlineData("Error!", 0, 1)]
+        [InlineData(JsonErrorCode.Unspecified, "", 0, 0)]
+        [InlineData(JsonErrorCode.Custom, "Error!", 0, 1)]
         // No newline conversions.
-        [InlineData("\n", 1, 0)]
-        [InlineData("Error!\r\n", 0, 2)]
-        public void UnchangedParametersInError(string message, int start, int length)
+        [InlineData(JsonErrorCode.ExpectedEof, "\n", 1, 0)]
+        [InlineData(JsonErrorCode.Custom + 999, "Error!\r\n", 0, 2)]
+        public void UnchangedParametersInError(JsonErrorCode errorCode, string message, int start, int length)
         {
-            var errorInfo = new TextErrorInfo(message, start, length);
+            var errorInfo = new JsonErrorInfo(errorCode, message, start, length);
+            Assert.Equal(errorCode, errorInfo.ErrorCode);
             Assert.Equal(message, errorInfo.Message);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
