@@ -46,7 +46,30 @@ namespace SysExtensions
         /// The elements of the list.
         /// </param>
         public ReadOnlyList(IEnumerable<T> elements)
-            => array = elements == null || !elements.Any() ? emptyArray : elements.ToArray();
+        {
+            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
+            if (elements is ICollection<T> collection)
+            {
+                var length = collection.Count;
+                if (length == 0)
+                {
+                    array = emptyArray;
+                }
+                else
+                {
+                    array = new T[length];
+                    collection.CopyTo(array, 0);
+                }
+            }
+            else if (elements == null || !elements.Any())
+            {
+                array = emptyArray;
+            }
+            else
+            {
+                array = elements.ToArray();
+            }
+        }
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.
