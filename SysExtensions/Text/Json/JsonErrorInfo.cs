@@ -19,14 +19,34 @@
  *********************************************************************************/
 #endregion
 
+using System;
+
 namespace SysExtensions.Text.Json
 {
-    public class JsonErrorInfo : TextErrorInfo
+    /// <summary>
+    /// Reports an error at a certain location in a source text.
+    /// </summary>
+    public class JsonErrorInfo
     {
         /// <summary>
         /// Gets the error code.
         /// </summary>
         public JsonErrorCode ErrorCode { get; }
+
+        /// <summary>
+        /// Gets the error message.
+        /// </summary>
+        public string Message { get; }
+
+        /// <summary>
+        /// Gets the start position of the text span where the error occurred.
+        /// </summary>
+        public int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span where the error occurred.
+        /// </summary>
+        public int Length { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
@@ -43,16 +63,22 @@ namespace SysExtensions.Text.Json
         /// <param name="length">
         /// The length of the text span where the error occurred.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="message"/> is null.
         /// </exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
         /// </exception>
         public JsonErrorInfo(JsonErrorCode errorCode, string message, int start, int length)
-            : base(message, start, length)
         {
+            Message = message ?? throw new ArgumentNullException(nameof(message));
+
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
             ErrorCode = errorCode;
+            Start = start;
+            Length = length;
         }
     }
 }

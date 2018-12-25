@@ -62,7 +62,6 @@
     <Compile Include="Text\Json\JsonValue.cs" />
     <Compile Include="Text\Json\JsonWhitespace.cs" />
     <Compile Include="Text\TextElement.cs" />
-    <Compile Include="Text\TextErrorInfo.cs" />
     <Compile Include="Text\TextIndex.cs" />
     <Compile Include="Union.cs" />
     <Compile Include="UtilityExtensions.cs" />
