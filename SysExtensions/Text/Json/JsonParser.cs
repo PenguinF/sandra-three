@@ -31,28 +31,28 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public class JsonParser : JsonSymbolVisitor<JsonSyntaxNode>
     {
-        private readonly ReadOnlyList<TextElement<JsonSymbol>> tokens;
-        private readonly int sourceLength;
+        private readonly ReadOnlyList<TextElement<JsonSymbol>> Tokens;
+        private readonly int SourceLength;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
-        private int currentTokenIndex;
+        private int CurrentTokenIndex;
 
         public JsonParser(ReadOnlyList<TextElement<JsonSymbol>> tokens, int sourceLength)
         {
-            this.tokens = tokens;
-            this.sourceLength = sourceLength;
-            currentTokenIndex = 0;
+            Tokens = tokens;
+            SourceLength = sourceLength;
+            CurrentTokenIndex = 0;
         }
 
         private TextElement<JsonSymbol> PeekSkipComments()
         {
             // Skip comments until encountering something meaningful.
-            while (currentTokenIndex < tokens.Count)
+            while (CurrentTokenIndex < Tokens.Count)
             {
-                TextElement<JsonSymbol> current = tokens[currentTokenIndex];
+                TextElement<JsonSymbol> current = Tokens[CurrentTokenIndex];
                 if (!current.TerminalSymbol.IsBackground) return current;
                 Errors.AddRange(current.TerminalSymbol.Errors);
-                currentTokenIndex++;
+                CurrentTokenIndex++;
             }
             return null;
         }
@@ -60,11 +60,11 @@ namespace SysExtensions.Text.Json
         private TextElement<JsonSymbol> ReadSkipComments()
         {
             // Skip comments until encountering something meaningful.
-            while (currentTokenIndex < tokens.Count)
+            while (CurrentTokenIndex < Tokens.Count)
             {
-                TextElement<JsonSymbol> current = tokens[currentTokenIndex];
+                TextElement<JsonSymbol> current = Tokens[CurrentTokenIndex];
                 Errors.AddRange(current.TerminalSymbol.Errors);
-                currentTokenIndex++;
+                CurrentTokenIndex++;
                 if (!current.TerminalSymbol.IsBackground) return current;
             }
             return null;
@@ -186,7 +186,7 @@ namespace SysExtensions.Text.Json
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
-                            sourceLength,
+                            SourceLength,
                             0));
                     }
                     else if (!isCurlyClose)
@@ -237,7 +237,7 @@ namespace SysExtensions.Text.Json
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
-                            sourceLength,
+                            SourceLength,
                             0));
                     }
                     else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
@@ -266,7 +266,7 @@ namespace SysExtensions.Text.Json
 
             Errors.Add(new JsonErrorInfo(
                 JsonErrorCode.UnrecognizedValue,
-                tokens[currentTokenIndex - 1].Start,
+                Tokens[CurrentTokenIndex - 1].Start,
                 value.Length,
                 new[] { value }));
 
