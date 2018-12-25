@@ -186,12 +186,15 @@ namespace SysExtensions.Text.Json
                 if (!isComma)
                 {
                     // Assume missing closing bracket '}' on EOF or control symbol.
+                    int endPosition;
                     if (textElement == null)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
                             SourceLength,
                             0));
+
+                        endPosition = SourceLength;
                     }
                     else if (!isCurlyClose)
                     {
@@ -199,9 +202,17 @@ namespace SysExtensions.Text.Json
                             JsonErrorCode.ControlSymbolInObject,
                             textElement.Start,
                             textElement.Length));
+
+                        endPosition = textElement.Start;
+                    }
+                    else
+                    {
+                        endPosition = textElement.End;
                     }
 
-                    return new JsonMapSyntax(mapBuilder);
+                    int start = visitedToken.Start;
+                    int length = endPosition - start;
+                    return new JsonMapSyntax(mapBuilder, start, length);
                 }
             }
         }
@@ -231,18 +242,21 @@ namespace SysExtensions.Text.Json
                             textElement.Start,
                             textElement.Length));
 
-                        listBuilder.Add(new JsonMissingValueSyntax());
+                        listBuilder.Add(new JsonMissingValueSyntax(textElement.Start));
                     }
                 }
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
+                    int endPosition;
                     if (textElement == null)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
                             SourceLength,
                             0));
+
+                        endPosition = SourceLength;
                     }
                     else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
                     {
@@ -250,9 +264,17 @@ namespace SysExtensions.Text.Json
                             JsonErrorCode.ControlSymbolInArray,
                             textElement.Start,
                             textElement.Length));
+
+                        endPosition = textElement.Start;
+                    }
+                    else
+                    {
+                        endPosition = textElement.End;
                     }
 
-                    return new JsonListSyntax(listBuilder);
+                    int start = visitedToken.Start;
+                    int length = endPosition - start;
+                    return new JsonListSyntax(listBuilder, start, length);
                 }
             }
         }
@@ -260,12 +282,12 @@ namespace SysExtensions.Text.Json
         public override JsonSyntaxNode VisitValue(JsonValue symbol, TextElement<JsonSymbol> visitedToken)
         {
             string value = symbol.Value;
-            if (value == JsonValue.True) return new JsonBooleanLiteralSyntax(true);
-            if (value == JsonValue.False) return new JsonBooleanLiteralSyntax(false);
+            if (value == JsonValue.True) return new JsonBooleanLiteralSyntax(visitedToken, true);
+            if (value == JsonValue.False) return new JsonBooleanLiteralSyntax(visitedToken, false);
 
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
-                return new JsonIntegerLiteralSyntax(integerValue);
+                return new JsonIntegerLiteralSyntax(visitedToken, integerValue);
             }
 
             Errors.Add(new JsonErrorInfo(
@@ -274,17 +296,17 @@ namespace SysExtensions.Text.Json
                 visitedToken.Length,
                 new[] { value }));
 
-            return new JsonUndefinedValueSyntax();
+            return new JsonUndefinedValueSyntax(visitedToken);
         }
 
         public override JsonSyntaxNode VisitString(JsonString symbol, TextElement<JsonSymbol> visitedToken)
-            => new JsonStringLiteralSyntax(symbol.Value);
+            => new JsonStringLiteralSyntax(visitedToken, symbol.Value);
 
         private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
-                                     out JsonSyntaxNode firstValue,
+                                     out JsonSyntaxNode firstValueNode,
                                      out TextElement<JsonSymbol> firstValueSymbol)
         {
-            firstValue = default(JsonSyntaxNode);
+            firstValueNode = default(JsonSyntaxNode);
             firstValueSymbol = default(TextElement<JsonSymbol>);
 
             TextElement<JsonSymbol> textElement = PeekSkipComments();
@@ -300,8 +322,8 @@ namespace SysExtensions.Text.Json
 
                 if (!hasValue)
                 {
-                    if (textElement.TerminalSymbol.Errors.Any()) firstValue = new JsonUndefinedValueSyntax();
-                    else firstValue = Visit(textElement.TerminalSymbol, textElement);
+                    if (textElement.TerminalSymbol.Errors.Any()) firstValueNode = new JsonUndefinedValueSyntax(textElement);
+                    else firstValueNode = Visit(textElement.TerminalSymbol, textElement);
                     hasValue = true;
                 }
                 else if (!textElement.TerminalSymbol.Errors.Any())

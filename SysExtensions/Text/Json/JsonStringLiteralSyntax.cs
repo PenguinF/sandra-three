@@ -28,7 +28,8 @@ namespace SysExtensions.Text.Json
     {
         public string Value { get; }
 
-        public JsonStringLiteralSyntax(string value)
+        public JsonStringLiteralSyntax(TextElement<JsonSymbol> stringToken, string value)
+            : base(stringToken.Start, stringToken.Length)
             => Value = value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitStringLiteralSyntax(this);

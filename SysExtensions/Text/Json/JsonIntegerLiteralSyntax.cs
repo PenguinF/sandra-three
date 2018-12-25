@@ -30,7 +30,8 @@ namespace SysExtensions.Text.Json
     {
         public BigInteger Value { get; }
 
-        public JsonIntegerLiteralSyntax(BigInteger value)
+        public JsonIntegerLiteralSyntax(TextElement<JsonSymbol> integerToken, BigInteger value)
+            : base(integerToken.Start, integerToken.Length)
             => Value = value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);

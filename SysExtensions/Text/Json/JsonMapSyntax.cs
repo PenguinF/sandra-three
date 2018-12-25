@@ -30,7 +30,8 @@ namespace SysExtensions.Text.Json
     {
         public IReadOnlyList<JsonMapNodeKeyValuePair> MapNodeKeyValuePairs { get; }
 
-        public JsonMapSyntax(IReadOnlyList<JsonMapNodeKeyValuePair> mapNodeKeyValuePairs)
+        public JsonMapSyntax(IReadOnlyList<JsonMapNodeKeyValuePair> mapNodeKeyValuePairs, int start, int length)
+            : base(start, length)
             => MapNodeKeyValuePairs = mapNodeKeyValuePairs;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitMapSyntax(this);

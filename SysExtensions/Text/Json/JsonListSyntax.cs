@@ -30,7 +30,8 @@ namespace SysExtensions.Text.Json
     {
         public IReadOnlyList<JsonSyntaxNode> ElementNodes { get; }
 
-        public JsonListSyntax(IReadOnlyList<JsonSyntaxNode> elementNodes)
+        public JsonListSyntax(IReadOnlyList<JsonSyntaxNode> elementNodes, int start, int length)
+            : base(start, length)
             => ElementNodes = elementNodes;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitListSyntax(this);

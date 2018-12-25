@@ -26,6 +26,22 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public abstract class JsonSyntaxNode
     {
+        /// <summary>
+        /// Gets the start position of the text span corresponding with this node.
+        /// </summary>
+        public int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length { get; }
+
+        protected JsonSyntaxNode(int start, int length)
+        {
+            Start = start;
+            Length = length;
+        }
+
         public abstract void Accept(JsonSyntaxNodeVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg);

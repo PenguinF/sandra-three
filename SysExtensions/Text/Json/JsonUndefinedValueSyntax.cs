@@ -26,7 +26,8 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public sealed class JsonUndefinedValueSyntax : JsonSyntaxNode
     {
-        public JsonUndefinedValueSyntax()
+        public JsonUndefinedValueSyntax(TextElement<JsonSymbol> undefinedToken)
+            : base(undefinedToken.Start, undefinedToken.Length)
         {
         }
 

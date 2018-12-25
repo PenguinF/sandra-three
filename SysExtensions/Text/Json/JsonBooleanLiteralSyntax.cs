@@ -28,7 +28,8 @@ namespace SysExtensions.Text.Json
     {
         public bool Value { get; }
 
-        public JsonBooleanLiteralSyntax(bool value)
+        public JsonBooleanLiteralSyntax(TextElement<JsonSymbol> booleanToken, bool value)
+            : base(booleanToken.Start, booleanToken.Length)
             => Value = value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);

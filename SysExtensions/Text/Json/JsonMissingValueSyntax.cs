@@ -26,7 +26,8 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public sealed class JsonMissingValueSyntax : JsonSyntaxNode
     {
-        public JsonMissingValueSyntax()
+        public JsonMissingValueSyntax(int start)
+            : base(start, 0)
         {
         }
 
