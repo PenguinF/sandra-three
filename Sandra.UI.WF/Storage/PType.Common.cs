@@ -112,8 +112,19 @@ namespace Sandra.UI.WF.Storage
         {
             private readonly Dictionary<string, T> stringToTarget = new Dictionary<string, T>();
 
+            /// <summary>
+            /// Initializes a new instance of a <see cref="KeyedSet{T}"/> <see cref="PType"/>.
+            /// </summary>
+            /// <param name="keyedValues">
+            /// The mapping which maps distinct keys to values of type <typeparamref name="T"/>.
+            /// </param>
+            /// <exception cref="ArgumentNullException">
+            /// <paramref name="keyedValues"/> is null.
+            /// </exception>
             public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
             {
+                if (keyedValues == null) throw new ArgumentNullException(nameof(keyedValues));
+
                 foreach (var keyedValue in keyedValues)
                 {
                     stringToTarget.Add(keyedValue.Key, keyedValue.Value);
