@@ -37,16 +37,19 @@ namespace SysExtensions.Tests
         }
 
         [Theory]
-        [InlineData(JsonErrorCode.Unspecified, 0, 0)]
-        [InlineData(JsonErrorCode.Custom, 0, 1)]
-        [InlineData(JsonErrorCode.ExpectedEof, 1, 0)]
-        [InlineData(JsonErrorCode.Custom + 999, 0, 2)]
-        public void UnchangedParametersInError(JsonErrorCode errorCode, int start, int length)
+        [InlineData(JsonErrorCode.Unspecified, 0, 0, null)]
+        [InlineData(JsonErrorCode.Custom, 0, 1, new string[0])]
+        [InlineData(JsonErrorCode.ExpectedEof, 1, 0, new[] { "\n", "" })]
+        [InlineData(JsonErrorCode.Custom + 999, 0, 2, new[] { "Aa" })]
+        public void UnchangedParametersInError(JsonErrorCode errorCode, int start, int length, string[] parameters)
         {
-            var errorInfo = new JsonErrorInfo(errorCode, start, length);
+            var errorInfo = new JsonErrorInfo(errorCode, start, length, parameters);
             Assert.Equal(errorCode, errorInfo.ErrorCode);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
+
+            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+            Assert.Equal<string>(parameters, errorInfo.Parameters);
         }
     }
 }

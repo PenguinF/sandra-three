@@ -407,9 +407,11 @@ namespace SysExtensions.Tests
             {
                 Assert.NotNull(generatedError);
                 Assert.Equal(expectedError.ErrorCode, generatedError.ErrorCode);
-                Assert.Equal(expectedError.Message, generatedError.Message);
                 Assert.Equal(expectedError.Start, generatedError.Start);
                 Assert.Equal(expectedError.Length, generatedError.Length);
+
+                // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+                Assert.Equal<string>(expectedError.Parameters, generatedError.Parameters);
             })).ToArray());
         }
     }

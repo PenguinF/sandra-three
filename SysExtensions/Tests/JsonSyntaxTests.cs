@@ -151,6 +151,9 @@ namespace SysExtensions.Tests
             Assert.Equal(expected.Start, actual.Start);
             Assert.Equal(expected.Length, actual.Length);
             Assert.Equal(expected.ErrorCode, actual.ErrorCode);
+
+            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+            Assert.Equal<string>(expected.Parameters, actual.Parameters);
         }
 
         [Theory]
