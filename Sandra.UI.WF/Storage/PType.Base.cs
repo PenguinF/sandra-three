@@ -50,17 +50,10 @@ namespace Sandra.UI.WF.Storage
         private sealed class BaseType<TValue> : PType<TValue>
             where TValue : PValue
         {
-            public override bool TryGetValidValue(PValue value, out TValue targetValue)
-            {
-                if (value is TValue)
-                {
-                    targetValue = (TValue)value;
-                    return true;
-                }
-
-                targetValue = default(TValue);
-                return false;
-            }
+            public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
+                => value is TValue targetValue
+                ? ValidValue(targetValue)
+                : InvalidValue(null);
 
             public override PValue GetPValue(TValue value) => value;
         }
@@ -92,21 +85,13 @@ namespace Sandra.UI.WF.Storage
             /// <paramref name="baseType"/> is null.
             /// </exception>
             protected Derived(PType<TBase> baseType)
-            {
-                BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
-            }
+                => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
 
-            public override sealed bool TryGetValidValue(PValue value, out T targetValue)
-            {
-                if (BaseType.TryGetValidValue(value, out TBase baseValue)
-                    && TryGetTargetValue(baseValue).IsOption2(out targetValue))
-                {
-                    return true;
-                }
-
-                targetValue = default(T);
-                return false;
-            }
+            public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
+                => BaseType.TryGetValidValue(value).IsOption2(out TBase baseValue)
+                && TryGetTargetValue(baseValue).IsOption2(out T targetValue)
+                ? ValidValue(targetValue)
+                : InvalidValue(null);
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 

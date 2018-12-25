@@ -51,7 +51,7 @@ namespace Sandra.UI.WF.Storage
             if (hasRootValue)
             {
                 PValue rootValue = new ToPValueConverter().Visit(rootNode);
-                bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
+                bool validMap = PType.Map.TryGetValidValue(rootValue).IsOption2(out map);
                 if (!validMap)
                 {
                     errors.Add(new JsonErrorInfo(

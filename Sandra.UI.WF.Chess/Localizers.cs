@@ -482,19 +482,19 @@ namespace Sandra.UI.WF
 
         public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetTargetValue(PMap value)
         {
-            var targetValue = new Dictionary<LocalizedStringKey, string>();
+            var dictionary = new Dictionary<LocalizedStringKey, string>();
 
             foreach (var kv in value)
             {
-                if (!PType.String.TryGetValidValue(kv.Value, out PString stringValue))
+                if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
                 {
                     return InvalidValue(null);
                 }
 
-                targetValue.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
+                dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
             }
 
-            return ValidValue(targetValue);
+            return ValidValue(dictionary);
         }
     }
 }

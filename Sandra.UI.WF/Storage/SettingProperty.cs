@@ -130,7 +130,7 @@ namespace Sandra.UI.WF.Storage
         /// Whether or not conversion succeeded.
         /// </returns>
         public bool TryGetValidValue(PValue value, out T targetValue)
-            => PType.TryGetValidValue(value, out targetValue);
+            => PType.TryGetValidValue(value).IsOption2(out targetValue);
 
         public override bool IsValidValue(PValue value)
             => TryGetValidValue(value, out T targetValue);
