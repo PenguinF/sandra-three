@@ -28,6 +28,21 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public class JsonErrorInfo
     {
+        public const string EmptyKeyMessage = "Missing property key";
+        public const string EmptyValueMessage = "Missing value";
+        public const string MultipleValuesMessage = "',' expected";
+        public const string MultiplePropertyKeysMessage = "':' expected";
+        public const string MultipleKeySectionsMessage = "Unexpected ':', expected ',' or '}'";
+        public const string EofInObjectMessage = "Unexpected end of file, expected '}'";
+        public const string InvalidKeyMessage = "Invalid property key";
+        public const string DuplicateKeyMessage = "Key '{0}' already exists in object";
+        public const string ControlSymbolInObjectMessage = "'}' expected";
+        public const string EofInArrayMessage = "Unexpected end of file, expected ']'";
+        public const string ControlSymbolInArrayMessage = "']' expected";
+        public const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
+        public const string NoPMapMessage = "Expected json object at root";
+        public const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
+
         /// <summary>
         /// Gets the error code.
         /// </summary>
