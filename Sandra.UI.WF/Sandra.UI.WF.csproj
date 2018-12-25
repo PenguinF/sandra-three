@@ -68,6 +68,7 @@
     <Compile Include="Storage\CompactSettingWriter.cs" />
     <Compile Include="Storage\FileNameType.cs" />
     <Compile Include="Storage\FileWatcher.cs" />
+    <Compile Include="Storage\ITypeErrorBuilder.cs" />
     <Compile Include="Storage\OpaqueColorType.cs" />
     <Compile Include="Storage\PersistableFormState.cs" />
     <Compile Include="Storage\PList.cs" />
