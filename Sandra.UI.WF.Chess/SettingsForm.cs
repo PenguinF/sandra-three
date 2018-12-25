@@ -22,6 +22,7 @@
 using Sandra.UI.WF.Storage;
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -39,6 +40,8 @@ namespace Sandra.UI.WF
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
         private readonly SettingsTextBox settingsTextBox;
+
+        private readonly LocalizedString errorLocationString;
 
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
@@ -102,8 +105,9 @@ namespace Sandra.UI.WF
                 // Interaction between settingsTextBox and errorsTextBox.
                 settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
-                // Do an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
-                DisplayErrors();
+                // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
+                errorLocationString = new LocalizedString(LocalizedStringKeys.ErrorLocation);
+                errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
                 errorsListBox.KeyDown += ErrorsListBox_KeyDown;
@@ -160,9 +164,13 @@ namespace Sandra.UI.WF
                 else
                 {
                     var errorMessages = (from error in settingsTextBox.CurrentErrors
-                                         let lineIndex = settingsTextBox.LineFromPosition(error.Start)
-                                         let position = settingsTextBox.GetColumn(error.Start)
-                                         select $"{error.Message()} at line {lineIndex + 1}, position {position + 1}").ToArray();
+                                         let lineIndex = (settingsTextBox.LineFromPosition(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let position = (settingsTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                                         // Instead of using errorLocationString.DisplayText.Value,
+                                         // use the current localizer to format the localized string.
+                                         select Localizer.Current.Localize(
+                                             errorLocationString.Key,
+                                             new[] { error.Message(), lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;
@@ -217,6 +225,16 @@ namespace Sandra.UI.WF
 
                 splitter.SplitterMoved += (_, __) => Program.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                errorLocationString?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

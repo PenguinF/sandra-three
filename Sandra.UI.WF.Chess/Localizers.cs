@@ -44,6 +44,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
+        internal static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
         internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
@@ -238,9 +239,10 @@ namespace Sandra.UI.WF
             Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
         }
 
-        public override string Localize(LocalizedStringKey localizedStringKey)
-            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
-            : Default.Localize(localizedStringKey);
+        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText)
+            ? displayText.ConditionalFormat(parameters)
+            : Default.Localize(localizedStringKey, parameters);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;
 
@@ -295,9 +297,10 @@ namespace Sandra.UI.WF
 
         public readonly Dictionary<LocalizedStringKey, string> Dictionary;
 
-        public override string Localize(LocalizedStringKey localizedStringKey)
-            => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
-            : Default.Localize(localizedStringKey);
+        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
+            => Dictionary.TryGetValue(localizedStringKey, out string displayText)
+            ? displayText.ConditionalFormat(parameters)
+            : Default.Localize(localizedStringKey, parameters);
 
         private BuiltInEnglishLocalizer()
         {
@@ -314,6 +317,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
+                { LocalizedStringKeys.ErrorLocation, "{0} at line {1}, position {2}" },
                 { LocalizedStringKeys.Exit, "Exit" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },
@@ -361,77 +365,82 @@ namespace Sandra.UI.WF
                 { LocalizedConsoleKeys.ConsoleKeyEnd, "End" },
                 { LocalizedConsoleKeys.ConsoleKeyPageDown, "PageDown" },
                 { LocalizedConsoleKeys.ConsoleKeyPageUp, "PageUp" },
+
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "Unexpected symbol '{0}'" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "Unterminated multi-line comment" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "Unterminated string" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "Unrecognized escape sequence ('{0}')" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "Illegal control character '{0}' in string" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.ExpectedEof), "End of file expected" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInObject), "Unexpected end of file, expected '}'" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInArray), "Unexpected end of file, expected ']'" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.ControlSymbolInObject), "'}' expected" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.ControlSymbolInArray), "']' expected" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.InvalidPropertyKey), "Invalid property key" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "Key '{0}' already exists in object" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "Missing property key" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MissingValue), "Missing value" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "Unrecognized value '{0}'" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeySections), "Unexpected ':', expected ',' or '}'" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
+                { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
+
+                { JsonErrorInfoExtensions.RootValueShouldBeObjectTypeError, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             };
         }
     }
 
     public static class JsonErrorInfoExtensions
     {
-        public const string EmptyKeyMessage = "Missing property key";
-        public const string EmptyValueMessage = "Missing value";
-        public const string MultipleValuesMessage = "',' expected";
-        public const string MultiplePropertyKeysMessage = "':' expected";
-        public const string MultipleKeySectionsMessage = "Unexpected ':', expected ',' or '}'";
-        public const string EofInObjectMessage = "Unexpected end of file, expected '}'";
-        public const string InvalidKeyMessage = "Invalid property key";
-        public const string DuplicateKeyMessage = "Key '{0}' already exists in object";
-        public const string ControlSymbolInObjectMessage = "'}' expected";
-        public const string EofInArrayMessage = "Unexpected end of file, expected ']'";
-        public const string ControlSymbolInArrayMessage = "']' expected";
-        public const string UnrecognizedValueMessage = "Unrecognized value '{0}'";
-        public const string NoPMapMessage = "Expected json object at root";
-        public const string FileShouldHaveEndedAlreadyMessage = "End of file expected";
+        internal static readonly LocalizedStringKey RootValueShouldBeObjectTypeError = new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError));
+
+        public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
+        {
+            const string UnspecifiedMessage = "Unspecified error";
+
+            if (jsonErrorCode == JsonErrorCode.Unspecified)
+            {
+                return LocalizedStringKey.Unlocalizable(UnspecifiedMessage);
+            }
+            else if (jsonErrorCode == JsonErrorCode.Custom)
+            {
+                // Special case for an error which is not a json parse error,
+                // but rather like a type error resulting from a root value having an unexpected type.
+                return RootValueShouldBeObjectTypeError;
+            }
+            else
+            {
+                return new LocalizedStringKey($"JsonError{jsonErrorCode}");
+            }
+        }
 
         /// <summary>
         /// Gets the error message.
         /// </summary>
         public static string Message(this JsonErrorInfo jsonErrorInfo)
         {
-            var parameters = jsonErrorInfo.Parameters;
+            return Localizer.Current.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+        }
 
-            switch (jsonErrorInfo.ErrorCode)
+        /// <summary>
+        /// Conditionally formats a string, based on whether or not it has parameters.
+        /// </summary>
+        public static string ConditionalFormat(this string localizedString, string[] parameters)
+        {
+            if (parameters == null || parameters.Length == 0) return localizedString;
+
+            try
             {
-                case JsonErrorCode.UnexpectedSymbol:
-                    return string.Format("Unexpected symbol '{0}'", parameters);
-                case JsonErrorCode.UnterminatedMultiLineComment:
-                    return "Unterminated multi-line comment";
-                case JsonErrorCode.UnterminatedString:
-                    return "Unterminated string";
-                case JsonErrorCode.UnrecognizedEscapeSequence:
-                    return string.Format("Unrecognized escape sequence ('{0}')", parameters);
-                case JsonErrorCode.IllegalControlCharacterInString:
-                    return string.Format("Illegal control character '{0}' in string", parameters);
-                case JsonErrorCode.ExpectedEof:
-                    return FileShouldHaveEndedAlreadyMessage;
-                case JsonErrorCode.UnexpectedEofInObject:
-                    return EofInObjectMessage;
-                case JsonErrorCode.UnexpectedEofInArray:
-                    return EofInArrayMessage;
-                case JsonErrorCode.ControlSymbolInObject:
-                    return ControlSymbolInObjectMessage;
-                case JsonErrorCode.ControlSymbolInArray:
-                    return ControlSymbolInArrayMessage;
-                case JsonErrorCode.InvalidPropertyKey:
-                    return InvalidKeyMessage;
-                case JsonErrorCode.PropertyKeyAlreadyExists:
-                    return string.Format(DuplicateKeyMessage, parameters);
-                case JsonErrorCode.MissingPropertyKey:
-                    return EmptyKeyMessage;
-                case JsonErrorCode.MissingValue:
-                    return EmptyValueMessage;
-                case JsonErrorCode.UnrecognizedValue:
-                    return string.Format(UnrecognizedValueMessage, parameters);
-                case JsonErrorCode.MultiplePropertyKeySections:
-                    return MultipleKeySectionsMessage;
-                case JsonErrorCode.MultiplePropertyKeys:
-                    return MultiplePropertyKeysMessage;
-                case JsonErrorCode.MultipleValues:
-                    return MultipleValuesMessage;
-                case JsonErrorCode.Custom:
-                    return NoPMapMessage;
-                case JsonErrorCode.Unspecified:
-                default:
-                    return "Unspecified error";
+                return string.Format(localizedString, parameters);
+            }
+            catch (FormatException)
+            {
+                // The provided localized format string is in an incorrect format, and/or it contains
+                // more parameter substitution locations than there are parameters provided.
+                // Examples:
+                // string.Format("Test with parameters {invalid parameter}", parameters)
+                // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
+                return $"{localizedString} {UtilityExtensions.ToDefaultParameterListDisplayString(parameters)}";
             }
         }
     }

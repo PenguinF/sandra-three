@@ -509,14 +509,8 @@ namespace Sandra.UI.WF.Storage
     {
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
-            string errorMessage = jsonErrorInfo.ErrorCode.ToString();
-
-            if (jsonErrorInfo.Parameters != null && jsonErrorInfo.Parameters.Length > 0)
-            {
-                errorMessage += "(" + string.Join(", ", jsonErrorInfo.Parameters) + ")";
-            }
-
-            return $"{errorMessage} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
+            string paramDisplayString = UtilityExtensions.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
+            return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
         public AutoSaveFileParseException(JsonErrorInfo jsonErrorInfo)
