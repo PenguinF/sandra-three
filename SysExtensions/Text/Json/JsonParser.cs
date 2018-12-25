@@ -84,18 +84,19 @@ namespace SysExtensions.Text.Json
             {
                 bool gotKey = ParseMultiValue(
                     JsonErrorCode.MultiplePropertyKeys,
-                    out JsonSyntaxNode parsedKey,
+                    out JsonSyntaxNode parsedKeyNode,
                     out TextElement<JsonSymbol> first);
 
                 bool validKey = false;
-                string propertyKey = default(string);
+                JsonStringLiteralSyntax propertyKeyNode = default(JsonStringLiteralSyntax);
 
                 if (gotKey)
                 {
                     // Analyze if this is an actual, unique property key.
-                    if (parsedKey is JsonStringLiteralSyntax)
+                    if (parsedKeyNode is JsonStringLiteralSyntax stringLiteral)
                     {
-                        propertyKey = ((JsonStringLiteralSyntax)parsedKey).Value;
+                        propertyKeyNode = stringLiteral;
+                        string propertyKey = stringLiteral.Value;
 
                         // Expect unique keys.
                         validKey = !foundKeys.Contains(propertyKey);
@@ -150,7 +151,7 @@ namespace SysExtensions.Text.Json
                     // Only the first value can be valid, even if it's undefined.
                     if (validKey && !gotColon && gotValue)
                     {
-                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKey, parsedValue));
+                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValue));
                     }
 
                     textElement = ReadSkipComments();

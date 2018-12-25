@@ -106,7 +106,7 @@ namespace Sandra.UI.WF.Storage
 
             foreach (var keyedNode in value.MapNodeKeyValuePairs)
             {
-                mapBuilder.Add(keyedNode.Key, Visit(keyedNode.Value));
+                mapBuilder.Add(keyedNode.Key.Value, Visit(keyedNode.Value));
             }
 
             return new PMap(mapBuilder);

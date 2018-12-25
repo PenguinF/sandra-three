@@ -43,7 +43,10 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public struct JsonMapNodeKeyValuePair
     {
-        public string Key { get; }
+        /// <summary>
+        /// Gets the syntax node containing the key of this <see cref="JsonMapNodeKeyValuePair"/>.
+        /// </summary>
+        public JsonStringLiteralSyntax Key { get; }
 
         /// <summary>
         /// Gets the syntax node containing the value of this <see cref="JsonMapNodeKeyValuePair"/>.
@@ -53,10 +56,13 @@ namespace SysExtensions.Text.Json
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonMapNodeKeyValuePair"/>.
         /// </summary>
+        /// <param name="key">
+        /// The syntax node containing the key.
+        /// </param>
         /// <param name="value">
         /// The syntax node containing the value.
         /// </param>
-        public JsonMapNodeKeyValuePair(string key, JsonSyntaxNode value)
+        public JsonMapNodeKeyValuePair(JsonStringLiteralSyntax key, JsonSyntaxNode value)
         {
             Key = key;
             Value = value;
