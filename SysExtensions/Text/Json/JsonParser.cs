@@ -231,7 +231,7 @@ namespace SysExtensions.Text.Json
                             textElement.Start,
                             textElement.Length));
 
-                        listBuilder.Add(new JsonUndefinedValueSyntax());
+                        listBuilder.Add(new JsonMissingValueSyntax());
                     }
                 }
                 else

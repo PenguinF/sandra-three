@@ -116,6 +116,7 @@ namespace Sandra.UI.WF.Storage
         public override PValue VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
         public override PValue VisitListSyntax(JsonListSyntax value) => new PList(value.ElementNodes.Select(Visit));
         public override PValue VisitMapSyntax(JsonMapSyntax value) => ConvertToMap(value);
+        public override PValue VisitMissingValueSyntax(JsonMissingValueSyntax node) => PConstantValue.Undefined;
         public override PValue VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
         public override PValue VisitUndefinedValueSyntax(JsonUndefinedValueSyntax value) => PConstantValue.Undefined;
     }
