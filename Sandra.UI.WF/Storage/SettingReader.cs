@@ -121,7 +121,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.InvalidPropertyKey,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.InvalidPropertyKey),
                                 first.Start,
                                 first.Length));
                         }
@@ -143,7 +142,6 @@ namespace Sandra.UI.WF.Storage
                             // Multiple ':' without a ','.
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.MultiplePropertyKeySections,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.MultiplePropertyKeySections),
                                 textElement.Start,
                                 textElement.Length));
                         }
@@ -175,7 +173,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.MissingPropertyKey,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.MissingPropertyKey),
                                 textElement.Start,
                                 textElement.Length));
                         }
@@ -184,7 +181,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.MissingValue,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.MissingValue),
                                 textElement.Start,
                                 textElement.Length));
                         }
@@ -197,7 +193,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.UnexpectedEofInObject,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnexpectedEofInObject),
                                 sourceLength,
                                 0));
                         }
@@ -205,7 +200,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.ControlSymbolInObject,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.ControlSymbolInObject),
                                 textElement.Start,
                                 textElement.Length));
                         }
@@ -237,7 +231,6 @@ namespace Sandra.UI.WF.Storage
                             // Two commas or '[,': add an empty PErrorValue.
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.MissingValue,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.MissingValue),
                                 textElement.Start,
                                 textElement.Length));
 
@@ -251,7 +244,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.UnexpectedEofInArray,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnexpectedEofInArray),
                                 sourceLength,
                                 0));
                         }
@@ -259,7 +251,6 @@ namespace Sandra.UI.WF.Storage
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.ControlSymbolInArray,
-                                JsonErrorInfo.FormatErrorMessage(JsonErrorCode.ControlSymbolInArray),
                                 textElement.Start,
                                 textElement.Length));
                         }
@@ -330,7 +321,6 @@ namespace Sandra.UI.WF.Storage
                     // Two or more consecutive values not allowed.
                     Errors.Add(new JsonErrorInfo(
                         multipleValuesErrorCode,
-                        JsonErrorInfo.FormatErrorMessage(multipleValuesErrorCode),
                         textElement.Start,
                         textElement.Length));
                 }
@@ -348,7 +338,6 @@ namespace Sandra.UI.WF.Storage
                 {
                     Errors.Add(new JsonErrorInfo(
                         JsonErrorCode.ExpectedEof,
-                        JsonErrorInfo.FormatErrorMessage(JsonErrorCode.ExpectedEof),
                         extraElement.Start,
                         extraElement.Length));
                 }
@@ -360,7 +349,6 @@ namespace Sandra.UI.WF.Storage
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
-                            JsonErrorInfo.FormatErrorMessage(JsonErrorCode.Custom),
                             textElement.Start,
                             textElement.Length));
                     }

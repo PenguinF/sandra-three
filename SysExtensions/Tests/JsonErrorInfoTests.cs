@@ -39,7 +39,7 @@ namespace SysExtensions.Tests
         [InlineData(0, -1, "length")]
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.Unspecified, string.Empty, start, length));
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new JsonErrorInfo(JsonErrorCode.Unspecified, start, length));
         }
 
         [Theory]

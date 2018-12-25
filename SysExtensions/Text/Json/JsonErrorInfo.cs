@@ -117,6 +117,26 @@ namespace SysExtensions.Text.Json
         /// <param name="errorCode">
         /// The error code.
         /// </param>
+        /// <param name="start">
+        /// The start position of the text span where the error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the error occurred.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
+        public JsonErrorInfo(JsonErrorCode errorCode, int start, int length)
+            : this(errorCode, FormatErrorMessage(errorCode), start, length)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonErrorInfo"/>.
+        /// </summary>
+        /// <param name="errorCode">
+        /// The error code.
+        /// </param>
         /// <param name="message">
         /// The error message.
         /// </param>

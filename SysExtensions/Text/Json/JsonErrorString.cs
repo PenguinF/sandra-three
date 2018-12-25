@@ -37,7 +37,7 @@ namespace SysExtensions.Text.Json
         /// The length of the unterminated string.
         /// </param>
         public static JsonErrorInfo Unterminated(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedString, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnterminatedString), start, length);
+            => new JsonErrorInfo(JsonErrorCode.UnterminatedString, start, length);
 
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unrecognized escape sequences.

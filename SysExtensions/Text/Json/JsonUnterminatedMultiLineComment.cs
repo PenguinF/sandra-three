@@ -35,7 +35,7 @@ namespace SysExtensions.Text.Json
         /// The length of the unterminated comment.
         /// </param>
         public static JsonErrorInfo CreateError(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, JsonErrorInfo.FormatErrorMessage(JsonErrorCode.UnterminatedMultiLineComment), start, length);
+            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
 
         public JsonErrorInfo Error { get; }
 
