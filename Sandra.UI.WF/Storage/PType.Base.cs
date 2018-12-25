@@ -53,7 +53,7 @@ namespace Sandra.UI.WF.Storage
             public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
                 => value is TValue targetValue
                 ? ValidValue(targetValue)
-                : InvalidValue(null);
+                : InvalidValue(new PTypeErrorBuilder());
 
             public override PValue GetPValue(TValue value) => value;
         }
@@ -91,7 +91,7 @@ namespace Sandra.UI.WF.Storage
                 => BaseType.TryGetValidValue(value).IsOption2(out TBase baseValue)
                 && TryGetTargetValue(baseValue).IsOption2(out T targetValue)
                 ? ValidValue(targetValue)
-                : InvalidValue(null);
+                : InvalidValue(new PTypeErrorBuilder());
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 
@@ -179,7 +179,7 @@ namespace Sandra.UI.WF.Storage
             public override sealed Union<ITypeErrorBuilder, T> TryGetTargetValue(T candidateValue)
                 => IsValid(candidateValue, out ITypeErrorBuilder typeError)
                 ? ValidValue(candidateValue)
-                : InvalidValue(null);
+                : InvalidValue(typeError);
 
             public override sealed T GetBaseValue(T value)
             {
@@ -195,7 +195,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public sealed class RangedInteger : Filter<PInteger>
+        public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
             /// Gets the minimum value which is allowed for values of this type.
@@ -226,7 +226,7 @@ namespace Sandra.UI.WF.Storage
                 => MinValue <= candidateValue.Value
                 && candidateValue.Value <= MaxValue
                 ? ValidValue(out typeError)
-                : InvalidValue(null, out typeError);
+                : InvalidValue(this, out typeError);
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

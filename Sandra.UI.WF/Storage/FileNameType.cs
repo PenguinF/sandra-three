@@ -37,6 +37,6 @@ namespace Sandra.UI.WF.Storage
             && !fileName.StartsWith(".")
             && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
             ? ValidValue(out typeError)
-            : InvalidValue(null, out typeError);
+            : InvalidValue(new PTypeErrorBuilder(), out typeError);
     }
 }

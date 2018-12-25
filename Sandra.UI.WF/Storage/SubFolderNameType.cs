@@ -59,7 +59,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            return InvalidValue(null, out typeError);
+            return InvalidValue(new PTypeErrorBuilder(), out typeError);
         }
     }
 }

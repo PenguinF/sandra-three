@@ -65,6 +65,7 @@ namespace Sandra.UI.WF.Storage
                         {
                             if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
                             {
+                                errors.Add(PTypeError.Create(typeError, keyedNode.Value.Start, keyedNode.Value.Length));
                             }
                         }
 

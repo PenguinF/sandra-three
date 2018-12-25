@@ -46,7 +46,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            return InvalidValue(null);
+            return InvalidValue(new PTypeErrorBuilder());
         }
 
         public override string GetBaseValue(Color value)

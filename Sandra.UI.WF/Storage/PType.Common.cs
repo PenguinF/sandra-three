@@ -67,7 +67,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public sealed class Enumeration<TEnum> : Derived<string, TEnum> where TEnum : struct
+        public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
             private readonly Dictionary<string, TEnum> stringToEnum = new Dictionary<string, TEnum>();
@@ -97,12 +97,12 @@ namespace Sandra.UI.WF.Storage
             public override Union<ITypeErrorBuilder, TEnum> TryGetTargetValue(string stringValue)
                 => stringToEnum.TryGetValue(stringValue, out TEnum targetValue)
                 ? ValidValue(targetValue)
-                : InvalidValue(null);
+                : InvalidValue(this);
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
         }
 
-        public sealed class KeyedSet<T> : Derived<string, T> where T : class
+        public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
         {
             private readonly Dictionary<string, T> stringToTarget = new Dictionary<string, T>();
 
@@ -128,7 +128,7 @@ namespace Sandra.UI.WF.Storage
             public override Union<ITypeErrorBuilder, T> TryGetTargetValue(string stringValue)
                 => stringToTarget.TryGetValue(stringValue, out T targetValue)
                 ? ValidValue(targetValue)
-                : InvalidValue(null);
+                : InvalidValue(this);
 
             public override string GetBaseValue(T value)
             {

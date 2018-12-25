@@ -456,7 +456,7 @@ namespace Sandra.UI.WF
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
             ? ValidValue(value.Trim())
-            : InvalidValue(null);
+            : InvalidValue(new PTypeErrorBuilder());
     }
 
     public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
@@ -488,7 +488,7 @@ namespace Sandra.UI.WF
             {
                 if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
                 {
-                    return InvalidValue(null);
+                    return InvalidValue(new PTypeErrorBuilder());
                 }
 
                 dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);

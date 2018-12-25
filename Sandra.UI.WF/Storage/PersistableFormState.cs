@@ -53,7 +53,7 @@ namespace Sandra.UI.WF.Storage
                     return ValidValue(new PersistableFormState(maximized, new Rectangle(left, top, width, height)));
                 }
 
-                return InvalidValue(null);
+                return InvalidValue(new PTypeErrorBuilder());
             }
 
             public override PValue GetPValue(PersistableFormState value) => new PList(
