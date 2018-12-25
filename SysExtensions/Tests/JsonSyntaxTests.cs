@@ -144,6 +144,13 @@ namespace SysExtensions.Tests
             Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty, 0));
         }
 
+        private static void AssertErrorEqual(JsonErrorInfo expected, JsonErrorInfo actual)
+        {
+            Assert.Equal(expected.Start, actual.Start);
+            Assert.Equal(expected.Length, actual.Length);
+            Assert.Equal(expected.Message, actual.Message);
+        }
+
         [Theory]
         [InlineData("*")]
         [InlineData("€")]
@@ -151,7 +158,7 @@ namespace SysExtensions.Tests
         {
             var error = JsonUnknownSymbol.CreateError(displayCharValue, 0);
             var symbol = new JsonUnknownSymbol(displayCharValue, 0);
-            Assert.True(error.EqualTo(symbol.Error));
+            AssertErrorEqual(error, symbol.Error);
         }
 
         [Theory]
@@ -160,7 +167,7 @@ namespace SysExtensions.Tests
         {
             var error = JsonUnterminatedMultiLineComment.CreateError(0, commentText.Length);
             var symbol = new JsonUnterminatedMultiLineComment(0, commentText.Length);
-            Assert.True(error.EqualTo(symbol.Error));
+            AssertErrorEqual(error, symbol.Error);
         }
 
         [Theory]

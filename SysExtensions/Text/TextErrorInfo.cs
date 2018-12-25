@@ -71,26 +71,5 @@ namespace SysExtensions.Text
             Start = start;
             Length = length;
         }
-
-        /// <summary>
-        /// Compares this <see cref="TextErrorInfo"/> with another and returns if they are equal.
-        /// </summary>
-        /// <param name="other">
-        /// The <see cref="TextErrorInfo"/> to compare with.
-        /// </param>
-        /// <returns>
-        /// true if both <see cref="TextErrorInfo"/> instances are equal; otherwise false.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="other"/> is null.
-        /// </exception>
-        public bool EqualTo(TextErrorInfo other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            return Start == other.Start
-                && Length == other.Length
-                && Message == other.Message;
-        }
     }
 }
