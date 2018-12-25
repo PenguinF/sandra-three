@@ -63,10 +63,13 @@ namespace Sandra.UI.WF.Storage
         /// <param name="value">
         /// The value to convert from.
         /// </param>
+        /// <param name="typeError">
+        /// Type error, if conversion failed.
+        /// </param>
         /// <returns>
         /// Whether or not conversion will succeed.
         /// </returns>
-        public abstract bool IsValidValue(PValue value);
+        public abstract bool IsValidValue(PValue value, out ITypeErrorBuilder typeError);
     }
 
     /// <summary>
@@ -130,7 +133,7 @@ namespace Sandra.UI.WF.Storage
         public Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
             => PType.TryGetValidValue(value);
 
-        public override bool IsValidValue(PValue value)
-            => TryGetValidValue(value).IsOption2(out T targetValue);
+        public override bool IsValidValue(PValue value, out ITypeErrorBuilder typeError)
+            => !TryGetValidValue(value).IsOption1(out typeError);
     }
 }
