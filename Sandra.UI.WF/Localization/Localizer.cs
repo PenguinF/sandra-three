@@ -44,7 +44,9 @@ namespace Sandra.UI.WF
             {
                 if (localizedStringKey == null) return null;
                 if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
-                return "{" + localizedStringKey.Key + "}";
+                return parameters == null || parameters.Length == 0
+                    ? "{" + localizedStringKey.Key + "}"
+                    : "{" + localizedStringKey.Key + "(" + string.Join(", ", parameters) + ")}";
             }
         }
 
