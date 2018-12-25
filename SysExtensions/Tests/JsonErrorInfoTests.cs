@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * TextErrorInfoTests.cs
+ * JsonErrorInfoTests.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -25,7 +25,7 @@ using Xunit;
 
 namespace SysExtensions.Tests
 {
-    public class TextErrorInfoTests
+    public class JsonErrorInfoTests
     {
         [Fact]
         public void NullMessageShouldThrowInError()
