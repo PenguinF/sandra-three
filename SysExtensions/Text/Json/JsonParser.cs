@@ -33,8 +33,7 @@ namespace SysExtensions.Text.Json
     {
         private readonly ReadOnlyList<TextElement<JsonSymbol>> tokens;
         private readonly int sourceLength;
-
-        public readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
+        private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
         private int currentTokenIndex;
 
@@ -320,7 +319,7 @@ namespace SysExtensions.Text.Json
             }
         }
 
-        public bool TryParse(out JsonSyntaxNode rootValue, out TextElement<JsonSymbol> textElement)
+        public bool TryParse(out JsonSyntaxNode rootValue, out TextElement<JsonSymbol> textElement, out List<JsonErrorInfo> errors)
         {
             bool hasRootValue = ParseMultiValue(
                 JsonErrorCode.ExpectedEof,
@@ -336,6 +335,7 @@ namespace SysExtensions.Text.Json
                     extraElement.Length));
             }
 
+            errors = Errors;
             return hasRootValue;
         }
     }
