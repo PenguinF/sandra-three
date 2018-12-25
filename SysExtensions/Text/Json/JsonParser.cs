@@ -82,10 +82,7 @@ namespace SysExtensions.Text.Json
 
             for (; ; )
             {
-                bool gotKey = ParseMultiValue(
-                    JsonErrorCode.MultiplePropertyKeys,
-                    out JsonSyntaxNode parsedKeyNode,
-                    out TextElement<JsonSymbol> first);
+                bool gotKey = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys, out JsonSyntaxNode parsedKeyNode);
 
                 bool validKey = false;
                 JsonStringLiteralSyntax propertyKeyNode = default(JsonStringLiteralSyntax);
@@ -109,8 +106,8 @@ namespace SysExtensions.Text.Json
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.PropertyKeyAlreadyExists,
-                                first.Start,
-                                first.Length,
+                                parsedKeyNode.Start,
+                                parsedKeyNode.Length,
                                 new[] { propertyKey }));
                         }
                     }
@@ -118,14 +115,14 @@ namespace SysExtensions.Text.Json
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
-                            first.Start,
-                            first.Length));
+                            parsedKeyNode.Start,
+                            parsedKeyNode.Length));
                     }
                 }
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                 TextElement<JsonSymbol> textElement = ReadSkipComments();
-                JsonSyntaxNode parsedValue = default(JsonSyntaxNode);
+                JsonSyntaxNode parsedValueNode = default(JsonSyntaxNode);
 
                 // If gotValue remains false, a missing value error will be reported.
                 bool gotValue = false;
@@ -143,15 +140,12 @@ namespace SysExtensions.Text.Json
                             textElement.Length));
                     }
 
-                    gotValue |= ParseMultiValue(
-                        JsonErrorCode.MultipleValues,
-                        out parsedValue,
-                        out TextElement<JsonSymbol> firstValueSymbol);
+                    gotValue |= ParseMultiValue(JsonErrorCode.MultipleValues, out parsedValueNode);
 
                     // Only the first value can be valid, even if it's undefined.
                     if (validKey && !gotColon && gotValue)
                     {
-                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValue));
+                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValueNode));
                     }
 
                     textElement = ReadSkipComments();
@@ -223,12 +217,9 @@ namespace SysExtensions.Text.Json
 
             for (; ; )
             {
-                bool gotValue = ParseMultiValue(
-                    JsonErrorCode.MultipleValues,
-                    out JsonSyntaxNode parsedValue,
-                    out TextElement<JsonSymbol> firstSymbol);
+                bool gotValue = ParseMultiValue(JsonErrorCode.MultipleValues, out JsonSyntaxNode parsedValueNode);
 
-                if (gotValue) listBuilder.Add(parsedValue);
+                if (gotValue) listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                 TextElement<JsonSymbol> textElement = ReadSkipComments();
@@ -303,16 +294,13 @@ namespace SysExtensions.Text.Json
             => new JsonStringLiteralSyntax(visitedToken, symbol.Value);
 
         private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
-                                     out JsonSyntaxNode firstValueNode,
-                                     out TextElement<JsonSymbol> firstValueSymbol)
+                                     out JsonSyntaxNode firstValueNode)
         {
             firstValueNode = default(JsonSyntaxNode);
-            firstValueSymbol = default(TextElement<JsonSymbol>);
 
             TextElement<JsonSymbol> textElement = PeekSkipComments();
             if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return false;
 
-            firstValueSymbol = textElement;
             bool hasValue = false;
 
             for (; ; )
@@ -346,12 +334,9 @@ namespace SysExtensions.Text.Json
             }
         }
 
-        public bool TryParse(out JsonSyntaxNode rootValue, out TextElement<JsonSymbol> textElement, out List<JsonErrorInfo> errors)
+        public bool TryParse(out JsonSyntaxNode rootNode, out List<JsonErrorInfo> errors)
         {
-            bool hasRootValue = ParseMultiValue(
-                JsonErrorCode.ExpectedEof,
-                out rootValue,
-                out textElement);
+            bool hasRootValue = ParseMultiValue(JsonErrorCode.ExpectedEof, out rootNode);
 
             TextElement<JsonSymbol> extraElement = ReadSkipComments();
             if (extraElement != null)

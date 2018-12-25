@@ -43,12 +43,9 @@ namespace Sandra.UI.WF.Storage
             Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
         }
 
-        private static bool TryParse(JsonParser parseRun, out PMap map, out List<JsonErrorInfo> errors)
+        private static bool TryParse(JsonParser parser, out PMap map, out List<JsonErrorInfo> errors)
         {
-            bool hasRootValue = parseRun.TryParse(
-                out JsonSyntaxNode rootNode,
-                out TextElement<JsonSymbol> textElement,
-                out errors);
+            bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
             {
@@ -58,8 +55,8 @@ namespace Sandra.UI.WF.Storage
                 {
                     errors.Add(new JsonErrorInfo(
                         JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
-                        textElement.Start,
-                        textElement.Length));
+                        rootNode.Start,
+                        rootNode.Length));
                 }
 
                 return validMap;
