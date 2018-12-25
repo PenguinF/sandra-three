@@ -95,7 +95,7 @@ namespace Sandra.UI.WF.Storage
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
             if (TryGetRawValue(property, out PValue pValue)
-                && property.TryGetValidValue(pValue, out value))
+                && property.TryGetValidValue(pValue).IsOption2(out value))
             {
                 return true;
             }
