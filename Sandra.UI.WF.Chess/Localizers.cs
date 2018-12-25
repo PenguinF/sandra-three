@@ -238,9 +238,9 @@ namespace Sandra.UI.WF
             Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
         }
 
-        public override string Localize(LocalizedStringKey localizedStringKey)
+        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
-            : Default.Localize(localizedStringKey);
+            : Default.Localize(localizedStringKey, parameters);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;
 
@@ -295,9 +295,9 @@ namespace Sandra.UI.WF
 
         public readonly Dictionary<LocalizedStringKey, string> Dictionary;
 
-        public override string Localize(LocalizedStringKey localizedStringKey)
+        public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText) ? displayText
-            : Default.Localize(localizedStringKey);
+            : Default.Localize(localizedStringKey, parameters);
 
         private BuiltInEnglishLocalizer()
         {

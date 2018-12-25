@@ -31,11 +31,16 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Generates a localized string given a <see cref="LocalizedStringKey"/>.
         /// </summary>
-        public abstract string Localize(LocalizedStringKey localizedStringKey);
+        public string Localize(LocalizedStringKey localizedStringKey) => Localize(localizedStringKey, null);
+
+        /// <summary>
+        /// Generates and formats a localized string given a <see cref="LocalizedStringKey"/> and an array of parameters.
+        /// </summary>
+        public abstract string Localize(LocalizedStringKey localizedStringKey, string[] parameters);
 
         private sealed class DefaultLocalizer : Localizer
         {
-            public override string Localize(LocalizedStringKey localizedStringKey)
+            public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             {
                 if (localizedStringKey == null) return null;
                 if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
