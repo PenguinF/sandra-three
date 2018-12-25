@@ -426,9 +426,23 @@ namespace Sandra.UI.WF
         /// Conditionally formats a string, based on whether or not it has parameters.
         /// </summary>
         public static string ConditionalFormat(this string localizedString, string[] parameters)
-            => parameters == null || parameters.Length == 0
-            ? localizedString
-            : string.Format(localizedString, parameters);
+        {
+            if (parameters == null || parameters.Length == 0) return localizedString;
+
+            try
+            {
+                return string.Format(localizedString, parameters);
+            }
+            catch (FormatException)
+            {
+                // The provided localized format string is in an incorrect format, and/or it contains
+                // more parameter substitution locations than there are parameters provided.
+                // Examples:
+                // string.Format("Test with parameters {invalid parameter}", parameters)
+                // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
+                return $"{localizedString} {UtilityExtensions.ToDefaultParameterListDisplayString(parameters)}";
+            }
+        }
     }
 
     public sealed class TrimmedStringType : PType.Derived<string, string>
