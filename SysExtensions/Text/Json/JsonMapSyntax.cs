@@ -28,13 +28,38 @@ namespace SysExtensions.Text.Json
     /// </summary>
     public sealed class JsonMapSyntax : JsonSyntaxNode
     {
-        public IReadOnlyDictionary<string, JsonSyntaxNode> MapNodeKeyValuePairs { get; }
+        public IReadOnlyList<JsonMapNodeKeyValuePair> MapNodeKeyValuePairs { get; }
 
-        public JsonMapSyntax(IReadOnlyDictionary<string, JsonSyntaxNode> mapNodeKeyValuePairs)
+        public JsonMapSyntax(IReadOnlyList<JsonMapNodeKeyValuePair> mapNodeKeyValuePairs)
             => MapNodeKeyValuePairs = mapNodeKeyValuePairs;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
+    /// </summary>
+    public struct JsonMapNodeKeyValuePair
+    {
+        public string Key { get; }
+
+        /// <summary>
+        /// Gets the syntax node containing the value of this <see cref="JsonMapNodeKeyValuePair"/>.
+        /// </summary>
+        public JsonSyntaxNode Value { get; }
+
+        /// <summary>
+        /// Initializes a new instance of a <see cref="JsonMapNodeKeyValuePair"/>.
+        /// </summary>
+        /// <param name="value">
+        /// The syntax node containing the value.
+        /// </param>
+        public JsonMapNodeKeyValuePair(string key, JsonSyntaxNode value)
+        {
+            Key = key;
+            Value = value;
+        }
     }
 }

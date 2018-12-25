@@ -75,7 +75,7 @@ namespace SysExtensions.Text.Json
 
         public override JsonSyntaxNode VisitCurlyOpen(JsonCurlyOpen curlyOpen, TextElement<JsonSymbol> visitedToken)
         {
-            Dictionary<string, JsonSyntaxNode> mapBuilder = new Dictionary<string, JsonSyntaxNode>();
+            var mapBuilder = new List<JsonMapNodeKeyValuePair>();
 
             // Maintain a separate set of keys to aid error reporting on duplicate keys.
             HashSet<string> foundKeys = new HashSet<string>();
@@ -150,7 +150,7 @@ namespace SysExtensions.Text.Json
                     // Only the first value can be valid, even if it's undefined.
                     if (validKey && !gotColon && gotValue)
                     {
-                        mapBuilder.Add(propertyKey, parsedValue);
+                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKey, parsedValue));
                     }
 
                     textElement = ReadSkipComments();
