@@ -40,7 +40,7 @@ namespace Sandra.UI.WF.Storage
             InvalidRelativeFolderChars = Path.GetInvalidPathChars().Union(new[] { '?', '*' }).ToArray();
         }
 
-        public override bool IsValid(string folderPath)
+        public override bool IsValid(string folderPath, out ITypeErrorBuilder typeError)
         {
             if (!string.IsNullOrEmpty(folderPath)
                 && folderPath.IndexOfAny(InvalidRelativeFolderChars) < 0
@@ -52,11 +52,14 @@ namespace Sandra.UI.WF.Storage
                 for (var parentFolder = subFolder.Parent; parentFolder != null; parentFolder = parentFolder.Parent)
                 {
                     // Indeed a subfolder?
-                    if (localApplicationFolder.FullName == parentFolder.FullName) return true;
+                    if (localApplicationFolder.FullName == parentFolder.FullName)
+                    {
+                        return ValidValue(out typeError);
+                    }
                 }
             }
 
-            return false;
+            return InvalidValue(null, out typeError);
         }
     }
 }

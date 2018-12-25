@@ -32,9 +32,11 @@ namespace Sandra.UI.WF.Storage
 
         private FileNameType() : base(PType.CLR.String) { }
 
-        public override bool IsValid(string fileName)
+        public override bool IsValid(string fileName, out ITypeErrorBuilder typeError)
             => !string.IsNullOrEmpty(fileName)
             && !fileName.StartsWith(".")
-            && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
+            && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
+            ? ValidValue(out typeError)
+            : InvalidValue(null, out typeError);
     }
 }
