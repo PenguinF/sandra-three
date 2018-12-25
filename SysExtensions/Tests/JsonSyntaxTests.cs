@@ -148,7 +148,7 @@ namespace SysExtensions.Tests
         {
             Assert.Equal(expected.Start, actual.Start);
             Assert.Equal(expected.Length, actual.Length);
-            Assert.Equal(expected.Message, actual.Message);
+            Assert.Equal(expected.ErrorCode, actual.ErrorCode);
         }
 
         [Theory]
