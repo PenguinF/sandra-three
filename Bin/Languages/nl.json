@@ -13,6 +13,7 @@
     "DemoteLine": "Variant degraderen",
     "EditPreferencesFile": "Wijzig voorkeuren",
     "EndOfGame": "Naar einde partij",
+    "ErrorLocation": "{0} op regel {1}, positie {2}",
     "Exit": "Afsluiten",
     "FastBackward": "Snel achterwaarts",
     "FastForward": "Snel voorwaarts",
