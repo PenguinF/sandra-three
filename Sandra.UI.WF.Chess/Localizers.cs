@@ -453,17 +453,10 @@ namespace Sandra.UI.WF
 
         public override string GetBaseValue(string value) => value;
 
-        public override bool TryGetTargetValue(string value, out string targetValue)
-        {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                targetValue = value.Trim();
-                return true;
-            }
-
-            targetValue = default(string);
-            return false;
-        }
+        public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
+            => !string.IsNullOrWhiteSpace(value)
+            ? ValidValue(value.Trim())
+            : InvalidValue(null);
     }
 
     public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
@@ -487,22 +480,21 @@ namespace Sandra.UI.WF
             return new PMap(dictionary);
         }
 
-        public override bool TryGetTargetValue(PMap value, out Dictionary<LocalizedStringKey, string> targetValue)
+        public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetTargetValue(PMap value)
         {
-            targetValue = new Dictionary<LocalizedStringKey, string>();
+            var targetValue = new Dictionary<LocalizedStringKey, string>();
 
             foreach (var kv in value)
             {
                 if (!PType.String.TryGetValidValue(kv.Value, out PString stringValue))
                 {
-                    targetValue = default(Dictionary<LocalizedStringKey, string>);
-                    return false;
+                    return InvalidValue(null);
                 }
 
                 targetValue.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
             }
 
-            return true;
+            return ValidValue(targetValue);
         }
     }
 }

@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
 using System.Numerics;
 
@@ -98,7 +99,7 @@ namespace Sandra.UI.WF.Storage
             public override sealed bool TryGetValidValue(PValue value, out T targetValue)
             {
                 if (BaseType.TryGetValidValue(value, out TBase baseValue)
-                    && TryGetTargetValue(baseValue, out targetValue))
+                    && TryGetTargetValue(baseValue).IsOption2(out targetValue))
                 {
                     return true;
                 }
@@ -115,17 +116,14 @@ namespace Sandra.UI.WF.Storage
             /// <param name="value">
             /// The value to convert from.
             /// </param>
-            /// <param name="targetValue">
-            /// The target value to convert to, if conversion succeeds.
-            /// </param>
             /// <returns>
-            /// Whether or not conversion succeeded.
+            /// The target value to convert to, if conversion succeeds, or a type error, if conversion fails.
             /// </returns>
-            public abstract bool TryGetTargetValue(TBase value, out T targetValue);
+            public abstract Union<ITypeErrorBuilder, T> TryGetTargetValue(TBase value);
 
             /// <summary>
             /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="TBase"/> value.
-            /// Assumed is that this is the reverse operation of <see cref="GetTargetValue(TBase)"/>.
+            /// Assumed is that this is the reverse operation of <see cref="TryGetTargetValue(TBase)"/>.
             /// </summary>
             /// <param name="value">
             /// The value to convert from.
@@ -193,17 +191,10 @@ namespace Sandra.UI.WF.Storage
             /// </returns>
             public abstract bool IsValid(T candidateValue, out ITypeErrorBuilder typeError);
 
-            public override sealed bool TryGetTargetValue(T candidateValue, out T targetValue)
-            {
-                if (IsValid(candidateValue, out ITypeErrorBuilder typeError))
-                {
-                    targetValue = candidateValue;
-                    return true;
-                }
-
-                targetValue = default(T);
-                return false;
-            }
+            public override sealed Union<ITypeErrorBuilder, T> TryGetTargetValue(T candidateValue)
+                => IsValid(candidateValue, out ITypeErrorBuilder typeError)
+                ? ValidValue(candidateValue)
+                : InvalidValue(null);
 
             public override sealed T GetBaseValue(T value)
             {

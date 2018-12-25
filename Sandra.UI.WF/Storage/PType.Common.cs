@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
 using System.Collections.Generic;
 
@@ -39,11 +40,8 @@ namespace Sandra.UI.WF.Storage
             {
                 public _BooleanCLRType() : base(PType.Boolean) { }
 
-                public override bool TryGetTargetValue(PBoolean boolean, out bool targetValue)
-                {
-                    targetValue = boolean.Value;
-                    return true;
-                }
+                public override Union<ITypeErrorBuilder, bool> TryGetTargetValue(PBoolean boolean)
+                    => ValidValue(boolean.Value);
 
                 public override PBoolean GetBaseValue(bool value) => new PBoolean(value);
             }
@@ -52,11 +50,8 @@ namespace Sandra.UI.WF.Storage
             {
                 public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
 
-                public override bool TryGetTargetValue(PInteger integer, out int targetValue)
-                {
-                    targetValue = (int)integer.Value;
-                    return true;
-                }
+                public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
+                    => ValidValue((int)integer.Value);
 
                 public override PInteger GetBaseValue(int value) => new PInteger(value);
             }
@@ -65,11 +60,8 @@ namespace Sandra.UI.WF.Storage
             {
                 public _StringCLRType() : base(PType.String) { }
 
-                public override bool TryGetTargetValue(PString stringValue, out string targetValue)
-                {
-                    targetValue = stringValue.Value;
-                    return true;
-                }
+                public override Union<ITypeErrorBuilder, string> TryGetTargetValue(PString stringValue)
+                    => ValidValue(stringValue.Value);
 
                 public override PString GetBaseValue(string value) => new PString(value);
             }
@@ -102,8 +94,10 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public override bool TryGetTargetValue(string stringValue, out TEnum targetValue)
-                => stringToEnum.TryGetValue(stringValue, out targetValue);
+            public override Union<ITypeErrorBuilder, TEnum> TryGetTargetValue(string stringValue)
+                => stringToEnum.TryGetValue(stringValue, out TEnum targetValue)
+                ? ValidValue(targetValue)
+                : InvalidValue(null);
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
         }
@@ -131,8 +125,10 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public override bool TryGetTargetValue(string stringValue, out T targetValue)
-                => stringToTarget.TryGetValue(stringValue, out targetValue);
+            public override Union<ITypeErrorBuilder, T> TryGetTargetValue(string stringValue)
+                => stringToTarget.TryGetValue(stringValue, out T targetValue)
+                ? ValidValue(targetValue)
+                : InvalidValue(null);
 
             public override string GetBaseValue(T value)
             {

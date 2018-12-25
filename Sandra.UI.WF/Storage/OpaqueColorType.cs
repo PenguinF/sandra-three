@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System.Drawing;
 using System.Globalization;
 
@@ -34,20 +35,18 @@ namespace Sandra.UI.WF.Storage
 
         private OpaqueColorType() : base(PType.CLR.String) { }
 
-        public override bool TryGetTargetValue(string value, out Color targetValue)
+        public override Union<ITypeErrorBuilder, Color> TryGetTargetValue(string value)
         {
             if (value != null && value.Length == 7 && value[0] == '#')
             {
                 string hexString = value.Substring(1);
                 if (int.TryParse(hexString, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out int rgb))
                 {
-                    targetValue = Color.FromArgb(255, Color.FromArgb(rgb));
-                    return true;
+                    return ValidValue(Color.FromArgb(255, Color.FromArgb(rgb)));
                 }
             }
 
-            targetValue = default(Color);
-            return false;
+            return InvalidValue(null);
         }
 
         public override string GetBaseValue(Color value)
