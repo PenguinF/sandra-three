@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
 
 namespace Sandra.UI.WF
@@ -44,9 +45,7 @@ namespace Sandra.UI.WF
             {
                 if (localizedStringKey == null) return null;
                 if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
-                return parameters == null || parameters.Length == 0
-                    ? "{" + localizedStringKey.Key + "}"
-                    : "{" + localizedStringKey.Key + "(" + string.Join(", ", parameters) + ")}";
+                return "{" + localizedStringKey.Key + UtilityExtensions.ToDefaultParameterListDisplayString(parameters) + "}";
             }
         }
 
