@@ -35,7 +35,7 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class SettingReader
     {
-        private class ParseRun : JsonSymbolVisitor<PValue>
+        private class ParseRun : JsonSymbolVisitor<JsonSyntaxNode>
         {
             private readonly ReadOnlyList<TextElement<JsonSymbol>> tokens;
             private readonly int sourceLength;
@@ -77,9 +77,9 @@ namespace Sandra.UI.WF.Storage
                 return null;
             }
 
-            public override PValue VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+            public override JsonSyntaxNode VisitCurlyOpen(JsonCurlyOpen curlyOpen)
             {
-                Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+                Dictionary<string, JsonSyntaxNode> mapBuilder = new Dictionary<string, JsonSyntaxNode>();
 
                 // Maintain a separate set of keys to aid error reporting on duplicate keys.
                 HashSet<string> foundKeys = new HashSet<string>();
@@ -88,7 +88,7 @@ namespace Sandra.UI.WF.Storage
                 {
                     bool gotKey = ParseMultiValue(
                         JsonErrorCode.MultiplePropertyKeys,
-                        out PValue parsedKey,
+                        out JsonSyntaxNode parsedKey,
                         out TextElement<JsonSymbol> first);
 
                     bool validKey = false;
@@ -97,9 +97,9 @@ namespace Sandra.UI.WF.Storage
                     if (gotKey)
                     {
                         // Analyze if this is an actual, unique property key.
-                        if (parsedKey is PString)
+                        if (parsedKey is JsonStringLiteralSyntax)
                         {
-                            propertyKey = ((PString)parsedKey).Value;
+                            propertyKey = ((JsonStringLiteralSyntax)parsedKey).Value;
 
                             // Expect unique keys.
                             validKey = !foundKeys.Contains(propertyKey);
@@ -128,7 +128,7 @@ namespace Sandra.UI.WF.Storage
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                     TextElement<JsonSymbol> textElement = ReadSkipComments();
-                    PValue parsedValue = default(PValue);
+                    JsonSyntaxNode parsedValue = default(JsonSyntaxNode);
 
                     // If gotValue remains false, a missing value error will be reported.
                     bool gotValue = false;
@@ -204,20 +204,20 @@ namespace Sandra.UI.WF.Storage
                                 textElement.Length));
                         }
 
-                        return new PMap(mapBuilder);
+                        return new JsonMapSyntax(mapBuilder);
                     }
                 }
             }
 
-            public override PValue VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
+            public override JsonSyntaxNode VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
             {
-                List<PValue> listBuilder = new List<PValue>();
+                List<JsonSyntaxNode> listBuilder = new List<JsonSyntaxNode>();
 
                 for (; ; )
                 {
                     bool gotValue = ParseMultiValue(
                         JsonErrorCode.MultipleValues,
-                        out PValue parsedValue,
+                        out JsonSyntaxNode parsedValue,
                         out TextElement<JsonSymbol> firstSymbol);
 
                     if (gotValue) listBuilder.Add(parsedValue);
@@ -234,7 +234,7 @@ namespace Sandra.UI.WF.Storage
                                 textElement.Start,
                                 textElement.Length));
 
-                            listBuilder.Add(PConstantValue.Undefined);
+                            listBuilder.Add(new JsonUndefinedValueSyntax());
                         }
                     }
                     else
@@ -255,20 +255,20 @@ namespace Sandra.UI.WF.Storage
                                 textElement.Length));
                         }
 
-                        return new PList(listBuilder);
+                        return new JsonListSyntax(listBuilder);
                     }
                 }
             }
 
-            public override PValue VisitValue(JsonValue symbol)
+            public override JsonSyntaxNode VisitValue(JsonValue symbol)
             {
                 string value = symbol.Value;
-                if (value == JsonValue.True) return PConstantValue.True;
-                if (value == JsonValue.False) return PConstantValue.False;
+                if (value == JsonValue.True) return new JsonBooleanLiteralSyntax(true);
+                if (value == JsonValue.False) return new JsonBooleanLiteralSyntax(false);
 
                 if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
                 {
-                    return new PInteger(integerValue);
+                    return new JsonIntegerLiteralSyntax(integerValue);
                 }
 
                 Errors.Add(new JsonErrorInfo(
@@ -277,16 +277,16 @@ namespace Sandra.UI.WF.Storage
                     value.Length,
                     new[] { value }));
 
-                return PConstantValue.Undefined;
+                return new JsonUndefinedValueSyntax();
             }
 
-            public override PValue VisitString(JsonString symbol) => new PString(symbol.Value);
+            public override JsonSyntaxNode VisitString(JsonString symbol) => new JsonStringLiteralSyntax(symbol.Value);
 
             private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
-                                         out PValue firstValue,
+                                         out JsonSyntaxNode firstValue,
                                          out TextElement<JsonSymbol> firstValueSymbol)
             {
-                firstValue = default(PValue);
+                firstValue = default(JsonSyntaxNode);
                 firstValueSymbol = default(TextElement<JsonSymbol>);
 
                 TextElement<JsonSymbol> textElement = PeekSkipComments();
@@ -302,7 +302,7 @@ namespace Sandra.UI.WF.Storage
 
                     if (!hasValue)
                     {
-                        if (textElement.TerminalSymbol.Errors.Any()) firstValue = PConstantValue.Undefined;
+                        if (textElement.TerminalSymbol.Errors.Any()) firstValue = new JsonUndefinedValueSyntax();
                         else firstValue = Visit(textElement.TerminalSymbol);
                         hasValue = true;
                     }
@@ -326,7 +326,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            public bool TryParse(out PValue rootValue, out TextElement<JsonSymbol> textElement)
+            public bool TryParse(out JsonSyntaxNode rootValue, out TextElement<JsonSymbol> textElement)
             {
                 bool hasRootValue = ParseMultiValue(
                     JsonErrorCode.ExpectedEof,
@@ -358,10 +358,11 @@ namespace Sandra.UI.WF.Storage
 
         private static bool TryParse(ParseRun parseRun, out PMap map)
         {
-            bool hasRootValue = parseRun.TryParse(out PValue rootValue, out TextElement<JsonSymbol> textElement);
+            bool hasRootValue = parseRun.TryParse(out JsonSyntaxNode rootNode, out TextElement<JsonSymbol> textElement);
 
             if (hasRootValue)
             {
+                PValue rootValue = new ToPValueConverter().Visit(rootNode);
                 bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
                 if (!validMap)
                 {
@@ -406,5 +407,27 @@ namespace Sandra.UI.WF.Storage
 
             return errors;
         }
+    }
+
+    public class ToPValueConverter : JsonSyntaxNodeVisitor<PValue>
+    {
+        public PMap ConvertToMap(JsonMapSyntax value)
+        {
+            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+
+            foreach (var keyedNode in value.MapNodeKeyValuePairs)
+            {
+                mapBuilder.Add(keyedNode.Key, Visit(keyedNode.Value));
+            }
+
+            return new PMap(mapBuilder);
+        }
+
+        public override PValue VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
+        public override PValue VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
+        public override PValue VisitListSyntax(JsonListSyntax value) => new PList(value.ElementNodes.Select(Visit));
+        public override PValue VisitMapSyntax(JsonMapSyntax value) => ConvertToMap(value);
+        public override PValue VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
+        public override PValue VisitUndefinedValueSyntax(JsonUndefinedValueSyntax value) => PConstantValue.Undefined;
     }
 }
