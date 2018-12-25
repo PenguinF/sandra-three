@@ -37,16 +37,14 @@ namespace SysExtensions.Tests
         }
 
         [Theory]
-        [InlineData(JsonErrorCode.Unspecified, "", 0, 0)]
-        [InlineData(JsonErrorCode.Custom, "Error!", 0, 1)]
-        // No newline conversions.
-        [InlineData(JsonErrorCode.ExpectedEof, "\n", 1, 0)]
-        [InlineData(JsonErrorCode.Custom + 999, "Error!\r\n", 0, 2)]
-        public void UnchangedParametersInError(JsonErrorCode errorCode, string message, int start, int length)
+        [InlineData(JsonErrorCode.Unspecified, 0, 0)]
+        [InlineData(JsonErrorCode.Custom, 0, 1)]
+        [InlineData(JsonErrorCode.ExpectedEof, 1, 0)]
+        [InlineData(JsonErrorCode.Custom + 999, 0, 2)]
+        public void UnchangedParametersInError(JsonErrorCode errorCode, int start, int length)
         {
-            var errorInfo = new JsonErrorInfo(errorCode, message, start, length);
+            var errorInfo = new JsonErrorInfo(errorCode, start, length);
             Assert.Equal(errorCode, errorInfo.ErrorCode);
-            Assert.Equal(message, errorInfo.Message);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
         }
