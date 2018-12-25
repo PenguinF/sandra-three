@@ -224,7 +224,7 @@ namespace SysExtensions.Text.Json
                 {
                     if (!gotValue)
                     {
-                        // Two commas or '[,': add an empty PErrorValue.
+                        // Two commas or '[,': add an empty JsonUndefinedValueSyntax.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             textElement.Start,
