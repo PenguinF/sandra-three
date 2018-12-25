@@ -50,17 +50,35 @@ namespace Sandra.UI.WF.Storage
 
             if (hasRootValue)
             {
-                PValue rootValue = new ToPValueConverter().Visit(rootNode);
-                bool validMap = PType.Map.TryGetValidValue(rootValue).IsOption2(out map);
-                if (!validMap)
+                if (rootNode is JsonMapSyntax mapNode)
                 {
-                    errors.Add(new JsonErrorInfo(
-                        JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
-                        rootNode.Start,
-                        rootNode.Length));
+                    Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+                    var converter = new ToPValueConverter();
+
+                    // Analyze values with the provided schema while building the PMap.
+                    foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
+                    {
+                        var convertedValue = converter.Visit(keyedNode.Value);
+
+                        // TODO: should probably add a warning if a property key does not exist.
+                        if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
+                        {
+                            if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            {
+                            }
+                        }
+
+                        mapBuilder.Add(keyedNode.Key.Value, convertedValue);
+                    }
+
+                    map = new PMap(mapBuilder);
+                    return true;
                 }
 
-                return validMap;
+                errors.Add(PTypeError.Create(
+                    null,
+                    rootNode.Start,
+                    rootNode.Length));
             }
 
             map = default(PMap);
