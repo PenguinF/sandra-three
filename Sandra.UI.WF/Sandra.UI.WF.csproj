@@ -76,6 +76,7 @@
     <Compile Include="Storage\PType.Base.cs" />
     <Compile Include="Storage\PType.Common.cs" />
     <Compile Include="Storage\PType.cs" />
+    <Compile Include="Storage\PTypeError.cs" />
     <Compile Include="Storage\PValue.cs" />
     <Compile Include="Storage\SettingComment.cs" />
     <Compile Include="Storage\SettingCopy.cs" />
