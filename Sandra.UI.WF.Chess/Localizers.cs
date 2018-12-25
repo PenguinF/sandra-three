@@ -44,6 +44,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
+        internal static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
         internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         internal static readonly LocalizedStringKey FastBackward = new LocalizedStringKey(nameof(FastBackward));
         internal static readonly LocalizedStringKey FastForward = new LocalizedStringKey(nameof(FastForward));
@@ -316,6 +317,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
+                { LocalizedStringKeys.ErrorLocation, "{0} at line {1}, position {2}" },
                 { LocalizedStringKeys.Exit, "Exit" },
                 { LocalizedStringKeys.FastBackward, "Fast backward" },
                 { LocalizedStringKeys.FastForward, "Fast forward" },

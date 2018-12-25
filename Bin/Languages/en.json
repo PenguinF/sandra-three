@@ -13,6 +13,7 @@
     "DemoteLine": "Demote line",
     "EditPreferencesFile": "Edit preferences",
     "EndOfGame": "End of game",
+    "ErrorLocation": "{0} at line {1}, position {2}",
     "Exit": "Exit",
     "FastBackward": "Fast backward",
     "FastForward": "Fast forward",
