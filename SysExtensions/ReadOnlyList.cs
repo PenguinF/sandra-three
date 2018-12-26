@@ -39,14 +39,56 @@ namespace SysExtensions
 
         private readonly T[] array;
 
+        private static T[] GetArray(IEnumerable<T> elements)
+        {
+            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
+            if (elements != null)
+            {
+                if (elements is ICollection<T> collection)
+                {
+                    var length = collection.Count;
+                    if (length > 0)
+                    {
+                        T[] array = new T[length];
+                        collection.CopyTo(array, 0);
+                        return array;
+                    }
+                }
+                else if (elements is IReadOnlyCollection<T> readOnlyCollection)
+                {
+                    var length = readOnlyCollection.Count;
+                    if (length > 0)
+                    {
+                        T[] array = new T[length];
+                        int index = 0;
+                        foreach (var element in readOnlyCollection)
+                        {
+                            array[index] = element;
+
+                            // Don't check if index >= length, assume that readOnlyCollection
+                            // satisfies the contract that the number of enumerated elements is always equal to Count.
+                            index++;
+                        }
+                        return array;
+                    }
+                }
+                else if (elements.Any())
+                {
+                    return elements.ToArray();
+                }
+            }
+
+            // Default case if null or empty.
+            return emptyArray;
+        }
+
         /// <summary>
         /// Initializes a new instance of <see cref="ReadOnlyList{T}"/>.
         /// </summary>
         /// <param name="elements">
         /// The elements of the list.
         /// </param>
-        public ReadOnlyList(IEnumerable<T> elements)
-            => array = elements == null || !elements.Any() ? emptyArray : elements.ToArray();
+        public ReadOnlyList(IEnumerable<T> elements) => array = GetArray(elements);
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.
