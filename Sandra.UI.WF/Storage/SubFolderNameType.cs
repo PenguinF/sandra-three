@@ -49,16 +49,24 @@ namespace Sandra.UI.WF.Storage
                 && folderPath.IndexOfAny(InvalidRelativeFolderChars) < 0
                 && !Path.IsPathRooted(folderPath))
             {
-                var localApplicationFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-                var subFolder = new DirectoryInfo(Path.Combine(localApplicationFolder.FullName, folderPath));
-
-                for (var parentFolder = subFolder.Parent; parentFolder != null; parentFolder = parentFolder.Parent)
+                try
                 {
-                    // Indeed a subfolder?
-                    if (localApplicationFolder.FullName == parentFolder.FullName)
+                    var localApplicationFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+                    var subFolder = new DirectoryInfo(Path.Combine(localApplicationFolder.FullName, folderPath));
+
+                    for (var parentFolder = subFolder.Parent; parentFolder != null; parentFolder = parentFolder.Parent)
                     {
-                        return ValidValue(out typeError);
+                        // Indeed a subfolder?
+                        if (localApplicationFolder.FullName == parentFolder.FullName)
+                        {
+                            return ValidValue(out typeError);
+                        }
                     }
+                }
+                catch
+                {
+                    // For all kinds of DirectoryInfo exceptions not prevented by the if-statement,
+                    // just return InvalidValue().
                 }
             }
 
