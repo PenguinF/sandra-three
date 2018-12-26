@@ -419,6 +419,11 @@ namespace Sandra.UI.WF
         /// </summary>
         public static string Message(this JsonErrorInfo jsonErrorInfo, Localizer localizer)
         {
+            if (jsonErrorInfo is PTypeError typeError)
+            {
+                return typeError.GetLocalizedMessage(localizer);
+            }
+
             return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
         }
 

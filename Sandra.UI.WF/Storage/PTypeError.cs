@@ -34,6 +34,17 @@ namespace Sandra.UI.WF.Storage
         /// </summary>
         public ITypeErrorBuilder TypeErrorBuilder { get; }
 
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public string GetLocalizedMessage(Localizer localizer) => TypeErrorBuilder.GetLocalizedTypeErrorMessage(localizer);
+
         private PTypeError(ITypeErrorBuilder typeErrorBuilder, int start, int length)
             : base(JsonErrorCode.Custom, start, length)
         {
