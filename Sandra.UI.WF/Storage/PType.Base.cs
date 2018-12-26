@@ -21,6 +21,7 @@
 
 using SysExtensions;
 using System;
+using System.Globalization;
 using System.Numerics;
 
 namespace Sandra.UI.WF.Storage
@@ -255,9 +256,13 @@ namespace Sandra.UI.WF.Storage
             /// Gets the localized, context sensitive message for this error.
             /// </summary>
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
-            {
-                return localizer.Localize(RangedIntegerTypeError);
-            }
+                => localizer.Localize(RangedIntegerTypeError, new[]
+                {
+                    propertyKey,
+                    valueString,
+                    MinValue.ToString(CultureInfo.InvariantCulture),
+                    MaxValue.ToString(CultureInfo.InvariantCulture)
+                });
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";
