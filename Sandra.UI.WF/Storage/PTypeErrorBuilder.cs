@@ -37,6 +37,28 @@ namespace Sandra.UI.WF.Storage
         public static readonly LocalizedStringKey EnumerateWithOr = new LocalizedStringKey(nameof(EnumerateWithOr));
 
         /// <summary>
+        /// Surrounds a string value with double quote characters.
+        /// </summary>
+        /// <param name="stringValue">
+        /// The string value to surround.
+        /// </param>
+        /// <returns>
+        /// The string value surrounded with double quote characters.
+        /// </returns>
+        public static string QuoteStringValue(string stringValue) => $"\"{stringValue}\"";
+
+        /// <summary>
+        /// Surrounds a value with single quote characters.
+        /// </summary>
+        /// <param name="value">
+        /// The value to surround.
+        /// </param>
+        /// <returns>
+        /// The value surrounded with single quote characters.
+        /// </returns>
+        public static string QuoteValue(string value) => $"'{value}'";
+
+        /// <summary>
         /// Gets the translation key for this error message.
         /// </summary>
         // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.

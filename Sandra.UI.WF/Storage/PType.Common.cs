@@ -124,12 +124,12 @@ namespace Sandra.UI.WF.Storage
                 string localizedValueList;
                 if (stringToEnum.Count == 1)
                 {
-                    localizedValueList = stringToEnum.Keys.First();
+                    localizedValueList = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.First());
                 }
                 else
                 {
-                    IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1);
-                    var lastEnumValue = stringToEnum.Keys.Last();
+                    IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
+                    var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
                     localizedValueList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
                     {
                         string.Join(", ", enumValues),
@@ -206,17 +206,17 @@ namespace Sandra.UI.WF.Storage
                 string localizedKeysList;
                 if (stringToTarget.Count == 1)
                 {
-                    localizedKeysList = stringToTarget.Keys.First();
+                    localizedKeysList = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.First());
                 }
                 else
                 {
                     // TODO: escape characters in KeyedSet keys.
-                    IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1);
-                    var lastEnumValue = stringToTarget.Keys.Last();
+                    IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
+                    var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
                     localizedKeysList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
                     {
                         string.Join(", ", keys),
-                        lastEnumValue
+                        lastKey
                     });
                 }
 

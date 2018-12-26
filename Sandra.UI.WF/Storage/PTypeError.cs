@@ -100,6 +100,11 @@ namespace Sandra.UI.WF.Storage
             else
             {
                 valueString = json.Substring(valueNode.Start, valueNode.Length);
+
+                if (!(valueNode is JsonStringLiteralSyntax))
+                {
+                    valueString = PTypeErrorBuilder.QuoteValue(valueString);
+                }
             }
 
             return new PTypeError(

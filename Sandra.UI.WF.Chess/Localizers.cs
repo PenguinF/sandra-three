@@ -556,14 +556,14 @@ namespace Sandra.UI.WF
             => localizer.Localize(LocalizedMessageKey, new[]
             {
                 propertyKey,
-                Key,
+                PTypeErrorBuilder.QuoteStringValue(Key),
                 Visit(InvalidStringValue, localizer)
             });
 
 
         public override string DefaultVisit(PValue value, Localizer localizer) => localizer.Localize(PType.JsonUndefinedValue);
-        public override string VisitBoolean(PBoolean value, Localizer localizer) => JsonValue.BoolSymbol(value.Value);
-        public override string VisitInteger(PInteger value, Localizer localizer) => value.Value.ToString(CultureInfo.InvariantCulture);
+        public override string VisitBoolean(PBoolean value, Localizer localizer) => PTypeErrorBuilder.QuoteValue(JsonValue.BoolSymbol(value.Value));
+        public override string VisitInteger(PInteger value, Localizer localizer) => PTypeErrorBuilder.QuoteValue(value.Value.ToString(CultureInfo.InvariantCulture));
         public override string VisitList(PList value, Localizer localizer) => localizer.Localize(PType.JsonArray);
         public override string VisitMap(PMap value, Localizer localizer) => localizer.Localize(PType.JsonObject);
     }
