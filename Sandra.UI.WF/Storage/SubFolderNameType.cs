@@ -30,6 +30,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class SubFolderNameType : PType.Filter<string>
     {
+        public static readonly PTypeErrorBuilder SubFolderNameTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(SubFolderNameTypeError)));
+
         public static SubFolderNameType Instance = new SubFolderNameType();
 
         private readonly char[] InvalidRelativeFolderChars;
@@ -59,7 +62,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            return InvalidValue(new PTypeErrorBuilder(), out typeError);
+            return InvalidValue(SubFolderNameTypeError, out typeError);
         }
     }
 }

@@ -447,6 +447,9 @@ namespace Sandra.UI.WF
 
     public sealed class TrimmedStringType : PType.Derived<string, string>
     {
+        public static readonly PTypeErrorBuilder TrimmedStringTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(TrimmedStringTypeError)));
+
         public static TrimmedStringType Instance = new TrimmedStringType();
 
         private TrimmedStringType() : base(PType.CLR.String) { }
@@ -456,7 +459,7 @@ namespace Sandra.UI.WF
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
             ? ValidValue(value.Trim())
-            : InvalidValue(new PTypeErrorBuilder());
+            : InvalidValue(TrimmedStringTypeError);
     }
 
     public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
@@ -488,7 +491,7 @@ namespace Sandra.UI.WF
             {
                 if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
                 {
-                    return InvalidValue(new PTypeErrorBuilder());
+                    return InvalidValue(new PTypeErrorBuilder(TranslationDictionaryTypeError.LocalizedMessageKey));
                 }
 
                 dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
@@ -496,5 +499,16 @@ namespace Sandra.UI.WF
 
             return ValidValue(dictionary);
         }
+    }
+
+    /// <summary>
+    /// Represents the result of a failed typecheck of <see cref="TranslationDictionaryType"/>.
+    /// </summary>
+    public class TranslationDictionaryTypeError
+    {
+        /// <summary>
+        /// Gets the translation key for this error message.
+        /// </summary>
+        public static readonly LocalizedStringKey LocalizedMessageKey = new LocalizedStringKey(nameof(TranslationDictionaryTypeError));
     }
 }

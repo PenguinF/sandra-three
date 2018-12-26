@@ -27,33 +27,49 @@ namespace Sandra.UI.WF.Storage
 {
     public static partial class PType
     {
+        public static readonly PTypeErrorBuilder BooleanTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(BooleanTypeError)));
+
+        public static readonly PTypeErrorBuilder IntegerTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(IntegerTypeError)));
+
+        public static readonly PTypeErrorBuilder MapTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(MapTypeError)));
+
+        public static readonly PTypeErrorBuilder StringTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(StringTypeError)));
+
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>();
+        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>();
+        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PMap"/> values.
         /// </summary>
-        public static readonly PType<PMap> Map = new BaseType<PMap>();
+        public static readonly PType<PMap> Map = new BaseType<PMap>(MapTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>();
+        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError);
 
         private sealed class BaseType<TValue> : PType<TValue>
             where TValue : PValue
         {
+            public PTypeErrorBuilder TypeError { get; }
+
+            public BaseType(PTypeErrorBuilder typeError) => TypeError = typeError;
+
             public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
                 => value is TValue targetValue
                 ? ValidValue(targetValue)
-                : InvalidValue(new PTypeErrorBuilder());
+                : InvalidValue(TypeError);
 
             public override PValue GetPValue(TValue value) => value;
         }
@@ -88,10 +104,7 @@ namespace Sandra.UI.WF.Storage
                 => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
 
             public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
-                => BaseType.TryGetValidValue(value).IsOption2(out TBase baseValue)
-                && TryGetTargetValue(baseValue).IsOption2(out T targetValue)
-                ? ValidValue(targetValue)
-                : InvalidValue(new PTypeErrorBuilder());
+                => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 
@@ -195,6 +208,11 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
+        /// <summary>
+        /// Gets the translation key for <see cref="RangedInteger"/> type check failure error messages.
+        /// </summary>
+        public static readonly LocalizedStringKey RangedIntegerTypeError = new LocalizedStringKey(nameof(RangedIntegerTypeError));
+
         public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
@@ -227,6 +245,14 @@ namespace Sandra.UI.WF.Storage
                 && candidateValue.Value <= MaxValue
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
+
+            /// <summary>
+            /// Gets the localized, context sensitive message for this error.
+            /// </summary>
+            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            {
+                return localizer.Localize(RangedIntegerTypeError);
+            }
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

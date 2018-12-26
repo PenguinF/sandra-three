@@ -31,6 +31,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class OpaqueColorType : PType.Derived<string, Color>
     {
+        public static readonly PTypeErrorBuilder OpaqueColorTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(OpaqueColorTypeError)));
+
         public static OpaqueColorType Instance = new OpaqueColorType();
 
         private OpaqueColorType() : base(PType.CLR.String) { }
@@ -46,7 +49,7 @@ namespace Sandra.UI.WF.Storage
                 }
             }
 
-            return InvalidValue(new PTypeErrorBuilder());
+            return InvalidValue(OpaqueColorTypeError);
         }
 
         public override string GetBaseValue(Color value)

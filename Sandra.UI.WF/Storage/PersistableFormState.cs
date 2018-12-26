@@ -33,6 +33,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class PersistableFormState
     {
+        public static readonly PTypeErrorBuilder PersistableFormStateTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(PersistableFormStateTypeError)));
+
         /// <summary>
         /// Gets the <see cref="PType"/> of a <see cref="PersistableFormState"/>.
         /// </summary>
@@ -53,7 +56,7 @@ namespace Sandra.UI.WF.Storage
                     return ValidValue(new PersistableFormState(maximized, new Rectangle(left, top, width, height)));
                 }
 
-                return InvalidValue(new PTypeErrorBuilder());
+                return InvalidValue(PersistableFormStateTypeError);
             }
 
             public override PValue GetPValue(PersistableFormState value) => new PList(

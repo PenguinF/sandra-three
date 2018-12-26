@@ -26,5 +26,27 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class PTypeErrorBuilder : ITypeErrorBuilder
     {
+        /// <summary>
+        /// Gets the translation key for this error message.
+        /// </summary>
+        // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
+        // Instead, GetLocalizedTypeErrorMessage() handles the localization.
+        public LocalizedStringKey LocalizedMessageKey { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
+        /// </summary>
+        /// <param name="localizedMessageKey">
+        /// The translation key for this error message.
+        /// </param>
+        public PTypeErrorBuilder(LocalizedStringKey localizedMessageKey) => LocalizedMessageKey = localizedMessageKey;
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        public string GetLocalizedTypeErrorMessage(Localizer localizer)
+        {
+            return localizer.Localize(LocalizedMessageKey);
+        }
     }
 }

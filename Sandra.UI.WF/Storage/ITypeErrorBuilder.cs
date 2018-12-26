@@ -26,5 +26,15 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public interface ITypeErrorBuilder
     {
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        string GetLocalizedTypeErrorMessage(Localizer localizer);
     }
 }

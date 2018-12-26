@@ -67,6 +67,11 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
+        /// <summary>
+        /// Gets the translation key for a typecheck error message of <see cref="PType.Enumeration{TEnum}"/>.
+        /// </summary>
+        public static readonly LocalizedStringKey EnumerationTypeError = new LocalizedStringKey(nameof(EnumerationTypeError));
+
         public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
@@ -100,7 +105,20 @@ namespace Sandra.UI.WF.Storage
                 : InvalidValue(this);
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
+
+            /// <summary>
+            /// Gets the localized, context sensitive message for this error.
+            /// </summary>
+            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            {
+                return localizer.Localize(EnumerationTypeError);
+            }
         }
+
+        /// <summary>
+        /// Gets the translation key for a typecheck error message of <see cref="PType.KeyedSet{T}"/>.
+        /// </summary>
+        public static readonly LocalizedStringKey KeyedSetTypeError = new LocalizedStringKey(nameof(KeyedSetTypeError));
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
         {
@@ -138,6 +156,14 @@ namespace Sandra.UI.WF.Storage
                 }
 
                 throw new ArgumentException("Target value not found.");
+            }
+
+            /// <summary>
+            /// Gets the localized, context sensitive message for this error.
+            /// </summary>
+            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            {
+                return localizer.Localize(KeyedSetTypeError);
             }
         }
     }

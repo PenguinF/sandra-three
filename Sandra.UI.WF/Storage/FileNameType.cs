@@ -28,6 +28,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class FileNameType : PType.Filter<string>
     {
+        public static readonly PTypeErrorBuilder FileNameTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
+
         public static FileNameType Instance = new FileNameType();
 
         private FileNameType() : base(PType.CLR.String) { }
@@ -37,6 +40,6 @@ namespace Sandra.UI.WF.Storage
             && !fileName.StartsWith(".")
             && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
             ? ValidValue(out typeError)
-            : InvalidValue(new PTypeErrorBuilder(), out typeError);
+            : InvalidValue(FileNameTypeError, out typeError);
     }
 }
