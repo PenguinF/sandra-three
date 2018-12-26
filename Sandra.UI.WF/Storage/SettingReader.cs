@@ -68,7 +68,7 @@ namespace Sandra.UI.WF.Storage
                         {
                             if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
                             {
-                                errors.Add(PTypeError.Create(typeError, keyedNode.Value.Start, keyedNode.Value.Length));
+                                errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
                         }
 
@@ -79,10 +79,7 @@ namespace Sandra.UI.WF.Storage
                     return true;
                 }
 
-                errors.Add(PTypeError.Create(
-                    RootValueShouldBeObjectTypeError,
-                    rootNode.Start,
-                    rootNode.Length));
+                errors.Add(PTypeError.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
             }
 
             map = default(PMap);
