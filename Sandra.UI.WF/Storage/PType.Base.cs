@@ -29,6 +29,16 @@ namespace Sandra.UI.WF.Storage
     public static partial class PType
     {
         /// <summary>
+        /// Gets the translation key for referring to a general json array (list).
+        /// </summary>
+        public static readonly LocalizedStringKey JsonArray = new LocalizedStringKey(nameof(JsonArray));
+
+        /// <summary>
+        /// Gets the translation key for referring to a general json object (map).
+        /// </summary>
+        public static readonly LocalizedStringKey JsonObject = new LocalizedStringKey(nameof(JsonObject));
+
+        /// <summary>
         /// Gets the translation key for referring to an undefined value.
         /// </summary>
         public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));

@@ -387,6 +387,8 @@ namespace Sandra.UI.WF
 
                 { SettingReader.RootValueShouldBeObjectTypeError.LocalizedMessageKey, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
 
+                { PType.JsonArray, "a value array ('[1, 2, ...]')" },
+                { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
                 { PType.JsonUndefinedValue, "an undefined value" },
 
                 { PType.BooleanTypeError.LocalizedMessageKey, "Expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
@@ -405,6 +407,7 @@ namespace Sandra.UI.WF
                 { FileNameType.FileNameTypeError.LocalizedMessageKey, "Expected valid file name for {0}, but found {1}" },
                 { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "Expected valid subfolder name for {0}, but found {1}" },
                 { TrimmedStringType.TrimmedStringTypeError.LocalizedMessageKey, "Expected string value which contains at least one non white-space character for {0}, but found {1}" },
+                { TranslationDictionaryTypeError.LocalizedMessageKey, "Expected string translations for {0}, but found {2} at key {1}" },
             };
         }
     }
@@ -507,7 +510,7 @@ namespace Sandra.UI.WF
             {
                 if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
                 {
-                    return InvalidValue(new PTypeErrorBuilder(TranslationDictionaryTypeError.LocalizedMessageKey));
+                    return InvalidValue(new TranslationDictionaryTypeError(kv.Key, kv.Value));
                 }
 
                 dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
@@ -520,11 +523,48 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents the result of a failed typecheck of <see cref="TranslationDictionaryType"/>.
     /// </summary>
-    public class TranslationDictionaryTypeError
+    public class TranslationDictionaryTypeError : PValueVisitor<Localizer, string>, ITypeErrorBuilder
     {
         /// <summary>
         /// Gets the translation key for this error message.
         /// </summary>
         public static readonly LocalizedStringKey LocalizedMessageKey = new LocalizedStringKey(nameof(TranslationDictionaryTypeError));
+
+        /// <summary>
+        /// Gets the key with the illegal value.
+        /// </summary>
+        public string Key { get; }
+
+        /// <summary>
+        /// Gets the illegal value.
+        /// </summary>
+        public PValue InvalidStringValue { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="KeyedSetTypeError"/>.
+        /// </summary>
+        internal TranslationDictionaryTypeError(string key, PValue invalidStringValue)
+        {
+            Key = key;
+            InvalidStringValue = invalidStringValue;
+        }
+
+        /// <summary>
+        /// Gets the localized error message in the current language.
+        /// </summary>
+        public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+            => localizer.Localize(LocalizedMessageKey, new[]
+            {
+                propertyKey,
+                Key,
+                Visit(InvalidStringValue, localizer)
+            });
+
+
+        public override string DefaultVisit(PValue value, Localizer localizer) => localizer.Localize(PType.JsonUndefinedValue);
+        public override string VisitBoolean(PBoolean value, Localizer localizer) => JsonValue.BoolSymbol(value.Value);
+        public override string VisitInteger(PInteger value, Localizer localizer) => value.Value.ToString(CultureInfo.InvariantCulture);
+        public override string VisitList(PList value, Localizer localizer) => localizer.Localize(PType.JsonArray);
+        public override string VisitMap(PMap value, Localizer localizer) => localizer.Localize(PType.JsonObject);
     }
 }
