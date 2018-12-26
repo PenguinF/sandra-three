@@ -57,8 +57,6 @@ namespace Sandra.UI.WF.Storage
         /// The localized error message.
         /// </returns>
         public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
-        {
-            return localizer.Localize(LocalizedMessageKey);
-        }
+            => localizer.Localize(LocalizedMessageKey, new[] { propertyKey, valueString });
     }
 }

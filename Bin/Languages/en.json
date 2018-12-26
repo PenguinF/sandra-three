@@ -76,6 +76,15 @@
     "JsonErrorMultiplePropertyKeySections": "Unexpected ':', expected ',' or '}'",
     "JsonErrorMultiplePropertyKeys": "':' expected",
     "JsonErrorMultipleValues": "',' expected",
-    "RootValueShouldBeObjectTypeError": "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')"
+    "RootValueShouldBeObjectTypeError": "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')",
+    "JsonUndefinedValue": "an undefined value",
+    "BooleanTypeError": "Expected 'false' or 'true' value for {0}, but found {1}",
+    "IntegerTypeError": "Expected integer value for {0}, but found {1}",
+    "StringTypeError": "Expected string value for {0}, but found {1}",
+    "MapTypeError": "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}",
+    "OpaqueColorTypeError": "Expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}",
+    "FileNameTypeError": "Expected valid file name for {0}, but found {1}",
+    "SubFolderNameTypeError": "Expected valid subfolder name for {0}, but found {1}",
+    "TrimmedStringTypeError": "Expected string value which contains at least one non white-space character for {0}, but found {1}"
   }
 }
