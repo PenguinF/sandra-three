@@ -53,9 +53,6 @@ namespace SysExtensions.Text.Json
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
             length = json.Length;
-            currentIndex = 0;
-            firstUnusedIndex = 0;
-            currentTokenizer = Default;
         }
 
         private IEnumerable<TextElement<JsonSymbol>> Default()
@@ -492,6 +489,12 @@ namespace SysExtensions.Text.Json
         /// </returns>
         public IEnumerable<TextElement<JsonSymbol>> TokenizeAll()
         {
+            currentIndex = 0;
+            firstUnusedIndex = 0;
+            currentTokenizer = Default;
+            errors.Clear();
+            valueBuilder.Clear();
+
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.
             while (currentTokenizer != null)
