@@ -27,6 +27,16 @@ namespace Sandra.UI.WF.Storage
     public class PTypeErrorBuilder : ITypeErrorBuilder
     {
         /// <summary>
+        /// Gets the translation key for when there are no legal values.
+        /// </summary>
+        public static readonly LocalizedStringKey NoLegalValues = new LocalizedStringKey(nameof(NoLegalValues));
+
+        /// <summary>
+        /// Gets the translation key for concatenating a list of values.
+        /// </summary>
+        public static readonly LocalizedStringKey EnumerateWithOr = new LocalizedStringKey(nameof(EnumerateWithOr));
+
+        /// <summary>
         /// Gets the translation key for this error message.
         /// </summary>
         // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.

@@ -22,6 +22,7 @@
 using SysExtensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI.WF.Storage
 {
@@ -111,7 +112,37 @@ namespace Sandra.UI.WF.Storage
             /// </summary>
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
             {
-                return localizer.Localize(EnumerationTypeError);
+                if (stringToEnum.Count == 0)
+                {
+                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
+                    {
+                        propertyKey,
+                        valueString
+                    });
+                }
+
+                string localizedValueList;
+                if (stringToEnum.Count == 1)
+                {
+                    localizedValueList = stringToEnum.Keys.First();
+                }
+                else
+                {
+                    IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1);
+                    var lastEnumValue = stringToEnum.Keys.Last();
+                    localizedValueList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
+                    {
+                        string.Join(", ", enumValues),
+                        lastEnumValue
+                    });
+                }
+
+                return localizer.Localize(EnumerationTypeError, new[]
+                {
+                    propertyKey,
+                    valueString,
+                    localizedValueList
+                });
             }
         }
 
@@ -163,7 +194,38 @@ namespace Sandra.UI.WF.Storage
             /// </summary>
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
             {
-                return localizer.Localize(KeyedSetTypeError);
+                if (stringToTarget.Count == 0)
+                {
+                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
+                    {
+                        propertyKey,
+                        valueString
+                    });
+                }
+
+                string localizedKeysList;
+                if (stringToTarget.Count == 1)
+                {
+                    localizedKeysList = stringToTarget.Keys.First();
+                }
+                else
+                {
+                    // TODO: escape characters in KeyedSet keys.
+                    IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1);
+                    var lastEnumValue = stringToTarget.Keys.Last();
+                    localizedKeysList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
+                    {
+                        string.Join(", ", keys),
+                        lastEnumValue
+                    });
+                }
+
+                return localizer.Localize(KeyedSetTypeError, new[]
+                {
+                    propertyKey,
+                    valueString,
+                    localizedKeysList
+                });
             }
         }
     }
