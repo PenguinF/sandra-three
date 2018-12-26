@@ -385,15 +385,13 @@ namespace Sandra.UI.WF
                 { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
                 { JsonErrorInfoExtensions.GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
 
-                { JsonErrorInfoExtensions.RootValueShouldBeObjectTypeError, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
+                { SettingReader.RootValueShouldBeObjectTypeError.LocalizedMessageKey, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             };
         }
     }
 
     public static class JsonErrorInfoExtensions
     {
-        internal static readonly LocalizedStringKey RootValueShouldBeObjectTypeError = new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError));
-
         public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
         {
             const string UnspecifiedMessage = "Unspecified error";
@@ -401,12 +399,6 @@ namespace Sandra.UI.WF
             if (jsonErrorCode == JsonErrorCode.Unspecified)
             {
                 return LocalizedStringKey.Unlocalizable(UnspecifiedMessage);
-            }
-            else if (jsonErrorCode == JsonErrorCode.Custom)
-            {
-                // Special case for an error which is not a json parse error,
-                // but rather like a type error resulting from a root value having an unexpected type.
-                return RootValueShouldBeObjectTypeError;
             }
             else
             {

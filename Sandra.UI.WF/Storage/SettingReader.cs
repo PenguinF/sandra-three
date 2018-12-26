@@ -33,6 +33,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class SettingReader
     {
+        public static readonly PTypeErrorBuilder RootValueShouldBeObjectTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError)));
+
         private readonly string json;
 
         public ReadOnlyList<TextElement<JsonSymbol>> Tokens { get; }
@@ -77,7 +80,7 @@ namespace Sandra.UI.WF.Storage
                 }
 
                 errors.Add(PTypeError.Create(
-                    null,
+                    RootValueShouldBeObjectTypeError,
                     rootNode.Start,
                     rootNode.Length));
             }
