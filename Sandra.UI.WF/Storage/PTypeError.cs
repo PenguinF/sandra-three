@@ -88,11 +88,22 @@ namespace Sandra.UI.WF.Storage
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
+            string valueString;
+            if (valueNode is JsonMissingValueSyntax)
+            {
+                // Missing values.
+                valueString = null;
+            }
+            else
+            {
+                valueString = json.Substring(valueNode.Start, valueNode.Length);
+            }
+
             return new PTypeError(
                 typeErrorBuilder,
                 // Do a Substring because the property key may contain escaped characters.
                 keyNode == null ? null : json.Substring(keyNode.Start, keyNode.Length),
-                json.Substring(valueNode.Start, valueNode.Length),
+                valueString,
                 valueNode.Start,
                 valueNode.Length);
         }
