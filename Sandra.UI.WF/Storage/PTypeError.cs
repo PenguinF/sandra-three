@@ -91,13 +91,17 @@ namespace Sandra.UI.WF.Storage
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
+            const int maxLength = 30;
+            const string ellipsis = "...";
+            const int ellipsisLength = 3;
+
             string valueString;
             if (valueNode is JsonMissingValueSyntax)
             {
                 // Missing values.
                 valueString = null;
             }
-            else
+            else if (valueNode.Length <= maxLength)
             {
                 valueString = json.Substring(valueNode.Start, valueNode.Length);
 
@@ -105,6 +109,10 @@ namespace Sandra.UI.WF.Storage
                 {
                     valueString = PTypeErrorBuilder.QuoteValue(valueString);
                 }
+            }
+            else
+            {
+                valueString = PTypeErrorBuilder.QuoteValue(json.Substring(valueNode.Start, maxLength - ellipsisLength) + ellipsis);
             }
 
             return new PTypeError(
