@@ -27,6 +27,11 @@ namespace Sandra.UI.WF.Storage
 {
     public static partial class PType
     {
+        /// <summary>
+        /// Gets the translation key for referring to an undefined value.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));
+
         public static readonly PTypeErrorBuilder BooleanTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(BooleanTypeError)));
 
@@ -249,7 +254,7 @@ namespace Sandra.UI.WF.Storage
             /// <summary>
             /// Gets the localized, context sensitive message for this error.
             /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
             {
                 return localizer.Localize(RangedIntegerTypeError);
             }

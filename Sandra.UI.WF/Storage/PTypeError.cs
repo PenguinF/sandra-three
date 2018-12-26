@@ -53,7 +53,10 @@ namespace Sandra.UI.WF.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public string GetLocalizedMessage(Localizer localizer) => TypeErrorBuilder.GetLocalizedTypeErrorMessage(localizer);
+        public string GetLocalizedMessage(Localizer localizer) => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
+            localizer,
+            PropertyKey,
+            ValueString ?? localizer.Localize(PType.JsonUndefinedValue));
 
         private PTypeError(ITypeErrorBuilder typeErrorBuilder, string propertyKey, string valueString, int start, int length)
             : base(JsonErrorCode.Custom, start, length)

@@ -32,9 +32,15 @@ namespace Sandra.UI.WF.Storage
         /// <param name="localizer">
         /// The localizer to use.
         /// </param>
+        /// <param name="propertyKey">
+        /// The property key for which the error occurred, or null if there was none.
+        /// </param>
+        /// <param name="valueString">
+        /// A string representation of the value in the source code.
+        /// </param>
         /// <returns>
         /// The localized error message.
         /// </returns>
-        string GetLocalizedTypeErrorMessage(Localizer localizer);
+        string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString);
     }
 }

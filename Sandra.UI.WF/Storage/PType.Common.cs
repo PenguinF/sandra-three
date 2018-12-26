@@ -109,7 +109,7 @@ namespace Sandra.UI.WF.Storage
             /// <summary>
             /// Gets the localized, context sensitive message for this error.
             /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
             {
                 return localizer.Localize(EnumerationTypeError);
             }
@@ -161,7 +161,7 @@ namespace Sandra.UI.WF.Storage
             /// <summary>
             /// Gets the localized, context sensitive message for this error.
             /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer)
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
             {
                 return localizer.Localize(KeyedSetTypeError);
             }

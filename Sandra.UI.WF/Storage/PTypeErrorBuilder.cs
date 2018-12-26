@@ -44,7 +44,19 @@ namespace Sandra.UI.WF.Storage
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
         /// </summary>
-        public string GetLocalizedTypeErrorMessage(Localizer localizer)
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="propertyKey">
+        /// The property key for which the error occurred, or null if there was none.
+        /// </param>
+        /// <param name="valueString">
+        /// A string representation of the value in the source code.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
         {
             return localizer.Localize(LocalizedMessageKey);
         }
