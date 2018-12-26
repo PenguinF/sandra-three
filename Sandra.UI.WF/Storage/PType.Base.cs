@@ -19,7 +19,9 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
+using System.Globalization;
 using System.Numerics;
 
 namespace Sandra.UI.WF.Storage
@@ -27,39 +29,63 @@ namespace Sandra.UI.WF.Storage
     public static partial class PType
     {
         /// <summary>
+        /// Gets the translation key for referring to a general json array (list).
+        /// </summary>
+        public static readonly LocalizedStringKey JsonArray = new LocalizedStringKey(nameof(JsonArray));
+
+        /// <summary>
+        /// Gets the translation key for referring to a general json object (map).
+        /// </summary>
+        public static readonly LocalizedStringKey JsonObject = new LocalizedStringKey(nameof(JsonObject));
+
+        /// <summary>
+        /// Gets the translation key for referring to an undefined value.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));
+
+        public static readonly PTypeErrorBuilder BooleanTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(BooleanTypeError)));
+
+        public static readonly PTypeErrorBuilder IntegerTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(IntegerTypeError)));
+
+        public static readonly PTypeErrorBuilder MapTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(MapTypeError)));
+
+        public static readonly PTypeErrorBuilder StringTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(StringTypeError)));
+
+        /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>();
+        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>();
+        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PMap"/> values.
         /// </summary>
-        public static readonly PType<PMap> Map = new BaseType<PMap>();
+        public static readonly PType<PMap> Map = new BaseType<PMap>(MapTypeError);
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>();
+        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError);
 
         private sealed class BaseType<TValue> : PType<TValue>
             where TValue : PValue
         {
-            public override bool TryGetValidValue(PValue value, out TValue targetValue)
-            {
-                if (value is TValue)
-                {
-                    targetValue = (TValue)value;
-                    return true;
-                }
+            public PTypeErrorBuilder TypeError { get; }
 
-                targetValue = default(TValue);
-                return false;
-            }
+            public BaseType(PTypeErrorBuilder typeError) => TypeError = typeError;
+
+            public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
+                => value is TValue targetValue
+                ? ValidValue(targetValue)
+                : InvalidValue(TypeError);
 
             public override PValue GetPValue(TValue value) => value;
         }
@@ -91,21 +117,10 @@ namespace Sandra.UI.WF.Storage
             /// <paramref name="baseType"/> is null.
             /// </exception>
             protected Derived(PType<TBase> baseType)
-            {
-                BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
-            }
+                => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
 
-            public override sealed bool TryGetValidValue(PValue value, out T targetValue)
-            {
-                if (BaseType.TryGetValidValue(value, out TBase baseValue)
-                    && TryGetTargetValue(baseValue, out targetValue))
-                {
-                    return true;
-                }
-
-                targetValue = default(T);
-                return false;
-            }
+            public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
+                => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 
@@ -115,17 +130,14 @@ namespace Sandra.UI.WF.Storage
             /// <param name="value">
             /// The value to convert from.
             /// </param>
-            /// <param name="targetValue">
-            /// The target value to convert to, if conversion succeeds.
-            /// </param>
             /// <returns>
-            /// Whether or not conversion succeeded.
+            /// The target value to convert to, if conversion succeeds, or a type error, if conversion fails.
             /// </returns>
-            public abstract bool TryGetTargetValue(TBase value, out T targetValue);
+            public abstract Union<ITypeErrorBuilder, T> TryGetTargetValue(TBase value);
 
             /// <summary>
             /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="TBase"/> value.
-            /// Assumed is that this is the reverse operation of <see cref="GetTargetValue(TBase)"/>.
+            /// Assumed is that this is the reverse operation of <see cref="TryGetTargetValue(TBase)"/>.
             /// </summary>
             /// <param name="value">
             /// The value to convert from.
@@ -144,28 +156,63 @@ namespace Sandra.UI.WF.Storage
         /// </typeparam>
         public abstract class Filter<T> : Derived<T, T>
         {
+            /// <summary>
+            /// Helper method to indicate a failed conversion in <see cref="IsValid(T, out ITypeErrorBuilder)"/>.
+            /// </summary>
+            /// <param name="convertTypeError">
+            /// The type error generated by the failed conversion.
+            /// </param>
+            /// <param name="typeError">
+            /// Always returns <paramref name="convertTypeError"/>.
+            /// </param>
+            /// <returns>
+            /// Always returns false.
+            /// </returns>
+            protected bool InvalidValue(ITypeErrorBuilder convertTypeError, out ITypeErrorBuilder typeError)
+            {
+                typeError = convertTypeError;
+                return false;
+            }
+
+            /// <summary>
+            /// Helper method to indicate a successful conversion in <see cref="IsValid(T, out ITypeErrorBuilder)"/>.
+            /// </summary>
+            /// <param name="typeError">
+            /// Always returns null.
+            /// </param>
+            /// <returns>
+            /// Always returns true.
+            /// </returns>
+            protected bool ValidValue(out ITypeErrorBuilder typeError)
+            {
+                typeError = null;
+                return true;
+            }
+
             protected Filter(PType<T> baseType) : base(baseType) { }
 
             /// <summary>
             /// Returns if a value of the target type is a member of this <see cref="PType"/>.
             /// </summary>
-            public abstract bool IsValid(T candidateValue);
+            /// <param name="candidateValue">
+            /// The candidate value to check.
+            /// </param>
+            /// <param name="typeError">
+            /// A type error, if the candidate value is invalid.
+            /// </param>
+            /// <returns>
+            /// True if the candidate value is valid; otherwise false.
+            /// </returns>
+            public abstract bool IsValid(T candidateValue, out ITypeErrorBuilder typeError);
 
-            public override sealed bool TryGetTargetValue(T candidateValue, out T targetValue)
-            {
-                if (IsValid(candidateValue))
-                {
-                    targetValue = candidateValue;
-                    return true;
-                }
-
-                targetValue = default(T);
-                return false;
-            }
+            public override sealed Union<ITypeErrorBuilder, T> TryGetTargetValue(T candidateValue)
+                => IsValid(candidateValue, out ITypeErrorBuilder typeError)
+                ? ValidValue(candidateValue)
+                : InvalidValue(typeError);
 
             public override sealed T GetBaseValue(T value)
             {
-                if (!IsValid(value))
+                if (!IsValid(value, out ITypeErrorBuilder _))
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(value),
@@ -177,7 +224,12 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        public sealed class RangedInteger : Filter<PInteger>
+        /// <summary>
+        /// Gets the translation key for <see cref="RangedInteger"/> type check failure error messages.
+        /// </summary>
+        public static readonly LocalizedStringKey RangedIntegerTypeError = new LocalizedStringKey(nameof(RangedIntegerTypeError));
+
+        public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
             /// Gets the minimum value which is allowed for values of this type.
@@ -204,9 +256,23 @@ namespace Sandra.UI.WF.Storage
                 MaxValue = maxValue;
             }
 
-            public override bool IsValid(PInteger candidateValue)
+            public override bool IsValid(PInteger candidateValue, out ITypeErrorBuilder typeError)
                 => MinValue <= candidateValue.Value
-                && candidateValue.Value <= MaxValue;
+                && candidateValue.Value <= MaxValue
+                ? ValidValue(out typeError)
+                : InvalidValue(this, out typeError);
+
+            /// <summary>
+            /// Gets the localized, context sensitive message for this error.
+            /// </summary>
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+                => localizer.Localize(RangedIntegerTypeError, new[]
+                {
+                    propertyKey,
+                    valueString,
+                    MinValue.ToString(CultureInfo.InvariantCulture),
+                    MaxValue.ToString(CultureInfo.InvariantCulture)
+                });
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

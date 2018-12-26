@@ -91,7 +91,7 @@ namespace Sandra.UI.WF.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            if (Schema.ContainsProperty(property) && property.IsValidValue(value))
+            if (Schema.ContainsProperty(property) && property.IsValidValue(value, out ITypeErrorBuilder _))
             {
                 KeyValueMapping[property.Name] = value;
             }

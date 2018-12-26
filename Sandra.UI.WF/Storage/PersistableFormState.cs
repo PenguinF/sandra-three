@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,6 +33,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class PersistableFormState
     {
+        public static readonly PTypeErrorBuilder PersistableFormStateTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(PersistableFormStateTypeError)));
+
         /// <summary>
         /// Gets the <see cref="PType"/> of a <see cref="PersistableFormState"/>.
         /// </summary>
@@ -39,22 +43,20 @@ namespace Sandra.UI.WF.Storage
 
         private sealed class FormStatePType : PType<PersistableFormState>
         {
-            public override bool TryGetValidValue(PValue value, out PersistableFormState targetValue)
+            public override Union<ITypeErrorBuilder, PersistableFormState> TryGetValidValue(PValue value)
             {
                 if (value is PList windowBoundsList
                     && windowBoundsList.Count == 5
-                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0], out bool maximized)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1], out int left)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2], out int top)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3], out int width)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4], out int height))
+                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0]).IsOption2(out bool maximized)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1]).IsOption2(out int left)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2]).IsOption2(out int top)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3]).IsOption2(out int width)
+                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4]).IsOption2(out int height))
                 {
-                    targetValue = new PersistableFormState(maximized, new Rectangle(left, top, width, height));
-                    return true;
+                    return ValidValue(new PersistableFormState(maximized, new Rectangle(left, top, width, height)));
                 }
 
-                targetValue = default(PersistableFormState);
-                return false;
+                return InvalidValue(PersistableFormStateTypeError);
             }
 
             public override PValue GetPValue(PersistableFormState value) => new PList(

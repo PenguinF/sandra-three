@@ -167,7 +167,7 @@ namespace Sandra.UI.WF
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            parser.TryParse(out PMap dummy, out List<JsonErrorInfo> errors);
+            parser.TryParse(settingsFile.Settings.Schema, out PMap dummy, out List<JsonErrorInfo> errors);
 
             IndicatorClearRange(0, TextLength);
 
@@ -274,7 +274,7 @@ namespace Sandra.UI.WF
                 {
                     if (error.Start <= textPosition && textPosition < error.Start + error.Length)
                     {
-                        yield return error.Message();
+                        yield return error.Message(Localizer.Current);
                     }
                 }
             }

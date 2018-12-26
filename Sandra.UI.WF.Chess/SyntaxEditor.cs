@@ -21,6 +21,7 @@
 
 using Sandra.UI.WF.Storage;
 using ScintillaNET;
+using SysExtensions;
 using SysExtensions.Text;
 using System;
 using System.Drawing;
@@ -231,11 +232,8 @@ namespace Sandra.UI.WF
 
         private ScintillaZoomFactor() : base(new PType.RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
 
-        public override bool TryGetTargetValue(PInteger integer, out int targetValue)
-        {
-            targetValue = (int)integer.Value;
-            return true;
-        }
+        public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
+            => ValidValue((int)integer.Value);
 
         public override PInteger GetBaseValue(int value) => new PInteger(value);
     }

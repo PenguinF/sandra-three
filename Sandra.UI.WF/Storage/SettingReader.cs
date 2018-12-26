@@ -33,6 +33,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public class SettingReader
     {
+        public static readonly PTypeErrorBuilder RootValueShouldBeObjectTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError)));
+
         private readonly string json;
 
         public ReadOnlyList<TextElement<JsonSymbol>> Tokens { get; }
@@ -43,24 +46,40 @@ namespace Sandra.UI.WF.Storage
             Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
         }
 
-        public bool TryParse(out PMap map, out List<JsonErrorInfo> errors)
+        public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)
         {
             JsonParser parser = new JsonParser(Tokens, json.Length);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
             {
-                PValue rootValue = new ToPValueConverter().Visit(rootNode);
-                bool validMap = PType.Map.TryGetValidValue(rootValue, out map);
-                if (!validMap)
+                if (rootNode is JsonMapSyntax mapNode)
                 {
-                    errors.Add(new JsonErrorInfo(
-                        JsonErrorCode.Custom, // Custom error code because an empty json is technically valid.
-                        rootNode.Start,
-                        rootNode.Length));
+                    Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
+                    var converter = new ToPValueConverter();
+
+                    // Analyze values with the provided schema while building the PMap.
+                    foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
+                    {
+                        var convertedValue = converter.Visit(keyedNode.Value);
+
+                        // TODO: should probably add a warning if a property key does not exist.
+                        if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
+                        {
+                            if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            {
+                                errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                            }
+                        }
+
+                        mapBuilder.Add(keyedNode.Key.Value, convertedValue);
+                    }
+
+                    map = new PMap(mapBuilder);
+                    return true;
                 }
 
-                return validMap;
+                errors.Add(PTypeError.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
             }
 
             map = default(PMap);
@@ -74,7 +93,7 @@ namespace Sandra.UI.WF.Storage
         {
             var parser = new SettingReader(json);
 
-            if (parser.TryParse(out PMap map, out List<JsonErrorInfo> errors))
+            if (parser.TryParse(workingCopy.Schema, out PMap map, out List<JsonErrorInfo> errors))
             {
                 foreach (var kv in map)
                 {

@@ -77,5 +77,22 @@
     "JsonErrorMultiplePropertyKeys": "':' verwacht",
     "JsonErrorMultipleValues": "',' verwacht",
     "RootValueShouldBeObjectTypeError": "Object ('{{ \"a\" = 1, \"b\" = 2, ... }}') verwacht",
+    "JsonArray": "een waardereeks ('[1, 2, ...]')",
+    "JsonObject": "een object ('{{ \"a\" = 1, \"b\" = 2, ... }}')",
+    "JsonUndefinedValue": "een ongedefinieerde waarde",
+    "BooleanTypeError": "'false' of 'true' waarde voor eigenschap {0} verwacht, maar er staat {1}",
+    "IntegerTypeError": "Geheel getal voor eigenschap {0} verwacht, maar er staat {1}",
+    "StringTypeError": "Stringwaarde voor eigenschap {0} verwacht, maar er staat {1}",
+    "MapTypeError": "Object ('{{ \"a\" = 1, \"b\" = 2, ... }}') voor eigenschap {0} verwacht, maar er staat {1}",
+    "NoLegalValues": "Er staat waarde {1}, maar er bestaan geen geldige waarden voor eigenschap {0}",
+    "EnumerateWithOr": "{0} of {1}",
+    "EnumerationTypeError": "Waarde(n) {2} voor eigenschap {0} verwacht, maar er staat {1}",
+    "KeyedSetTypeError": "Waarde(n) {2} voor eigenschap {0} verwacht, maar er staat {1}",
+    "RangedIntegerTypeError": "Geheel getal tussen {2} en {3} voor eigenschap {0} verwacht, maar er staat {1}",
+    "OpaqueColorTypeError": "Stringwaarde in het HTML kleur formaat (b.v. \"#808000\", of \"#DC143C\") voor eigenschap {0} verwacht, maar er staat {1}",
+    "FileNameTypeError": "Geldige bestandsnaam voor eigenschap {0} verwacht, maar er staat {1}",
+    "SubFolderNameTypeError": "Geldige mapnaam voor eigenschap {0} verwacht, maar er staat {1}",
+    "TrimmedStringTypeError": "Stringwaarde met minstens één niet-witruimte karakter voor eigenschap {0} verwacht, maar er staat {1}",
+    "TranslationDictionaryTypeError": "Vertalingen aangegeven door stringwaarden voor eigenschap {0} verwacht, maar er staat {2} bij vertaalsleutel {1}"
   }
 }

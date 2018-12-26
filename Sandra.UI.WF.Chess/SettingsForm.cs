@@ -170,7 +170,7 @@ namespace Sandra.UI.WF
                                          // use the current localizer to format the localized string.
                                          select Localizer.Current.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(), lineIndex, position })).ToArray();
+                                             new[] { error.Message(Localizer.Current), lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

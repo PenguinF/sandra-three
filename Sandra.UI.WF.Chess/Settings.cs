@@ -65,11 +65,8 @@ namespace Sandra.UI.WF
 
             private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
 
-            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
-            {
-                targetValue = (int)integer.Value;
-                return true;
-            }
+            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
+                => ValidValue((int)integer.Value);
 
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
@@ -149,11 +146,8 @@ namespace Sandra.UI.WF
 
             private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
 
-            public override bool TryGetTargetValue(PInteger integer, out int targetValue)
-            {
-                targetValue = (int)integer.Value;
-                return true;
-            }
+            public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
+                => ValidValue((int)integer.Value);
 
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }

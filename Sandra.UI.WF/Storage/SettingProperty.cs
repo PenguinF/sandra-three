@@ -19,6 +19,7 @@
  *********************************************************************************/
 #endregion
 
+using SysExtensions;
 using System;
 
 namespace Sandra.UI.WF.Storage
@@ -62,10 +63,13 @@ namespace Sandra.UI.WF.Storage
         /// <param name="value">
         /// The value to convert from.
         /// </param>
+        /// <param name="typeError">
+        /// Type error, if conversion failed.
+        /// </param>
         /// <returns>
         /// Whether or not conversion will succeed.
         /// </returns>
-        public abstract bool IsValidValue(PValue value);
+        public abstract bool IsValidValue(PValue value, out ITypeErrorBuilder typeError);
     }
 
     /// <summary>
@@ -123,16 +127,13 @@ namespace Sandra.UI.WF.Storage
         /// <param name="value">
         /// The value to convert from.
         /// </param>
-        /// <param name="targetValue">
-        /// The target value to convert to, if conversion succeeds.
-        /// </param>
         /// <returns>
-        /// Whether or not conversion succeeded.
+        /// The target value to convert to, if conversion succeeds, or a type error, if conversion fails.
         /// </returns>
-        public bool TryGetValidValue(PValue value, out T targetValue)
-            => PType.TryGetValidValue(value, out targetValue);
+        public Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
+            => PType.TryGetValidValue(value);
 
-        public override bool IsValidValue(PValue value)
-            => TryGetValidValue(value, out T targetValue);
+        public override bool IsValidValue(PValue value, out ITypeErrorBuilder typeError)
+            => !TryGetValidValue(value).IsOption1(out typeError);
     }
 }

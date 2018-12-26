@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * FileNameType.cs
+ * ITypeErrorBuilder.cs
  * 
  * Copyright (c) 2004-2018 Henk Nicolai
  * 
@@ -19,27 +19,28 @@
  *********************************************************************************/
 #endregion
 
-using System.IO;
-
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
-    /// Specialized PType that only accepts strings that are legal file names.
+    /// Contains information to build an error message caused by a value being of a different type than expected.
     /// </summary>
-    public sealed class FileNameType : PType.Filter<string>
+    public interface ITypeErrorBuilder
     {
-        public static readonly PTypeErrorBuilder FileNameTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
-
-        public static FileNameType Instance = new FileNameType();
-
-        private FileNameType() : base(PType.CLR.String) { }
-
-        public override bool IsValid(string fileName, out ITypeErrorBuilder typeError)
-            => !string.IsNullOrEmpty(fileName)
-            && !fileName.StartsWith(".")
-            && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
-            ? ValidValue(out typeError)
-            : InvalidValue(FileNameTypeError, out typeError);
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="propertyKey">
+        /// The property key for which the error occurred, or null if there was none.
+        /// </param>
+        /// <param name="valueString">
+        /// A string representation of the value in the source code.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString);
     }
 }

@@ -30,6 +30,9 @@ namespace Sandra.UI.WF.Storage
     /// </summary>
     public sealed class SubFolderNameType : PType.Filter<string>
     {
+        public static readonly PTypeErrorBuilder SubFolderNameTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(SubFolderNameTypeError)));
+
         public static SubFolderNameType Instance = new SubFolderNameType();
 
         private readonly char[] InvalidRelativeFolderChars;
@@ -40,23 +43,34 @@ namespace Sandra.UI.WF.Storage
             InvalidRelativeFolderChars = Path.GetInvalidPathChars().Union(new[] { '?', '*' }).ToArray();
         }
 
-        public override bool IsValid(string folderPath)
+        public override bool IsValid(string folderPath, out ITypeErrorBuilder typeError)
         {
             if (!string.IsNullOrEmpty(folderPath)
                 && folderPath.IndexOfAny(InvalidRelativeFolderChars) < 0
                 && !Path.IsPathRooted(folderPath))
             {
-                var localApplicationFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-                var subFolder = new DirectoryInfo(Path.Combine(localApplicationFolder.FullName, folderPath));
-
-                for (var parentFolder = subFolder.Parent; parentFolder != null; parentFolder = parentFolder.Parent)
+                try
                 {
-                    // Indeed a subfolder?
-                    if (localApplicationFolder.FullName == parentFolder.FullName) return true;
+                    var localApplicationFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+                    var subFolder = new DirectoryInfo(Path.Combine(localApplicationFolder.FullName, folderPath));
+
+                    for (var parentFolder = subFolder.Parent; parentFolder != null; parentFolder = parentFolder.Parent)
+                    {
+                        // Indeed a subfolder?
+                        if (localApplicationFolder.FullName == parentFolder.FullName)
+                        {
+                            return ValidValue(out typeError);
+                        }
+                    }
+                }
+                catch
+                {
+                    // For all kinds of DirectoryInfo exceptions not prevented by the if-statement,
+                    // just return InvalidValue().
                 }
             }
 
-            return false;
+            return InvalidValue(SubFolderNameTypeError, out typeError);
         }
     }
 }
