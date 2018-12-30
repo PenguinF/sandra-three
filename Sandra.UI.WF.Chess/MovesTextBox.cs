@@ -441,15 +441,7 @@ namespace Sandra.UI.WF
         {
             if (!ModifierKeys.HasFlag(Keys.Control) && game != null)
             {
-                UpdatingGame = true;
-                try
-                {
-                    game.HandleMouseWheelEvent(e.Delta);
-                }
-                finally
-                {
-                    UpdatingGame = false;
-                }
+                game.HandleMouseWheelEvent(e.Delta);
             }
 
             base.OnMouseWheel(e);
