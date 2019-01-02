@@ -141,7 +141,7 @@ namespace Sandra.UI.WF
                         }
 
                         return CreateSettingsForm(
-                            true,
+                            !Program.GetSetting(SettingKeys.DeveloperMode),
                             Program.DefaultSettings,
                             SettingKeys.DefaultSettingsWindow,
                             SettingKeys.DefaultSettingsErrorHeight);
