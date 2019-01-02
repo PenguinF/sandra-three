@@ -20,6 +20,9 @@
   // preferences.
   "local_preferences_file_name": "Preferences.json",
 
+  // Enables tools which assist with SandraChess development and debugging.
+  "developer_mode": false,
+
   // Subfolder of the application directory which is scanned for language files.
   // Backward slashes ('\') must be escaped in json strings (e.g.
   // "C:\\Temp\\temp.txt"). Instead, forward slashes ('/') can be used to
