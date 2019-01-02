@@ -41,6 +41,7 @@ namespace Sandra.UI.WF
         private readonly ListBoxEx errorsListBox;
         private readonly SettingsTextBox settingsTextBox;
 
+        private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
         public SettingsForm(bool isReadOnly,
@@ -105,6 +106,9 @@ namespace Sandra.UI.WF
                 // Interaction between settingsTextBox and errorsTextBox.
                 settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
+                // Assume that if this display text changes, that of errorLocationString changes too.
+                noErrorsString = new LocalizedString(LocalizedStringKeys.NoErrorsMessage);
+
                 // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
                 errorLocationString = new LocalizedString(LocalizedStringKeys.ErrorLocation);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors();
@@ -157,7 +161,7 @@ namespace Sandra.UI.WF
                 if (settingsTextBox.CurrentErrorCount == 0)
                 {
                     errorsListBox.Items.Clear();
-                    errorsListBox.Items.Add("(No errors)");
+                    errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
                     errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
                     errorsListBox.Font = noErrorsFont;
                 }
@@ -231,6 +235,7 @@ namespace Sandra.UI.WF
         {
             if (disposing)
             {
+                noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }
 
