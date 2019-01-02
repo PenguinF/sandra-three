@@ -44,6 +44,14 @@ namespace Sandra.UI.WF
         private readonly Box<Form> creditsFormBox = new Box<Form>();
         private readonly Box<Form> languageFormBox = new Box<Form>();
 
+        // Separate action handler for building the MainMenuStrip.
+        private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+
+        // Action handler for the developer tools dropdown item.
+        private readonly UIActionHandler developerToolsActionHandler = new UIActionHandler();
+
+        private readonly LocalizedToolStripMenuItem developerToolsMenuItem;
+
         public MdiContainerForm()
         {
             IsMdiContainer = true;
@@ -59,10 +67,29 @@ namespace Sandra.UI.WF
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
             indexFocusDependentUIActions(MainMenuStrip.Items);
+
+            // Developer tools.
+            developerToolsMenuItem = new LocalizedToolStripMenuItem { LocalizedText = developerTools };
+            developerToolsMenuItem.LocalizedText.DisplayText.ValueChanged += displayText => developerToolsMenuItem.Text = displayText.Replace("&", "&&");
+            MainMenuStrip.Items.Add(developerToolsMenuItem);
+
+            UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
+            UpdateDeveloperToolsMenu();
         }
 
-        // Separate action handler for building the MainMenuStrip.
-        readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+        private void UpdateDeveloperToolsMenu()
+        {
+            bool atLeastOneItemVisible = false;
+
+            foreach (var menuItem in developerToolsMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                var state = developerToolsActionHandler.TryPerformAction(menuItem.Action, false);
+                menuItem.Update(state);
+                atLeastOneItemVisible |= state.Visible;
+            }
+
+            developerToolsMenuItem.Visible = atLeastOneItemVisible;
+        }
 
         class FocusDependentUIActionState
         {
@@ -156,6 +183,9 @@ namespace Sandra.UI.WF
             this.BindAction(OpenAbout, TryOpenAbout);
             this.BindAction(ShowCredits, TryShowCredits);
             this.BindAction(EditCurrentLanguage, TryEditCurrentLanguage);
+
+            // Use developerToolsActionHandler to add to the developer tools menu.
+            developerToolsActionHandler.BindAction(EditCurrentLanguage.Action, EditCurrentLanguage.DefaultBinding, TryEditCurrentLanguage);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
