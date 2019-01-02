@@ -61,6 +61,7 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
         internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
@@ -334,6 +335,7 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.NewGame, "New game" },
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
+                { LocalizedStringKeys.NoErrorsMessage, "(No errors)" },
                 { LocalizedStringKeys.Paste, "Paste" },
                 { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
