@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
     public partial class SettingsForm : UIActionForm
     {
         private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
-        private static readonly Font errorsFont = new Font("Calibri", 10);
+        private static readonly Font normalFont = new Font("Calibri", 10);
 
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
@@ -196,7 +196,7 @@ namespace Sandra.UI.WF
                     }
 
                     errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
-                    errorsListBox.Font = errorsFont;
+                    errorsListBox.Font = normalFont;
                 }
             }
             finally
