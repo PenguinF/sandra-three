@@ -270,5 +270,46 @@ namespace Sandra.UI.WF
                 MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
                 MenuIcon = Properties.Resources.speech,
             });
+
+        public UIActionState TryEditCurrentLanguage(bool perform)
+        {
+            // Only enable in developer mode.
+            if (!Program.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
+
+            // Cannot edit built-in localizer.
+            if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
+
+            if (perform)
+            {
+                OpenOrActivateToolForm(
+                    languageFormBox,
+                    () =>
+                    {
+                        // Generate translations into language file if empty.
+                        if (fileLocalizer.Dictionary.Count == 0)
+                        {
+                            var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
+
+                            // Fill with built-in English translations.
+                            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+
+                            // And overwrite the existing language file with this.
+                            // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
+                            SettingsFile.WriteToFile(
+                                settingCopy.Commit(),
+                                fileLocalizer.LanguageFile.AbsoluteFilePath,
+                                SettingWriterOptions.SuppressSettingComments);
+                        }
+
+                        return CreateSettingsForm(
+                            false,
+                            fileLocalizer.LanguageFile,
+                            SettingKeys.LanguageWindow,
+                            SettingKeys.LanguageErrorHeight);
+                    });
+            }
+
+            return UIActionVisibility.Enabled;
+        }
     }
 }

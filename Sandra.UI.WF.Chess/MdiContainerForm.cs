@@ -42,6 +42,7 @@ namespace Sandra.UI.WF
         private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
         private readonly Box<Form> aboutFormBox = new Box<Form>();
         private readonly Box<Form> creditsFormBox = new Box<Form>();
+        private readonly Box<Form> languageFormBox = new Box<Form>();
 
         public MdiContainerForm()
         {
@@ -154,6 +155,7 @@ namespace Sandra.UI.WF
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(OpenAbout, TryOpenAbout);
             this.BindAction(ShowCredits, TryShowCredits);
+            this.BindAction(EditCurrentLanguage, TryEditCurrentLanguage);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
