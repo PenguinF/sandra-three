@@ -36,10 +36,10 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        private Form openLocalSettingsForm;
-        private Form openDefaultSettingsForm;
-        private Form openAboutForm;
-        private Form openCreditsForm;
+        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> aboutFormBox = new Box<Form>();
+        private readonly Box<Form> creditsFormBox = new Box<Form>();
 
         public MdiContainerForm()
         {
@@ -330,6 +330,31 @@ namespace Sandra.UI.WF
             PieceImages = loadChessPieceImages();
 
             NewPlayingBoard();
+        }
+
+        private void OpenOrActivateToolForm(Box<Form> toolForm, Func<Form> toolFormConstructor)
+        {
+            if (toolForm.Value == null)
+            {
+                // Rely on exception handler in call stack, so no try-catch here.
+                toolForm.Value = toolFormConstructor();
+
+                if (toolForm.Value != null)
+                {
+                    toolForm.Value.Owner = this;
+                    toolForm.Value.ShowInTaskbar = false;
+                    toolForm.Value.ShowIcon = false;
+                    toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
+                    toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
+                    toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
+                }
+            }
+
+            if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
+            {
+                toolForm.Value.Visible = true;
+                toolForm.Value.Activate();
+            }
         }
 
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
