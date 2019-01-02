@@ -308,9 +308,12 @@ namespace SysExtensions.Tests
             }
         }
 
+        public static IEnumerable<object[]> JustTwoSymbols()
+            => TwoSymbolsOfEachType().Select(array => new object[] { array[0], array[2] });
+
         [Theory]
-        [MemberData(nameof(TwoSymbolsOfEachType))]
-        public void RepeatableTokenization(string json1, Type type1, string json2, Type type2)
+        [MemberData(nameof(JustTwoSymbols))]
+        public void RepeatableTokenization(string json1, string json2)
         {
             var json = $"{json1} {json2}";
 
