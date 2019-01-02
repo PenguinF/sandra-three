@@ -37,6 +37,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Box.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="EnumIndexedArray.cs" />
     <Compile Include="LinqExtensions.cs" />
