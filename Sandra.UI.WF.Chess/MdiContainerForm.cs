@@ -75,6 +75,9 @@ namespace Sandra.UI.WF
 
             UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
             UpdateDeveloperToolsMenu();
+
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
+            developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
         }
 
         private void UpdateDeveloperToolsMenu()
@@ -90,6 +93,12 @@ namespace Sandra.UI.WF
 
             developerToolsMenuItem.Visible = atLeastOneItemVisible;
         }
+
+        private void DeveloperToolsActionHandler_UIActionsInvalidated(UIActionHandler _)
+            => UpdateDeveloperToolsMenu();
+
+        private void DeveloperModeChanged(object sender, EventArgs e)
+            => developerToolsActionHandler.Invalidate();
 
         class FocusDependentUIActionState
         {
