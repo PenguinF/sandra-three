@@ -39,6 +39,17 @@ namespace Sandra.UI.WF
         /// </summary>
         public abstract string Localize(LocalizedStringKey localizedStringKey, string[] parameters);
 
+        /// <summary>
+        /// Notifies localizers that the translations of this language were updated.
+        /// </summary>
+        protected void NotifyChanged()
+        {
+            if (Current == this)
+            {
+                event_CurrentChanged.Raise(null, EventArgs.Empty);
+            }
+        }
+
         private sealed class DefaultLocalizer : Localizer
         {
             public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)

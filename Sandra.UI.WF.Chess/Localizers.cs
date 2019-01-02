@@ -42,6 +42,8 @@ namespace Sandra.UI.WF
         internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
+        internal static readonly LocalizedStringKey DeveloperTools = new LocalizedStringKey(nameof(DeveloperTools));
+        internal static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
         internal static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
@@ -237,6 +239,11 @@ namespace Sandra.UI.WF
             LanguageFile = languageFile;
             LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
             FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
+            UpdateDictionary();
+        }
+
+        private void UpdateDictionary()
+        {
             Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
         }
 
@@ -290,6 +297,18 @@ namespace Sandra.UI.WF
 
             return new UIActionState(UIActionVisibility.Enabled, Current == this);
         }
+
+        public void EnableLiveUpdates()
+        {
+            // Can only happen after a message loop has been started.
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
+        }
+
+        private void TranslationsChanged(object sender, EventArgs e)
+        {
+            UpdateDictionary();
+            NotifyChanged();
+        }
     }
 
     internal sealed class BuiltInEnglishLocalizer : Localizer
@@ -316,6 +335,8 @@ namespace Sandra.UI.WF
                 { LocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
+                { LocalizedStringKeys.DeveloperTools, "Tools" },
+                { LocalizedStringKeys.EditCurrentLanguage, "Edit current language" },
                 { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
                 { LocalizedStringKeys.ErrorLocation, "{0} at line {1}, position {2}" },

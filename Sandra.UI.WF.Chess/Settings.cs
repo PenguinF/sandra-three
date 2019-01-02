@@ -90,6 +90,14 @@ namespace Sandra.UI.WF
             FileNameType.Instance,
             new SettingComment(LocalPreferencesFileNameDescription));
 
+        private static readonly string DeveloperModeDescription
+            = "Enables tools which assist with SandraChess development and debugging.";
+
+        public static readonly SettingProperty<bool> DeveloperMode = new SettingProperty<bool>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
+            PType.CLR.Boolean,
+            new SettingComment(DeveloperModeDescription));
+
         private static readonly string LangFolderNameDescription
             = "Subfolder of the application directory which is scanned for language files. "
             + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
@@ -118,6 +126,14 @@ namespace Sandra.UI.WF
 
         public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
+            PType.CLR.Int32);
+
+        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> LanguageErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
             PType.CLR.Int32);
 
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
@@ -208,6 +224,8 @@ namespace Sandra.UI.WF
                 SettingKeys.DefaultSettingsErrorHeight,
                 SettingKeys.PreferencesWindow,
                 SettingKeys.PreferencesErrorHeight,
+                SettingKeys.LanguageWindow,
+                SettingKeys.LanguageErrorHeight,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
         }
@@ -219,6 +237,7 @@ namespace Sandra.UI.WF
                 SettingKeys.Version,
                 SettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
+                SettingKeys.DeveloperMode,
                 SettingKeys.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
@@ -237,7 +256,8 @@ namespace Sandra.UI.WF
                 SettingKeys.LastMoveArrowColor,
                 SettingKeys.DisplayLegalTargetSquares,
                 SettingKeys.LegalTargetSquaresColor,
-                SettingKeys.FastNavigationPlyCount);
+                SettingKeys.FastNavigationPlyCount,
+                SettingKeys.DeveloperMode);
         }
 
         public static SettingCopy CreateBuiltIn()
@@ -247,6 +267,7 @@ namespace Sandra.UI.WF
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
+            defaultSettings.AddOrReplace(SettingKeys.DeveloperMode, false);
             defaultSettings.AddOrReplace(SettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);

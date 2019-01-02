@@ -67,65 +67,51 @@ namespace Sandra.UI.WF
                                         SettingProperty<int> errorHeightSetting)
             => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
             {
-                Owner = this,
                 ClientSize = new Size(600, 600),
-                ShowIcon = false,
-                ShowInTaskbar = false,
-                StartPosition = FormStartPosition.CenterScreen,
-                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
 
         public UIActionState TryEditPreferencesFile(bool perform)
         {
             if (perform)
             {
-                if (openLocalSettingsForm == null)
-                {
-                    // If the file doesn't exist yet, generate a local settings file with a commented out copy
-                    // of the default settings to serve as an example, and to show which settings are available.
-                    Exception exception = null;
-                    if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
+                OpenOrActivateToolForm(
+                    localSettingsFormBox,
+                    () =>
                     {
-                        SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
-
-                        var defaultSettingsObject = Program.DefaultSettings.Settings;
-                        foreach (var property in localSettingsExample.Schema.AllProperties)
+                        // If the file doesn't exist yet, generate a local settings file with a commented out copy
+                        // of the default settings to serve as an example, and to show which settings are available.
+                        if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
                         {
-                            if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
-                                && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out PValue sourceValue))
+                            SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
+
+                            var defaultSettingsObject = Program.DefaultSettings.Settings;
+                            foreach (var property in localSettingsExample.Schema.AllProperties)
                             {
-                                localSettingsExample.AddOrReplaceRaw(property, sourceValue);
+                                if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
+                                    && defaultSettingsObject.TryGetRawValue(defaultSettingProperty, out PValue sourceValue))
+                                {
+                                    localSettingsExample.AddOrReplaceRaw(property, sourceValue);
+                                }
+                            }
+
+                            Exception exception = SettingsFile.WriteToFile(
+                                localSettingsExample.Commit(),
+                                Program.LocalSettings.AbsoluteFilePath,
+                                SettingWriterOptions.CommentOutProperties);
+
+                            if (exception != null)
+                            {
+                                MessageBox.Show(exception.Message);
+                                return null;
                             }
                         }
 
-                        exception = SettingsFile.WriteToFile(
-                            localSettingsExample.Commit(),
-                            Program.LocalSettings.AbsoluteFilePath,
-                            SettingWriterOptions.CommentOutProperties);
-                    }
-
-                    if (exception != null)
-                    {
-                        MessageBox.Show(exception.Message);
-                    }
-                    else
-                    {
-                        // Rely on exception handler in call stack, so no try-catch here.
-                        openLocalSettingsForm = CreateSettingsForm(
+                        return CreateSettingsForm(
                             false,
                             Program.LocalSettings,
                             SettingKeys.PreferencesWindow,
                             SettingKeys.PreferencesErrorHeight);
-
-                        openLocalSettingsForm.FormClosed += (_, __) => openLocalSettingsForm = null;
-                    }
-                }
-
-                if (openLocalSettingsForm != null && !openLocalSettingsForm.ContainsFocus)
-                {
-                    openLocalSettingsForm.Visible = true;
-                    openLocalSettingsForm.Activate();
-                }
+                    });
             }
 
             return UIActionVisibility.Enabled;
@@ -143,30 +129,23 @@ namespace Sandra.UI.WF
         {
             if (perform)
             {
-                if (openDefaultSettingsForm == null)
-                {
-                    if (!File.Exists(Program.DefaultSettings.AbsoluteFilePath))
+                OpenOrActivateToolForm(
+                    defaultSettingsFormBox,
+                    () =>
                     {
-                        // Before opening the possibly non-existent file, write to it.
-                        // Ignore exceptions, may be caused by insufficient access rights.
-                        Program.DefaultSettings.WriteToFile();
-                    }
+                        if (!File.Exists(Program.DefaultSettings.AbsoluteFilePath))
+                        {
+                            // Before opening the possibly non-existent file, write to it.
+                            // Ignore exceptions, may be caused by insufficient access rights.
+                            Program.DefaultSettings.WriteToFile();
+                        }
 
-                    // Rely on exception handler in call stack, so no try-catch here.
-                    openDefaultSettingsForm = CreateSettingsForm(
-                        true,
-                        Program.DefaultSettings,
-                        SettingKeys.DefaultSettingsWindow,
-                        SettingKeys.DefaultSettingsErrorHeight);
-
-                    openDefaultSettingsForm.FormClosed += (_, __) => openDefaultSettingsForm = null;
-                }
-
-                if (!openDefaultSettingsForm.ContainsFocus)
-                {
-                    openDefaultSettingsForm.Visible = true;
-                    openDefaultSettingsForm.Activate();
-                }
+                        return CreateSettingsForm(
+                            !Program.GetSetting(SettingKeys.DeveloperMode),
+                            Program.DefaultSettings,
+                            SettingKeys.DefaultSettingsWindow,
+                            SettingKeys.DefaultSettingsErrorHeight);
+                    });
             }
 
             return UIActionVisibility.Enabled;
@@ -230,13 +209,8 @@ namespace Sandra.UI.WF
 
             var readOnlyTextForm = new UIActionForm
             {
-                Owner = this,
                 ClientSize = new Size(width, height),
-                ShowIcon = false,
-                ShowInTaskbar = false,
-                StartPosition = FormStartPosition.CenterScreen,
                 Text = Path.GetFileName(fileName),
-                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
             };
 
             readOnlyTextForm.Controls.Add(textBox);
@@ -258,21 +232,9 @@ namespace Sandra.UI.WF
             // File.Exists() is too expensive to call hundreds of times.
             if (perform)
             {
-                if (openAboutForm == null)
-                {
-                    openAboutForm = CreateReadOnlyTextForm("README.txt", 600, 300);
-
-                    if (openAboutForm != null)
-                    {
-                        openAboutForm.FormClosed += (_, __) => openAboutForm = null;
-                    }
-                }
-
-                if (openAboutForm != null && !openAboutForm.ContainsFocus)
-                {
-                    openAboutForm.Visible = true;
-                    openAboutForm.Activate();
-                }
+                OpenOrActivateToolForm(
+                    aboutFormBox,
+                    () => CreateReadOnlyTextForm("README.txt", 600, 300));
             }
 
             return UIActionVisibility.Enabled;
@@ -292,21 +254,59 @@ namespace Sandra.UI.WF
             // File.Exists() is too expensive to call hundreds of times.
             if (perform)
             {
-                if (openCreditsForm == null)
-                {
-                    openCreditsForm = CreateReadOnlyTextForm("Credits.txt", 700, 600);
+                OpenOrActivateToolForm(
+                    creditsFormBox,
+                    () => CreateReadOnlyTextForm("Credits.txt", 700, 600));
+            }
 
-                    if (openCreditsForm != null)
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(EditCurrentLanguage)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
+                MenuIcon = Properties.Resources.speech,
+            });
+
+        public UIActionState TryEditCurrentLanguage(bool perform)
+        {
+            // Only enable in developer mode.
+            if (!Program.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
+
+            // Cannot edit built-in localizer.
+            if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
+
+            if (perform)
+            {
+                OpenOrActivateToolForm(
+                    languageFormBox,
+                    () =>
                     {
-                        openCreditsForm.FormClosed += (_, __) => openCreditsForm = null;
-                    }
-                }
+                        // Generate translations into language file if empty.
+                        if (fileLocalizer.Dictionary.Count == 0)
+                        {
+                            var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
-                if (openCreditsForm != null && !openCreditsForm.ContainsFocus)
-                {
-                    openCreditsForm.Visible = true;
-                    openCreditsForm.Activate();
-                }
+                            // Fill with built-in English translations.
+                            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+
+                            // And overwrite the existing language file with this.
+                            // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
+                            SettingsFile.WriteToFile(
+                                settingCopy.Commit(),
+                                fileLocalizer.LanguageFile.AbsoluteFilePath,
+                                SettingWriterOptions.SuppressSettingComments);
+                        }
+
+                        return CreateSettingsForm(
+                            false,
+                            fileLocalizer.LanguageFile,
+                            SettingKeys.LanguageWindow,
+                            SettingKeys.LanguageErrorHeight);
+                    });
             }
 
             return UIActionVisibility.Enabled;

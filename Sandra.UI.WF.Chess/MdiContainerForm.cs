@@ -36,10 +36,21 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        private Form openLocalSettingsForm;
-        private Form openDefaultSettingsForm;
-        private Form openAboutForm;
-        private Form openCreditsForm;
+        private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
+
+        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> aboutFormBox = new Box<Form>();
+        private readonly Box<Form> creditsFormBox = new Box<Form>();
+        private readonly Box<Form> languageFormBox = new Box<Form>();
+
+        // Separate action handler for building the MainMenuStrip.
+        private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+
+        // Action handler for the developer tools dropdown item.
+        private readonly UIActionHandler developerToolsActionHandler = new UIActionHandler();
+
+        private readonly LocalizedToolStripMenuItem developerToolsMenuItem;
 
         public MdiContainerForm()
         {
@@ -56,10 +67,38 @@ namespace Sandra.UI.WF
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
             indexFocusDependentUIActions(MainMenuStrip.Items);
+
+            // Developer tools.
+            developerToolsMenuItem = new LocalizedToolStripMenuItem { LocalizedText = developerTools };
+            developerToolsMenuItem.LocalizedText.DisplayText.ValueChanged += displayText => developerToolsMenuItem.Text = displayText.Replace("&", "&&");
+            MainMenuStrip.Items.Add(developerToolsMenuItem);
+
+            UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
+            UpdateDeveloperToolsMenu();
+
+            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
+            developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
         }
 
-        // Separate action handler for building the MainMenuStrip.
-        readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+        private void UpdateDeveloperToolsMenu()
+        {
+            bool atLeastOneItemVisible = false;
+
+            foreach (var menuItem in developerToolsMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                var state = developerToolsActionHandler.TryPerformAction(menuItem.Action, false);
+                menuItem.Update(state);
+                atLeastOneItemVisible |= state.Visible;
+            }
+
+            developerToolsMenuItem.Visible = atLeastOneItemVisible;
+        }
+
+        private void DeveloperToolsActionHandler_UIActionsInvalidated(UIActionHandler _)
+            => UpdateDeveloperToolsMenu();
+
+        private void DeveloperModeChanged(object sender, EventArgs e)
+            => developerToolsActionHandler.Invalidate();
 
         class FocusDependentUIActionState
         {
@@ -152,6 +191,10 @@ namespace Sandra.UI.WF
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(OpenAbout, TryOpenAbout);
             this.BindAction(ShowCredits, TryShowCredits);
+            this.BindAction(EditCurrentLanguage, TryEditCurrentLanguage);
+
+            // Use developerToolsActionHandler to add to the developer tools menu.
+            developerToolsActionHandler.BindAction(EditCurrentLanguage.Action, EditCurrentLanguage.DefaultBinding, TryEditCurrentLanguage);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
@@ -304,6 +347,9 @@ namespace Sandra.UI.WF
 
         protected override void OnLoad(EventArgs e)
         {
+            // Enable live updates to localizers now a message loop exists.
+            Localizers.Registered.ForEach(x => x.EnableLiveUpdates());
+
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
 
@@ -332,6 +378,31 @@ namespace Sandra.UI.WF
             NewPlayingBoard();
         }
 
+        private void OpenOrActivateToolForm(Box<Form> toolForm, Func<Form> toolFormConstructor)
+        {
+            if (toolForm.Value == null)
+            {
+                // Rely on exception handler in call stack, so no try-catch here.
+                toolForm.Value = toolFormConstructor();
+
+                if (toolForm.Value != null)
+                {
+                    toolForm.Value.Owner = this;
+                    toolForm.Value.ShowInTaskbar = false;
+                    toolForm.Value.ShowIcon = false;
+                    toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
+                    toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
+                    toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
+                }
+            }
+
+            if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
+            {
+                toolForm.Value.Visible = true;
+                toolForm.Value.Activate();
+            }
+        }
+
         EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();
@@ -348,6 +419,16 @@ namespace Sandra.UI.WF
             array[ColoredPiece.WhiteQueen] = Program.LoadImage("wq");
             array[ColoredPiece.WhiteKing] = Program.LoadImage("wk");
             return array;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                developerTools.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
