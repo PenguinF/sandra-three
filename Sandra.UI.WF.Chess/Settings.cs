@@ -128,6 +128,14 @@ namespace Sandra.UI.WF
             new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
             PType.CLR.Int32);
 
+        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> LanguageErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
+            PType.CLR.Int32);
+
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
@@ -216,6 +224,8 @@ namespace Sandra.UI.WF
                 SettingKeys.DefaultSettingsErrorHeight,
                 SettingKeys.PreferencesWindow,
                 SettingKeys.PreferencesErrorHeight,
+                SettingKeys.LanguageWindow,
+                SettingKeys.LanguageErrorHeight,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
         }
