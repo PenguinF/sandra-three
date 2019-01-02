@@ -238,6 +238,11 @@ namespace Sandra.UI.WF
             LanguageFile = languageFile;
             LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
             FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
+            UpdateDictionary();
+        }
+
+        private void UpdateDictionary()
+        {
             Dictionary = LanguageFile.Settings.TryGetValue(Localizers.Translations, out Dictionary<LocalizedStringKey, string> dict) ? dict : new Dictionary<LocalizedStringKey, string>();
         }
 
@@ -290,6 +295,18 @@ namespace Sandra.UI.WF
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Current == this);
+        }
+
+        public void EnableLiveUpdates()
+        {
+            // Can only happen after a message loop has been started.
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
+        }
+
+        private void TranslationsChanged(object sender, EventArgs e)
+        {
+            UpdateDictionary();
+            NotifyChanged();
         }
     }
 
