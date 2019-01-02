@@ -261,5 +261,14 @@ namespace Sandra.UI.WF
 
             return UIActionVisibility.Enabled;
         }
+
+        public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(EditCurrentLanguage)),
+            new UIActionBinding
+            {
+                ShowInMenu = true,
+                MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
+                MenuIcon = Properties.Resources.speech,
+            });
     }
 }
