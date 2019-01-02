@@ -36,6 +36,8 @@ namespace Sandra.UI.WF
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
+        private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
+
         private readonly Box<Form> localSettingsFormBox = new Box<Form>();
         private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
         private readonly Box<Form> aboutFormBox = new Box<Form>();
@@ -373,6 +375,16 @@ namespace Sandra.UI.WF
             array[ColoredPiece.WhiteQueen] = Program.LoadImage("wq");
             array[ColoredPiece.WhiteKing] = Program.LoadImage("wk");
             return array;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                developerTools.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }
