@@ -43,7 +43,7 @@ namespace Sandra.UI.WF
             // Like this because this InteractiveGame has a longer lifetime than chessBoardForm and movesForm.
             // It will go out of scope automatically when both chessBoardForm and movesForm are closed.
             if (chessBoardForm != null) chessBoardForm.GameUpdated();
-            MovesTextBox movesTextBox = getMovesTextBox();
+            MovesTextBox movesTextBox = GetMovesTextBox();
             if (movesTextBox != null) movesTextBox.GameUpdated();
         }
 
@@ -65,13 +65,13 @@ namespace Sandra.UI.WF
         StandardChessBoardForm chessBoardForm;
         SnappingMdiChildForm movesForm;
 
-        MovesTextBox getMovesTextBox()
+        MovesTextBox GetMovesTextBox()
         {
             if (movesForm == null) return null;
             return (MovesTextBox)movesForm.Controls[0];
         }
 
-        private static Chess.Variation getFirstMove(Chess.Variation variation)
+        private static Chess.Variation GetFirstMove(Chess.Variation variation)
         {
             Chess.Variation firstMoveInVariation = variation;
             while (firstMoveInVariation != null && firstMoveInVariation.VariationIndex == 0)

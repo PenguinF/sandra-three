@@ -59,14 +59,14 @@ namespace Sandra.UI.WF
             Text = "Sandra";
 
             // Initialize UIActions before building the MainMenuStrip based on it.
-            initializeUIActions();
+            InitializeUIActions();
 
             MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
-            indexFocusDependentUIActions(MainMenuStrip.Items);
+            IndexFocusDependentUIActions(MainMenuStrip.Items);
 
             // Developer tools.
             developerToolsMenuItem = new LocalizedToolStripMenuItem { LocalizedText = developerTools };
@@ -109,7 +109,7 @@ namespace Sandra.UI.WF
 
         readonly Dictionary<UIAction, FocusDependentUIActionState> focusDependentUIActions = new Dictionary<UIAction, FocusDependentUIActionState>();
 
-        void bindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
+        void BindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
         {
             foreach (DefaultUIActionBinding binding in bindings)
             {
@@ -169,7 +169,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        void initializeUIActions()
+        void InitializeUIActions()
         {
             // More than one localizer: can switch between them.
             if (Localizers.Registered.Count() >= 2)
@@ -181,7 +181,7 @@ namespace Sandra.UI.WF
 
                 UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
                 mainMenuActionHandler.RootMenuNode.Nodes.Add(langMenu);
-                bindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
+                BindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
             // Actions which have their handler in this instance.
@@ -200,7 +200,7 @@ namespace Sandra.UI.WF
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
-            bindFocusDependentUIActions(fileMenu,
+            BindFocusDependentUIActions(fileMenu,
                                         EditPreferencesFile,
                                         ShowDefaultSettingsFile,
                                         Exit);
@@ -209,7 +209,7 @@ namespace Sandra.UI.WF
             mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
-            bindFocusDependentUIActions(gameMenu,
+            BindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard);
 
             UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo)
@@ -219,7 +219,7 @@ namespace Sandra.UI.WF
             gameMenu.Nodes.Add(goToMenu);
 
             // Add all these to a submenu.
-            bindFocusDependentUIActions(goToMenu,
+            BindFocusDependentUIActions(goToMenu,
                                         InteractiveGame.GotoStart,
                                         InteractiveGame.GotoFirstMove,
                                         InteractiveGame.FastNavigateBackward,
@@ -231,7 +231,7 @@ namespace Sandra.UI.WF
                                         InteractiveGame.GotoPreviousVariation,
                                         InteractiveGame.GotoNextVariation);
 
-            bindFocusDependentUIActions(gameMenu,
+            BindFocusDependentUIActions(gameMenu,
                                         InteractiveGame.PromoteActiveVariation,
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
@@ -245,7 +245,7 @@ namespace Sandra.UI.WF
             mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
 
             // Add these actions to the "View" dropdown list.
-            bindFocusDependentUIActions(viewMenu,
+            BindFocusDependentUIActions(viewMenu,
                                         InteractiveGame.GotoChessBoardForm,
                                         InteractiveGame.GotoMovesForm,
                                         SharedUIAction.ZoomIn,
@@ -255,23 +255,23 @@ namespace Sandra.UI.WF
             mainMenuActionHandler.RootMenuNode.Nodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.
-            bindFocusDependentUIActions(helpMenu,
+            BindFocusDependentUIActions(helpMenu,
                                         OpenAbout,
                                         ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
-            FocusHelper.Instance.FocusChanged += focusHelper_FocusChanged;
+            FocusHelper.Instance.FocusChanged += FocusHelper_FocusChanged;
         }
 
-        void focusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
+        void FocusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
         {
             foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
-                previousHandler.UIActionsInvalidated -= focusedHandler_UIActionsInvalidated;
+                previousHandler.UIActionsInvalidated -= FocusedHandler_UIActionsInvalidated;
             }
             foreach (UIActionHandler currentHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
             {
-                currentHandler.UIActionsInvalidated += focusedHandler_UIActionsInvalidated;
+                currentHandler.UIActionsInvalidated += FocusedHandler_UIActionsInvalidated;
             }
 
             // Invalidate all focus dependent items.
@@ -280,10 +280,10 @@ namespace Sandra.UI.WF
                 state.IsDirty = true;
             }
 
-            updateFocusDependentMenuItems();
+            UpdateFocusDependentMenuItems();
         }
 
-        void focusedHandler_UIActionsInvalidated(UIActionHandler activeHandler)
+        void FocusedHandler_UIActionsInvalidated(UIActionHandler activeHandler)
         {
             foreach (var state in focusDependentUIActions.Values)
             {
@@ -293,18 +293,18 @@ namespace Sandra.UI.WF
 
             // Register on the Idle event since focus changes might happen as well.
             // Do make sure the Idle event is registered at most once.
-            Application.Idle -= application_Idle;
-            Application.Idle += application_Idle;
+            Application.Idle -= Application_Idle;
+            Application.Idle += Application_Idle;
         }
 
-        void application_Idle(object sender, EventArgs e)
+        void Application_Idle(object sender, EventArgs e)
         {
-            updateFocusDependentMenuItems();
+            UpdateFocusDependentMenuItems();
         }
 
-        void updateFocusDependentMenuItems()
+        void UpdateFocusDependentMenuItems()
         {
-            Application.Idle -= application_Idle;
+            Application.Idle -= Application_Idle;
             foreach (var state in focusDependentUIActions.Values.Where(x => x.IsDirty))
             {
                 // If not yet indexed, then fast-exit.
@@ -313,7 +313,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        void indexFocusDependentUIActions(ToolStripItemCollection collection)
+        void IndexFocusDependentUIActions(ToolStripItemCollection collection)
         {
             foreach (ToolStripMenuItem item in collection.OfType<ToolStripMenuItem>())
             {
@@ -327,11 +327,11 @@ namespace Sandra.UI.WF
                 }
                 else
                 {
-                    indexFocusDependentUIActions(item.DropDownItems);
+                    IndexFocusDependentUIActions(item.DropDownItems);
                 }
             }
 
-            updateFocusDependentMenuItems();
+            UpdateFocusDependentMenuItems();
         }
 
         public void NewPlayingBoard()
@@ -373,7 +373,7 @@ namespace Sandra.UI.WF
                 });
 
             // Load chess piece images from a fixed path.
-            PieceImages = loadChessPieceImages();
+            PieceImages = LoadChessPieceImages();
 
             NewPlayingBoard();
         }
@@ -403,7 +403,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        EnumIndexedArray<ColoredPiece, Image> loadChessPieceImages()
+        EnumIndexedArray<ColoredPiece, Image> LoadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();
             array[ColoredPiece.BlackPawn] = Program.LoadImage("bp");

@@ -50,7 +50,7 @@ namespace Sandra.UI.WF
             set
             {
                 pieceImages = value;
-                copyPositionToBoard();
+                CopyPositionToBoard();
             }
         }
 
@@ -64,7 +64,7 @@ namespace Sandra.UI.WF
                 if (game != value)
                 {
                     game = value;
-                    copyPositionToBoard();
+                    CopyPositionToBoard();
                 }
             }
         }
@@ -83,41 +83,41 @@ namespace Sandra.UI.WF
                 {
                     if (moveStatus != MoveStatus.None)
                     {
-                        stopDisplayLegalTargetSquaresEffect();
-                        PlayingBoard.SetForegroundImageAttribute(toSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
+                        StopDisplayLegalTargetSquaresEffect();
+                        PlayingBoard.SetForegroundImageAttribute(ToSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
                     }
                     if (PlayingBoard.HoverSquare != null)
                     {
-                        leaveSquareEffects(PlayingBoard.HoverSquare);
+                        LeaveSquareEffects(PlayingBoard.HoverSquare);
                     }
 
                     isBoardFlipped = value;
-                    copyPositionToBoard();
+                    CopyPositionToBoard();
 
                     if (moveStatus != MoveStatus.None)
                     {
-                        displayLegalTargetSquaresEffect();
-                        updateMoveStartSquareEffect();
+                        DisplayLegalTargetSquaresEffect();
+                        UpdateMoveStartSquareEffect();
                     }
                     if (PlayingBoard.HoverSquare != null)
                     {
-                        enterSquareEffects(PlayingBoard.HoverSquare);
+                        EnterSquareEffects(PlayingBoard.HoverSquare);
                     }
 
-                    mouseMoveEffects(PointToClient(MousePosition));
+                    MouseMoveEffects(PointToClient(MousePosition));
                 }
             }
         }
 
-        private Chess.Square toSquare(SquareLocation squareLocation)
+        private Chess.Square ToSquare(SquareLocation squareLocation)
             => isBoardFlipped ? (7 - (Chess.File)squareLocation.X).Combine((Chess.Rank)squareLocation.Y)
                               : ((Chess.File)squareLocation.X).Combine((Chess.Rank)7 - squareLocation.Y);
 
-        private SquareLocation toSquareLocation(Chess.Square square)
+        private SquareLocation ToSquareLocation(Chess.Square square)
             => isBoardFlipped ? new SquareLocation(7 - square.X(), square.Y())
                               : new SquareLocation(square.X(), 7 - square.Y());
 
-        private void copyPositionToBoard()
+        private void CopyPositionToBoard()
         {
             if (game != null)
             {
@@ -127,11 +127,11 @@ namespace Sandra.UI.WF
                     Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
                     if (coloredPiece == null)
                     {
-                        PlayingBoard.SetForegroundImage(toSquareLocation(square), null);
+                        PlayingBoard.SetForegroundImage(ToSquareLocation(square), null);
                     }
                     else
                     {
-                        PlayingBoard.SetForegroundImage(toSquareLocation(square), PieceImages[(Chess.ColoredPiece)coloredPiece]);
+                        PlayingBoard.SetForegroundImage(ToSquareLocation(square), PieceImages[(Chess.ColoredPiece)coloredPiece]);
                     }
                 }
             }
@@ -163,15 +163,15 @@ namespace Sandra.UI.WF
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
             Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LegalTargetSquaresColor, DisplayLegalTargetSquaresChanged);
 
-            PlayingBoard.MouseMove += playingBoard_MouseMove;
-            PlayingBoard.MouseEnterSquare += playingBoard_MouseEnterSquare;
-            PlayingBoard.MouseLeaveSquare += playingBoard_MouseLeaveSquare;
-            PlayingBoard.MouseWheel += playingBoard_MouseWheel;
+            PlayingBoard.MouseMove += PlayingBoard_MouseMove;
+            PlayingBoard.MouseEnterSquare += PlayingBoard_MouseEnterSquare;
+            PlayingBoard.MouseLeaveSquare += PlayingBoard_MouseLeaveSquare;
+            PlayingBoard.MouseWheel += PlayingBoard_MouseWheel;
 
-            PlayingBoard.SquareMouseDown += playingBoard_SquareMouseDown;
-            PlayingBoard.SquareMouseUp += playingBoard_SquareMouseUp;
+            PlayingBoard.SquareMouseDown += PlayingBoard_SquareMouseDown;
+            PlayingBoard.SquareMouseUp += PlayingBoard_SquareMouseUp;
 
-            PlayingBoard.Paint += playingBoard_Paint;
+            PlayingBoard.Paint += PlayingBoard_Paint;
 
             Controls.Add(PlayingBoard);
 
@@ -179,10 +179,10 @@ namespace Sandra.UI.WF
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.SizableToolWindow;
 
-            updateLastMoveArrowPen();
+            UpdateLastMoveArrowPen();
         }
 
-        private void updateLastMoveArrowPen()
+        private void UpdateLastMoveArrowPen()
         {
             lastMoveArrowPen = new Pen(Program.GetSetting(SettingKeys.LastMoveArrowColor))
             {
@@ -207,7 +207,7 @@ namespace Sandra.UI.WF
         private void LastMoveArrowColorChanged(object sender, EventArgs e)
         {
             lastMoveArrowPen.Dispose();
-            updateLastMoveArrowPen();
+            UpdateLastMoveArrowPen();
             PlayingBoard.Invalidate();
         }
 
@@ -215,11 +215,11 @@ namespace Sandra.UI.WF
         {
             if (moveStatus != MoveStatus.None)
             {
-                displayLegalTargetSquaresEffect();
+                DisplayLegalTargetSquaresEffect();
             }
         }
 
-        private void playingBoard_MouseWheel(object sender, MouseEventArgs e)
+        private void PlayingBoard_MouseWheel(object sender, MouseEventArgs e)
         {
             if (ModifierKeys.HasFlag(Keys.Control))
             {
@@ -243,12 +243,12 @@ namespace Sandra.UI.WF
 
         private bool drawFocusMoveStartSquare;
 
-        private bool canPieceBeMoved(SquareLocation squareLocation)
+        private bool CanPieceBeMoved(SquareLocation squareLocation)
         {
             if (game != null && squareLocation != null)
             {
                 // Check if location is a member of all squares where a piece sits of the current color.
-                Chess.Square square = toSquare(squareLocation);
+                Chess.Square square = ToSquare(squareLocation);
                 Chess.ColoredPiece? coloredPiece = game.Game.GetColoredPiece(square);
                 if (coloredPiece != null)
                 {
@@ -259,11 +259,11 @@ namespace Sandra.UI.WF
             return false;
         }
 
-        private void updateMoveStartSquareEffect()
+        private void UpdateMoveStartSquareEffect()
         {
             if (moveStatus != MoveStatus.None)
             {
-                SquareLocation moveStartSquareLocation = toSquareLocation(moveStartSquare);
+                SquareLocation moveStartSquareLocation = ToSquareLocation(moveStartSquare);
                 if (moveStatus == MoveStatus.Dragging && dragCursor != null)
                 {
                     PlayingBoard.SetForegroundImageAttribute(moveStartSquareLocation, ForegroundImageAttribute.HalfTransparent);
@@ -282,7 +282,7 @@ namespace Sandra.UI.WF
 
         private CursorFromHandle dragCursor;
 
-        private void updateDragCursor(Image newImage, Point dragStartPosition)
+        private void UpdateDragCursor(Image newImage, Point dragStartPosition)
         {
             CursorFromHandle newDragCursor = null;
 
@@ -310,10 +310,10 @@ namespace Sandra.UI.WF
                 }
             }
 
-            updateDragCursor(newDragCursor);
+            UpdateDragCursor(newDragCursor);
         }
 
-        private void updateDragCursor(CursorFromHandle newDragCursor)
+        private void UpdateDragCursor(CursorFromHandle newDragCursor)
         {
             CursorFromHandle oldDragCursor = dragCursor;
 
@@ -342,7 +342,7 @@ namespace Sandra.UI.WF
             BottomRight,
         }
 
-        private Chess.ColoredPiece getPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
+        private Chess.ColoredPiece GetPromoteToPiece(SquareQuadrant quadrant, Chess.Color promoteColor)
         {
             if (isBoardFlipped)
             {
@@ -418,7 +418,7 @@ namespace Sandra.UI.WF
 
         private SquareQuadrant hoverQuadrant;
 
-        private void updateHoverQuadrant(SquareQuadrant value, Chess.Color promoteColor)
+        private void UpdateHoverQuadrant(SquareQuadrant value, Chess.Color promoteColor)
         {
             if (hoverQuadrant != value)
             {
@@ -428,16 +428,16 @@ namespace Sandra.UI.WF
                 {
                     if (value == SquareQuadrant.Indeterminate)
                     {
-                        updateDragCursor(PlayingBoard.GetForegroundImage(toSquareLocation(moveStartSquare)), dragStartPosition);
+                        UpdateDragCursor(PlayingBoard.GetForegroundImage(ToSquareLocation(moveStartSquare)), dragStartPosition);
                     }
                     else
                     {
-                        updateDragCursor(PieceImages[getPromoteToPiece(value, promoteColor)], dragStartPosition);
+                        UpdateDragCursor(PieceImages[GetPromoteToPiece(value, promoteColor)], dragStartPosition);
                     }
                 }
                 else
                 {
-                    updateDragCursor(null);
+                    UpdateDragCursor(null);
                 }
 
                 // Also invalidate the PlayingBoard so the promotion effect will be redrawn.
@@ -445,7 +445,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private Rectangle getSquareQuadrantRectangle(ref Rectangle squareRectangle, SquareQuadrant squareQuadrant)
+        private Rectangle GetSquareQuadrantRectangle(ref Rectangle squareRectangle, SquareQuadrant squareQuadrant)
         {
             int squareSize = squareRectangle.Width;
             int halfSquareSize = (squareSize + 1) / 2;
@@ -470,13 +470,13 @@ namespace Sandra.UI.WF
 
         private SquareLocation currentSquareWithCaptureEffect;
 
-        private void displayCaptureEffect(Chess.Square captureSquare)
+        private void DisplayCaptureEffect(Chess.Square captureSquare)
         {
-            currentSquareWithCaptureEffect = toSquareLocation(captureSquare);
+            currentSquareWithCaptureEffect = ToSquareLocation(captureSquare);
             PlayingBoard.SetForegroundImageAttribute(currentSquareWithCaptureEffect, ForegroundImageAttribute.HalfTransparent);
         }
 
-        private void stopDisplayCaptureEffect()
+        private void StopDisplayCaptureEffect()
         {
             if (currentSquareWithCaptureEffect != null)
             {
@@ -487,29 +487,29 @@ namespace Sandra.UI.WF
 
         private SquareLocation currentSquareWithPromoteEffect;
 
-        private void displayPromoteEffect(Chess.Square promoteSquare)
+        private void DisplayPromoteEffect(Chess.Square promoteSquare)
         {
-            currentSquareWithPromoteEffect = toSquareLocation(promoteSquare);
+            currentSquareWithPromoteEffect = ToSquareLocation(promoteSquare);
         }
 
-        private void stopDisplayPromoteEffect()
+        private void StopDisplayPromoteEffect()
         {
             if (currentSquareWithPromoteEffect != null)
             {
-                updateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
+                UpdateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
                 currentSquareWithPromoteEffect = null;
             }
         }
 
         private SquareLocation currentSquareWithEnPassantEffect;
 
-        private void displayEnPassantEffect(Chess.Square enPassantCaptureSquare)
+        private void DisplayEnPassantEffect(Chess.Square enPassantCaptureSquare)
         {
-            currentSquareWithEnPassantEffect = toSquareLocation(enPassantCaptureSquare);
+            currentSquareWithEnPassantEffect = ToSquareLocation(enPassantCaptureSquare);
             PlayingBoard.SetForegroundImageAttribute(currentSquareWithEnPassantEffect, ForegroundImageAttribute.HalfTransparent);
         }
 
-        private void stopDisplayEnPassantEffect()
+        private void StopDisplayEnPassantEffect()
         {
             if (currentSquareWithEnPassantEffect != null)
             {
@@ -521,16 +521,16 @@ namespace Sandra.UI.WF
         private SquareLocation rookSquareWithCastlingEffect;
         private SquareLocation rookTargetSquareWithCastlingEffect;
 
-        private void displayCastlingEffect(Chess.Square rookSquare, Chess.Square rookTargetSquare)
+        private void DisplayCastlingEffect(Chess.Square rookSquare, Chess.Square rookTargetSquare)
         {
-            rookSquareWithCastlingEffect = toSquareLocation(rookSquare);
-            rookTargetSquareWithCastlingEffect = toSquareLocation(rookTargetSquare);
+            rookSquareWithCastlingEffect = ToSquareLocation(rookSquare);
+            rookTargetSquareWithCastlingEffect = ToSquareLocation(rookTargetSquare);
             PlayingBoard.SetForegroundImageAttribute(rookSquareWithCastlingEffect, ForegroundImageAttribute.HalfTransparent);
             PlayingBoard.SetForegroundImage(rookTargetSquareWithCastlingEffect,
                                             PlayingBoard.GetForegroundImage(rookSquareWithCastlingEffect));
         }
 
-        private void stopDisplayCastlingEffect()
+        private void StopDisplayCastlingEffect()
         {
             if (rookSquareWithCastlingEffect != null)
             {
@@ -541,7 +541,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void displayLegalTargetSquaresEffect()
+        private void DisplayLegalTargetSquaresEffect()
         {
             Color overlayColor = Program.GetSetting(SettingKeys.DisplayLegalTargetSquares)
                 ? Color.FromArgb(48, Program.GetSetting(SettingKeys.LegalTargetSquaresColor))
@@ -561,12 +561,12 @@ namespace Sandra.UI.WF
                 if (moveCheckResult.IsLegalMove())
                 {
                     // Highlight each found square.
-                    PlayingBoard.SetSquareOverlayColor(toSquareLocation(square), overlayColor);
+                    PlayingBoard.SetSquareOverlayColor(ToSquareLocation(square), overlayColor);
                 }
             }
         }
 
-        private void stopDisplayLegalTargetSquaresEffect()
+        private void StopDisplayLegalTargetSquaresEffect()
         {
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
@@ -574,7 +574,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void mouseMoveEffects(Point mouseLocation)
+        private void MouseMoveEffects(Point mouseLocation)
         {
             if (currentSquareWithPromoteEffect != null)
             {
@@ -600,32 +600,32 @@ namespace Sandra.UI.WF
                         }
                     }
                 }
-                updateHoverQuadrant(hitQuadrant, game.Game.SideToMove);
+                UpdateHoverQuadrant(hitQuadrant, game.Game.SideToMove);
             }
 
             if (moveStatus == MoveStatus.Dragging && dragCursor == null)
             {
-                updateDragCursor(PlayingBoard.GetForegroundImage(toSquareLocation(moveStartSquare)), dragStartPosition);
+                UpdateDragCursor(PlayingBoard.GetForegroundImage(ToSquareLocation(moveStartSquare)), dragStartPosition);
             }
 
-            updateMoveStartSquareEffect();
+            UpdateMoveStartSquareEffect();
         }
 
-        private void playingBoard_MouseMove(object sender, MouseEventArgs e) => mouseMoveEffects(e.Location);
+        private void PlayingBoard_MouseMove(object sender, MouseEventArgs e) => MouseMoveEffects(e.Location);
 
-        private void highlightHoverSquare()
+        private void HighlightHoverSquare()
         {
             var hoverSquare = PlayingBoard.HoverSquare;
 
             if (moveStatus != MoveStatus.Dragging
-                && canPieceBeMoved(hoverSquare)
-                && (moveStatus == MoveStatus.None || toSquare(hoverSquare) != moveStartSquare))
+                && CanPieceBeMoved(hoverSquare)
+                && (moveStatus == MoveStatus.None || ToSquare(hoverSquare) != moveStartSquare))
             {
                 PlayingBoard.SetForegroundImageAttribute(hoverSquare, ForegroundImageAttribute.Highlight);
             }
         }
 
-        private void enterSquareEffects(SquareLocation location)
+        private void EnterSquareEffects(SquareLocation location)
         {
             if (moveStatus != MoveStatus.None)
             {
@@ -634,7 +634,7 @@ namespace Sandra.UI.WF
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo()
                 {
                     SourceSquare = moveStartSquare,
-                    TargetSquare = toSquare(location),
+                    TargetSquare = ToSquare(location),
                 };
 
                 game.Game.TryMakeMove(ref moveInfo, false);
@@ -644,50 +644,50 @@ namespace Sandra.UI.WF
                 {
                     if (moveCheckResult == Chess.MoveCheckResult.MissingEnPassant)
                     {
-                        displayEnPassantEffect(game.Game.EnPassantCaptureSquare);
+                        DisplayEnPassantEffect(game.Game.EnPassantCaptureSquare);
                     }
                     else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleQueenside)
                     {
-                        displayCastlingEffect(moveInfo.SourceSquare - 4, moveInfo.SourceSquare - 1);
+                        DisplayCastlingEffect(moveInfo.SourceSquare - 4, moveInfo.SourceSquare - 1);
                     }
                     else if (moveCheckResult == Chess.MoveCheckResult.MissingCastleKingside)
                     {
-                        displayCastlingEffect(moveInfo.SourceSquare + 3, moveInfo.SourceSquare + 1);
+                        DisplayCastlingEffect(moveInfo.SourceSquare + 3, moveInfo.SourceSquare + 1);
                     }
                     else
                     {
                         if (moveCheckResult == Chess.MoveCheckResult.MissingPromotionInformation)
                         {
-                            displayPromoteEffect(moveInfo.TargetSquare);
+                            DisplayPromoteEffect(moveInfo.TargetSquare);
                         }
-                        displayCaptureEffect(moveInfo.TargetSquare);
+                        DisplayCaptureEffect(moveInfo.TargetSquare);
                     }
                 }
             }
 
-            highlightHoverSquare();
+            HighlightHoverSquare();
         }
 
-        private void leaveSquareEffects(SquareLocation location)
+        private void LeaveSquareEffects(SquareLocation location)
         {
-            stopDisplayPromoteEffect();
-            stopDisplayEnPassantEffect();
-            stopDisplayCastlingEffect();
-            stopDisplayCaptureEffect();
+            StopDisplayPromoteEffect();
+            StopDisplayEnPassantEffect();
+            StopDisplayCastlingEffect();
+            StopDisplayCaptureEffect();
 
             if (moveStatus != MoveStatus.Dragging
-                && canPieceBeMoved(location)
-                && (moveStatus == MoveStatus.None || toSquare(location) != moveStartSquare))
+                && CanPieceBeMoved(location)
+                && (moveStatus == MoveStatus.None || ToSquare(location) != moveStartSquare))
             {
                 PlayingBoard.SetForegroundImageAttribute(location, ForegroundImageAttribute.Default);
             }
         }
 
-        private void playingBoard_MouseEnterSquare(PlayingBoard sender, SquareEventArgs e) => enterSquareEffects(e.Location);
+        private void PlayingBoard_MouseEnterSquare(PlayingBoard sender, SquareEventArgs e) => EnterSquareEffects(e.Location);
 
-        private void playingBoard_MouseLeaveSquare(PlayingBoard sender, SquareEventArgs e) => leaveSquareEffects(e.Location);
+        private void PlayingBoard_MouseLeaveSquare(PlayingBoard sender, SquareEventArgs e) => LeaveSquareEffects(e.Location);
 
-        private bool commitOrCancelMove(SquareLocation targetSquare)
+        private bool CommitOrCancelMove(SquareLocation targetSquare)
         {
             if (targetSquare != null)
             {
@@ -695,7 +695,7 @@ namespace Sandra.UI.WF
                 Chess.MoveInfo moveInfo = new Chess.MoveInfo
                 {
                     SourceSquare = moveStartSquare,
-                    TargetSquare = toSquare(targetSquare),
+                    TargetSquare = ToSquare(targetSquare),
                 };
 
                 if (currentSquareWithEnPassantEffect != null)
@@ -705,7 +705,7 @@ namespace Sandra.UI.WF
                 }
                 else if (rookSquareWithCastlingEffect != null)
                 {
-                    if (toSquare(rookTargetSquareWithCastlingEffect).X() > toSquare(rookSquareWithCastlingEffect).X())
+                    if (ToSquare(rookTargetSquareWithCastlingEffect).X() > ToSquare(rookSquareWithCastlingEffect).X())
                     {
                         // Rook moves to the right.
                         moveInfo.MoveType = Chess.MoveType.CastleQueenside;
@@ -718,10 +718,10 @@ namespace Sandra.UI.WF
                 else if (currentSquareWithPromoteEffect != null)
                 {
                     moveInfo.MoveType = Chess.MoveType.Promotion;
-                    moveInfo.PromoteTo = getPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
+                    moveInfo.PromoteTo = GetPromoteToPiece(hoverQuadrant, game.Game.SideToMove).GetPiece();
                 }
 
-                resetMoveEffects();
+                ResetMoveEffects();
 
                 game.Game.TryMakeMove(ref moveInfo, true);
 
@@ -735,18 +735,18 @@ namespace Sandra.UI.WF
             }
             else
             {
-                resetMoveEffects();
+                ResetMoveEffects();
             }
 
             moveStatus = MoveStatus.None;
             return false;
         }
 
-        private void playingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
+        private void PlayingBoard_SquareMouseDown(PlayingBoard sender, SquareMouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (moveStatus == MoveStatus.None || e.Location == null || toSquare(e.Location) != moveStartSquare)
+                if (moveStatus == MoveStatus.None || e.Location == null || ToSquare(e.Location) != moveStartSquare)
                 {
                     if (drawFocusMoveStartSquare)
                     {
@@ -759,17 +759,17 @@ namespace Sandra.UI.WF
                 }
 
                 // Commit or cancel a started move first, before checking e.Location again.
-                bool moveMade = moveStatus != MoveStatus.None && commitOrCancelMove(e.Location);
+                bool moveMade = moveStatus != MoveStatus.None && CommitOrCancelMove(e.Location);
 
                 // Only recheck if no move was made.
-                if (!moveMade && canPieceBeMoved(e.Location))
+                if (!moveMade && CanPieceBeMoved(e.Location))
                 {
                     moveStatus = MoveStatus.Dragging;
-                    moveStartSquare = toSquare(e.Location);
-                    displayLegalTargetSquaresEffect();
+                    moveStartSquare = ToSquare(e.Location);
+                    DisplayLegalTargetSquaresEffect();
 
                     // Immediately remove the highlight.
-                    updateMoveStartSquareEffect();
+                    UpdateMoveStartSquareEffect();
 
                     Point dragStartSquareLocation = PlayingBoard.GetSquareRectangle(e.Location).Location;
                     dragStartPosition = new Point
@@ -781,33 +781,33 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void resetMoveEffects()
+        private void ResetMoveEffects()
         {
-            stopDisplayPromoteEffect();
-            stopDisplayEnPassantEffect();
-            stopDisplayCastlingEffect();
-            stopDisplayCaptureEffect();
-            stopDisplayLegalTargetSquaresEffect();
+            StopDisplayPromoteEffect();
+            StopDisplayEnPassantEffect();
+            StopDisplayCastlingEffect();
+            StopDisplayCaptureEffect();
+            StopDisplayLegalTargetSquaresEffect();
 
             foreach (var squareLocation in PlayingBoard.AllSquareLocations)
             {
                 PlayingBoard.SetForegroundImageAttribute(squareLocation, ForegroundImageAttribute.Default);
             }
 
-            highlightHoverSquare();
+            HighlightHoverSquare();
         }
 
-        private void playingBoard_SquareMouseUp(PlayingBoard sender, SquareMouseEventArgs e)
+        private void PlayingBoard_SquareMouseUp(PlayingBoard sender, SquareMouseEventArgs e)
         {
             if (moveStatus == MoveStatus.Dragging)
             {
                 // Always reset the half-transparency.
-                PlayingBoard.SetForegroundImageAttribute(toSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
+                PlayingBoard.SetForegroundImageAttribute(ToSquareLocation(moveStartSquare), ForegroundImageAttribute.Default);
 
                 // Only commit or cancel a move if the piece was dropped onto a different square.
-                if (e.Location == null || moveStartSquare != toSquare(e.Location))
+                if (e.Location == null || moveStartSquare != ToSquare(e.Location))
                 {
-                    commitOrCancelMove(e.Location);
+                    CommitOrCancelMove(e.Location);
                 }
                 else
                 {
@@ -816,24 +816,24 @@ namespace Sandra.UI.WF
                     moveStatus = MoveStatus.Moving;
                 }
 
-                updateMoveStartSquareEffect();
-                updateDragCursor(null);
+                UpdateMoveStartSquareEffect();
+                UpdateDragCursor(null);
             }
         }
 
         internal void GameUpdated()
         {
             // Cancel any pending moves.
-            resetMoveEffects();
+            ResetMoveEffects();
             moveStatus = MoveStatus.None;
 
             // Then copy the position.
-            copyPositionToBoard();
+            CopyPositionToBoard();
         }
 
         Pen lastMoveArrowPen;
 
-        private void drawLastMoveArrow(Graphics g, SquareLocation start, SquareLocation target)
+        private void DrawLastMoveArrow(Graphics g, SquareLocation start, SquareLocation target)
         {
             Rectangle startSquareRect = PlayingBoard.GetSquareRectangle(start);
             int startSquareCenterX = startSquareRect.X + startSquareRect.Width / 2;
@@ -880,7 +880,7 @@ namespace Sandra.UI.WF
             lastMoveArrowPen.EndCap = LineCap.RoundAnchor;
         }
 
-        private Color getDarkerGrayColor(Chess.Square square)
+        private Color GetDarkerGrayColor(Chess.Square square)
         {
             Color baseColor = ((square.X() + square.Y()) % 2) == 0
                             ? PlayingBoard.LightSquareColor
@@ -891,15 +891,15 @@ namespace Sandra.UI.WF
             return Color.FromArgb(targetBrightness, targetBrightness, targetBrightness);
         }
 
-        private void playingBoard_Paint(object sender, PaintEventArgs e)
+        private void PlayingBoard_Paint(object sender, PaintEventArgs e)
         {
             // Draw a dotted line between the centers of the squares of the last move.
             if (game != null && !game.Game.IsFirstMove)
             {
                 Chess.Move lastCommittedMove = game.Game.PreviousMove();
-                drawLastMoveArrow(e.Graphics,
-                                  toSquareLocation(lastCommittedMove.SourceSquare),
-                                  toSquareLocation(lastCommittedMove.TargetSquare));
+                DrawLastMoveArrow(e.Graphics,
+                                  ToSquareLocation(lastCommittedMove.SourceSquare),
+                                  ToSquareLocation(lastCommittedMove.TargetSquare));
             }
 
             // Draw subtle corners just inside the edges of a legal target square.
@@ -911,7 +911,7 @@ namespace Sandra.UI.WF
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, -10, 0));
                 e.Graphics.ExcludeClip(Rectangle.Inflate(hoverRect, 0, -10));
 
-                using (var darkerGrayPen = new Pen(getDarkerGrayColor(toSquare(hoverSquare)), 1f))
+                using (var darkerGrayPen = new Pen(GetDarkerGrayColor(ToSquare(hoverSquare)), 1f))
                 {
                     e.Graphics.DrawRectangle(darkerGrayPen, new Rectangle(hoverRect.X, hoverRect.Y, hoverRect.Width - 1, hoverRect.Height - 1));
                 }
@@ -933,17 +933,17 @@ namespace Sandra.UI.WF
                     {
                         if (quadrant == hoverQuadrant)
                         {
-                            Image image = PieceImages[getPromoteToPiece(quadrant, promoteColor)];
-                            e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
-                                                 getSquareQuadrantRectangle(ref rect, quadrant),
+                            Image image = PieceImages[GetPromoteToPiece(quadrant, promoteColor)];
+                            e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
+                                                 GetSquareQuadrantRectangle(ref rect, quadrant),
                                                  0, 0, image.Width, image.Height,
                                                  GraphicsUnit.Pixel,
                                                  PlayingBoard.HighlightImageAttributes);
                         }
                         else
                         {
-                            e.Graphics.DrawImage(PieceImages[getPromoteToPiece(quadrant, promoteColor)],
-                                                 getSquareQuadrantRectangle(ref rect, quadrant));
+                            e.Graphics.DrawImage(PieceImages[GetPromoteToPiece(quadrant, promoteColor)],
+                                                 GetSquareQuadrantRectangle(ref rect, quadrant));
                         }
                     });
                 }
@@ -952,9 +952,9 @@ namespace Sandra.UI.WF
             // Draw a kind of focus rectangle around the moveStartSquare if not dragging.
             if (moveStatus != MoveStatus.None && drawFocusMoveStartSquare)
             {
-                Rectangle activeRect = PlayingBoard.GetSquareRectangle(toSquareLocation(moveStartSquare));
+                Rectangle activeRect = PlayingBoard.GetSquareRectangle(ToSquareLocation(moveStartSquare));
 
-                using (Pen darkerGrayPen = new Pen(getDarkerGrayColor(moveStartSquare), 2f))
+                using (Pen darkerGrayPen = new Pen(GetDarkerGrayColor(moveStartSquare), 2f))
                 {
                     e.Graphics.DrawRectangle(darkerGrayPen, activeRect.X, activeRect.Y, activeRect.Width - 1, activeRect.Height - 1);
                 }
@@ -969,7 +969,7 @@ namespace Sandra.UI.WF
         /// </param>
         public void PerformAutoFit(int? targetSquareSize)
         {
-            startResize();
+            StartResize();
 
             // Simulate OnResizing event.
             // No need to create a RECT with coordinates relative to the screen, since only the size may be affected.
@@ -999,7 +999,7 @@ namespace Sandra.UI.WF
                 };
             }
 
-            performAutoFit(ref windowRect, ResizeMode.BottomRight);
+            PerformAutoFit(ref windowRect, ResizeMode.BottomRight);
 
             SetBoundsCore(windowRect.Left, windowRect.Top,
                           windowRect.Right - windowRect.Left, windowRect.Bottom - windowRect.Top,
@@ -1015,17 +1015,17 @@ namespace Sandra.UI.WF
         {
             base.OnResizeBegin(e);
 
-            startResize();
+            StartResize();
         }
 
-        private void startResize()
+        private void StartResize()
         {
             // Cache difference in size between the window and the client rectangle.
             widthDifference = Bounds.Width - ClientRectangle.Width;
             heightDifference = Bounds.Height - ClientRectangle.Height;
         }
 
-        private void performAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
+        private void PerformAutoFit(ref RECT resizeRect, ResizeMode resizeMode)
         {
             Size maxBounds;
             switch (resizeMode)
@@ -1085,7 +1085,7 @@ namespace Sandra.UI.WF
         protected override void OnResizing(ref RECT resizeRect, ResizeMode resizeMode)
         {
             // Snap to auto-fit.
-            performAutoFit(ref resizeRect, resizeMode);
+            PerformAutoFit(ref resizeRect, resizeMode);
         }
 
         protected override void Dispose(bool disposing)
