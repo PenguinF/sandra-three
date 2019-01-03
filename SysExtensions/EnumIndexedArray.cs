@@ -52,7 +52,7 @@ namespace SysExtensions
 
         private TValue[] arr;
 
-        private void init()
+        private void Init()
         {
             if (arr == null) arr = new TValue[Length];
         }
@@ -63,7 +63,7 @@ namespace SysExtensions
         public static EnumIndexedArray<TEnum, TValue> New()
         {
             EnumIndexedArray<TEnum, TValue> wrapped = default(EnumIndexedArray<TEnum, TValue>);
-            wrapped.init();
+            wrapped.Init();
             return wrapped;
         }
 
@@ -82,7 +82,7 @@ namespace SysExtensions
                 }
                 catch (NullReferenceException)
                 {
-                    init();
+                    Init();
                     return arr[(int)(object)index];
                 }
             }
@@ -94,7 +94,7 @@ namespace SysExtensions
                 }
                 catch (NullReferenceException)
                 {
-                    init();
+                    Init();
                     arr[(int)(object)index] = value;
                 }
             }
@@ -113,7 +113,7 @@ namespace SysExtensions
             }
             catch (NullReferenceException)
             {
-                init();
+                Init();
                 Array.Copy(arr, copy.arr, Length);
                 return copy;
             }

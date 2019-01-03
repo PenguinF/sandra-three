@@ -39,7 +39,7 @@ namespace Sandra.Chess
 
         private Position() { }
 
-        private bool checkInvariants()
+        private bool CheckInvariants()
         {
             // Disjunct colors.
             if (colorVectors[Color.White].Test(colorVectors[Color.Black])) return false;
@@ -174,15 +174,17 @@ namespace Sandra.Chess
         /// </summary>
         public static Position GetInitialPosition()
         {
-            var initialPosition = new Position();
+            var initialPosition = new Position
+            {
+                SideToMove = Color.White,
+                colorVectors = EnumIndexedArray<Color, ulong>.New(),
+                pieceVectors = EnumIndexedArray<Piece, ulong>.New(),
+                castlingRightsVector = Constants.CastlingTargetSquares,
+            };
 
-            initialPosition.SideToMove = Color.White;
-
-            initialPosition.colorVectors = EnumIndexedArray<Color, ulong>.New();
             initialPosition.colorVectors[Color.White] = Constants.WhiteInStartPosition;
             initialPosition.colorVectors[Color.Black] = Constants.BlackInStartPosition;
 
-            initialPosition.pieceVectors = EnumIndexedArray<Piece, ulong>.New();
             initialPosition.pieceVectors[Piece.Pawn] = Constants.PawnsInStartPosition;
             initialPosition.pieceVectors[Piece.Knight] = Constants.KnightsInStartPosition;
             initialPosition.pieceVectors[Piece.Bishop] = Constants.BishopsInStartPosition;
@@ -190,9 +192,7 @@ namespace Sandra.Chess
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
 
-            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
-
-            Debug.Assert(initialPosition.checkInvariants());
+            Debug.Assert(initialPosition.CheckInvariants());
 
             return initialPosition;
         }
@@ -237,7 +237,7 @@ namespace Sandra.Chess
         public Square FindKing(Color color)
             => (colorVectors[color] & pieceVectors[Piece.King]).GetSingleSquare();
 
-        private static ulong revokedCastlingRights(ulong moveDelta)
+        private static ulong RevokedCastlingRights(ulong moveDelta)
         {
             ulong affectedKingSquares = moveDelta & Constants.KingsInStartPosition;
             // If king squares are affected, only rook squares on the same side of the board can be affected as well.
@@ -249,7 +249,7 @@ namespace Sandra.Chess
             return (moveDelta & Constants.RooksStartPositionQueenside).East().East() | (moveDelta & Constants.RooksStartPositionKingside).West();
         }
 
-        private void compareMoveTypes(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
+        private void CompareMoveTypes(MoveType expectedMoveType, MoveType actualMoveType, ref MoveCheckResult moveCheckResult)
         {
             if (actualMoveType != expectedMoveType)
             {
@@ -316,11 +316,13 @@ namespace Sandra.Chess
             // Range checks.
             moveInfo.ThrowWhenOutOfRange();
 
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
 
-            Move move = new Move();
-            move.SourceSquare = moveInfo.SourceSquare;
-            move.TargetSquare = moveInfo.TargetSquare;
+            Move move = new Move
+            {
+                SourceSquare = moveInfo.SourceSquare,
+                TargetSquare = moveInfo.TargetSquare
+            };
 
             ulong sourceVector = move.SourceSquare.ToVector();
             ulong targetVector = move.TargetSquare.ToVector();
@@ -478,7 +480,7 @@ namespace Sandra.Chess
             }
 
             // Check for illegal move types.
-            compareMoveTypes(move.MoveType, moveInfo.MoveType, ref moveInfo.Result);
+            CompareMoveTypes(move.MoveType, moveInfo.MoveType, ref moveInfo.Result);
 
             if (moveInfo.Result.IsLegalMove())
             {
@@ -560,7 +562,7 @@ namespace Sandra.Chess
                     if (castlingRightsVector.Test())
                     {
                         // Revoke castling rights if kings or rooks are gone from their starting position.
-                        castlingRightsVector &= ~revokedCastlingRights(moveDelta);
+                        castlingRightsVector &= ~RevokedCastlingRights(moveDelta);
                     }
 
                     SideToMove = SideToMove.Opposite();
@@ -578,7 +580,7 @@ namespace Sandra.Chess
                 }
             }
 
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
 
             return move;
         }
@@ -592,7 +594,7 @@ namespace Sandra.Chess
         /// </remarks>
         internal void FastMakeMove(Move move)
         {
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
 
             ulong targetVector = move.TargetSquare.ToVector();
 
@@ -657,12 +659,12 @@ namespace Sandra.Chess
             if (castlingRightsVector.Test())
             {
                 // Revoke castling rights if kings or rooks are gone from their starting position.
-                castlingRightsVector &= ~revokedCastlingRights(moveDelta);
+                castlingRightsVector &= ~RevokedCastlingRights(moveDelta);
             }
 
             SideToMove = SideToMove.Opposite();
 
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
         }
 
         /// <summary>
@@ -670,7 +672,7 @@ namespace Sandra.Chess
         /// </summary>
         public IEnumerable<MoveInfo> GenerateLegalMoves()
         {
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
 
             ulong sideToMoveVector = colorVectors[SideToMove];
             ulong oppositeColorVector = colorVectors[SideToMove.Opposite()];
@@ -787,7 +789,7 @@ namespace Sandra.Chess
                 }
             }
 
-            Debug.Assert(checkInvariants());
+            Debug.Assert(CheckInvariants());
         }
     }
 

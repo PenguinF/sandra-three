@@ -35,7 +35,7 @@ namespace Sandra.UI.WF
 
         public static readonly string DefaultLangFolderName = "Languages";
 
-        private static string localApplicationDataPath(bool isLocalSchema)
+        private static string LocalApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
             $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
 
@@ -45,7 +45,7 @@ namespace Sandra.UI.WF
             + " is located ("
             + Program.DefaultSettingsFileName
             + "), and one that lives in the local application data folder"
-            + localApplicationDataPath(isLocalSchema)
+            + LocalApplicationDataPath(isLocalSchema)
             + ".",
             "Preferences in the latter file override those that are specified in the default. "
             + "In the majority of cases, only the latter file is changed, while the default "

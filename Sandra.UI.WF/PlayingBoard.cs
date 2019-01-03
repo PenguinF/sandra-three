@@ -48,7 +48,7 @@ namespace Sandra.UI.WF
                 | ControlStyles.FixedWidth
                 | ControlStyles.Opaque, true);
 
-            updateSquareArrays();
+            UpdateSquareArrays();
 
             // Highlight by setting a gamma smaller than 1.
             var highlight = new ImageAttributes();
@@ -125,8 +125,8 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BoardHeight), value))
                 {
-                    updateSquareArrays();
-                    verifySizeToFit();
+                    UpdateSquareArrays();
+                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -155,8 +155,8 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BoardWidth), value))
                 {
-                    updateSquareArrays();
-                    verifySizeToFit();
+                    UpdateSquareArrays();
+                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -206,7 +206,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(BorderWidth), value))
                 {
-                    verifySizeToFit();
+                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -332,7 +332,7 @@ namespace Sandra.UI.WF
                 }
                 if (propertyStore.Set(nameof(InnerSpacing), value))
                 {
-                    verifySizeToFit();
+                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -398,7 +398,7 @@ namespace Sandra.UI.WF
             {
                 if (propertyStore.Set(nameof(SizeToFit), value))
                 {
-                    verifySizeToFit();
+                    VerifySizeToFit();
                     Invalidate();
                 }
             }
@@ -452,7 +452,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Image GetForegroundImage(int x, int y) => foregroundImages[getIndex(x, y)];
+        public Image GetForegroundImage(int x, int y) => foregroundImages[GetIndex(x, y)];
 
         /// <summary>
         /// Gets the <see cref="Image"/> on position (x, y).
@@ -468,7 +468,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public Image GetForegroundImage(SquareLocation squareLocation)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             return GetForegroundImage(squareLocation.X, squareLocation.Y);
         }
 
@@ -480,7 +480,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetForegroundImage(int x, int y, Image value)
         {
-            int index = getIndex(x, y);
+            int index = GetIndex(x, y);
             if (foregroundImages[index] != value)
             {
                 foregroundImages[index] = value;
@@ -502,7 +502,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetForegroundImage(SquareLocation squareLocation, Image value)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             SetForegroundImage(squareLocation.X, squareLocation.Y, value);
         }
 
@@ -515,7 +515,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => foregroundImageAttributes[getIndex(x, y)];
+        public ForegroundImageAttribute GetForegroundImageAttribute(int x, int y) => foregroundImageAttributes[GetIndex(x, y)];
 
         /// <summary>
         /// Gets the current <see cref="ForegroundImageAttribute"/> for the <see cref="Image"/> on position (x, y).
@@ -531,7 +531,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public ForegroundImageAttribute GetForegroundImageAttribute(SquareLocation squareLocation)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             return GetForegroundImageAttribute(squareLocation.X, squareLocation.Y);
         }
 
@@ -543,7 +543,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetForegroundImageAttribute(int x, int y, ForegroundImageAttribute value)
         {
-            int index = getIndex(x, y);
+            int index = GetIndex(x, y);
             if (foregroundImageAttributes[index] != value)
             {
                 foregroundImageAttributes[index] = value;
@@ -565,7 +565,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetForegroundImageAttribute(SquareLocation squareLocation, ForegroundImageAttribute value)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             SetForegroundImageAttribute(squareLocation.X, squareLocation.Y, value);
         }
 
@@ -578,7 +578,7 @@ namespace Sandra.UI.WF
         /// <exception cref="IndexOutOfRangeException">
         /// Thrown when either <paramref name="x"/> or <paramref name="y"/> are smaller than 0 or greater than or equal to <see cref="BoardWidth"/> or <see cref="BoardHeight"/> respectively.
         /// </exception>
-        public Color GetSquareOverlayColor(int x, int y) => squareOverlayColors[getIndex(x, y)];
+        public Color GetSquareOverlayColor(int x, int y) => squareOverlayColors[GetIndex(x, y)];
 
         /// <summary>
         /// Gets an overlay color for the square on position (x, y).
@@ -594,7 +594,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public Color GetSquareOverlayColor(SquareLocation squareLocation)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             return GetSquareOverlayColor(squareLocation.X, squareLocation.Y);
         }
 
@@ -606,7 +606,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetSquareOverlayColor(int x, int y, Color value)
         {
-            int index = getIndex(x, y);
+            int index = GetIndex(x, y);
             if (squareOverlayColors[index] != value)
             {
                 squareOverlayColors[index] = value;
@@ -628,12 +628,12 @@ namespace Sandra.UI.WF
         /// </exception>
         public void SetSquareOverlayColor(SquareLocation squareLocation, Color value)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             SetSquareOverlayColor(squareLocation.X, squareLocation.Y, value);
         }
 
 
-        private void updateSquareArrays()
+        private void UpdateSquareArrays()
         {
             int newArrayLength = BoardWidth * BoardHeight;
             foregroundImages = new Image[newArrayLength];
@@ -665,7 +665,7 @@ namespace Sandra.UI.WF
         /// or null (Nothing in Visual Basic) if the mouse pointer is located outside the control's bounds or above a border.
         /// </summary>
         [Browsable(false)]
-        public SquareLocation HoverSquare => getSquareLocation(hoveringSquareIndex);
+        public SquareLocation HoverSquare => GetSquareLocation(hoveringSquareIndex);
 
         /// <summary>
         /// Gets the <see cref="Rectangle"/> for the square on position (x, y) in coordinates relative to the top left corner of the control.
@@ -675,7 +675,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public Rectangle GetSquareRectangle(int x, int y)
         {
-            throwIfOutOfRange(x, y);
+            ThrowIfOutOfRange(x, y);
             int delta = SquareSize + InnerSpacing;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
@@ -696,7 +696,7 @@ namespace Sandra.UI.WF
         /// </exception>
         public Rectangle GetSquareRectangle(SquareLocation squareLocation)
         {
-            throwIfNull(squareLocation);
+            ThrowIfNull(squareLocation);
             return GetSquareRectangle(squareLocation.X, squareLocation.Y);
         }
 
@@ -709,7 +709,7 @@ namespace Sandra.UI.WF
         /// <returns>
         /// The <see cref="SquareLocation"/> at the specified point, or null if there is none.
         /// </returns>
-        public SquareLocation GetSquareLocation(Point point) => getSquareLocation(getSquareIndexFromLocation(point));
+        public SquareLocation GetSquareLocation(Point point) => GetSquareLocation(GetSquareIndexFromLocation(point));
 
 
         /// <summary>
@@ -725,7 +725,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MouseEnterSquare"/> event. 
         /// </summary>
-        protected void RaiseMouseEnterSquare(int squareIndex) => OnMouseEnterSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
+        protected void RaiseMouseEnterSquare(int squareIndex) => OnMouseEnterSquare(new SquareEventArgs(GetSquareLocation(squareIndex)));
 
 
         /// <summary>
@@ -741,7 +741,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Raises the <see cref="MouseLeaveSquare"/> event. 
         /// </summary>
-        protected void RaiseMouseLeaveSquare(int squareIndex) => OnMouseLeaveSquare(new SquareEventArgs(getSquareLocation(squareIndex)));
+        protected void RaiseMouseLeaveSquare(int squareIndex) => OnMouseLeaveSquare(new SquareEventArgs(GetSquareLocation(squareIndex)));
 
 
         /// <summary>
@@ -759,7 +759,7 @@ namespace Sandra.UI.WF
         /// </summary>
         protected void RaiseSquareMouseUp(int squareIndex, MouseButtons button, Point mouseLocation)
         {
-            OnSquareMouseUp(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
+            OnSquareMouseUp(new SquareMouseEventArgs(GetSquareLocation(squareIndex), button, mouseLocation));
         }
 
 
@@ -778,42 +778,42 @@ namespace Sandra.UI.WF
         /// </summary>
         protected void RaiseSquareMouseDown(int squareIndex, MouseButtons button, Point mouseLocation)
         {
-            OnSquareMouseDown(new SquareMouseEventArgs(getSquareLocation(squareIndex), button, mouseLocation));
+            OnSquareMouseDown(new SquareMouseEventArgs(GetSquareLocation(squareIndex), button, mouseLocation));
         }
 
 
-        private int getX(int index) => index % BoardWidth;
-        private int getY(int index) => index / BoardWidth;
+        private int GetX(int index) => index % BoardWidth;
+        private int GetY(int index) => index / BoardWidth;
 
-        private SquareLocation getSquareLocation(int index) => index < 0 ? null
-                                                             : new SquareLocation(getX(index), getY(index));
+        private SquareLocation GetSquareLocation(int index) => index < 0 ? null
+                                                             : new SquareLocation(GetX(index), GetY(index));
 
-        private void throwIfNull(SquareLocation squareLocation)
+        private void ThrowIfNull(SquareLocation squareLocation)
         {
             if (squareLocation == null) throw new ArgumentNullException(nameof(squareLocation));
         }
 
-        private void throwIfOutOfRange(int x, int y)
+        private void ThrowIfOutOfRange(int x, int y)
         {
             if (x < 0 || x >= BoardWidth) throw new IndexOutOfRangeException(nameof(x));
             if (y < 0 || y >= BoardHeight) throw new IndexOutOfRangeException(nameof(y));
         }
 
-        private int getIndex(int x, int y)
+        private int GetIndex(int x, int y)
         {
-            throwIfOutOfRange(x, y);
+            ThrowIfOutOfRange(x, y);
             return y * BoardWidth + x;
         }
 
-        private Point getLocationFromIndex(int index)
+        private Point GetLocationFromIndex(int index)
         {
             if (index < 0 || index >= BoardWidth * BoardHeight)
             {
                 return Point.Empty;
             }
 
-            int x = getX(index),
-                y = getY(index),
+            int x = GetX(index),
+                y = GetY(index),
                 delta = SquareSize + InnerSpacing;
             int px = BorderWidth + x * delta,
                 py = BorderWidth + y * delta;
@@ -844,7 +844,7 @@ namespace Sandra.UI.WF
             return new Rectangle();
         }
 
-        private int maxSquareSize(Size clientSize)
+        private int MaxSquareSize(Size clientSize)
         {
             int totalBorderWidth = BorderWidth * 2;
             int squareSizeHrz = (clientSize.Width - InnerSpacing * (BoardWidth - 1) - totalBorderWidth) / BoardWidth;
@@ -852,10 +852,10 @@ namespace Sandra.UI.WF
             return Math.Max(Math.Min(squareSizeHrz, squareSizeVrt), 0);
         }
 
-        private void performSizeToFit()
+        private void PerformSizeToFit()
         {
             // Resize the squares so that it is as large as possible while still fitting in the client area.
-            int newSquareSize = maxSquareSize(ClientSize);
+            int newSquareSize = MaxSquareSize(ClientSize);
             // Store directly in the property store, to bypass SizeToFit check.
             if (propertyStore.Set(nameof(SquareSize), newSquareSize))
             {
@@ -863,15 +863,15 @@ namespace Sandra.UI.WF
             }
         }
 
-        private void verifySizeToFit()
+        private void VerifySizeToFit()
         {
             // Only conditionally perform size-to-fit.
-            if (SizeToFit) performSizeToFit();
+            if (SizeToFit) PerformSizeToFit();
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
         {
-            verifySizeToFit();
+            VerifySizeToFit();
             base.OnLayout(levent);
         }
 
@@ -879,7 +879,7 @@ namespace Sandra.UI.WF
         /// Returns the size closest to the given size which will allow the board to fit exactly.
         /// </summary>
         public Size GetClosestAutoFitSize(Size maxBounds)
-            => GetExactAutoFitSize(maxSquareSize(maxBounds));
+            => GetExactAutoFitSize(MaxSquareSize(maxBounds));
 
         /// <summary>
         /// Given a square size, returns the <see cref="Size"/> which will allow the board to fit exactly.
@@ -896,7 +896,7 @@ namespace Sandra.UI.WF
 
         private int hoveringSquareIndex = -1;
 
-        private int getSquareIndexFromLocation(Point clientLocation)
+        private int GetSquareIndexFromLocation(Point clientLocation)
         {
             int squareSize = SquareSize;
 
@@ -934,9 +934,9 @@ namespace Sandra.UI.WF
             return hit;
         }
 
-        private int hitTest(Point clientLocation)
+        private int HitTest(Point clientLocation)
         {
-            int hit = getSquareIndexFromLocation(clientLocation);
+            int hit = GetSquareIndexFromLocation(clientLocation);
 
             // Update hovering information.
             if (hoveringSquareIndex != hit)
@@ -959,7 +959,7 @@ namespace Sandra.UI.WF
         {
             if (lastKnownMouseMovePoint.X >= 0 && lastKnownMouseMovePoint.Y >= 0)
             {
-                hitTest(lastKnownMouseMovePoint);
+                HitTest(lastKnownMouseMovePoint);
             }
 
             base.OnMouseEnter(e);
@@ -967,7 +967,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            RaiseSquareMouseDown(hitTest(e.Location), e.Button, e.Location);
+            RaiseSquareMouseDown(HitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseDown(e);
         }
@@ -975,7 +975,7 @@ namespace Sandra.UI.WF
         protected override void OnMouseMove(MouseEventArgs e)
         {
             // Do a hit test, which updates hover information.
-            hitTest(e.Location);
+            HitTest(e.Location);
 
             // Remember position for mouse-enters without mouse-leaves.
             lastKnownMouseMovePoint = e.Location;
@@ -985,7 +985,7 @@ namespace Sandra.UI.WF
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            RaiseSquareMouseUp(hitTest(e.Location), e.Button, e.Location);
+            RaiseSquareMouseUp(HitTest(e.Location), e.Button, e.Location);
 
             base.OnMouseUp(e);
         }
@@ -994,7 +994,7 @@ namespace Sandra.UI.WF
         {
             // Hit test a position outside of the control to reset the hover square index and raise proper events.
             lastKnownMouseMovePoint = new Point(-1, -1);
-            hitTest(lastKnownMouseMovePoint);
+            HitTest(lastKnownMouseMovePoint);
 
             base.OnMouseLeave(e);
         }
@@ -1010,7 +1010,7 @@ namespace Sandra.UI.WF
             public Brush DarkSquareBrush;
             public Brush LightSquareBrush;
 
-            private void releaseUnmanagedResources()
+            private void ReleaseUnmanagedResources()
             {
                 // Unmanaged resources: also dispose when finalizing.
                 if (BackgroundBrush != null) BackgroundBrush.Dispose();
@@ -1022,13 +1022,13 @@ namespace Sandra.UI.WF
 
             public void Dispose()
             {
-                releaseUnmanagedResources();
+                ReleaseUnmanagedResources();
                 GC.SuppressFinalize(this);
             }
 
             ~GDIPaintResources()
             {
-                releaseUnmanagedResources();
+                ReleaseUnmanagedResources();
             }
         }
 
@@ -1172,7 +1172,7 @@ namespace Sandra.UI.WF
                                 Image currentImg = foregroundImages[index];
                                 if (currentImg != null)
                                 {
-                                    drawForegroundImage(g, currentImg,
+                                    DrawForegroundImage(g, currentImg,
                                                         new Rectangle(x, y, sizeH, sizeV),
                                                         foregroundImageAttributes[index]);
                                 }
@@ -1188,7 +1188,7 @@ namespace Sandra.UI.WF
                     {
                         if (!squareOverlayColors[index].IsEmpty)
                         {
-                            Point offset = getLocationFromIndex(index);
+                            Point offset = GetLocationFromIndex(index);
                             // Draw overlay color on the square, with the already drawn foreground image.
                             using (var overlayBrush = new SolidBrush(squareOverlayColors[index]))
                             {
@@ -1202,7 +1202,7 @@ namespace Sandra.UI.WF
             base.OnPaint(pe);
         }
 
-        private void drawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
+        private void DrawForegroundImage(Graphics g, Image image, Rectangle destinationRectangle, ForegroundImageAttribute imgAttribute)
         {
             if (imgAttribute == ForegroundImageAttribute.HalfTransparent)
             {
@@ -1284,19 +1284,19 @@ namespace Sandra.UI.WF
             X = x; Y = y;
         }
 
-        private bool equals(SquareLocation other) => other != null && X == other.X && Y == other.Y;
+        private bool EqualTo(SquareLocation other) => other != null && X == other.X && Y == other.Y;
 
-        public override bool Equals(object obj) => equals(obj as SquareLocation);
+        public override bool Equals(object obj) => EqualTo(obj as SquareLocation);
 
         // Rely on hash code generation of the built-in .NET library.
         public override int GetHashCode() => new Tuple<int, int>(X, Y).GetHashCode();
 
         public static bool operator ==(SquareLocation left, SquareLocation right)
-            => ReferenceEquals(left, null) ? ReferenceEquals(right, null)
-             : left.equals(right);
+            => left is null ? right is null
+             : left.EqualTo(right);
 
         public static bool operator !=(SquareLocation left, SquareLocation right)
-            => ReferenceEquals(left, null) ? !ReferenceEquals(right, null)
-             : !left.equals(right);
+            => left is null ? !(right is null)
+             : !left.EqualTo(right);
     }
 }

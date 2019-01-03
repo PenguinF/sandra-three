@@ -70,15 +70,15 @@ namespace Sandra.UI.WF
 
         public static bool operator ==(LocalizedStringKey first, LocalizedStringKey second)
         {
-            if (ReferenceEquals(null, first)) return ReferenceEquals(null, second);
-            if (ReferenceEquals(null, second)) return false;
+            if (first is null) return second is null;
+            if (second is null) return false;
             return first.Key == second.Key && first.DisplayText == second.DisplayText;
         }
 
         public static bool operator !=(LocalizedStringKey first, LocalizedStringKey second)
         {
-            if (ReferenceEquals(null, first)) return !ReferenceEquals(null, second);
-            if (ReferenceEquals(null, second)) return true;
+            if (first is null) return !(second is null);
+            if (second is null) return true;
             return first.Key != second.Key || first.DisplayText != second.DisplayText;
         }
     }

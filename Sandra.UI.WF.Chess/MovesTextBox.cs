@@ -34,7 +34,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : SyntaxEditor<PGNTerminalSymbol>
+    public partial class MovesTextBox : SyntaxEditor<IPGNTerminalSymbol>
     {
         private const int activeMoveStyleIndex = 8;
 
@@ -238,7 +238,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        private IEnumerable<PGNTerminalSymbol> GeneratePGNTerminalSymbols()
+        private IEnumerable<IPGNTerminalSymbol> GeneratePGNTerminalSymbols()
         {
             if (game != null)
             {
@@ -248,10 +248,10 @@ namespace Sandra.UI.WF
                 return GeneratePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
-            return Enumerable.Empty<PGNTerminalSymbol>();
+            return Enumerable.Empty<IPGNTerminalSymbol>();
         }
 
-        private TextElement<PGNTerminalSymbol> currentActiveMoveStyleElement;
+        private TextElement<IPGNTerminalSymbol> currentActiveMoveStyleElement;
 
         private void RefreshText()
         {
@@ -268,13 +268,13 @@ namespace Sandra.UI.WF
 
         private void UpdateText()
         {
-            List<PGNTerminalSymbol> updatedTerminalSymbols = GeneratePGNTerminalSymbols().ToList();
+            List<IPGNTerminalSymbol> updatedTerminalSymbols = GeneratePGNTerminalSymbols().ToList();
 
             int existingElementCount = TextIndex.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
             PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-            TextElement<PGNTerminalSymbol> newActiveMoveElement = null;
+            TextElement<IPGNTerminalSymbol> newActiveMoveElement = null;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
             int minLength = Math.Min(existingElementCount, updatedElementCount);
@@ -373,10 +373,10 @@ namespace Sandra.UI.WF
         {
             if (game != null)
             {
-                TextElement<PGNTerminalSymbol> elementBefore = TextIndex.GetElementBefore(selectionStart);
-                TextElement<PGNTerminalSymbol> elementAfter = TextIndex.GetElementAfter(selectionStart);
+                TextElement<IPGNTerminalSymbol> elementBefore = TextIndex.GetElementBefore(selectionStart);
+                TextElement<IPGNTerminalSymbol> elementAfter = TextIndex.GetElementAfter(selectionStart);
 
-                TextElement<PGNTerminalSymbol> activeElement = elementBefore;
+                TextElement<IPGNTerminalSymbol> activeElement = elementBefore;
                 PGNPly pgnPly;
 
                 if (activeElement == null)
@@ -424,7 +424,7 @@ namespace Sandra.UI.WF
 
                     // Search for the current active move element to set its font.
                     PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-                    foreach (TextElement<PGNTerminalSymbol> textElement in TextIndex.Elements)
+                    foreach (TextElement<IPGNTerminalSymbol> textElement in TextIndex.Elements)
                     {
                         if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                         {

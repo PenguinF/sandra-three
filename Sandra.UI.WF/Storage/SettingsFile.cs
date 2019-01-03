@@ -163,11 +163,11 @@ namespace Sandra.UI.WF.Storage
                 fileChangeQueue = new ConcurrentQueue<FileChangeType>();
                 watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
-                pollFileChangesBackgroundTask = Task.Run(() => pollFileChangesLoop());
+                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop());
             }
         }
 
-        private void pollFileChangesLoop()
+        private void PollFileChangesLoop()
         {
             try
             {
@@ -187,7 +187,7 @@ namespace Sandra.UI.WF.Storage
 
                     if (hasChanges)
                     {
-                        sc.Post(raiseSettingsChangedEvent, Load());
+                        sc.Post(RaiseSettingsChangedEvent, Load());
                     }
 
                     // Stop the loop if the FileWatcher errored out.
@@ -239,7 +239,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private void raiseSettingsChangedEvent(object state)
+        private void RaiseSettingsChangedEvent(object state)
         {
             SettingObject newSettings = (SettingObject)state;
 

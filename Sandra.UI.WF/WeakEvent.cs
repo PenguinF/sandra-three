@@ -58,7 +58,7 @@ namespace Sandra.UI.WF
                 MethodInfo = methodInfo;
             }
 
-            bool isInvalid(object target)
+            bool IsInvalid(object target)
                 // Null or disposed controls are invalid.
                 => target == null
                 || target is IWeakEventTarget weakEventTarget && weakEventTarget.IsDisposed
@@ -78,7 +78,7 @@ namespace Sandra.UI.WF
                 {
                     // Instance method, check if the target is still alive.
                     target = wr.Target;
-                    if (isInvalid(target))
+                    if (IsInvalid(target))
                     {
                         Invalid = true;
                         return;
@@ -92,7 +92,7 @@ namespace Sandra.UI.WF
 
         List<HandlerRef> wrappers = new List<HandlerRef>();
 
-        void purge()
+        void Purge()
         {
             // Purge by copying all valid wrappers to a new list and forget the old wrapper list.
             wrappers = new List<HandlerRef>(wrappers.Where(x => !x.Invalid));
@@ -102,9 +102,9 @@ namespace Sandra.UI.WF
         /// Adds a handler to the event. This is equivalent to the statement:
         /// <code>myEvent += <paramref name="handler"/>;</code>
         /// </summary>
-        public void AddListener(Action<TSender, TEventArgs> handler) => addListener(handler);
+        public void AddListener(Action<TSender, TEventArgs> handler) => AddListenerInner(handler);
 
-        private void addListener(Delegate handler)
+        private void AddListenerInner(Delegate handler)
         {
             if (null == handler) throw new ArgumentNullException(nameof(handler));
 
@@ -123,9 +123,9 @@ namespace Sandra.UI.WF
         /// Removes a handler from the event. This is equivalent to the statement:
         /// <code>myEvent -= <param name="handler">handler</param>;</code>
         /// </summary>
-        public void RemoveListener(Action<TSender, TEventArgs> handler) => removeListener(handler);
+        public void RemoveListener(Action<TSender, TEventArgs> handler) => RemoveListenerInner(handler);
 
-        private void removeListener(Delegate handler)
+        private void RemoveListenerInner(Delegate handler)
         {
             if (null == handler) throw new ArgumentNullException(nameof(handler));
 
@@ -145,7 +145,7 @@ namespace Sandra.UI.WF
                 purgeNeeded |= wrapper.Invalid;
             }
 
-            if (purgeNeeded) purge();
+            if (purgeNeeded) Purge();
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Sandra.UI.WF
             }
 
             // Purge the list.
-            if (purgeNeeded) purge();
+            if (purgeNeeded) Purge();
 
             // Fire the event.
             invocationList?.Invoke(sender, e);

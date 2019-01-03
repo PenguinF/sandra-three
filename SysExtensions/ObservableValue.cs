@@ -36,7 +36,7 @@ namespace SysExtensions
 
         private TValue value;
 
-        private event Action<TValue> valueChanged;
+        private event Action<TValue> _ValueChanged;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ObservableValue{TValue}"/> with a default initial value and default equality comparer.
@@ -104,12 +104,12 @@ namespace SysExtensions
         {
             add
             {
-                valueChanged += value;
+                _ValueChanged += value;
                 value(Value);
             }
             remove
             {
-                valueChanged -= value;
+                _ValueChanged -= value;
             }
         }
 
@@ -126,7 +126,7 @@ namespace SysExtensions
         /// </summary>
         protected virtual void OnValueChanged(TValue newValue)
         {
-            valueChanged?.Invoke(newValue);
+            _ValueChanged?.Invoke(newValue);
         }
     }
 }

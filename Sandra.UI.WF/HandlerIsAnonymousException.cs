@@ -40,18 +40,18 @@ namespace Sandra.UI.WF
         public const string AnonymousTypeNameLabel = "Anonymous type name: ";
         public const string DeclaringTypeNameLabel = "Declaring type name: ";
 
-        static string getNullableTypeName(Type type) => type != null ? type.FullName : "<null>";
+        static string GetNullableTypeName(Type type) => type != null ? type.FullName : "<null>";
 
-        static IEnumerable<string> getExceptionText(MethodInfo methodInfo)
+        static IEnumerable<string> GetExceptionText(MethodInfo methodInfo)
         {
             yield return HandlerIsAnonymousExceptionMessage;
             yield return string.Empty;
             yield return MethodNameLabel + methodInfo.Name;
             yield return AnonymousTypeNameLabel + methodInfo.DeclaringType.FullName;
-            yield return DeclaringTypeNameLabel + getNullableTypeName(methodInfo.DeclaringType.DeclaringType);
+            yield return DeclaringTypeNameLabel + GetNullableTypeName(methodInfo.DeclaringType.DeclaringType);
         }
 
-        public HandlerIsAnonymousException(MethodInfo methodInfo) : base(string.Join(Environment.NewLine, getExceptionText(methodInfo)))
+        public HandlerIsAnonymousException(MethodInfo methodInfo) : base(string.Join(Environment.NewLine, GetExceptionText(methodInfo)))
         {
         }
 

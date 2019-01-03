@@ -26,7 +26,9 @@ namespace Sandra.UI.WF.Storage
     /// <summary>
     /// Base interface for all types of values which are persistable.
     /// </summary>
+#pragma warning disable IDE1006 // Interface not starting with 'I' is intentional.
     public interface PValue
+#pragma warning restore IDE1006
     {
         void Accept(PValueVisitor visitor);
         TResult Accept<TResult>(PValueVisitor<TResult> visitor);

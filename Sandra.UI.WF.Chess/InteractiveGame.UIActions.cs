@@ -110,7 +110,7 @@ namespace Sandra.UI.WF
                         chessBoardForm = null;
 
                         // To refresh the state of the GotoChessBoardForm action elsewhere.
-                        var movesTextBox = getMovesTextBox();
+                        var movesTextBox = GetMovesTextBox();
                         if (movesTextBox != null) movesTextBox.ActionHandler.Invalidate();
                     };
                 }
@@ -414,7 +414,7 @@ namespace Sandra.UI.WF
 
         public UIActionState TryGotoEnd(bool perform)
         {
-            if (Game.IsLastMove && getFirstMove(Game.ActiveTree.ParentVariation) == null)
+            if (Game.IsLastMove && GetFirstMove(Game.ActiveTree.ParentVariation) == null)
             {
                 // Last move in the main line of the game.
                 return UIActionVisibility.Disabled;
@@ -511,7 +511,7 @@ namespace Sandra.UI.WF
         public UIActionState TryPromoteActiveVariation(bool perform)
         {
             // Find the first move in this variation.
-            Variation firstMoveInVariation = getFirstMove(Game.ActiveTree.ParentVariation);
+            Variation firstMoveInVariation = GetFirstMove(Game.ActiveTree.ParentVariation);
 
             if (firstMoveInVariation == null)
             {

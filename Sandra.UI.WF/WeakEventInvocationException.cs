@@ -102,12 +102,12 @@ namespace Sandra.UI.WF
         /// </returns>
 
         // Glue stack trace of inner exception and this exception together.
-        public override string StackTrace => mergeWithStackTrace(InnerException.StackTrace);
+        public override string StackTrace => MergeWithStackTrace(InnerException.StackTrace);
 
         // Override base.ToString() for the unhandled exception dialog.
-        public override string ToString() => mergeWithStackTrace(InnerException.ToString());
+        public override string ToString() => MergeWithStackTrace(InnerException.ToString());
 
-        string mergeWithStackTrace(string baseString)
+        string MergeWithStackTrace(string baseString)
         {
             string baseStackTrace = base.StackTrace;
             if (string.IsNullOrEmpty(baseString)) return baseStackTrace;
