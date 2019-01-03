@@ -86,9 +86,10 @@ namespace Sandra.Chess.Tests
             /// </summary>
             public static ShadowPosition GetInitialPosition()
             {
-                var initialPosition = new ShadowPosition();
-
-                initialPosition.sideToMove = Color.White;
+                var initialPosition = new ShadowPosition
+                {
+                    sideToMove = Color.White
+                };
 
                 initialPosition.piecePerSquare[0] = ColoredPieceOrEmpty.WhiteRook;
                 initialPosition.piecePerSquare[1] = ColoredPieceOrEmpty.WhiteKnight;
