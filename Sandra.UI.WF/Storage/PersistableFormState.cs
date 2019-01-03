@@ -122,7 +122,10 @@ namespace Sandra.UI.WF.Storage
         /// </exception>
         public void AttachTo(Form form)
         {
+            // Suppress "use 'throw' expression" message, throw must happen before Detach, and this.form cannot be assigned earlier.
+#pragma warning disable IDE0016
             if (form == null) throw new ArgumentNullException(nameof(form));
+#pragma warning restore IDE0016
 
             // Assume caller will deal with unregistering Changed event.
             Detach();
