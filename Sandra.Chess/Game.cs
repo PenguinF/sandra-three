@@ -81,7 +81,7 @@ namespace Sandra.Chess
         /// </summary>
         public MoveTree ActiveTree { get; private set; }
 
-        private void setActiveTree(MoveTree value)
+        private void SetActiveTreeInner(MoveTree value)
         {
             // Replay all moves until the new active tree has been reached.
             Stack<Move> previousMoves = new Stack<Move>();
@@ -118,7 +118,7 @@ namespace Sandra.Chess
 
             if (ActiveTree != value)
             {
-                setActiveTree(value);
+                SetActiveTreeInner(value);
             }
         }
 
@@ -132,7 +132,7 @@ namespace Sandra.Chess
             if (IsFirstMove) return;
 
             // Replay until the previous move.
-            setActiveTree(ActiveTree.ParentVariation.ParentTree);
+            SetActiveTreeInner(ActiveTree.ParentVariation.ParentTree);
         }
 
         public void Forward()

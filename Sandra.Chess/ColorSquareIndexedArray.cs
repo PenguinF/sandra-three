@@ -35,7 +35,7 @@ namespace Sandra.Chess
     {
         private TValue[,] arr;
 
-        private void init()
+        private void Init()
         {
             if (arr == null) arr = new TValue[EnumHelper<Color>.EnumCount, EnumHelper<Square>.EnumCount];
         }
@@ -46,7 +46,7 @@ namespace Sandra.Chess
         public static ColorSquareIndexedArray<TValue> New()
         {
             ColorSquareIndexedArray<TValue> wrapped = default(ColorSquareIndexedArray<TValue>);
-            wrapped.init();
+            wrapped.Init();
             return wrapped;
         }
 
@@ -60,7 +60,7 @@ namespace Sandra.Chess
                 }
                 catch (NullReferenceException)
                 {
-                    init();
+                    Init();
                     return arr[(int)color, (int)square];
                 }
             }
@@ -72,7 +72,7 @@ namespace Sandra.Chess
                 }
                 catch (NullReferenceException)
                 {
-                    init();
+                    Init();
                     arr[(int)color, (int)square] = value;
                 }
             }

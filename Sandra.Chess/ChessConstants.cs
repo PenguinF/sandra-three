@@ -449,19 +449,19 @@ namespace Sandra.Chess
             // The order in a ray is determined by which bit in the occupancy index corresponds to a given blocking square.
             // This in turn is determined indirectly by the multipliers which are used in step B.
             Square[] baseFile = { Square.A8, Square.A7, Square.A6, Square.A5, Square.A4, Square.A3, Square.A2, Square.A1 };
-            ulong[,] baseFileReachability = calculateRayReachabilityTable(baseFile);
+            ulong[,] baseFileReachability = CalculateRayReachabilityTable(baseFile);
             fileReachability = new ulong[TotalSquareCount, totalOccupancies];
 
             Square[] baseRank = { Square.A1, Square.B1, Square.C1, Square.D1, Square.E1, Square.F1, Square.G1, Square.H1 };
-            ulong[,] baseRankReachability = calculateRayReachabilityTable(baseRank);
+            ulong[,] baseRankReachability = CalculateRayReachabilityTable(baseRank);
             rankReachability = new ulong[TotalSquareCount, totalOccupancies];
 
             Square[] baseA1H8 = { Square.A1, Square.B2, Square.C3, Square.D4, Square.E5, Square.F6, Square.G7, Square.H8 };
-            ulong[,] baseA1H8Reachability = calculateRayReachabilityTable(baseA1H8);
+            ulong[,] baseA1H8Reachability = CalculateRayReachabilityTable(baseA1H8);
             a1h8Reachability = new ulong[TotalSquareCount, totalOccupancies];
 
             Square[] baseA8H1 = { Square.A8, Square.B7, Square.C6, Square.D5, Square.E4, Square.F3, Square.G2, Square.H1 };
-            ulong[,] baseA8H1Reachability = calculateRayReachabilityTable(baseA8H1);
+            ulong[,] baseA8H1Reachability = CalculateRayReachabilityTable(baseA8H1);
             a8h1Reachability = new ulong[TotalSquareCount, totalOccupancies];
 
             // To zero out part of a diagonal before shifting it to another shorter diagonal.
@@ -524,7 +524,7 @@ namespace Sandra.Chess
             }
         }
 
-        private static ulong[,] calculateRayReachabilityTable(Square[] ray)
+        private static ulong[,] CalculateRayReachabilityTable(Square[] ray)
         {
             // Construct a bitfield which is true for all squares in the ray.
             ulong rayVector = 0;
@@ -587,12 +587,12 @@ namespace Sandra.Chess
             return reachability;
         }
 
-        private static int occupancyIndex_File(Square square, ulong occupied)
+        private static int OccupancyIndex_File(Square square, ulong occupied)
         {
             return (int)(((InnerFileMasks[square] & occupied) * fileMultipliers[square]) >> 57);
         }
 
-        private static int occupancyIndex_Rank(Square square, ulong occupied)
+        private static int OccupancyIndex_Rank(Square square, ulong occupied)
         {
             // rankMultiplier[square], if it existed, would map the rank to the seventh rank by a simple shift left,
             // after which a '>> 57' would be correct here too.
@@ -600,12 +600,12 @@ namespace Sandra.Chess
             return (int)((InnerRankMasks[square] & occupied) >> rankShifts[square]);
         }
 
-        private static int occupancyIndex_DiagA1H8(Square square, ulong occupied)
+        private static int OccupancyIndex_DiagA1H8(Square square, ulong occupied)
         {
             return (int)(((InnerA1H8Masks[square] & occupied) * a1h8Multipliers[square]) >> 57);
         }
 
-        private static int occupancyIndex_DiagA8H1(Square square, ulong occupied)
+        private static int OccupancyIndex_DiagA8H1(Square square, ulong occupied)
         {
             return (int)(((InnerA8H1Masks[square] & occupied) * a8h1Multipliers[square]) >> 57);
         }
@@ -615,8 +615,8 @@ namespace Sandra.Chess
         /// </summary>
         public static ulong ReachableSquaresStraight(Square sourceSquare, ulong occupied)
         {
-            return fileReachability[(int)sourceSquare, occupancyIndex_File(sourceSquare, occupied)]
-                 | rankReachability[(int)sourceSquare, occupancyIndex_Rank(sourceSquare, occupied)];
+            return fileReachability[(int)sourceSquare, OccupancyIndex_File(sourceSquare, occupied)]
+                 | rankReachability[(int)sourceSquare, OccupancyIndex_Rank(sourceSquare, occupied)];
         }
 
         /// <summary>
@@ -624,8 +624,8 @@ namespace Sandra.Chess
         /// </summary>
         public static ulong ReachableSquaresDiagonal(Square sourceSquare, ulong occupied)
         {
-            return a1h8Reachability[(int)sourceSquare, occupancyIndex_DiagA1H8(sourceSquare, occupied)]
-                 | a8h1Reachability[(int)sourceSquare, occupancyIndex_DiagA8H1(sourceSquare, occupied)];
+            return a1h8Reachability[(int)sourceSquare, OccupancyIndex_DiagA1H8(sourceSquare, occupied)]
+                 | a8h1Reachability[(int)sourceSquare, OccupancyIndex_DiagA8H1(sourceSquare, occupied)];
         }
 
         /// <summary>

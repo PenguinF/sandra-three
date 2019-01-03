@@ -62,7 +62,7 @@ namespace Sandra.Chess
             MoveTree = new MoveTree(this);
         }
 
-        private void reposition(int destinationVariationIndex, bool after)
+        private void Reposition(int destinationVariationIndex, bool after)
         {
             if (destinationVariationIndex < 0
                 || destinationVariationIndex >= ParentTree.Variations.Count)
@@ -121,7 +121,7 @@ namespace Sandra.Chess
         /// </exception>
         public void RepositionBefore(int destinationVariationIndex)
         {
-            reposition(destinationVariationIndex, false);
+            Reposition(destinationVariationIndex, false);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Sandra.Chess
         /// </exception>
         public void RepositionAfter(int destinationVariationIndex)
         {
-            reposition(destinationVariationIndex, true);
+            Reposition(destinationVariationIndex, true);
         }
     }
 
