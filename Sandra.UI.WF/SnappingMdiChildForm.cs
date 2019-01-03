@@ -32,56 +32,56 @@ namespace Sandra.UI.WF
     /// </summary>
     public class SnappingMdiChildForm : ConstrainedMoveResizeForm
     {
-        LineSegment createIfNonEmpty(int position, int min, int max)
+        LineSegment CreateIfNonEmpty(int position, int min, int max)
         {
             if (min < max) return new LineSegment(position, min, max);
             return null;
         }
 
-        LineSegment getLeftBorder(ref RECT rectangle, int cutoff)
+        LineSegment GetLeftBorder(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the left border if it's non-empty.
-            return createIfNonEmpty(rectangle.Left, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
+            return CreateIfNonEmpty(rectangle.Left, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
         }
 
-        LineSegment getRightBorder(ref RECT rectangle, int cutoff)
+        LineSegment GetRightBorder(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the right border if it's non-empty.
-            return createIfNonEmpty(rectangle.Right, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
+            return CreateIfNonEmpty(rectangle.Right, rectangle.Top + cutoff, rectangle.Bottom - cutoff);
         }
 
-        LineSegment getTopBorder(ref RECT rectangle, int cutoff)
+        LineSegment GetTopBorder(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the top border if it's non-empty.
-            return createIfNonEmpty(rectangle.Top, rectangle.Left + cutoff, rectangle.Right - cutoff);
+            return CreateIfNonEmpty(rectangle.Top, rectangle.Left + cutoff, rectangle.Right - cutoff);
         }
 
-        LineSegment getBottomBorder(ref RECT rectangle, int cutoff)
+        LineSegment GetBottomBorder(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only yield the bpttom border if it's non-empty.
-            return createIfNonEmpty(rectangle.Bottom, rectangle.Left + cutoff, rectangle.Right - cutoff);
+            return CreateIfNonEmpty(rectangle.Bottom, rectangle.Left + cutoff, rectangle.Right - cutoff);
         }
 
-        void addIfNonEmpty(List<LineSegment> list, LineSegment segment)
+        void AddIfNonEmpty(List<LineSegment> list, LineSegment segment)
         {
             if (segment != null) list.Add(segment);
         }
 
-        List<LineSegment> getVerticalBorders(ref RECT rectangle, int cutoff)
+        List<LineSegment> GetVerticalBorders(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only add left and right borders if they are non-empty.
             List<LineSegment> verticalBorders = new List<LineSegment>();
-            addIfNonEmpty(verticalBorders, getLeftBorder(ref rectangle, cutoff));
-            addIfNonEmpty(verticalBorders, getRightBorder(ref rectangle, cutoff));
+            AddIfNonEmpty(verticalBorders, GetLeftBorder(ref rectangle, cutoff));
+            AddIfNonEmpty(verticalBorders, GetRightBorder(ref rectangle, cutoff));
             return verticalBorders;
         }
 
-        List<LineSegment> getHorizontalBorders(ref RECT rectangle, int cutoff)
+        List<LineSegment> GetHorizontalBorders(ref RECT rectangle, int cutoff)
         {
             // Cut off the given length and only add top and bottom borders if they are non-empty.
             List<LineSegment> horizontalBorders = new List<LineSegment>();
-            addIfNonEmpty(horizontalBorders, getTopBorder(ref rectangle, cutoff));
-            addIfNonEmpty(horizontalBorders, getBottomBorder(ref rectangle, cutoff));
+            AddIfNonEmpty(horizontalBorders, GetTopBorder(ref rectangle, cutoff));
+            AddIfNonEmpty(horizontalBorders, GetBottomBorder(ref rectangle, cutoff));
             return horizontalBorders;
         }
 
@@ -117,12 +117,12 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Calculates an array of visible vertical or horizontal segments, given a list of possibly overlapping rectangles.
         /// </summary>
-        LineSegment[] calculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
+        LineSegment[] CalculateSegments(ref RECT mdiClientRectangle, List<RECT> mdiChildRectangles, bool isVertical)
         {
             // Create snap line segments for each MDI child, and add extra segments for the MDI client rectangle.
             List<LineSegment> segments = isVertical
-                ? getVerticalBorders(ref mdiClientRectangle, 0)
-                : getHorizontalBorders(ref mdiClientRectangle, 0);
+                ? GetVerticalBorders(ref mdiClientRectangle, 0)
+                : GetHorizontalBorders(ref mdiClientRectangle, 0);
 
             // Loop over MDI child rectangles, to cut away hidden sections of segments.
             for (int mdiChildRectangleIndex = mdiChildRectangles.Count - 1; mdiChildRectangleIndex >= 0; --mdiChildRectangleIndex)
@@ -131,8 +131,8 @@ namespace Sandra.UI.WF
 
                 // Calculate segments for this MDI child, and start with initial full segments.
                 List<LineSegment> childSegments = isVertical
-                    ? getVerticalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength)
-                    : getHorizontalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength);
+                    ? GetVerticalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength)
+                    : GetHorizontalBorders(ref mdiChildRectangle, InsensitiveBorderEndLength);
 
                 // Loop over MDI child rectangles that are higher in the z-order, since they can overlap.
                 for (int overlappingRectangleIndex = mdiChildRectangleIndex - 1; overlappingRectangleIndex >= 0; --overlappingRectangleIndex)
@@ -198,7 +198,7 @@ namespace Sandra.UI.WF
         /// <summary>
         /// Precalculates and caches line segments that this form can snap onto.
         /// </summary>
-        void prepareSizeMove(Control.ControlCollection mdiChildren)
+        void PrepareSizeMove(Control.ControlCollection mdiChildren)
         {
             // Ignore the possibility that the MDI client rectangle is empty.
             RECT mdiClientRectangle = new RECT
@@ -248,14 +248,14 @@ namespace Sandra.UI.WF
             }
 
             // Calculate snappable segments and save them to arrays which can be used efficiently from within the WndProc() override.
-            m_verticalSegments = calculateSegments(ref mdiClientRectangle, mdiChildRectangles, true);
-            m_horizontalSegments = calculateSegments(ref mdiClientRectangle, mdiChildRectangles, false);
+            m_verticalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, true);
+            m_horizontalSegments = CalculateSegments(ref mdiClientRectangle, mdiChildRectangles, false);
         }
 
         /// <summary>
         /// Checks if line segments that this form can snap onto should be precalculated (again).
         /// </summary>
-        void checkUpdateSizeMove()
+        void CheckUpdateSizeMove()
         {
             Form parentForm = MdiParent;
             if (parentForm != null)
@@ -270,7 +270,7 @@ namespace Sandra.UI.WF
                         {
                             m_canSnap = true;
                             m_currentMdiClientScreenRectangle = currentMdiClientScreenRectangle;
-                            prepareSizeMove(c.Controls);
+                            PrepareSizeMove(c.Controls);
                         }
                         // No need to check 'other' MdiClients, so stop looping.
                         return;
@@ -284,7 +284,7 @@ namespace Sandra.UI.WF
             base.OnResizeBegin(e);
 
             // Precalculate size/move line segments.
-            checkUpdateSizeMove();
+            CheckUpdateSizeMove();
         }
 
         protected override void OnResizeEnd(EventArgs e)
@@ -301,13 +301,13 @@ namespace Sandra.UI.WF
             if (!m_canSnap) return;
 
             // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
-            checkUpdateSizeMove();
+            CheckUpdateSizeMove();
 
             // Evaluate left/right borders, then top/bottom borders.
 
             // Create line segments for each border of this window.
-            LineSegment leftBorder = getLeftBorder(ref moveRect, InsensitiveBorderEndLength);
-            LineSegment rightBorder = getRightBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment leftBorder = GetLeftBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment rightBorder = GetRightBorder(ref moveRect, InsensitiveBorderEndLength);
 
             if (null != leftBorder && null != rightBorder)
             {
@@ -336,8 +336,8 @@ namespace Sandra.UI.WF
             }
 
             // Create line segments for each border of this window.
-            LineSegment topBorder = getTopBorder(ref moveRect, InsensitiveBorderEndLength);
-            LineSegment bottomBorder = getBottomBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment topBorder = GetTopBorder(ref moveRect, InsensitiveBorderEndLength);
+            LineSegment bottomBorder = GetBottomBorder(ref moveRect, InsensitiveBorderEndLength);
 
             if (null != topBorder && null != bottomBorder)
             {
@@ -372,7 +372,7 @@ namespace Sandra.UI.WF
             if (!m_canSnap) return;
 
             // Check if the MDI client rectangle changed during move/resize, because the client area may show or hide scrollbars during sizing/moving of this window.
-            checkUpdateSizeMove();
+            CheckUpdateSizeMove();
 
             // Evaluate left/right borders, then top/bottom borders.
 
@@ -384,7 +384,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Left:
                 case ResizeMode.TopLeft:
                 case ResizeMode.BottomLeft:
-                    LineSegment leftBorder = getLeftBorder(ref resizeRect, InsensitiveBorderEndLength);
+                    LineSegment leftBorder = GetLeftBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != leftBorder)
                     {
                         foreach (LineSegment verticalSegment in m_verticalSegments)
@@ -401,7 +401,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Right:
                 case ResizeMode.TopRight:
                 case ResizeMode.BottomRight:
-                    LineSegment rightBorder = getRightBorder(ref resizeRect, InsensitiveBorderEndLength);
+                    LineSegment rightBorder = GetRightBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != rightBorder)
                     {
                         foreach (LineSegment verticalSegment in m_verticalSegments)
@@ -425,7 +425,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Top:
                 case ResizeMode.TopLeft:
                 case ResizeMode.TopRight:
-                    LineSegment topBorder = getTopBorder(ref resizeRect, InsensitiveBorderEndLength);
+                    LineSegment topBorder = GetTopBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != topBorder)
                     {
                         foreach (LineSegment horizontalSegment in m_horizontalSegments)
@@ -442,7 +442,7 @@ namespace Sandra.UI.WF
                 case ResizeMode.Bottom:
                 case ResizeMode.BottomLeft:
                 case ResizeMode.BottomRight:
-                    LineSegment bottomBorder = getBottomBorder(ref resizeRect, InsensitiveBorderEndLength);
+                    LineSegment bottomBorder = GetBottomBorder(ref resizeRect, InsensitiveBorderEndLength);
                     if (null != bottomBorder)
                     {
                         foreach (LineSegment horizontalSegment in m_horizontalSegments)

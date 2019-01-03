@@ -221,7 +221,7 @@ namespace Sandra.UI.WF
         /// </param>
         public static void BuildMenu(UIActionHandler actionHandler, ToolStripItemCollection destination)
         {
-            new UIMenuBuilder(actionHandler).buildMenu(actionHandler.RootMenuNode.Nodes, destination);
+            new UIMenuBuilder(actionHandler).BuildMenu(actionHandler.RootMenuNode.Nodes, destination);
         }
 
         UIActionHandler ActionHandler;
@@ -231,7 +231,7 @@ namespace Sandra.UI.WF
             ActionHandler = actionHandler;
         }
 
-        void buildMenu(IEnumerable<UIMenuNode> actionList, ToolStripItemCollection destination)
+        void BuildMenu(IEnumerable<UIMenuNode> actionList, ToolStripItemCollection destination)
         {
             bool first = true;
             bool firstInGroup = false;
@@ -257,7 +257,7 @@ namespace Sandra.UI.WF
             }
         }
 
-        void initializeMenuItem(UIMenuNode node, LocalizedToolStripMenuItem menuItem)
+        void InitializeMenuItem(UIMenuNode node, LocalizedToolStripMenuItem menuItem)
         {
             // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
             if (node.CaptionKey != null)
@@ -284,7 +284,7 @@ namespace Sandra.UI.WF
             if (!currentActionState.Visible) return null;
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
-            initializeMenuItem(element, menuItem);
+            InitializeMenuItem(element, menuItem);
 
             menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
             menuItem.ShortcutKeyDisplayStringParts.ForEach(
@@ -314,9 +314,9 @@ namespace Sandra.UI.WF
             if (container.CaptionKey == null && container.Icon == null) return null;
 
             var menuItem = new LocalizedToolStripMenuItem();
-            initializeMenuItem(container, menuItem);
+            InitializeMenuItem(container, menuItem);
 
-            buildMenu(container.Nodes, menuItem.DropDownItems);
+            BuildMenu(container.Nodes, menuItem.DropDownItems);
 
             // No empty submenu items.
             if (menuItem.DropDownItems.Count == 0) return null;

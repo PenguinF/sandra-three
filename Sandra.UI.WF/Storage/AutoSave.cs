@@ -266,7 +266,7 @@ namespace Sandra.UI.WF.Storage
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
                 cts = new CancellationTokenSource();
-                autoSaveBackgroundTask = autoSaveLoop(cts.Token);
+                autoSaveBackgroundTask = AutoSaveLoop(cts.Token);
             }
             catch (ArgumentException)
             {
@@ -332,7 +332,7 @@ namespace Sandra.UI.WF.Storage
             }
         }
 
-        private async Task autoSaveLoop(CancellationToken ct)
+        private async Task AutoSaveLoop(CancellationToken ct)
         {
             for (; ; )
             {

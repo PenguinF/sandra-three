@@ -125,7 +125,7 @@ namespace Sandra.UI.WF.Storage
             if (form == null) throw new ArgumentNullException(nameof(form));
 
             // Assume caller will deal with unregistering Changed event.
-            detach();
+            Detach();
             this.form = form;
 
             // Initialize with updated values.
@@ -136,7 +136,7 @@ namespace Sandra.UI.WF.Storage
             form.FormClosed += Form_FormClosed;
         }
 
-        private void detach()
+        private void Detach()
         {
             if (form != null)
             {
@@ -150,7 +150,7 @@ namespace Sandra.UI.WF.Storage
 
         private void Form_FormClosed(object sender, FormClosedEventArgs e)
         {
-            detach();
+            Detach();
         }
 
         private void Form_ResizeEnd(object sender, EventArgs e)

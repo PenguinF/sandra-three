@@ -39,14 +39,14 @@ namespace Sandra.UI.WF.Storage
             this.filePath = filePath;
         }
 
-        private FileSystemWatcher createFileSystemWatcher()
+        private FileSystemWatcher CreateFileSystemWatcher()
         {
             var fileSystemWatcher = new FileSystemWatcher(Path.GetDirectoryName(filePath), Path.GetFileName(filePath));
-            fileSystemWatcher.Changed += watcher_ChangedCreatedDeleted;
-            fileSystemWatcher.Created += watcher_ChangedCreatedDeleted;
-            fileSystemWatcher.Deleted += watcher_ChangedCreatedDeleted;
-            fileSystemWatcher.Renamed += watcher_Renamed;
-            fileSystemWatcher.Error += watcher_Error;
+            fileSystemWatcher.Changed += Watcher_ChangedCreatedDeleted;
+            fileSystemWatcher.Created += Watcher_ChangedCreatedDeleted;
+            fileSystemWatcher.Deleted += Watcher_ChangedCreatedDeleted;
+            fileSystemWatcher.Renamed += Watcher_Renamed;
+            fileSystemWatcher.Error += Watcher_Error;
             return fileSystemWatcher;
         }
 
@@ -57,38 +57,38 @@ namespace Sandra.UI.WF.Storage
                 this.fileChangeQueue = fileChangeQueue;
                 this.eventWaitHandle = eventWaitHandle;
 
-                fileSystemWatcher = createFileSystemWatcher();
+                fileSystemWatcher = CreateFileSystemWatcher();
                 fileSystemWatcher.EnableRaisingEvents = true;
             }
         }
 
-        private void fileChangePosted(FileChangeType fileChangeType)
+        private void FileChangePosted(FileChangeType fileChangeType)
         {
             // Enqueue the file change, and signal wait handle to wake up listener thread.
             fileChangeQueue.Enqueue(fileChangeType);
             eventWaitHandle.Set();
         }
 
-        private void watcher_ChangedCreatedDeleted(object sender, FileSystemEventArgs e)
-            => fileChangePosted(FileChangeType.Change);
+        private void Watcher_ChangedCreatedDeleted(object sender, FileSystemEventArgs e)
+            => FileChangePosted(FileChangeType.Change);
 
-        private void watcher_Renamed(object sender, RenamedEventArgs e)
-            => fileChangePosted(FileChangeType.Change);
+        private void Watcher_Renamed(object sender, RenamedEventArgs e)
+            => FileChangePosted(FileChangeType.Change);
 
-        private void watcher_Error(object sender, ErrorEventArgs e)
+        private void Watcher_Error(object sender, ErrorEventArgs e)
         {
             fileSystemWatcher.EnableRaisingEvents = false;
             if (e.GetException() is InternalBufferOverflowException)
             {
                 // Recreate the watcher.
                 fileSystemWatcher.Dispose();
-                fileSystemWatcher = createFileSystemWatcher();
+                fileSystemWatcher = CreateFileSystemWatcher();
                 fileSystemWatcher.EnableRaisingEvents = true;
-                fileChangePosted(FileChangeType.ErrorBufferOverflow);
+                FileChangePosted(FileChangeType.ErrorBufferOverflow);
             }
             else
             {
-                fileChangePosted(FileChangeType.ErrorUnspecified);
+                FileChangePosted(FileChangeType.ErrorUnspecified);
             }
         }
 
