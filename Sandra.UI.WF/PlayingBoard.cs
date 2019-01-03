@@ -1292,11 +1292,11 @@ namespace Sandra.UI.WF
         public override int GetHashCode() => new Tuple<int, int>(X, Y).GetHashCode();
 
         public static bool operator ==(SquareLocation left, SquareLocation right)
-            => ReferenceEquals(left, null) ? ReferenceEquals(right, null)
+            => left is null ? right is null
              : left.EqualTo(right);
 
         public static bool operator !=(SquareLocation left, SquareLocation right)
-            => ReferenceEquals(left, null) ? !ReferenceEquals(right, null)
+            => left is null ? !(right is null)
              : !left.EqualTo(right);
     }
 }

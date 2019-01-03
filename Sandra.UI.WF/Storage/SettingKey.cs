@@ -52,15 +52,15 @@ namespace Sandra.UI.WF.Storage
 
         public static bool operator ==(SettingKey first, SettingKey second)
         {
-            if (ReferenceEquals(null, first)) return ReferenceEquals(null, second);
-            if (ReferenceEquals(null, second)) return false;
+            if (first is null) return second is null;
+            if (second is null) return false;
             return first.Key == second.Key;
         }
 
         public static bool operator !=(SettingKey first, SettingKey second)
         {
-            if (ReferenceEquals(null, first)) return !ReferenceEquals(null, second);
-            if (ReferenceEquals(null, second)) return true;
+            if (first is null) return !(second is null);
+            if (second is null) return true;
             return first.Key != second.Key;
         }
 
