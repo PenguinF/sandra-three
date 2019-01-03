@@ -51,14 +51,14 @@ namespace SysExtensions.Tests
         {
             string expectedCommentText = alternativeCommentText ?? json;
 
-            Action<TextElement<JsonSymbol>> firstTokenAssert = symbol =>
+            void firstTokenAssert(TextElement<JsonSymbol> symbol)
             {
                 Assert.NotNull(symbol);
                 Assert.IsType<JsonComment>(symbol.TerminalSymbol);
                 Assert.Equal(0, symbol.Start);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
                 Assert.Equal(expectedCommentText, json.Substring(symbol.Start, symbol.Length));
-            };
+            }
 
             if (alternativeCommentText == null)
             {
