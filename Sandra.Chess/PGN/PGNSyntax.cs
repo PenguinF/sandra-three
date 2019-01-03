@@ -46,7 +46,7 @@ namespace Sandra.PGN.Temp
             Plies = plyList;
         }
 
-        public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols()
+        public IEnumerable<IPGNTerminalSymbol> GenerateTerminalSymbols()
         {
             bool precededByFormattedMoveSymbol = false;
             bool emitSpace = false;
@@ -122,7 +122,7 @@ namespace Sandra.PGN.Temp
             Variation = variation ?? throw new ArgumentNullException(nameof(variation));
         }
 
-        public IEnumerable<PGNTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
+        public IEnumerable<IPGNTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
         {
             if (PlyCount % 2 == 0)
             {
@@ -139,7 +139,7 @@ namespace Sandra.PGN.Temp
         }
     }
 
-    public interface PGNTerminalSymbol : IEquatable<PGNTerminalSymbol>
+    public interface IPGNTerminalSymbol : IEquatable<IPGNTerminalSymbol>
     {
         void Accept(PGNTerminalSymbolVisitor visitor);
         TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor);
@@ -147,8 +147,8 @@ namespace Sandra.PGN.Temp
 
     public abstract class PGNTerminalSymbolVisitor
     {
-        public virtual void DefaultVisit(PGNTerminalSymbol symbol) { }
-        public virtual void Visit(PGNTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void DefaultVisit(IPGNTerminalSymbol symbol) { }
+        public virtual void Visit(IPGNTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitMoveCounterSymbol(MoveCounterSymbol symbol) => DefaultVisit(symbol);
@@ -159,8 +159,8 @@ namespace Sandra.PGN.Temp
 
     public abstract class PGNTerminalSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(PGNTerminalSymbol symbol) => default(TResult);
-        public virtual TResult Visit(PGNTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult DefaultVisit(IPGNTerminalSymbol symbol) => default(TResult);
+        public virtual TResult Visit(IPGNTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
         public virtual TResult VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitMoveCounterSymbol(MoveCounterSymbol symbol) => DefaultVisit(symbol);
@@ -169,19 +169,19 @@ namespace Sandra.PGN.Temp
         public virtual TResult VisitSpaceSymbol(SpaceSymbol symbol) => DefaultVisit(symbol);
     }
 
-    public sealed class SpaceSymbol : PGNTerminalSymbol
+    public sealed class SpaceSymbol : IPGNTerminalSymbol
     {
         public const string SpaceText = " ";
 
         public static readonly SpaceSymbol Value = new SpaceSymbol();
 
-        public bool Equals(PGNTerminalSymbol other) => other is SpaceSymbol;
+        public bool Equals(IPGNTerminalSymbol other) => other is SpaceSymbol;
 
         public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSpaceSymbol(this);
     }
 
-    public sealed class SideLineStartSymbol : PGNTerminalSymbol
+    public sealed class SideLineStartSymbol : IPGNTerminalSymbol
     {
         public const string SideLineStartText = "(";
 
@@ -194,7 +194,7 @@ namespace Sandra.PGN.Temp
             SideLine = sideLine;
         }
 
-        public bool Equals(PGNTerminalSymbol other)
+        public bool Equals(IPGNTerminalSymbol other)
             => other is SideLineStartSymbol
             && SideLine.Plies[0].Ply.Variation == ((SideLineStartSymbol)other).SideLine.Plies[0].Ply.Variation;
 
@@ -202,7 +202,7 @@ namespace Sandra.PGN.Temp
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
     }
 
-    public sealed class SideLineEndSymbol : PGNTerminalSymbol
+    public sealed class SideLineEndSymbol : IPGNTerminalSymbol
     {
         public const string SideLineEndText = ")";
 
@@ -215,7 +215,7 @@ namespace Sandra.PGN.Temp
             SideLine = sideLine;
         }
 
-        public bool Equals(PGNTerminalSymbol other)
+        public bool Equals(IPGNTerminalSymbol other)
             => other is SideLineEndSymbol
             && SideLine.Plies[0].Ply.Variation == ((SideLineEndSymbol)other).SideLine.Plies[0].Ply.Variation;
 
@@ -223,7 +223,7 @@ namespace Sandra.PGN.Temp
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineEndSymbol(this);
     }
 
-    public sealed class BlackToMoveEllipsisSymbol : PGNTerminalSymbol
+    public sealed class BlackToMoveEllipsisSymbol : IPGNTerminalSymbol
     {
         public const string EllipsisText = "..";
 
@@ -234,7 +234,7 @@ namespace Sandra.PGN.Temp
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(PGNTerminalSymbol other)
+        public bool Equals(IPGNTerminalSymbol other)
             => other is BlackToMoveEllipsisSymbol
             && Ply.Variation == ((BlackToMoveEllipsisSymbol)other).Ply.Variation;
 
@@ -242,7 +242,7 @@ namespace Sandra.PGN.Temp
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
     }
 
-    public sealed class MoveCounterSymbol : PGNTerminalSymbol
+    public sealed class MoveCounterSymbol : IPGNTerminalSymbol
     {
         public readonly PGNPly Ply;
 
@@ -251,7 +251,7 @@ namespace Sandra.PGN.Temp
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(PGNTerminalSymbol other)
+        public bool Equals(IPGNTerminalSymbol other)
             => other is MoveCounterSymbol
             && Ply.Variation == ((MoveCounterSymbol)other).Ply.Variation;
 
@@ -259,7 +259,7 @@ namespace Sandra.PGN.Temp
         public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
     }
 
-    public sealed class FormattedMoveSymbol : PGNTerminalSymbol
+    public sealed class FormattedMoveSymbol : IPGNTerminalSymbol
     {
         public readonly PGNPly Ply;
 
@@ -268,7 +268,7 @@ namespace Sandra.PGN.Temp
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(PGNTerminalSymbol other)
+        public bool Equals(IPGNTerminalSymbol other)
             => other is FormattedMoveSymbol
             && Ply.Variation == ((FormattedMoveSymbol)other).Ply.Variation;
 
