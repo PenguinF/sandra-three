@@ -174,23 +174,23 @@ namespace Sandra.Chess
         /// </summary>
         public static Position GetInitialPosition()
         {
-            var initialPosition = new Position();
+            var initialPosition = new Position
+            {
+                SideToMove = Color.White,
+                colorVectors = EnumIndexedArray<Color, ulong>.New(),
+                pieceVectors = EnumIndexedArray<Piece, ulong>.New(),
+                castlingRightsVector = Constants.CastlingTargetSquares,
+            };
 
-            initialPosition.SideToMove = Color.White;
-
-            initialPosition.colorVectors = EnumIndexedArray<Color, ulong>.New();
             initialPosition.colorVectors[Color.White] = Constants.WhiteInStartPosition;
             initialPosition.colorVectors[Color.Black] = Constants.BlackInStartPosition;
 
-            initialPosition.pieceVectors = EnumIndexedArray<Piece, ulong>.New();
             initialPosition.pieceVectors[Piece.Pawn] = Constants.PawnsInStartPosition;
             initialPosition.pieceVectors[Piece.Knight] = Constants.KnightsInStartPosition;
             initialPosition.pieceVectors[Piece.Bishop] = Constants.BishopsInStartPosition;
             initialPosition.pieceVectors[Piece.Rook] = Constants.RooksInStartPosition;
             initialPosition.pieceVectors[Piece.Queen] = Constants.QueensInStartPosition;
             initialPosition.pieceVectors[Piece.King] = Constants.KingsInStartPosition;
-
-            initialPosition.castlingRightsVector = Constants.CastlingTargetSquares;
 
             Debug.Assert(initialPosition.CheckInvariants());
 
@@ -318,9 +318,11 @@ namespace Sandra.Chess
 
             Debug.Assert(CheckInvariants());
 
-            Move move = new Move();
-            move.SourceSquare = moveInfo.SourceSquare;
-            move.TargetSquare = moveInfo.TargetSquare;
+            Move move = new Move
+            {
+                SourceSquare = moveInfo.SourceSquare,
+                TargetSquare = moveInfo.TargetSquare
+            };
 
             ulong sourceVector = move.SourceSquare.ToVector();
             ulong targetVector = move.TargetSquare.ToVector();
