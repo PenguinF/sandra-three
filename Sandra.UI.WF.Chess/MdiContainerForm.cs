@@ -32,7 +32,7 @@ namespace Sandra.UI.WF
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : UIActionForm
+    public partial class MdiContainerForm : UIActionForm, IWeakEventTarget
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 

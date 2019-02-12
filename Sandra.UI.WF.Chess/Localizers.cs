@@ -216,7 +216,7 @@ namespace Sandra.UI.WF
     /// Apart from being a <see cref="Localizer"/>, contains properties
     /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
     /// </summary>
-    public sealed class FileLocalizer : Localizer
+    public sealed class FileLocalizer : Localizer, IWeakEventTarget
     {
         /// <summary>
         /// Gets the settings file from which this localizer is loaded.
@@ -310,6 +310,10 @@ namespace Sandra.UI.WF
             UpdateDictionary();
             NotifyChanged();
         }
+
+        // TranslationsChanged only raises another WeakEvent so this does not indirectly leak.
+        // FileLocalizers do not go out of scope during the lifetime of the application.
+        bool IWeakEventTarget.IsDisposed => false;
     }
 
     internal sealed class BuiltInEnglishLocalizer : Localizer
