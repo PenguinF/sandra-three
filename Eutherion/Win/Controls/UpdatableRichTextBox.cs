@@ -23,7 +23,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.Controls
 {
     /// <summary>
     /// Standard Windows <see cref="RichTextBox"/> with a <see cref="BeginUpdate"/> method to suspend repainting of the <see cref="RichTextBox"/>. 

@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion;
+using Eutherion.Win.Forms;
 using Sandra.Chess;
 using System;
 using System.Drawing;

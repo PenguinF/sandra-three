@@ -40,25 +40,20 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConstrainedMoveResizeForm.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Controls\UpdatableRichTextBox.cs">
+      <SubType>Component</SubType>
     </Compile>
-    <Compile Include="CursorFromHandle.cs" />
-    <Compile Include="DragUtils.cs" />
+    <Compile Include="DragDrop\CursorFromHandle.cs" />
+    <Compile Include="DragDrop\DragUtilities.cs" />
     <Compile Include="FocusHelper.cs" />
-    <Compile Include="LineSegment.cs" />
-    <Compile Include="PlayingBoard.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="PlayingBoard.EventArgs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyStore.cs" />
-    <Compile Include="RichTextBox\UpdatableRichTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SnappingMdiChildForm.cs">
+    <Compile Include="Forms\ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\SnappingMdiChildForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LineSegment.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AutoSave.cs" />
     <Compile Include="Storage\CompactSettingWriter.cs" />
     <Compile Include="Storage\FileNameType.cs" />
@@ -97,5 +92,6 @@
       <Name>Eutherion.Shared</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

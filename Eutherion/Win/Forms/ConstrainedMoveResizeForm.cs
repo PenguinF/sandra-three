@@ -24,7 +24,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.Forms
 {
     /// <summary>
     /// Windows <see cref="Form"/> with extra <see cref="OnMoving(ref RECT)"/> and <see cref="OnResizing(ref RECT, ResizeMode)"/> methods,

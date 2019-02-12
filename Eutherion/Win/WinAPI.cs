@@ -23,7 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win
 {
     /// <summary>
     /// Encapsulates the RECT structure which is used by the Windows API.

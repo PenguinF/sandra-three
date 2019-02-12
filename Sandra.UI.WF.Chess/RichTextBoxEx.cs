@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Controls;
+
 namespace Sandra.UI.WF
 {
     /// <summary>

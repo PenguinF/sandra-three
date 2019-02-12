@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * DragUtils.cs
+ * DragUtilities.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -25,9 +25,9 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.DragDrop
 {
-    public static class DragUtils
+    public static class DragUtilities
     {
         /// <summary>
         /// Resizes an image, overlays it with an existing <see cref="Cursor"/>, and creates a new <see cref="Cursor"/> from the result.

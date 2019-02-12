@@ -21,6 +21,8 @@
 
 using Eutherion;
 using Eutherion.Utils;
+using Eutherion.Win.DragDrop;
+using Eutherion.Win.Forms;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -297,7 +299,7 @@ namespace Sandra.UI.WF
 
                     try
                     {
-                        newDragCursor = DragUtils.CreateDragCursorFromImage(newImage,
+                        newDragCursor = DragUtilities.CreateDragCursorFromImage(newImage,
                                                                             imageRectangle.Size,
                                                                             Cursors.Default,
                                                                             new Point(hotSpotX, hotSpotY));

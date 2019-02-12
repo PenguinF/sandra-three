@@ -19,13 +19,14 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.UI.WF;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.Forms
 {
     /// <summary>
     /// Windows <see cref="Form"/> which, if it's an MDI child, snaps to other MDI children and the edges of its parent MDI client area.

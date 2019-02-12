@@ -23,7 +23,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.DragDrop
 {
     /// <summary>
     /// Creates a <see cref="System.Windows.Forms.Cursor"/> from a Windows handle.
