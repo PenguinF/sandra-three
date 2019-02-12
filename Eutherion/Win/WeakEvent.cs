@@ -23,7 +23,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace Sandra.UI.WF
 {
@@ -61,8 +60,7 @@ namespace Sandra.UI.WF
             bool IsInvalid(object target)
                 // Null or disposed controls are invalid.
                 => target == null
-                || target is IWeakEventTarget weakEventTarget && weakEventTarget.IsDisposed
-                || target is Control targetControl && targetControl.IsDisposed;
+                || target is IWeakEventTarget weakEventTarget && weakEventTarget.IsDisposed;
 
             internal void IfValidTarget(Action<object> targetAction)
             {
