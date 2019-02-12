@@ -47,8 +47,6 @@
     <Compile Include="DragUtils.cs" />
     <Compile Include="FocusHelper.cs" />
     <Compile Include="LineSegment.cs" />
-    <Compile Include="Localization\LocalizedString.cs" />
-    <Compile Include="Localization\Localizer.cs" />
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>

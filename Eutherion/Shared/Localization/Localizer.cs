@@ -22,7 +22,7 @@
 using Eutherion.Utils;
 using System;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Localization
 {
     /// <summary>
     /// Defines an abstract method to generate a localized string given a <see cref="LocalizedStringKey"/>.

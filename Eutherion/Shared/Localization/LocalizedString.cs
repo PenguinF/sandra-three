@@ -23,7 +23,7 @@ using Eutherion.Utils;
 using System;
 using System.Diagnostics;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Localization
 {
     /// <summary>
     /// Represents an immutable identifier for a <see cref="LocalizedString"/>.

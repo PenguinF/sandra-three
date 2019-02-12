@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Sandra.UI.WF.Storage;
 using ScintillaNET;

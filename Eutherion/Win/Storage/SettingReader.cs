@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;

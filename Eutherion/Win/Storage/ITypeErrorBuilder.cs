@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
+
 namespace Sandra.UI.WF.Storage
 {
     /// <summary>
