@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace SysExtensions.Tests
+namespace Eutherion.Shared.Tests
 {
     public class JsonTokenizerTests
     {

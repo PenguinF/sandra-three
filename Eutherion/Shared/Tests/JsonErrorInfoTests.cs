@@ -23,7 +23,7 @@ using SysExtensions.Text.Json;
 using System;
 using Xunit;
 
-namespace SysExtensions.Tests
+namespace Eutherion.Shared.Tests
 {
     public class JsonErrorInfoTests
     {

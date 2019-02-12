@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace SysExtensions.Tests
+namespace Eutherion.Shared.Tests
 {
     public class JsonSyntaxTests
     {

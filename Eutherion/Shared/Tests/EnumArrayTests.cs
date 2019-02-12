@@ -23,7 +23,7 @@ using SysExtensions;
 using System;
 using Xunit;
 
-namespace Sandra.Chess.Tests
+namespace Eutherion.Shared.Tests
 {
     public class EnumArrayTests
     {
