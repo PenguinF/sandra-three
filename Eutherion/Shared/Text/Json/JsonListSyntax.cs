@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a list syntax node.

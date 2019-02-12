@@ -21,7 +21,7 @@
 
 using System.Numerics;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents an integer literal value syntax node.

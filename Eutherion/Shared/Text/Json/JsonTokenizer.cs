@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Based on https://www.json.org/.

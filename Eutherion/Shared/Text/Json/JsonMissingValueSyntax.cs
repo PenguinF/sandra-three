@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a missing value in a list. It has a length of 0.

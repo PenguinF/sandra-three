@@ -22,7 +22,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     public abstract class JsonSymbol
     {

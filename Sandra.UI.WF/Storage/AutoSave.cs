@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using SysExtensions;
-using SysExtensions.Text.Json;
+using Eutherion;
+using Eutherion.Text.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

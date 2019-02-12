@@ -24,7 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Represents a read-only list of elements that can be accessed by index.

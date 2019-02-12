@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Contains a value and provides it with an event to observe updates to it.

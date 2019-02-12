@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     public class JsonCurlyOpen : JsonSymbol
     {

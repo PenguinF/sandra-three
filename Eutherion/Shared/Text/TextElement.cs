@@ -21,7 +21,7 @@
 
 using System;
 
-namespace SysExtensions.Text
+namespace Eutherion.Text
 {
     /// <summary>
     /// Represents an element of formatted text indexed by a <see cref="TextIndex{TTerminal}"/>,

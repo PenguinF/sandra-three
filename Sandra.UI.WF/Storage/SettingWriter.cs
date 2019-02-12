@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using SysExtensions.Text.Json;
+using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;

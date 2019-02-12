@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Sandra.UI.WF.Storage;
 using ScintillaNET;
-using SysExtensions.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

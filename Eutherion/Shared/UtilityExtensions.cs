@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace SysExtensions
+namespace Eutherion
 {
     /// <summary>
     /// Contains utility extension methods.

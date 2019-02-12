@@ -19,7 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using SysExtensions;
+using Eutherion;
+using Eutherion.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;

@@ -22,7 +22,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     public class JsonString : JsonSymbol
     {

@@ -21,7 +21,7 @@
 
 using System;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     public class JsonValue : JsonSymbol
     {

@@ -23,7 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Contains general helper methods for enumerations.

@@ -21,7 +21,7 @@
 
 using System;
 
-namespace SysExtensions.Text.Json
+namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Reports an error at a certain location in a source text.

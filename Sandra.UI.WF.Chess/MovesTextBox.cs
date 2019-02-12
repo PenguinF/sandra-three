@@ -19,10 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using Eutherion.Utils;
 using Sandra.PGN.Temp;
 using ScintillaNET;
-using SysExtensions;
-using SysExtensions.Text;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// References a value, adding an indirection.

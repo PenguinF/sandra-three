@@ -22,7 +22,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SysExtensions.Text
+namespace Eutherion.Text
 {
     /// <summary>
     /// Manages an index of terminal symbols wrapped in <see cref="TextElement{TTerminal}"/> instances.

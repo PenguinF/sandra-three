@@ -22,7 +22,7 @@
 using System;
 using System.Linq;
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Contains an array which is indexed by an enumeration.

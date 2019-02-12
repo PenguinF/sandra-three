@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using SysExtensions;
+using Eutherion.Utils;
 
 namespace Sandra.Chess
 {

@@ -21,7 +21,7 @@
 
 using System;
 
-namespace SysExtensions
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Encapsulates a value which can have two different types.

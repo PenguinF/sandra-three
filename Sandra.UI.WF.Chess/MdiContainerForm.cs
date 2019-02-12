@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using Sandra.Chess;
-using SysExtensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
