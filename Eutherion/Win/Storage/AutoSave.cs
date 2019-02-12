@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Text.Json;
+using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -509,7 +510,7 @@ namespace Sandra.UI.WF.Storage
     {
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
-            string paramDisplayString = UtilityExtensions.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
+            string paramDisplayString = DebugUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 

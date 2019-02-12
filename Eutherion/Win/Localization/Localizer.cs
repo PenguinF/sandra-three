@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Utils;
 using System;
 
@@ -57,7 +56,7 @@ namespace Sandra.UI.WF
             {
                 if (localizedStringKey == null) return null;
                 if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
-                return "{" + localizedStringKey.Key + UtilityExtensions.ToDefaultParameterListDisplayString(parameters) + "}";
+                return "{" + localizedStringKey.Key + DebugUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
             }
         }
 
