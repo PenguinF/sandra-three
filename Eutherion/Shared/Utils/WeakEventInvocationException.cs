@@ -22,7 +22,7 @@
 using System;
 using System.Collections;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Represents the exception thrown from the invocation of a weak event.

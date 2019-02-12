@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion;
+using Eutherion.Utils;
 using System;
 using System.Windows.Forms;
 

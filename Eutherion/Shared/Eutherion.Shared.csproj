@@ -74,9 +74,12 @@
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
+    <Compile Include="Utils\HandlerIsAnonymousException.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\Union.cs" />
+    <Compile Include="Utils\WeakEvent.cs" />
+    <Compile Include="Utils\WeakEventInvocationException.cs" />
     <Compile Include="Utils\_void.cs" />
   </ItemGroup>
   <ItemGroup />

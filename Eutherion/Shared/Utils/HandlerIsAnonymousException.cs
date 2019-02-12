@@ -25,7 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Exception thrown when an event handler is registered on a weak event with a target that is anonymous or otherwise compiler generated.

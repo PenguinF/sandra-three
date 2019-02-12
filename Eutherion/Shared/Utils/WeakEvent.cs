@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Utils
 {
     /// <summary>
     /// Defines an event on objects that have a longer lifetime than the controls that subscribe on them.

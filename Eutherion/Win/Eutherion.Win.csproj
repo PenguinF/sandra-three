@@ -46,7 +46,6 @@
     <Compile Include="CursorFromHandle.cs" />
     <Compile Include="DragUtils.cs" />
     <Compile Include="FocusHelper.cs" />
-    <Compile Include="HandlerIsAnonymousException.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="Localization\LocalizedString.cs" />
     <Compile Include="Localization\Localizer.cs" />
@@ -92,8 +91,6 @@
     <Compile Include="UIAction\UIActionBinding.cs" />
     <Compile Include="UIAction\UIActionHandler.cs" />
     <Compile Include="UIAction\UIMenu.cs" />
-    <Compile Include="WeakEvent.cs" />
-    <Compile Include="WeakEventInvocationException.cs" />
     <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
