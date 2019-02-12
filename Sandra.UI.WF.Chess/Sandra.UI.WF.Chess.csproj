@@ -127,17 +127,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Eutherion\Shared\Eutherion.Shared.csproj">
+      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
+      <Name>Eutherion.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Sandra.Chess\Sandra.Chess.csproj">
-      <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
+      <Project>{f5e121c5-a874-4fef-9ff5-56285420cff6}</Project>
       <Name>Sandra.Chess</Name>
     </ProjectReference>
     <ProjectReference Include="..\Sandra.UI.WF\Sandra.UI.WF.csproj">
       <Project>{77da1d85-0062-4caa-af31-49d9a0b16bb2}</Project>
       <Name>Sandra.UI.WF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SysExtensions\SysExtensions.csproj">
-      <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
-      <Name>SysExtensions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

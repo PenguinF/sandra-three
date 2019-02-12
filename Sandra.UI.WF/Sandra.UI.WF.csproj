@@ -99,13 +99,13 @@
     <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SysExtensions\SysExtensions.csproj">
-      <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
-      <Name>SysExtensions</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\Eutherion\Shared\Eutherion.Shared.csproj">
+      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
+      <Name>Eutherion.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

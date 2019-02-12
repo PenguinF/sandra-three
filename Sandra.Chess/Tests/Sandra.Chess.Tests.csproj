@@ -70,20 +70,20 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\SysExtensions\SysExtensions.csproj">
-      <Project>{32beb911-9502-4add-8e4d-b44d268a9477}</Project>
-      <Name>SysExtensions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Sandra.Chess.csproj">
-      <Project>{1b805a61-6e0c-455f-a8cf-343b7915180d}</Project>
-      <Name>Sandra.Chess</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\..\packages\xunit.analyzers.0.9.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Eutherion\Shared\Eutherion.Shared.csproj">
+      <Project>{ae889497-9b7c-4fd5-b5da-a3d4158369ec}</Project>
+      <Name>Eutherion.Shared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sandra.Chess.csproj">
+      <Project>{f5e121c5-a874-4fef-9ff5-56285420cff6}</Project>
+      <Name>Sandra.Chess</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
