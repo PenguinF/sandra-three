@@ -35,7 +35,7 @@ namespace Sandra.UI
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.
     /// </summary>
-    public partial class SettingsTextBox : SyntaxEditor<JsonSymbol>
+    public partial class JsonTextBox : SyntaxEditor<JsonSymbol>
     {
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
@@ -72,9 +72,9 @@ namespace Sandra.UI
 
         private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
-            private readonly SettingsTextBox owner;
+            private readonly JsonTextBox owner;
 
-            public StyleSelector(SettingsTextBox owner)
+            public StyleSelector(JsonTextBox owner)
             {
                 this.owner = owner;
             }
@@ -90,7 +90,7 @@ namespace Sandra.UI
         private readonly SettingsFile settingsFile;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="SettingsTextBox"/>.
+        /// Initializes a new instance of a <see cref="JsonTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
@@ -98,7 +98,7 @@ namespace Sandra.UI
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public SettingsTextBox(SettingsFile settingsFile)
+        public JsonTextBox(SettingsFile settingsFile)
         {
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
 

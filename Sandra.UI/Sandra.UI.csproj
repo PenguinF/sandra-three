@@ -57,6 +57,13 @@
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
+    <Compile Include="JsonTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="JsonTextBox.UIActions.cs">
+      <DependentUpon>JsonTextBox.cs</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ListBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -105,13 +112,6 @@
     <Compile Include="SettingsForm.UIActions.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SettingsTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SettingsTextBox.UIActions.cs">
-      <DependentUpon>SettingsTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="SharedUIAction.cs" />
     <Compile Include="StandardChessBoardForm.cs">
