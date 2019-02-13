@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     public partial class ListBoxEx
     {

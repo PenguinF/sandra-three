@@ -22,7 +22,7 @@
 using Eutherion;
 using Eutherion.Win.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Encapsulates a chess game which publishes a set of shared <see cref="UIAction"/>s.

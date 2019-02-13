@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Provides data for the <see cref="PlayingBoard.MouseEnterSquare"/>

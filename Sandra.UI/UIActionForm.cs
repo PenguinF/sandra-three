@@ -23,7 +23,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Top level Form which ties in with the UIAction framework.

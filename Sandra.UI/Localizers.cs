@@ -32,7 +32,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     internal static class LocalizedStringKeys
     {

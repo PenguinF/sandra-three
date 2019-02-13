@@ -21,7 +21,7 @@
 
 using Eutherion.Win.UIActions;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     public partial class SettingsForm
     {

@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI.WF.Chess", "Sandra.UI.WF.Chess\Sandra.UI.WF.Chess.csproj", "{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bin", "Bin", "{CC73C019-791D-49A0-BE2D-9FE7E00FBAA0}"
 	ProjectSection(SolutionItems) = preProject
 		Bin\Credits.txt = Bin\Credits.txt
 		Bin\DefaultSettings.json = Bin\DefaultSettings.json
 		Bin\README.txt = Bin\README.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI", "Sandra.UI\Sandra.UI.csproj", "{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Shared", "Eutherion\Shared\Eutherion.Shared.csproj", "{AE889497-9B7C-4FD5-B5DA-A3D4158369EC}"
 EndProject
@@ -28,10 +28,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AE889497-9B7C-4FD5-B5DA-A3D4158369EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE889497-9B7C-4FD5-B5DA-A3D4158369EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE889497-9B7C-4FD5-B5DA-A3D4158369EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -52,6 +48,10 @@ Global
 		{9DDB6AD7-4822-4732-9E18-309405917032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DDB6AD7-4822-4732-9E18-309405917032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DDB6AD7-4822-4732-9E18-309405917032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

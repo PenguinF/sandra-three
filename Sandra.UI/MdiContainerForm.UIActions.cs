@@ -29,7 +29,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Main MdiContainer Form.

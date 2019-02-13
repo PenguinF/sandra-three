@@ -27,7 +27,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     static class Program
     {

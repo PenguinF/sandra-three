@@ -7,7 +7,7 @@
     <ProjectGuid>{7D79CFA6-1DA7-4496-B62C-B5C2F97C2E3F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sandra.UI.WF</RootNamespace>
+    <RootNamespace>Sandra.UI</RootNamespace>
     <AssemblyName>SandraChess</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -37,7 +37,7 @@
     <ApplicationIcon>Sandra.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Sandra.UI.WF.Program</StartupObject>
+    <StartupObject>Sandra.UI.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ScintillaNET, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">

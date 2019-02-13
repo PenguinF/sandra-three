@@ -29,7 +29,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Represents a <see cref="Scintilla"/> control with syntax highlighting, a number of <see cref="UIAction"/> hooks,

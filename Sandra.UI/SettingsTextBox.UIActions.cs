@@ -23,7 +23,7 @@ using Eutherion.Win.UIActions;
 using System;
 using System.IO;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     public partial class SettingsTextBox
     {

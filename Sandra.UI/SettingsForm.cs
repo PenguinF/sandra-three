@@ -29,7 +29,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     public partial class SettingsForm : UIActionForm
     {

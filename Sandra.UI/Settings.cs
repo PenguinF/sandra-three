@@ -25,7 +25,7 @@ using System;
 using System.Drawing;
 using System.IO;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     internal static class SettingKeys
     {

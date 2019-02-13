@@ -22,7 +22,7 @@
 using Eutherion.Win.UIActions;
 using System;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     internal static class SharedUIAction
     {

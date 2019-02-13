@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * ListBoxEx.cs
+ * RichTextBoxEx.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,15 +19,15 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Controls;
 using Eutherion.Win.UIActions;
-using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
-    /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.
+    /// Represents a Windows rich text box which exposes a number of <see cref="UIAction"/> hooks.
     /// </summary>
-    public partial class ListBoxEx : ListBox, IUIActionHandlerProvider
+    public partial class RichTextBoxEx : UpdatableRichTextBox, IUIActionHandlerProvider
     {
         /// <summary>
         /// Gets the action handler for this control.
@@ -35,13 +35,21 @@ namespace Sandra.UI.WF
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
         /// <summary>
-        /// Binds the regular copy/select-all UIActions to this listbox.
+        /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
         /// </summary>
-        public void BindStandardCopySelectUIActions()
+        public void BindStandardEditUIActions()
         {
             this.BindActions(new UIActionBindings
             {
+                { SharedUIAction.Undo, TryUndo },
+                { SharedUIAction.Redo, TryRedo },
+
+                { SharedUIAction.ZoomIn, TryZoomIn },
+                { SharedUIAction.ZoomOut, TryZoomOut },
+
+                { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
                 { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+                { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
                 { SharedUIAction.SelectAllText, TrySelectAllText },
             });
         }

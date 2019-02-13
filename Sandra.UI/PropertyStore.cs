@@ -21,7 +21,7 @@
 
 using System.Collections.Generic;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Helper class which stores values for a fixed set of properties.

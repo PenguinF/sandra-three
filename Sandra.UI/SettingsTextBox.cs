@@ -30,7 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
     /// <summary>
     /// Represents a Windows rich text box which displays a json settings file.

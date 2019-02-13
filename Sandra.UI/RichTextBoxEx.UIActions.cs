@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SyntaxEditor.UIActions.cs
+ * RichTextBoxEx.UIActions.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -20,11 +20,12 @@
 #endregion
 
 using Eutherion.Win.UIActions;
+using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Sandra.UI
 {
-    public partial class SyntaxEditor<TTerminal>
+    public partial class RichTextBoxEx
     {
         public UIActionState TryUndo(bool perform)
         {
@@ -45,14 +46,14 @@ namespace Sandra.UI.WF
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
-            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
+            if (SelectionLength == 0) return UIActionVisibility.Disabled;
             if (perform) Cut();
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryCopySelectionToClipBoard(bool perform)
         {
-            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
+            if (SelectionLength == 0) return UIActionVisibility.Disabled;
             if (perform) Copy();
             return UIActionVisibility.Enabled;
         }
@@ -74,28 +75,51 @@ namespace Sandra.UI.WF
 
         public UIActionState TryZoomIn(bool perform)
         {
-            int zoomFactor = Zoom;
-            if (zoomFactor >= ScintillaZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor >= RichTextZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor++;
-                Zoom = zoomFactor;
-                RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
+                ZoomFactor = RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryZoomOut(bool perform)
         {
-            int zoomFactor = Zoom;
-            if (zoomFactor <= ScintillaZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
+            int zoomFactor = RichTextZoomFactor.ToDiscreteZoomFactor(ZoomFactor);
+            if (zoomFactor <= RichTextZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
             {
                 zoomFactor--;
-                Zoom = zoomFactor;
-                RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
+                ZoomFactor = RichTextZoomFactor.FromDiscreteZoomFactor(zoomFactor);
             }
             return UIActionVisibility.Enabled;
         }
+    }
+
+    public static class RichTextZoomFactor
+    {
+        /// <summary>
+        /// Returns the minimum discrete integer value which when converted with
+        /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
+        /// of a <see cref="RichTextBox"/> which is between 1/64 and 64, endpoints not included.
+        /// </summary>
+        public static readonly int MinDiscreteValue = -9;
+
+        /// <summary>
+        /// Returns the maximum discrete integer value which when converted with
+        /// <see cref="FromDiscreteZoomFactor"/> is still a valid value for the ZoomFactor property
+        /// of a <see cref="RichTextBox"/> which is between 1/64 and 64, endpoints not included.
+        /// </summary>
+        public static readonly int MaxDiscreteValue = 649;
+
+        public static float FromDiscreteZoomFactor(int zoomFactor)
+            => (zoomFactor + 10) / 10f;
+
+        public static int ToDiscreteZoomFactor(float zoomFactor)
+            // Assume discrete deltas of 0.1f.
+            // Set 0 to be the default, so 1.0f should map to 0.
+            => (int)Math.Round(zoomFactor * 10f) - 10;
     }
 }
