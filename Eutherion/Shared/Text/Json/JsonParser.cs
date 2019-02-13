@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -33,45 +32,28 @@ namespace Eutherion.Text.Json
     /// </summary>
     public class JsonParser : JsonSymbolVisitor<TextElement<JsonSymbol>, JsonSyntaxNode>
     {
-        private readonly ReadOnlyList<TextElement<JsonSymbol>> Tokens;
+        private readonly IEnumerator<TextElement<JsonSymbol>> Tokens;
         private readonly int SourceLength;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
-        private int CurrentTokenIndex;
+        private TextElement<JsonSymbol> CurrentToken;
 
-        public JsonParser(ReadOnlyList<TextElement<JsonSymbol>> tokens, int sourceLength)
+        public JsonParser(IEnumerable<TextElement<JsonSymbol>> tokens, int sourceLength)
         {
-            Tokens = tokens ?? throw new ArgumentNullException(nameof(tokens));
+            if (tokens == null) throw new ArgumentNullException(nameof(tokens));
+            Tokens = tokens.GetEnumerator();
             SourceLength = sourceLength;
-            CurrentTokenIndex = 0;
         }
 
-        private TextElement<JsonSymbol> PeekSkipComments()
+        private void ShiftToNextForegroundToken()
         {
             // Skip comments until encountering something meaningful.
-            while (CurrentTokenIndex < Tokens.Count)
+            do
             {
-                TextElement<JsonSymbol> current = Tokens[CurrentTokenIndex];
-                if (!current.TerminalSymbol.IsBackground) return current;
-                Errors.AddRange(current.TerminalSymbol.Errors);
-                CurrentTokenIndex++;
+                CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
+                if (CurrentToken != null) Errors.AddRange(CurrentToken.TerminalSymbol.Errors);
             }
-
-            return null;
-        }
-
-        private TextElement<JsonSymbol> ReadSkipComments()
-        {
-            // Skip comments until encountering something meaningful.
-            while (CurrentTokenIndex < Tokens.Count)
-            {
-                TextElement<JsonSymbol> current = Tokens[CurrentTokenIndex];
-                Errors.AddRange(current.TerminalSymbol.Errors);
-                CurrentTokenIndex++;
-                if (!current.TerminalSymbol.IsBackground) return current;
-            }
-
-            return null;
+            while (CurrentToken != null && CurrentToken.TerminalSymbol.IsBackground);
         }
 
         public override JsonSyntaxNode VisitCurlyOpen(JsonCurlyOpen curlyOpen, TextElement<JsonSymbol> visitedToken)
@@ -122,7 +104,6 @@ namespace Eutherion.Text.Json
                 }
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                TextElement<JsonSymbol> textElement = ReadSkipComments();
                 JsonSyntaxNode parsedValueNode = default(JsonSyntaxNode);
 
                 // If gotValue remains false, a missing value error will be reported.
@@ -130,15 +111,15 @@ namespace Eutherion.Text.Json
 
                 // Loop parsing values until encountering a non ':'.
                 bool gotColon = false;
-                while (textElement != null && textElement.TerminalSymbol is JsonColon)
+                while (CurrentToken != null && CurrentToken.TerminalSymbol is JsonColon)
                 {
                     if (gotColon)
                     {
                         // Multiple ':' without a ','.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MultiplePropertyKeySections,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
                     }
 
                     gotValue |= ParseMultiValue(JsonErrorCode.MultipleValues, out parsedValueNode);
@@ -149,12 +130,11 @@ namespace Eutherion.Text.Json
                         mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValueNode));
                     }
 
-                    textElement = ReadSkipComments();
                     gotColon = true;
                 }
 
-                bool isComma = textElement != null && textElement.TerminalSymbol is JsonComma;
-                bool isCurlyClose = textElement != null && textElement.TerminalSymbol is JsonCurlyClose;
+                bool isComma = CurrentToken != null && CurrentToken.TerminalSymbol is JsonComma;
+                bool isCurlyClose = CurrentToken != null && CurrentToken.TerminalSymbol is JsonCurlyClose;
 
                 // '}' directly following a ',' should not report errors.
                 // '..., : }' however misses both a key and a value.
@@ -165,16 +145,16 @@ namespace Eutherion.Text.Json
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingPropertyKey,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
                     }
 
                     if (!gotValue)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
                     }
                 }
 
@@ -182,7 +162,7 @@ namespace Eutherion.Text.Json
                 {
                     // Assume missing closing bracket '}' on EOF or control symbol.
                     int endPosition;
-                    if (textElement == null)
+                    if (CurrentToken == null)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
@@ -195,14 +175,14 @@ namespace Eutherion.Text.Json
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInObject,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
 
-                        endPosition = textElement.Start;
+                        endPosition = CurrentToken.Start;
                     }
                     else
                     {
-                        endPosition = textElement.End;
+                        endPosition = CurrentToken.End;
                     }
 
                     int start = visitedToken.Start;
@@ -223,25 +203,24 @@ namespace Eutherion.Text.Json
                 if (gotValue) listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                TextElement<JsonSymbol> textElement = ReadSkipComments();
-                if (textElement != null && textElement.TerminalSymbol is JsonComma)
+                if (CurrentToken != null && CurrentToken.TerminalSymbol is JsonComma)
                 {
                     if (!gotValue)
                     {
                         // Two commas or '[,': add an empty JsonUndefinedValueSyntax.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
 
-                        listBuilder.Add(new JsonMissingValueSyntax(textElement.Start));
+                        listBuilder.Add(new JsonMissingValueSyntax(CurrentToken.Start));
                     }
                 }
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
                     int endPosition;
-                    if (textElement == null)
+                    if (CurrentToken == null)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
@@ -250,18 +229,18 @@ namespace Eutherion.Text.Json
 
                         endPosition = SourceLength;
                     }
-                    else if (!(textElement.TerminalSymbol is JsonSquareBracketClose))
+                    else if (!(CurrentToken.TerminalSymbol is JsonSquareBracketClose))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInArray,
-                            textElement.Start,
-                            textElement.Length));
+                            CurrentToken.Start,
+                            CurrentToken.Length));
 
-                        endPosition = textElement.Start;
+                        endPosition = CurrentToken.Start;
                     }
                     else
                     {
-                        endPosition = textElement.End;
+                        endPosition = CurrentToken.End;
                     }
 
                     int start = visitedToken.Start;
@@ -299,39 +278,39 @@ namespace Eutherion.Text.Json
         {
             firstValueNode = default(JsonSyntaxNode);
 
-            TextElement<JsonSymbol> textElement = PeekSkipComments();
-            if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return false;
+            ShiftToNextForegroundToken();
+            if (CurrentToken == null || !CurrentToken.TerminalSymbol.IsValueStartSymbol) return false;
 
             bool hasValue = false;
 
             for (; ; )
             {
-                // Read the same symbol again but now eat it.
-                textElement = ReadSkipComments();
-
                 if (!hasValue)
                 {
-                    if (textElement.TerminalSymbol.Errors.Any()) firstValueNode = new JsonUndefinedValueSyntax(textElement);
-                    else firstValueNode = Visit(textElement.TerminalSymbol, textElement);
+                    if (CurrentToken.TerminalSymbol.Errors.Any()) firstValueNode = new JsonUndefinedValueSyntax(CurrentToken);
+                    else firstValueNode = Visit(CurrentToken.TerminalSymbol, CurrentToken);
                     hasValue = true;
                 }
-                else if (!textElement.TerminalSymbol.Errors.Any())
+                else if (!CurrentToken.TerminalSymbol.Errors.Any())
                 {
                     // Make sure consecutive symbols are parsed as if they were valid.
                     // Discard the result.
-                    Visit(textElement.TerminalSymbol, textElement);
+                    Visit(CurrentToken.TerminalSymbol, CurrentToken);
                 }
 
-                // Peek at the next symbol.
+                // CurrentToken may be null, e.g. unterminated objects or arrays.
+                if (CurrentToken == null) return true;
+
+                // Move to the next symbol.
                 // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                textElement = PeekSkipComments();
-                if (textElement == null || !textElement.TerminalSymbol.IsValueStartSymbol) return true;
+                ShiftToNextForegroundToken();
+                if (CurrentToken == null || !CurrentToken.TerminalSymbol.IsValueStartSymbol) return true;
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
                     multipleValuesErrorCode,
-                    textElement.Start,
-                    textElement.Length));
+                    CurrentToken.Start,
+                    CurrentToken.Length));
             }
         }
 
@@ -339,13 +318,12 @@ namespace Eutherion.Text.Json
         {
             bool hasRootValue = ParseMultiValue(JsonErrorCode.ExpectedEof, out rootNode);
 
-            TextElement<JsonSymbol> extraElement = ReadSkipComments();
-            if (extraElement != null)
+            if (CurrentToken != null)
             {
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
-                    extraElement.Start,
-                    extraElement.Length));
+                    CurrentToken.Start,
+                    CurrentToken.Length));
             }
 
             errors = Errors;
