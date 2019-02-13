@@ -84,6 +84,7 @@
     <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />
     <Compile Include="UIActions\UIActionHandler.cs" />
+    <Compile Include="UIActions\UIAutoHideMainMenu.cs" />
     <Compile Include="UIActions\UIMenu.cs" />
     <Compile Include="Utils\KeyUtilities.cs" />
     <Compile Include="WinAPI.cs" />
