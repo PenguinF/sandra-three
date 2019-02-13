@@ -23,6 +23,7 @@ using Eutherion.Text;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
+using Eutherion.Win.Utils;
 using ScintillaNET;
 using System;
 using System.Drawing;
@@ -156,7 +157,7 @@ namespace Sandra.UI
             editBindings
                 .Where(x => x.Binding.DefaultBinding.Shortcuts != null)
                 .SelectMany(x => x.Binding.DefaultBinding.Shortcuts)
-                .Select(KeyUtils.ToKeys)
+                .Select(KeyUtilities.ToKeys)
                 .ForEach(ClearCmdKey);
 
             ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);

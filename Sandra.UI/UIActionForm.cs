@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Win.UIActions;
+using Eutherion.Win.Utils;
 using System;
 using System.Windows.Forms;
 
@@ -40,7 +41,7 @@ namespace Sandra.UI
             try
             {
                 // This code makes shortcuts work for all UIActionHandlers.
-                return KeyUtils.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
+                return KeyUtilities.TryExecute(keyData) || base.ProcessCmdKey(ref msg, keyData);
             }
             catch (Exception e)
             {
