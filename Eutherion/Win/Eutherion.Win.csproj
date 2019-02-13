@@ -47,6 +47,7 @@
     <Compile Include="DragDrop\DragUtilities.cs" />
     <Compile Include="FileWatcher.cs" />
     <Compile Include="FocusHelper.cs" />
+    <Compile Include="FormExtensions.cs" />
     <Compile Include="Forms\ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
     </Compile>
