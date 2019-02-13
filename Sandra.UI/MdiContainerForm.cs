@@ -41,12 +41,6 @@ namespace Sandra.UI
 
         private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
 
-        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
-        private readonly Box<Form> aboutFormBox = new Box<Form>();
-        private readonly Box<Form> creditsFormBox = new Box<Form>();
-        private readonly Box<Form> languageFormBox = new Box<Form>();
-
         // Separate action handler for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
 
@@ -188,24 +182,27 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(EditPreferencesFile, TryEditPreferencesFile);
-            this.BindAction(ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
+            this.BindAction(ToolForms.EditPreferencesFile, TryEditPreferencesFile);
+            this.BindAction(ToolForms.ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(OpenAbout, TryOpenAbout);
-            this.BindAction(ShowCredits, TryShowCredits);
-            this.BindAction(EditCurrentLanguage, TryEditCurrentLanguage);
+            this.BindAction(ToolForms.OpenAbout, TryOpenAbout);
+            this.BindAction(ToolForms.ShowCredits, TryShowCredits);
+            this.BindAction(ToolForms.EditCurrentLanguage, TryEditCurrentLanguage);
 
             // Use developerToolsActionHandler to add to the developer tools menu.
-            developerToolsActionHandler.BindAction(EditCurrentLanguage.Action, EditCurrentLanguage.DefaultBinding, TryEditCurrentLanguage);
+            developerToolsActionHandler.BindAction(
+                ToolForms.EditCurrentLanguage.Action,
+                ToolForms.EditCurrentLanguage.DefaultBinding,
+                TryEditCurrentLanguage);
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        EditPreferencesFile,
-                                        ShowDefaultSettingsFile,
+                                        ToolForms.EditPreferencesFile,
+                                        ToolForms.ShowDefaultSettingsFile,
                                         Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
@@ -259,8 +256,8 @@ namespace Sandra.UI
 
             // Add these actions to the "Help" dropdown list.
             BindFocusDependentUIActions(helpMenu,
-                                        OpenAbout,
-                                        ShowCredits);
+                                        ToolForms.OpenAbout,
+                                        ToolForms.ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += FocusHelper_FocusChanged;
@@ -379,31 +376,6 @@ namespace Sandra.UI
             PieceImages = LoadChessPieceImages();
 
             NewPlayingBoard();
-        }
-
-        private void OpenOrActivateToolForm(Box<Form> toolForm, Func<Form> toolFormConstructor)
-        {
-            if (toolForm.Value == null)
-            {
-                // Rely on exception handler in call stack, so no try-catch here.
-                toolForm.Value = toolFormConstructor();
-
-                if (toolForm.Value != null)
-                {
-                    toolForm.Value.Owner = this;
-                    toolForm.Value.ShowInTaskbar = false;
-                    toolForm.Value.ShowIcon = false;
-                    toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
-                    toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
-                    toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
-                }
-            }
-
-            if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
-            {
-                toolForm.Value.Visible = true;
-                toolForm.Value.Activate();
-            }
         }
 
         EnumIndexedArray<ColoredPiece, Image> LoadChessPieceImages()

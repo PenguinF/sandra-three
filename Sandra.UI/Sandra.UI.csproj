@@ -128,6 +128,7 @@
       <SubType>Component</SubType>
       <DependentUpon>SyntaxEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="ToolForms.cs" />
     <Compile Include="UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
