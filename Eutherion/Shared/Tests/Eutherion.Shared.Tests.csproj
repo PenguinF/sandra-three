@@ -38,6 +38,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CircularBufferTests.cs" />
     <Compile Include="EnumArrayTests.cs" />
     <Compile Include="JsonErrorInfoTests.cs" />
     <Compile Include="JsonSyntaxTests.cs" />

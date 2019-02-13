@@ -74,6 +74,7 @@
     <Compile Include="Text\TextIndex.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />
+    <Compile Include="Utils\CircularBuffer.cs" />
     <Compile Include="Utils\DebugUtilities.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
