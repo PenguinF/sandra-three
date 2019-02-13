@@ -44,7 +44,7 @@ namespace Eutherion.Win.Storage
         public SettingReader(string json)
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
-            Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(new JsonTokenizer(json).TokenizeAll());
+            Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
         }
 
         public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)

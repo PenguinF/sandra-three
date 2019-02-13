@@ -39,9 +39,17 @@ namespace Sandra.UI
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
 
+        private readonly UIAutoHideMainMenu autoHideMainMenu;
+        private readonly UIAutoHideMainMenuItem langMenu;
+        private readonly UIAutoHideMainMenuItem fileMenu;
+        private readonly UIAutoHideMainMenuItem editMenu;
+        private readonly UIAutoHideMainMenuItem viewMenu;
+        private readonly UIAutoHideMainMenuItem helpMenu;
+        private readonly UIAutoHideMainMenuItem developerToolsMenu;
+
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
-        private readonly SettingsTextBox settingsTextBox;
+        private readonly JsonTextBox jsonTextBox;
 
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
@@ -56,33 +64,33 @@ namespace Sandra.UI
 
             Text = Path.GetFileName(settingsFile.AbsoluteFilePath);
 
-            settingsTextBox = new SettingsTextBox(settingsFile)
+            jsonTextBox = new JsonTextBox(settingsFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
             };
 
-            settingsTextBox.BindActions(new UIActionBindings
+            jsonTextBox.BindActions(new UIActionBindings
             {
-                { SettingsTextBox.SaveToFile, settingsTextBox.TrySaveToFile },
+                { JsonTextBox.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
-            settingsTextBox.BindStandardEditUIActions();
+            jsonTextBox.BindStandardEditUIActions();
 
-            settingsTextBox.BindActions(new UIActionBindings
+            jsonTextBox.BindActions(new UIActionBindings
             {
                 { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
                 { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
             });
 
-            UIMenu.AddTo(settingsTextBox);
+            UIMenu.AddTo(jsonTextBox);
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
-            if (settingsTextBox.ReadOnly && settingsTextBox.CurrentErrorCount == 0)
+            if (jsonTextBox.ReadOnly && jsonTextBox.CurrentErrorCount == 0)
             {
                 // No errors while read-only: do not display an errors textbox.
-                Controls.Add(settingsTextBox);
+                Controls.Add(jsonTextBox);
             }
             else
             {
@@ -106,7 +114,7 @@ namespace Sandra.UI
                 UIMenu.AddTo(errorsListBox);
 
                 // Interaction between settingsTextBox and errorsTextBox.
-                settingsTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
+                jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(LocalizedStringKeys.NoErrorsMessage);
@@ -126,15 +134,64 @@ namespace Sandra.UI
                     Orientation = Orientation.Horizontal,
                 };
 
-                splitter.Panel1.Controls.Add(settingsTextBox);
+                splitter.Panel1.Controls.Add(jsonTextBox);
                 splitter.Panel2.Controls.Add(errorsListBox);
 
                 // Copy background color.
-                errorsListBox.BackColor = settingsTextBox.NoStyleBackColor;
-                splitter.Panel2.BackColor = settingsTextBox.NoStyleBackColor;
+                errorsListBox.BackColor = jsonTextBox.NoStyleBackColor;
+                splitter.Panel2.BackColor = jsonTextBox.NoStyleBackColor;
 
                 Controls.Add(splitter);
             }
+
+            // Initialize menu strip which becomes visible only when the ALT key is pressed.
+            autoHideMainMenu = new UIAutoHideMainMenu(this);
+
+            langMenu = autoHideMainMenu.AddMenuItem(null, Properties.Resources.globe);
+            Localizers.Registered.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
+
+            fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
+            fileMenu.BindActions(
+                ToolForms.EditPreferencesFile,
+                ToolForms.ShowDefaultSettingsFile);
+
+            editMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Edit);
+            editMenu.BindActions(
+                SharedUIAction.Undo,
+                SharedUIAction.Redo,
+                SharedUIAction.CutSelectionToClipBoard,
+                SharedUIAction.CopySelectionToClipBoard,
+                SharedUIAction.PasteSelectionFromClipBoard,
+                SharedUIAction.SelectAllText);
+
+            viewMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.View);
+            viewMenu.BindActions(
+                SharedUIAction.ZoomIn,
+                SharedUIAction.ZoomOut);
+
+            developerToolsMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.DeveloperTools);
+            developerToolsMenu.BindAction(ToolForms.EditCurrentLanguage, alwaysVisible: false);
+
+            helpMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Help);
+            helpMenu.BindActions(
+                ToolForms.OpenAbout,
+                ToolForms.ShowCredits);
+
+            // Implemtations for global UIActions.
+            if (Localizers.Registered.Count() >= 2)
+            {
+                // More than one localizer: can switch between them.
+                foreach (var localizer in Localizers.Registered)
+                {
+                    this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
+                }
+            }
+
+            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
+            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
+            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
+            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
+            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -150,7 +207,7 @@ namespace Sandra.UI
             var index = errorsListBox.SelectedIndex;
             if (0 <= index && index < errorsListBox.Items.Count)
             {
-                settingsTextBox.ActivateError(index);
+                jsonTextBox.ActivateError(index);
             }
         }
 
@@ -160,18 +217,18 @@ namespace Sandra.UI
 
             try
             {
-                if (settingsTextBox.CurrentErrorCount == 0)
+                if (jsonTextBox.CurrentErrorCount == 0)
                 {
                     errorsListBox.Items.Clear();
                     errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
-                    errorsListBox.ForeColor = settingsTextBox.LineNumberForeColor;
+                    errorsListBox.ForeColor = jsonTextBox.LineNumberForeColor;
                     errorsListBox.Font = noErrorsFont;
                 }
                 else
                 {
-                    var errorMessages = (from error in settingsTextBox.CurrentErrors
-                                         let lineIndex = (settingsTextBox.LineFromPosition(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
-                                         let position = (settingsTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                    var errorMessages = (from error in jsonTextBox.CurrentErrors
+                                         let lineIndex = (jsonTextBox.LineFromPosition(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let position = (jsonTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
                                          select Localizer.Current.Localize(
@@ -201,7 +258,7 @@ namespace Sandra.UI
                         index++;
                     }
 
-                    errorsListBox.ForeColor = settingsTextBox.NoStyleForeColor;
+                    errorsListBox.ForeColor = jsonTextBox.NoStyleForeColor;
                     errorsListBox.Font = normalFont;
                 }
             }
@@ -233,10 +290,22 @@ namespace Sandra.UI
             }
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Menu | Keys.Alt))
+            {
+                autoHideMainMenu.ToggleMainMenu();
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                autoHideMainMenu.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

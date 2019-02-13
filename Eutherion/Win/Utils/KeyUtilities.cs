@@ -104,17 +104,22 @@ namespace Eutherion.Win.Utils
         }
 
         /// <summary>
-        /// Tries to convert a user command key to a <see cref="UIAction"/> and perform it on the currently focused .NET control.
+        /// Searches for an <see cref="UIActionHandler"/> to convert a user command key to a <see cref="UIAction"/>
+        /// and then perform the action.
         /// </summary>
         /// <param name="shortcut">
         /// The shortcut key pressed by the user.
         /// </param>
+        /// <param name="bottomLevelControl">
+        /// The <see cref="Control"/> from which to initiate searching for a handler for the shortcut key.
+        /// Generally this is the control which has the keyboard focus.
+        /// </param>
         /// <returns>
-        /// Whether or not the key was processed.
+        /// Whether or not a <see cref="UIActionHandler"/> was found which processed the key successfully.
         /// </returns>
-        public static bool TryExecute(Keys shortcut)
+        public static bool TryExecute(Keys shortcut, Control bottomLevelControl)
         {
-            foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+            foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(bottomLevelControl))
             {
                 // Try to find an action with given shortcut.
                 foreach (var mapping in actionHandler.KeyMappings)

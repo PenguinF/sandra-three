@@ -43,16 +43,11 @@ namespace Eutherion.Text.Json
         private int firstUnusedIndex;
         private Func<IEnumerable<TextElement<JsonSymbol>>> currentTokenizer;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="JsonTokenizer"/>.
-        /// </summary>
-        /// <param name="json">
-        /// The JSON to tokenize.
-        /// </param>
-        public JsonTokenizer(string json)
+        private JsonTokenizer(string json)
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
             length = json.Length;
+            currentTokenizer = Default;
         }
 
         private IEnumerable<TextElement<JsonSymbol>> Default()
@@ -484,17 +479,19 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Tokenizes the source Json from start to end.
         /// </summary>
+        /// <param name="json">
+        /// The Json to tokenize.
+        /// </param>
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
         /// </returns>
-        public IEnumerable<TextElement<JsonSymbol>> TokenizeAll()
+        public static IEnumerable<TextElement<JsonSymbol>> TokenizeAll(string json)
         {
-            currentIndex = 0;
-            firstUnusedIndex = 0;
-            currentTokenizer = Default;
-            errors.Clear();
-            valueBuilder.Clear();
+            return new JsonTokenizer(json)._TokenizeAll();
+        }
 
+        private IEnumerable<TextElement<JsonSymbol>> _TokenizeAll()
+        {
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.
             while (currentTokenizer != null)

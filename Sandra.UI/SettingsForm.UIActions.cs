@@ -29,7 +29,7 @@ namespace Sandra.UI
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = settingsTextBox.CurrentErrorCount;
+            int errorCount = jsonTextBox.CurrentErrorCount;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)
@@ -49,7 +49,7 @@ namespace Sandra.UI
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = settingsTextBox.CurrentErrorCount;
+            int errorCount = jsonTextBox.CurrentErrorCount;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)

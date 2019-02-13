@@ -33,7 +33,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullJsonThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonTokenizer(null));
+            Assert.Throws<ArgumentNullException>(() => JsonTokenizer.TokenizeAll(null).Any());
         }
 
         [Theory]
@@ -63,14 +63,14 @@ namespace Eutherion.Shared.Tests
             if (alternativeCommentText == null)
             {
                 Assert.Collection(
-                    new JsonTokenizer(json).TokenizeAll(),
+                    JsonTokenizer.TokenizeAll(json),
                     firstTokenAssert);
             }
             else
             {
                 // Expect some whitespace at the end.
                 Assert.Collection(
-                    new JsonTokenizer(json).TokenizeAll(),
+                    JsonTokenizer.TokenizeAll(json),
                     firstTokenAssert,
                     symbol => Assert.IsType<JsonWhitespace>(symbol.TerminalSymbol));
             }
@@ -79,7 +79,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void EmptyStringNoTokens()
         {
-            Assert.False(new JsonTokenizer("").TokenizeAll().Any());
+            Assert.False(JsonTokenizer.TokenizeAll("").Any());
         }
 
         [Theory]
@@ -94,7 +94,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            Assert.Collection(new JsonTokenizer(ws).TokenizeAll(), x => Assert.IsType<JsonWhitespace>(x.TerminalSymbol));
+            Assert.Collection(JsonTokenizer.TokenizeAll(ws), x => Assert.IsType<JsonWhitespace>(x.TerminalSymbol));
         }
 
         [Theory]
@@ -116,7 +116,7 @@ namespace Eutherion.Shared.Tests
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
-            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
+            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType(tokenType, symbol.TerminalSymbol);
@@ -161,7 +161,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("ڳالھ")]
         public void ValueSymbol(string json)
         {
-            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
+            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
                 var valueSymbol = Assert.IsType<JsonValue>(symbol.TerminalSymbol);
@@ -193,7 +193,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\"\\u00200\"", " 0")] // last 0 is not part of the \u escape sequence
         public void StringValue(string json, string expectedValue)
         {
-            Assert.Collection(new JsonTokenizer(json).TokenizeAll(), symbol =>
+            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
                 var stringSymbol = Assert.IsType<JsonString>(symbol.TerminalSymbol);
@@ -275,7 +275,7 @@ namespace Eutherion.Shared.Tests
                 // so assert that this is indeed what happens.
                 if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
                 {
-                    Assert.Collection(new JsonTokenizer(json).TokenizeAll().Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
+                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1.TerminalSymbol);
@@ -291,7 +291,7 @@ namespace Eutherion.Shared.Tests
                         expectedSymbol2Length++;
                     }
 
-                    Assert.Collection(new JsonTokenizer(json).TokenizeAll().Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
+                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1.TerminalSymbol);
@@ -306,33 +306,6 @@ namespace Eutherion.Shared.Tests
                     });
                 }
             }
-        }
-
-        public static IEnumerable<object[]> JustTwoSymbols()
-            => TwoSymbolsOfEachType().Select(array => new object[] { array[0], array[2] });
-
-        [Theory]
-        [MemberData(nameof(JustTwoSymbols))]
-        public void RepeatableTokenization(string json1, string json2)
-        {
-            var json = $"{json1} {json2}";
-
-            // Create the tokenizer, tokenize twice, and assert that the result is the same.
-            var tokenizer = new JsonTokenizer(json);
-
-            // First tokenization creates the element inspectors for the second tokenization.
-            // The first tokenization generates the 'expected' values here.
-            var elementInspectors = tokenizer.TokenizeAll().Select(x => new Action<TextElement<JsonSymbol>>(y =>
-            {
-                Assert.NotNull(x);
-                Assert.NotNull(y);
-                Assert.Equal(x.Start, y.Start);
-                Assert.Equal(x.Length, y.Length);
-                Assert.IsType(x.TerminalSymbol.GetType(), y.TerminalSymbol);
-
-            })).ToArray();
-
-            Assert.Collection(tokenizer.TokenizeAll(), elementInspectors);
         }
 
         public static IEnumerable<object[]> GetErrorStrings()
@@ -434,7 +407,7 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            var generatedErrors = new JsonTokenizer(json).TokenizeAll().SelectMany(x => x.TerminalSymbol.Errors);
+            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.TerminalSymbol.Errors);
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);

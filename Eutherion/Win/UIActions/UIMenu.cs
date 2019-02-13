@@ -102,6 +102,60 @@ namespace Eutherion.Win.UIActions
     {
         public LocalizedString LocalizedText;
         public List<LocalizedString> ShortcutKeyDisplayStringParts;
+
+        /// <summary>
+        /// Sets up this menu item with the caption and icon from the menu node.
+        /// </summary>
+        /// <param name="node">
+        /// The <see cref="UIMenuNode"/> to initialize from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="node"/> is null.
+        /// </exception>
+        public void InitializeFrom(UIMenuNode node)
+        {
+            if (node == null) throw new ArgumentNullException(nameof(node));
+            InitializeFrom(node.CaptionKey, node.Icon);
+        }
+
+        /// <summary>
+        /// Sets up this menu item with the given caption and icon.
+        /// </summary>
+        /// <param name="captionKey">
+        /// The localized text to use for the caption.
+        /// </param>
+        /// <param name="icon">
+        /// The icon to show in the menu item.
+        /// </param>
+        public void InitializeFrom(LocalizedStringKey captionKey, Image icon)
+        {
+            if (LocalizedText != null) LocalizedText.Dispose();
+
+            if (captionKey != null)
+            {
+                LocalizedText = new LocalizedString(captionKey);
+
+                // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
+                LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&");
+            }
+            else
+            {
+                DisplayStyle = ToolStripItemDisplayStyle.Image;
+            }
+
+            ImageScaling = ToolStripItemImageScaling.None;
+            Image = icon;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (LocalizedText != null) LocalizedText.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
     }
 
     /// <summary>
@@ -258,24 +312,6 @@ namespace Eutherion.Win.UIActions
             }
         }
 
-        void InitializeMenuItem(UIMenuNode node, LocalizedToolStripMenuItem menuItem)
-        {
-            // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-            if (node.CaptionKey != null)
-            {
-                menuItem.LocalizedText = new LocalizedString(node.CaptionKey);
-                menuItem.LocalizedText.DisplayText.ValueChanged += displayText => menuItem.Text = displayText.Replace("&", "&&");
-                menuItem.Disposed += (_, __) => menuItem.LocalizedText.Dispose();
-            }
-            else
-            {
-                menuItem.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            }
-
-            menuItem.ImageScaling = ToolStripItemImageScaling.None;
-            menuItem.Image = node.Icon;
-        }
-
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
             if (element.CaptionKey == null && element.Icon == null) return null;
@@ -285,7 +321,7 @@ namespace Eutherion.Win.UIActions
             if (!currentActionState.Visible) return null;
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
-            InitializeMenuItem(element, menuItem);
+            menuItem.InitializeFrom(element);
 
             menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
             menuItem.ShortcutKeyDisplayStringParts.ForEach(
@@ -315,7 +351,7 @@ namespace Eutherion.Win.UIActions
             if (container.CaptionKey == null && container.Icon == null) return null;
 
             var menuItem = new LocalizedToolStripMenuItem();
-            InitializeMenuItem(container, menuItem);
+            menuItem.InitializeFrom(container);
 
             BuildMenu(container.Nodes, menuItem.DropDownItems);
 

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * UIActionForm.cs
+ * FormExtensions.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,36 +19,28 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win;
-using Eutherion.Win.UIActions;
-using Eutherion.Win.Utils;
-using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win
 {
-    /// <summary>
-    /// Top level Form which ties in with the UIAction framework.
-    /// </summary>
-    public class UIActionForm : Form, IUIActionHandlerProvider
+    public static class FormExtensions
     {
         /// <summary>
-        /// Gets the action handler for this control.
+        /// If a <see cref="Form"/> is minimized, restores it to its previous state.
         /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
-
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        /// <param name="form">
+        /// The <see cref="Form"/> to restore.
+        /// </param>
+        public static void Deminimize(this Form form)
         {
-            try
+            const int SW_RESTORE = 0x09;
+
+            if (form.IsHandleCreated
+                && !form.IsDisposed
+                && form.WindowState == FormWindowState.Minimized)
             {
-                // This code makes shortcuts work for all UIActionHandlers.
-                return KeyUtilities.TryExecute(keyData, FocusHelper.GetFocusedControl())
-                    || base.ProcessCmdKey(ref msg, keyData);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message);
-                return true;
+                WinAPI.ShowWindow(new HandleRef(form, form.Handle), SW_RESTORE);
             }
         }
     }

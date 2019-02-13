@@ -153,5 +153,8 @@ namespace Eutherion.Win
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool ShowCaret(HandleRef hWnd);
+
+        [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
+        public static extern bool ShowWindow(HandleRef hWnd, int nCmdShow);
     }
 }

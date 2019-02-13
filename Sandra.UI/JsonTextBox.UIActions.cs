@@ -25,12 +25,12 @@ using System.IO;
 
 namespace Sandra.UI
 {
-    public partial class SettingsTextBox
+    public partial class JsonTextBox
     {
-        public const string SettingsTextBoxUIActionPrefix = nameof(SettingsTextBox) + ".";
+        public const string JsonTextBoxUIActionPrefix = nameof(JsonTextBox) + ".";
 
         public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
-            new UIAction(SettingsTextBoxUIActionPrefix + nameof(SaveToFile)),
+            new UIAction(JsonTextBoxUIActionPrefix + nameof(SaveToFile)),
             new UIActionBinding
             {
                 ShowInMenu = true,

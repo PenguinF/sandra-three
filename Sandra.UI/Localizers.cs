@@ -46,6 +46,7 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey DeveloperTools = new LocalizedStringKey(nameof(DeveloperTools));
+        internal static readonly LocalizedStringKey Edit = new LocalizedStringKey(nameof(Edit));
         internal static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
@@ -343,6 +344,7 @@ namespace Sandra.UI
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.DeveloperTools, "Tools" },
+                { LocalizedStringKeys.Edit, "Edit" },
                 { LocalizedStringKeys.EditCurrentLanguage, "Edit current language" },
                 { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
