@@ -47,6 +47,7 @@ namespace Eutherion.Text.Json
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
             length = json.Length;
+            currentTokenizer = Default;
         }
 
         private IEnumerable<TextElement<JsonSymbol>> Default()
@@ -479,7 +480,7 @@ namespace Eutherion.Text.Json
         /// Tokenizes the source Json from start to end.
         /// </summary>
         /// <param name="json">
-        /// The JSON to tokenize.
+        /// The Json to tokenize.
         /// </param>
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
@@ -491,12 +492,6 @@ namespace Eutherion.Text.Json
 
         private IEnumerable<TextElement<JsonSymbol>> _TokenizeAll()
         {
-            currentIndex = 0;
-            firstUnusedIndex = 0;
-            currentTokenizer = Default;
-            errors.Clear();
-            valueBuilder.Clear();
-
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.
             while (currentTokenizer != null)
