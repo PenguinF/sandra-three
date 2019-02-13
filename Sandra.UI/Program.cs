@@ -186,31 +186,4 @@ namespace Sandra.UI
         }
 #endif
     }
-
-    internal class FormStateAutoSaver
-    {
-        private readonly SettingProperty<PersistableFormState> autoSaveProperty;
-        private readonly PersistableFormState formState;
-
-        public FormStateAutoSaver(
-            Form targetForm,
-            SettingProperty<PersistableFormState> autoSaveProperty,
-            PersistableFormState formState)
-        {
-            this.autoSaveProperty = autoSaveProperty;
-            this.formState = formState;
-
-            // Attach only after restoring.
-            formState.AttachTo(targetForm);
-
-            // This object goes out of scope when FormState goes out of scope,
-            // which is when the target Form is closed.
-            formState.Changed += FormState_Changed;
-        }
-
-        private void FormState_Changed(object sender, EventArgs e)
-        {
-            Program.AutoSave.Persist(autoSaveProperty, formState);
-        }
-    }
 }
