@@ -487,7 +487,12 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
         /// </returns>
-        public IEnumerable<TextElement<JsonSymbol>> TokenizeAll()
+        public static IEnumerable<TextElement<JsonSymbol>> TokenizeAll(string json)
+        {
+            return new JsonTokenizer(json)._TokenizeAll();
+        }
+
+        private IEnumerable<TextElement<JsonSymbol>> _TokenizeAll()
         {
             currentIndex = 0;
             firstUnusedIndex = 0;
