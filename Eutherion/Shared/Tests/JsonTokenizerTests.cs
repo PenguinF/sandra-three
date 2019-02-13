@@ -33,7 +33,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullJsonThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonTokenizer(null));
+            Assert.Throws<ArgumentNullException>(() => JsonTokenizer.TokenizeAll(null).Any());
         }
 
         [Theory]

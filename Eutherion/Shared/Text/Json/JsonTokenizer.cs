@@ -43,13 +43,7 @@ namespace Eutherion.Text.Json
         private int firstUnusedIndex;
         private Func<IEnumerable<TextElement<JsonSymbol>>> currentTokenizer;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="JsonTokenizer"/>.
-        /// </summary>
-        /// <param name="json">
-        /// The JSON to tokenize.
-        /// </param>
-        public JsonTokenizer(string json)
+        private JsonTokenizer(string json)
         {
             this.json = json ?? throw new ArgumentNullException(nameof(json));
             length = json.Length;
@@ -484,6 +478,9 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Tokenizes the source Json from start to end.
         /// </summary>
+        /// <param name="json">
+        /// The JSON to tokenize.
+        /// </param>
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
         /// </returns>
