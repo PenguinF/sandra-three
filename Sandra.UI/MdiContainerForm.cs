@@ -68,7 +68,9 @@ namespace Sandra.UI
             // Developer tools.
             developerToolsMenuItem = new LocalizedToolStripMenuItem { LocalizedText = developerTools };
             developerToolsMenuItem.LocalizedText.DisplayText.ValueChanged += displayText => developerToolsMenuItem.Text = displayText.Replace("&", "&&");
-            MainMenuStrip.Items.Add(developerToolsMenuItem);
+
+            // Insert before the Help menu.
+            MainMenuStrip.Items.Insert(MainMenuStrip.Items.Count - 1, developerToolsMenuItem);
 
             UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
             UpdateDeveloperToolsMenu();
