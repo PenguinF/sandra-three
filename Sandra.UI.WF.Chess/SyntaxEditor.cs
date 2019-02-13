@@ -21,7 +21,8 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.UI.WF.Storage;
+using Eutherion.Win.Storage;
+using Eutherion.Win.UIActions;
 using ScintillaNET;
 using System;
 using System.Drawing;

@@ -21,7 +21,7 @@
 
 using Eutherion.Localization;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Contains information to build an error message caused by a value being of a different type than expected.

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Captures the state of a <see cref="Form"/> for an auto-save file.

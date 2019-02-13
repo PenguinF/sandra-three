@@ -21,7 +21,7 @@
 
 using Eutherion.Utils;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Represents a type of <see cref="PValue"/>, which controls the range of values that are possible.

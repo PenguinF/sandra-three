@@ -21,7 +21,8 @@
 
 using Eutherion;
 using Eutherion.Localization;
-using Sandra.UI.WF.Storage;
+using Eutherion.Win.Storage;
+using Eutherion.Win.UIActions;
 using System;
 using System.Diagnostics;
 using System.Drawing;

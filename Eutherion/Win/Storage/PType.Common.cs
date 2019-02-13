@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {

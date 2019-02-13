@@ -23,7 +23,7 @@ using Eutherion.Localization;
 using Eutherion.Text.Json;
 using System;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Represents an error caused by a value being of a different type than expected.

@@ -22,7 +22,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.UIActions
 {
     /// <summary>
     /// Represents an immutable, opaque atom for a user action.

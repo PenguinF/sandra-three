@@ -21,7 +21,7 @@
 
 using System;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win
 {
     /// <summary>
     /// Helper class to represent a segment of a horizontal or vertical line.

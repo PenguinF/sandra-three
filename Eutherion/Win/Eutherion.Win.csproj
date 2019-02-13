@@ -45,6 +45,7 @@
     </Compile>
     <Compile Include="DragDrop\CursorFromHandle.cs" />
     <Compile Include="DragDrop\DragUtilities.cs" />
+    <Compile Include="FileWatcher.cs" />
     <Compile Include="FocusHelper.cs" />
     <Compile Include="Forms\ConstrainedMoveResizeForm.cs">
       <SubType>Form</SubType>
@@ -57,7 +58,6 @@
     <Compile Include="Storage\AutoSave.cs" />
     <Compile Include="Storage\CompactSettingWriter.cs" />
     <Compile Include="Storage\FileNameType.cs" />
-    <Compile Include="Storage\FileWatcher.cs" />
     <Compile Include="Storage\ITypeErrorBuilder.cs" />
     <Compile Include="Storage\OpaqueColorType.cs" />
     <Compile Include="Storage\PersistableFormState.cs" />
@@ -79,11 +79,11 @@
     <Compile Include="Storage\SettingsFile.cs" />
     <Compile Include="Storage\SettingWriter.cs" />
     <Compile Include="Storage\SubFolderNameType.cs" />
-    <Compile Include="UIAction\KeyUIActionMapping.cs" />
-    <Compile Include="UIAction\UIAction.cs" />
-    <Compile Include="UIAction\UIActionBinding.cs" />
-    <Compile Include="UIAction\UIActionHandler.cs" />
-    <Compile Include="UIAction\UIMenu.cs" />
+    <Compile Include="UIActions\KeyUIActionMapping.cs" />
+    <Compile Include="UIActions\UIAction.cs" />
+    <Compile Include="UIActions\UIActionBinding.cs" />
+    <Compile Include="UIActions\UIActionHandler.cs" />
+    <Compile Include="UIActions\UIMenu.cs" />
     <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>

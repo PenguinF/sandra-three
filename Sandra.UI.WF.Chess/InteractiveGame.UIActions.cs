@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Win.Forms;
+using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
 using System.Drawing;

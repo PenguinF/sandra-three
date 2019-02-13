@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Represents a single iteration of writing settings to a file.

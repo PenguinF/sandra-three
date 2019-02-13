@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.UIActions;
 using System;
 using System.IO;
 

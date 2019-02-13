@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.UIActions;
 using System.Windows.Forms;
 
 namespace Sandra.UI.WF

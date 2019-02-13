@@ -24,7 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.UIActions
 {
     /// <summary>
     /// Groups a set of optional properties to allow for one shared definition of a <see cref="UIAction"/> 

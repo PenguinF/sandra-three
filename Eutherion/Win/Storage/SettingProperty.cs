@@ -22,7 +22,7 @@
 using Eutherion.Utils;
 using System;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Contains the declaration of a setting property, but doesn't specify its type.

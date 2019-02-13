@@ -21,7 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
-using Sandra.UI.WF.Storage;
+using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;

@@ -24,7 +24,7 @@ using Eutherion.Utils;
 using System.Drawing;
 using System.Globalization;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Type that accepts strings in the HTML color format "#xxxxxx" where all x'es are hexadecimal characters,

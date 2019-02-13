@@ -22,7 +22,7 @@
 using Eutherion.Localization;
 using System.IO;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Specialized PType that only accepts strings that are legal file names.

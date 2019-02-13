@@ -27,7 +27,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.UIActions
 {
     public abstract class UIMenuNode
     {

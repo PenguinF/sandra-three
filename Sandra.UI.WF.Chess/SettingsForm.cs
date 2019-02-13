@@ -20,7 +20,8 @@
 #endregion
 
 using Eutherion.Localization;
-using Sandra.UI.WF.Storage;
+using Eutherion.Win.Storage;
+using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
 using System.Globalization;

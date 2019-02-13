@@ -23,7 +23,7 @@ using Eutherion.Text.Json;
 using System.Globalization;
 using System.Text;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Used by <see cref="AutoSave"/> to convert a <see cref="PMap"/> to its compact representation in JSON.

@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.UIActions;
+
 namespace Sandra.UI.WF
 {
     public partial class SettingsForm

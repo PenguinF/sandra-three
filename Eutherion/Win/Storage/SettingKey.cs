@@ -23,7 +23,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Represents a key for a setting value.

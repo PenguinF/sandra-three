@@ -21,6 +21,8 @@
 
 using Eutherion.Localization;
 using Eutherion.Utils;
+using Eutherion.Win;
+using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
 using System.Collections.Generic;

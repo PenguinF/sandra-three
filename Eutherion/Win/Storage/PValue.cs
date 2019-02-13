@@ -21,7 +21,7 @@
 
 using System.Numerics;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Base interface for all types of values which are persistable.

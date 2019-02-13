@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win.UIActions
 {
     /// <summary>
     /// Delegate which verifies if an action can be performed, and optionally performs it.

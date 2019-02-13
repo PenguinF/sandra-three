@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -30,7 +29,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Reads settings from a file.

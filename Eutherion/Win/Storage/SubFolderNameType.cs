@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using System.Linq;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Specialized PType that only accepts a certain class of subfolder names.

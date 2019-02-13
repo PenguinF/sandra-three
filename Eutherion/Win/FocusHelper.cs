@@ -19,12 +19,11 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Utils;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI.WF
+namespace Eutherion.Win
 {
     public sealed class FocusHelper
     {
@@ -46,7 +45,6 @@ namespace Sandra.UI.WF
             }
             return null;
         }
-
 
         Control currentFocusedControl;
 

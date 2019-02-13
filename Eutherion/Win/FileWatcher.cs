@@ -24,9 +24,9 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 
-namespace Sandra.UI.WF.Storage
+namespace Eutherion.Win
 {
-    internal class FileWatcher : IDisposable
+    public class FileWatcher : IDisposable
     {
         private readonly string filePath;
 
@@ -102,7 +102,7 @@ namespace Sandra.UI.WF.Storage
         }
     }
 
-    internal enum FileChangeType
+    public enum FileChangeType
     {
         Change,
         ErrorBufferOverflow,
