@@ -88,7 +88,7 @@ namespace Sandra.UI
                 ClientSize = new Size(600, 600),
             };
 
-        public static UIActionState TryEditPreferencesFile(Form owner, bool perform)
+        public static UIActionHandlerFunc TryEditPreferencesFile(Form owner) => perform =>
         {
             if (perform)
             {
@@ -134,7 +134,7 @@ namespace Sandra.UI
             }
 
             return UIActionVisibility.Enabled;
-        }
+        };
 
         public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
@@ -144,7 +144,7 @@ namespace Sandra.UI
                 MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
             });
 
-        public static UIActionState TryShowDefaultSettingsFile(Form owner, bool perform)
+        public static UIActionHandlerFunc TryShowDefaultSettingsFile(Form owner) => perform =>
         {
             if (perform)
             {
@@ -169,7 +169,7 @@ namespace Sandra.UI
             }
 
             return UIActionVisibility.Enabled;
-        }
+        };
 
         private static Form CreateReadOnlyTextForm(string fileName, int width, int height)
         {
@@ -231,7 +231,7 @@ namespace Sandra.UI
                 MenuCaptionKey = LocalizedStringKeys.About,
             });
 
-        public static UIActionState TryOpenAbout(Form owner, bool perform)
+        public static UIActionHandlerFunc TryOpenAbout(Form owner) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
@@ -244,7 +244,7 @@ namespace Sandra.UI
             }
 
             return UIActionVisibility.Enabled;
-        }
+        };
 
         public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
@@ -254,7 +254,7 @@ namespace Sandra.UI
                 MenuCaptionKey = LocalizedStringKeys.Credits,
             });
 
-        public static UIActionState TryShowCredits(Form owner, bool perform)
+        public static UIActionHandlerFunc TryShowCredits(Form owner) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
@@ -267,7 +267,7 @@ namespace Sandra.UI
             }
 
             return UIActionVisibility.Enabled;
-        }
+        };
 
         public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
@@ -278,7 +278,7 @@ namespace Sandra.UI
                 MenuIcon = Properties.Resources.speech,
             });
 
-        public static UIActionState TryEditCurrentLanguage(Form owner, bool perform)
+        public static UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
         {
             // Only enable in developer mode.
             if (!Program.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
@@ -318,6 +318,6 @@ namespace Sandra.UI
             }
 
             return UIActionVisibility.Enabled;
-        }
+        };
     }
 }

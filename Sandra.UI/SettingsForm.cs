@@ -39,6 +39,14 @@ namespace Sandra.UI
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
 
+        private readonly UIAutoHideMainMenu autoHideMainMenu;
+        private readonly UIAutoHideMainMenuItem langMenu;
+        private readonly UIAutoHideMainMenuItem fileMenu;
+        private readonly UIAutoHideMainMenuItem editMenu;
+        private readonly UIAutoHideMainMenuItem viewMenu;
+        private readonly UIAutoHideMainMenuItem helpMenu;
+        private readonly UIAutoHideMainMenuItem developerToolsMenu;
+
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
         private readonly JsonTextBox jsonTextBox;
@@ -135,6 +143,55 @@ namespace Sandra.UI
 
                 Controls.Add(splitter);
             }
+
+            // Initialize menu strip which becomes visible only when the ALT key is pressed.
+            autoHideMainMenu = new UIAutoHideMainMenu(this);
+
+            langMenu = autoHideMainMenu.AddMenuItem(null, Properties.Resources.globe);
+            Localizers.Registered.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
+
+            fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
+            fileMenu.BindActions(
+                ToolForms.EditPreferencesFile,
+                ToolForms.ShowDefaultSettingsFile);
+
+            editMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Edit);
+            editMenu.BindActions(
+                SharedUIAction.Undo,
+                SharedUIAction.Redo,
+                SharedUIAction.CutSelectionToClipBoard,
+                SharedUIAction.CopySelectionToClipBoard,
+                SharedUIAction.PasteSelectionFromClipBoard,
+                SharedUIAction.SelectAllText);
+
+            viewMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.View);
+            viewMenu.BindActions(
+                SharedUIAction.ZoomIn,
+                SharedUIAction.ZoomOut);
+
+            developerToolsMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.DeveloperTools);
+            developerToolsMenu.BindAction(ToolForms.EditCurrentLanguage, alwaysVisible: false);
+
+            helpMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Help);
+            helpMenu.BindActions(
+                ToolForms.OpenAbout,
+                ToolForms.ShowCredits);
+
+            // Implemtations for global UIActions.
+            if (Localizers.Registered.Count() >= 2)
+            {
+                // More than one localizer: can switch between them.
+                foreach (var localizer in Localizers.Registered)
+                {
+                    this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
+                }
+            }
+
+            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
+            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
+            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
+            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
+            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -233,10 +290,22 @@ namespace Sandra.UI
             }
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Menu | Keys.Alt))
+            {
+                autoHideMainMenu.ToggleMainMenu();
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
+                autoHideMainMenu.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

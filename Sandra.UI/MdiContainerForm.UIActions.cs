@@ -61,11 +61,5 @@ namespace Sandra.UI
             if (perform) NewPlayingBoard();
             return UIActionVisibility.Enabled;
         }
-
-        public UIActionState TryEditPreferencesFile(bool perform) => ToolForms.TryEditPreferencesFile(this, perform);
-        public UIActionState TryShowDefaultSettingsFile(bool perform) => ToolForms.TryShowDefaultSettingsFile(this, perform);
-        public UIActionState TryOpenAbout(bool perform) => ToolForms.TryOpenAbout(this, perform);
-        public UIActionState TryShowCredits(bool perform) => ToolForms.TryShowCredits(this, perform);
-        public UIActionState TryEditCurrentLanguage(bool perform) => ToolForms.TryEditCurrentLanguage(this, perform);
     }
 }

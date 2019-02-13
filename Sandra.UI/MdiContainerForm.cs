@@ -182,19 +182,19 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(ToolForms.EditPreferencesFile, TryEditPreferencesFile);
-            this.BindAction(ToolForms.ShowDefaultSettingsFile, TryShowDefaultSettingsFile);
+            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
+            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(ToolForms.OpenAbout, TryOpenAbout);
-            this.BindAction(ToolForms.ShowCredits, TryShowCredits);
-            this.BindAction(ToolForms.EditCurrentLanguage, TryEditCurrentLanguage);
+            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
+            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
+            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
             developerToolsActionHandler.BindAction(
                 ToolForms.EditCurrentLanguage.Action,
                 ToolForms.EditCurrentLanguage.DefaultBinding,
-                TryEditCurrentLanguage);
+                ToolForms.TryEditCurrentLanguage(this));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
