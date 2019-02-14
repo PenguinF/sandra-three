@@ -43,7 +43,13 @@ namespace Sandra.UI
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
-            if (perform) File.WriteAllText(settingsFile.AbsoluteFilePath, Text);
+
+            if (perform)
+            {
+                File.WriteAllText(settingsFile.AbsoluteFilePath, Text);
+                SetSavePoint();
+            }
+
             return UIActionVisibility.Enabled;
         }
     }
