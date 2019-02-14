@@ -33,6 +33,8 @@ namespace Sandra.UI
 {
     public partial class SettingsForm : UIActionForm
     {
+        private const string ChangedMarker = "• ";
+
         private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
         private static readonly Font normalFont = new Font("Calibri", 10);
 
@@ -54,6 +56,8 @@ namespace Sandra.UI
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
+        private readonly string fileName;
+
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
                             SettingProperty<PersistableFormState> formStateSetting,
@@ -62,7 +66,8 @@ namespace Sandra.UI
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            Text = Path.GetFileName(settingsFile.AbsoluteFilePath);
+            fileName = Path.GetFileName(settingsFile.AbsoluteFilePath);
+            Text = fileName;
 
             jsonTextBox = new JsonTextBox(settingsFile)
             {
@@ -112,6 +117,10 @@ namespace Sandra.UI
                 });
 
                 UIMenu.AddTo(errorsListBox);
+
+                // Save points.
+                jsonTextBox.SavePointLeft += (_,__) => Text = ChangedMarker + fileName;
+                jsonTextBox.SavePointReached += (_, __) => Text = fileName;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
