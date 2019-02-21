@@ -22,6 +22,7 @@
 using Eutherion.UIActions;
 using Eutherion.Win.Utils;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.UIActions
@@ -69,28 +70,17 @@ namespace Eutherion.Win.UIActions
         /// </returns>
         public static bool TryExecute(Keys shortcut, Control bottomLevelControl)
         {
-            foreach (UIActionHandler actionHandler in EnumerateUIActionHandlers(bottomLevelControl))
-            {
-                // Try to find an action with given shortcut.
-                foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
-                {
-                    if (interfaceSet.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
-                    {
-                        foreach (var registeredShortcut in shortcutKeysInterface.Shortcuts)
-                        {
-                            // If the shortcut matches, then try to perform the action.
-                            // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                            if (KeyUtilities.IsMatch(registeredShortcut, shortcut)
-                                && actionHandler.TryPerformAction(action, true).UIActionVisibility != UIActionVisibility.Parent)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
+            // Try to find an action with given shortcut.
+            return (from actionHandler in EnumerateUIActionHandlers(bottomLevelControl)
+                    from interfaceActionPair in actionHandler.InterfaceSets
+                    let shortcuts = interfaceActionPair.Item1.Get<ShortcutKeysUIActionInterface>()?.Shortcuts
+                    where shortcuts != null
+                    from registeredShortcut in shortcuts
+                        // If the shortcut matches, then try to perform the action.
+                        // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                    where KeyUtilities.IsMatch(registeredShortcut, shortcut)
+                    select actionHandler.TryPerformAction(interfaceActionPair.Item2, true).UIActionVisibility)
+                    .Any(x => x != UIActionVisibility.Parent);
         }
     }
 }
