@@ -22,6 +22,7 @@
 using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Forms;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
@@ -310,7 +311,7 @@ namespace Sandra.UI
             if (Game.IsFirstMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Backward);
+                Session.Current.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Backward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;
@@ -412,7 +413,7 @@ namespace Sandra.UI
             if (Game.IsLastMove) return UIActionVisibility.Disabled;
             if (perform)
             {
-                Program.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Forward);
+                Session.Current.GetSetting(SettingKeys.FastNavigationPlyCount).Times(Game.Forward);
                 ActiveMoveTreeUpdated();
             }
             return UIActionVisibility.Enabled;

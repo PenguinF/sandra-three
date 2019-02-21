@@ -34,8 +34,6 @@ namespace Sandra.UI
     {
         internal static string ExecutableFolder { get; private set; }
 
-        internal static SettingsFile LocalSettings { get; private set; }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -51,15 +49,6 @@ namespace Sandra.UI
             var settingsProvider = new SettingsProvider();
             using (var session = Session.Configure(ExecutableFolder, settingsProvider))
             {
-                // After creating the auto-save file, look for a local preferences file.
-                // Create a working copy with correct schema first.
-                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema());
-
-                // And then create the local settings file which can overwrite values in default settings.
-                LocalSettings = SettingsFile.Create(
-                    Path.Combine(session.AppDataSubFolder, session.GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
-                    localSettingsCopy);
-
                 Chess.Constants.ForceInitialize();
 
 #if DEBUG
@@ -71,13 +60,6 @@ namespace Sandra.UI
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new MdiContainerForm());
             }
-        }
-
-        internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
-        {
-            return LocalSettings.Settings.TryGetValue(property, out TValue result)
-                ? result
-                : Session.Current.GetDefaultSetting(property);
         }
 
         internal static Image LoadImage(string imageFileKey)

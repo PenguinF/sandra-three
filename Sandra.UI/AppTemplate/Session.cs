@@ -62,7 +62,6 @@ namespace Eutherion.Win.AppTemplate
 
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SharedSettingKeys.LangFolderName);
-
             registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(executableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
@@ -70,6 +69,15 @@ namespace Eutherion.Win.AppTemplate
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
             AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
+
+            // After creating the auto-save file, look for a local preferences file.
+            // Create a working copy with correct schema first.
+            SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema());
+
+            // And then create the local settings file which can overwrite values in default settings.
+            LocalSettings = SettingsFile.Create(
+                Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettingKeys.LocalPreferencesFileName)),
+                localSettingsCopy);
 
             if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
             {
@@ -87,14 +95,23 @@ namespace Eutherion.Win.AppTemplate
 
         public SettingsFile DefaultSettings { get; }
 
-        public SettingProperty<FileLocalizer> LangSetting { get; }
+        public SettingsFile LocalSettings { get; }
 
         public AutoSave AutoSave { get; }
+
+        public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
 
         public TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
             => DefaultSettings.Settings.GetValue(property);
+
+        public TValue GetSetting<TValue>(SettingProperty<TValue> property)
+        {
+            return LocalSettings.Settings.TryGetValue(property, out TValue result)
+                ? result
+                : GetDefaultSetting(property);
+        }
 
         public bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
@@ -152,6 +169,11 @@ namespace Eutherion.Win.AppTemplate
         /// Gets the built-in default settings. Its schema is used for the default settings file.
         /// </summary>
         SettingCopy CreateBuiltIn();
+
+        /// <summary>
+        /// Gets the schema to use for the local preferences file.
+        /// </summary>
+        SettingSchema CreateLocalSettingsSchema();
 
         /// <summary>
         /// Gets the schema to use for the auto-save file.

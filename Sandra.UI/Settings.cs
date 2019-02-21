@@ -72,14 +72,6 @@ namespace Sandra.UI
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        private static readonly string LocalPreferencesFileNameDescription
-            = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
-
-        public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
-            FileNameType.Instance,
-            new SettingComment(LocalPreferencesFileNameDescription));
-
         private static readonly string DeveloperModeDescription
             = "Enables tools which assist with SandraChess development and debugging.";
 
@@ -216,7 +208,7 @@ namespace Sandra.UI
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.Version,
                 SharedSettingKeys.AppDataSubFolderName,
-                SettingKeys.LocalPreferencesFileName,
+                SharedSettingKeys.LocalPreferencesFileName,
                 SettingKeys.DeveloperMode,
                 SharedSettingKeys.LangFolderName,
                 SettingKeys.DarkSquareColor,
@@ -246,7 +238,7 @@ namespace Sandra.UI
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SharedSettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
-            defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
+            defaultSettings.AddOrReplace(SharedSettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(SettingKeys.DeveloperMode, false);
             defaultSettings.AddOrReplace(SharedSettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);

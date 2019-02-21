@@ -22,6 +22,7 @@
 using Eutherion;
 using Eutherion.Utils;
 using Eutherion.Win;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.DragDrop;
 using Eutherion.Win.Forms;
 using System;
@@ -157,15 +158,15 @@ namespace Sandra.UI
                 Dock = DockStyle.Fill,
                 BoardWidth = Chess.Constants.SquareCount,
                 BoardHeight = Chess.Constants.SquareCount,
-                DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor),
-                LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor),
+                DarkSquareColor = Session.Current.GetSetting(SettingKeys.DarkSquareColor),
+                LightSquareColor = Session.Current.GetSetting(SettingKeys.LightSquareColor),
             };
 
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LegalTargetSquaresColor, DisplayLegalTargetSquaresChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DarkSquareColor, DarkSquareColorChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LightSquareColor, LightSquareColorChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LastMoveArrowColor, LastMoveArrowColorChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DisplayLegalTargetSquares, DisplayLegalTargetSquaresChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.LegalTargetSquaresColor, DisplayLegalTargetSquaresChanged);
 
             PlayingBoard.MouseMove += PlayingBoard_MouseMove;
             PlayingBoard.MouseEnterSquare += PlayingBoard_MouseEnterSquare;
@@ -188,7 +189,7 @@ namespace Sandra.UI
 
         private void UpdateLastMoveArrowPen()
         {
-            lastMoveArrowPen = new Pen(Program.GetSetting(SettingKeys.LastMoveArrowColor))
+            lastMoveArrowPen = new Pen(Session.Current.GetSetting(SettingKeys.LastMoveArrowColor))
             {
                 DashStyle = DashStyle.Dot,
                 Width = 2,
@@ -200,12 +201,12 @@ namespace Sandra.UI
 
         private void DarkSquareColorChanged(object sender, EventArgs e)
         {
-            PlayingBoard.DarkSquareColor = Program.GetSetting(SettingKeys.DarkSquareColor);
+            PlayingBoard.DarkSquareColor = Session.Current.GetSetting(SettingKeys.DarkSquareColor);
         }
 
         private void LightSquareColorChanged(object sender, EventArgs e)
         {
-            PlayingBoard.LightSquareColor = Program.GetSetting(SettingKeys.LightSquareColor);
+            PlayingBoard.LightSquareColor = Session.Current.GetSetting(SettingKeys.LightSquareColor);
         }
 
         private void LastMoveArrowColorChanged(object sender, EventArgs e)
@@ -547,8 +548,8 @@ namespace Sandra.UI
 
         private void DisplayLegalTargetSquaresEffect()
         {
-            Color overlayColor = Program.GetSetting(SettingKeys.DisplayLegalTargetSquares)
-                ? Color.FromArgb(48, Program.GetSetting(SettingKeys.LegalTargetSquaresColor))
+            Color overlayColor = Session.Current.GetSetting(SettingKeys.DisplayLegalTargetSquares)
+                ? Color.FromArgb(48, Session.Current.GetSetting(SettingKeys.LegalTargetSquaresColor))
                 : Color.Empty;
 
             // Move is allowed, now enumerate possible target squares and ask currentPosition if that's possible.

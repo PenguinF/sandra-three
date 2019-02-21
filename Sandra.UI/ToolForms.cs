@@ -103,9 +103,9 @@ namespace Sandra.UI
                     {
                         // If the file doesn't exist yet, generate a local settings file with a commented out copy
                         // of the default settings to serve as an example, and to show which settings are available.
-                        if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
+                        if (!File.Exists(Session.Current.LocalSettings.AbsoluteFilePath))
                         {
-                            SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
+                            SettingCopy localSettingsExample = new SettingCopy(Session.Current.LocalSettings.Settings.Schema);
 
                             var defaultSettingsObject = Session.Current.DefaultSettings.Settings;
                             foreach (var property in localSettingsExample.Schema.AllProperties)
@@ -119,7 +119,7 @@ namespace Sandra.UI
 
                             Exception exception = SettingsFile.WriteToFile(
                                 localSettingsExample.Commit(),
-                                Program.LocalSettings.AbsoluteFilePath,
+                                Session.Current.LocalSettings.AbsoluteFilePath,
                                 SettingWriterOptions.CommentOutProperties);
 
                             if (exception != null)
@@ -131,7 +131,7 @@ namespace Sandra.UI
 
                         return CreateSettingsForm(
                             false,
-                            Program.LocalSettings,
+                            Session.Current.LocalSettings,
                             SettingKeys.PreferencesWindow,
                             SettingKeys.PreferencesErrorHeight);
                     });
@@ -167,7 +167,7 @@ namespace Sandra.UI
                         }
 
                         return CreateSettingsForm(
-                            !Program.GetSetting(SettingKeys.DeveloperMode),
+                            !Session.Current.GetSetting(SettingKeys.DeveloperMode),
                             Session.Current.DefaultSettings,
                             SettingKeys.DefaultSettingsWindow,
                             SettingKeys.DefaultSettingsErrorHeight);
@@ -293,7 +293,7 @@ namespace Sandra.UI
         public static UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
         {
             // Only enable in developer mode.
-            if (!Program.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
+            if (!Session.Current.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
 
             // Cannot edit built-in localizer.
             if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;

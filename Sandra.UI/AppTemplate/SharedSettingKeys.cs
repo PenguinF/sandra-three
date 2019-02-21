@@ -36,6 +36,14 @@ namespace Eutherion.Win.AppTemplate
             SubFolderNameType.Instance,
             new SettingComment(AppDataSubFolderNameDescription));
 
+        private static readonly string LocalPreferencesFileNameDescription
+            = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
+
+        public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
+            FileNameType.Instance,
+            new SettingComment(LocalPreferencesFileNameDescription));
+
         private static readonly string LangFolderNameDescription
             = "Subfolder of the application directory which is scanned for language files. "
             + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "

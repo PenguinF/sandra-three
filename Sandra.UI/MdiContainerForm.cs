@@ -78,7 +78,7 @@ namespace Sandra.UI
             UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
             UpdateDeveloperToolsMenu();
 
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
             developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
         }
 
