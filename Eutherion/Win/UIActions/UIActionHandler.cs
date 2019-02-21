@@ -140,26 +140,6 @@ namespace Eutherion.Win.UIActions
         }
 
         /// <summary>
-        /// Helper function which enumerates all <see cref="UIActionHandler"/> instances
-        /// which are available on any parent of a <see cref="Control"/>.
-        /// </summary>
-        /// <param name="startControl">
-        /// <see cref="Control"/> where to start searching.
-        /// </param>
-        public static IEnumerable<UIActionHandler> EnumerateUIActionHandlers(Control startControl)
-        {
-            Control control = startControl;
-            while (control != null)
-            {
-                if (control is IUIActionHandlerProvider provider && provider.ActionHandler != null)
-                {
-                    yield return provider.ActionHandler;
-                }
-                control = control.Parent;
-            }
-        }
-
-        /// <summary>
         /// Invalidates this <see cref="UIActionHandler"/> manually.
         /// </summary>
         public void Invalidate()

@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.UIActions;
-using Eutherion.Win.UIActions;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.Utils
@@ -102,40 +101,6 @@ namespace Eutherion.Win.Utils
             if (code.HasFlag(KeyModifiers.Alt)) equivalentShortcut |= Keys.Alt;
 
             return equivalentShortcut;
-        }
-
-        /// <summary>
-        /// Searches for an <see cref="UIActionHandler"/> to convert a user command key to a <see cref="UIAction"/>
-        /// and then perform the action.
-        /// </summary>
-        /// <param name="shortcut">
-        /// The shortcut key pressed by the user.
-        /// </param>
-        /// <param name="bottomLevelControl">
-        /// The <see cref="Control"/> from which to initiate searching for a handler for the shortcut key.
-        /// Generally this is the control which has the keyboard focus.
-        /// </param>
-        /// <returns>
-        /// Whether or not a <see cref="UIActionHandler"/> was found which processed the key successfully.
-        /// </returns>
-        public static bool TryExecute(Keys shortcut, Control bottomLevelControl)
-        {
-            foreach (UIActionHandler actionHandler in UIActionHandler.EnumerateUIActionHandlers(bottomLevelControl))
-            {
-                // Try to find an action with given shortcut.
-                foreach (var mapping in actionHandler.KeyMappings)
-                {
-                    // If the shortcut matches, then try to perform the action.
-                    // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                    if (IsMatch(mapping.Shortcut, shortcut)
-                        && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
     }
 }

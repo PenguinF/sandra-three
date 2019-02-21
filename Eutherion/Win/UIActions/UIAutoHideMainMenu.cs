@@ -159,7 +159,7 @@ namespace Eutherion.Win.UIActions
                     if (perform) Owner.HideMainMenu();
 
                     // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                    foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                     {
                         UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
                         if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)

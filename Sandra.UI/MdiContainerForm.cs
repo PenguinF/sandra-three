@@ -140,7 +140,7 @@ namespace Sandra.UI
                         }
 
                         // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                        foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                        foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                         {
                             UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
                             if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
@@ -268,11 +268,11 @@ namespace Sandra.UI
 
         void FocusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
         {
-            foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
+            foreach (UIActionHandler previousHandler in UIActionUtilities.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
                 previousHandler.UIActionsInvalidated -= FocusedHandler_UIActionsInvalidated;
             }
-            foreach (UIActionHandler currentHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
+            foreach (UIActionHandler currentHandler in UIActionUtilities.EnumerateUIActionHandlers(e.CurrentFocusedControl))
             {
                 currentHandler.UIActionsInvalidated += FocusedHandler_UIActionsInvalidated;
             }
