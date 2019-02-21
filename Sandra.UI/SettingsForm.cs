@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -119,7 +120,7 @@ namespace Sandra.UI
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_,__) => Text = ChangedMarker + fileName;
+                jsonTextBox.SavePointLeft += (_, __) => Text = ChangedMarker + fileName;
                 jsonTextBox.SavePointReached += (_, __) => Text = fileName;
 
                 // Interaction between settingsTextBox and errorsTextBox.

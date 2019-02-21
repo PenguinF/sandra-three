@@ -1,6 +1,6 @@
-#region License
+﻿#region License
 /*********************************************************************************
- * KeyUIActionMapping.cs
+ * UIActionBindings.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -20,28 +20,22 @@
 #endregion
 
 using Eutherion.UIActions;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Eutherion.Win.UIActions
 {
     /// <summary>
-    /// Represents a mapping between a shortcut key and a <see cref="UIAction"/>.
+    /// Enumerates a collection of handlers for a set of <see cref="UIAction"/> bindings.
+    /// Instances of this class can be declared with a collection initializer.
     /// </summary>
-    public struct KeyUIActionMapping
+    public sealed class UIActionBindings : IEnumerable<UIActionBinding>
     {
-        public KeyUIActionMapping(ShortcutKeys shortcut, UIAction action)
-        {
-            Shortcut = shortcut;
-            Action = action;
-        }
+        private readonly List<UIActionBinding> added = new List<UIActionBinding>();
 
-        /// <summary>
-        /// Gets the shortcut key for this mapping.
-        /// </summary>
-        public ShortcutKeys Shortcut { get; }
+        public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new UIActionBinding(key, value));
 
-        /// <summary>
-        /// Gets the <see cref="UIAction"/> for this mapping.
-        /// </summary>
-        public UIAction Action { get; }
+        IEnumerator IEnumerable.GetEnumerator() => added.GetEnumerator();
+        IEnumerator<UIActionBinding> IEnumerable<UIActionBinding>.GetEnumerator() => added.GetEnumerator();
     }
 }

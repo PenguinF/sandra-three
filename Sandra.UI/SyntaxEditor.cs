@@ -157,7 +157,7 @@ namespace Sandra.UI
 
             ShortcutKeysUIActionInterface shortcutKeysInterface = null;
             editBindings
-                .Where(x => x.Binding.DefaultInterfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
+                .Where(x => x.Interfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
                 .SelectMany(x => shortcutKeysInterface.Shortcuts)
                 .Select(KeyUtilities.ToKeys)
                 .ForEach(ClearCmdKey);
