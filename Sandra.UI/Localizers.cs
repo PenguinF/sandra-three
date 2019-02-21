@@ -282,9 +282,11 @@ namespace Sandra.UI
                         new UIAction(nameof(Localizers) + "." + LanguageName),
                         new UIActionBinding
                         {
-                            ShowInMenu = true,
-                            MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                            MenuIcon = menuIcon,
+                            ContextMenuInterface = new ContextMenuUIActionInterface
+                            {
+                                MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                                MenuIcon = menuIcon,
+                            },
                         });
                 }
 

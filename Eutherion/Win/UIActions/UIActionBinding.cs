@@ -19,11 +19,9 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Eutherion.Win.UIActions
 {
@@ -33,37 +31,9 @@ namespace Eutherion.Win.UIActions
     /// </summary>
     public struct UIActionBinding
     {
-        /// <summary>
-        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
-        /// </summary>
-        public ShortcutKeys[] Shortcuts;
+        public ShortcutKeysUIActionInterface ShortcutKeysInterface;
 
-        /// <summary>
-        /// Whether or not the action is shown in the context menu.
-        /// </summary>
-        public bool ShowInMenu;
-
-        /// <summary>
-        /// If <see cref="ShowInMenu"/> is true, defines the container in which a menu item must be generated for this binding.
-        /// If this is null, the root node is used.
-        /// </summary>
-        public UIMenuNode.Container MenuContainer;
-
-        /// <summary>
-        /// Gets or sets if this action is the first in a group of actions.
-        /// This will result in a separator generated above the menu item generated for this binding.
-        /// </summary>
-        public bool IsFirstInGroup;
-
-        /// <summary>
-        /// If <see cref="ShowInMenu"/> is true, defines the caption to display for the generated menu item.
-        /// </summary>
-        public LocalizedStringKey MenuCaptionKey;
-
-        /// <summary>
-        /// If <see cref="ShowInMenu"/> is true, defines the image to display for the generated menu item.
-        /// </summary>
-        public Image MenuIcon;
+        public ContextMenuUIActionInterface ContextMenuInterface;
     }
 
     /// <summary>

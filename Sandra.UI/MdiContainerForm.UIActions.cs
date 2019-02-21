@@ -36,10 +36,15 @@ namespace Sandra.UI
             new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Exit,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.Exit,
+                },
             });
 
         public UIActionState TryExit(bool perform)
@@ -52,9 +57,14 @@ namespace Sandra.UI
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.NewGame,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.NewGame,
+                },
             });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)

@@ -64,11 +64,17 @@ namespace Eutherion.Win.UIActions
             public readonly UIAction Action;
             public readonly ShortcutKeys Shortcut;
 
-            public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaptionKey, binding.MenuIcon)
+            public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, ContextMenuUIActionInterface contextMenuInterface)
+                : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
-                if (binding.Shortcuts != null) Shortcut = binding.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
-                IsFirstInGroup = binding.IsFirstInGroup;
+
+                if (shortcutKeysInterface != null && shortcutKeysInterface.Shortcuts != null)
+                {
+                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
+                }
+
+                IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
             }
 
             public override TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor) => visitor.VisitElement(this);

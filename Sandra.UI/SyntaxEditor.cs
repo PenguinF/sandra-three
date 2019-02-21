@@ -155,8 +155,8 @@ namespace Sandra.UI
             };
 
             editBindings
-                .Where(x => x.Binding.DefaultBinding.Shortcuts != null)
-                .SelectMany(x => x.Binding.DefaultBinding.Shortcuts)
+                .Where(x => x.Binding.DefaultBinding.ShortcutKeysInterface != null && x.Binding.DefaultBinding.ShortcutKeysInterface.Shortcuts != null)
+                .SelectMany(x => x.Binding.DefaultBinding.ShortcutKeysInterface.Shortcuts)
                 .Select(KeyUtilities.ToKeys)
                 .ForEach(ClearCmdKey);
 

@@ -75,9 +75,11 @@ namespace Sandra.UI
             new UIAction(ToolFormsUIActionPrefix + nameof(EditPreferencesFile)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
-                MenuIcon = Properties.Resources.settings,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
+                    MenuIcon = Properties.Resources.settings,
+                },
             });
 
         private static Form CreateSettingsForm(bool isReadOnly,
@@ -141,8 +143,10 @@ namespace Sandra.UI
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
+                },
             });
 
         public static UIActionHandlerFunc TryShowDefaultSettingsFile(Form owner) => perform =>
@@ -228,8 +232,10 @@ namespace Sandra.UI
             new UIAction(ToolFormsUIActionPrefix + nameof(OpenAbout)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.About,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.About,
+                },
             });
 
         public static UIActionHandlerFunc TryOpenAbout(Form owner) => perform =>
@@ -251,8 +257,10 @@ namespace Sandra.UI
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.Credits,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.Credits,
+                },
             });
 
         public static UIActionHandlerFunc TryShowCredits(Form owner) => perform =>
@@ -274,9 +282,11 @@ namespace Sandra.UI
             new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
-                MenuIcon = Properties.Resources.speech,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
+                    MenuIcon = Properties.Resources.speech,
+                },
             });
 
         public static UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>

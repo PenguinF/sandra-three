@@ -111,16 +111,21 @@ namespace Sandra.UI
 
         void BindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
         {
-            foreach (DefaultUIActionBinding binding in bindings)
+            foreach (DefaultUIActionBinding binding in bindings.Where(x => x.DefaultBinding.ContextMenuInterface != null))
             {
                 // Copy the default binding and modify it.
-                UIActionBinding modifiedBinding = binding.DefaultBinding;
-
-                // Add a menu item inside the given container which will update itself after focus changes.
-                modifiedBinding.MenuContainer = container;
-
-                // Always show in the menu.
-                modifiedBinding.ShowInMenu = true;
+                UIActionBinding modifiedBinding = new UIActionBinding
+                {
+                    ShortcutKeysInterface = binding.DefaultBinding.ShortcutKeysInterface,
+                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    {
+                        IsFirstInGroup = binding.DefaultBinding.ContextMenuInterface.IsFirstInGroup,
+                        MenuCaptionKey = binding.DefaultBinding.ContextMenuInterface.MenuCaptionKey,
+                        MenuIcon = binding.DefaultBinding.ContextMenuInterface.MenuIcon,
+                        // Add a menu item inside the given container which will update itself after focus changes.
+                        MenuContainer = container,
+                    },
+                };
 
                 // Register in a Dictionary to be able to figure out which menu items should be updated.
                 focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
@@ -247,10 +252,35 @@ namespace Sandra.UI
             UIMenuNode.Container viewMenu = new UIMenuNode.Container(LocalizedStringKeys.View);
             mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
 
+            // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
+            // because they would otherwise remain invisible.
+            var modifiedGotoChessBoardForm = new DefaultUIActionBinding(
+                InteractiveGame.GotoChessBoardForm.Action,
+                new UIActionBinding
+                {
+                    ShortcutKeysInterface = InteractiveGame.GotoChessBoardForm.DefaultBinding.ShortcutKeysInterface,
+                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    {
+                        IsFirstInGroup = true,
+                        MenuCaptionKey = LocalizedStringKeys.Chessboard,
+                    },
+                });
+
+            var modifiedGotoMovesForm = new DefaultUIActionBinding(
+                InteractiveGame.GotoMovesForm.Action,
+                new UIActionBinding
+                {
+                    ShortcutKeysInterface = InteractiveGame.GotoMovesForm.DefaultBinding.ShortcutKeysInterface,
+                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    {
+                        MenuCaptionKey = LocalizedStringKeys.Moves,
+                    },
+                });
+
             // Add these actions to the "View" dropdown list.
             BindFocusDependentUIActions(viewMenu,
-                                        InteractiveGame.GotoChessBoardForm,
-                                        InteractiveGame.GotoMovesForm,
+                                        modifiedGotoChessBoardForm,
+                                        modifiedGotoMovesForm,
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
 

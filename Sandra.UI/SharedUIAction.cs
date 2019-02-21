@@ -33,102 +33,152 @@ namespace Sandra.UI
             new UIAction(SharedUIActionPrefix + nameof(Undo)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Undo,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
-                MenuIcon = Properties.Resources.undo,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.Undo,
+                    MenuIcon = Properties.Resources.undo,
+                },
             });
 
         public static readonly DefaultUIActionBinding Redo = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Redo)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.Redo,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
-                MenuIcon = Properties.Resources.redo,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.Redo,
+                    MenuIcon = Properties.Resources.redo,
+                },
             });
 
         public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.ZoomIn,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
-                MenuIcon = Properties.Resources.zoom_in,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.ZoomIn,
+                    MenuIcon = Properties.Resources.zoom_in,
+                },
             });
 
         public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomOut)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.ZoomOut,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
-                MenuIcon = Properties.Resources.zoom_out,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.ZoomOut,
+                    MenuIcon = Properties.Resources.zoom_out,
+                },
             });
 
         public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Cut,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
-                MenuIcon = Properties.Resources.cut,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.Cut,
+                    MenuIcon = Properties.Resources.cut,
+                },
             });
 
         public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.Copy,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-                MenuIcon = Properties.Resources.copy,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.Copy,
+                    MenuIcon = Properties.Resources.copy,
+                },
             });
 
         public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.Paste,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
-                MenuIcon = Properties.Resources.paste,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.Paste,
+                    MenuIcon = Properties.Resources.paste,
+                },
             });
 
         public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(SelectAllText)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.SelectAll,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.SelectAll,
+                },
             });
 
         public static readonly DefaultUIActionBinding GoToPreviousLocation = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.GoToPreviousLocation,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.GoToPreviousLocation,
+                },
             });
 
         public static readonly DefaultUIActionBinding GoToNextLocation = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToNextLocation)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.GoToNextLocation,
-                Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.GoToNextLocation,
+                },
             });
     }
 }

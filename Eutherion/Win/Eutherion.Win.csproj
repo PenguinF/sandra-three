@@ -83,6 +83,7 @@
     <Compile Include="UIActions\KeyUIActionMapping.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />
     <Compile Include="UIActions\UIActionHandler.cs" />
+    <Compile Include="UIActions\UIActionInterfaces.cs" />
     <Compile Include="UIActions\UIActionUtilities.cs" />
     <Compile Include="UIActions\UIAutoHideMainMenu.cs" />
     <Compile Include="UIActions\UIMenu.cs" />

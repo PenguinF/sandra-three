@@ -32,9 +32,11 @@ namespace Sandra.UI
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
+                },
             });
 
         public UIActionState TryUsePGNPieceSymbols(bool perform)
@@ -56,8 +58,10 @@ namespace Sandra.UI
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UseLongAlgebraicNotation)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
+                },
             });
 
         public UIActionState TryUseLongAlgebraicNotation(bool perform)

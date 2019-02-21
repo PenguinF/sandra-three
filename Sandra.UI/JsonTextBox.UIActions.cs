@@ -34,11 +34,16 @@ namespace Sandra.UI
             new UIAction(JsonTextBoxUIActionPrefix + nameof(SaveToFile)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Save,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
-                MenuIcon = Properties.Resources.save,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.Save,
+                    MenuIcon = Properties.Resources.save,
+                },
             });
 
         public UIActionState TrySaveToFile(bool perform)

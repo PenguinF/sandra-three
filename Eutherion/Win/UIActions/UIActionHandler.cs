@@ -77,17 +77,17 @@ namespace Eutherion.Win.UIActions
 
             handlers.Add(action, handler);
 
-            if (binding.Shortcuts != null)
+            if (binding.ShortcutKeysInterface != null && binding.ShortcutKeysInterface.Shortcuts != null)
             {
-                foreach (var shortcut in binding.Shortcuts.Where(x => !x.IsEmpty))
+                foreach (var shortcut in binding.ShortcutKeysInterface.Shortcuts.Where(x => !x.IsEmpty))
                 {
                     keyMappings.Add(new KeyUIActionMapping(shortcut, action));
                 }
             }
 
-            if (binding.ShowInMenu)
+            if (binding.ContextMenuInterface != null)
             {
-                (binding.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding));
+                (binding.ContextMenuInterface.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding.ShortcutKeysInterface, binding.ContextMenuInterface));
             }
         }
 

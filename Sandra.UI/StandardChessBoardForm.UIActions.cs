@@ -35,11 +35,16 @@ namespace Sandra.UI
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.FlipBoard,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
-                MenuIcon = Properties.Resources.flip,
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.FlipBoard,
+                    MenuIcon = Properties.Resources.flip,
+                },
             });
 
         public UIActionState TryFlipBoard(bool perform)
@@ -52,10 +57,15 @@ namespace Sandra.UI
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
             new UIActionBinding
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                },
+                ContextMenuInterface = new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
+                },
             });
 
         public UIActionState TryTakeScreenshot(bool perform)
