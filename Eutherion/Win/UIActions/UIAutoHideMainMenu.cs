@@ -150,7 +150,7 @@ namespace Eutherion.Win.UIActions
         {
             if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface _))
             {
-                DropDownItemsActionHandler.BindAction(binding.Action, binding.DefaultInterfaces, perform =>
+                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding.Action, binding.DefaultInterfaces, perform =>
                 {
                     try
                     {
@@ -175,7 +175,7 @@ namespace Eutherion.Win.UIActions
 
                     // No handler in the chain that processes the UIAction actively, so set to hidden/disabled.
                     return alwaysVisible ? UIActionVisibility.Disabled : UIActionVisibility.Hidden;
-                });
+                }));
             }
         }
 

@@ -1,6 +1,6 @@
-﻿#region License
+#region License
 /*********************************************************************************
- * ListBoxEx.cs
+ * IUIActionHandlerProvider.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,32 +19,16 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.UIActions;
-using Eutherion.Win.UIActions;
-using System.Windows.Forms;
-
-namespace Sandra.UI
+namespace Eutherion.UIActions
 {
     /// <summary>
-    /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.
+    /// Interface implemented by components to hook into the <see cref="UIAction"/> framework.
     /// </summary>
-    public partial class ListBoxEx : ListBox, IUIActionHandlerProvider
+    public interface IUIActionHandlerProvider
     {
         /// <summary>
-        /// Gets the action handler for this control.
+        /// Returns the <see cref="UIActionHandler"/> for the component, to which handlers for <see cref="UIAction"/>s can be bound.
         /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
-
-        /// <summary>
-        /// Binds the regular copy/select-all UIActions to this listbox.
-        /// </summary>
-        public void BindStandardCopySelectUIActions()
-        {
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
-                { SharedUIAction.SelectAllText, TrySelectAllText },
-            });
-        }
+        UIActionHandler ActionHandler { get; }
     }
 }

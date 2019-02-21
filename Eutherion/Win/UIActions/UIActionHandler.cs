@@ -21,117 +21,10 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.UIActions
 {
-    /// <summary>
-    /// Responsible for managing a set of <see cref="UIAction"/>s and their associated handlers.
-    /// </summary>
-    public class UIActionHandler
-    {
-        private readonly Dictionary<UIAction, UIActionHandlerFunc> handlers = new Dictionary<UIAction, UIActionHandlerFunc>();
-        private readonly List<(ImplementationSet<IUIActionInterface>, UIAction)> interfaceSets = new List<(ImplementationSet<IUIActionInterface>, UIAction)>();
-
-        /// <summary>
-        /// Enumerates all sets of interfaces which map to a invokable <see cref="UIAction"/> of this handler.
-        /// </summary>
-        public IEnumerable<(ImplementationSet<IUIActionInterface>, UIAction)> InterfaceSets => interfaceSets.Enumerate();
-
-        /// <summary>
-        /// Binds a handler function for a <see cref="UIAction"/> to this <see cref="UIActionHandler"/>,
-        /// and specifies how this <see cref="UIAction"/> is exposed to the user interface.
-        /// </summary>
-        /// <param name="action">
-        /// The <see cref="UIAction"/> to bind.
-        /// </param>
-        /// <param name="binding">
-        /// <see cref="UIActionBinding"/> structure containing parameters that define how the <see cref="UIAction"/> is exposed to the user interface.
-        /// </param>
-        /// <param name="handler">
-        /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
-        /// </param>
-        public void BindAction(UIAction action, ImplementationSet<IUIActionInterface> binding, UIActionHandlerFunc handler)
-        {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-            if (handler == null) throw new ArgumentNullException(nameof(handler));
-
-            handlers.Add(action, handler);
-            interfaceSets.Add((binding, action));
-        }
-
-        /// <summary>
-        /// Occurs when all actions have been invalidated.
-        /// </summary>
-        public event Action<UIActionHandler> UIActionsInvalidated;
-
-        /// <summary>
-        /// Raises the <see cref="UIActionsInvalidated"/> event. 
-        /// </summary>
-        protected virtual void OnUIActionsInvalidated()
-        {
-            UIActionsInvalidated?.Invoke(this);
-        }
-
-        /// <summary>
-        /// Verifies if an action can be performed, and optionally performs it.
-        /// </summary>
-        /// <param name="action">
-        /// The <see cref="UIAction"/> to perform.
-        /// </param>
-        /// <param name="perform">
-        /// Whether or not to perform the action.
-        /// </param>
-        /// <returns>
-        /// A complete <see cref="UIActionState"/> if <paramref name="perform"/> is false,
-        /// or a <see cref="UIActionState"/> indicating whether or not the action was performed successfully, if <paramref name="perform"/> is true.
-        /// </returns>
-        public UIActionState TryPerformAction(UIAction action, bool perform)
-        {
-            if (action == null) throw new ArgumentNullException(nameof(action));
-
-            if (handlers.TryGetValue(action, out UIActionHandlerFunc handler))
-            {
-                // Call the handler.
-                UIActionState result = handler(perform);
-
-                // Raise event if an action has been performed successfully.
-                if (perform && result.UIActionVisibility == UIActionVisibility.Enabled)
-                {
-                    Invalidate();
-                }
-
-                return result;
-            }
-
-            // Default is to look at parent controls for unsupported actions.
-            return default(UIActionState);
-        }
-
-        /// <summary>
-        /// Invalidates this <see cref="UIActionHandler"/> manually.
-        /// </summary>
-        public void Invalidate()
-        {
-            OnUIActionsInvalidated();
-        }
-    }
-
-    /// <summary>
-    /// Interface implemented by <see cref="Control"/> subclasses to hook into the <see cref="UIAction"/> framework.
-    /// </summary>
-    public interface IUIActionHandlerProvider
-    {
-        /// <summary>
-        /// Returns the <see cref="UIActionHandler"/> for the <see cref="Control"/>,
-        /// to which handlers for <see cref="UIAction"/>s can be bound.
-        /// </summary>
-        UIActionHandler ActionHandler { get; }
-    }
-
     public static class UIActionProviderExtensions
     {
         /// <summary>
@@ -154,7 +47,7 @@ namespace Eutherion.Win.UIActions
         {
             if (provider != null && provider.ActionHandler != null)
             {
-                provider.ActionHandler.BindAction(action, binding, handler);
+                provider.ActionHandler.BindAction(new UIActionBinding(action, binding, handler));
             }
         }
 
@@ -173,10 +66,7 @@ namespace Eutherion.Win.UIActions
         /// </param>
         public static void BindAction(this IUIActionHandlerProvider provider, DefaultUIActionBinding binding, UIActionHandlerFunc handler)
         {
-            if (provider != null && provider.ActionHandler != null)
-            {
-                provider.ActionHandler.BindAction(binding.Action, binding.DefaultInterfaces, handler);
-            }
+            BindAction(provider, binding.Action, binding.DefaultInterfaces, handler);
         }
 
         /// <summary>
@@ -191,14 +81,12 @@ namespace Eutherion.Win.UIActions
         /// </param>
         public static void BindActions(this IUIActionHandlerProvider provider, UIActionBindings bindings)
         {
-            if (provider != null && provider.ActionHandler != null)
+            foreach (var bindingHandlerPair in bindings)
             {
-                foreach (var bindingHandlerPair in bindings)
-                {
-                    provider.ActionHandler.BindAction(bindingHandlerPair.Binding.Action,
-                                                      bindingHandlerPair.Binding.DefaultInterfaces,
-                                                      bindingHandlerPair.Handler);
-                }
+                BindAction(provider,
+                           bindingHandlerPair.Binding.Action,
+                           bindingHandlerPair.Binding.DefaultInterfaces,
+                           bindingHandlerPair.Handler);
             }
         }
     }

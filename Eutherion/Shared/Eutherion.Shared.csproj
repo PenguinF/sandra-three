@@ -73,11 +73,13 @@
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextIndex.cs" />
     <Compile Include="UIActions\DefaultUIActionBinding.cs" />
+    <Compile Include="UIActions\IUIActionHandlerProvider.cs" />
     <Compile Include="UIActions\IUIActionInterface.cs" />
     <Compile Include="UIActions\LocalizedConsoleKeys.cs" />
     <Compile Include="UIActions\ShortcutKeys.cs" />
     <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />
+    <Compile Include="UIActions\UIActionHandler.cs" />
     <Compile Include="UIActions\UIActionHandlerFunc.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />

@@ -131,7 +131,7 @@ namespace Sandra.UI
                     focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
 
                     // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-                    mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding.Action, modifiedBinding, perform =>
                     {
                         try
                         {
@@ -170,7 +170,7 @@ namespace Sandra.UI
 
                         // No handler in the chain that processes the UIAction actively, so set to disabled.
                         return UIActionVisibility.Disabled;
-                    });
+                    }));
                 }
             }
         }
@@ -200,10 +200,10 @@ namespace Sandra.UI
             this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
-            developerToolsActionHandler.BindAction(
+            developerToolsActionHandler.BindAction(new UIActionBinding(
                 ToolForms.EditCurrentLanguage.Action,
                 ToolForms.EditCurrentLanguage.DefaultInterfaces,
-                ToolForms.TryEditCurrentLanguage(this));
+                ToolForms.TryEditCurrentLanguage(this)));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuRootNodes.Add(fileMenu);
