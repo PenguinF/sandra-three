@@ -273,18 +273,45 @@ namespace Eutherion.Win.UIActions
     {
         /// <summary>
         /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>
-        /// given the <see cref="UIMenuNode"/> which is defined in a <see cref="UIActionHandler"/>.
+        /// given the set of <see cref="ContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
         /// </summary>
         /// <param name="actionHandler">
-        /// The <see cref="UIActionHandler"/> which performs actions and defines the blueprint <see cref="UIMenuNode"/>.
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="ContextMenuUIActionInterface"/>s.
         /// </param>
         /// <param name="destination">
         /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
         /// </param>
         public static void BuildMenu(UIActionHandler actionHandler, ToolStripItemCollection destination)
         {
-            new UIMenuBuilder(actionHandler).BuildMenu(actionHandler.RootMenuNode.Nodes, destination);
+            var rootMenuNodes = new List<UIMenuNode>();
+
+            // Extract all ContextMenuUIActionInterfaces from the handler.
+            foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
+            {
+                if (interfaceSet.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                {
+                    var shortcutKeysInterface = interfaceSet.Get<ShortcutKeysUIActionInterface>();
+                    rootMenuNodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
+                }
+            }
+
+            BuildMenu(actionHandler, rootMenuNodes, destination);
         }
+
+        /// <summary>
+        /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>.
+        /// </summary>
+        /// <param name="actionHandler">
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the blueprint <see cref="UIMenuNode"/>.
+        /// </param>
+        /// <param name="rootMenuNodes">
+        /// Collection of the menu items to generate.
+        /// </param>
+        /// <param name="destination">
+        /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
+        /// </param>
+        public static void BuildMenu(UIActionHandler actionHandler, IEnumerable<UIMenuNode> rootMenuNodes, ToolStripItemCollection destination)
+            => new UIMenuBuilder(actionHandler).BuildMenu(rootMenuNodes, destination);
 
         UIActionHandler ActionHandler;
 

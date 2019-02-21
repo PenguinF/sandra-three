@@ -42,8 +42,9 @@ namespace Sandra.UI
 
         private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
 
-        // Separate action handler for building the MainMenuStrip.
+        // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+        private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
 
         // Action handler for the developer tools dropdown item.
         private readonly UIActionHandler developerToolsActionHandler = new UIActionHandler();
@@ -60,7 +61,7 @@ namespace Sandra.UI
             InitializeUIActions();
 
             MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, mainMenuRootNodes, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
@@ -185,7 +186,7 @@ namespace Sandra.UI
                 }
 
                 UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
-                mainMenuActionHandler.RootMenuNode.Nodes.Add(langMenu);
+                mainMenuRootNodes.Add(langMenu);
                 BindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
@@ -205,7 +206,7 @@ namespace Sandra.UI
                 ToolForms.TryEditCurrentLanguage(this));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
+            mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
@@ -214,7 +215,7 @@ namespace Sandra.UI
                                         Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
+            mainMenuRootNodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
             BindFocusDependentUIActions(gameMenu,
@@ -250,7 +251,7 @@ namespace Sandra.UI
                                         StandardChessBoardForm.TakeScreenshot);
 
             UIMenuNode.Container viewMenu = new UIMenuNode.Container(LocalizedStringKeys.View);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
+            mainMenuRootNodes.Add(viewMenu);
 
             // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
             // because they would otherwise remain invisible.
@@ -285,7 +286,7 @@ namespace Sandra.UI
                                         SharedUIAction.ZoomOut);
 
             UIMenuNode.Container helpMenu = new UIMenuNode.Container(LocalizedStringKeys.Help);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(helpMenu);
+            mainMenuRootNodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.
             BindFocusDependentUIActions(helpMenu,

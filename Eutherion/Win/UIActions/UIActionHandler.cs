@@ -34,17 +34,12 @@ namespace Eutherion.Win.UIActions
     public class UIActionHandler
     {
         private readonly Dictionary<UIAction, UIActionHandlerFunc> handlers = new Dictionary<UIAction, UIActionHandlerFunc>();
-        private readonly List<KeyUIActionMapping> keyMappings = new List<KeyUIActionMapping>();
+        private readonly List<(ImplementationSet<IUIActionInterface>, UIAction)> interfaceSets = new List<(ImplementationSet<IUIActionInterface>, UIAction)>();
 
         /// <summary>
-        /// Enumerates all non-empty <see cref="ShortcutKeys"/> which are bound to this handler.
+        /// Enumerates all sets of interfaces which map to a invokable <see cref="UIAction"/> of this handler.
         /// </summary>
-        public IEnumerable<KeyUIActionMapping> KeyMappings => keyMappings.Enumerate();
-
-        /// <summary>
-        /// Gets the top level node of a <see cref="UIMenuNode"/> tree.
-        /// </summary>
-        public UIMenuNode.Container RootMenuNode { get; } = new UIMenuNode.Container(null);
+        public IEnumerable<(ImplementationSet<IUIActionInterface>, UIAction)> InterfaceSets => interfaceSets.Enumerate();
 
         /// <summary>
         /// Binds a handler function for a <see cref="UIAction"/> to this <see cref="UIActionHandler"/>,
@@ -65,19 +60,7 @@ namespace Eutherion.Win.UIActions
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
             handlers.Add(action, handler);
-
-            if (binding.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
-            {
-                foreach (var shortcut in shortcutKeysInterface.Shortcuts.Where(x => !x.IsEmpty))
-                {
-                    keyMappings.Add(new KeyUIActionMapping(shortcut, action));
-                }
-            }
-
-            if (binding.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
-            {
-                RootMenuNode.Nodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
-            }
+            interfaceSets.Add((binding, action));
         }
 
         /// <summary>

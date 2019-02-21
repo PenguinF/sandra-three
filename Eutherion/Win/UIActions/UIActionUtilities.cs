@@ -72,14 +72,20 @@ namespace Eutherion.Win.UIActions
             foreach (UIActionHandler actionHandler in EnumerateUIActionHandlers(bottomLevelControl))
             {
                 // Try to find an action with given shortcut.
-                foreach (var mapping in actionHandler.KeyMappings)
+                foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
                 {
-                    // If the shortcut matches, then try to perform the action.
-                    // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
-                    if (KeyUtilities.IsMatch(mapping.Shortcut, shortcut)
-                        && actionHandler.TryPerformAction(mapping.Action, true).UIActionVisibility != UIActionVisibility.Parent)
+                    if (interfaceSet.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
                     {
-                        return true;
+                        foreach (var registeredShortcut in shortcutKeysInterface.Shortcuts)
+                        {
+                            // If the shortcut matches, then try to perform the action.
+                            // If the handler does not return UIActionVisibility.Parent, then swallow the key by returning true.
+                            if (KeyUtilities.IsMatch(registeredShortcut, shortcut)
+                                && actionHandler.TryPerformAction(action, true).UIActionVisibility != UIActionVisibility.Parent)
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
