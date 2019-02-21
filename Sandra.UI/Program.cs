@@ -63,11 +63,6 @@ namespace Sandra.UI
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appDataSubFolderName);
 
-#if DEBUG
-            // In debug mode, generate default json configuration files from hard coded settings.
-            GenerateJsonConfigurationFiles();
-#endif
-
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
             Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
@@ -83,12 +78,17 @@ namespace Sandra.UI
                     Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
                     localSettingsCopy);
 
-                Chess.Constants.ForceInitialize();
-
                 if (session.TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
                 {
                     Localizer.Current = localizer;
                 }
+
+                Chess.Constants.ForceInitialize();
+
+#if DEBUG
+                // In debug mode, generate default json configuration files from hard coded settings.
+                GenerateJsonConfigurationFiles();
+#endif
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
