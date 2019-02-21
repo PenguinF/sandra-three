@@ -107,7 +107,7 @@ namespace Sandra.UI
                         {
                             SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
 
-                            var defaultSettingsObject = Program.DefaultSettings.Settings;
+                            var defaultSettingsObject = Session.Current.DefaultSettings.Settings;
                             foreach (var property in localSettingsExample.Schema.AllProperties)
                             {
                                 if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
@@ -159,16 +159,16 @@ namespace Sandra.UI
                     defaultSettingsFormBox,
                     () =>
                     {
-                        if (!File.Exists(Program.DefaultSettings.AbsoluteFilePath))
+                        if (!File.Exists(Session.Current.DefaultSettings.AbsoluteFilePath))
                         {
                             // Before opening the possibly non-existent file, write to it.
                             // Ignore exceptions, may be caused by insufficient access rights.
-                            Program.DefaultSettings.WriteToFile();
+                            Session.Current.DefaultSettings.WriteToFile();
                         }
 
                         return CreateSettingsForm(
                             !Program.GetSetting(SettingKeys.DeveloperMode),
-                            Program.DefaultSettings,
+                            Session.Current.DefaultSettings,
                             SettingKeys.DefaultSettingsWindow,
                             SettingKeys.DefaultSettingsErrorHeight);
                     });

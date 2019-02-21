@@ -36,17 +36,33 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class Session : IDisposable
     {
+        public static readonly string DefaultSettingsFileName = "DefaultSettings.json";
+
         public static readonly string LangSettingKey = "lang";
 
         public static Session Current { get; private set; }
 
-        public static Session Configure(string executableFolder, string langFolderName, string appDataSubFolderName, ISettingsProvider settingsProvider)
-            => Current = new Session(executableFolder, langFolderName, appDataSubFolderName, settingsProvider);
+        public static Session Configure(string executableFolder, ISettingsProvider settingsProvider)
+            => Current = new Session(executableFolder, settingsProvider);
 
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
-        private Session(string executableFolder, string langFolderName, string appDataSubFolderName, ISettingsProvider settingsProvider)
+        private Session(string executableFolder, ISettingsProvider settingsProvider)
         {
+            // Attempt to load default settings.
+            DefaultSettings = SettingsFile.Create(
+                Path.Combine(executableFolder, DefaultSettingsFileName),
+                settingsProvider.CreateBuiltIn());
+
+            // Save name of APPDATA subfolder for persistent files.
+            var appDataSubFolderName = GetDefaultSetting(SharedSettingKeys.AppDataSubFolderName);
+            AppDataSubFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                appDataSubFolderName);
+
+            // Scan Languages subdirectory to load localizers.
+            var langFolderName = GetDefaultSetting(SharedSettingKeys.LangFolderName);
+
             registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(executableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
@@ -67,11 +83,18 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        public string AppDataSubFolder { get; }
+
+        public SettingsFile DefaultSettings { get; }
+
         public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public AutoSave AutoSave { get; }
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
+
+        public TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
+            => DefaultSettings.Settings.GetValue(property);
 
         public bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
@@ -125,6 +148,11 @@ namespace Eutherion.Win.AppTemplate
 
     public interface ISettingsProvider
     {
+        /// <summary>
+        /// Gets the built-in default settings. Its schema is used for the default settings file.
+        /// </summary>
+        SettingCopy CreateBuiltIn();
+
         /// <summary>
         /// Gets the schema to use for the auto-save file.
         /// </summary>

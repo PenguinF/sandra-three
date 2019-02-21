@@ -32,13 +32,7 @@ namespace Sandra.UI
 {
     static class Program
     {
-        internal const string DefaultSettingsFileName = "DefaultSettings.json";
-
         internal static string ExecutableFolder { get; private set; }
-
-        internal static string AppDataSubFolder { get; private set; }
-
-        internal static SettingsFile DefaultSettings { get; private set; }
 
         internal static SettingsFile LocalSettings { get; private set; }
 
@@ -54,22 +48,8 @@ namespace Sandra.UI
             // Store executable folder location for later use.
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
-            // Attempt to load default settings.
             var settingsProvider = new SettingsProvider();
-            DefaultSettings = SettingsFile.Create(
-                Path.Combine(ExecutableFolder, DefaultSettingsFileName),
-                settingsProvider.CreateBuiltIn());
-
-            // Save name of APPDATA subfolder for persistent files.
-            var appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
-            AppDataSubFolder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appDataSubFolderName);
-
-            // Scan Languages subdirectory to load localizers.
-            var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
-
-            using (var session = Session.Configure(ExecutableFolder, langFolderName, appDataSubFolderName, settingsProvider))
+            using (var session = Session.Configure(ExecutableFolder, settingsProvider))
             {
                 // After creating the auto-save file, look for a local preferences file.
                 // Create a working copy with correct schema first.
@@ -77,14 +57,14 @@ namespace Sandra.UI
 
                 // And then create the local settings file which can overwrite values in default settings.
                 LocalSettings = SettingsFile.Create(
-                    Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                    Path.Combine(session.AppDataSubFolder, session.GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
                     localSettingsCopy);
 
                 Chess.Constants.ForceInitialize();
 
 #if DEBUG
                 // In debug mode, generate default json configuration files from hard coded settings.
-                GenerateJsonConfigurationFiles();
+                GenerateJsonConfigurationFiles(session);
 #endif
 
                 Application.EnableVisualStyles();
@@ -93,14 +73,11 @@ namespace Sandra.UI
             }
         }
 
-        internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
-            => DefaultSettings.Settings.GetValue(property);
-
         internal static TValue GetSetting<TValue>(SettingProperty<TValue> property)
         {
             return LocalSettings.Settings.TryGetValue(property, out TValue result)
                 ? result
-                : GetDefaultSetting(property);
+                : Session.Current.GetDefaultSetting(property);
         }
 
         internal static Image LoadImage(string imageFileKey)
@@ -121,10 +98,10 @@ namespace Sandra.UI
         /// Generates DefaultSettings.json from the loaded default settings in memory,
         /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
         /// </summary>
-        private static void GenerateJsonConfigurationFiles()
+        private static void GenerateJsonConfigurationFiles(Session session)
         {
             SettingsFile.WriteToFile(
-                DefaultSettings.Settings,
+                session.DefaultSettings.Settings,
                 Path.Combine(ExecutableFolder, "DefaultSettings.json"));
 
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());

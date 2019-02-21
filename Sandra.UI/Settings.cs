@@ -44,7 +44,7 @@ namespace Sandra.UI
             "There are generally two copies of this file, one in the directory where "
             + Path.GetFileName(typeof(Program).Assembly.Location)
             + " is located ("
-            + Program.DefaultSettingsFileName
+            + Session.DefaultSettingsFileName
             + "), and one that lives in the local application data folder"
             + LocalApplicationDataPath(isLocalSchema)
             + ".",
@@ -72,17 +72,6 @@ namespace Sandra.UI
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        private static readonly string AppDataSubFolderNameDescription
-            = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
-            + "This includes the auto-save file, or e.g. a preferences file. "
-            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
-            + "Instead, forward slashes ('/') can be used to separate directories as well.";
-
-        public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
-            SubFolderNameType.Instance,
-            new SettingComment(AppDataSubFolderNameDescription));
-
         private static readonly string LocalPreferencesFileNameDescription
             = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
 
@@ -98,16 +87,6 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
             PType.CLR.Boolean,
             new SettingComment(DeveloperModeDescription));
-
-        private static readonly string LangFolderNameDescription
-            = "Subfolder of the application directory which is scanned for language files. "
-            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
-            + "Instead, forward slashes ('/') can be used to separate directories as well.";
-
-        public static readonly SettingProperty<string> LangFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LangFolderName))),
-            SubFolderNameType.Instance,
-            new SettingComment(LangFolderNameDescription));
 
         public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
@@ -236,10 +215,10 @@ namespace Sandra.UI
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.Version,
-                SettingKeys.AppDataSubFolderName,
+                SharedSettingKeys.AppDataSubFolderName,
                 SettingKeys.LocalPreferencesFileName,
                 SettingKeys.DeveloperMode,
-                SettingKeys.LangFolderName,
+                SharedSettingKeys.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
@@ -266,10 +245,10 @@ namespace Sandra.UI
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
-            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.AddOrReplace(SharedSettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(SettingKeys.DeveloperMode, false);
-            defaultSettings.AddOrReplace(SettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
+            defaultSettings.AddOrReplace(SharedSettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
             defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);
