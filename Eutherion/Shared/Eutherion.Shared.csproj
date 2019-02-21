@@ -83,6 +83,7 @@
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
+    <Compile Include="Utils\ImplementationSet.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\Union.cs" />
