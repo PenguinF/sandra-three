@@ -20,34 +20,11 @@
 #endregion
 
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.UIActions
 {
-    /// <summary>
-    /// Helper class which encapsulates a <see cref="IUIActionHandlerProvider"/>'s default suggested binding for a <see cref="UIAction"/>.
-    /// </summary>
-    public sealed class DefaultUIActionBinding
-    {
-        /// <summary>
-        /// Gets the <see cref="UIAction"/> to bind.
-        /// </summary>
-        public UIAction Action { get; }
-
-        /// <summary>
-        /// Gets the suggested default <see cref="ImplementationSet{TInterface}"/> which defines how the action is exposed to the user interface.
-        /// </summary>
-        public ImplementationSet<IUIActionInterface> DefaultInterfaces { get; }
-
-        public DefaultUIActionBinding(UIAction action, ImplementationSet<IUIActionInterface> defaultInterfaces)
-        {
-            Action = action;
-            DefaultInterfaces = defaultInterfaces;
-        }
-    }
-
     /// <summary>
     /// Defines a <see cref="UIActionHandlerFunc"/> for a given <see cref="DefaultUIActionBinding"/>.
     /// </summary>
