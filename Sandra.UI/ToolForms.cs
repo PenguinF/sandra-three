@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;

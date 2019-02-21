@@ -81,7 +81,6 @@
     <Compile Include="Storage\SettingWriter.cs" />
     <Compile Include="Storage\SubFolderNameType.cs" />
     <Compile Include="UIActions\KeyUIActionMapping.cs" />
-    <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />
     <Compile Include="UIActions\UIActionHandler.cs" />
     <Compile Include="UIActions\UIAutoHideMainMenu.cs" />

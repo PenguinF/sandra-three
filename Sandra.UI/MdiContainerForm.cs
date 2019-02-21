@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
 using Eutherion.Win.UIActions;

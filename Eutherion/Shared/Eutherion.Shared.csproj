@@ -72,6 +72,7 @@
     <Compile Include="Text\Json\JsonWhitespace.cs" />
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextIndex.cs" />
+    <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />

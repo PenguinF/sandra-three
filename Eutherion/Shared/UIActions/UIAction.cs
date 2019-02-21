@@ -22,7 +22,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Eutherion.Win.UIActions
+namespace Eutherion.UIActions
 {
     /// <summary>
     /// Represents an immutable, opaque atom for a user action.
@@ -109,12 +109,29 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public bool Enabled => UIActionVisibility == UIActionVisibility.Enabled;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UIActionState"/> with a given <see cref="UIActions.UIActionVisibility"/>
+        /// and which is unchecked.
+        /// </summary>
+        /// <param name="visibility">
+        /// The <see cref="UIActions.UIActionVisibility"/> of this <see cref="UIActionState"/>.
+        /// </param>
         public UIActionState(UIActionVisibility visibility)
         {
             UIActionVisibility = visibility;
             Checked = false;
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="UIActionState"/> with a given <see cref="UIActions.UIActionVisibility"/>
+        /// and checked state.
+        /// </summary>
+        /// <param name="visibility">
+        /// The <see cref="UIActions.UIActionVisibility"/> of this <see cref="UIActionState"/>.
+        /// </param>
+        /// <param name="isChecked">
+        /// The checked state of this <see cref="UIActionState"/>.
+        /// </param>
         public UIActionState(UIActionVisibility visibility, bool isChecked)
         {
             UIActionVisibility = visibility;

@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.UIActions;
+using Eutherion.UIActions;
 
 namespace Sandra.UI
 {
