@@ -51,32 +51,33 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
         public static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
 
-        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
-        {
-            { About, "About SandraChess" },
-            { Copy, "Copy" },
-            { Credits, "Show credits" },
-            { Cut, "Cut" },
-            { Edit, "Edit" },
-            { EditCurrentLanguage, "Edit current language" },
-            { EditPreferencesFile, "Edit preferences" },
-            { ErrorLocation, "{0} at line {1}, position {2}" },
-            { Exit, "Exit" },
-            { File, "File" },
-            { GoToNextLocation, "Go to next location" },
-            { GoToPreviousLocation, "Go to previous location" },
-            { Help, "Help" },
-            { NoErrorsMessage, "(No errors)" },
-            { Paste, "Paste" },
-            { Redo, "Redo" },
-            { Save, "Save" },
-            { SelectAll, "Select All" },
-            { ShowDefaultSettingsFile, "Show default settings" },
-            { Tools, "Tools" },
-            { Undo, "Undo" },
-            { View, "View" },
-            { ZoomIn, "Zoom in" },
-            { ZoomOut, "Zoom out" },
-        };
+        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations(string appName)
+            => new Dictionary<LocalizedStringKey, string>
+            {
+                { About, $"About {appName}" },
+                { Copy, "Copy" },
+                { Credits, "Show credits" },
+                { Cut, "Cut" },
+                { Edit, "Edit" },
+                { EditCurrentLanguage, "Edit current language" },
+                { EditPreferencesFile, "Edit preferences" },
+                { ErrorLocation, "{0} at line {1}, position {2}" },
+                { Exit, "Exit" },
+                { File, "File" },
+                { GoToNextLocation, "Go to next location" },
+                { GoToPreviousLocation, "Go to previous location" },
+                { Help, "Help" },
+                { NoErrorsMessage, "(No errors)" },
+                { Paste, "Paste" },
+                { Redo, "Redo" },
+                { Save, "Save" },
+                { SelectAll, "Select All" },
+                { ShowDefaultSettingsFile, "Show default settings" },
+                { Tools, "Tools" },
+                { Undo, "Undo" },
+                { View, "View" },
+                { ZoomIn, "Zoom in" },
+                { ZoomOut, "Zoom out" },
+            };
     }
 }

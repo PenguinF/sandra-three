@@ -39,20 +39,19 @@ namespace Sandra.UI
         [STAThread]
         static void Main()
         {
+            // Store executable folder/filename for later use.
+            Session.InitializeExecutablePath(typeof(Program).Assembly.Location);
+
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
                 LocalizedStringKeys.DefaultEnglishTranslations,
                 LocalizedConsoleKeys.DefaultEnglishTranslations,
-                SharedLocalizedStringKeys.DefaultEnglishTranslations,
+                SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
             Localizer.Current = builtInEnglishLocalizer;
 
-            var settingsProvider = new SettingsProvider();
-            using (var session = Session.Configure(
-                typeof(Program).Assembly,
-                settingsProvider,
-                builtInEnglishLocalizer.Dictionary))
+            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer.Dictionary))
             {
                 Chess.Constants.ForceInitialize();
 
@@ -71,7 +70,7 @@ namespace Sandra.UI
         {
             try
             {
-                return Image.FromFile(Path.Combine(Session.Current.ExecutableFolder, "Images", imageFileKey + ".png"));
+                return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
             }
             catch (Exception exc)
             {
@@ -89,7 +88,7 @@ namespace Sandra.UI
         {
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
-                Path.Combine(Session.Current.ExecutableFolder, "DefaultSettings.json"));
+                Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"));
 
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
@@ -97,7 +96,7 @@ namespace Sandra.UI
             settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
             SettingsFile.WriteToFile(
                 settingCopy.Commit(),
-                Path.Combine(Session.Current.ExecutableFolder, "Languages", "en.json"),
+                Path.Combine(Session.ExecutableFolder, "Languages", "en.json"),
                 SettingWriterOptions.SuppressSettingComments);
         }
 #endif

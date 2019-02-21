@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -41,18 +40,29 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly string LangSettingKey = "lang";
 
+        public static string ExecutableFolder { get; private set; }
+
+        public static string ExecutableFileName { get; private set; }
+
+        public static string ExecutableFileNameWithoutExtension { get; private set; }
+
+        public static void InitializeExecutablePath(string exePath)
+        {
+            ExecutableFolder = Path.GetDirectoryName(exePath);
+            ExecutableFileName = Path.GetFileName(exePath);
+            ExecutableFileNameWithoutExtension = Path.GetFileNameWithoutExtension(exePath);
+        }
+
         public static Session Current { get; private set; }
 
-        public static Session Configure(Assembly executableAssembly,
-                                        ISettingsProvider settingsProvider,
+        public static Session Configure(ISettingsProvider settingsProvider,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
-            => Current = new Session(executableAssembly, settingsProvider, defaultLocalizerDictionary);
+            => Current = new Session(settingsProvider, defaultLocalizerDictionary);
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
-        private Session(Assembly executableAssembly,
-                        ISettingsProvider settingsProvider,
+        private Session(ISettingsProvider settingsProvider,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
@@ -60,15 +70,11 @@ namespace Eutherion.Win.AppTemplate
             // May be null.
             this.defaultLocalizerDictionary = defaultLocalizerDictionary;
 
-            // Store executable folder/filename for later use.
-            ExecutableFolder = Path.GetDirectoryName(executableAssembly.Location);
-            ExecutableFileName = Path.GetFileName(executableAssembly.Location);
-
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
                 new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
                 PType.CLR.Boolean,
-                new SettingComment($"Enables tools which assist with {Path.GetFileNameWithoutExtension(ExecutableFileName)} development and debugging."));
+                new SettingComment($"Enables tools which assist with {ExecutableFileNameWithoutExtension} development and debugging."));
 
             // Attempt to load default settings.
             DefaultSettings = SettingsFile.Create(
@@ -111,10 +117,6 @@ namespace Eutherion.Win.AppTemplate
                 if (localizer != null) Localizer.Current = localizer;
             }
         }
-
-        public string ExecutableFolder { get; }
-
-        public string ExecutableFileName { get; }
 
         public SettingProperty<bool> DeveloperMode { get; }
 
