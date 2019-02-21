@@ -52,7 +52,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\Localizers.cs" />
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
