@@ -254,7 +254,7 @@ namespace Sandra.UI
 
         public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? displayText.ConditionalFormat(parameters)
+            ? LocalizedString.ConditionalFormat(displayText, parameters)
             : Default.Localize(localizedStringKey, parameters);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;
@@ -328,7 +328,7 @@ namespace Sandra.UI
 
         public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? displayText.ConditionalFormat(parameters)
+            ? LocalizedString.ConditionalFormat(displayText, parameters)
             : Default.Localize(localizedStringKey, parameters);
 
         private BuiltInEnglishLocalizer()
@@ -472,28 +472,6 @@ namespace Sandra.UI
             }
 
             return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
-        }
-
-        /// <summary>
-        /// Conditionally formats a string, based on whether or not it has parameters.
-        /// </summary>
-        public static string ConditionalFormat(this string localizedString, string[] parameters)
-        {
-            if (parameters == null || parameters.Length == 0) return localizedString;
-
-            try
-            {
-                return string.Format(localizedString, parameters);
-            }
-            catch (FormatException)
-            {
-                // The provided localized format string is in an incorrect format, and/or it contains
-                // more parameter substitution locations than there are parameters provided.
-                // Examples:
-                // string.Format("Test with parameters {invalid parameter}", parameters)
-                // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {DebugUtilities.ToDefaultParameterListDisplayString(parameters)}";
-            }
         }
     }
 
