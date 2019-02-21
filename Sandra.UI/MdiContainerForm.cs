@@ -115,23 +115,16 @@ namespace Sandra.UI
             {
                 if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
                 {
-                    // Copy the default binding and modify it.
-                    var modifiedBinding = new ImplementationSet<IUIActionInterface>
-                    {
-                        new ContextMenuUIActionInterface
-                        {
-                            IsFirstInGroup = contextMenuInterface.IsFirstInGroup,
-                            MenuCaptionKey = contextMenuInterface.MenuCaptionKey,
-                            MenuIcon = contextMenuInterface.MenuIcon,
-                            // Add a menu item inside the given container which will update itself after focus changes.
-                            MenuContainer = container,
-                        },
-                    };
-
+                    // Copy the default binding and remove the ContextMenuUIActionInterface
+                    // which is used below to construct a UIMenuNode.Element directly.
+                    var modifiedBinding = new ImplementationSet<IUIActionInterface>();
                     if (binding.DefaultInterfaces.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface))
                     {
                         modifiedBinding.Add(shortcutKeysInterface);
                     }
+
+                    // Add a menu item inside the given container which will update itself after focus changes.
+                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, shortcutKeysInterface, contextMenuInterface));
 
                     // Register in a Dictionary to be able to figure out which menu items should be updated.
                     focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());

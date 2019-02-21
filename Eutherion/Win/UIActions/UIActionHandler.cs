@@ -76,7 +76,7 @@ namespace Eutherion.Win.UIActions
 
             if (binding.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
             {
-                (contextMenuInterface.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
+                RootMenuNode.Nodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
             }
         }
 

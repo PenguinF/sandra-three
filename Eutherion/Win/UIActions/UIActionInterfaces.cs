@@ -42,12 +42,6 @@ namespace Eutherion.Win.UIActions
     public sealed class ContextMenuUIActionInterface : IUIActionInterface
     {
         /// <summary>
-        /// Defines the container in which a menu item must be generated for this binding.
-        /// If this is null, the root node is used.
-        /// </summary>
-        public UIMenuNode.Container MenuContainer;
-
-        /// <summary>
         /// Gets or sets if this action is the first in a group of actions.
         /// This will result in a separator generated above the menu item generated for this binding.
         /// </summary>
