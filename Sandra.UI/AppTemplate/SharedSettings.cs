@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SharedSettingKeys.cs
+ * SharedSettings.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -23,8 +23,12 @@ using Eutherion.Win.Storage;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public static class SharedSettingKeys
+    public static class SharedSettings
     {
+        public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
+
+        public static readonly string DefaultLangFolderName = "Languages";
+
         private static readonly string AppDataSubFolderNameDescription
             = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "

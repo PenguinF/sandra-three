@@ -142,7 +142,7 @@ namespace Eutherion.Win.AppTemplate
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
-            if (Session.Current.TryGetAutoSaveValue(SharedSettingKeys.JsonZoom, out int zoomFactor))
+            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {
                 Zoom = zoomFactor;
             }
@@ -156,7 +156,7 @@ namespace Eutherion.Win.AppTemplate
         {
             // Not only raise the event, but also save the zoom factor setting.
             base.OnZoomFactorChanged(e);
-            Session.Current.AutoSave.Persist(SharedSettingKeys.JsonZoom, e.ZoomFactor);
+            Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)

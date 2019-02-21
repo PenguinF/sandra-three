@@ -30,10 +30,6 @@ namespace Sandra.UI
     {
         public static readonly string DefaultAppDataSubFolderName = "SandraChess";
 
-        public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
-
-        public static readonly string DefaultLangFolderName = "Languages";
-
         private static readonly string VersionDescription
             = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
 
@@ -142,13 +138,13 @@ namespace Sandra.UI
             return new SettingSchema(
                 session.LangSetting,
                 SettingKeys.Window,
-                SharedSettingKeys.DefaultSettingsWindow,
-                SharedSettingKeys.DefaultSettingsErrorHeight,
-                SharedSettingKeys.PreferencesWindow,
-                SharedSettingKeys.PreferencesErrorHeight,
-                SharedSettingKeys.LanguageWindow,
-                SharedSettingKeys.LanguageErrorHeight,
-                SharedSettingKeys.JsonZoom,
+                SharedSettings.DefaultSettingsWindow,
+                SharedSettings.DefaultSettingsErrorHeight,
+                SharedSettings.PreferencesWindow,
+                SharedSettings.PreferencesErrorHeight,
+                SharedSettings.LanguageWindow,
+                SharedSettings.LanguageErrorHeight,
+                SharedSettings.JsonZoom,
                 SettingKeys.Notation,
                 SettingKeys.MovesZoom);
         }
@@ -158,10 +154,10 @@ namespace Sandra.UI
             return new SettingSchema(
                 session.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.Version,
-                SharedSettingKeys.AppDataSubFolderName,
-                SharedSettingKeys.LocalPreferencesFileName,
+                SharedSettings.AppDataSubFolderName,
+                SharedSettings.LocalPreferencesFileName,
                 session.DeveloperMode,
-                SharedSettingKeys.LangFolderName,
+                SharedSettings.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
@@ -188,10 +184,10 @@ namespace Sandra.UI
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
-            defaultSettings.AddOrReplace(SharedSettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
-            defaultSettings.AddOrReplace(SharedSettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
+            defaultSettings.AddOrReplace(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.AddOrReplace(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
             defaultSettings.AddOrReplace(session.DeveloperMode, false);
-            defaultSettings.AddOrReplace(SharedSettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
+            defaultSettings.AddOrReplace(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
             defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);

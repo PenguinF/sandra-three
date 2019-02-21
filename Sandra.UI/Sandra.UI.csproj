@@ -80,7 +80,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SharedResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="AppTemplate\SharedSettingKeys.cs" />
+    <Compile Include="AppTemplate\SharedSettings.cs" />
     <Compile Include="AppTemplate\SharedUIAction.cs" />
     <Compile Include="AppTemplate\SyntaxEditor.cs">
       <SubType>Component</SubType>

@@ -132,8 +132,8 @@ namespace Eutherion.Win.AppTemplate
                         return CreateSettingsForm(
                             false,
                             LocalSettings,
-                            SharedSettingKeys.PreferencesWindow,
-                            SharedSettingKeys.PreferencesErrorHeight);
+                            SharedSettings.PreferencesWindow,
+                            SharedSettings.PreferencesErrorHeight);
                     });
             }
 
@@ -169,8 +169,8 @@ namespace Eutherion.Win.AppTemplate
                         return CreateSettingsForm(
                             !GetSetting(DeveloperMode),
                             DefaultSettings,
-                            SharedSettingKeys.DefaultSettingsWindow,
-                            SharedSettingKeys.DefaultSettingsErrorHeight);
+                            SharedSettings.DefaultSettingsWindow,
+                            SharedSettings.DefaultSettingsErrorHeight);
                     });
             }
 
@@ -326,8 +326,8 @@ namespace Eutherion.Win.AppTemplate
                         return CreateSettingsForm(
                             false,
                             fileLocalizer.LanguageFile,
-                            SharedSettingKeys.LanguageWindow,
-                            SharedSettingKeys.LanguageErrorHeight);
+                            SharedSettings.LanguageWindow,
+                            SharedSettings.LanguageErrorHeight);
                     });
             }
 

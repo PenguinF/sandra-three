@@ -82,13 +82,13 @@ namespace Eutherion.Win.AppTemplate
                 settingsProvider.CreateBuiltIn(this));
 
             // Save name of APPDATA subfolder for persistent files.
-            var appDataSubFolderName = GetDefaultSetting(SharedSettingKeys.AppDataSubFolderName);
+            var appDataSubFolderName = GetDefaultSetting(SharedSettings.AppDataSubFolderName);
             AppDataSubFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appDataSubFolderName);
 
             // Scan Languages subdirectory to load localizers.
-            var langFolderName = GetDefaultSetting(SharedSettingKeys.LangFolderName);
+            var langFolderName = GetDefaultSetting(SharedSettings.LangFolderName);
             registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
@@ -103,7 +103,7 @@ namespace Eutherion.Win.AppTemplate
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
-                Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettingKeys.LocalPreferencesFileName)),
+                Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
                 localSettingsCopy);
 
             if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
