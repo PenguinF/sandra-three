@@ -32,8 +32,6 @@ namespace Sandra.UI
 {
     static class Program
     {
-        internal static string ExecutableFolder { get; private set; }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -43,11 +41,8 @@ namespace Sandra.UI
             // Use built-in localizer if none is provided.
             Localizer.Current = BuiltInEnglishLocalizer.Instance;
 
-            // Store executable folder location for later use.
-            ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
-
             var settingsProvider = new SettingsProvider();
-            using (var session = Session.Configure(ExecutableFolder, settingsProvider))
+            using (var session = Session.Configure(typeof(Program).Assembly, settingsProvider))
             {
                 Chess.Constants.ForceInitialize();
 
@@ -66,7 +61,7 @@ namespace Sandra.UI
         {
             try
             {
-                return Image.FromFile(Path.Combine(ExecutableFolder, "Images", imageFileKey + ".png"));
+                return Image.FromFile(Path.Combine(Session.Current.ExecutableFolder, "Images", imageFileKey + ".png"));
             }
             catch (Exception exc)
             {
@@ -84,7 +79,7 @@ namespace Sandra.UI
         {
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
-                Path.Combine(ExecutableFolder, "DefaultSettings.json"));
+                Path.Combine(Session.Current.ExecutableFolder, "DefaultSettings.json"));
 
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
@@ -92,7 +87,7 @@ namespace Sandra.UI
             settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
             SettingsFile.WriteToFile(
                 settingCopy.Commit(),
-                Path.Combine(ExecutableFolder, "Languages", "en.json"),
+                Path.Combine(Session.Current.ExecutableFolder, "Languages", "en.json"),
                 SettingWriterOptions.SuppressSettingComments);
         }
 #endif

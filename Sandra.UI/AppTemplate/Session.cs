@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -42,17 +43,23 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Current { get; private set; }
 
-        public static Session Configure(string executableFolder, ISettingsProvider settingsProvider)
-            => Current = new Session(executableFolder, settingsProvider);
+        public static Session Configure(Assembly executableAssembly, ISettingsProvider settingsProvider)
+            => Current = new Session(executableAssembly, settingsProvider);
 
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
-        private Session(string executableFolder, ISettingsProvider settingsProvider)
+        private Session(Assembly executableAssembly, ISettingsProvider settingsProvider)
         {
+            if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
+
+            // Store executable folder/filename for later use.
+            ExecutableFolder = Path.GetDirectoryName(executableAssembly.Location);
+            ExecutableFileName = Path.GetFileName(executableAssembly.Location);
+
             // Attempt to load default settings.
             DefaultSettings = SettingsFile.Create(
-                Path.Combine(executableFolder, DefaultSettingsFileName),
-                settingsProvider.CreateBuiltIn());
+                Path.Combine(ExecutableFolder, DefaultSettingsFileName),
+                settingsProvider.CreateBuiltIn(this));
 
             // Save name of APPDATA subfolder for persistent files.
             var appDataSubFolderName = GetDefaultSetting(SharedSettingKeys.AppDataSubFolderName);
@@ -62,7 +69,7 @@ namespace Eutherion.Win.AppTemplate
 
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SharedSettingKeys.LangFolderName);
-            registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(executableFolder, langFolderName));
+            registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
                 new SettingKey(LangSettingKey),
@@ -72,7 +79,7 @@ namespace Eutherion.Win.AppTemplate
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
-            SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema());
+            SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
 
             // And then create the local settings file which can overwrite values in default settings.
             LocalSettings = SettingsFile.Create(
@@ -91,6 +98,10 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        public string ExecutableFolder { get; }
+
+        public string ExecutableFileName { get; }
+
         public string AppDataSubFolder { get; }
 
         public SettingsFile DefaultSettings { get; }
@@ -102,6 +113,22 @@ namespace Eutherion.Win.AppTemplate
         public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
+
+        private string LocalApplicationDataPath(bool isLocalSchema)
+            => !isLocalSchema ? string.Empty :
+            $" ({AppDataSubFolder})";
+
+        public SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
+            "There are generally two copies of this file, one in the directory where "
+            + ExecutableFileName
+            + " is located ("
+            + DefaultSettingsFileName
+            + "), and one that lives in the local application data folder"
+            + LocalApplicationDataPath(isLocalSchema)
+            + ".",
+            "Preferences in the latter file override those that are specified in the default. "
+            + "In the majority of cases, only the latter file is changed, while the default "
+            + "settings serve as a template.");
 
         public TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
             => DefaultSettings.Settings.GetValue(property);
@@ -168,12 +195,12 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the built-in default settings. Its schema is used for the default settings file.
         /// </summary>
-        SettingCopy CreateBuiltIn();
+        SettingCopy CreateBuiltIn(Session session);
 
         /// <summary>
         /// Gets the schema to use for the local preferences file.
         /// </summary>
-        SettingSchema CreateLocalSettingsSchema();
+        SettingSchema CreateLocalSettingsSchema(Session session);
 
         /// <summary>
         /// Gets the schema to use for the auto-save file.

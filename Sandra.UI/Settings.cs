@@ -22,9 +22,7 @@
 using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
-using System;
 using System.Drawing;
-using System.IO;
 
 namespace Sandra.UI
 {
@@ -35,22 +33,6 @@ namespace Sandra.UI
         public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
 
         public static readonly string DefaultLangFolderName = "Languages";
-
-        private static string LocalApplicationDataPath(bool isLocalSchema)
-            => !isLocalSchema ? string.Empty :
-            $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
-
-        public static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
-            "There are generally two copies of this file, one in the directory where "
-            + Path.GetFileName(typeof(Program).Assembly.Location)
-            + " is located ("
-            + Session.DefaultSettingsFileName
-            + "), and one that lives in the local application data folder"
-            + LocalApplicationDataPath(isLocalSchema)
-            + ".",
-            "Preferences in the latter file override those that are specified in the default. "
-            + "In the majority of cases, only the latter file is changed, while the default "
-            + "settings serve as a template.");
 
         private static readonly string VersionDescription
             = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
@@ -202,10 +184,10 @@ namespace Sandra.UI
                 SettingKeys.Zoom);
         }
 
-        public SettingSchema CreateDefaultSettingsSchema()
+        public SettingSchema CreateDefaultSettingsSchema(Session session)
         {
             return new SettingSchema(
-                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                session.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.Version,
                 SharedSettingKeys.AppDataSubFolderName,
                 SharedSettingKeys.LocalPreferencesFileName,
@@ -219,10 +201,10 @@ namespace Sandra.UI
                 SettingKeys.FastNavigationPlyCount);
         }
 
-        public SettingSchema CreateLocalSettingsSchema()
+        public SettingSchema CreateLocalSettingsSchema(Session session)
         {
             return new SettingSchema(
-                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
+                session.DefaultSettingsSchemaDescription(isLocalSchema: true),
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
@@ -232,9 +214,9 @@ namespace Sandra.UI
                 SettingKeys.DeveloperMode);
         }
 
-        public SettingCopy CreateBuiltIn()
+        public SettingCopy CreateBuiltIn(Session session)
         {
-            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
+            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SharedSettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
