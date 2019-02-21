@@ -70,7 +70,9 @@
     </Compile>
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="AppTemplate\Session.ToolForms.cs" />
-    <Compile Include="AppTemplate\SettingsForm.cs" />
+    <Compile Include="AppTemplate\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppTemplate\SharedLocalizedlStringKeys.cs" />
     <Compile Include="AppTemplate\SharedResources.Designer.cs">
       <AutoGen>True</AutoGen>
