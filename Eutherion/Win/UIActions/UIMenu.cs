@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -63,11 +64,17 @@ namespace Eutherion.Win.UIActions
             public readonly UIAction Action;
             public readonly ShortcutKeys Shortcut;
 
-            public Element(UIAction action, UIActionBinding binding) : base(binding.MenuCaptionKey, binding.MenuIcon)
+            public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, ContextMenuUIActionInterface contextMenuInterface)
+                : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
-                if (binding.Shortcuts != null) Shortcut = binding.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
-                IsFirstInGroup = binding.IsFirstInGroup;
+
+                if (shortcutKeysInterface != null && shortcutKeysInterface.Shortcuts != null)
+                {
+                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
+                }
+
+                IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
             }
 
             public override TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
@@ -266,18 +273,45 @@ namespace Eutherion.Win.UIActions
     {
         /// <summary>
         /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>
-        /// given the <see cref="UIMenuNode"/> which is defined in a <see cref="UIActionHandler"/>.
+        /// given the set of <see cref="ContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
         /// </summary>
         /// <param name="actionHandler">
-        /// The <see cref="UIActionHandler"/> which performs actions and defines the blueprint <see cref="UIMenuNode"/>.
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="ContextMenuUIActionInterface"/>s.
         /// </param>
         /// <param name="destination">
         /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
         /// </param>
         public static void BuildMenu(UIActionHandler actionHandler, ToolStripItemCollection destination)
         {
-            new UIMenuBuilder(actionHandler).BuildMenu(actionHandler.RootMenuNode.Nodes, destination);
+            var rootMenuNodes = new List<UIMenuNode>();
+
+            // Extract all ContextMenuUIActionInterfaces from the handler.
+            foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
+            {
+                if (interfaceSet.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                {
+                    var shortcutKeysInterface = interfaceSet.Get<ShortcutKeysUIActionInterface>();
+                    rootMenuNodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
+                }
+            }
+
+            BuildMenu(actionHandler, rootMenuNodes, destination);
         }
+
+        /// <summary>
+        /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>.
+        /// </summary>
+        /// <param name="actionHandler">
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the blueprint <see cref="UIMenuNode"/>.
+        /// </param>
+        /// <param name="rootMenuNodes">
+        /// Collection of the menu items to generate.
+        /// </param>
+        /// <param name="destination">
+        /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
+        /// </param>
+        public static void BuildMenu(UIActionHandler actionHandler, IEnumerable<UIMenuNode> rootMenuNodes, ToolStripItemCollection destination)
+            => new UIMenuBuilder(actionHandler).BuildMenu(rootMenuNodes, destination);
 
         UIActionHandler ActionHandler;
 

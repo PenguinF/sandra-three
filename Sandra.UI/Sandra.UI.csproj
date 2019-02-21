@@ -52,26 +52,47 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
+    <Compile Include="AppTemplate\FileLocalizer.cs" />
+    <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />
+    <Compile Include="AppTemplate\JsonTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\ListBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\Localizers.cs" />
+    <Compile Include="AppTemplate\RichTextBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\ScintillaEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\Session.cs" />
+    <Compile Include="AppTemplate\Session.ToolForms.cs" />
+    <Compile Include="AppTemplate\SettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\SharedLocalizedlStringKeys.cs" />
+    <Compile Include="AppTemplate\SharedResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SharedResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="AppTemplate\SharedSettings.cs" />
+    <Compile Include="AppTemplate\SharedUIAction.cs" />
+    <Compile Include="AppTemplate\SyntaxEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\UIActionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
-    <Compile Include="JsonTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="JsonTextBox.UIActions.cs">
-      <DependentUpon>JsonTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ListBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ListBoxEx.UIActions.cs">
-      <DependentUpon>ListBoxEx.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Localizers.cs" />
+    <Compile Include="LocalizedStringKeys.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,38 +119,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyStore.cs" />
-    <Compile Include="RichTextBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="RichTextBoxEx.UIActions.cs">
-      <DependentUpon>RichTextBoxEx.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SettingsForm.UIActions.cs">
-      <DependentUpon>SettingsForm.cs</DependentUpon>
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SharedUIAction.cs" />
     <Compile Include="StandardChessBoardForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="StandardChessBoardForm.UIActions.cs">
       <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxEditor.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyntaxEditor.UIActions.cs">
-      <SubType>Component</SubType>
-      <DependentUpon>SyntaxEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ToolForms.cs" />
-    <Compile Include="UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
@@ -149,21 +144,26 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Properties\copy.png" />
-    <None Include="Properties\cut.png" />
     <None Include="Properties\flip.png" />
-    <None Include="Properties\globe.png" />
-    <None Include="Properties\paste.png" />
-    <None Include="Properties\redo.png" />
-    <None Include="Properties\save.png" />
-    <None Include="Properties\settings.png" />
-    <None Include="Properties\speech.png" />
-    <None Include="Properties\undo.png" />
-    <None Include="Properties\zoom_in.png" />
-    <None Include="Properties\zoom_out.png" />
+    <None Include="AppTemplate\copy.png" />
+    <None Include="AppTemplate\cut.png" />
+    <None Include="AppTemplate\paste.png" />
+    <None Include="AppTemplate\redo.png" />
+    <None Include="AppTemplate\undo.png" />
+    <None Include="AppTemplate\zoom_in.png" />
+    <None Include="AppTemplate\zoom_out.png" />
+    <None Include="AppTemplate\settings.png" />
+    <None Include="AppTemplate\speech.png" />
+    <None Include="AppTemplate\globe.png" />
+    <None Include="AppTemplate\save.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="AppTemplate\SharedResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SharedResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>Eutherion.Win.AppTemplate</CustomToolNamespace>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

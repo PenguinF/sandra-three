@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * ListBoxEx.cs
+ * UIActionBindings.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,31 +19,23 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.UIActions;
-using System.Windows.Forms;
+using Eutherion.UIActions;
+using System.Collections;
+using System.Collections.Generic;
 
-namespace Sandra.UI
+namespace Eutherion.Win.UIActions
 {
     /// <summary>
-    /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.
+    /// Enumerates a collection of handlers for a set of <see cref="UIAction"/> bindings.
+    /// Instances of this class can be declared with a collection initializer.
     /// </summary>
-    public partial class ListBoxEx : ListBox, IUIActionHandlerProvider
+    public sealed class UIActionBindings : IEnumerable<UIActionBinding>
     {
-        /// <summary>
-        /// Gets the action handler for this control.
-        /// </summary>
-        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+        private readonly List<UIActionBinding> added = new List<UIActionBinding>();
 
-        /// <summary>
-        /// Binds the regular copy/select-all UIActions to this listbox.
-        /// </summary>
-        public void BindStandardCopySelectUIActions()
-        {
-            this.BindActions(new UIActionBindings
-            {
-                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
-                { SharedUIAction.SelectAllText, TrySelectAllText },
-            });
-        }
+        public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new UIActionBinding(key, value));
+
+        IEnumerator IEnumerable.GetEnumerator() => added.GetEnumerator();
+        IEnumerator<UIActionBinding> IEnumerable<UIActionBinding>.GetEnumerator() => added.GetEnumerator();
     }
 }

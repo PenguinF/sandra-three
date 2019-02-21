@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
@@ -147,43 +148,42 @@ namespace Eutherion.Win.UIActions
 
         public void BindAction(DefaultUIActionBinding binding, bool alwaysVisible)
         {
-            // Always show in the menu, why else call this method?
-            UIActionBinding modifiedBinding = binding.DefaultBinding;
-            modifiedBinding.ShowInMenu = true;
-
-            DropDownItemsActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
+            if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface _))
             {
-                try
+                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding.Action, binding.DefaultInterfaces, perform =>
                 {
-                    if (perform) Owner.HideMainMenu();
-
-                    // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                    foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                    try
                     {
-                        UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                        if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                        if (perform) Owner.HideMainMenu();
+
+                        // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                        foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
                         {
-                            return currentActionState.UIActionVisibility == UIActionVisibility.Hidden && alwaysVisible
-                                ? UIActionVisibility.Disabled
-                                : currentActionState;
+                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            {
+                                return currentActionState.UIActionVisibility == UIActionVisibility.Hidden && alwaysVisible
+                                    ? UIActionVisibility.Disabled
+                                    : currentActionState;
+                            }
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show(e.Message);
-                }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
 
-                // No handler in the chain that processes the UIAction actively, so set to hidden/disabled.
-                return alwaysVisible ? UIActionVisibility.Disabled : UIActionVisibility.Hidden;
-            });
+                    // No handler in the chain that processes the UIAction actively, so set to hidden/disabled.
+                    return alwaysVisible ? UIActionVisibility.Disabled : UIActionVisibility.Hidden;
+                }));
+            }
         }
 
         public void BindAction(DefaultUIActionBinding binding)
             => BindAction(binding, alwaysVisible: true);
 
         public void BindActions(params DefaultUIActionBinding[] bindings)
-            => bindings.ForEach(x => BindAction(x));
+            => bindings.ForEach(BindAction);
 
         private bool UpdateMenu()
         {

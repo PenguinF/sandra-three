@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SyntaxEditor.cs
+ * ScintillaEx.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
@@ -30,46 +30,24 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a <see cref="Scintilla"/> control with syntax highlighting, a number of <see cref="UIAction"/> hooks,
-    /// and a mouse-wheel event handler.
+    /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks.
     /// </summary>
-    public abstract partial class SyntaxEditor<TTerminal> : Scintilla, IUIActionHandlerProvider
+    public class ScintillaEx : Scintilla, IUIActionHandlerProvider
     {
         /// <summary>
         /// Gets the action handler for this control.
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        protected readonly TextIndex<TTerminal> TextIndex;
-
-        protected Style DefaultStyle => Styles[Style.Default];
-
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleBackColor => DefaultStyle.BackColor;
-
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleForeColor => DefaultStyle.ForeColor;
-
-        public SyntaxEditor()
+        public ScintillaEx()
         {
-            TextIndex = new TextIndex<TTerminal>();
-
             UsePopup(false);
 
             BufferedDraw = false;
             Technology = Technology.DirectWrite;
-
-            HScrollBar = false;
-            VScrollBar = true;
-
-            Margins.ForEach(x => x.Width = 0);
 
             //https://notepad-plus-plus.org/community/topic/12576/list-of-all-assigned-keyboard-shortcuts/8
             //https://scintilla.org/CommandValues.html
@@ -80,24 +58,12 @@ namespace Sandra.UI
             ClearCmdKey(Keys.Control | Keys.L);
             ClearCmdKey(Keys.Control | Keys.R);
             ClearCmdKey(Keys.Control | Keys.U);
-
-            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
-            {
-                Zoom = zoomFactor;
-            }
-        }
-
-        protected void ApplyStyle(TextElement<TTerminal> element, Style style)
-        {
-            if (style != null)
-            {
-                StartStyling(element.Start);
-                SetStyling(element.Length, style.Index);
-            }
+            ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
+            ClearCmdKey(Keys.OemMinus | Keys.Control);
         }
 
         /// <summary>
-        /// Occurs when the zoom factor of this <see cref="SyntaxEditor{TTerminal}"/> is updated.
+        /// Occurs when the zoom factor of this <see cref="ScintillaEx"/> is updated.
         /// </summary>
         public event EventHandler<ZoomFactorChangedEventArgs> ZoomFactorChanged;
 
@@ -108,16 +74,7 @@ namespace Sandra.UI
         /// The data for the event.
         /// </param>
         protected virtual void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
-        {
-            ZoomFactorChanged?.Invoke(this, e);
-        }
-
-        private void RaiseZoomFactorChanged(ZoomFactorChangedEventArgs e)
-        {
-            // Not only raise the event, but also save the zoom factor setting.
-            OnZoomFactorChanged(e);
-            Program.AutoSave.Persist(SettingKeys.Zoom, e.ZoomFactor);
-        }
+            => ZoomFactorChanged?.Invoke(this, e);
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
@@ -130,40 +87,119 @@ namespace Sandra.UI
                 if (ScintillaZoomFactor.MinDiscreteValue <= newZoomFactorPrediction
                     && newZoomFactorPrediction <= ScintillaZoomFactor.MaxDiscreteValue)
                 {
-                    RaiseZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
+                    OnZoomFactorChanged(new ZoomFactorChangedEventArgs(newZoomFactorPrediction));
                 }
             }
         }
 
         /// <summary>
-        /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
+        /// Gets the regular cut/copy/paste/select-all UIActions for this textbox.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Undo, TryUndo },
+            { SharedUIAction.Redo, TryRedo },
+
+            { SharedUIAction.ZoomIn, TryZoomIn },
+            { SharedUIAction.ZoomOut, TryZoomOut },
+
+            { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
+            { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+            { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
+            { SharedUIAction.SelectAllText, TrySelectAllText },
+        };
+
+        /// <summary>
+        /// Binds the regular cut/copy/paste/select-all UIActions to this textbox.
         /// </summary>
         public void BindStandardEditUIActions()
+            => BindEditUIActions(StandardUIActionBindings);
+
+        /// <summary>
+        /// Binds a collection of UIActions to this textbox.
+        /// </summary>
+        public void BindEditUIActions(UIActionBindings editBindings)
         {
-            var editBindings = new UIActionBindings
-            {
-                { SharedUIAction.Undo, TryUndo },
-                { SharedUIAction.Redo, TryRedo },
-
-                { SharedUIAction.ZoomIn, TryZoomIn },
-                { SharedUIAction.ZoomOut, TryZoomOut },
-
-                { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
-                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
-                { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
-                { SharedUIAction.SelectAllText, TrySelectAllText },
-            };
-
+            ShortcutKeysUIActionInterface shortcutKeysInterface = null;
             editBindings
-                .Where(x => x.Binding.DefaultBinding.Shortcuts != null)
-                .SelectMany(x => x.Binding.DefaultBinding.Shortcuts)
+                .Where(x => x.Interfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
+                .SelectMany(x => shortcutKeysInterface.Shortcuts)
                 .Select(KeyUtilities.ToKeys)
                 .ForEach(ClearCmdKey);
 
-            ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
-            ClearCmdKey(Keys.OemMinus | Keys.Control);
-
             this.BindActions(editBindings);
+        }
+
+        public UIActionState TryUndo(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CanUndo) return UIActionVisibility.Disabled;
+            if (perform) Undo();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryRedo(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CanRedo) return UIActionVisibility.Disabled;
+            if (perform) Redo();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryCutSelectionToClipBoard(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
+            if (perform) Cut();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryCopySelectionToClipBoard(bool perform)
+        {
+            if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
+            if (perform) Copy();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryPasteSelectionFromClipBoard(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!Clipboard.ContainsText()) return UIActionVisibility.Disabled;
+            if (perform) Paste();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TrySelectAllText(bool perform)
+        {
+            if (TextLength == 0) return UIActionVisibility.Disabled;
+            if (perform) SelectAll();
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryZoomIn(bool perform)
+        {
+            int zoomFactor = Zoom;
+            if (zoomFactor >= ScintillaZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                zoomFactor++;
+                Zoom = zoomFactor;
+                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
+            }
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryZoomOut(bool perform)
+        {
+            int zoomFactor = Zoom;
+            if (zoomFactor <= ScintillaZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
+            if (perform)
+            {
+                zoomFactor--;
+                Zoom = zoomFactor;
+                OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
+            }
+            return UIActionVisibility.Enabled;
         }
     }
 
@@ -195,7 +231,7 @@ namespace Sandra.UI
     }
 
     /// <summary>
-    /// Provides data for the <see cref="SyntaxEditor{TTerminal}.ZoomFactorChanged"/> event.
+    /// Provides data for the <see cref="ScintillaEx.ZoomFactorChanged"/> event.
     /// </summary>
     public class ZoomFactorChangedEventArgs : EventArgs
     {

@@ -20,8 +20,10 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
@@ -39,10 +41,11 @@ namespace Sandra.UI
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
+        private readonly LocalizedString developerTools = new LocalizedString(SharedLocalizedStringKeys.Tools);
 
-        // Separate action handler for building the MainMenuStrip.
+        // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
+        private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
 
         // Action handler for the developer tools dropdown item.
         private readonly UIActionHandler developerToolsActionHandler = new UIActionHandler();
@@ -59,7 +62,7 @@ namespace Sandra.UI
             InitializeUIActions();
 
             MainMenuStrip = new MenuStrip();
-            UIMenuBuilder.BuildMenu(mainMenuActionHandler, MainMenuStrip.Items);
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, mainMenuRootNodes, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
@@ -75,7 +78,7 @@ namespace Sandra.UI
             UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
             UpdateDeveloperToolsMenu();
 
-            Program.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
             developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
         }
 
@@ -112,103 +115,108 @@ namespace Sandra.UI
         {
             foreach (DefaultUIActionBinding binding in bindings)
             {
-                // Copy the default binding and modify it.
-                UIActionBinding modifiedBinding = binding.DefaultBinding;
-
-                // Add a menu item inside the given container which will update itself after focus changes.
-                modifiedBinding.MenuContainer = container;
-
-                // Always show in the menu.
-                modifiedBinding.ShowInMenu = true;
-
-                // Register in a Dictionary to be able to figure out which menu items should be updated.
-                focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
-
-                // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-                mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
+                if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
                 {
-                    try
+                    // Copy the default binding and remove the ContextMenuUIActionInterface
+                    // which is used below to construct a UIMenuNode.Element directly.
+                    var modifiedBinding = new ImplementationSet<IUIActionInterface>();
+                    if (binding.DefaultInterfaces.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface))
                     {
-                        var state = focusDependentUIActions[binding.Action];
+                        modifiedBinding.Add(shortcutKeysInterface);
+                    }
 
-                        if (!perform)
-                        {
-                            // Only clear/set the state when called from updateFocusDependentMenuItems().
-                            state.CurrentHandler = null;
-                            state.IsDirty = false;
-                        }
+                    // Add a menu item inside the given container which will update itself after focus changes.
+                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, shortcutKeysInterface, contextMenuInterface));
 
-                        // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                        foreach (var actionHandler in UIActionHandler.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                    // Register in a Dictionary to be able to figure out which menu items should be updated.
+                    focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
+
+                    // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding.Action, modifiedBinding, perform =>
+                    {
+                        try
                         {
-                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            var state = focusDependentUIActions[binding.Action];
+
+                            if (!perform)
                             {
-                                // Remember the action handler this UIAction is now bound to.
-                                if (!perform)
-                                {
-                                    // Only clear/set the state when called from updateFocusDependentMenuItems().
-                                    state.CurrentHandler = actionHandler;
-                                }
-                                return currentActionState;
+                                // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                state.CurrentHandler = null;
+                                state.IsDirty = false;
                             }
 
-                            // Only consider handlers which are defined in the context of this one.
-                            if (ActionHandler == actionHandler) break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.Message);
-                    }
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    // Remember the action handler this UIAction is now bound to.
+                                    if (!perform)
+                                    {
+                                        // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                        state.CurrentHandler = actionHandler;
+                                    }
+                                    return currentActionState;
+                                }
 
-                    // No handler in the chain that processes the UIAction actively, so set to disabled.
-                    return UIActionVisibility.Disabled;
-                });
+                                // Only consider handlers which are defined in the context of this one.
+                                if (ActionHandler == actionHandler) break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
             }
         }
 
         void InitializeUIActions()
         {
             // More than one localizer: can switch between them.
-            if (Localizers.Registered.Count() >= 2)
+            if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
-                foreach (var localizer in Localizers.Registered)
+                foreach (var localizer in Session.Current.RegisteredLocalizers)
                 {
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
-                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
-                mainMenuActionHandler.RootMenuNode.Nodes.Add(langMenu);
-                BindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
+                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe);
+                mainMenuRootNodes.Add(langMenu);
+                BindFocusDependentUIActions(langMenu, Session.Current.RegisteredLocalizers.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
-            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
-            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
-            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
+            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
-            developerToolsActionHandler.BindAction(
-                ToolForms.EditCurrentLanguage.Action,
-                ToolForms.EditCurrentLanguage.DefaultBinding,
-                ToolForms.TryEditCurrentLanguage(this));
+            developerToolsActionHandler.BindAction(new UIActionBinding(
+                Session.Current.EditCurrentLanguage.Action,
+                Session.Current.EditCurrentLanguage.DefaultInterfaces,
+                Session.Current.TryEditCurrentLanguage(this)));
 
-            UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(fileMenu);
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
+            mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        ToolForms.EditPreferencesFile,
-                                        ToolForms.ShowDefaultSettingsFile,
+                                        Session.Current.EditPreferencesFile,
+                                        Session.Current.ShowDefaultSettingsFile,
                                         Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(gameMenu);
+            mainMenuRootNodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
             BindFocusDependentUIActions(gameMenu,
@@ -243,23 +251,48 @@ namespace Sandra.UI
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
-            UIMenuNode.Container viewMenu = new UIMenuNode.Container(LocalizedStringKeys.View);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(viewMenu);
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View);
+            mainMenuRootNodes.Add(viewMenu);
+
+            // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
+            // because they would otherwise remain invisible.
+            var modifiedGotoChessBoardForm = new DefaultUIActionBinding(
+                InteractiveGame.GotoChessBoardForm.Action,
+                new ImplementationSet<IUIActionInterface>
+                {
+                    InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
+                    new ContextMenuUIActionInterface
+                    {
+                        IsFirstInGroup = true,
+                        MenuCaptionKey = LocalizedStringKeys.Chessboard,
+                    },
+                });
+
+            var modifiedGotoMovesForm = new DefaultUIActionBinding(
+                InteractiveGame.GotoMovesForm.Action,
+                new ImplementationSet<IUIActionInterface>
+                {
+                    InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
+                    new ContextMenuUIActionInterface
+                    {
+                        MenuCaptionKey = LocalizedStringKeys.Moves,
+                    },
+                });
 
             // Add these actions to the "View" dropdown list.
             BindFocusDependentUIActions(viewMenu,
-                                        InteractiveGame.GotoChessBoardForm,
-                                        InteractiveGame.GotoMovesForm,
+                                        modifiedGotoChessBoardForm,
+                                        modifiedGotoMovesForm,
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
 
-            UIMenuNode.Container helpMenu = new UIMenuNode.Container(LocalizedStringKeys.Help);
-            mainMenuActionHandler.RootMenuNode.Nodes.Add(helpMenu);
+            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help);
+            mainMenuRootNodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.
             BindFocusDependentUIActions(helpMenu,
-                                        ToolForms.OpenAbout,
-                                        ToolForms.ShowCredits);
+                                        Session.Current.OpenAbout,
+                                        Session.Current.ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += FocusHelper_FocusChanged;
@@ -267,11 +300,11 @@ namespace Sandra.UI
 
         void FocusHelper_FocusChanged(FocusHelper sender, FocusChangedEventArgs e)
         {
-            foreach (UIActionHandler previousHandler in UIActionHandler.EnumerateUIActionHandlers(e.PreviousFocusedControl))
+            foreach (UIActionHandler previousHandler in UIActionUtilities.EnumerateUIActionHandlers(e.PreviousFocusedControl))
             {
                 previousHandler.UIActionsInvalidated -= FocusedHandler_UIActionsInvalidated;
             }
-            foreach (UIActionHandler currentHandler in UIActionHandler.EnumerateUIActionHandlers(e.CurrentFocusedControl))
+            foreach (UIActionHandler currentHandler in UIActionUtilities.EnumerateUIActionHandlers(e.CurrentFocusedControl))
             {
                 currentHandler.UIActionsInvalidated += FocusedHandler_UIActionsInvalidated;
             }
@@ -350,7 +383,7 @@ namespace Sandra.UI
         protected override void OnLoad(EventArgs e)
         {
             // Enable live updates to localizers now a message loop exists.
-            Localizers.Registered.ForEach(x => x.EnableLiveUpdates());
+            Session.Current.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
 
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
@@ -358,7 +391,7 @@ namespace Sandra.UI
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            Program.AttachFormStateAutoSaver(
+            Session.Current.AttachFormStateAutoSaver(
                 this,
                 SettingKeys.Window,
                 () =>

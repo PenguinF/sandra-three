@@ -168,11 +168,7 @@ namespace Eutherion.Win.Storage
             public KeyedSet(IEnumerable<KeyValuePair<string, T>> keyedValues) : base(CLR.String)
             {
                 if (keyedValues == null) throw new ArgumentNullException(nameof(keyedValues));
-
-                foreach (var keyedValue in keyedValues)
-                {
-                    stringToTarget.Add(keyedValue.Key, keyedValue.Value);
-                }
+                keyedValues.ForEach(stringToTarget.Add);
             }
 
             public override Union<ITypeErrorBuilder, T> TryGetTargetValue(string stringValue)

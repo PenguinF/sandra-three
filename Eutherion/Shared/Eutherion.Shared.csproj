@@ -72,6 +72,15 @@
     <Compile Include="Text\Json\JsonWhitespace.cs" />
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextIndex.cs" />
+    <Compile Include="UIActions\DefaultUIActionBinding.cs" />
+    <Compile Include="UIActions\IUIActionHandlerProvider.cs" />
+    <Compile Include="UIActions\IUIActionInterface.cs" />
+    <Compile Include="UIActions\LocalizedConsoleKeys.cs" />
+    <Compile Include="UIActions\ShortcutKeys.cs" />
+    <Compile Include="UIActions\UIAction.cs" />
+    <Compile Include="UIActions\UIActionBinding.cs" />
+    <Compile Include="UIActions\UIActionHandler.cs" />
+    <Compile Include="UIActions\UIActionHandlerFunc.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
@@ -79,6 +88,7 @@
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
+    <Compile Include="Utils\ImplementationSet.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\Union.cs" />

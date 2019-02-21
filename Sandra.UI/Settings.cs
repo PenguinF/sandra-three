@@ -20,36 +20,15 @@
 #endregion
 
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
-using System;
 using System.Drawing;
-using System.IO;
 
 namespace Sandra.UI
 {
     internal static class SettingKeys
     {
         public static readonly string DefaultAppDataSubFolderName = "SandraChess";
-
-        public static readonly string DefaultLocalPreferencesFileName = "Preferences.json";
-
-        public static readonly string DefaultLangFolderName = "Languages";
-
-        private static string LocalApplicationDataPath(bool isLocalSchema)
-            => !isLocalSchema ? string.Empty :
-            $" ({Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DefaultAppDataSubFolderName)})";
-
-        public static SettingComment DefaultSettingsSchemaDescription(bool isLocalSchema) => new SettingComment(
-            "There are generally two copies of this file, one in the directory where "
-            + Path.GetFileName(typeof(Program).Assembly.Location)
-            + " is located ("
-            + Program.DefaultSettingsFileName
-            + "), and one that lives in the local application data folder"
-            + LocalApplicationDataPath(isLocalSchema)
-            + ".",
-            "Preferences in the latter file override those that are specified in the default. "
-            + "In the majority of cases, only the latter file is changed, while the default "
-            + "settings serve as a template.");
 
         private static readonly string VersionDescription
             = "Identifies the version of the set of recognized properties. The only allowed value is 1.";
@@ -71,77 +50,16 @@ namespace Sandra.UI
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        private static readonly string AppDataSubFolderNameDescription
-            = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
-            + "This includes the auto-save file, or e.g. a preferences file. "
-            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
-            + "Instead, forward slashes ('/') can be used to separate directories as well.";
-
-        public static readonly SettingProperty<string> AppDataSubFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(AppDataSubFolderName))),
-            SubFolderNameType.Instance,
-            new SettingComment(AppDataSubFolderNameDescription));
-
-        private static readonly string LocalPreferencesFileNameDescription
-            = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
-
-        public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),
-            FileNameType.Instance,
-            new SettingComment(LocalPreferencesFileNameDescription));
-
-        private static readonly string DeveloperModeDescription
-            = "Enables tools which assist with SandraChess development and debugging.";
-
-        public static readonly SettingProperty<bool> DeveloperMode = new SettingProperty<bool>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
-            PType.CLR.Boolean,
-            new SettingComment(DeveloperModeDescription));
-
-        private static readonly string LangFolderNameDescription
-            = "Subfolder of the application directory which is scanned for language files. "
-            + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
-            + "Instead, forward slashes ('/') can be used to separate directories as well.";
-
-        public static readonly SettingProperty<string> LangFolderName = new SettingProperty<string>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LangFolderName))),
-            SubFolderNameType.Instance,
-            new SettingComment(LangFolderNameDescription));
-
         public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
-
-        public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> DefaultSettingsErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsErrorHeight))),
-            PType.CLR.Int32);
-
-        public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
-            PType.CLR.Int32);
-
-        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> LanguageErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
-            PType.CLR.Int32);
 
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
-        public static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
+        public static readonly SettingProperty<int> MovesZoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(MovesZoom))),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -213,32 +131,33 @@ namespace Sandra.UI
             new SettingComment(LegalTargetSquaresColorDescription));
     }
 
-    internal static class Settings
+    public class SettingsProvider : ISettingsProvider
     {
-        public static SettingSchema CreateAutoSaveSchema()
+        public SettingSchema CreateAutoSaveSchema(Session session)
         {
             return new SettingSchema(
-                Localizers.LangSetting,
+                session.LangSetting,
                 SettingKeys.Window,
-                SettingKeys.DefaultSettingsWindow,
-                SettingKeys.DefaultSettingsErrorHeight,
-                SettingKeys.PreferencesWindow,
-                SettingKeys.PreferencesErrorHeight,
-                SettingKeys.LanguageWindow,
-                SettingKeys.LanguageErrorHeight,
+                SharedSettings.DefaultSettingsWindow,
+                SharedSettings.DefaultSettingsErrorHeight,
+                SharedSettings.PreferencesWindow,
+                SharedSettings.PreferencesErrorHeight,
+                SharedSettings.LanguageWindow,
+                SharedSettings.LanguageErrorHeight,
+                SharedSettings.JsonZoom,
                 SettingKeys.Notation,
-                SettingKeys.Zoom);
+                SettingKeys.MovesZoom);
         }
 
-        public static SettingSchema CreateDefaultSettingsSchema()
+        public SettingSchema CreateDefaultSettingsSchema(Session session)
         {
             return new SettingSchema(
-                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
+                session.DefaultSettingsSchemaDescription(isLocalSchema: false),
                 SettingKeys.Version,
-                SettingKeys.AppDataSubFolderName,
-                SettingKeys.LocalPreferencesFileName,
-                SettingKeys.DeveloperMode,
-                SettingKeys.LangFolderName,
+                SharedSettings.AppDataSubFolderName,
+                SharedSettings.LocalPreferencesFileName,
+                session.DeveloperMode,
+                SharedSettings.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
@@ -247,28 +166,28 @@ namespace Sandra.UI
                 SettingKeys.FastNavigationPlyCount);
         }
 
-        public static SettingSchema CreateLocalSettingsSchema()
+        public SettingSchema CreateLocalSettingsSchema(Session session)
         {
             return new SettingSchema(
-                SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
+                session.DefaultSettingsSchemaDescription(isLocalSchema: true),
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
                 SettingKeys.LastMoveArrowColor,
                 SettingKeys.DisplayLegalTargetSquares,
                 SettingKeys.LegalTargetSquaresColor,
                 SettingKeys.FastNavigationPlyCount,
-                SettingKeys.DeveloperMode);
+                session.DeveloperMode);
         }
 
-        public static SettingCopy CreateBuiltIn()
+        public SettingCopy CreateBuiltIn(Session session)
         {
-            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
+            SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema(session));
 
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
-            defaultSettings.AddOrReplace(SettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
-            defaultSettings.AddOrReplace(SettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
-            defaultSettings.AddOrReplace(SettingKeys.DeveloperMode, false);
-            defaultSettings.AddOrReplace(SettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
+            defaultSettings.AddOrReplace(SharedSettings.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
+            defaultSettings.AddOrReplace(SharedSettings.LocalPreferencesFileName, SharedSettings.DefaultLocalPreferencesFileName);
+            defaultSettings.AddOrReplace(session.DeveloperMode, false);
+            defaultSettings.AddOrReplace(SharedSettings.LangFolderName, SharedSettings.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);
             defaultSettings.AddOrReplace(SettingKeys.LastMoveArrowColor, Color.DimGray);

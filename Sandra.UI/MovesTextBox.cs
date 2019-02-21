@@ -22,6 +22,7 @@
 using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Sandra.PGN.Temp;
 using ScintillaNET;
 using System;
@@ -74,6 +75,18 @@ namespace Sandra.UI
                     UpdateMoveFormatter();
                 }
             };
+
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.MovesZoom, out int zoomFactor))
+            {
+                Zoom = zoomFactor;
+            }
+        }
+
+        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
+        {
+            // Not only raise the event, but also save the zoom factor setting.
+            base.OnZoomFactorChanged(e);
+            Session.Current.AutoSave.Persist(SettingKeys.MovesZoom, e.ZoomFactor);
         }
 
         protected override void Dispose(bool disposing)
@@ -116,7 +129,7 @@ namespace Sandra.UI
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out MFOSettingValue mfoSettingValue))
+                if (Session.Current.TryGetAutoSaveValue(SettingKeys.Notation, out MFOSettingValue mfoSettingValue))
                 {
                     moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }
@@ -124,7 +137,7 @@ namespace Sandra.UI
             else
             {
                 // Update setting if the formatter was already initialized.
-                Program.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
+                Session.Current.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
             }
 
             string pieceSymbols;

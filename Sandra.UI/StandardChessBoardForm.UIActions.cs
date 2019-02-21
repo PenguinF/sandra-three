@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
@@ -32,13 +34,18 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.FlipBoard,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
-                MenuIcon = Properties.Resources.flip,
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.FlipBoard,
+                    MenuIcon = Properties.Resources.flip,
+                },
             });
 
         public UIActionState TryFlipBoard(bool perform)
@@ -49,12 +56,17 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
+                },
             });
 
         public UIActionState TryTakeScreenshot(bool perform)

@@ -23,20 +23,23 @@ using Eutherion.Win.Storage;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    internal class FormStateAutoSaver
+    public class FormStateAutoSaver
     {
+        private readonly Session ownerSession;
         private readonly SettingProperty<PersistableFormState> autoSaveProperty;
         private readonly PersistableFormState formState;
 
         public FormStateAutoSaver(
+            Session ownerSession,
             Form targetForm,
             SettingProperty<PersistableFormState> autoSaveProperty,
             PersistableFormState formState)
         {
-            this.autoSaveProperty = autoSaveProperty;
-            this.formState = formState;
+            this.ownerSession = ownerSession ?? throw new ArgumentNullException(nameof(ownerSession));
+            this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
+            this.formState = formState ?? throw new ArgumentNullException(nameof(formState));
 
             // Attach only after restoring.
             formState.AttachTo(targetForm);
@@ -48,7 +51,7 @@ namespace Sandra.UI
 
         private void FormState_Changed(object sender, EventArgs e)
         {
-            Program.AutoSave.Persist(autoSaveProperty, formState);
+            ownerSession.AutoSave.Persist(autoSaveProperty, formState);
         }
     }
 }

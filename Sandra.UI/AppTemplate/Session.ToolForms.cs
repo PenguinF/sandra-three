@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * ToolForms.cs
+ * Session.ToolForms.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,33 +19,35 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Contains a number of forms which should be displayed at most once.
+    /// Contains all ambient state which is global to a single user session.
+    /// This includes e.g. an auto-save file, settings and preferences.
     /// </summary>
-    static class ToolForms
+    public partial class Session : IDisposable
     {
-        public const string ToolFormsUIActionPrefix = nameof(ToolForms) + ".";
+        public const string ToolFormsUIActionPrefix = nameof(Session) + ".";
 
-        private static readonly Box<Form> localSettingsFormBox = new Box<Form>();
-        private static readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
-        private static readonly Box<Form> aboutFormBox = new Box<Form>();
-        private static readonly Box<Form> creditsFormBox = new Box<Form>();
-        private static readonly Box<Form> languageFormBox = new Box<Form>();
+        private readonly Box<Form> localSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
+        private readonly Box<Form> aboutFormBox = new Box<Form>();
+        private readonly Box<Form> creditsFormBox = new Box<Form>();
+        private readonly Box<Form> languageFormBox = new Box<Form>();
 
-        private static void OpenOrActivateToolForm(Form owner, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        private void OpenOrActivateToolForm(Form owner, Box<Form> toolForm, Func<Form> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {
@@ -70,25 +72,27 @@ namespace Sandra.UI
             }
         }
 
-        public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
+        public readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditPreferencesFile)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
-                MenuIcon = Properties.Resources.settings,
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
+                    MenuIcon = SharedResources.settings,
+                },
             });
 
-        private static Form CreateSettingsForm(bool isReadOnly,
-                                               SettingsFile settingsFile,
-                                               SettingProperty<PersistableFormState> formStateSetting,
-                                               SettingProperty<int> errorHeightSetting)
+        private Form CreateSettingsForm(bool isReadOnly,
+                                        SettingsFile settingsFile,
+                                        SettingProperty<PersistableFormState> formStateSetting,
+                                        SettingProperty<int> errorHeightSetting)
             => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
             {
                 ClientSize = new Size(600, 600),
             };
 
-        public static UIActionHandlerFunc TryEditPreferencesFile(Form owner) => perform =>
+        public UIActionHandlerFunc TryEditPreferencesFile(Form owner) => perform =>
         {
             if (perform)
             {
@@ -99,11 +103,11 @@ namespace Sandra.UI
                     {
                         // If the file doesn't exist yet, generate a local settings file with a commented out copy
                         // of the default settings to serve as an example, and to show which settings are available.
-                        if (!File.Exists(Program.LocalSettings.AbsoluteFilePath))
+                        if (!File.Exists(LocalSettings.AbsoluteFilePath))
                         {
-                            SettingCopy localSettingsExample = new SettingCopy(Program.LocalSettings.Settings.Schema);
+                            SettingCopy localSettingsExample = new SettingCopy(LocalSettings.Settings.Schema);
 
-                            var defaultSettingsObject = Program.DefaultSettings.Settings;
+                            var defaultSettingsObject = DefaultSettings.Settings;
                             foreach (var property in localSettingsExample.Schema.AllProperties)
                             {
                                 if (defaultSettingsObject.Schema.TryGetProperty(property.Name, out SettingProperty defaultSettingProperty)
@@ -115,7 +119,7 @@ namespace Sandra.UI
 
                             Exception exception = SettingsFile.WriteToFile(
                                 localSettingsExample.Commit(),
-                                Program.LocalSettings.AbsoluteFilePath,
+                                LocalSettings.AbsoluteFilePath,
                                 SettingWriterOptions.CommentOutProperties);
 
                             if (exception != null)
@@ -127,24 +131,26 @@ namespace Sandra.UI
 
                         return CreateSettingsForm(
                             false,
-                            Program.LocalSettings,
-                            SettingKeys.PreferencesWindow,
-                            SettingKeys.PreferencesErrorHeight);
+                            LocalSettings,
+                            SharedSettings.PreferencesWindow,
+                            SharedSettings.PreferencesErrorHeight);
                     });
             }
 
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
+        public readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = SharedLocalizedStringKeys.ShowDefaultSettingsFile,
+                },
             });
 
-        public static UIActionHandlerFunc TryShowDefaultSettingsFile(Form owner) => perform =>
+        public UIActionHandlerFunc TryShowDefaultSettingsFile(Form owner) => perform =>
         {
             if (perform)
             {
@@ -153,25 +159,25 @@ namespace Sandra.UI
                     defaultSettingsFormBox,
                     () =>
                     {
-                        if (!File.Exists(Program.DefaultSettings.AbsoluteFilePath))
+                        if (!File.Exists(DefaultSettings.AbsoluteFilePath))
                         {
                             // Before opening the possibly non-existent file, write to it.
                             // Ignore exceptions, may be caused by insufficient access rights.
-                            Program.DefaultSettings.WriteToFile();
+                            DefaultSettings.WriteToFile();
                         }
 
                         return CreateSettingsForm(
-                            !Program.GetSetting(SettingKeys.DeveloperMode),
-                            Program.DefaultSettings,
-                            SettingKeys.DefaultSettingsWindow,
-                            SettingKeys.DefaultSettingsErrorHeight);
+                            !GetSetting(DeveloperMode),
+                            DefaultSettings,
+                            SharedSettings.DefaultSettingsWindow,
+                            SharedSettings.DefaultSettingsErrorHeight);
                     });
             }
 
             return UIActionVisibility.Enabled;
         };
 
-        private static Form CreateReadOnlyTextForm(string fileName, int width, int height)
+        private Form CreateReadOnlyTextForm(string fileName, int width, int height)
         {
             string text;
             try
@@ -223,15 +229,17 @@ namespace Sandra.UI
             return readOnlyTextForm;
         }
 
-        public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
+        public readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(OpenAbout)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.About,
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = SharedLocalizedStringKeys.About,
+                },
             });
 
-        public static UIActionHandlerFunc TryOpenAbout(Form owner) => perform =>
+        public UIActionHandlerFunc TryOpenAbout(Form owner) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
@@ -246,15 +254,17 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
+        public readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.Credits,
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = SharedLocalizedStringKeys.Credits,
+                },
             });
 
-        public static UIActionHandlerFunc TryShowCredits(Form owner) => perform =>
+        public UIActionHandlerFunc TryShowCredits(Form owner) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
@@ -269,19 +279,21 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         };
 
-        public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
+        public readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
-                MenuIcon = Properties.Resources.speech,
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
+                    MenuIcon = SharedResources.speech,
+                },
             });
 
-        public static UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
         {
             // Only enable in developer mode.
-            if (!Program.GetSetting(SettingKeys.DeveloperMode)) return UIActionVisibility.Hidden;
+            if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
 
             // Cannot edit built-in localizer.
             if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
@@ -298,8 +310,10 @@ namespace Sandra.UI
                         {
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
-                            // Fill with built-in English translations.
-                            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+                            // Fill with built-in default dictionary, or if not provided, an empty dictionary.
+                            settingCopy.AddOrReplace(
+                                Localizers.Translations,
+                                defaultLocalizerDictionary ?? new Dictionary<LocalizedStringKey, string>());
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
@@ -312,8 +326,8 @@ namespace Sandra.UI
                         return CreateSettingsForm(
                             false,
                             fileLocalizer.LanguageFile,
-                            SettingKeys.LanguageWindow,
-                            SettingKeys.LanguageErrorHeight);
+                            SharedSettings.LanguageWindow,
+                            SharedSettings.LanguageErrorHeight);
                     });
             }
 

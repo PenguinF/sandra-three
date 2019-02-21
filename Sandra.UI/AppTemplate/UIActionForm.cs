@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * RichTextBoxEx.cs
+ * UIActionForm.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,39 +19,36 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.Controls;
+using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
+using System;
+using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a Windows rich text box which exposes a number of <see cref="UIAction"/> hooks.
+    /// Top level Form which ties in with the UIAction framework.
     /// </summary>
-    public partial class RichTextBoxEx : UpdatableRichTextBox, IUIActionHandlerProvider
+    public class UIActionForm : Form, IUIActionHandlerProvider
     {
         /// <summary>
         /// Gets the action handler for this control.
         /// </summary>
         public UIActionHandler ActionHandler { get; } = new UIActionHandler();
 
-        /// <summary>
-        /// Binds the regular cut/copy/paste/select all UIActions to this textbox.
-        /// </summary>
-        public void BindStandardEditUIActions()
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            this.BindActions(new UIActionBindings
+            try
             {
-                { SharedUIAction.Undo, TryUndo },
-                { SharedUIAction.Redo, TryRedo },
-
-                { SharedUIAction.ZoomIn, TryZoomIn },
-                { SharedUIAction.ZoomOut, TryZoomOut },
-
-                { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
-                { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
-                { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
-                { SharedUIAction.SelectAllText, TrySelectAllText },
-            });
+                // This code makes shortcuts work for all UIActionHandlers.
+                return UIActionUtilities.TryExecute(keyData, FocusHelper.GetFocusedControl())
+                    || base.ProcessCmdKey(ref msg, keyData);
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return true;
+            }
         }
     }
 }

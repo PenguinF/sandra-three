@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * ListBoxEx.UIActions.cs
+ * ListBoxEx.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,15 +19,39 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    public partial class ListBoxEx
+    /// <summary>
+    /// Represents a Windows list box which exposes a number of <see cref="UIAction"/> hooks.
+    /// </summary>
+    public class ListBoxEx : ListBox, IUIActionHandlerProvider
     {
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        /// <summary>
+        /// Gets the regular copy/select-all UIActions for this listbox.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+            { SharedUIAction.SelectAllText, TrySelectAllText },
+        };
+
+        /// <summary>
+        /// Binds the regular copy/select-all UIActions to this listbox.
+        /// </summary>
+        public void BindStandardCopySelectUIActions()
+            => this.BindActions(StandardUIActionBindings);
+
         public UIActionState TryCopySelectionToClipBoard(bool perform)
         {
             if (SelectedItems.Count == 0) return UIActionVisibility.Disabled;

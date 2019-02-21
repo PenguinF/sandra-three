@@ -1,6 +1,6 @@
 #region License
 /*********************************************************************************
- * KeyUIActionMapping.cs
+ * ShortcutKeys.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -23,14 +23,32 @@ using Eutherion.Localization;
 using System;
 using System.Collections.Generic;
 
-namespace Eutherion.Win.UIActions
+namespace Eutherion.UIActions
 {
+    /// <summary>
+    /// Specifies a general set of key modifiers.
+    /// </summary>
     [Flags]
     public enum KeyModifiers
     {
+        /// <summary>
+        /// No modifiers.
+        /// </summary>
         None = 0,
+
+        /// <summary>
+        /// The SHIFT key modifier.
+        /// </summary>
         Shift = 1,
+
+        /// <summary>
+        /// The CONTROL key modifier.
+        /// </summary>
         Control = 2,
+
+        /// <summary>
+        /// The ALT key modifier.
+        /// </summary>
         Alt = 4,
     }
 
@@ -39,21 +57,52 @@ namespace Eutherion.Win.UIActions
     /// </summary>
     public struct ShortcutKeys
     {
-        public KeyModifiers Modifiers;
-        public ConsoleKey Key;
+        /// <summary>
+        /// Gets or sets the key modifiers for this shortcut.
+        /// </summary>
+        public KeyModifiers Modifiers { get; set; }
 
-        public ShortcutKeys(KeyModifiers modifierCode, ConsoleKey key)
+        /// <summary>
+        /// Gets or sets the console key for this shortcut.
+        /// </summary>
+        public ConsoleKey Key { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ShortcutKeys"/>.
+        /// </summary>
+        /// <param name="modifiers">
+        /// The key modifiers for this shortcut.
+        /// </param>
+        /// <param name="key">
+        /// The console key for this shortcut.
+        /// </param>
+        public ShortcutKeys(KeyModifiers modifiers, ConsoleKey key)
         {
-            Modifiers = modifierCode;
+            Modifiers = modifiers;
             Key = key;
         }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="ShortcutKeys"/> without modifier keys.
+        /// </summary>
+        /// <param name="key">
+        /// The console key for this shortcut.
+        /// </param>
         public ShortcutKeys(ConsoleKey key) : this(KeyModifiers.None, key)
         {
         }
 
+        /// <summary>
+        /// Returns if this shortcut key is empty. This ignores the key modifiers.
+        /// </summary>
         public bool IsEmpty => Key == 0;
 
+        /// <summary>
+        /// Enumerates the <see cref="LocalizedStringKey"/>s which combined construct a localized display string for this shortcut.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="LocalizedStringKey"/>s enumerable which combined construct a localized display string for this shortcut.
+        /// </returns>
         public IEnumerable<LocalizedStringKey> DisplayStringParts()
         {
             if (IsEmpty) yield break;
@@ -112,43 +161,5 @@ namespace Eutherion.Win.UIActions
                 }
             }
         }
-    }
-
-    public static class LocalizedConsoleKeys
-    {
-        public static readonly LocalizedStringKey ConsoleKeyAlt = new LocalizedStringKey(nameof(ConsoleKeyAlt));
-        public static readonly LocalizedStringKey ConsoleKeyCtrl = new LocalizedStringKey(nameof(ConsoleKeyCtrl));
-        public static readonly LocalizedStringKey ConsoleKeyDelete = new LocalizedStringKey(nameof(ConsoleKeyDelete));
-        public static readonly LocalizedStringKey ConsoleKeyDownArrow = new LocalizedStringKey(nameof(ConsoleKeyDownArrow));
-        public static readonly LocalizedStringKey ConsoleKeyEnd = new LocalizedStringKey(nameof(ConsoleKeyEnd));
-        public static readonly LocalizedStringKey ConsoleKeyHome = new LocalizedStringKey(nameof(ConsoleKeyHome));
-        public static readonly LocalizedStringKey ConsoleKeyLeftArrow = new LocalizedStringKey(nameof(ConsoleKeyLeftArrow));
-        public static readonly LocalizedStringKey ConsoleKeyPageDown = new LocalizedStringKey(nameof(ConsoleKeyPageDown));
-        public static readonly LocalizedStringKey ConsoleKeyPageUp = new LocalizedStringKey(nameof(ConsoleKeyPageUp));
-        public static readonly LocalizedStringKey ConsoleKeyRightArrow = new LocalizedStringKey(nameof(ConsoleKeyRightArrow));
-        public static readonly LocalizedStringKey ConsoleKeyShift = new LocalizedStringKey(nameof(ConsoleKeyShift));
-        public static readonly LocalizedStringKey ConsoleKeyUpArrow = new LocalizedStringKey(nameof(ConsoleKeyUpArrow));
-    }
-
-    /// <summary>
-    /// Represents a mapping between a shortcut key and a <see cref="UIAction"/>.
-    /// </summary>
-    public struct KeyUIActionMapping
-    {
-        public KeyUIActionMapping(ShortcutKeys shortcut, UIAction action)
-        {
-            Shortcut = shortcut;
-            Action = action;
-        }
-
-        /// <summary>
-        /// Gets the shortcut key for this mapping.
-        /// </summary>
-        public ShortcutKeys Shortcut { get; }
-
-        /// <summary>
-        /// Gets the <see cref="UIAction"/> for this mapping.
-        /// </summary>
-        public UIAction Action { get; }
     }
 }

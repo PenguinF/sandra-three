@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * RichTextBoxEx.UIActions.cs
+ * RichTextBoxEx.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,14 +19,47 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
+using Eutherion.Win.Controls;
 using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    public partial class RichTextBoxEx
+    /// <summary>
+    /// Represents a Windows rich text box which exposes a number of <see cref="UIAction"/> hooks.
+    /// </summary>
+    public class RichTextBoxEx : UpdatableRichTextBox, IUIActionHandlerProvider
     {
+        /// <summary>
+        /// Gets the action handler for this control.
+        /// </summary>
+        public UIActionHandler ActionHandler { get; } = new UIActionHandler();
+
+        /// <summary>
+        /// Gets the regular cut/copy/paste/select-all UIActions for this textbox.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Undo, TryUndo },
+            { SharedUIAction.Redo, TryRedo },
+
+            { SharedUIAction.ZoomIn, TryZoomIn },
+            { SharedUIAction.ZoomOut, TryZoomOut },
+
+            { SharedUIAction.CutSelectionToClipBoard, TryCutSelectionToClipBoard },
+            { SharedUIAction.CopySelectionToClipBoard, TryCopySelectionToClipBoard },
+            { SharedUIAction.PasteSelectionFromClipBoard, TryPasteSelectionFromClipBoard },
+            { SharedUIAction.SelectAllText, TrySelectAllText },
+        };
+
+        /// <summary>
+        /// Binds the regular cut/copy/paste/select-all UIActions to this textbox.
+        /// </summary>
+        public void BindStandardEditUIActions()
+            => this.BindActions(StandardUIActionBindings);
+
         public UIActionState TryUndo(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;

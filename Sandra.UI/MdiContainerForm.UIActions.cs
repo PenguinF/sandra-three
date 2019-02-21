@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
+using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -33,12 +36,17 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                IsFirstInGroup = true,
-                MenuCaptionKey = LocalizedStringKeys.Exit,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Exit,
+                },
             });
 
         public UIActionState TryExit(bool perform)
@@ -49,11 +57,16 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShowInMenu = true,
-                MenuCaptionKey = LocalizedStringKeys.NewGame,
-                Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    MenuCaptionKey = LocalizedStringKeys.NewGame,
+                },
             });
 
         public UIActionState TryOpenNewPlayingBoard(bool perform)

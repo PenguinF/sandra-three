@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -29,9 +30,9 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    public partial class SettingsForm : UIActionForm
+    public class SettingsForm : UIActionForm
     {
         private const string ChangedMarker = "• ";
 
@@ -77,7 +78,7 @@ namespace Sandra.UI
 
             jsonTextBox.BindActions(new UIActionBindings
             {
-                { JsonTextBox.SaveToFile, jsonTextBox.TrySaveToFile },
+                { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
             jsonTextBox.BindStandardEditUIActions();
@@ -119,17 +120,17 @@ namespace Sandra.UI
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_,__) => Text = ChangedMarker + fileName;
+                jsonTextBox.SavePointLeft += (_, __) => Text = ChangedMarker + fileName;
                 jsonTextBox.SavePointReached += (_, __) => Text = fileName;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
-                noErrorsString = new LocalizedString(LocalizedStringKeys.NoErrorsMessage);
+                noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
 
                 // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
-                errorLocationString = new LocalizedString(LocalizedStringKeys.ErrorLocation);
+                errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
@@ -156,15 +157,15 @@ namespace Sandra.UI
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            langMenu = autoHideMainMenu.AddMenuItem(null, Properties.Resources.globe);
-            Localizers.Registered.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
+            langMenu = autoHideMainMenu.AddMenuItem(null, SharedResources.globe);
+            Session.Current.RegisteredLocalizers.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
 
-            fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
+            fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
             fileMenu.BindActions(
-                ToolForms.EditPreferencesFile,
-                ToolForms.ShowDefaultSettingsFile);
+                Session.Current.EditPreferencesFile,
+                Session.Current.ShowDefaultSettingsFile);
 
-            editMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Edit);
+            editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
             editMenu.BindActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
@@ -173,34 +174,34 @@ namespace Sandra.UI
                 SharedUIAction.PasteSelectionFromClipBoard,
                 SharedUIAction.SelectAllText);
 
-            viewMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.View);
+            viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
 
-            developerToolsMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.DeveloperTools);
-            developerToolsMenu.BindAction(ToolForms.EditCurrentLanguage, alwaysVisible: false);
+            developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
+            developerToolsMenu.BindAction(Session.Current.EditCurrentLanguage, alwaysVisible: false);
 
-            helpMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Help);
+            helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
             helpMenu.BindActions(
-                ToolForms.OpenAbout,
-                ToolForms.ShowCredits);
+                Session.Current.OpenAbout,
+                Session.Current.ShowCredits);
 
             // Implemtations for global UIActions.
-            if (Localizers.Registered.Count() >= 2)
+            if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                foreach (var localizer in Localizers.Registered)
+                foreach (var localizer in Session.Current.RegisteredLocalizers)
                 {
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
             }
 
-            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
-            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
-            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
-            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
-            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
+            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -282,11 +283,11 @@ namespace Sandra.UI
             // Default value shows about 2 errors at default zoom level.
             const int defaultErrorHeight = 34;
 
-            Program.AttachFormStateAutoSaver(this, formStateSetting, null);
+            Session.Current.AttachFormStateAutoSaver(this, formStateSetting, null);
 
             if (splitter != null && errorsListBox != null)
             {
-                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
+                if (!Session.Current.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
                 {
                     targetErrorHeight = defaultErrorHeight;
                 }
@@ -295,7 +296,7 @@ namespace Sandra.UI
                 int splitterDistance = ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
                 if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
 
-                splitter.SplitterMoved += (_, __) => Program.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
+                splitter.SplitterMoved += (_, __) => Session.Current.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
             }
         }
 
@@ -320,6 +321,46 @@ namespace Sandra.UI
             }
 
             base.Dispose(disposing);
+        }
+
+        public UIActionState TryGoToPreviousLocation(bool perform)
+        {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = jsonTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to previous or last position.
+                int targetIndex = errorsListBox.SelectedIndex - 1;
+                if (targetIndex < 0) targetIndex = errorCount - 1;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryGoToNextLocation(bool perform)
+        {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = jsonTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to next or first position.
+                int targetIndex = errorsListBox.SelectedIndex + 1;
+                if (targetIndex >= errorCount) targetIndex = 0;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
+            return UIActionVisibility.Enabled;
         }
     }
 }
