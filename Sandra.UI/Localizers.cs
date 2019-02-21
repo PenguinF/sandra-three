@@ -30,17 +30,13 @@ namespace Sandra.UI
 {
     internal static class LocalizedStringKeys
     {
-        internal static readonly LocalizedStringKey About = new LocalizedStringKey(nameof(About));
         internal static readonly LocalizedStringKey BreakAtCurrentPosition = new LocalizedStringKey(nameof(BreakAtCurrentPosition));
         internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
-        internal static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey DeveloperTools = new LocalizedStringKey(nameof(DeveloperTools));
         internal static readonly LocalizedStringKey Edit = new LocalizedStringKey(nameof(Edit));
-        internal static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
-        internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         internal static readonly LocalizedStringKey EndOfGame = new LocalizedStringKey(nameof(EndOfGame));
         internal static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
         internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
@@ -63,7 +59,6 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
         internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
-        internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
@@ -85,19 +80,19 @@ namespace Sandra.UI
         {
             Dictionary = new Dictionary<LocalizedStringKey, string>
             {
-                { LocalizedStringKeys.About, "About SandraChess" },
+                { SharedLocalizedStringKeys.About, "About SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Break at current position" },
                 { LocalizedStringKeys.Chessboard, "Chessboard" },
                 { SharedLocalizedStringKeys.Copy, "Copy" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Copy diagram to clipboard" },
-                { LocalizedStringKeys.Credits, "Show credits" },
+                { SharedLocalizedStringKeys.Credits, "Show credits" },
                 { SharedLocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.DeveloperTools, "Tools" },
                 { LocalizedStringKeys.Edit, "Edit" },
-                { LocalizedStringKeys.EditCurrentLanguage, "Edit current language" },
-                { LocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
+                { SharedLocalizedStringKeys.EditCurrentLanguage, "Edit current language" },
+                { SharedLocalizedStringKeys.EditPreferencesFile, "Edit preferences" },
                 { LocalizedStringKeys.EndOfGame, "End of game" },
                 { LocalizedStringKeys.ErrorLocation, "{0} at line {1}, position {2}" },
                 { LocalizedStringKeys.Exit, "Exit" },
@@ -125,7 +120,7 @@ namespace Sandra.UI
                 { SharedLocalizedStringKeys.Redo, "Redo" },
                 { LocalizedStringKeys.Save, "Save" },
                 { SharedLocalizedStringKeys.SelectAll, "Select All" },
-                { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
+                { SharedLocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },

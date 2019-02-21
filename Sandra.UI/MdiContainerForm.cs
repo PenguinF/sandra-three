@@ -78,7 +78,7 @@ namespace Sandra.UI
             UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
             UpdateDeveloperToolsMenu();
 
-            Session.Current.LocalSettings.RegisterSettingsChangedHandler(SettingKeys.DeveloperMode, DeveloperModeChanged);
+            Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
             developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
         }
 
@@ -192,27 +192,27 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
-            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
             this.BindAction(Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
-            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
-            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
+            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
             developerToolsActionHandler.BindAction(new UIActionBinding(
-                ToolForms.EditCurrentLanguage.Action,
-                ToolForms.EditCurrentLanguage.DefaultInterfaces,
-                ToolForms.TryEditCurrentLanguage(this)));
+                Session.Current.EditCurrentLanguage.Action,
+                Session.Current.EditCurrentLanguage.DefaultInterfaces,
+                Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary)));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
             mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        ToolForms.EditPreferencesFile,
-                                        ToolForms.ShowDefaultSettingsFile,
+                                        Session.Current.EditPreferencesFile,
+                                        Session.Current.ShowDefaultSettingsFile,
                                         Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
@@ -291,8 +291,8 @@ namespace Sandra.UI
 
             // Add these actions to the "Help" dropdown list.
             BindFocusDependentUIActions(helpMenu,
-                                        ToolForms.OpenAbout,
-                                        ToolForms.ShowCredits);
+                                        Session.Current.OpenAbout,
+                                        Session.Current.ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += FocusHelper_FocusChanged;

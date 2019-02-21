@@ -53,5 +53,30 @@ namespace Eutherion.Win.AppTemplate
             new SettingKey(SettingKey.ToSnakeCase(nameof(LangFolderName))),
             SubFolderNameType.Instance,
             new SettingComment(LangFolderNameDescription));
+
+        public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> DefaultSettingsErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsErrorHeight))),
+            PType.CLR.Int32);
+
+        public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
+            PType.CLR.Int32);
+
+        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> LanguageErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
+            PType.CLR.Int32);
+
     }
 }

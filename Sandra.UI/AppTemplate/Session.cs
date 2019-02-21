@@ -35,7 +35,7 @@ namespace Eutherion.Win.AppTemplate
     /// Contains all ambient state which is global to a single user session.
     /// This includes e.g. an auto-save file, settings and preferences.
     /// </summary>
-    public class Session : IDisposable
+    public partial class Session : IDisposable
     {
         public static readonly string DefaultSettingsFileName = "DefaultSettings.json";
 
@@ -55,6 +55,12 @@ namespace Eutherion.Win.AppTemplate
             // Store executable folder/filename for later use.
             ExecutableFolder = Path.GetDirectoryName(executableAssembly.Location);
             ExecutableFileName = Path.GetFileName(executableAssembly.Location);
+
+            // This depends on ExecutableFileName.
+            DeveloperMode = new SettingProperty<bool>(
+                new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
+                PType.CLR.Boolean,
+                new SettingComment($"Enables tools which assist with {Path.GetFileNameWithoutExtension(ExecutableFileName)} development and debugging."));
 
             // Attempt to load default settings.
             DefaultSettings = SettingsFile.Create(
@@ -101,6 +107,8 @@ namespace Eutherion.Win.AppTemplate
         public string ExecutableFolder { get; }
 
         public string ExecutableFileName { get; }
+
+        public SettingProperty<bool> DeveloperMode { get; }
 
         public string AppDataSubFolder { get; }
 

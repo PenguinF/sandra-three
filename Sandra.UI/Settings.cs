@@ -54,41 +54,9 @@ namespace Sandra.UI
             public override PInteger GetBaseValue(int value) => new PInteger(value);
         }
 
-        private static readonly string DeveloperModeDescription
-            = "Enables tools which assist with SandraChess development and debugging.";
-
-        public static readonly SettingProperty<bool> DeveloperMode = new SettingProperty<bool>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DeveloperMode))),
-            PType.CLR.Boolean,
-            new SettingComment(DeveloperModeDescription));
-
         public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
-
-        public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> DefaultSettingsErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsErrorHeight))),
-            PType.CLR.Int32);
-
-        public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
-            PType.CLR.Int32);
-
-        public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),
-            PersistableFormState.Type);
-
-        public static readonly SettingProperty<int> LanguageErrorHeight = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
-            PType.CLR.Int32);
 
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
@@ -174,12 +142,12 @@ namespace Sandra.UI
             return new SettingSchema(
                 session.LangSetting,
                 SettingKeys.Window,
-                SettingKeys.DefaultSettingsWindow,
-                SettingKeys.DefaultSettingsErrorHeight,
-                SettingKeys.PreferencesWindow,
-                SettingKeys.PreferencesErrorHeight,
-                SettingKeys.LanguageWindow,
-                SettingKeys.LanguageErrorHeight,
+                SharedSettingKeys.DefaultSettingsWindow,
+                SharedSettingKeys.DefaultSettingsErrorHeight,
+                SharedSettingKeys.PreferencesWindow,
+                SharedSettingKeys.PreferencesErrorHeight,
+                SharedSettingKeys.LanguageWindow,
+                SharedSettingKeys.LanguageErrorHeight,
                 SettingKeys.Notation,
                 SettingKeys.Zoom);
         }
@@ -191,7 +159,7 @@ namespace Sandra.UI
                 SettingKeys.Version,
                 SharedSettingKeys.AppDataSubFolderName,
                 SharedSettingKeys.LocalPreferencesFileName,
-                SettingKeys.DeveloperMode,
+                session.DeveloperMode,
                 SharedSettingKeys.LangFolderName,
                 SettingKeys.DarkSquareColor,
                 SettingKeys.LightSquareColor,
@@ -211,7 +179,7 @@ namespace Sandra.UI
                 SettingKeys.DisplayLegalTargetSquares,
                 SettingKeys.LegalTargetSquaresColor,
                 SettingKeys.FastNavigationPlyCount,
-                SettingKeys.DeveloperMode);
+                session.DeveloperMode);
         }
 
         public SettingCopy CreateBuiltIn(Session session)
@@ -221,7 +189,7 @@ namespace Sandra.UI
             defaultSettings.AddOrReplace(SettingKeys.Version, 1);
             defaultSettings.AddOrReplace(SharedSettingKeys.AppDataSubFolderName, SettingKeys.DefaultAppDataSubFolderName);
             defaultSettings.AddOrReplace(SharedSettingKeys.LocalPreferencesFileName, SettingKeys.DefaultLocalPreferencesFileName);
-            defaultSettings.AddOrReplace(SettingKeys.DeveloperMode, false);
+            defaultSettings.AddOrReplace(session.DeveloperMode, false);
             defaultSettings.AddOrReplace(SharedSettingKeys.LangFolderName, SettingKeys.DefaultLangFolderName);
             defaultSettings.AddOrReplace(SettingKeys.DarkSquareColor, Color.LightBlue);
             defaultSettings.AddOrReplace(SettingKeys.LightSquareColor, Color.Azure);

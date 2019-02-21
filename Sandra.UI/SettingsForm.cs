@@ -163,8 +163,8 @@ namespace Sandra.UI
 
             fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
             fileMenu.BindActions(
-                ToolForms.EditPreferencesFile,
-                ToolForms.ShowDefaultSettingsFile);
+                Session.Current.EditPreferencesFile,
+                Session.Current.ShowDefaultSettingsFile);
 
             editMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Edit);
             editMenu.BindActions(
@@ -181,12 +181,12 @@ namespace Sandra.UI
                 SharedUIAction.ZoomOut);
 
             developerToolsMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.DeveloperTools);
-            developerToolsMenu.BindAction(ToolForms.EditCurrentLanguage, alwaysVisible: false);
+            developerToolsMenu.BindAction(Session.Current.EditCurrentLanguage, alwaysVisible: false);
 
             helpMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Help);
             helpMenu.BindActions(
-                ToolForms.OpenAbout,
-                ToolForms.ShowCredits);
+                Session.Current.OpenAbout,
+                Session.Current.ShowCredits);
 
             // Implemtations for global UIActions.
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
@@ -198,11 +198,11 @@ namespace Sandra.UI
                 }
             }
 
-            this.BindAction(ToolForms.EditPreferencesFile, ToolForms.TryEditPreferencesFile(this));
-            this.BindAction(ToolForms.ShowDefaultSettingsFile, ToolForms.TryShowDefaultSettingsFile(this));
-            this.BindAction(ToolForms.OpenAbout, ToolForms.TryOpenAbout(this));
-            this.BindAction(ToolForms.ShowCredits, ToolForms.TryShowCredits(this));
-            this.BindAction(ToolForms.EditCurrentLanguage, ToolForms.TryEditCurrentLanguage(this));
+            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
