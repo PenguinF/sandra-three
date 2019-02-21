@@ -33,10 +33,8 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey About = new LocalizedStringKey(nameof(About));
         internal static readonly LocalizedStringKey BreakAtCurrentPosition = new LocalizedStringKey(nameof(BreakAtCurrentPosition));
         internal static readonly LocalizedStringKey Chessboard = new LocalizedStringKey(nameof(Chessboard));
-        internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey CopyDiagramToClipboard = new LocalizedStringKey(nameof(CopyDiagramToClipboard));
         internal static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
-        internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
         internal static readonly LocalizedStringKey DeleteLine = new LocalizedStringKey(nameof(DeleteLine));
         internal static readonly LocalizedStringKey DemoteLine = new LocalizedStringKey(nameof(DemoteLine));
         internal static readonly LocalizedStringKey DeveloperTools = new LocalizedStringKey(nameof(DeveloperTools));
@@ -53,8 +51,6 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey FlipBoard = new LocalizedStringKey(nameof(FlipBoard));
         internal static readonly LocalizedStringKey Game = new LocalizedStringKey(nameof(Game));
         internal static readonly LocalizedStringKey GoTo = new LocalizedStringKey(nameof(GoTo));
-        internal static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
-        internal static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
         internal static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
         internal static readonly LocalizedStringKey Moves = new LocalizedStringKey(nameof(Moves));
@@ -62,22 +58,16 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
         internal static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
-        internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
-        internal static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
         internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
-        internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
-        internal static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
         internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
         internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
-        internal static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
-        internal static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
     }
 
     internal sealed class BuiltInEnglishLocalizer : Localizer
@@ -98,10 +88,10 @@ namespace Sandra.UI
                 { LocalizedStringKeys.About, "About SandraChess" },
                 { LocalizedStringKeys.BreakAtCurrentPosition, "Break at current position" },
                 { LocalizedStringKeys.Chessboard, "Chessboard" },
-                { LocalizedStringKeys.Copy, "Copy" },
+                { SharedLocalizedStringKeys.Copy, "Copy" },
                 { LocalizedStringKeys.CopyDiagramToClipboard, "Copy diagram to clipboard" },
                 { LocalizedStringKeys.Credits, "Show credits" },
-                { LocalizedStringKeys.Cut, "Cut" },
+                { SharedLocalizedStringKeys.Cut, "Cut" },
                 { LocalizedStringKeys.DeleteLine, "Delete line" },
                 { LocalizedStringKeys.DemoteLine, "Demote line" },
                 { LocalizedStringKeys.DeveloperTools, "Tools" },
@@ -118,8 +108,8 @@ namespace Sandra.UI
                 { LocalizedStringKeys.FlipBoard, "Flip board" },
                 { LocalizedStringKeys.Game, "Game" },
                 { LocalizedStringKeys.GoTo, "Go to" },
-                { LocalizedStringKeys.GoToNextLocation, "Go to next location" },
-                { LocalizedStringKeys.GoToPreviousLocation, "Go to previous location" },
+                { SharedLocalizedStringKeys.GoToNextLocation, "Go to next location" },
+                { SharedLocalizedStringKeys.GoToPreviousLocation, "Go to previous location" },
                 { LocalizedStringKeys.Help, "Help" },
                 { LocalizedStringKeys.LastMove, "Last move" },
                 { LocalizedStringKeys.Moves, "Moves" },
@@ -127,22 +117,22 @@ namespace Sandra.UI
                 { LocalizedStringKeys.NextLine, "Next line" },
                 { LocalizedStringKeys.NextMove, "Next move" },
                 { LocalizedStringKeys.NoErrorsMessage, "(No errors)" },
-                { LocalizedStringKeys.Paste, "Paste" },
+                { SharedLocalizedStringKeys.Paste, "Paste" },
                 { LocalizedStringKeys.PieceSymbols, "NBRQK" },
                 { LocalizedStringKeys.PreviousLine, "Previous line" },
                 { LocalizedStringKeys.PreviousMove, "Previous move" },
                 { LocalizedStringKeys.PromoteLine, "Promote line" },
-                { LocalizedStringKeys.Redo, "Redo" },
+                { SharedLocalizedStringKeys.Redo, "Redo" },
                 { LocalizedStringKeys.Save, "Save" },
-                { LocalizedStringKeys.SelectAll, "Select All" },
+                { SharedLocalizedStringKeys.SelectAll, "Select All" },
                 { LocalizedStringKeys.ShowDefaultSettingsFile, "Show default settings" },
                 { LocalizedStringKeys.StartOfGame, "Start of game" },
                 { LocalizedStringKeys.UseLongAlgebraicNotation, "Use long algebraic notation" },
                 { LocalizedStringKeys.UsePGNPieceSymbols, "Use PGN notation" },
-                { LocalizedStringKeys.Undo, "Undo" },
+                { SharedLocalizedStringKeys.Undo, "Undo" },
                 { LocalizedStringKeys.View, "View" },
-                { LocalizedStringKeys.ZoomIn, "Zoom in" },
-                { LocalizedStringKeys.ZoomOut, "Zoom out" },
+                { SharedLocalizedStringKeys.ZoomIn, "Zoom in" },
+                { SharedLocalizedStringKeys.ZoomOut, "Zoom out" },
 
                 { LocalizedConsoleKeys.ConsoleKeyCtrl, "Ctrl" },
                 { LocalizedConsoleKeys.ConsoleKeyShift, "Shift" },

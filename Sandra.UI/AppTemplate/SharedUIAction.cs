@@ -24,7 +24,7 @@ using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     internal static class SharedUIAction
     {
@@ -41,8 +41,8 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.Undo,
-                    MenuIcon = Properties.Resources.undo,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Undo,
+                    MenuIcon = SharedResources.undo,
                 },
             });
 
@@ -56,8 +56,8 @@ namespace Sandra.UI
                 },
                 new ContextMenuUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.Redo,
-                    MenuIcon = Properties.Resources.redo,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Redo,
+                    MenuIcon = SharedResources.redo,
                 },
             });
 
@@ -72,8 +72,8 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.ZoomIn,
-                    MenuIcon = Properties.Resources.zoom_in,
+                    MenuCaptionKey = SharedLocalizedStringKeys.ZoomIn,
+                    MenuIcon = SharedResources.zoom_in,
                 },
             });
 
@@ -87,8 +87,8 @@ namespace Sandra.UI
                 },
                 new ContextMenuUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.ZoomOut,
-                    MenuIcon = Properties.Resources.zoom_out,
+                    MenuCaptionKey = SharedLocalizedStringKeys.ZoomOut,
+                    MenuIcon = SharedResources.zoom_out,
                 },
             });
 
@@ -103,8 +103,8 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.Cut,
-                    MenuIcon = Properties.Resources.cut,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Cut,
+                    MenuIcon = SharedResources.cut,
                 },
             });
 
@@ -118,8 +118,8 @@ namespace Sandra.UI
                 },
                 new ContextMenuUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.Copy,
-                    MenuIcon = Properties.Resources.copy,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Copy,
+                    MenuIcon = SharedResources.copy,
                 },
             });
 
@@ -133,8 +133,8 @@ namespace Sandra.UI
                 },
                 new ContextMenuUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.Paste,
-                    MenuIcon = Properties.Resources.paste,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Paste,
+                    MenuIcon = SharedResources.paste,
                 },
             });
 
@@ -149,7 +149,7 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.SelectAll,
+                    MenuCaptionKey = SharedLocalizedStringKeys.SelectAll,
                 },
             });
 
@@ -164,7 +164,7 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.GoToPreviousLocation,
+                    MenuCaptionKey = SharedLocalizedStringKeys.GoToPreviousLocation,
                 },
             });
 
@@ -178,7 +178,7 @@ namespace Sandra.UI
                 },
                 new ContextMenuUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.GoToNextLocation,
+                    MenuCaptionKey = SharedLocalizedStringKeys.GoToNextLocation,
                 },
             });
     }

@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Controls;
 using Eutherion.Win.UIActions;
 
