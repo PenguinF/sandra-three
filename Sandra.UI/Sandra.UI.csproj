@@ -54,7 +54,13 @@
   <ItemGroup>
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\ListBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AppTemplate\Localizers.cs" />
+    <Compile Include="AppTemplate\RichTextBoxEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="AppTemplate\SharedLocalizedlStringKeys.cs" />
     <Compile Include="AppTemplate\SharedResources.Designer.cs">
@@ -73,13 +79,6 @@
     </Compile>
     <Compile Include="JsonTextBox.UIActions.cs">
       <DependentUpon>JsonTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ListBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ListBoxEx.UIActions.cs">
-      <DependentUpon>ListBoxEx.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Localizers.cs" />
@@ -109,13 +108,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyStore.cs" />
-    <Compile Include="RichTextBoxEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="RichTextBoxEx.UIActions.cs">
-      <DependentUpon>RichTextBoxEx.cs</DependentUpon>
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
