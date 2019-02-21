@@ -151,8 +151,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Properties\flip.png" />
-    <None Include="Properties\globe.png" />
-    <None Include="Properties\save.png" />
     <None Include="AppTemplate\copy.png" />
     <None Include="AppTemplate\cut.png" />
     <None Include="AppTemplate\paste.png" />
@@ -162,6 +160,8 @@
     <None Include="AppTemplate\zoom_out.png" />
     <None Include="AppTemplate\settings.png" />
     <None Include="AppTemplate\speech.png" />
+    <None Include="AppTemplate\globe.png" />
+    <None Include="AppTemplate\save.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -128,10 +128,10 @@ namespace Sandra.UI
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
-                noErrorsString = new LocalizedString(LocalizedStringKeys.NoErrorsMessage);
+                noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
 
                 // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
-                errorLocationString = new LocalizedString(LocalizedStringKeys.ErrorLocation);
+                errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
@@ -158,15 +158,15 @@ namespace Sandra.UI
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            langMenu = autoHideMainMenu.AddMenuItem(null, Properties.Resources.globe);
+            langMenu = autoHideMainMenu.AddMenuItem(null, SharedResources.globe);
             Session.Current.RegisteredLocalizers.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
 
-            fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
+            fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
             fileMenu.BindActions(
                 Session.Current.EditPreferencesFile,
                 Session.Current.ShowDefaultSettingsFile);
 
-            editMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Edit);
+            editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
             editMenu.BindActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
@@ -175,15 +175,15 @@ namespace Sandra.UI
                 SharedUIAction.PasteSelectionFromClipBoard,
                 SharedUIAction.SelectAllText);
 
-            viewMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.View);
+            viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
 
-            developerToolsMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.DeveloperTools);
+            developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
             developerToolsMenu.BindAction(Session.Current.EditCurrentLanguage, alwaysVisible: false);
 
-            helpMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.Help);
+            helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
             helpMenu.BindActions(
                 Session.Current.OpenAbout,
                 Session.Current.ShowCredits);

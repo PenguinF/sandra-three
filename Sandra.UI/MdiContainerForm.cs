@@ -41,7 +41,7 @@ namespace Sandra.UI
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
-        private readonly LocalizedString developerTools = new LocalizedString(LocalizedStringKeys.DeveloperTools);
+        private readonly LocalizedString developerTools = new LocalizedString(SharedLocalizedStringKeys.Tools);
 
         // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
@@ -186,7 +186,7 @@ namespace Sandra.UI
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
-                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
+                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe);
                 mainMenuRootNodes.Add(langMenu);
                 BindFocusDependentUIActions(langMenu, Session.Current.RegisteredLocalizers.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
@@ -206,7 +206,7 @@ namespace Sandra.UI
                 Session.Current.EditCurrentLanguage.DefaultInterfaces,
                 Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary)));
 
-            UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
             mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
@@ -251,7 +251,7 @@ namespace Sandra.UI
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
-            UIMenuNode.Container viewMenu = new UIMenuNode.Container(LocalizedStringKeys.View);
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View);
             mainMenuRootNodes.Add(viewMenu);
 
             // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
@@ -286,7 +286,7 @@ namespace Sandra.UI
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
 
-            UIMenuNode.Container helpMenu = new UIMenuNode.Container(LocalizedStringKeys.Help);
+            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help);
             mainMenuRootNodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.

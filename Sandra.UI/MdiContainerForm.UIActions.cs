@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -44,7 +45,7 @@ namespace Sandra.UI
                 new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.Exit,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Exit,
                 },
             });
 

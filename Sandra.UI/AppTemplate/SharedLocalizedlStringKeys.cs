@@ -29,15 +29,24 @@ namespace Eutherion.Win.AppTemplate
         internal static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         internal static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
         internal static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
+        internal static readonly LocalizedStringKey Edit = new LocalizedStringKey(nameof(Edit));
         internal static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
         internal static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
+        internal static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
+        internal static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
+        internal static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
         internal static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
         internal static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
+        internal static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
+        internal static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
         internal static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         internal static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
+        internal static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
         internal static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         internal static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
+        internal static readonly LocalizedStringKey Tools = new LocalizedStringKey(nameof(Tools));
         internal static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
+        internal static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
         internal static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
         internal static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
     }
