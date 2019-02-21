@@ -22,6 +22,7 @@
 using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Sandra.PGN.Temp;
 using ScintillaNET;
 using System;
@@ -124,7 +125,7 @@ namespace Sandra.UI
             else
             {
                 // Update setting if the formatter was already initialized.
-                Program.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
+                Session.Current.AutoSave.Persist(SettingKeys.Notation, (MFOSettingValue)moveFormattingOption);
             }
 
             string pieceSymbols;

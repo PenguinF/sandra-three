@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Win.Storage;
-using Sandra.UI;
 using System;
 using System.Windows.Forms;
 
@@ -49,7 +48,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void FormState_Changed(object sender, EventArgs e)
         {
-            Program.AutoSave.Persist(autoSaveProperty, formState);
+            Session.Current.AutoSave.Persist(autoSaveProperty, formState);
         }
     }
 }

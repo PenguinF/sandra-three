@@ -22,6 +22,7 @@
 using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using Eutherion.Win.Utils;
@@ -117,7 +118,7 @@ namespace Sandra.UI
         {
             // Not only raise the event, but also save the zoom factor setting.
             OnZoomFactorChanged(e);
-            Program.AutoSave.Persist(SettingKeys.Zoom, e.ZoomFactor);
+            Session.Current.AutoSave.Persist(SettingKeys.Zoom, e.ZoomFactor);
         }
 
         protected override void OnMouseWheel(MouseEventArgs e)

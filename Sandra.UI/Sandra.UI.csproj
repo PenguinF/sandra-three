@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>

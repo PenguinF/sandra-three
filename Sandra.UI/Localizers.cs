@@ -24,6 +24,7 @@ using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -299,7 +300,7 @@ namespace Sandra.UI
             if (perform)
             {
                 Current = this;
-                Program.AutoSave.Persist(Localizers.LangSetting, this);
+                Session.Current.AutoSave.Persist(Localizers.LangSetting, this);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Current == this);

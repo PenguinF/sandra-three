@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
 using System.Drawing;
@@ -213,9 +214,9 @@ namespace Sandra.UI
             new SettingComment(LegalTargetSquaresColorDescription));
     }
 
-    internal static class Settings
+    public class SettingsProvider : ISettingsProvider
     {
-        public static SettingSchema CreateAutoSaveSchema()
+        public SettingSchema CreateAutoSaveSchema()
         {
             return new SettingSchema(
                 Localizers.LangSetting,
@@ -230,7 +231,7 @@ namespace Sandra.UI
                 SettingKeys.Zoom);
         }
 
-        public static SettingSchema CreateDefaultSettingsSchema()
+        public SettingSchema CreateDefaultSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: false),
@@ -247,7 +248,7 @@ namespace Sandra.UI
                 SettingKeys.FastNavigationPlyCount);
         }
 
-        public static SettingSchema CreateLocalSettingsSchema()
+        public SettingSchema CreateLocalSettingsSchema()
         {
             return new SettingSchema(
                 SettingKeys.DefaultSettingsSchemaDescription(isLocalSchema: true),
@@ -260,7 +261,7 @@ namespace Sandra.UI
                 SettingKeys.DeveloperMode);
         }
 
-        public static SettingCopy CreateBuiltIn()
+        public SettingCopy CreateBuiltIn()
         {
             SettingCopy defaultSettings = new SettingCopy(CreateDefaultSettingsSchema());
 

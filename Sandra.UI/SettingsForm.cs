@@ -21,6 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -296,7 +297,7 @@ namespace Sandra.UI
                 int splitterDistance = ClientSize.Height - targetErrorHeight - splitter.SplitterWidth;
                 if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
 
-                splitter.SplitterMoved += (_, __) => Program.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
+                splitter.SplitterMoved += (_, __) => Session.Current.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
             }
         }
 

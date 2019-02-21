@@ -42,8 +42,6 @@ namespace Sandra.UI
 
         internal static SettingsFile LocalSettings { get; private set; }
 
-        internal static AutoSave AutoSave { get; private set; }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -54,9 +52,10 @@ namespace Sandra.UI
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
             // Attempt to load default settings.
+            var settingsProvider = new SettingsProvider();
             DefaultSettings = SettingsFile.Create(
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
-                Settings.CreateBuiltIn());
+                settingsProvider.CreateBuiltIn());
 
             // Save name of APPDATA subfolder for persistent files.
             var appDataSubFolderName = GetDefaultSetting(SettingKeys.AppDataSubFolderName);
@@ -73,30 +72,28 @@ namespace Sandra.UI
             var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
             Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
-            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(Settings.CreateAutoSaveSchema()));
-
-            // After creating the auto-save file, look for a local preferences file.
-            // Create a working copy with correct schema first.
-            SettingCopy localSettingsCopy = new SettingCopy(Settings.CreateLocalSettingsSchema());
-
-            // And then create the local settings file which can overwrite values in default settings.
-            LocalSettings = SettingsFile.Create(
-                Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
-                localSettingsCopy);
-
-            Chess.Constants.ForceInitialize();
-
-            if (TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
+            using (Session.Configure(appDataSubFolderName, settingsProvider))
             {
-                Localizer.Current = localizer;
+                // After creating the auto-save file, look for a local preferences file.
+                // Create a working copy with correct schema first.
+                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema());
+
+                // And then create the local settings file which can overwrite values in default settings.
+                LocalSettings = SettingsFile.Create(
+                    Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
+                    localSettingsCopy);
+
+                Chess.Constants.ForceInitialize();
+
+                if (TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
+                {
+                    Localizer.Current = localizer;
+                }
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MdiContainerForm());
             }
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MdiContainerForm());
-
-            // Wait until the auto-save background task has finished.
-            AutoSave.Close();
         }
 
         internal static TValue GetDefaultSetting<TValue>(SettingProperty<TValue> property)
@@ -110,7 +107,7 @@ namespace Sandra.UI
         }
 
         internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
-            => AutoSave.CurrentSettings.TryGetValue(property, out value);
+            => Session.Current.AutoSave.CurrentSettings.TryGetValue(property, out value);
 
         internal static void AttachFormStateAutoSaver(
             Form targetForm,
