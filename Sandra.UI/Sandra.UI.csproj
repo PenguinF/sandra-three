@@ -61,6 +61,9 @@
     <Compile Include="AppTemplate\RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AppTemplate\ScintillaEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="AppTemplate\SharedLocalizedlStringKeys.cs" />
     <Compile Include="AppTemplate\SharedResources.Designer.cs">
@@ -70,6 +73,9 @@
     </Compile>
     <Compile Include="AppTemplate\SharedSettingKeys.cs" />
     <Compile Include="AppTemplate\SharedUIAction.cs" />
+    <Compile Include="AppTemplate\UIActionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
@@ -126,14 +132,7 @@
     <Compile Include="SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="SyntaxEditor.UIActions.cs">
-      <SubType>Component</SubType>
-      <DependentUpon>SyntaxEditor.cs</DependentUpon>
-    </Compile>
     <Compile Include="ToolForms.cs" />
-    <Compile Include="UIActionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Eutherion\Shared\Eutherion.Shared.csproj">

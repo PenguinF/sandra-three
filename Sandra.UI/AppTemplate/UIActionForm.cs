@@ -20,12 +20,11 @@
 #endregion
 
 using Eutherion.UIActions;
-using Eutherion.Win;
 using Eutherion.Win.UIActions;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// Top level Form which ties in with the UIAction framework.

@@ -21,6 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
