@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 using System.IO;
@@ -32,13 +33,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding SaveToFile = new DefaultUIActionBinding(
             new UIAction(JsonTextBoxUIActionPrefix + nameof(SaveToFile)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.Save,

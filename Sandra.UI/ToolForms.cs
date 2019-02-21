@@ -73,9 +73,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditPreferencesFile)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.EditPreferencesFile,
                     MenuIcon = Properties.Resources.settings,
@@ -141,9 +141,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.ShowDefaultSettingsFile,
                 },
@@ -230,9 +230,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(OpenAbout)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.About,
                 },
@@ -255,9 +255,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.Credits,
                 },
@@ -280,9 +280,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.EditCurrentLanguage,
                     MenuIcon = Properties.Resources.speech,

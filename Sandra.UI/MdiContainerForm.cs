@@ -256,10 +256,10 @@ namespace Sandra.UI
             // because they would otherwise remain invisible.
             var modifiedGotoChessBoardForm = new DefaultUIActionBinding(
                 InteractiveGame.GotoChessBoardForm.Action,
-                new UIActionBinding
+                new ImplementationSet<IUIActionInterface>
                 {
-                    ShortcutKeysInterface = InteractiveGame.GotoChessBoardForm.DefaultBinding.ShortcutKeysInterface,
-                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    InteractiveGame.GotoChessBoardForm.DefaultBinding.ShortcutKeysInterface,
+                    new ContextMenuUIActionInterface
                     {
                         IsFirstInGroup = true,
                         MenuCaptionKey = LocalizedStringKeys.Chessboard,
@@ -268,10 +268,10 @@ namespace Sandra.UI
 
             var modifiedGotoMovesForm = new DefaultUIActionBinding(
                 InteractiveGame.GotoMovesForm.Action,
-                new UIActionBinding
+                new ImplementationSet<IUIActionInterface>
                 {
-                    ShortcutKeysInterface = InteractiveGame.GotoMovesForm.DefaultBinding.ShortcutKeysInterface,
-                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    InteractiveGame.GotoMovesForm.DefaultBinding.ShortcutKeysInterface,
+                    new ContextMenuUIActionInterface
                     {
                         MenuCaptionKey = LocalizedStringKeys.Moves,
                     },

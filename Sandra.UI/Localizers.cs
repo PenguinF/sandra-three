@@ -280,9 +280,9 @@ namespace Sandra.UI
 
                     switchToLangUIActionBinding = new DefaultUIActionBinding(
                         new UIAction(nameof(Localizers) + "." + LanguageName),
-                        new UIActionBinding
+                        new ImplementationSet<IUIActionInterface>
                         {
-                            ContextMenuInterface = new ContextMenuUIActionInterface
+                            new ContextMenuUIActionInterface
                             {
                                 MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
                                 MenuIcon = menuIcon,

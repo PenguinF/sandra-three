@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
@@ -33,13 +34,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding FlipBoard = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.FlipBoard,
@@ -55,13 +56,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding TakeScreenshot = new DefaultUIActionBinding(
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,

@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -31,13 +32,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding Undo = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Undo)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.Undo,
@@ -47,13 +48,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding Redo = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Redo)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.Redo,
                     MenuIcon = Properties.Resources.redo,
@@ -62,13 +63,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding ZoomIn = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.ZoomIn,
@@ -78,13 +79,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding ZoomOut = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(ZoomOut)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.ZoomOut,
                     MenuIcon = Properties.Resources.zoom_out,
@@ -93,13 +94,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding CutSelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.Cut,
@@ -109,13 +110,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding CopySelectionToClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.Copy,
                     MenuIcon = Properties.Resources.copy,
@@ -124,13 +125,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding PasteSelectionFromClipBoard = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.Paste,
                     MenuIcon = Properties.Resources.paste,
@@ -139,13 +140,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding SelectAllText = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(SelectAllText)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.SelectAll,
@@ -154,13 +155,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GoToPreviousLocation = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.GoToPreviousLocation,
@@ -169,13 +170,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GoToNextLocation = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToNextLocation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.GoToNextLocation,
                 },

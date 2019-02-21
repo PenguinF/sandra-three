@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -34,13 +35,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.Exit,
@@ -55,13 +56,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding OpenNewPlayingBoard = new DefaultUIActionBinding(
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NewGame,
                 },

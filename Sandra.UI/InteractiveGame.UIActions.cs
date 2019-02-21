@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Forms;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
@@ -38,9 +39,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoChessBoardForm = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoChessBoardForm)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
                 },
@@ -132,9 +133,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoMovesForm = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
                 },
@@ -229,13 +230,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoStart = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoStart)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.StartOfGame,
@@ -256,13 +257,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoFirstMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FirstMove,
                 },
@@ -288,9 +289,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding FastNavigateBackward = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateBackward)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -298,7 +299,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FastBackward,
                 },
@@ -318,9 +319,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoPreviousMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -328,7 +329,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.PreviousMove,
                 },
@@ -348,9 +349,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoNextMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -358,7 +359,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NextMove,
                 },
@@ -390,9 +391,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding FastNavigateForward = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateForward)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -400,7 +401,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FastForward,
                 },
@@ -420,13 +421,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoLastMove = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoLastMove)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.LastMove,
                 },
@@ -446,13 +447,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoEnd = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoEnd)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.EndOfGame,
                 },
@@ -478,9 +479,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoPreviousVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -488,7 +489,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PreviousLine,
@@ -517,9 +518,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding GotoNextVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -527,7 +528,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NextLine,
                 },
@@ -552,9 +553,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding PromoteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(PromoteActiveVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -562,7 +563,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PromoteLine,
@@ -591,9 +592,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding DemoteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(DemoteActiveVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[]
                     {
@@ -601,7 +602,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
                     },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.DemoteLine,
                 },
@@ -634,13 +635,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding BreakActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(BreakActiveVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
                 },
@@ -661,13 +662,13 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding DeleteActiveVariation = new DefaultUIActionBinding(
             new UIAction(InteractiveGameUIActionPrefix + nameof(DeleteActiveVariation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ShortcutKeysInterface = new ShortcutKeysUIActionInterface
+                new ShortcutKeysUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
                 },
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.DeleteLine,
                 },

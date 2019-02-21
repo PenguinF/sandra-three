@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.UIActions;
 
 namespace Sandra.UI
@@ -30,9 +31,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding UsePGNPieceSymbols = new DefaultUIActionBinding(
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
@@ -56,9 +57,9 @@ namespace Sandra.UI
 
         public static readonly DefaultUIActionBinding UseLongAlgebraicNotation = new DefaultUIActionBinding(
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UseLongAlgebraicNotation)),
-            new UIActionBinding
+            new ImplementationSet<IUIActionInterface>
             {
-                ContextMenuInterface = new ContextMenuUIActionInterface
+                new ContextMenuUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
                 },

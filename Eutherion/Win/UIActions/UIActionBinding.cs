@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -51,10 +52,14 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public UIActionBinding DefaultBinding { get; }
 
-        public DefaultUIActionBinding(UIAction action, UIActionBinding defaultBinding)
+        public DefaultUIActionBinding(UIAction action, ImplementationSet<IUIActionInterface> defaultBinding)
         {
             Action = action;
-            DefaultBinding = defaultBinding;
+            DefaultBinding = new UIActionBinding
+            {
+                ShortcutKeysInterface = defaultBinding.Get<ShortcutKeysUIActionInterface>(),
+                ContextMenuInterface = defaultBinding.Get<ContextMenuUIActionInterface>(),
+            };
         }
     }
 
