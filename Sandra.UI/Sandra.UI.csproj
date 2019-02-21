@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
     <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />
@@ -91,7 +92,7 @@
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
     </Compile>
-    <Compile Include="Localizers.cs" />
+    <Compile Include="LocalizedStringKeys.cs" />
     <Compile Include="MdiContainerForm.cs">
       <SubType>Form</SubType>
     </Compile>

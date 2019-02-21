@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
@@ -39,19 +40,25 @@ namespace Sandra.UI
         static void Main()
         {
             // Use built-in localizer if none is provided.
-            Localizer.Current = BuiltInEnglishLocalizer.Instance;
+            var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
+                LocalizedStringKeys.DefaultEnglishTranslations,
+                LocalizedConsoleKeys.DefaultEnglishTranslations,
+                SharedLocalizedStringKeys.DefaultEnglishTranslations,
+                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
+
+            Localizer.Current = builtInEnglishLocalizer;
 
             var settingsProvider = new SettingsProvider();
             using (var session = Session.Configure(
                 typeof(Program).Assembly,
                 settingsProvider,
-                BuiltInEnglishLocalizer.Instance.Dictionary))
+                builtInEnglishLocalizer.Dictionary))
             {
                 Chess.Constants.ForceInitialize();
 
 #if DEBUG
                 // In debug mode, generate default json configuration files from hard coded settings.
-                GenerateJsonConfigurationFiles(session);
+                GenerateJsonConfigurationFiles(session, builtInEnglishLocalizer);
 #endif
 
                 Application.EnableVisualStyles();
@@ -78,7 +85,7 @@ namespace Sandra.UI
         /// Generates DefaultSettings.json from the loaded default settings in memory,
         /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
         /// </summary>
-        private static void GenerateJsonConfigurationFiles(Session session)
+        private static void GenerateJsonConfigurationFiles(Session session, BuiltInEnglishLocalizer builtInEnglishLocalizer)
         {
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
@@ -87,7 +94,7 @@ namespace Sandra.UI
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
             settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
-            settingCopy.AddOrReplace(Localizers.Translations, BuiltInEnglishLocalizer.Instance.Dictionary);
+            settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
             SettingsFile.WriteToFile(
                 settingCopy.Commit(),
                 Path.Combine(Session.Current.ExecutableFolder, "Languages", "en.json"),

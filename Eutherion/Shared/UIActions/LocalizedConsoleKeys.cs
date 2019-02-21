@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using System.Collections.Generic;
 
 namespace Eutherion.UIActions
 {
@@ -88,5 +89,26 @@ namespace Eutherion.UIActions
         /// Gets the <see cref="LocalizedStringKey"/> for <see cref="System.ConsoleKey.UpArrow"/>.
         /// </summary>
         public static readonly LocalizedStringKey ConsoleKeyUpArrow = new LocalizedStringKey(nameof(ConsoleKeyUpArrow));
+
+        /// <summary>
+        /// Enumerates all <see cref="LocalizedStringKey"/>s in this class with a suggested default English translation.
+        /// </summary>
+        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
+        {
+            { ConsoleKeyCtrl, "Ctrl" },
+            { ConsoleKeyShift, "Shift" },
+            { ConsoleKeyAlt, "Alt" },
+
+            { ConsoleKeyLeftArrow, "Left Arrow" },
+            { ConsoleKeyRightArrow, "Right Arrow" },
+            { ConsoleKeyUpArrow, "Up Arrow" },
+            { ConsoleKeyDownArrow, "Down Arrow" },
+
+            { ConsoleKeyDelete, "Del" },
+            { ConsoleKeyHome, "Home" },
+            { ConsoleKeyEnd, "End" },
+            { ConsoleKeyPageDown, "PageDown" },
+            { ConsoleKeyPageUp, "PageUp" },
+        };
     }
 }
