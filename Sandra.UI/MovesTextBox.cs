@@ -75,6 +75,18 @@ namespace Sandra.UI
                     UpdateMoveFormatter();
                 }
             };
+
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.MovesZoom, out int zoomFactor))
+            {
+                Zoom = zoomFactor;
+            }
+        }
+
+        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
+        {
+            // Not only raise the event, but also save the zoom factor setting.
+            base.OnZoomFactorChanged(e);
+            Session.Current.AutoSave.Persist(SettingKeys.MovesZoom, e.ZoomFactor);
         }
 
         protected override void Dispose(bool disposing)

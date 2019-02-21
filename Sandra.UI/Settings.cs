@@ -62,8 +62,12 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
-        public static readonly SettingProperty<int> Zoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(Zoom))),
+        public static readonly SettingProperty<int> JsonZoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(JsonZoom))),
+            ScintillaZoomFactor.Instance);
+
+        public static readonly SettingProperty<int> MovesZoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(MovesZoom))),
             ScintillaZoomFactor.Instance);
 
         private static readonly string FastNavigationPlyCountDescription
@@ -148,8 +152,9 @@ namespace Sandra.UI
                 SharedSettingKeys.PreferencesErrorHeight,
                 SharedSettingKeys.LanguageWindow,
                 SharedSettingKeys.LanguageErrorHeight,
+                SettingKeys.JsonZoom,
                 SettingKeys.Notation,
-                SettingKeys.Zoom);
+                SettingKeys.MovesZoom);
         }
 
         public SettingSchema CreateDefaultSettingsSchema(Session session)

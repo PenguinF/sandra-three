@@ -142,9 +142,21 @@ namespace Sandra.UI
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.JsonZoom, out int zoomFactor))
+            {
+                Zoom = zoomFactor;
+            }
+
             // Set the Text property and use that as input, because it will not exactly match the json string.
             Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
             EmptyUndoBuffer();
+        }
+
+        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
+        {
+            // Not only raise the event, but also save the zoom factor setting.
+            base.OnZoomFactorChanged(e);
+            Session.Current.AutoSave.Persist(SettingKeys.JsonZoom, e.ZoomFactor);
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)

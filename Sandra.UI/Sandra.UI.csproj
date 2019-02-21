@@ -74,6 +74,9 @@
     </Compile>
     <Compile Include="AppTemplate\SharedSettingKeys.cs" />
     <Compile Include="AppTemplate\SharedUIAction.cs" />
+    <Compile Include="AppTemplate\SyntaxEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AppTemplate\UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -129,9 +132,6 @@
     <Compile Include="StandardChessBoardForm.UIActions.cs">
       <DependentUpon>StandardChessBoardForm.cs</DependentUpon>
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SyntaxEditor.cs">
-      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

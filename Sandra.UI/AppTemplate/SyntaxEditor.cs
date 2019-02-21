@@ -21,12 +21,11 @@
 
 using Eutherion.Text;
 using Eutherion.UIActions;
-using Eutherion.Win.AppTemplate;
 using ScintillaNET;
 using System.Drawing;
 using System.Linq;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting, a number of <see cref="UIAction"/> hooks,
@@ -56,11 +55,6 @@ namespace Sandra.UI
             VScrollBar = true;
 
             Margins.ForEach(x => x.Width = 0);
-
-            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
-            {
-                Zoom = zoomFactor;
-            }
         }
 
         protected void ApplyStyle(TextElement<TTerminal> element, Style style)
@@ -70,13 +64,6 @@ namespace Sandra.UI
                 StartStyling(element.Start);
                 SetStyling(element.Length, style.Index);
             }
-        }
-
-        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
-        {
-            // Not only raise the event, but also save the zoom factor setting.
-            base.OnZoomFactorChanged(e);
-            Session.Current.AutoSave.Persist(SettingKeys.Zoom, e.ZoomFactor);
         }
     }
 }
