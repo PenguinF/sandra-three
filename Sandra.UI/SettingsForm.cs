@@ -159,7 +159,7 @@ namespace Sandra.UI
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
             langMenu = autoHideMainMenu.AddMenuItem(null, Properties.Resources.globe);
-            Localizers.Registered.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
+            Session.Current.RegisteredLocalizers.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
 
             fileMenu = autoHideMainMenu.AddMenuItem(LocalizedStringKeys.File);
             fileMenu.BindActions(
@@ -189,10 +189,10 @@ namespace Sandra.UI
                 ToolForms.ShowCredits);
 
             // Implemtations for global UIActions.
-            if (Localizers.Registered.Count() >= 2)
+            if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
                 // More than one localizer: can switch between them.
-                foreach (var localizer in Localizers.Registered)
+                foreach (var localizer in Session.Current.RegisteredLocalizers)
                 {
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }

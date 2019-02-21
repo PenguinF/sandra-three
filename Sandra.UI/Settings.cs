@@ -216,10 +216,10 @@ namespace Sandra.UI
 
     public class SettingsProvider : ISettingsProvider
     {
-        public SettingSchema CreateAutoSaveSchema()
+        public SettingSchema CreateAutoSaveSchema(Session session)
         {
             return new SettingSchema(
-                Localizers.LangSetting,
+                session.LangSetting,
                 SettingKeys.Window,
                 SettingKeys.DefaultSettingsWindow,
                 SettingKeys.DefaultSettingsErrorHeight,

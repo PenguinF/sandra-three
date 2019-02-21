@@ -48,6 +48,9 @@ namespace Sandra.UI
         [STAThread]
         static void Main()
         {
+            // Use built-in localizer if none is provided.
+            Localizer.Current = BuiltInEnglishLocalizer.Instance;
+
             // Store executable folder location for later use.
             ExecutableFolder = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
@@ -65,9 +68,8 @@ namespace Sandra.UI
 
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
-            Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
-            using (var session = Session.Configure(appDataSubFolderName, settingsProvider))
+            using (var session = Session.Configure(ExecutableFolder, langFolderName, appDataSubFolderName, settingsProvider))
             {
                 // After creating the auto-save file, look for a local preferences file.
                 // Create a working copy with correct schema first.
@@ -77,11 +79,6 @@ namespace Sandra.UI
                 LocalSettings = SettingsFile.Create(
                     Path.Combine(AppDataSubFolder, GetDefaultSetting(SettingKeys.LocalPreferencesFileName)),
                     localSettingsCopy);
-
-                if (session.TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
-                {
-                    Localizer.Current = localizer;
-                }
 
                 Chess.Constants.ForceInitialize();
 

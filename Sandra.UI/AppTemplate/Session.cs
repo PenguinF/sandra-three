@@ -19,9 +19,14 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Win.Storage;
+using Sandra.UI;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -32,17 +37,42 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class Session : IDisposable
     {
+        public static readonly string LangSettingKey = "lang";
+
         public static Session Current { get; private set; }
 
-        public static Session Configure(string appDataSubFolderName, ISettingsProvider settingsProvider)
-            => Current = new Session(appDataSubFolderName, settingsProvider);
+        public static Session Configure(string executableFolder, string langFolderName, string appDataSubFolderName, ISettingsProvider settingsProvider)
+            => Current = new Session(executableFolder, langFolderName, appDataSubFolderName, settingsProvider);
+
+        private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
+
+        private Session(string executableFolder, string langFolderName, string appDataSubFolderName, ISettingsProvider settingsProvider)
+        {
+            registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(executableFolder, langFolderName));
+
+            LangSetting = new SettingProperty<FileLocalizer>(
+                new SettingKey(LangSettingKey),
+                new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
+
+            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
+
+            if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
+            {
+                Localizer.Current = localizer;
+            }
+            else
+            {
+                // Select best fit.
+                localizer = Localizers.BestFit(registeredLocalizers);
+                if (localizer != null) Localizer.Current = localizer;
+            }
+        }
+
+        public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public AutoSave AutoSave { get; }
 
-        private Session(string appDataSubFolderName, ISettingsProvider settingsProvider)
-        {
-            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema()));
-        }
+        public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
 
         public bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
             => AutoSave.CurrentSettings.TryGetValue(property, out value);
@@ -99,6 +129,6 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the schema to use for the auto-save file.
         /// </summary>
-        SettingSchema CreateAutoSaveSchema();
+        SettingSchema CreateAutoSaveSchema(Session session);
     }
 }

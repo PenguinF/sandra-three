@@ -90,18 +90,6 @@ namespace Sandra.UI
 
     internal static class Localizers
     {
-        public static readonly string LangSettingKey = "lang";
-
-        private static readonly Dictionary<string, FileLocalizer> registered
-            = new Dictionary<string, FileLocalizer>(StringComparer.OrdinalIgnoreCase);
-
-        public static IEnumerable<FileLocalizer> Registered => registered.Select(kv => kv.Value);
-
-        /// <summary>
-        /// This setting key is moved to this class to ensure the localizers are set up before the auto-save setting is loaded.
-        /// </summary>
-        public static SettingProperty<FileLocalizer> LangSetting { get; private set; }
-
         private static readonly string NativeNameDescription
             = "Name of the language in the language itself. This property is mandatory.";
 
@@ -134,7 +122,7 @@ namespace Sandra.UI
                 Translations);
         }
 
-        private static IEnumerable<string> LocalizerKeyCandidates(CultureInfo uiCulture)
+        public static IEnumerable<string> LocalizerKeyCandidates(CultureInfo uiCulture)
         {
             yield return uiCulture.NativeName;
             yield return uiCulture.Name;
@@ -158,8 +146,10 @@ namespace Sandra.UI
         /// <param name="defaultLangDirectory">
         /// Path to the directory to scan for language files.
         /// </param>
-        public static void ScanLocalizers(string defaultLangDirectory)
+        public static Dictionary<string, FileLocalizer> ScanLocalizers(string defaultLangDirectory)
         {
+            var foundLocalizers = new Dictionary<string, FileLocalizer>(StringComparer.OrdinalIgnoreCase);
+
             var languageFileSchema = CreateLanguageFileSchema();
 
             try
@@ -175,7 +165,7 @@ namespace Sandra.UI
                             var languageFile = SettingsFile.Create(fileInfo.FullName, new SettingCopy(languageFileSchema));
                             languageFile.Settings.TryGetValue(FlagIconFile, out string flagIconFileName);
 
-                            registered.Add(
+                            foundLocalizers.Add(
                                 Path.GetFileNameWithoutExtension(fileInfo.Name),
                                 new FileLocalizer(languageFile));
                         }
@@ -191,29 +181,26 @@ namespace Sandra.UI
                 exc.Trace();
             }
 
-            LangSetting = new SettingProperty<FileLocalizer>(
-                new SettingKey(LangSettingKey),
-                new PType.KeyedSet<FileLocalizer>(registered));
+            return foundLocalizers;
+        }
 
-            if (registered.Count == 0)
-            {
-                // Use built-in localizer if none is provided.
-                Localizer.Current = BuiltInEnglishLocalizer.Instance;
-            }
-            else
+        public static FileLocalizer BestFit(Dictionary<string, FileLocalizer> localizers)
+        {
+            if (localizers.Count > 0)
             {
                 // Try keys based on CurrentUICulture.
                 foreach (var candidateKey in LocalizerKeyCandidates(CultureInfo.CurrentUICulture))
                 {
-                    if (registered.TryGetValue(candidateKey, out FileLocalizer localizerMatch))
+                    if (localizers.TryGetValue(candidateKey, out FileLocalizer localizerMatch))
                     {
-                        Localizer.Current = localizerMatch;
-                        return;
+                        return localizerMatch;
                     }
                 }
 
-                Localizer.Current = registered.First().Value;
+                return localizers.First().Value;
             }
+
+            return null;
         }
     }
 
@@ -300,7 +287,7 @@ namespace Sandra.UI
             if (perform)
             {
                 Current = this;
-                Session.Current.AutoSave.Persist(Localizers.LangSetting, this);
+                Session.Current.AutoSave.Persist(Session.Current.LangSetting, this);
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Current == this);

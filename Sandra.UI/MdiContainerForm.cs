@@ -179,16 +179,16 @@ namespace Sandra.UI
         void InitializeUIActions()
         {
             // More than one localizer: can switch between them.
-            if (Localizers.Registered.Count() >= 2)
+            if (Session.Current.RegisteredLocalizers.Count() >= 2)
             {
-                foreach (var localizer in Localizers.Registered)
+                foreach (var localizer in Session.Current.RegisteredLocalizers)
                 {
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
                 UIMenuNode.Container langMenu = new UIMenuNode.Container(null, Properties.Resources.globe);
                 mainMenuRootNodes.Add(langMenu);
-                BindFocusDependentUIActions(langMenu, Localizers.Registered.Select(x => x.SwitchToLangUIActionBinding).ToArray());
+                BindFocusDependentUIActions(langMenu, Session.Current.RegisteredLocalizers.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
 
             // Actions which have their handler in this instance.
@@ -383,7 +383,7 @@ namespace Sandra.UI
         protected override void OnLoad(EventArgs e)
         {
             // Enable live updates to localizers now a message loop exists.
-            Localizers.Registered.ForEach(x => x.EnableLiveUpdates());
+            Session.Current.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
 
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
