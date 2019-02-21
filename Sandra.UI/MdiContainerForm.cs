@@ -111,66 +111,73 @@ namespace Sandra.UI
 
         void BindFocusDependentUIActions(UIMenuNode.Container container, params DefaultUIActionBinding[] bindings)
         {
-            foreach (DefaultUIActionBinding binding in bindings.Where(x => x.DefaultBinding.ContextMenuInterface != null))
+            foreach (DefaultUIActionBinding binding in bindings)
             {
-                // Copy the default binding and modify it.
-                UIActionBinding modifiedBinding = new UIActionBinding
+                if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
                 {
-                    ShortcutKeysInterface = binding.DefaultBinding.ShortcutKeysInterface,
-                    ContextMenuInterface = new ContextMenuUIActionInterface
+                    // Copy the default binding and modify it.
+                    var modifiedBinding = new ImplementationSet<IUIActionInterface>
                     {
-                        IsFirstInGroup = binding.DefaultBinding.ContextMenuInterface.IsFirstInGroup,
-                        MenuCaptionKey = binding.DefaultBinding.ContextMenuInterface.MenuCaptionKey,
-                        MenuIcon = binding.DefaultBinding.ContextMenuInterface.MenuIcon,
-                        // Add a menu item inside the given container which will update itself after focus changes.
-                        MenuContainer = container,
-                    },
-                };
+                        new ContextMenuUIActionInterface
+                        {
+                            IsFirstInGroup = contextMenuInterface.IsFirstInGroup,
+                            MenuCaptionKey = contextMenuInterface.MenuCaptionKey,
+                            MenuIcon = contextMenuInterface.MenuIcon,
+                            // Add a menu item inside the given container which will update itself after focus changes.
+                            MenuContainer = container,
+                        },
+                    };
 
-                // Register in a Dictionary to be able to figure out which menu items should be updated.
-                focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
-
-                // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-                mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
-                {
-                    try
+                    if (binding.DefaultInterfaces.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface))
                     {
-                        var state = focusDependentUIActions[binding.Action];
+                        modifiedBinding.Add(shortcutKeysInterface);
+                    }
 
-                        if (!perform)
-                        {
-                            // Only clear/set the state when called from updateFocusDependentMenuItems().
-                            state.CurrentHandler = null;
-                            state.IsDirty = false;
-                        }
+                    // Register in a Dictionary to be able to figure out which menu items should be updated.
+                    focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
 
-                        // Try to find a UIActionHandler that is willing to validate/perform the given action.
-                        foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                    // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
+                    mainMenuActionHandler.BindAction(binding.Action, modifiedBinding, perform =>
+                    {
+                        try
                         {
-                            UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
-                            if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                            var state = focusDependentUIActions[binding.Action];
+
+                            if (!perform)
                             {
-                                // Remember the action handler this UIAction is now bound to.
-                                if (!perform)
-                                {
-                                    // Only clear/set the state when called from updateFocusDependentMenuItems().
-                                    state.CurrentHandler = actionHandler;
-                                }
-                                return currentActionState;
+                                // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                state.CurrentHandler = null;
+                                state.IsDirty = false;
                             }
 
-                            // Only consider handlers which are defined in the context of this one.
-                            if (ActionHandler == actionHandler) break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.Message);
-                    }
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    // Remember the action handler this UIAction is now bound to.
+                                    if (!perform)
+                                    {
+                                        // Only clear/set the state when called from updateFocusDependentMenuItems().
+                                        state.CurrentHandler = actionHandler;
+                                    }
+                                    return currentActionState;
+                                }
 
-                    // No handler in the chain that processes the UIAction actively, so set to disabled.
-                    return UIActionVisibility.Disabled;
-                });
+                                // Only consider handlers which are defined in the context of this one.
+                                if (ActionHandler == actionHandler) break;
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    });
+                }
             }
         }
 
@@ -201,7 +208,7 @@ namespace Sandra.UI
             // Use developerToolsActionHandler to add to the developer tools menu.
             developerToolsActionHandler.BindAction(
                 ToolForms.EditCurrentLanguage.Action,
-                ToolForms.EditCurrentLanguage.DefaultBinding,
+                ToolForms.EditCurrentLanguage.DefaultInterfaces,
                 ToolForms.TryEditCurrentLanguage(this));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(LocalizedStringKeys.File);
@@ -258,7 +265,7 @@ namespace Sandra.UI
                 InteractiveGame.GotoChessBoardForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoChessBoardForm.DefaultBinding.ShortcutKeysInterface,
+                    InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
                     new ContextMenuUIActionInterface
                     {
                         IsFirstInGroup = true,
@@ -270,7 +277,7 @@ namespace Sandra.UI
                 InteractiveGame.GotoMovesForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoMovesForm.DefaultBinding.ShortcutKeysInterface,
+                    InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
                     new ContextMenuUIActionInterface
                     {
                         MenuCaptionKey = LocalizedStringKeys.Moves,

@@ -27,17 +27,6 @@ using System.Collections.Generic;
 namespace Eutherion.Win.UIActions
 {
     /// <summary>
-    /// Groups a set of optional properties to allow for one shared definition of a <see cref="UIAction"/> 
-    /// across several components and ways of exposing those actions (menu, shortcut key, buttons, etc).
-    /// </summary>
-    public struct UIActionBinding
-    {
-        public ShortcutKeysUIActionInterface ShortcutKeysInterface;
-
-        public ContextMenuUIActionInterface ContextMenuInterface;
-    }
-
-    /// <summary>
     /// Helper class which encapsulates a <see cref="IUIActionHandlerProvider"/>'s default suggested binding for a <see cref="UIAction"/>.
     /// </summary>
     public sealed class DefaultUIActionBinding
@@ -48,18 +37,14 @@ namespace Eutherion.Win.UIActions
         public UIAction Action { get; }
 
         /// <summary>
-        /// Gets the <see cref="UIActionBinding"/> which contains the default parameters that define how the action is exposed to the user interface.
+        /// Gets the suggested default <see cref="ImplementationSet{TInterface}"/> which defines how the action is exposed to the user interface.
         /// </summary>
-        public UIActionBinding DefaultBinding { get; }
+        public ImplementationSet<IUIActionInterface> DefaultInterfaces { get; }
 
-        public DefaultUIActionBinding(UIAction action, ImplementationSet<IUIActionInterface> defaultBinding)
+        public DefaultUIActionBinding(UIAction action, ImplementationSet<IUIActionInterface> defaultInterfaces)
         {
             Action = action;
-            DefaultBinding = new UIActionBinding
-            {
-                ShortcutKeysInterface = defaultBinding.Get<ShortcutKeysUIActionInterface>(),
-                ContextMenuInterface = defaultBinding.Get<ContextMenuUIActionInterface>(),
-            };
+            DefaultInterfaces = defaultInterfaces;
         }
     }
 

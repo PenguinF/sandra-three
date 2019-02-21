@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,24 +71,24 @@ namespace Eutherion.Win.UIActions
         /// <param name="handler">
         /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
         /// </param>
-        public void BindAction(UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
+        public void BindAction(UIAction action, ImplementationSet<IUIActionInterface> binding, UIActionHandlerFunc handler)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (handler == null) throw new ArgumentNullException(nameof(handler));
 
             handlers.Add(action, handler);
 
-            if (binding.ShortcutKeysInterface != null && binding.ShortcutKeysInterface.Shortcuts != null)
+            if (binding.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
             {
-                foreach (var shortcut in binding.ShortcutKeysInterface.Shortcuts.Where(x => !x.IsEmpty))
+                foreach (var shortcut in shortcutKeysInterface.Shortcuts.Where(x => !x.IsEmpty))
                 {
                     keyMappings.Add(new KeyUIActionMapping(shortcut, action));
                 }
             }
 
-            if (binding.ContextMenuInterface != null)
+            if (binding.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
             {
-                (binding.ContextMenuInterface.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, binding.ShortcutKeysInterface, binding.ContextMenuInterface));
+                (contextMenuInterface.MenuContainer ?? RootMenuNode).Nodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
             }
         }
 
@@ -178,7 +179,7 @@ namespace Eutherion.Win.UIActions
         /// <param name="handler">
         /// The handler function used to perform the <see cref="UIAction"/> and determine its <see cref="UIActionState"/>.
         /// </param>
-        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, UIActionBinding binding, UIActionHandlerFunc handler)
+        public static void BindAction(this IUIActionHandlerProvider provider, UIAction action, ImplementationSet<IUIActionInterface> binding, UIActionHandlerFunc handler)
         {
             if (provider != null && provider.ActionHandler != null)
             {
@@ -203,7 +204,7 @@ namespace Eutherion.Win.UIActions
         {
             if (provider != null && provider.ActionHandler != null)
             {
-                provider.ActionHandler.BindAction(binding.Action, binding.DefaultBinding, handler);
+                provider.ActionHandler.BindAction(binding.Action, binding.DefaultInterfaces, handler);
             }
         }
 
@@ -224,7 +225,7 @@ namespace Eutherion.Win.UIActions
                 foreach (var bindingHandlerPair in bindings)
                 {
                     provider.ActionHandler.BindAction(bindingHandlerPair.Binding.Action,
-                                                      bindingHandlerPair.Binding.DefaultBinding,
+                                                      bindingHandlerPair.Binding.DefaultInterfaces,
                                                       bindingHandlerPair.Handler);
                 }
             }

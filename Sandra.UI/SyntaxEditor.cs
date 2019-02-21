@@ -154,9 +154,10 @@ namespace Sandra.UI
                 { SharedUIAction.SelectAllText, TrySelectAllText },
             };
 
+            ShortcutKeysUIActionInterface shortcutKeysInterface = null;
             editBindings
-                .Where(x => x.Binding.DefaultBinding.ShortcutKeysInterface != null && x.Binding.DefaultBinding.ShortcutKeysInterface.Shortcuts != null)
-                .SelectMany(x => x.Binding.DefaultBinding.ShortcutKeysInterface.Shortcuts)
+                .Where(x => x.Binding.DefaultInterfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
+                .SelectMany(x => shortcutKeysInterface.Shortcuts)
                 .Select(KeyUtilities.ToKeys)
                 .ForEach(ClearCmdKey);
 

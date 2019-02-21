@@ -218,7 +218,7 @@ namespace Sandra.UI
 
     /// <summary>
     /// Apart from being a <see cref="Localizer"/>, contains properties
-    /// to allow construction of <see cref="UIActionBinding"/>s and interact with settings.
+    /// to allow construction of <see cref="UIAction"/> bindings and interact with settings.
     /// </summary>
     public sealed class FileLocalizer : Localizer, IWeakEventTarget
     {
