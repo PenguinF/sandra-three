@@ -90,6 +90,34 @@ namespace Eutherion
         }
 
         /// <summary>
+        /// Adds the specified key-value pair to the dictionary.
+        /// </summary>
+        /// <typeparam name="TKey">
+        /// The type of keys in the dictionary.
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        /// The type of values in the dictionary.
+        /// </typeparam>
+        /// <param name="dictionary">
+        /// The dictionary in which to add the key-value pair.
+        /// </param>
+        /// <param name="keyValuePair">
+        /// The key and value of the element to add.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="dictionary"/> is null -or- <paramref name="keyValuePair"/>.Key is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// An element with the same key already exists in the dictionary.
+        /// </exception>
+        public static void Add<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, KeyValuePair<TKey, TValue> keyValuePair)
+        {
+            if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
+
+            dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+        }
+
+        /// <summary>
         /// Writes an <see cref="Exception"/> to <see cref="Debug"/>.  
         /// </summary>
         /// <param name="exception">
