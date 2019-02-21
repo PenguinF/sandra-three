@@ -284,11 +284,11 @@ namespace Sandra.UI
             // Default value shows about 2 errors at default zoom level.
             const int defaultErrorHeight = 34;
 
-            Program.AttachFormStateAutoSaver(this, formStateSetting, null);
+            Session.Current.AttachFormStateAutoSaver(this, formStateSetting, null);
 
             if (splitter != null && errorsListBox != null)
             {
-                if (!Program.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
+                if (!Session.Current.TryGetAutoSaveValue(errorHeightSetting, out int targetErrorHeight))
                 {
                     targetErrorHeight = defaultErrorHeight;
                 }

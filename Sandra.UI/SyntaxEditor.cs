@@ -83,7 +83,7 @@ namespace Sandra.UI
             ClearCmdKey(Keys.Control | Keys.R);
             ClearCmdKey(Keys.Control | Keys.U);
 
-            if (Program.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
+            if (Session.Current.TryGetAutoSaveValue(SettingKeys.Zoom, out int zoomFactor))
             {
                 Zoom = zoomFactor;
             }

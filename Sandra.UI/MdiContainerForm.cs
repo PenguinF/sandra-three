@@ -23,6 +23,7 @@ using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using Sandra.Chess;
 using System;
@@ -390,7 +391,7 @@ namespace Sandra.UI
             base.OnLoad(e);
 
             // Initialize from settings if available.
-            Program.AttachFormStateAutoSaver(
+            Session.Current.AttachFormStateAutoSaver(
                 this,
                 SettingKeys.Window,
                 () =>

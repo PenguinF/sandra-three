@@ -72,7 +72,7 @@ namespace Sandra.UI
             var langFolderName = GetDefaultSetting(SettingKeys.LangFolderName);
             Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
 
-            using (Session.Configure(appDataSubFolderName, settingsProvider))
+            using (var session = Session.Configure(appDataSubFolderName, settingsProvider))
             {
                 // After creating the auto-save file, look for a local preferences file.
                 // Create a working copy with correct schema first.
@@ -85,7 +85,7 @@ namespace Sandra.UI
 
                 Chess.Constants.ForceInitialize();
 
-                if (TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
+                if (session.TryGetAutoSaveValue(Localizers.LangSetting, out FileLocalizer localizer))
                 {
                     Localizer.Current = localizer;
                 }
@@ -104,49 +104,6 @@ namespace Sandra.UI
             return LocalSettings.Settings.TryGetValue(property, out TValue result)
                 ? result
                 : GetDefaultSetting(property);
-        }
-
-        internal static bool TryGetAutoSaveValue<TValue>(SettingProperty<TValue> property, out TValue value)
-            => Session.Current.AutoSave.CurrentSettings.TryGetValue(property, out value);
-
-        internal static void AttachFormStateAutoSaver(
-            Form targetForm,
-            SettingProperty<PersistableFormState> property,
-            Action noValidFormStateAction)
-        {
-            bool boundsInitialized = false;
-
-            if (TryGetAutoSaveValue(property, out PersistableFormState formState))
-            {
-                Rectangle targetBounds = formState.Bounds;
-
-                // If all bounds are known initialize from those.
-                // Do make sure it ends up on a visible working area.
-                targetBounds.Intersect(Screen.GetWorkingArea(targetBounds));
-                if (targetBounds.Width >= targetForm.MinimumSize.Width && targetBounds.Height >= targetForm.MinimumSize.Height)
-                {
-                    targetForm.SetBounds(targetBounds.Left, targetBounds.Top, targetBounds.Width, targetBounds.Height, BoundsSpecified.All);
-                    boundsInitialized = true;
-                }
-            }
-            else
-            {
-                formState = new PersistableFormState(false, Rectangle.Empty);
-            }
-
-            // Allow caller to determine a window state itself if no formState was applied successfully.
-            if (!boundsInitialized && noValidFormStateAction != null)
-            {
-                noValidFormStateAction();
-            }
-
-            // Restore maximized setting after setting the Bounds.
-            if (formState.Maximized)
-            {
-                targetForm.WindowState = FormWindowState.Maximized;
-            }
-
-            new FormStateAutoSaver(targetForm, property, formState);
         }
 
         internal static Image LoadImage(string imageFileKey)

@@ -117,7 +117,7 @@ namespace Sandra.UI
             if (moveFormatter == null)
             {
                 // Initialize moveFormattingOption from settings.
-                if (Program.TryGetAutoSaveValue(SettingKeys.Notation, out MFOSettingValue mfoSettingValue))
+                if (Session.Current.TryGetAutoSaveValue(SettingKeys.Notation, out MFOSettingValue mfoSettingValue))
                 {
                     moveFormattingOption = (MoveFormattingOption)mfoSettingValue;
                 }

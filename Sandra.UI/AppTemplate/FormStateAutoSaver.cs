@@ -27,14 +27,17 @@ namespace Eutherion.Win.AppTemplate
 {
     public class FormStateAutoSaver
     {
+        private readonly Session ownerSession;
         private readonly SettingProperty<PersistableFormState> autoSaveProperty;
         private readonly PersistableFormState formState;
 
         public FormStateAutoSaver(
+            Session ownerSession,
             Form targetForm,
             SettingProperty<PersistableFormState> autoSaveProperty,
             PersistableFormState formState)
         {
+            this.ownerSession = ownerSession ?? throw new ArgumentNullException(nameof(ownerSession));
             this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
             this.formState = formState ?? throw new ArgumentNullException(nameof(formState));
 
@@ -48,7 +51,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void FormState_Changed(object sender, EventArgs e)
         {
-            Session.Current.AutoSave.Persist(autoSaveProperty, formState);
+            ownerSession.AutoSave.Persist(autoSaveProperty, formState);
         }
     }
 }
