@@ -198,13 +198,13 @@ namespace Sandra.UI
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
             developerToolsActionHandler.BindAction(new UIActionBinding(
                 Session.Current.EditCurrentLanguage.Action,
                 Session.Current.EditCurrentLanguage.DefaultInterfaces,
-                Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary)));
+                Session.Current.TryEditCurrentLanguage(this)));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
             mainMenuRootNodes.Add(fileMenu);

@@ -42,7 +42,10 @@ namespace Sandra.UI
             Localizer.Current = BuiltInEnglishLocalizer.Instance;
 
             var settingsProvider = new SettingsProvider();
-            using (var session = Session.Configure(typeof(Program).Assembly, settingsProvider))
+            using (var session = Session.Configure(
+                typeof(Program).Assembly,
+                settingsProvider,
+                BuiltInEnglishLocalizer.Instance.Dictionary))
             {
                 Chess.Constants.ForceInitialize();
 

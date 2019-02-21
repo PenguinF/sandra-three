@@ -43,14 +43,22 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Current { get; private set; }
 
-        public static Session Configure(Assembly executableAssembly, ISettingsProvider settingsProvider)
-            => Current = new Session(executableAssembly, settingsProvider);
+        public static Session Configure(Assembly executableAssembly,
+                                        ISettingsProvider settingsProvider,
+                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
+            => Current = new Session(executableAssembly, settingsProvider, defaultLocalizerDictionary);
 
+        private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
-        private Session(Assembly executableAssembly, ISettingsProvider settingsProvider)
+        private Session(Assembly executableAssembly,
+                        ISettingsProvider settingsProvider,
+                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
+
+            // May be null.
+            this.defaultLocalizerDictionary = defaultLocalizerDictionary;
 
             // Store executable folder/filename for later use.
             ExecutableFolder = Path.GetDirectoryName(executableAssembly.Location);

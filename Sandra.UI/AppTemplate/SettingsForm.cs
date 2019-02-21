@@ -21,7 +21,6 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
-using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -31,9 +30,9 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    public partial class SettingsForm : UIActionForm
+    public class SettingsForm : UIActionForm
     {
         private const string ChangedMarker = "• ";
 
@@ -202,7 +201,7 @@ namespace Sandra.UI
             this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
             this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this, BuiltInEnglishLocalizer.Instance.Dictionary));
+            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -322,6 +321,46 @@ namespace Sandra.UI
             }
 
             base.Dispose(disposing);
+        }
+
+        public UIActionState TryGoToPreviousLocation(bool perform)
+        {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = jsonTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to previous or last position.
+                int targetIndex = errorsListBox.SelectedIndex - 1;
+                if (targetIndex < 0) targetIndex = errorCount - 1;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryGoToNextLocation(bool perform)
+        {
+            if (errorsListBox == null) return UIActionVisibility.Hidden;
+
+            int errorCount = jsonTextBox.CurrentErrorCount;
+            if (errorCount == 0) return UIActionVisibility.Disabled;
+
+            if (perform)
+            {
+                // Go to next or first position.
+                int targetIndex = errorsListBox.SelectedIndex + 1;
+                if (targetIndex >= errorCount) targetIndex = 0;
+                errorsListBox.ClearSelected();
+                errorsListBox.SelectedIndex = targetIndex;
+                ActivateSelectedError();
+            }
+
+            return UIActionVisibility.Enabled;
         }
     }
 }

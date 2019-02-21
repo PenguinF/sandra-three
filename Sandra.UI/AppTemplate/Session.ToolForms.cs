@@ -24,7 +24,6 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
-using Sandra.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -291,7 +290,7 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryEditCurrentLanguage(Form owner, Dictionary<LocalizedStringKey, string> defaultDictionary) => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
         {
             // Only enable in developer mode.
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
@@ -311,8 +310,10 @@ namespace Eutherion.Win.AppTemplate
                         {
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
-                            // Fill with built-in English translations.
-                            settingCopy.AddOrReplace(Localizers.Translations, defaultDictionary);
+                            // Fill with built-in default dictionary, or if not provided, an empty dictionary.
+                            settingCopy.AddOrReplace(
+                                Localizers.Translations,
+                                defaultLocalizerDictionary ?? new Dictionary<LocalizedStringKey, string>());
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
