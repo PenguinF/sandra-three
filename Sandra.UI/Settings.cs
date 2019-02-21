@@ -62,10 +62,6 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
 
-        public static readonly SettingProperty<int> JsonZoom = new SettingProperty<int>(
-            new SettingKey(SettingKey.ToSnakeCase(nameof(JsonZoom))),
-            ScintillaZoomFactor.Instance);
-
         public static readonly SettingProperty<int> MovesZoom = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(MovesZoom))),
             ScintillaZoomFactor.Instance);
@@ -152,7 +148,7 @@ namespace Sandra.UI
                 SharedSettingKeys.PreferencesErrorHeight,
                 SharedSettingKeys.LanguageWindow,
                 SharedSettingKeys.LanguageErrorHeight,
-                SettingKeys.JsonZoom,
+                SharedSettingKeys.JsonZoom,
                 SettingKeys.Notation,
                 SettingKeys.MovesZoom);
         }

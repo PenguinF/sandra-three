@@ -54,6 +54,10 @@
   <ItemGroup>
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
+    <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />
+    <Compile Include="AppTemplate\JsonTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="AppTemplate\ListBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -83,13 +87,6 @@
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
-    </Compile>
-    <Compile Include="JsonTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="JsonTextBox.UIActions.cs">
-      <DependentUpon>JsonTextBox.cs</DependentUpon>
-      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Localizers.cs" />
     <Compile Include="MdiContainerForm.cs">

@@ -78,5 +78,8 @@ namespace Eutherion.Win.AppTemplate
             new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageErrorHeight))),
             PType.CLR.Int32);
 
+        public static readonly SettingProperty<int> JsonZoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(JsonZoom))),
+            ScintillaZoomFactor.Instance);
     }
 }

@@ -21,7 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
-using Eutherion.Win.AppTemplate;
+using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
@@ -31,12 +31,12 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a Windows rich text box which displays a json settings file.
+    /// Represents a syntax editor which displays a json settings file.
     /// </summary>
-    public partial class JsonTextBox : SyntaxEditor<JsonSymbol>
+    public class JsonTextBox : SyntaxEditor<JsonSymbol>
     {
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
@@ -142,7 +142,7 @@ namespace Sandra.UI
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
-            if (Session.Current.TryGetAutoSaveValue(SettingKeys.JsonZoom, out int zoomFactor))
+            if (Session.Current.TryGetAutoSaveValue(SharedSettingKeys.JsonZoom, out int zoomFactor))
             {
                 Zoom = zoomFactor;
             }
@@ -156,7 +156,7 @@ namespace Sandra.UI
         {
             // Not only raise the event, but also save the zoom factor setting.
             base.OnZoomFactorChanged(e);
-            Session.Current.AutoSave.Persist(SettingKeys.JsonZoom, e.ZoomFactor);
+            Session.Current.AutoSave.Persist(SharedSettingKeys.JsonZoom, e.ZoomFactor);
         }
 
         private void ParseAndApplySyntaxHighlighting(string json)
@@ -315,6 +315,19 @@ namespace Sandra.UI
         {
             CallTipCancel();
             base.OnDwellEnd(e);
+        }
+
+        public UIActionState TrySaveToFile(bool perform)
+        {
+            if (ReadOnly) return UIActionVisibility.Hidden;
+
+            if (perform)
+            {
+                File.WriteAllText(settingsFile.AbsoluteFilePath, Text);
+                SetSavePoint();
+            }
+
+            return UIActionVisibility.Enabled;
         }
     }
 }

@@ -79,7 +79,7 @@ namespace Sandra.UI
 
             jsonTextBox.BindActions(new UIActionBindings
             {
-                { JsonTextBox.SaveToFile, jsonTextBox.TrySaveToFile },
+                { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
             jsonTextBox.BindStandardEditUIActions();
