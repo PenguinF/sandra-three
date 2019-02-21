@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Localization;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
 using System.Drawing;

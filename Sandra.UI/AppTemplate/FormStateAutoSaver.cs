@@ -20,12 +20,13 @@
 #endregion
 
 using Eutherion.Win.Storage;
+using Sandra.UI;
 using System;
 using System.Windows.Forms;
 
-namespace Sandra.UI
+namespace Eutherion.Win.AppTemplate
 {
-    internal class FormStateAutoSaver
+    public class FormStateAutoSaver
     {
         private readonly SettingProperty<PersistableFormState> autoSaveProperty;
         private readonly PersistableFormState formState;
@@ -35,8 +36,8 @@ namespace Sandra.UI
             SettingProperty<PersistableFormState> autoSaveProperty,
             PersistableFormState formState)
         {
-            this.autoSaveProperty = autoSaveProperty;
-            this.formState = formState;
+            this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
+            this.formState = formState ?? throw new ArgumentNullException(nameof(formState));
 
             // Attach only after restoring.
             formState.AttachTo(targetForm);
