@@ -162,8 +162,8 @@ namespace Eutherion.Win.AppTemplate
 
             fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
             fileMenu.BindActions(
-                Session.Current.EditPreferencesFile,
-                Session.Current.ShowDefaultSettingsFile);
+                Session.EditPreferencesFile,
+                Session.ShowDefaultSettingsFile);
 
             editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
             editMenu.BindActions(
@@ -180,12 +180,12 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.ZoomOut);
 
             developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
-            developerToolsMenu.BindAction(Session.Current.EditCurrentLanguage, alwaysVisible: false);
+            developerToolsMenu.BindAction(Session.EditCurrentLanguage, alwaysVisible: false);
 
             helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
             helpMenu.BindActions(
-                Session.Current.OpenAbout,
-                Session.Current.ShowCredits);
+                Session.OpenAbout,
+                Session.ShowCredits);
 
             // Implemtations for global UIActions.
             if (Session.Current.RegisteredLocalizers.Count() >= 2)
@@ -197,11 +197,11 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
 
-            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
-            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
-            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
-            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
