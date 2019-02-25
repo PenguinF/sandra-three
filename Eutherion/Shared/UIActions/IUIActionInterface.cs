@@ -22,7 +22,8 @@
 namespace Eutherion.UIActions
 {
     /// <summary>
-    /// Defines a way in which a <see cref="UIAction"/> is exposed to a user interface.
+    /// Defines a way in which a <see cref="UIAction"/> is exposed to a user interface
+    /// (e.g. menu, shortcut key, buttons, ribbon, etc.).
     /// </summary>
     public interface IUIActionInterface
     {
