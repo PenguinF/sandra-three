@@ -194,7 +194,7 @@ namespace Sandra.UI
             // Actions which have their handler in this instance.
             this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
             this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
-            this.BindAction(Exit, TryExit);
+            this.BindAction(SharedUIAction.Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
@@ -213,7 +213,7 @@ namespace Sandra.UI
             BindFocusDependentUIActions(fileMenu,
                                         Session.Current.EditPreferencesFile,
                                         Session.Current.ShowDefaultSettingsFile,
-                                        Exit);
+                                        SharedUIAction.Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
             mainMenuRootNodes.Add(gameMenu);
