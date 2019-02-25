@@ -43,12 +43,6 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingProperty<int> errorHeightSetting;
 
         private readonly UIAutoHideMainMenu autoHideMainMenu;
-        private readonly UIAutoHideMainMenuItem langMenu;
-        private readonly UIAutoHideMainMenuItem fileMenu;
-        private readonly UIAutoHideMainMenuItem editMenu;
-        private readonly UIAutoHideMainMenuItem viewMenu;
-        private readonly UIAutoHideMainMenuItem helpMenu;
-        private readonly UIAutoHideMainMenuItem developerToolsMenu;
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
@@ -157,15 +151,15 @@ namespace Eutherion.Win.AppTemplate
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            langMenu = autoHideMainMenu.AddMenuItem(null, SharedResources.globe);
+            var langMenu = autoHideMainMenu.AddMenuItem(null, SharedResources.globe);
             Session.Current.RegisteredLocalizers.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
 
-            fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
+            var fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
             fileMenu.BindActions(
                 Session.EditPreferencesFile,
                 Session.ShowDefaultSettingsFile);
 
-            editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
+            var editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
             editMenu.BindActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
@@ -174,15 +168,15 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.PasteSelectionFromClipBoard,
                 SharedUIAction.SelectAllText);
 
-            viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
+            var viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
 
-            developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
+            var developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
             developerToolsMenu.BindAction(Session.EditCurrentLanguage, alwaysVisible: false);
 
-            helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
+            var helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
             helpMenu.BindActions(
                 Session.OpenAbout,
                 Session.ShowCredits);
