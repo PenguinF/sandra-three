@@ -46,6 +46,10 @@ namespace Eutherion.Utils
         /// </summary>
         public static Union<T1, T2> Option2(T2 value) => new ValueOfType2(value);
 
+        public static implicit operator Union<T1, T2>(T1 value) => new ValueOfType1(value);
+
+        public static implicit operator Union<T1, T2>(T2 value) => new ValueOfType2(value);
+
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the first type.
         /// </summary>
@@ -215,6 +219,12 @@ namespace Eutherion.Utils
         /// Creates a new <see cref="Union{T1, T2, T3}"/> with a value of the third type.
         /// </summary>
         public static Union<T1, T2, T3> Option3(T3 value) => new ValueOfType3(value);
+
+        public static implicit operator Union<T1, T2, T3>(T1 value) => new ValueOfType1(value);
+
+        public static implicit operator Union<T1, T2, T3>(T2 value) => new ValueOfType2(value);
+
+        public static implicit operator Union<T1, T2, T3>(T3 value) => new ValueOfType3(value);
 
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type.
@@ -457,6 +467,14 @@ namespace Eutherion.Utils
         /// Creates a new <see cref="Union{T1, T2, T3, T4}"/> with a value of the fourth type.
         /// </summary>
         public static Union<T1, T2, T3, T4> Option4(T4 value) => new ValueOfType4(value);
+
+        public static implicit operator Union<T1, T2, T3, T4>(T1 value) => new ValueOfType1(value);
+
+        public static implicit operator Union<T1, T2, T3, T4>(T2 value) => new ValueOfType2(value);
+
+        public static implicit operator Union<T1, T2, T3, T4>(T3 value) => new ValueOfType3(value);
+
+        public static implicit operator Union<T1, T2, T3, T4>(T4 value) => new ValueOfType4(value);
 
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type.
