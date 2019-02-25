@@ -285,6 +285,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 new ContextMenuUIActionInterface
                 {
+                    IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
                     MenuIcon = SharedResources.speech,
                 },
