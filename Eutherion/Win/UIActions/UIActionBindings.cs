@@ -20,8 +20,10 @@
 #endregion
 
 using Eutherion.UIActions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Eutherion.Win.UIActions
 {
@@ -33,9 +35,70 @@ namespace Eutherion.Win.UIActions
     {
         private readonly List<UIActionBinding> added = new List<UIActionBinding>();
 
-        public void Add(DefaultUIActionBinding key, UIActionHandlerFunc value) => added.Add(new UIActionBinding(key, value));
+        /// <summary>
+        /// Initializes a new empty instance of <see cref="UIActionBindings"/>.
+        /// </summary>
+        public UIActionBindings() { }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="UIActionBindings"/> containing a collection of bindings.
+        /// </summary>
+        /// <param name="bindings">
+        /// The bindings to add.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="bindings"/> is null - or at least one of the elements of the enumeration is null.
+        /// </exception>
+        public UIActionBindings(IEnumerable<UIActionBinding> bindings)
+            => AddRange(bindings);
+
+        /// <summary>
+        /// Adds a binding.
+        /// </summary>
+        /// <param name="binding">
+        /// The binding to add.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="binding"/> is null.
+        /// </exception>
+        public void Add(UIActionBinding binding)
+            => added.Add(binding ?? throw new ArgumentNullException(nameof(binding)));
+
+        /// <summary>
+        /// Adds a binding.
+        /// </summary>
+        /// <param name="binding">
+        /// The <see cref="DefaultUIActionBinding"/> to add.
+        /// </param>
+        /// <param name="handler">
+        /// The handler to add for the binding.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="binding"/> and/or <paramref name="handler"/> are null.
+        /// </exception>
+        public void Add(DefaultUIActionBinding binding, UIActionHandlerFunc handler)
+            => added.Add(new UIActionBinding(binding, handler));
+
+        /// <summary>
+        /// Adds a collection of bindings.
+        /// </summary>
+        /// <param name="bindings">
+        /// The bindings to add.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="bindings"/> is null - or at least one of the elements of the enumeration is null.
+        /// </exception>
+        public void AddRange(IEnumerable<UIActionBinding> bindings)
+            => (bindings ?? throw new ArgumentNullException(nameof(bindings))).ForEach(Add);
+
+        /// <summary>
+        /// Gets an enumerator that iterates through the bindings of this collection.
+        /// </summary>
+        /// <returns>
+        /// The enumerator that iterates through the bindings of this collection.
+        /// </returns>
+        public IEnumerator<UIActionBinding> GetEnumerator() => added.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => added.GetEnumerator();
-        IEnumerator<UIActionBinding> IEnumerable<UIActionBinding>.GetEnumerator() => added.GetEnumerator();
     }
 }

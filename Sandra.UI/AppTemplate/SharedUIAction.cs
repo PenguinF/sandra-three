@@ -30,6 +30,21 @@ namespace Eutherion.Win.AppTemplate
     {
         public const string SharedUIActionPrefix = nameof(SharedUIAction) + ".";
 
+        public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(Exit)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Exit,
+                },
+            });
+
         public static readonly DefaultUIActionBinding Undo = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Undo)),
             new ImplementationSet<IUIActionInterface>

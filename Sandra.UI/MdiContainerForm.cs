@@ -192,18 +192,18 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(Session.Current.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
-            this.BindAction(Session.Current.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
-            this.BindAction(Exit, TryExit);
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
+            this.BindAction(SharedUIAction.Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
-            this.BindAction(Session.Current.OpenAbout, Session.Current.TryOpenAbout(this));
-            this.BindAction(Session.Current.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.Current.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
+            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
+            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
             // Use developerToolsActionHandler to add to the developer tools menu.
             developerToolsActionHandler.BindAction(new UIActionBinding(
-                Session.Current.EditCurrentLanguage.Action,
-                Session.Current.EditCurrentLanguage.DefaultInterfaces,
+                Session.EditCurrentLanguage.Action,
+                Session.EditCurrentLanguage.DefaultInterfaces,
                 Session.Current.TryEditCurrentLanguage(this)));
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
@@ -211,9 +211,9 @@ namespace Sandra.UI
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        Session.Current.EditPreferencesFile,
-                                        Session.Current.ShowDefaultSettingsFile,
-                                        Exit);
+                                        Session.EditPreferencesFile,
+                                        Session.ShowDefaultSettingsFile,
+                                        SharedUIAction.Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
             mainMenuRootNodes.Add(gameMenu);
@@ -291,8 +291,8 @@ namespace Sandra.UI
 
             // Add these actions to the "Help" dropdown list.
             BindFocusDependentUIActions(helpMenu,
-                                        Session.Current.OpenAbout,
-                                        Session.Current.ShowCredits);
+                                        Session.OpenAbout,
+                                        Session.ShowCredits);
 
             // Track focus to detect when main menu items must be updated.
             FocusHelper.Instance.FocusChanged += FocusHelper_FocusChanged;
@@ -382,13 +382,10 @@ namespace Sandra.UI
 
         protected override void OnLoad(EventArgs e)
         {
-            // Enable live updates to localizers now a message loop exists.
-            Session.Current.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
+            base.OnLoad(e);
 
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
-
-            base.OnLoad(e);
 
             // Initialize from settings if available.
             Session.Current.AttachFormStateAutoSaver(

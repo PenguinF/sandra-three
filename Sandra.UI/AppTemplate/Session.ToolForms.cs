@@ -47,7 +47,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly Box<Form> creditsFormBox = new Box<Form>();
         private readonly Box<Form> languageFormBox = new Box<Form>();
 
-        private void OpenOrActivateToolForm(Form owner, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        private void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {
@@ -56,7 +56,7 @@ namespace Eutherion.Win.AppTemplate
 
                 if (toolForm.Value != null)
                 {
-                    toolForm.Value.Owner = owner;
+                    toolForm.Value.Owner = ownerControl?.TopLevelControl as Form;
                     toolForm.Value.ShowInTaskbar = false;
                     toolForm.Value.ShowIcon = false;
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
@@ -72,7 +72,7 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        public readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
+        public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
@@ -92,12 +92,12 @@ namespace Eutherion.Win.AppTemplate
                 ClientSize = new Size(600, 600),
             };
 
-        public UIActionHandlerFunc TryEditPreferencesFile(Form owner) => perform =>
+        public UIActionHandlerFunc TryEditPreferencesFile(Control ownerControl) => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    owner,
+                    ownerControl,
                     localSettingsFormBox,
                     () =>
                     {
@@ -140,7 +140,7 @@ namespace Eutherion.Win.AppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
+        public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
@@ -150,12 +150,12 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryShowDefaultSettingsFile(Form owner) => perform =>
+        public UIActionHandlerFunc TryShowDefaultSettingsFile(Control ownerControl) => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    owner,
+                    ownerControl,
                     defaultSettingsFormBox,
                     () =>
                     {
@@ -229,7 +229,7 @@ namespace Eutherion.Win.AppTemplate
             return readOnlyTextForm;
         }
 
-        public readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
+        public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
@@ -239,14 +239,14 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryOpenAbout(Form owner) => perform =>
+        public UIActionHandlerFunc TryOpenAbout(Control ownerControl) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    owner,
+                    ownerControl,
                     aboutFormBox,
                     () => CreateReadOnlyTextForm("README.txt", 600, 300));
             }
@@ -254,7 +254,7 @@ namespace Eutherion.Win.AppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
+        public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
@@ -264,14 +264,14 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryShowCredits(Form owner) => perform =>
+        public UIActionHandlerFunc TryShowCredits(Control ownerControl) => perform =>
         {
             // Assume file exists, is distributed with executable.
             // File.Exists() is too expensive to call hundreds of times.
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    owner,
+                    ownerControl,
                     creditsFormBox,
                     () => CreateReadOnlyTextForm("Credits.txt", 700, 600));
             }
@@ -279,18 +279,19 @@ namespace Eutherion.Win.AppTemplate
             return UIActionVisibility.Enabled;
         };
 
-        public readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
+        public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
             new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
                 {
+                    IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
                     MenuIcon = SharedResources.speech,
                 },
             });
 
-        public UIActionHandlerFunc TryEditCurrentLanguage(Form owner) => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage(Control ownerControl) => perform =>
         {
             // Only enable in developer mode.
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
@@ -301,7 +302,7 @@ namespace Eutherion.Win.AppTemplate
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    owner,
+                    ownerControl,
                     languageFormBox,
                     () =>
                     {

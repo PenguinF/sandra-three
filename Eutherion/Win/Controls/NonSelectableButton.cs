@@ -1,6 +1,6 @@
-#region License
+﻿#region License
 /*********************************************************************************
- * IUIActionInterface.cs
+ * NonSelectableButton.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,13 +19,18 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.UIActions
+using System.Windows.Forms;
+
+namespace Eutherion.Win.Controls
 {
     /// <summary>
-    /// Defines a way in which a <see cref="UIAction"/> is exposed to a user interface
-    /// (e.g. menu, shortcut key, buttons, ribbon, etc.).
+    /// Standard Windows <see cref="Button"/> which cannot receive keyboard focus. 
     /// </summary>
-    public interface IUIActionInterface
+    public class NonSelectableButton : Button
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="NonSelectableButton"/>.
+        /// </summary>
+        public NonSelectableButton() => SetStyle(ControlStyles.Selectable, false);
     }
 }

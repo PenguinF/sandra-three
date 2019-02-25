@@ -21,7 +21,6 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -33,21 +32,6 @@ namespace Sandra.UI
     public partial class MdiContainerForm
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
-
-        public static readonly DefaultUIActionBinding Exit = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(Exit)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
-                },
-                new ContextMenuUIActionInterface
-                {
-                    IsFirstInGroup = true,
-                    MenuCaptionKey = SharedLocalizedStringKeys.Exit,
-                },
-            });
 
         public UIActionState TryExit(bool perform)
         {
