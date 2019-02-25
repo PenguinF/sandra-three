@@ -382,13 +382,10 @@ namespace Sandra.UI
 
         protected override void OnLoad(EventArgs e)
         {
-            // Enable live updates to localizers now a message loop exists.
-            Session.Current.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
+            base.OnLoad(e);
 
             // Determine minimum size before restoring from settings: always show title bar and menu.
             MinimumSize = new Size(144, SystemInformation.CaptionHeight + MainMenuStrip.Height);
-
-            base.OnLoad(e);
 
             // Initialize from settings if available.
             Session.Current.AttachFormStateAutoSaver(

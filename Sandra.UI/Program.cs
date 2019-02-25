@@ -27,6 +27,7 @@ using Eutherion.Win.Storage;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -62,7 +63,16 @@ namespace Sandra.UI
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MdiContainerForm());
+
+                var mdiContainerForm = new MdiContainerForm();
+
+                mdiContainerForm.Load += (_, __) =>
+                {
+                    // Enable live updates to localizers now a message loop exists.
+                    session.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
+                };
+
+                Application.Run(mdiContainerForm);
             }
         }
 
