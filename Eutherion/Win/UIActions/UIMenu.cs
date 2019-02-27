@@ -37,17 +37,17 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
         /// </summary>
-        public readonly LocalizedStringKey CaptionKey;
+        public LocalizedStringKey CaptionKey { get; }
 
         /// <summary>
         /// Gets the icon to display for this node.
         /// </summary>
-        public readonly Image Icon;
+        public Image Icon { get; }
 
         /// <summary>
         /// Gets or sets if this node is the first in a group of nodes.
         /// </summary>
-        public bool IsFirstInGroup;
+        public bool IsFirstInGroup { get; set; }
 
         protected UIMenuNode(LocalizedStringKey captionKey)
         {
