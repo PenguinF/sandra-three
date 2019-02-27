@@ -56,5 +56,11 @@ namespace Eutherion.Win.UIActions
         /// Defines the image to display for the generated menu item.
         /// </summary>
         public Image MenuIcon;
+
+        /// <summary>
+        /// Indicates if a modal dialog will be displayed if the action is invoked.
+        /// If true, the display text of the menu item is followed by "...".
+        /// </summary>
+        public bool OpensDialog;
     }
 }

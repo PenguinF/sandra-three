@@ -22,7 +22,7 @@
 namespace Eutherion.Utils
 {
     /// <summary>
-    /// Contains utility extension methods.
+    /// Contains utility methods.
     /// </summary>
     public static class DebugUtilities
     {
