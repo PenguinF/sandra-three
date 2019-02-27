@@ -64,6 +64,12 @@ namespace Eutherion.Win.UIActions
             public readonly UIAction Action;
             public readonly ShortcutKeys Shortcut;
 
+            /// <summary>
+            /// Indicates if a modal dialog will be displayed if the action is invoked.
+            /// If true, the display text of the menu item is followed by "...".
+            /// </summary>
+            public readonly bool OpensDialog;
+
             public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, ContextMenuUIActionInterface contextMenuInterface)
                 : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
@@ -107,6 +113,8 @@ namespace Eutherion.Win.UIActions
     /// </summary>
     public class LocalizedToolStripMenuItem : ToolStripMenuItem
     {
+        public static readonly string OpensDialogIndicatorSuffix = "...";
+
         public LocalizedString LocalizedText;
         public List<LocalizedString> ShortcutKeyDisplayStringParts;
 
@@ -122,7 +130,11 @@ namespace Eutherion.Win.UIActions
         public void InitializeFrom(UIMenuNode node)
         {
             if (node == null) throw new ArgumentNullException(nameof(node));
-            InitializeFrom(node.CaptionKey, node.Icon);
+
+            InitializeFrom(
+                node.CaptionKey,
+                node.Icon,
+                node is UIMenuNode.Element element && element.OpensDialog);
         }
 
         /// <summary>
@@ -134,7 +146,10 @@ namespace Eutherion.Win.UIActions
         /// <param name="icon">
         /// The icon to show in the menu item.
         /// </param>
-        public void InitializeFrom(LocalizedStringKey captionKey, Image icon)
+        /// <param name="opensDialog">
+        /// Whether or not the display text of the menu item is followed by a "...".
+        /// </param>
+        public void InitializeFrom(LocalizedStringKey captionKey, Image icon, bool opensDialog)
         {
             if (LocalizedText != null) LocalizedText.Dispose();
 
@@ -142,8 +157,17 @@ namespace Eutherion.Win.UIActions
             {
                 LocalizedText = new LocalizedString(captionKey);
 
-                // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-                LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&");
+                // Put opensDialog in an if-condition so it doesn't need to be captured into the closure.
+                if (!opensDialog)
+                {
+                    // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
+                    LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&");
+                }
+                else
+                {
+                    // Add OpensDialogIndicatorSuffix.
+                    LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&") + OpensDialogIndicatorSuffix;
+                }
             }
             else
             {
