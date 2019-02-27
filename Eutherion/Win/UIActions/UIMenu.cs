@@ -81,6 +81,7 @@ namespace Eutherion.Win.UIActions
                 }
 
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
+                OpensDialog = contextMenuInterface.OpensDialog;
             }
 
             public override TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor) => visitor.VisitElement(this);
