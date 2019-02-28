@@ -39,7 +39,7 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public partial class Session : IDisposable
     {
-        public const string ToolFormsUIActionPrefix = nameof(Session) + ".";
+        public const string SessionUIActionPrefix = nameof(Session) + ".";
 
         private readonly Box<Form> localSettingsFormBox = new Box<Form>();
         private readonly Box<Form> defaultSettingsFormBox = new Box<Form>();
@@ -73,7 +73,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         public static readonly DefaultUIActionBinding EditPreferencesFile = new DefaultUIActionBinding(
-            new UIAction(ToolFormsUIActionPrefix + nameof(EditPreferencesFile)),
+            new UIAction(SessionUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
@@ -141,7 +141,7 @@ namespace Eutherion.Win.AppTemplate
         };
 
         public static readonly DefaultUIActionBinding ShowDefaultSettingsFile = new DefaultUIActionBinding(
-            new UIAction(ToolFormsUIActionPrefix + nameof(ShowDefaultSettingsFile)),
+            new UIAction(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
@@ -230,7 +230,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         public static readonly DefaultUIActionBinding OpenAbout = new DefaultUIActionBinding(
-            new UIAction(ToolFormsUIActionPrefix + nameof(OpenAbout)),
+            new UIAction(SessionUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
@@ -255,7 +255,7 @@ namespace Eutherion.Win.AppTemplate
         };
 
         public static readonly DefaultUIActionBinding ShowCredits = new DefaultUIActionBinding(
-            new UIAction(ToolFormsUIActionPrefix + nameof(ShowCredits)),
+            new UIAction(SessionUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
@@ -280,7 +280,7 @@ namespace Eutherion.Win.AppTemplate
         };
 
         public static readonly DefaultUIActionBinding EditCurrentLanguage = new DefaultUIActionBinding(
-            new UIAction(ToolFormsUIActionPrefix + nameof(EditCurrentLanguage)),
+            new UIAction(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
                 new ContextMenuUIActionInterface
