@@ -66,4 +66,14 @@ namespace Eutherion.Win.AppTemplate
             }
         }
     }
+
+    /// <summary>
+    /// Contains default styles for syntax editors.
+    /// </summary>
+    public static class DefaultSyntaxEditorStyle
+    {
+        public static readonly Color BackColor = Color.FromArgb(16, 16, 16);
+        public static readonly Color ForeColor = Color.WhiteSmoke;
+        public static readonly Font Font = new Font("Consolas", 10);
+    }
 }
