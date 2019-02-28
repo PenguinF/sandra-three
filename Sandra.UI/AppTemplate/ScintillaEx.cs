@@ -64,6 +64,15 @@ namespace Eutherion.Win.AppTemplate
             ClearCmdKey(Keys.OemMinus | Keys.Control);
         }
 
+        protected void ApplyStyle(Style style, int start, int length)
+        {
+            if (style != null)
+            {
+                StartStyling(start);
+                SetStyling(length, style.Index);
+            }
+        }
+
         /// <summary>
         /// Occurs when the zoom factor of this <see cref="ScintillaEx"/> is updated.
         /// </summary>

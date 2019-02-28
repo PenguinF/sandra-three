@@ -46,13 +46,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         protected void ApplyStyle(TextElement<TTerminal> element, Style style)
-        {
-            if (style != null)
-            {
-                StartStyling(element.Start);
-                SetStyling(element.Length, style.Index);
-            }
-        }
+            => ApplyStyle(style, element.Start, element.Length);
     }
 
     /// <summary>
