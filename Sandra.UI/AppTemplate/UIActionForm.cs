@@ -27,7 +27,7 @@ using System.Windows.Forms;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Top level Form which ties in with the UIAction framework.
+    /// Top level <see cref="Form"/> which ties in with the UIAction framework.
     /// </summary>
     public class UIActionForm : Form, IUIActionHandlerProvider
     {
