@@ -56,6 +56,7 @@ namespace Eutherion.Win.AppTemplate
             ClearCmdKey(Keys.Control | Keys.F);
             ClearCmdKey(Keys.Control | Keys.H);
             ClearCmdKey(Keys.Control | Keys.L);
+            ClearCmdKey(Keys.Control | Keys.N);
             ClearCmdKey(Keys.Control | Keys.R);
             ClearCmdKey(Keys.Control | Keys.U);
             ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
