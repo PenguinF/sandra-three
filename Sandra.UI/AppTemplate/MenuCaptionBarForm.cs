@@ -27,6 +27,8 @@ namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// <see cref="UIActionForm"/> which displays a main menu inside a custom caption bar.
+    /// It is advisable to give the main menu strip a back color so it does not display
+    /// a gradient which clashes with the custom drawn caption bar area.
     /// </summary>
     public class MenuCaptionBarForm : UIActionForm
     {

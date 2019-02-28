@@ -53,7 +53,11 @@ namespace Sandra.UI
             // Initialize UIActions before building the MainMenuStrip based on it.
             InitializeUIActions();
 
-            MainMenuStrip = new MenuStrip();
+            MainMenuStrip = new MenuStrip
+            {
+                BackColor = DefaultSyntaxEditorStyle.ForeColor
+            };
+
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, mainMenuRootNodes, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
 
