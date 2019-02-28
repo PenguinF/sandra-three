@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -70,6 +71,20 @@ namespace Eutherion.Win.AppTemplate
                     .Where(x => x.Visible)
                     .Select(x => x.Width)
                     .Sum();
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            {
+                var g = e.Graphics;
+                var mainMenuWidth = MainMenuStrip.Width;
+
+                using (var captionAreaColorBrush = new SolidBrush(MainMenuStrip.BackColor))
+                {
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, Width - MainMenuStrip.Width, MainMenuStrip.Height));
+                }
             }
         }
     }
