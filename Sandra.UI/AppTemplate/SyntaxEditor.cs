@@ -65,5 +65,10 @@ namespace Eutherion.Win.AppTemplate
         public static readonly Color BackColor = Color.FromArgb(16, 16, 16);
         public static readonly Color ForeColor = Color.WhiteSmoke;
         public static readonly Font Font = new Font("Consolas", 10);
+
+        /// <summary>
+        /// Gets the default fore color used for displaying line numbers in a syntax editor.
+        /// </summary>
+        public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
     }
 }

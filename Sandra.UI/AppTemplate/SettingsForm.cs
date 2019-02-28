@@ -225,7 +225,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     errorsListBox.Items.Clear();
                     errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
-                    errorsListBox.ForeColor = jsonTextBox.LineNumberForeColor;
+                    errorsListBox.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
                     errorsListBox.Font = noErrorsFont;
                 }
                 else

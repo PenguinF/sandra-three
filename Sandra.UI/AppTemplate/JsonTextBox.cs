@@ -43,8 +43,6 @@ namespace Eutherion.Win.AppTemplate
         private const int stringStyleIndex = 10;
         private const int errorIndicatorIndex = 8;
 
-        private static readonly Color lineNumberForeColor = Color.FromArgb(176, 176, 176);
-
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
 
@@ -61,11 +59,6 @@ namespace Eutherion.Win.AppTemplate
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
-
-        /// <summary>
-        /// Gets the fore color used for displaying line numbers in this syntax editor.
-        /// </summary>
-        public Color LineNumberForeColor => LineNumberStyle.ForeColor;
 
         private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
@@ -111,7 +104,7 @@ namespace Eutherion.Win.AppTemplate
             SetSelectionForeColor(true, DefaultSyntaxEditorStyle.BackColor);
 
             LineNumberStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
-            LineNumberStyle.ForeColor = lineNumberForeColor;
+            LineNumberStyle.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
             DefaultSyntaxEditorStyle.Font.CopyTo(LineNumberStyle);
 
             CallTipStyle.BackColor = callTipBackColor;
