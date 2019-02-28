@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Windows.Forms;
+
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
@@ -26,5 +28,31 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarForm : UIActionForm
     {
+        public MenuCaptionBarForm()
+        {
+            SetStyle(ControlStyles.AllPaintingInWmPaint
+                | ControlStyles.UserPaint
+                | ControlStyles.UserMouse
+                | ControlStyles.OptimizedDoubleBuffer
+                | ControlStyles.FixedHeight
+                | ControlStyles.FixedWidth
+                | ControlStyles.ResizeRedraw
+                | ControlStyles.Opaque, true);
+
+            ControlBox = false;
+            FormBorderStyle = FormBorderStyle.None;
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                // Enables borders regardless of ControlBox and FormBorderStyle settings.
+                const int WS_SIZEBOX = 0x40000;
+                CreateParams cp = base.CreateParams;
+                cp.Style |= WS_SIZEBOX;
+                return cp;
+            }
+        }
     }
 }
