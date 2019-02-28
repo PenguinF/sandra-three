@@ -63,6 +63,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="AppTemplate\Localizers.cs" />
+    <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppTemplate\RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>

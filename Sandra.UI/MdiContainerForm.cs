@@ -36,7 +36,7 @@ namespace Sandra.UI
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : UIActionForm, IWeakEventTarget
+    public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
