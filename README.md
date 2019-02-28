@@ -1,6 +1,8 @@
 # sandra-three
 Third incarnation of a chess UI for Windows 7 and higher.
 
+![Screenshot Sandra 0.5](https://github.com/PenguinF/sandra-three/tree/master/Doc/screenshot_Sandra_0.5.png)
+
 Main design principle is to have a fluid interface, in which everything should 'just work'. This has led to various complex features which should be hardly noticable, but without which the application feels clumsy:
 
 * Windows click or snap together when moved around.
