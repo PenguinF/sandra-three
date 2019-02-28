@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -88,6 +89,30 @@ namespace Eutherion.Win.AppTemplate
                     g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, Width - MainMenuStrip.Width, MainMenuStrip.Height));
                 }
             }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x84;
+
+            const int HTCAPTION = 2;
+
+            if (m.Msg == WM_NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            {
+                Point position = PointToClient(new Point(m.LParam.ToInt32()));
+
+                if (position.Y >= 0
+                    && position.Y < MainMenuStrip.Height
+                    && position.X >= 0
+                    && position.X < ClientSize.Width)
+                {
+                    // This is the draggable 'caption' area.
+                    m.Result = (IntPtr)HTCAPTION;
+                    return;
+                }
+            }
+
+            base.WndProc(ref m);
         }
     }
 }
