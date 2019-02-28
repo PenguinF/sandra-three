@@ -274,6 +274,7 @@ namespace Eutherion.Win.AppTemplate
             if (keyData == (Keys.Menu | Keys.Alt))
             {
                 autoHideMainMenu.ToggleMainMenu();
+                if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
                 return true;
             }
 
