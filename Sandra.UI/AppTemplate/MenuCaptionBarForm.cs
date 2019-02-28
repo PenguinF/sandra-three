@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Controls;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -36,6 +37,11 @@ namespace Eutherion.Win.AppTemplate
     {
         private const int MainMenuHorizontalMargin = 8;
 
+        private const int buttonOuterRightMargin = 12;
+        private const int captionButtonSize = 24;
+
+        private readonly NonSelectableButton minimizeButton;
+
         public MenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
@@ -49,6 +55,11 @@ namespace Eutherion.Win.AppTemplate
 
             ControlBox = false;
             FormBorderStyle = FormBorderStyle.None;
+
+            minimizeButton = CreateCaptionButton(SharedResources.minimize);
+            minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
+
+            Controls.Add(minimizeButton);
         }
 
         protected override CreateParams CreateParams
@@ -63,6 +74,51 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        private NonSelectableButton CreateCaptionButton(Image icon)
+        {
+            var button = new NonSelectableButton
+            {
+                Image = icon,
+                ImageAlign = ContentAlignment.MiddleCenter,
+                FlatStyle = FlatStyle.Flat,
+                Margin = new Padding(0),
+                Padding = new Padding(0),
+                TabStop = false,
+            };
+
+            button.FlatAppearance.BorderSize = 0;
+
+            return button;
+        }
+
+        protected override void OnControlAdded(ControlEventArgs e)
+        {
+            base.OnControlAdded(e);
+
+            if (e.Control == MainMenuStrip)
+            {
+                MainMenuStrip.BackColorChanged += MainMenuStrip_BackColorChanged;
+                UpdateCaptionAreaButtonsBackColor();
+            }
+        }
+
+        protected override void OnControlRemoved(ControlEventArgs e)
+        {
+            if (e.Control == MainMenuStrip)
+            {
+                MainMenuStrip.BackColorChanged -= MainMenuStrip_BackColorChanged;
+            }
+
+            base.OnControlRemoved(e);
+        }
+
+        private void MainMenuStrip_BackColorChanged(object sender, EventArgs e) => UpdateCaptionAreaButtonsBackColor();
+
+        private void UpdateCaptionAreaButtonsBackColor()
+        {
+            minimizeButton.BackColor = MainMenuStrip.BackColor;
+        }
+
         protected override void OnLayout(LayoutEventArgs levent)
         {
             base.OnLayout(levent);
@@ -75,6 +131,24 @@ namespace Eutherion.Win.AppTemplate
                     .Where(x => x.Visible)
                     .Select(x => x.Width)
                     .Sum();
+
+                // Calculate top edge position for all caption buttons: 1 pixel above center.
+                int topEdge = MainMenuStrip.Height - captionButtonSize - 2;
+                topEdge = topEdge < 0 ? 0 : topEdge / 2;
+
+                // Use a vertical edge variable so buttons can be placed from right to left.
+                int currentVerticalEdge = Width - captionButtonSize - buttonOuterRightMargin;
+
+                minimizeButton.SetBounds(
+                    currentVerticalEdge,
+                    topEdge,
+                    captionButtonSize,
+                    captionButtonSize);
+            }
+            else
+            {
+                // Don't mess with visibility, so put buttons outside of the client rectangle.
+                minimizeButton.SetBounds(-2, -2, 1, 1);
             }
         }
 
