@@ -153,13 +153,10 @@ namespace Eutherion.Win.AppTemplate
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            var langMenu = autoHideMainMenu.AddMenuItem(null, SharedResources.globe);
-            Session.Current.RegisteredLocalizers.ForEach(x => langMenu.BindAction(x.SwitchToLangUIActionBinding, alwaysVisible: false));
-
             var fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
             fileMenu.BindActions(
-                Session.EditPreferencesFile,
-                Session.ShowDefaultSettingsFile);
+                SharedUIAction.SaveToFile,
+                SharedUIAction.Close);
 
             var editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
             editMenu.BindActions(
@@ -174,30 +171,6 @@ namespace Eutherion.Win.AppTemplate
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
-
-            var developerToolsMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Tools);
-            developerToolsMenu.BindAction(Session.EditCurrentLanguage, alwaysVisible: false);
-
-            var helpMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Help);
-            helpMenu.BindActions(
-                Session.OpenAbout,
-                Session.ShowCredits);
-
-            // Implemtations for global UIActions.
-            if (Session.Current.RegisteredLocalizers.Count() >= 2)
-            {
-                // More than one localizer: can switch between them.
-                foreach (var localizer in Session.Current.RegisteredLocalizers)
-                {
-                    this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
-                }
-            }
-
-            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
-            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
-            this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
-            this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
