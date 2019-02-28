@@ -60,7 +60,12 @@ namespace Eutherion.Win.AppTemplate
             minimizeButton = CreateCaptionButton(SharedResources.minimize);
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
 
-            maximizeButton = CreateCaptionButton(SharedResources.maximize);
+            maximizeButton = CreateCaptionButton(null);
+            maximizeButton.Click += (_, __) =>
+            {
+                WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
+                UpdateMaximizeButtonIcon();
+            };
 
             SuspendLayout();
 
@@ -128,6 +133,14 @@ namespace Eutherion.Win.AppTemplate
             maximizeButton.BackColor = MainMenuStrip.BackColor;
         }
 
+        private void UpdateMaximizeButtonIcon()
+        {
+            maximizeButton.Image
+                = WindowState == FormWindowState.Maximized
+                ? SharedResources.demaximize
+                : SharedResources.maximize;
+        }
+
         protected override void OnLayout(LayoutEventArgs levent)
         {
             base.OnLayout(levent);
@@ -165,8 +178,13 @@ namespace Eutherion.Win.AppTemplate
             else
             {
                 // Don't mess with visibility, so put buttons outside of the client rectangle.
+                maximizeButton.SetBounds(-2, -2, 1, 1);
                 minimizeButton.SetBounds(-2, -2, 1, 1);
             }
+
+            // Update maximize button because Aero snap changes the client size directly and updates
+            // the window state, but does not seem to call WndProc with e.g. a WM_SYSCOMMAND.
+            UpdateMaximizeButtonIcon();
         }
 
         protected override void OnPaint(PaintEventArgs e)
