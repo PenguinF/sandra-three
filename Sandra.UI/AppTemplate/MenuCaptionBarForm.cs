@@ -41,6 +41,7 @@ namespace Eutherion.Win.AppTemplate
         private const int captionButtonSize = 24;
 
         private readonly NonSelectableButton minimizeButton;
+        private readonly NonSelectableButton maximizeButton;
 
         public MenuCaptionBarForm()
         {
@@ -59,7 +60,14 @@ namespace Eutherion.Win.AppTemplate
             minimizeButton = CreateCaptionButton(SharedResources.minimize);
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
 
+            maximizeButton = CreateCaptionButton(SharedResources.maximize);
+
+            SuspendLayout();
+
             Controls.Add(minimizeButton);
+            Controls.Add(maximizeButton);
+
+            ResumeLayout();
         }
 
         protected override CreateParams CreateParams
@@ -117,6 +125,7 @@ namespace Eutherion.Win.AppTemplate
         private void UpdateCaptionAreaButtonsBackColor()
         {
             minimizeButton.BackColor = MainMenuStrip.BackColor;
+            maximizeButton.BackColor = MainMenuStrip.BackColor;
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
@@ -138,6 +147,14 @@ namespace Eutherion.Win.AppTemplate
 
                 // Use a vertical edge variable so buttons can be placed from right to left.
                 int currentVerticalEdge = Width - captionButtonSize - buttonOuterRightMargin;
+
+                maximizeButton.SetBounds(
+                    currentVerticalEdge,
+                    topEdge,
+                    captionButtonSize,
+                    captionButtonSize);
+
+                currentVerticalEdge = currentVerticalEdge - captionButtonSize;
 
                 minimizeButton.SetBounds(
                     currentVerticalEdge,

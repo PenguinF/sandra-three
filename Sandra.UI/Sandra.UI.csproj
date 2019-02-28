@@ -160,6 +160,7 @@
     <None Include="AppTemplate\globe.png" />
     <None Include="AppTemplate\save.png" />
     <None Include="AppTemplate\minimize.png" />
+    <None Include="AppTemplate\maximize.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
