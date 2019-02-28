@@ -63,6 +63,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="AppTemplate\Localizers.cs" />
+    <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppTemplate\RichTextBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -156,6 +159,10 @@
     <None Include="AppTemplate\speech.png" />
     <None Include="AppTemplate\globe.png" />
     <None Include="AppTemplate\save.png" />
+    <None Include="AppTemplate\minimize.png" />
+    <None Include="AppTemplate\maximize.png" />
+    <None Include="AppTemplate\demaximize.png" />
+    <None Include="AppTemplate\close.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>

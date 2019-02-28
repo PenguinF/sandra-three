@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -37,70 +36,80 @@ namespace Sandra.UI
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
-    public partial class MdiContainerForm : UIActionForm, IWeakEventTarget
+    public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
     {
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
-
-        private readonly LocalizedString developerTools = new LocalizedString(SharedLocalizedStringKeys.Tools);
 
         // Separate action handler and root menu node for building the MainMenuStrip.
         private readonly UIActionHandler mainMenuActionHandler = new UIActionHandler();
         private readonly List<UIMenuNode> mainMenuRootNodes = new List<UIMenuNode>();
 
-        // Action handler for the developer tools dropdown item.
-        private readonly UIActionHandler developerToolsActionHandler = new UIActionHandler();
-
-        private readonly LocalizedToolStripMenuItem developerToolsMenuItem;
-
         public MdiContainerForm()
         {
             IsMdiContainer = true;
             Icon = Properties.Resources.Sandra;
-            Text = "Sandra";
+            Text = Session.ExecutableFileNameWithoutExtension;
 
             // Initialize UIActions before building the MainMenuStrip based on it.
             InitializeUIActions();
 
-            MainMenuStrip = new MenuStrip();
+            MainMenuStrip = new MenuStrip
+            {
+                BackColor = DefaultSyntaxEditorStyle.ForeColor
+            };
+
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, mainMenuRootNodes, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
 
             // After building the MainMenuStrip, build an index of ToolstripMenuItems which are bound on focus dependent UIActions.
             IndexFocusDependentUIActions(MainMenuStrip.Items);
 
-            // Developer tools.
-            developerToolsMenuItem = new LocalizedToolStripMenuItem { LocalizedText = developerTools };
-            developerToolsMenuItem.LocalizedText.DisplayText.ValueChanged += displayText => developerToolsMenuItem.Text = displayText.Replace("&", "&&");
-
-            // Insert before the Help menu.
-            MainMenuStrip.Items.Insert(MainMenuStrip.Items.Count - 1, developerToolsMenuItem);
-
-            UIMenuBuilder.BuildMenu(developerToolsActionHandler, developerToolsMenuItem.DropDownItems);
-            UpdateDeveloperToolsMenu();
-
             Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
-            developerToolsActionHandler.UIActionsInvalidated += DeveloperToolsActionHandler_UIActionsInvalidated;
+            ShowOrHideEditCurrentLanguageItem();
         }
 
-        private void UpdateDeveloperToolsMenu()
+        private void ShowOrHideEditCurrentLanguageItem()
         {
-            bool atLeastOneItemVisible = false;
-
-            foreach (var menuItem in developerToolsMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            // Make an exception for the EditCurrentLanguage action: hide it when it's disabled.
+            // This code is fragile because it assumes several things about the location
+            // and the localized string keys of the involved menu items.
+            foreach (ToolStripItem item in MainMenuStrip.Items)
             {
-                var state = developerToolsActionHandler.TryPerformAction(menuItem.Action, false);
-                menuItem.Update(state);
-                atLeastOneItemVisible |= state.Visible;
+                if (item is LocalizedToolStripMenuItem localizedItem
+                    && localizedItem.LocalizedText != null
+                    && localizedItem.LocalizedText.Key == SharedLocalizedStringKeys.Tools)
+                {
+                    ToolStripItem previousItem = null;
+
+                    foreach (ToolStripItem dropDownItem in localizedItem.DropDownItems)
+                    {
+                        if (dropDownItem is UIActionToolStripMenuItem uiActionItem
+                            && uiActionItem.LocalizedText.Key == SharedLocalizedStringKeys.EditCurrentLanguage)
+                        {
+                            // Use ActionHandler rather than mainMenuActionHandler because it can return UIActionVisibility.Hidden.
+                            var uiActionState = ActionHandler.TryPerformAction(uiActionItem.Action, false);
+
+                            bool visible = uiActionState.UIActionVisibility != UIActionVisibility.Hidden;
+                            uiActionItem.Visible = visible;
+
+                            // Hide/show ToolStripSeparator as well.
+                            previousItem.Visible = visible;
+                            break;
+                        }
+
+                        previousItem = dropDownItem;
+                    }
+
+                    break;
+                }
             }
-
-            developerToolsMenuItem.Visible = atLeastOneItemVisible;
         }
-
-        private void DeveloperToolsActionHandler_UIActionsInvalidated(UIActionHandler _)
-            => UpdateDeveloperToolsMenu();
 
         private void DeveloperModeChanged(object sender, EventArgs e)
-            => developerToolsActionHandler.Invalidate();
+        {
+            UpdateFocusDependentMenuItems();
+            ShowOrHideEditCurrentLanguageItem();
+        }
 
         class FocusDependentUIActionState
         {
@@ -200,19 +209,11 @@ namespace Sandra.UI
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
             this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
-            // Use developerToolsActionHandler to add to the developer tools menu.
-            developerToolsActionHandler.BindAction(new UIActionBinding(
-                Session.EditCurrentLanguage.Action,
-                Session.EditCurrentLanguage.DefaultInterfaces,
-                Session.Current.TryEditCurrentLanguage(this)));
-
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
             mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        Session.EditPreferencesFile,
-                                        Session.ShowDefaultSettingsFile,
                                         SharedUIAction.Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
@@ -285,6 +286,15 @@ namespace Sandra.UI
                                         modifiedGotoMovesForm,
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
+
+            UIMenuNode.Container toolsMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools);
+            mainMenuRootNodes.Add(toolsMenu);
+
+            // Add these actions to the "Tools" dropdown list.
+            BindFocusDependentUIActions(toolsMenu,
+                                        Session.EditPreferencesFile,
+                                        Session.ShowDefaultSettingsFile,
+                                        Session.EditCurrentLanguage);
 
             UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help);
             mainMenuRootNodes.Add(helpMenu);
@@ -426,16 +436,6 @@ namespace Sandra.UI
             array[ColoredPiece.WhiteQueen] = Program.LoadImage("wq");
             array[ColoredPiece.WhiteKing] = Program.LoadImage("wk");
             return array;
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                developerTools.Dispose();
-            }
-
-            base.Dispose(disposing);
         }
     }
 }

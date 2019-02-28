@@ -27,6 +27,7 @@ namespace Eutherion.Win.AppTemplate
     public static class SharedLocalizedStringKeys
     {
         public static readonly LocalizedStringKey About = new LocalizedStringKey(nameof(About));
+        public static readonly LocalizedStringKey Close = new LocalizedStringKey(nameof(Close));
         public static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         public static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
         public static readonly LocalizedStringKey Cut = new LocalizedStringKey(nameof(Cut));
@@ -55,6 +56,7 @@ namespace Eutherion.Win.AppTemplate
             => new Dictionary<LocalizedStringKey, string>
             {
                 { About, $"About {appName}" },
+                { Close, "Close" },
                 { Copy, "Copy" },
                 { Credits, "Show credits" },
                 { Cut, "Cut" },

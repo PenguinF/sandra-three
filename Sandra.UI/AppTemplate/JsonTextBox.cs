@@ -43,12 +43,6 @@ namespace Eutherion.Win.AppTemplate
         private const int stringStyleIndex = 10;
         private const int errorIndicatorIndex = 8;
 
-        private static readonly Color defaultBackColor = Color.FromArgb(16, 16, 16);
-        private static readonly Color defaultForeColor = Color.WhiteSmoke;
-        private static readonly Font defaultFont = new Font("Consolas", 10);
-
-        private static readonly Color lineNumberForeColor = Color.FromArgb(176, 176, 176);
-
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
 
@@ -65,11 +59,6 @@ namespace Eutherion.Win.AppTemplate
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
-
-        /// <summary>
-        /// Gets the fore color used for displaying line numbers in this syntax editor.
-        /// </summary>
-        public Color LineNumberForeColor => LineNumberStyle.ForeColor;
 
         private sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
@@ -106,20 +95,20 @@ namespace Eutherion.Win.AppTemplate
             BorderStyle = BorderStyle.None;
 
             StyleResetDefault();
-            DefaultStyle.BackColor = defaultBackColor;
-            DefaultStyle.ForeColor = defaultForeColor;
-            defaultFont.CopyTo(DefaultStyle);
+            DefaultStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
+            DefaultStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
+            DefaultSyntaxEditorStyle.Font.CopyTo(DefaultStyle);
             StyleClearAll();
 
-            SetSelectionBackColor(true, defaultForeColor);
-            SetSelectionForeColor(true, defaultBackColor);
+            SetSelectionBackColor(true, DefaultSyntaxEditorStyle.ForeColor);
+            SetSelectionForeColor(true, DefaultSyntaxEditorStyle.BackColor);
 
-            LineNumberStyle.BackColor = defaultBackColor;
-            LineNumberStyle.ForeColor = lineNumberForeColor;
-            defaultFont.CopyTo(LineNumberStyle);
+            LineNumberStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
+            LineNumberStyle.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
+            DefaultSyntaxEditorStyle.Font.CopyTo(LineNumberStyle);
 
             CallTipStyle.BackColor = callTipBackColor;
-            CallTipStyle.ForeColor = defaultForeColor;
+            CallTipStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
             callTipFont.CopyTo(CallTipStyle);
 
             CommentStyle.ForeColor = commentForeColor;
@@ -134,10 +123,10 @@ namespace Eutherion.Win.AppTemplate
             Indicators[errorIndicatorIndex].ForeColor = Color.Red;
             IndicatorCurrent = errorIndicatorIndex;
 
-            Margins[0].BackColor = defaultBackColor;
-            Margins[1].BackColor = defaultBackColor;
+            Margins[0].BackColor = DefaultSyntaxEditorStyle.BackColor;
+            Margins[1].BackColor = DefaultSyntaxEditorStyle.BackColor;
 
-            CaretForeColor = defaultForeColor;
+            CaretForeColor = DefaultSyntaxEditorStyle.ForeColor;
 
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
@@ -320,6 +309,7 @@ namespace Eutherion.Win.AppTemplate
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!Modified) return UIActionVisibility.Disabled;
 
             if (perform)
             {

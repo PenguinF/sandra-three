@@ -27,7 +27,7 @@ using System.Windows.Forms;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Top level Form which ties in with the UIAction framework.
+    /// Top level <see cref="Form"/> which ties in with the UIAction framework.
     /// </summary>
     public class UIActionForm : Form, IUIActionHandlerProvider
     {
@@ -49,6 +49,25 @@ namespace Eutherion.Win.AppTemplate
                 MessageBox.Show(e.Message);
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        /// <summary>
+        /// Binds the regular UIActions to this Form.
+        /// </summary>
+        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
         }
     }
 }

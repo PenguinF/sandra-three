@@ -37,16 +37,6 @@ namespace Eutherion.Win.AppTemplate
 
         protected Style DefaultStyle => Styles[Style.Default];
 
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleBackColor => DefaultStyle.BackColor;
-
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleForeColor => DefaultStyle.ForeColor;
-
         public SyntaxEditor()
         {
             TextIndex = new TextIndex<TTerminal>();
@@ -65,5 +55,20 @@ namespace Eutherion.Win.AppTemplate
                 SetStyling(element.Length, style.Index);
             }
         }
+    }
+
+    /// <summary>
+    /// Contains default styles for syntax editors.
+    /// </summary>
+    public static class DefaultSyntaxEditorStyle
+    {
+        public static readonly Color BackColor = Color.FromArgb(16, 16, 16);
+        public static readonly Color ForeColor = Color.WhiteSmoke;
+        public static readonly Font Font = new Font("Consolas", 10);
+
+        /// <summary>
+        /// Gets the default fore color used for displaying line numbers in a syntax editor.
+        /// </summary>
+        public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
     }
 }

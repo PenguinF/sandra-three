@@ -45,6 +45,21 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
+        public static readonly DefaultUIActionBinding Close = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(Close)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new ShortcutKeysUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Alt, ConsoleKey.F4), },
+                },
+                new ContextMenuUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuCaptionKey = SharedLocalizedStringKeys.Close,
+                },
+            });
+
         public static readonly DefaultUIActionBinding Undo = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(Undo)),
             new ImplementationSet<IUIActionInterface>
