@@ -224,8 +224,14 @@ namespace Eutherion.Win.AppTemplate
         protected override void WndProc(ref Message m)
         {
             const int WM_NCHITTEST = 0x84;
+            const int WM_SYSCOMMAND = 0x0112;
 
             const int HTCAPTION = 2;
+
+            const int SC_MASK = 0xfff0;
+            const int SC_RESTORE = 0xf120;
+            const int SC_MAXIMIZE = 0xf030;
+            const int SC_MINIMIZE = 0xf020;
 
             if (m.Msg == WM_NCHITTEST && MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
             {
@@ -243,6 +249,16 @@ namespace Eutherion.Win.AppTemplate
             }
 
             base.WndProc(ref m);
+
+            // Make sure the maximize button icon is updated too when the FormWindowState is updated externally.
+            if (m.Msg == WM_SYSCOMMAND)
+            {
+                int wParam = SC_MASK & m.WParam.ToInt32();
+                if (wParam == SC_MAXIMIZE || wParam == SC_MINIMIZE || wParam == SC_RESTORE)
+                {
+                    UpdateMaximizeButtonIcon();
+                }
+            }
         }
     }
 }
