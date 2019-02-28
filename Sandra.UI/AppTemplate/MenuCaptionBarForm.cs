@@ -21,6 +21,7 @@
 
 using System;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -82,11 +83,31 @@ namespace Eutherion.Win.AppTemplate
             if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
             {
                 var g = e.Graphics;
-                var mainMenuWidth = MainMenuStrip.Width;
+                int width = Width;
+                int mainMenuWidth = MainMenuStrip.Width;
 
                 using (var captionAreaColorBrush = new SolidBrush(MainMenuStrip.BackColor))
                 {
-                    g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, Width - MainMenuStrip.Width, MainMenuStrip.Height));
+                    g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
+                }
+
+                string text = Text;
+
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    // Take Y and Height from first menu item so text can be aligned with it.
+                    var firstMenuItemBounds = MainMenuStrip.Items[0].Bounds;
+                    var textAreaRectangle = new Rectangle(0, firstMenuItemBounds.Y, width, firstMenuItemBounds.Height);
+
+                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                    TextRenderer.DrawText(
+                        g,
+                        text,
+                        MainMenuStrip.Font,
+                        textAreaRectangle,
+                        MainMenuStrip.ForeColor,
+                        MainMenuStrip.BackColor,
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
             }
         }
