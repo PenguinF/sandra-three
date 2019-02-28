@@ -38,10 +38,12 @@ namespace Eutherion.Win.AppTemplate
         private const int MainMenuHorizontalMargin = 8;
 
         private const int buttonOuterRightMargin = 12;
+        private const int closeButtonMargin = 4;
         private const int captionButtonSize = 24;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
+        private readonly NonSelectableButton closeButton;
 
         public MenuCaptionBarForm()
         {
@@ -67,10 +69,14 @@ namespace Eutherion.Win.AppTemplate
                 UpdateMaximizeButtonIcon();
             };
 
+            closeButton = CreateCaptionButton(SharedResources.close);
+            closeButton.Click += (_, __) => Close();
+
             SuspendLayout();
 
             Controls.Add(minimizeButton);
             Controls.Add(maximizeButton);
+            Controls.Add(closeButton);
 
             ResumeLayout();
         }
@@ -131,6 +137,7 @@ namespace Eutherion.Win.AppTemplate
         {
             minimizeButton.BackColor = MainMenuStrip.BackColor;
             maximizeButton.BackColor = MainMenuStrip.BackColor;
+            closeButton.BackColor = MainMenuStrip.BackColor;
         }
 
         private void UpdateMaximizeButtonIcon()
@@ -161,6 +168,14 @@ namespace Eutherion.Win.AppTemplate
                 // Use a vertical edge variable so buttons can be placed from right to left.
                 int currentVerticalEdge = Width - captionButtonSize - buttonOuterRightMargin;
 
+                closeButton.SetBounds(
+                    currentVerticalEdge,
+                    topEdge,
+                    captionButtonSize,
+                    captionButtonSize);
+
+                currentVerticalEdge = currentVerticalEdge - captionButtonSize - closeButtonMargin;
+
                 maximizeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
@@ -178,6 +193,7 @@ namespace Eutherion.Win.AppTemplate
             else
             {
                 // Don't mess with visibility, so put buttons outside of the client rectangle.
+                closeButton.SetBounds(-2, -2, 1, 1);
                 maximizeButton.SetBounds(-2, -2, 1, 1);
                 minimizeButton.SetBounds(-2, -2, 1, 1);
             }

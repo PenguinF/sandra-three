@@ -162,6 +162,7 @@
     <None Include="AppTemplate\minimize.png" />
     <None Include="AppTemplate\maximize.png" />
     <None Include="AppTemplate\demaximize.png" />
+    <None Include="AppTemplate\close.png" />
     <Content Include="Sandra.ico" />
   </ItemGroup>
   <ItemGroup>
