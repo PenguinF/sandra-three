@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -28,6 +29,8 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class MenuCaptionBarForm : UIActionForm
     {
+        private const int MainMenuHorizontalMargin = 8;
+
         public MenuCaptionBarForm()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint
@@ -52,6 +55,21 @@ namespace Eutherion.Win.AppTemplate
                 CreateParams cp = base.CreateParams;
                 cp.Style |= WS_SIZEBOX;
                 return cp;
+            }
+        }
+
+        protected override void OnLayout(LayoutEventArgs levent)
+        {
+            base.OnLayout(levent);
+
+            if (MainMenuStrip != null && MainMenuStrip.Items.Count > 0)
+            {
+                MainMenuStrip.Width = MainMenuHorizontalMargin +
+                    MainMenuStrip.Items
+                    .OfType<ToolStripItem>()
+                    .Where(x => x.Visible)
+                    .Select(x => x.Width)
+                    .Sum();
             }
         }
     }
