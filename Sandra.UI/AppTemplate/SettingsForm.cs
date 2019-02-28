@@ -148,6 +148,8 @@ namespace Eutherion.Win.AppTemplate
                 Controls.Add(splitter);
             }
 
+            BindStandardUIActions();
+
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 

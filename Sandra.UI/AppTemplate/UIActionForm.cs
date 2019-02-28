@@ -50,5 +50,24 @@ namespace Eutherion.Win.AppTemplate
                 return true;
             }
         }
+
+        /// <summary>
+        /// Gets the regular UIActions for this Form.
+        /// </summary>
+        public UIActionBindings StandardUIActionBindings => new UIActionBindings
+        {
+            { SharedUIAction.Close, TryClose },
+        };
+
+        /// <summary>
+        /// Binds the regular UIActions to this Form.
+        /// </summary>
+        public void BindStandardUIActions() => this.BindActions(StandardUIActionBindings);
+
+        public UIActionState TryClose(bool perform)
+        {
+            if (perform) Close();
+            return UIActionVisibility.Enabled;
+        }
     }
 }

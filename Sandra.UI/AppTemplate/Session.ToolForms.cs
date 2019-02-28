@@ -226,6 +226,9 @@ namespace Eutherion.Win.AppTemplate
 
             readOnlyTextForm.Controls.Add(textBox);
 
+            // This adds a Close menu item to the context menu of the textBox.
+            textBox.BindActions(readOnlyTextForm.StandardUIActionBindings);
+
             return readOnlyTextForm;
         }
 
