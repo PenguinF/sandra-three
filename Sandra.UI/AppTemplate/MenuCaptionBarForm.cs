@@ -210,8 +210,9 @@ namespace Eutherion.Win.AppTemplate
                 var g = e.Graphics;
                 int width = Width;
                 int mainMenuWidth = MainMenuStrip.Width;
+                Color mainMenuBackColor = MainMenuStrip.BackColor;
 
-                using (var captionAreaColorBrush = new SolidBrush(MainMenuStrip.BackColor))
+                using (var captionAreaColorBrush = new SolidBrush(mainMenuBackColor))
                 {
                     g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
                 }
@@ -220,9 +221,30 @@ namespace Eutherion.Win.AppTemplate
 
                 if (!string.IsNullOrWhiteSpace(text))
                 {
+                    Font menuFont = MainMenuStrip.Font;
+
+                    // Measure the text. If its left edge is about to disappear under the main menu,
+                    // use a different Rectangle to center the text in.
+                    // See also e.g. Visual Studio Code where it works the same way.
+                    // Also use an extra MainMenuHorizontalMargin.
+                    Size measuredTextSize = TextRenderer.MeasureText(text, menuFont);
+                    int probableLeftTextEdge = (width - measuredTextSize.Width) / 2;
+
+                    // (0, width) places the Text in the center of the whole caption area bar, which is the most natural.
+                    int textAreaLeftEdge = 0;
+                    int textAreaWidth = width;
+
+                    int outerMenuRightEdge = mainMenuWidth + MainMenuHorizontalMargin;
+                    if (probableLeftTextEdge < outerMenuRightEdge)
+                    {
+                        // Now place it in the middle between the outer menu right edge and the system buttons.
+                        textAreaLeftEdge = outerMenuRightEdge;
+                        textAreaWidth = minimizeButton.Left - textAreaLeftEdge;
+                    }
+
                     // Take Y and Height from first menu item so text can be aligned with it.
                     var firstMenuItemBounds = MainMenuStrip.Items[0].Bounds;
-                    var textAreaRectangle = new Rectangle(0, firstMenuItemBounds.Y, width, firstMenuItemBounds.Height);
+                    var textAreaRectangle = new Rectangle(textAreaLeftEdge, firstMenuItemBounds.Y, textAreaWidth, firstMenuItemBounds.Height);
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
                     TextRenderer.DrawText(
@@ -231,7 +253,7 @@ namespace Eutherion.Win.AppTemplate
                         MainMenuStrip.Font,
                         textAreaRectangle,
                         MainMenuStrip.ForeColor,
-                        MainMenuStrip.BackColor,
+                        mainMenuBackColor,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
             }
