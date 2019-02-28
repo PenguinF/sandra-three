@@ -33,7 +33,8 @@ using System.Windows.Forms;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks.
+    /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks
+    /// and a mouse-wheel event handler.
     /// </summary>
     public class ScintillaEx : Scintilla, IUIActionHandlerProvider
     {

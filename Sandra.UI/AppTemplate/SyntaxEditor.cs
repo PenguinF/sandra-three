@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.UIActions;
 using ScintillaNET;
 using System.Drawing;
 using System.Linq;
@@ -28,8 +27,7 @@ using System.Linq;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting, a number of <see cref="UIAction"/> hooks,
-    /// and a mouse-wheel event handler.
+    /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting.
     /// </summary>
     public abstract class SyntaxEditor<TTerminal> : ScintillaEx
     {
