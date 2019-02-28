@@ -142,8 +142,8 @@ namespace Eutherion.Win.AppTemplate
                 splitter.Panel2.Controls.Add(errorsListBox);
 
                 // Copy background color.
-                errorsListBox.BackColor = jsonTextBox.NoStyleBackColor;
-                splitter.Panel2.BackColor = jsonTextBox.NoStyleBackColor;
+                errorsListBox.BackColor = DefaultSyntaxEditorStyle.BackColor;
+                splitter.Panel2.BackColor = DefaultSyntaxEditorStyle.BackColor;
 
                 Controls.Add(splitter);
             }
@@ -262,7 +262,7 @@ namespace Eutherion.Win.AppTemplate
                         index++;
                     }
 
-                    errorsListBox.ForeColor = jsonTextBox.NoStyleForeColor;
+                    errorsListBox.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
                     errorsListBox.Font = normalFont;
                 }
             }

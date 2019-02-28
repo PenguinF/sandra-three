@@ -37,16 +37,6 @@ namespace Eutherion.Win.AppTemplate
 
         protected Style DefaultStyle => Styles[Style.Default];
 
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleBackColor => DefaultStyle.BackColor;
-
-        /// <summary>
-        /// Gets the back color of this syntax editor in areas where no style or syntax highlighting is applied.
-        /// </summary>
-        public Color NoStyleForeColor => DefaultStyle.ForeColor;
-
         public SyntaxEditor()
         {
             TextIndex = new TextIndex<TTerminal>();
