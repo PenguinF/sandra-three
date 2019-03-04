@@ -217,18 +217,6 @@ namespace Eutherion.Win.UIActions
 
     public static class UIMenu
     {
-        /// <summary>
-        /// Adds a dynamic <see cref="ContextMenuStrip"/> to a control if it implements <see cref="IUIActionHandlerProvider"/>.
-        /// </summary>
-        public static void AddTo<TUIActionControl>(TUIActionControl control)
-            where TUIActionControl : Control, IUIActionHandlerProvider
-        {
-            if (control != null && control.ActionHandler != null)
-            {
-                control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
-            }
-        }
-
         private class UIMenuStrip<TUIActionControl> : ContextMenuStrip
             where TUIActionControl : Control, IUIActionHandlerProvider
         {
@@ -293,6 +281,18 @@ namespace Eutherion.Win.UIActions
                     Items.Add(dummyItem);
                     e.Cancel = true;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Adds a dynamic <see cref="ContextMenuStrip"/> to a control if it implements <see cref="IUIActionHandlerProvider"/>.
+        /// </summary>
+        public static void AddTo<TUIActionControl>(TUIActionControl control)
+            where TUIActionControl : Control, IUIActionHandlerProvider
+        {
+            if (control != null && control.ActionHandler != null)
+            {
+                control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
             }
         }
     }
