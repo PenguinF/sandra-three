@@ -153,12 +153,12 @@ namespace Eutherion.Win.AppTemplate
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            var fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
+            var fileMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.File));
             fileMenu.BindActions(
                 SharedUIAction.SaveToFile,
                 SharedUIAction.Close);
 
-            var editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
+            var editMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.Edit));
             editMenu.BindActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
@@ -167,7 +167,7 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.PasteSelectionFromClipBoard,
                 SharedUIAction.SelectAllText);
 
-            var viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
+            var viewMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.View));
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
