@@ -300,7 +300,7 @@ namespace Eutherion.Win.AppTemplate
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
 
             // Cannot edit built-in localizer.
-            if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
+            if (!(CurrentLocalizer is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
 
             if (perform)
             {

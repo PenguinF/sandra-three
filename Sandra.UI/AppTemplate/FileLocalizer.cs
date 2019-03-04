@@ -112,11 +112,11 @@ namespace Eutherion.Win.AppTemplate
         {
             if (perform)
             {
-                Current = this;
+                Session.Current.CurrentLocalizer = this;
                 Session.Current.AutoSave.Persist(Session.Current.LangSetting, this);
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, Current == this);
+            return new UIActionState(UIActionVisibility.Enabled, Session.Current.CurrentLocalizer == this);
         }
 
         public void EnableLiveUpdates()

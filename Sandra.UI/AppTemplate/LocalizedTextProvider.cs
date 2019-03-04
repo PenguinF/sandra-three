@@ -37,7 +37,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
-        public string GetText() => Localizer.Current.Localize(Key);
+        public string GetText() => Session.Current.CurrentLocalizer.Localize(Key);
 
         /// <summary>
         /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="LocalizedStringKey"/>.

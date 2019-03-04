@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Localization;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
@@ -46,9 +45,7 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            Localizer.Current = builtInEnglishLocalizer;
-
-            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer.Dictionary))
+            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer, builtInEnglishLocalizer.Dictionary))
             {
                 Chess.Constants.ForceInitialize();
 

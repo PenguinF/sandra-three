@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Win.Storage;
@@ -277,7 +276,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     if (error.Start <= textPosition && textPosition < error.Start + error.Length)
                     {
-                        yield return error.Message(Localizer.Current);
+                        yield return error.Message(Session.Current.CurrentLocalizer);
                     }
                 }
             }

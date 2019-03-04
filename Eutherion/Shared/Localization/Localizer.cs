@@ -61,12 +61,6 @@ namespace Eutherion.Localization
 
         private static Localizer current;
 
-        /// <summary>
-        /// Gets or sets the current <see cref="Localizer"/>.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// The provided new value for <see cref="Current"/> is null.
-        /// </exception>
         public static Localizer Current
         {
             get => current;

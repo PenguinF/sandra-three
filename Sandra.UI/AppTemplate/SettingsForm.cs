@@ -221,9 +221,9 @@ namespace Eutherion.Win.AppTemplate
                                          let position = (jsonTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
-                                         select Localizer.Current.Localize(
+                                         select Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(Localizer.Current), lineIndex, position })).ToArray();
+                                             new[] { error.Message(Session.Current.CurrentLocalizer), lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

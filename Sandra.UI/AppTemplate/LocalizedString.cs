@@ -26,7 +26,7 @@ using System;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
+    /// Represents a localized string, which is updated on a change to <see cref="Session.CurrentLocalizer"/>.
     /// </summary>
     public class LocalizedString : LocalizedTextProvider, IDisposable, IWeakEventTarget
     {

@@ -59,13 +59,15 @@ namespace Eutherion.Win.AppTemplate
         public static Session Current { get; private set; }
 
         public static Session Configure(ISettingsProvider settingsProvider,
+                                        Localizer defaultLocalizer,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
-            => Current = new Session(settingsProvider, defaultLocalizerDictionary);
+            => Current = new Session(settingsProvider, defaultLocalizer, defaultLocalizerDictionary);
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
         private Session(ISettingsProvider settingsProvider,
+                        Localizer defaultLocalizer,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
@@ -109,15 +111,17 @@ namespace Eutherion.Win.AppTemplate
                 Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
                 localSettingsCopy);
 
+            CurrentLocalizer = defaultLocalizer;
+
             if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
             {
-                Localizer.Current = localizer;
+                CurrentLocalizer = localizer;
             }
             else
             {
                 // Select best fit.
                 localizer = Localizers.BestFit(registeredLocalizers);
-                if (localizer != null) Localizer.Current = localizer;
+                if (localizer != null) CurrentLocalizer = localizer;
             }
         }
 
@@ -202,6 +206,18 @@ namespace Eutherion.Win.AppTemplate
             }
 
             new FormStateAutoSaver(this, targetForm, property, formState);
+        }
+
+        /// <summary>
+        /// Gets or sets the current <see cref="Localizer"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// The provided new value for <see cref="CurrentLocalizer"/> is null.
+        /// </exception>
+        public Localizer CurrentLocalizer
+        {
+            get => Localizer.Current;
+            set => Localizer.Current = value;
         }
 
         public void Dispose()
