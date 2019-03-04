@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="AppTemplate\LocalizedConsoleKeys.cs" />
     <Compile Include="AppTemplate\LocalizedString.cs" />
+    <Compile Include="AppTemplate\LocalizedTextProvider.cs" />
     <Compile Include="AppTemplate\Localizers.cs" />
     <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
       <SubType>Form</SubType>
