@@ -89,28 +89,6 @@ namespace Eutherion.Localization
     public sealed class LocalizedString : IDisposable, IWeakEventTarget
     {
         /// <summary>
-        /// Conditionally formats a string, based on whether or not it has parameters.
-        /// </summary>
-        public static string ConditionalFormat(string localizedString, string[] parameters)
-        {
-            if (parameters == null || parameters.Length == 0) return localizedString;
-
-            try
-            {
-                return string.Format(localizedString, parameters);
-            }
-            catch (FormatException)
-            {
-                // The provided localized format string is in an incorrect format, and/or it contains
-                // more parameter substitution locations than there are parameters provided.
-                // Examples:
-                // string.Format("Test with parameters {invalid parameter}", parameters)
-                // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {StringUtilities.ToDefaultParameterListDisplayString(parameters)}";
-            }
-        }
-
-        /// <summary>
         /// Gets the key for this <see cref="LocalizedString"/>.
         /// </summary>
         public readonly LocalizedStringKey Key;
