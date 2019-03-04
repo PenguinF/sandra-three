@@ -111,14 +111,21 @@ namespace Eutherion.Win.UIActions
     {
         public static readonly string OpensDialogIndicatorSuffix = "...";
 
-        public LocalizedStringKey CaptionKey { get; }
+        /// <summary>
+        /// Generates the text to display for the generated menu item.
+        /// </summary>
+        public ITextProvider TextProvider { get; }
 
         /// <summary>
         /// Generates the image to display for this menu item.
         /// </summary>
         public IImageProvider IconProvider { get; }
 
-        public IEnumerable<LocalizedStringKey> ShortcutKeyDisplayStringParts { get; }
+        /// <summary>
+        /// Generates the shortcut key to display in the menu item.
+        /// If the enumeration is null or empty, no shortcut key will be shown.
+        /// </summary>
+        public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -133,9 +140,9 @@ namespace Eutherion.Win.UIActions
         {
             ImageScaling = ToolStripItemImageScaling.None;
 
-            CaptionKey = captionKey;
+            TextProvider = captionKey == null ? null : new LocalizedTextProvider(captionKey);
             IconProvider = iconProvider;
-            ShortcutKeyDisplayStringParts = displayStringParts;
+            ShortcutKeyDisplayTextProviders = displayStringParts?.Select(x => new LocalizedTextProvider(x));
             OpensDialog = opensDialog;
 
             Update();
@@ -146,7 +153,7 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public void Update()
         {
-            string displayText = CaptionKey == null ? null : Localizer.Current.Localize(CaptionKey);
+            string displayText = TextProvider?.GetText();
 
             if (!string.IsNullOrWhiteSpace(displayText))
             {
@@ -169,9 +176,9 @@ namespace Eutherion.Win.UIActions
 
             Image = IconProvider?.GetImage();
 
-            if (ShortcutKeyDisplayStringParts != null)
+            if (ShortcutKeyDisplayTextProviders != null)
             {
-                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayStringParts.Select(x => Localizer.Current.Localize(x)));
+                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayTextProviders.Select(x => x.GetText()));
             }
             else
             {

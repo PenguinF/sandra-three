@@ -84,14 +84,16 @@ namespace Sandra.UI
             foreach (ToolStripItem item in MainMenuStrip.Items)
             {
                 if (item is LocalizedToolStripMenuItem localizedItem
-                    && localizedItem.CaptionKey == SharedLocalizedStringKeys.Tools)
+                    && localizedItem.TextProvider is LocalizedTextProvider localizedTextProvider
+                    && localizedTextProvider.Key == SharedLocalizedStringKeys.Tools)
                 {
                     ToolStripItem previousItem = null;
 
                     foreach (ToolStripItem dropDownItem in localizedItem.DropDownItems)
                     {
                         if (dropDownItem is UIActionToolStripMenuItem uiActionItem
-                            && uiActionItem.CaptionKey == SharedLocalizedStringKeys.EditCurrentLanguage)
+                            && uiActionItem.TextProvider is LocalizedTextProvider subLocalizedTextProvider
+                            && subLocalizedTextProvider.Key == SharedLocalizedStringKeys.EditCurrentLanguage)
                         {
                             // Use ActionHandler rather than mainMenuActionHandler because it can return UIActionVisibility.Hidden.
                             var uiActionState = ActionHandler.TryPerformAction(uiActionItem.Action, false);
