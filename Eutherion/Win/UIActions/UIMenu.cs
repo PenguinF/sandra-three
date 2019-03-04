@@ -116,20 +116,20 @@ namespace Eutherion.Win.UIActions
     {
         public static readonly string OpensDialogIndicatorSuffix = "...";
 
-        public LocalizedStringKey CaptionKey { get; private set; }
+        public LocalizedStringKey CaptionKey { get; }
 
-        public IEnumerable<LocalizedStringKey> ShortcutKeyDisplayStringParts { get; private set; }
+        public IEnumerable<LocalizedStringKey> ShortcutKeyDisplayStringParts { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
         /// If true, the display text of the menu item is followed by "...".
         /// </summary>
-        public bool OpensDialog { get; private set; }
+        public bool OpensDialog { get; }
 
-        protected void InitializeFrom(LocalizedStringKey captionKey,
-                                      Image icon,
-                                      IEnumerable<LocalizedStringKey> displayStringParts,
-                                      bool opensDialog)
+        protected LocalizedToolStripMenuItem(LocalizedStringKey captionKey,
+                                             Image icon,
+                                             IEnumerable<LocalizedStringKey> displayStringParts,
+                                             bool opensDialog)
         {
             ImageScaling = ToolStripItemImageScaling.None;
 
@@ -178,7 +178,7 @@ namespace Eutherion.Win.UIActions
         }
 
         /// <summary>
-        /// Sets up this menu item with the caption and icon from the menu node.
+        /// Creates a menu item with the caption and icon from the menu node.
         /// </summary>
         /// <param name="container">
         /// The <see cref="UIMenuNode.Container"/> to initialize from.
@@ -186,10 +186,10 @@ namespace Eutherion.Win.UIActions
         /// <exception cref="ArgumentNullException">
         /// <paramref name="container"/> is null.
         /// </exception>
-        public void InitializeFrom(UIMenuNode.Container container)
+        public static LocalizedToolStripMenuItem CreateFrom(UIMenuNode.Container container)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
-            InitializeFrom(container.CaptionKey, container.Icon, null, false);
+            return new LocalizedToolStripMenuItem(container.CaptionKey, container.Icon, null, false);
         }
     }
 
@@ -203,13 +203,17 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public UIAction Action { get; }
 
-        public UIActionToolStripMenuItem(UIAction action)
+        private UIActionToolStripMenuItem(UIMenuNode.Element element)
+            : base(element.CaptionKey,
+                   element.Icon,
+                   element.Shortcut.DisplayStringParts(),
+                   element.OpensDialog)
         {
-            Action = action;
+            Action = element.Action;
         }
 
         /// <summary>
-        /// Sets up this menu item with the caption and icon from the menu node.
+        /// Creates a new menu item with the caption and icon from the menu node.
         /// </summary>
         /// <param name="element">
         /// The <see cref="UIMenuNode.Element"/> to initialize from.
@@ -217,15 +221,10 @@ namespace Eutherion.Win.UIActions
         /// <exception cref="ArgumentNullException">
         /// <paramref name="element"/> is null.
         /// </exception>
-        public void InitializeFrom(UIMenuNode.Element element)
+        public static UIActionToolStripMenuItem CreateFrom(UIMenuNode.Element element)
         {
             if (element == null) throw new ArgumentNullException(nameof(element));
-
-            InitializeFrom(
-                element.CaptionKey,
-                element.Icon,
-                element.Shortcut.DisplayStringParts(),
-                element.OpensDialog);
+            return new UIActionToolStripMenuItem(element);
         }
 
         public void Update(UIActionState currentActionState)
@@ -425,8 +424,7 @@ namespace Eutherion.Win.UIActions
 
             if (!currentActionState.Visible) return null;
 
-            var menuItem = new UIActionToolStripMenuItem(element.Action);
-            menuItem.InitializeFrom(element);
+            var menuItem = UIActionToolStripMenuItem.CreateFrom(element);
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;
@@ -449,9 +447,7 @@ namespace Eutherion.Win.UIActions
         {
             if (container.CaptionKey == null && container.Icon == null) return null;
 
-            var menuItem = new LocalizedToolStripMenuItem();
-            menuItem.InitializeFrom(container);
-
+            var menuItem = LocalizedToolStripMenuItem.CreateFrom(container);
             BuildMenu(container.Nodes, menuItem.DropDownItems);
 
             // No empty submenu items.

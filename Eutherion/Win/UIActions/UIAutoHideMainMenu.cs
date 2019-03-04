@@ -185,8 +185,7 @@ namespace Eutherion.Win.UIActions
         {
             if (MenuItem == null)
             {
-                MenuItem = new LocalizedToolStripMenuItem();
-                MenuItem.InitializeFrom(ContainerNode);
+                MenuItem = LocalizedToolStripMenuItem.CreateFrom(ContainerNode);
                 UIMenuBuilder.BuildMenu(DropDownItemsActionHandler, MenuItem.DropDownItems);
                 MenuItem.Visible = UpdateMenu();
                 MenuItem.DropDownOpening += (_, __) => UpdateMenu();
