@@ -37,6 +37,11 @@ namespace Eutherion.Win.AppTemplate
     public sealed class FileLocalizer : Localizer, IWeakEventTarget
     {
         /// <summary>
+        /// Gets the owner <see cref="Session"/> of this localizer.
+        /// </summary>
+        public Session Session { get; }
+
+        /// <summary>
         /// Gets the settings file from which this localizer is loaded.
         /// </summary>
         public SettingsFile LanguageFile { get; }
@@ -53,8 +58,9 @@ namespace Eutherion.Win.AppTemplate
 
         public Dictionary<LocalizedStringKey, string> Dictionary { get; private set; }
 
-        public FileLocalizer(SettingsFile languageFile)
+        public FileLocalizer(Session session, SettingsFile languageFile)
         {
+            Session = session ?? throw new ArgumentNullException(nameof(session));
             LanguageFile = languageFile;
             LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
             FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
@@ -112,11 +118,11 @@ namespace Eutherion.Win.AppTemplate
         {
             if (perform)
             {
-                Session.Current.CurrentLocalizer = this;
-                Session.Current.AutoSave.Persist(Session.Current.LangSetting, this);
+                Session.CurrentLocalizer = this;
+                Session.AutoSave.Persist(Session.LangSetting, this);
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, Session.Current.CurrentLocalizer == this);
+            return new UIActionState(UIActionVisibility.Enabled, Session.CurrentLocalizer == this);
         }
 
         public void EnableLiveUpdates()
@@ -128,7 +134,7 @@ namespace Eutherion.Win.AppTemplate
         private void TranslationsChanged(object sender, EventArgs e)
         {
             UpdateDictionary();
-            Session.Current.NotifyCurrentLocalizerChanged(this);
+            Session.NotifyCurrentLocalizerChanged(this);
         }
 
         // TranslationsChanged only raises another WeakEvent so this does not indirectly leak.

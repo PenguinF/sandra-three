@@ -86,10 +86,13 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Initializes the available localizers.
         /// </summary>
+        /// <param name="session">
+        /// The session in which to register the language files.
+        /// </param>
         /// <param name="defaultLangDirectory">
         /// Path to the directory to scan for language files.
         /// </param>
-        public static Dictionary<string, FileLocalizer> ScanLocalizers(string defaultLangDirectory)
+        public static Dictionary<string, FileLocalizer> ScanLocalizers(Session session, string defaultLangDirectory)
         {
             var foundLocalizers = new Dictionary<string, FileLocalizer>(StringComparer.OrdinalIgnoreCase);
 
@@ -110,7 +113,7 @@ namespace Eutherion.Win.AppTemplate
 
                             foundLocalizers.Add(
                                 Path.GetFileNameWithoutExtension(fileInfo.Name),
-                                new FileLocalizer(languageFile));
+                                new FileLocalizer(session, languageFile));
                         }
                         catch (Exception exc)
                         {
