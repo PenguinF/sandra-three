@@ -40,9 +40,9 @@ namespace Eutherion.Win.UIActions
         public LocalizedStringKey CaptionKey { get; }
 
         /// <summary>
-        /// Gets the icon to display for this node.
+        /// Defines the icon to display for this node.
         /// </summary>
-        public Image Icon { get; }
+        public IImageProvider IconProvider { get; }
 
         /// <summary>
         /// Gets or sets if this node is the first in a group of nodes.
@@ -56,7 +56,7 @@ namespace Eutherion.Win.UIActions
 
         protected UIMenuNode(LocalizedStringKey captionKey, Image icon) : this(captionKey)
         {
-            Icon = icon;
+            IconProvider = icon == null ? null : new ConstantImageProvider(icon);
         }
 
         public sealed class Element : UIMenuNode
@@ -128,14 +128,14 @@ namespace Eutherion.Win.UIActions
         public bool OpensDialog { get; }
 
         protected LocalizedToolStripMenuItem(LocalizedStringKey captionKey,
-                                             Image icon,
+                                             IImageProvider iconProvider,
                                              IEnumerable<LocalizedStringKey> displayStringParts,
                                              bool opensDialog)
         {
             ImageScaling = ToolStripItemImageScaling.None;
 
             CaptionKey = captionKey;
-            IconProvider = icon == null ? ConstantImageProvider.Empty : new ConstantImageProvider(icon);
+            IconProvider = iconProvider;
             ShortcutKeyDisplayStringParts = displayStringParts;
             OpensDialog = opensDialog;
 
@@ -192,7 +192,7 @@ namespace Eutherion.Win.UIActions
         public static LocalizedToolStripMenuItem CreateFrom(UIMenuNode.Container container)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
-            return new LocalizedToolStripMenuItem(container.CaptionKey, container.Icon, null, false);
+            return new LocalizedToolStripMenuItem(container.CaptionKey, container.IconProvider, null, false);
         }
     }
 
@@ -208,7 +208,7 @@ namespace Eutherion.Win.UIActions
 
         private UIActionToolStripMenuItem(UIMenuNode.Element element)
             : base(element.CaptionKey,
-                   element.Icon,
+                   element.IconProvider,
                    element.Shortcut,
                    element.OpensDialog)
         {
@@ -420,7 +420,7 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (element.CaptionKey == null && element.Icon == null) return null;
+            if (element.CaptionKey == null && element.IconProvider == null) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -447,7 +447,7 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (container.CaptionKey == null && container.Icon == null) return null;
+            if (container.CaptionKey == null && container.IconProvider == null) return null;
 
             var menuItem = LocalizedToolStripMenuItem.CreateFrom(container);
             BuildMenu(container.Nodes, menuItem.DropDownItems);
