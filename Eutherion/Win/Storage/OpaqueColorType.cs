@@ -35,7 +35,7 @@ namespace Eutherion.Win.Storage
         public static readonly PTypeErrorBuilder OpaqueColorTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(OpaqueColorTypeError)));
 
-        public static OpaqueColorType Instance = new OpaqueColorType();
+        public static readonly OpaqueColorType Instance = new OpaqueColorType();
 
         private OpaqueColorType() : base(PType.CLR.String) { }
 

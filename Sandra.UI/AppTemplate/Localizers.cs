@@ -152,7 +152,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly PTypeErrorBuilder TrimmedStringTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(TrimmedStringTypeError)));
 
-        public static TrimmedStringType Instance = new TrimmedStringType();
+        public static readonly TrimmedStringType Instance = new TrimmedStringType();
 
         private TrimmedStringType() : base(PType.CLR.String) { }
 
@@ -166,7 +166,7 @@ namespace Eutherion.Win.AppTemplate
 
     public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
     {
-        public static TranslationDictionaryType Instance = new TranslationDictionaryType();
+        public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
         private TranslationDictionaryType() : base(PType.Map) { }
 

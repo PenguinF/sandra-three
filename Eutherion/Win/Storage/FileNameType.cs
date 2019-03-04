@@ -32,7 +32,7 @@ namespace Eutherion.Win.Storage
         public static readonly PTypeErrorBuilder FileNameTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
 
-        public static FileNameType Instance = new FileNameType();
+        public static readonly FileNameType Instance = new FileNameType();
 
         private FileNameType() : base(PType.CLR.String) { }
 
