@@ -40,6 +40,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConstantImageProvider.cs" />
     <Compile Include="Controls\NonSelectableButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -57,6 +58,7 @@
     <Compile Include="Forms\SnappingMdiChildForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="IImageProvider.cs" />
     <Compile Include="LineSegment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AutoSave.cs" />

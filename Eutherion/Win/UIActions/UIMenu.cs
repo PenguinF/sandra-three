@@ -114,6 +114,11 @@ namespace Eutherion.Win.UIActions
 
         public LocalizedStringKey CaptionKey { get; }
 
+        /// <summary>
+        /// Generates the image to display for this menu item.
+        /// </summary>
+        public IImageProvider IconProvider { get; }
+
         public IEnumerable<LocalizedStringKey> ShortcutKeyDisplayStringParts { get; }
 
         /// <summary>
@@ -130,7 +135,7 @@ namespace Eutherion.Win.UIActions
             ImageScaling = ToolStripItemImageScaling.None;
 
             CaptionKey = captionKey;
-            Image = icon;
+            IconProvider = icon == null ? ConstantImageProvider.Empty : new ConstantImageProvider(icon);
             ShortcutKeyDisplayStringParts = displayStringParts;
             OpensDialog = opensDialog;
 
@@ -162,6 +167,8 @@ namespace Eutherion.Win.UIActions
                 DisplayStyle = ToolStripItemDisplayStyle.Image;
                 Text = string.Empty;
             }
+
+            Image = IconProvider?.GetImage();
 
             if (ShortcutKeyDisplayStringParts != null)
             {
