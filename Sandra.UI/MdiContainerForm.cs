@@ -210,21 +210,21 @@ namespace Sandra.UI
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
             this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
-            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
             mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
                                         SharedUIAction.Exit);
 
-            UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
+            UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game.ToTextProvider());
             mainMenuRootNodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
             BindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard);
 
-            UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo)
+            UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo.ToTextProvider())
             {
                 IsFirstInGroup = true,
             };
@@ -253,7 +253,7 @@ namespace Sandra.UI
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
-            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View);
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
             mainMenuRootNodes.Add(viewMenu);
 
             // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
@@ -266,7 +266,7 @@ namespace Sandra.UI
                     {
                         Shortcuts = InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
                         IsFirstInGroup = true,
-                        MenuCaptionKey = LocalizedStringKeys.Chessboard,
+                        MenuTextProvider = LocalizedStringKeys.Chessboard.ToTextProvider(),
                     },
                 });
 
@@ -277,7 +277,7 @@ namespace Sandra.UI
                     new CombinedUIActionInterface
                     {
                         Shortcuts = InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
-                        MenuCaptionKey = LocalizedStringKeys.Moves,
+                        MenuTextProvider = LocalizedStringKeys.Moves.ToTextProvider(),
                     },
                 });
 
@@ -288,7 +288,7 @@ namespace Sandra.UI
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
 
-            UIMenuNode.Container toolsMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools);
+            UIMenuNode.Container toolsMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools.ToTextProvider());
             mainMenuRootNodes.Add(toolsMenu);
 
             // Add these actions to the "Tools" dropdown list.
@@ -297,7 +297,7 @@ namespace Sandra.UI
                                         Session.ShowDefaultSettingsFile,
                                         Session.EditCurrentLanguage);
 
-            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help);
+            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help.ToTextProvider());
             mainMenuRootNodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.

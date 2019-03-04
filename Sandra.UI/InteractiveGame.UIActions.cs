@@ -237,7 +237,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.StartOfGame,
+                    MenuTextProvider = LocalizedStringKeys.StartOfGame.ToTextProvider(),
                 },
             });
 
@@ -260,7 +260,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
-                    MenuCaptionKey = LocalizedStringKeys.FirstMove,
+                    MenuTextProvider = LocalizedStringKeys.FirstMove.ToTextProvider(),
                 },
             });
 
@@ -293,7 +293,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.PageUp),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.FastBackward,
+                    MenuTextProvider = LocalizedStringKeys.FastBackward.ToTextProvider(),
                 },
             });
 
@@ -320,7 +320,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.LeftArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.PreviousMove,
+                    MenuTextProvider = LocalizedStringKeys.PreviousMove.ToTextProvider(),
                 },
             });
 
@@ -347,7 +347,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.RightArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.NextMove,
+                    MenuTextProvider = LocalizedStringKeys.NextMove.ToTextProvider(),
                 },
             });
 
@@ -386,7 +386,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.PageDown),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.FastForward,
+                    MenuTextProvider = LocalizedStringKeys.FastForward.ToTextProvider(),
                 },
             });
 
@@ -409,7 +409,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
-                    MenuCaptionKey = LocalizedStringKeys.LastMove,
+                    MenuTextProvider = LocalizedStringKeys.LastMove.ToTextProvider(),
                 },
             });
 
@@ -432,7 +432,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
-                    MenuCaptionKey = LocalizedStringKeys.EndOfGame,
+                    MenuTextProvider = LocalizedStringKeys.EndOfGame.ToTextProvider(),
                 },
             });
 
@@ -466,7 +466,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
                     },
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.PreviousLine,
+                    MenuTextProvider = LocalizedStringKeys.PreviousLine.ToTextProvider(),
                 },
             });
 
@@ -501,7 +501,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.DownArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.NextLine,
+                    MenuTextProvider = LocalizedStringKeys.NextLine.ToTextProvider(),
                 },
             });
 
@@ -534,7 +534,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
                     },
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.PromoteLine,
+                    MenuTextProvider = LocalizedStringKeys.PromoteLine.ToTextProvider(),
                 },
             });
 
@@ -569,7 +569,7 @@ namespace Sandra.UI
                         new ShortcutKeys(ConsoleKey.D),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
                     },
-                    MenuCaptionKey = LocalizedStringKeys.DemoteLine,
+                    MenuTextProvider = LocalizedStringKeys.DemoteLine.ToTextProvider(),
                 },
             });
 
@@ -605,7 +605,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
-                    MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
+                    MenuTextProvider = LocalizedStringKeys.BreakAtCurrentPosition.ToTextProvider(),
                 },
             });
 
@@ -629,7 +629,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
-                    MenuCaptionKey = LocalizedStringKeys.DeleteLine,
+                    MenuTextProvider = LocalizedStringKeys.DeleteLine.ToTextProvider(),
                 },
             });
 

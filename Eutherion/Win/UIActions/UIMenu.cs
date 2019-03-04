@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
@@ -48,12 +47,12 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public bool IsFirstInGroup { get; set; }
 
-        protected UIMenuNode(LocalizedStringKey captionKey)
+        protected UIMenuNode(ITextProvider textProvider)
         {
-            TextProvider = captionKey == null ? null : new LocalizedTextProvider(captionKey);
+            TextProvider = textProvider;
         }
 
-        protected UIMenuNode(LocalizedStringKey captionKey, IImageProvider iconProvider) : this(captionKey)
+        protected UIMenuNode(ITextProvider textProvider, IImageProvider iconProvider) : this(textProvider)
         {
             IconProvider = iconProvider;
         }
@@ -78,11 +77,11 @@ namespace Eutherion.Win.UIActions
             public bool OpensDialog { get; }
 
             public Element(UIAction action, IContextMenuUIActionInterface contextMenuInterface)
-                : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
+                : base(contextMenuInterface.MenuTextProvider, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
 
-                ShortcutKeyDisplayTextProviders = contextMenuInterface.DisplayShortcutKeys?.Select(x => new LocalizedTextProvider(x));
+                ShortcutKeyDisplayTextProviders = contextMenuInterface.DisplayShortcutKeys;
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
                 OpensDialog = contextMenuInterface.OpensDialog;
             }
@@ -94,11 +93,11 @@ namespace Eutherion.Win.UIActions
         {
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
 
-            public Container(LocalizedStringKey captionKey) : base(captionKey)
+            public Container(ITextProvider textProvider) : base(textProvider)
             {
             }
 
-            public Container(LocalizedStringKey captionKey, IImageProvider iconProvider) : base(captionKey, iconProvider)
+            public Container(ITextProvider textProvider, IImageProvider iconProvider) : base(textProvider, iconProvider)
             {
             }
 

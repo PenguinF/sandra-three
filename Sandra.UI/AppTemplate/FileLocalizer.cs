@@ -98,7 +98,7 @@ namespace Eutherion.Win.AppTemplate
                         {
                             new CombinedUIActionInterface
                             {
-                                MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
+                                MenuTextProvider = LocalizedStringKey.Unlocalizable(LanguageName).ToTextProvider(),
                                 MenuIcon = menuIcon.ToImageProvider(),
                             },
                         });

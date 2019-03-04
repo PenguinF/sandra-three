@@ -78,7 +78,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditPreferencesFile.ToTextProvider(),
                     MenuIcon = SharedResources.settings.ToImageProvider(),
                 },
             });
@@ -146,7 +146,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.ShowDefaultSettingsFile,
+                    MenuTextProvider = SharedLocalizedStringKeys.ShowDefaultSettingsFile.ToTextProvider(),
                 },
             });
 
@@ -238,7 +238,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.About,
+                    MenuTextProvider = SharedLocalizedStringKeys.About.ToTextProvider(),
                 },
             });
 
@@ -263,7 +263,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.Credits,
+                    MenuTextProvider = SharedLocalizedStringKeys.Credits.ToTextProvider(),
                 },
             });
 
@@ -289,7 +289,7 @@ namespace Eutherion.Win.AppTemplate
                 new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditCurrentLanguage.ToTextProvider(),
                     MenuIcon = SharedResources.speech.ToImageProvider(),
                 },
             });

@@ -40,7 +40,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.FlipBoard,
+                    MenuTextProvider = LocalizedStringKeys.FlipBoard.ToTextProvider(),
                     MenuIcon = Properties.Resources.flip.ToImageProvider(),
                 },
             });
@@ -59,7 +59,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
+                    MenuTextProvider = LocalizedStringKeys.CopyDiagramToClipboard.ToTextProvider(),
                 },
             });
 

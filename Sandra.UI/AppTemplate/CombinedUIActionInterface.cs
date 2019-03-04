@@ -46,9 +46,9 @@ namespace Eutherion.Win.AppTemplate
         public bool IsFirstInGroup { get; set; }
 
         /// <summary>
-        /// Defines the caption to display for the generated menu item.
+        /// Defines the text provider used to generate the display text for the menu item.
         /// </summary>
-        public LocalizedStringKey MenuCaptionKey { get; set; }
+        public ITextProvider MenuTextProvider { get; set; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
@@ -69,66 +69,66 @@ namespace Eutherion.Win.AppTemplate
         /// The <see cref="LocalizedStringKey"/>s enumerable which combined construct a localized display string
         /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
         /// </returns>
-        public IEnumerable<LocalizedStringKey> DisplayShortcutKeys
+        public IEnumerable<ITextProvider> DisplayShortcutKeys
         {
             get
             {
                 if (Shortcuts == null) yield break;
                 if (!Shortcuts.Any(x => !x.IsEmpty, out ShortcutKeys shortcut)) yield break;
 
-                if (shortcut.Modifiers.HasFlag(KeyModifiers.Control)) yield return LocalizedConsoleKeys.ConsoleKeyCtrl;
-                if (shortcut.Modifiers.HasFlag(KeyModifiers.Shift)) yield return LocalizedConsoleKeys.ConsoleKeyShift;
-                if (shortcut.Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt;
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Control)) yield return LocalizedConsoleKeys.ConsoleKeyCtrl.ToTextProvider();
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Shift)) yield return LocalizedConsoleKeys.ConsoleKeyShift.ToTextProvider();
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt.ToTextProvider();
 
                 if (shortcut.Key >= ConsoleKey.D0 && shortcut.Key <= ConsoleKey.D9)
                 {
-                    yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)shortcut.Key - (int)ConsoleKey.D0));
+                    yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)shortcut.Key - (int)ConsoleKey.D0)).ToTextProvider();
                 }
                 else
                 {
                     switch (shortcut.Key)
                     {
                         case ConsoleKey.Add:
-                            yield return LocalizedStringKey.Unlocalizable("+");
+                            yield return LocalizedStringKey.Unlocalizable("+").ToTextProvider();
                             break;
                         case ConsoleKey.Subtract:
-                            yield return LocalizedStringKey.Unlocalizable("-");
+                            yield return LocalizedStringKey.Unlocalizable("-").ToTextProvider();
                             break;
                         case ConsoleKey.Multiply:
-                            yield return LocalizedStringKey.Unlocalizable("*");
+                            yield return LocalizedStringKey.Unlocalizable("*").ToTextProvider();
                             break;
                         case ConsoleKey.Divide:
-                            yield return LocalizedStringKey.Unlocalizable("/");
+                            yield return LocalizedStringKey.Unlocalizable("/").ToTextProvider();
                             break;
                         case ConsoleKey.Delete:
-                            yield return LocalizedConsoleKeys.ConsoleKeyDelete;
+                            yield return LocalizedConsoleKeys.ConsoleKeyDelete.ToTextProvider();
                             break;
                         case ConsoleKey.LeftArrow:
-                            yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
+                            yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow.ToTextProvider();
                             break;
                         case ConsoleKey.RightArrow:
-                            yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
+                            yield return LocalizedConsoleKeys.ConsoleKeyRightArrow.ToTextProvider();
                             break;
                         case ConsoleKey.UpArrow:
-                            yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
+                            yield return LocalizedConsoleKeys.ConsoleKeyUpArrow.ToTextProvider();
                             break;
                         case ConsoleKey.DownArrow:
-                            yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
+                            yield return LocalizedConsoleKeys.ConsoleKeyDownArrow.ToTextProvider();
                             break;
                         case ConsoleKey.Home:
-                            yield return LocalizedConsoleKeys.ConsoleKeyHome;
+                            yield return LocalizedConsoleKeys.ConsoleKeyHome.ToTextProvider();
                             break;
                         case ConsoleKey.End:
-                            yield return LocalizedConsoleKeys.ConsoleKeyEnd;
+                            yield return LocalizedConsoleKeys.ConsoleKeyEnd.ToTextProvider();
                             break;
                         case ConsoleKey.PageUp:
-                            yield return LocalizedConsoleKeys.ConsoleKeyPageUp;
+                            yield return LocalizedConsoleKeys.ConsoleKeyPageUp.ToTextProvider();
                             break;
                         case ConsoleKey.PageDown:
-                            yield return LocalizedConsoleKeys.ConsoleKeyPageDown;
+                            yield return LocalizedConsoleKeys.ConsoleKeyPageDown.ToTextProvider();
                             break;
                         default:
-                            yield return LocalizedStringKey.Unlocalizable(shortcut.Key.ToString());
+                            yield return LocalizedStringKey.Unlocalizable(shortcut.Key.ToString()).ToTextProvider();
                             break;
                     }
                 }
@@ -138,6 +138,9 @@ namespace Eutherion.Win.AppTemplate
 
     public static class CombinedUIActionInterfaceExtensions
     {
+        public static ITextProvider ToTextProvider(this LocalizedStringKey key)
+            => key == null ? null : new LocalizedTextProvider(key);
+
         public static IImageProvider ToImageProvider(this Image image)
             => image == null ? null : new ConstantImageProvider(image);
     }

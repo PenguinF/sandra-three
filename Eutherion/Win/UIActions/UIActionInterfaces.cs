@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Eutherion.Win.UIActions
 {
@@ -49,21 +47,20 @@ namespace Eutherion.Win.UIActions
         bool IsFirstInGroup { get; }
 
         /// <summary>
-        /// Defines the caption to display for the generated menu item.
+        /// Defines the text provider used to generate the display text for the menu item.
         /// </summary>
-        LocalizedStringKey MenuCaptionKey { get; }
+        ITextProvider MenuTextProvider { get; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
         IImageProvider MenuIcon { get; }
-        //IconProvider = iconProvider == null ? null : new ConstantImageProvider(iconProvider);
 
         /// <summary>
         /// Defines the shortcut key to display in the menu item.
         /// If the enumeration is null or empty, no shortcut key will be shown.
         /// </summary>
-        IEnumerable<LocalizedStringKey> DisplayShortcutKeys { get; }
+        IEnumerable<ITextProvider> DisplayShortcutKeys { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.

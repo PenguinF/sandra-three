@@ -46,7 +46,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
-                    MenuCaptionKey = LocalizedStringKeys.NewGame,
+                    MenuTextProvider = LocalizedStringKeys.NewGame.ToTextProvider(),
                 },
             });
 

@@ -36,7 +36,7 @@ namespace Sandra.UI
                 new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
+                    MenuTextProvider = LocalizedStringKeys.UsePGNPieceSymbols.ToTextProvider(),
                 },
             });
 
@@ -61,7 +61,7 @@ namespace Sandra.UI
             {
                 new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
+                    MenuTextProvider = LocalizedStringKeys.UseLongAlgebraicNotation.ToTextProvider(),
                 },
             });
 
