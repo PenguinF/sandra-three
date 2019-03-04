@@ -75,7 +75,6 @@
     <Compile Include="UIActions\DefaultUIActionBinding.cs" />
     <Compile Include="UIActions\IUIActionHandlerProvider.cs" />
     <Compile Include="UIActions\IUIActionInterface.cs" />
-    <Compile Include="UIActions\LocalizedConsoleKeys.cs" />
     <Compile Include="UIActions\ShortcutKeys.cs" />
     <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />

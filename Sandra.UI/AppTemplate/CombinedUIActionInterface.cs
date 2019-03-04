@@ -22,6 +22,7 @@
 using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -60,9 +61,79 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public bool OpensDialog { get; set; }
 
-        IEnumerable<LocalizedStringKey> IContextMenuUIActionInterface.DisplayShortcutKeys
-            => Shortcuts == null ? null
-            : Shortcuts.FirstOrDefault(x => !x.IsEmpty).DisplayStringParts();
+        /// <summary>
+        /// Enumerates the <see cref="LocalizedStringKey"/>s which combined construct a localized display string
+        /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="LocalizedStringKey"/>s enumerable which combined construct a localized display string
+        /// for the shortcut of this <see cref="CombinedUIActionInterface"/>.
+        /// </returns>
+        public IEnumerable<LocalizedStringKey> DisplayShortcutKeys
+        {
+            get
+            {
+                if (Shortcuts == null) yield break;
+                if (!Shortcuts.Any(x => !x.IsEmpty, out ShortcutKeys shortcut)) yield break;
+
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Control)) yield return LocalizedConsoleKeys.ConsoleKeyCtrl;
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Shift)) yield return LocalizedConsoleKeys.ConsoleKeyShift;
+                if (shortcut.Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt;
+
+                if (shortcut.Key >= ConsoleKey.D0 && shortcut.Key <= ConsoleKey.D9)
+                {
+                    yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)shortcut.Key - (int)ConsoleKey.D0));
+                }
+                else
+                {
+                    switch (shortcut.Key)
+                    {
+                        case ConsoleKey.Add:
+                            yield return LocalizedStringKey.Unlocalizable("+");
+                            break;
+                        case ConsoleKey.Subtract:
+                            yield return LocalizedStringKey.Unlocalizable("-");
+                            break;
+                        case ConsoleKey.Multiply:
+                            yield return LocalizedStringKey.Unlocalizable("*");
+                            break;
+                        case ConsoleKey.Divide:
+                            yield return LocalizedStringKey.Unlocalizable("/");
+                            break;
+                        case ConsoleKey.Delete:
+                            yield return LocalizedConsoleKeys.ConsoleKeyDelete;
+                            break;
+                        case ConsoleKey.LeftArrow:
+                            yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
+                            break;
+                        case ConsoleKey.RightArrow:
+                            yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
+                            break;
+                        case ConsoleKey.UpArrow:
+                            yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
+                            break;
+                        case ConsoleKey.DownArrow:
+                            yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
+                            break;
+                        case ConsoleKey.Home:
+                            yield return LocalizedConsoleKeys.ConsoleKeyHome;
+                            break;
+                        case ConsoleKey.End:
+                            yield return LocalizedConsoleKeys.ConsoleKeyEnd;
+                            break;
+                        case ConsoleKey.PageUp:
+                            yield return LocalizedConsoleKeys.ConsoleKeyPageUp;
+                            break;
+                        case ConsoleKey.PageDown:
+                            yield return LocalizedConsoleKeys.ConsoleKeyPageDown;
+                            break;
+                        default:
+                            yield return LocalizedStringKey.Unlocalizable(shortcut.Key.ToString());
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     public static class CombinedUIActionInterfaceExtensions

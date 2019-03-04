@@ -63,6 +63,7 @@
     <Compile Include="AppTemplate\ListBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AppTemplate\LocalizedConsoleKeys.cs" />
     <Compile Include="AppTemplate\LocalizedString.cs" />
     <Compile Include="AppTemplate\Localizers.cs" />
     <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
