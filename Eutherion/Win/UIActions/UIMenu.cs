@@ -119,38 +119,7 @@ namespace Eutherion.Win.UIActions
         public LocalizedString LocalizedText;
         public List<LocalizedString> ShortcutKeyDisplayStringParts;
 
-        /// <summary>
-        /// Sets up this menu item with the caption and icon from the menu node.
-        /// </summary>
-        /// <param name="node">
-        /// The <see cref="UIMenuNode"/> to initialize from.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="node"/> is null.
-        /// </exception>
-        public void InitializeFrom(UIMenuNode node)
-        {
-            if (node == null) throw new ArgumentNullException(nameof(node));
-
-            InitializeFrom(
-                node.CaptionKey,
-                node.Icon,
-                node is UIMenuNode.Element element && element.OpensDialog);
-        }
-
-        /// <summary>
-        /// Sets up this menu item with the given caption and icon.
-        /// </summary>
-        /// <param name="captionKey">
-        /// The localized text to use for the caption.
-        /// </param>
-        /// <param name="icon">
-        /// The icon to show in the menu item.
-        /// </param>
-        /// <param name="opensDialog">
-        /// Whether or not the display text of the menu item is followed by a "...".
-        /// </param>
-        public void InitializeFrom(LocalizedStringKey captionKey, Image icon, bool opensDialog)
+        protected void InitializeFrom(LocalizedStringKey captionKey, Image icon, bool opensDialog)
         {
             if (LocalizedText != null) LocalizedText.Dispose();
 
@@ -179,6 +148,21 @@ namespace Eutherion.Win.UIActions
             Image = icon;
         }
 
+        /// <summary>
+        /// Sets up this menu item with the caption and icon from the menu node.
+        /// </summary>
+        /// <param name="container">
+        /// The <see cref="UIMenuNode.Container"/> to initialize from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="container"/> is null.
+        /// </exception>
+        public void InitializeFrom(UIMenuNode.Container container)
+        {
+            if (container == null) throw new ArgumentNullException(nameof(container));
+            InitializeFrom(container.CaptionKey, container.Icon, false);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -203,6 +187,25 @@ namespace Eutherion.Win.UIActions
         public UIActionToolStripMenuItem(UIAction action)
         {
             Action = action;
+        }
+
+        /// <summary>
+        /// Sets up this menu item with the caption and icon from the menu node.
+        /// </summary>
+        /// <param name="element">
+        /// The <see cref="UIMenuNode.Element"/> to initialize from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="element"/> is null.
+        /// </exception>
+        public void InitializeFrom(UIMenuNode.Element element)
+        {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+
+            InitializeFrom(
+                element.CaptionKey,
+                element.Icon,
+                element.OpensDialog);
         }
 
         public void Update(UIActionState currentActionState)
