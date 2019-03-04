@@ -136,7 +136,7 @@ namespace Sandra.UI
                     // Copy the default binding and remove the ContextMenuUIActionInterface
                     // which is used below to construct a UIMenuNode.Element directly.
                     var modifiedBinding = new ImplementationSet<IUIActionInterface>();
-                    if (binding.DefaultInterfaces.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface))
+                    if (binding.DefaultInterfaces.TryGet(out IShortcutKeysUIActionInterface shortcutKeysInterface))
                     {
                         modifiedBinding.Add(shortcutKeysInterface);
                     }
@@ -268,9 +268,9 @@ namespace Sandra.UI
                 InteractiveGame.GotoChessBoardForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
                     new CombinedUIActionInterface
                     {
+                        Shortcuts = InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
                         IsFirstInGroup = true,
                         MenuCaptionKey = LocalizedStringKeys.Chessboard,
                     },
@@ -280,9 +280,9 @@ namespace Sandra.UI
                 InteractiveGame.GotoMovesForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
                     new CombinedUIActionInterface
                     {
+                        Shortcuts = InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
                         MenuCaptionKey = LocalizedStringKeys.Moves,
                     },
                 });

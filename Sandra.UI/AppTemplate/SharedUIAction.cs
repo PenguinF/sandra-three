@@ -21,7 +21,6 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.UIActions;
 using System;
 
 namespace Eutherion.Win.AppTemplate
@@ -34,12 +33,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(Exit)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Exit,
                 },
@@ -49,12 +45,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(Close)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Alt, ConsoleKey.F4), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Alt, ConsoleKey.F4), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Close,
                 },
@@ -64,12 +57,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(Undo)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Undo,
                     MenuIcon = SharedResources.undo,
@@ -80,12 +70,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(Redo)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Redo,
                     MenuIcon = SharedResources.redo,
                 },
@@ -95,12 +82,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(ZoomIn)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomIn,
                     MenuIcon = SharedResources.zoom_in,
@@ -111,12 +95,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(ZoomOut)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomOut,
                     MenuIcon = SharedResources.zoom_out,
                 },
@@ -126,12 +107,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(CutSelectionToClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Cut,
                     MenuIcon = SharedResources.cut,
@@ -142,12 +120,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(CopySelectionToClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Copy,
                     MenuIcon = SharedResources.copy,
                 },
@@ -157,12 +132,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(PasteSelectionFromClipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Paste,
                     MenuIcon = SharedResources.paste,
                 },
@@ -172,12 +144,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(SelectAllText)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.SelectAll,
                 },
@@ -187,12 +156,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(SaveToFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Save,
                     MenuIcon = SharedResources.save,
@@ -203,12 +169,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.GoToPreviousLocation,
                 },
@@ -218,12 +181,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SharedUIActionPrefix + nameof(GoToNextLocation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
                     MenuCaptionKey = SharedLocalizedStringKeys.GoToNextLocation,
                 },
             });

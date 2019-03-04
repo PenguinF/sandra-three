@@ -20,13 +20,22 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
 using System.Drawing;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public sealed class CombinedUIActionInterface : IContextMenuUIActionInterface
+    /// <summary>
+    /// Defines how a <see cref="UIAction"/> can be invoked by a keyboard shortcut and how it is shown in a context menu.
+    /// </summary>
+    public sealed class CombinedUIActionInterface : IShortcutKeysUIActionInterface, IContextMenuUIActionInterface
     {
+        /// <summary>
+        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
+        /// </summary>
+        public ShortcutKeys[] Shortcuts { get; set; }
+
         /// <summary>
         /// Gets or sets if this action is the first in a group of actions.
         /// This will result in a separator generated above the menu item generated for this binding.

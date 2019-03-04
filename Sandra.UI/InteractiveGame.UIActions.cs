@@ -42,7 +42,7 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoChessBoardForm)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.B), },
                 },
@@ -136,7 +136,7 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoMovesForm)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.M), },
                 },
@@ -233,12 +233,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoStart)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.StartOfGame,
                 },
@@ -260,12 +257,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoFirstMove)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
                     MenuCaptionKey = LocalizedStringKeys.FirstMove,
                 },
             });
@@ -292,16 +286,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateBackward)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.PageUp),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.FastBackward,
                 },
             });
@@ -322,16 +313,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousMove)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.LeftArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.PreviousMove,
                 },
             });
@@ -352,16 +340,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextMove)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.RightArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.NextMove,
                 },
             });
@@ -394,16 +379,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(FastNavigateForward)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.PageDown),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.FastForward,
                 },
             });
@@ -424,12 +406,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoLastMove)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
                     MenuCaptionKey = LocalizedStringKeys.LastMove,
                 },
             });
@@ -450,12 +429,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoEnd)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
                     MenuCaptionKey = LocalizedStringKeys.EndOfGame,
                 },
             });
@@ -482,16 +458,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoPreviousVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.UpArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PreviousLine,
                 },
@@ -521,16 +494,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(GotoNextVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.DownArrow),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.NextLine,
                 },
             });
@@ -556,16 +526,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(PromoteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.P),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PromoteLine,
                 },
@@ -595,16 +562,13 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(DemoteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[]
                     {
                         new ShortcutKeys(ConsoleKey.D),
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
                     },
-                },
-                new CombinedUIActionInterface
-                {
                     MenuCaptionKey = LocalizedStringKeys.DemoteLine,
                 },
             });
@@ -638,12 +602,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(BreakActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
                     MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
                 },
             });
@@ -665,12 +626,9 @@ namespace Sandra.UI
             new UIAction(InteractiveGameUIActionPrefix + nameof(DeleteActiveVariation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
-                },
                 new CombinedUIActionInterface
                 {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
                     MenuCaptionKey = LocalizedStringKeys.DeleteLine,
                 },
             });

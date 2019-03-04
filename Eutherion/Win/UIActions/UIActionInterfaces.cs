@@ -28,12 +28,12 @@ namespace Eutherion.Win.UIActions
     /// <summary>
     /// Defines how a <see cref="UIAction"/> can be invoked by a keyboard shortcut.
     /// </summary>
-    public sealed class ShortcutKeysUIActionInterface : IUIActionInterface
+    public interface IShortcutKeysUIActionInterface : IUIActionInterface
     {
         /// <summary>
         /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
         /// </summary>
-        public ShortcutKeys[] Shortcuts;
+        ShortcutKeys[] Shortcuts { get; }
     }
 
     /// <summary>
