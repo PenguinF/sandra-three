@@ -82,23 +82,23 @@ namespace Eutherion.Win.AppTemplate
 
                 if (shortcut.Key >= ConsoleKey.D0 && shortcut.Key <= ConsoleKey.D9)
                 {
-                    yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)shortcut.Key - (int)ConsoleKey.D0)).ToTextProvider();
+                    yield return Convert.ToString((int)shortcut.Key - (int)ConsoleKey.D0).ToTextProvider();
                 }
                 else
                 {
                     switch (shortcut.Key)
                     {
                         case ConsoleKey.Add:
-                            yield return LocalizedStringKey.Unlocalizable("+").ToTextProvider();
+                            yield return "+".ToTextProvider();
                             break;
                         case ConsoleKey.Subtract:
-                            yield return LocalizedStringKey.Unlocalizable("-").ToTextProvider();
+                            yield return "-".ToTextProvider();
                             break;
                         case ConsoleKey.Multiply:
-                            yield return LocalizedStringKey.Unlocalizable("*").ToTextProvider();
+                            yield return "*".ToTextProvider();
                             break;
                         case ConsoleKey.Divide:
-                            yield return LocalizedStringKey.Unlocalizable("/").ToTextProvider();
+                            yield return "/".ToTextProvider();
                             break;
                         case ConsoleKey.Delete:
                             yield return LocalizedConsoleKeys.ConsoleKeyDelete.ToTextProvider();
@@ -128,7 +128,7 @@ namespace Eutherion.Win.AppTemplate
                             yield return LocalizedConsoleKeys.ConsoleKeyPageDown.ToTextProvider();
                             break;
                         default:
-                            yield return LocalizedStringKey.Unlocalizable(shortcut.Key.ToString()).ToTextProvider();
+                            yield return shortcut.Key.ToString().ToTextProvider();
                             break;
                     }
                 }
@@ -138,6 +138,9 @@ namespace Eutherion.Win.AppTemplate
 
     public static class CombinedUIActionInterfaceExtensions
     {
+        public static ITextProvider ToTextProvider(this string displayText)
+            => new ConstantTextProvider(displayText);
+
         public static ITextProvider ToTextProvider(this LocalizedStringKey key)
             => key == null ? null : new LocalizedTextProvider(key);
 
