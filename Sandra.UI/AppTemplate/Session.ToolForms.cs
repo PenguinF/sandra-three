@@ -76,7 +76,7 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
                     MenuIcon = SharedResources.settings,
@@ -144,7 +144,7 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.ShowDefaultSettingsFile,
                 },
@@ -236,7 +236,7 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.About,
                 },
@@ -261,7 +261,7 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.Credits,
                 },
@@ -286,7 +286,7 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,

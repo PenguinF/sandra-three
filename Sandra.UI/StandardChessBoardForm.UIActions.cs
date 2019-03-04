@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using System;
 using System.Drawing;
@@ -40,7 +41,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.FlipBoard,
@@ -62,7 +63,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,

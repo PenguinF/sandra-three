@@ -131,7 +131,7 @@ namespace Sandra.UI
         {
             foreach (DefaultUIActionBinding binding in bindings)
             {
-                if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
                     // Copy the default binding and remove the ContextMenuUIActionInterface
                     // which is used below to construct a UIMenuNode.Element directly.
@@ -269,7 +269,7 @@ namespace Sandra.UI
                 new ImplementationSet<IUIActionInterface>
                 {
                     InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
-                    new ContextMenuUIActionInterface
+                    new CombinedUIActionInterface
                     {
                         IsFirstInGroup = true,
                         MenuCaptionKey = LocalizedStringKeys.Chessboard,
@@ -281,7 +281,7 @@ namespace Sandra.UI
                 new ImplementationSet<IUIActionInterface>
                 {
                     InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
-                    new ContextMenuUIActionInterface
+                    new CombinedUIActionInterface
                     {
                         MenuCaptionKey = LocalizedStringKeys.Moves,
                     },

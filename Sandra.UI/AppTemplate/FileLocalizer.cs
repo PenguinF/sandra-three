@@ -23,7 +23,6 @@ using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
-using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -97,7 +96,7 @@ namespace Eutherion.Win.AppTemplate
                         new UIAction(nameof(FileLocalizer) + "." + LanguageName),
                         new ImplementationSet<IUIActionInterface>
                         {
-                            new ContextMenuUIActionInterface
+                            new CombinedUIActionInterface
                             {
                                 MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
                                 MenuIcon = menuIcon,

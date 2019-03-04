@@ -130,7 +130,7 @@ namespace Eutherion.Win.UIActions
 
         public void BindAction(DefaultUIActionBinding binding, bool alwaysVisible)
         {
-            if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface _))
+            if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface _))
             {
                 DropDownItemsActionHandler.BindAction(new UIActionBinding(binding, perform =>
                 {

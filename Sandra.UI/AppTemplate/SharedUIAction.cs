@@ -38,7 +38,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Alt, ConsoleKey.F4), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Exit,
@@ -53,7 +53,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Alt, ConsoleKey.F4), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Close,
@@ -68,7 +68,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Undo,
@@ -84,7 +84,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.Redo,
                     MenuIcon = SharedResources.redo,
@@ -99,7 +99,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomIn,
@@ -115,7 +115,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomOut,
                     MenuIcon = SharedResources.zoom_out,
@@ -130,7 +130,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Cut,
@@ -146,7 +146,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.Copy,
                     MenuIcon = SharedResources.copy,
@@ -161,7 +161,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.Paste,
                     MenuIcon = SharedResources.paste,
@@ -176,7 +176,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.A), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.SelectAll,
@@ -191,7 +191,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Save,
@@ -207,7 +207,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.GoToPreviousLocation,
@@ -222,7 +222,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.GoToNextLocation,
                 },

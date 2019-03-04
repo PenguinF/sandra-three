@@ -237,7 +237,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Home), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.StartOfGame,
@@ -264,7 +264,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.Home), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FirstMove,
                 },
@@ -300,7 +300,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageUp),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FastBackward,
                 },
@@ -330,7 +330,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.LeftArrow),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.PreviousMove,
                 },
@@ -360,7 +360,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.RightArrow),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NextMove,
                 },
@@ -402,7 +402,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.PageDown),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.FastForward,
                 },
@@ -428,7 +428,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.End), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.LastMove,
                 },
@@ -454,7 +454,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.End), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.EndOfGame,
                 },
@@ -490,7 +490,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.UpArrow),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PreviousLine,
@@ -529,7 +529,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.DownArrow),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NextLine,
                 },
@@ -564,7 +564,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.P),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.PromoteLine,
@@ -603,7 +603,7 @@ namespace Sandra.UI
                         new ShortcutKeys(KeyModifiers.Control, ConsoleKey.D),
                     },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.DemoteLine,
                 },
@@ -642,7 +642,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.B), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.BreakAtCurrentPosition,
                 },
@@ -669,7 +669,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Delete), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.DeleteLine,
                 },

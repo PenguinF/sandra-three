@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
+    <Compile Include="AppTemplate\CombinedUIActionInterface.cs" />
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
     <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />

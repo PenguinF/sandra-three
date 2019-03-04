@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * UIActionInterfaces.cs
+ * CombinedUIActionInterface.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -20,47 +20,33 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.UIActions;
+using Eutherion.Win.UIActions;
 using System.Drawing;
 
-namespace Eutherion.Win.UIActions
+namespace Eutherion.Win.AppTemplate
 {
-    /// <summary>
-    /// Defines how a <see cref="UIAction"/> can be invoked by a keyboard shortcut.
-    /// </summary>
-    public sealed class ShortcutKeysUIActionInterface : IUIActionInterface
+    public sealed class CombinedUIActionInterface : IContextMenuUIActionInterface
     {
         /// <summary>
-        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
-        /// </summary>
-        public ShortcutKeys[] Shortcuts;
-    }
-
-    /// <summary>
-    /// Defines how a <see cref="UIAction"/> is shown in a context menu.
-    /// </summary>
-    public interface IContextMenuUIActionInterface : IUIActionInterface
-    {
-        /// <summary>
-        /// Gets if this action is the first in a group of actions.
+        /// Gets or sets if this action is the first in a group of actions.
         /// This will result in a separator generated above the menu item generated for this binding.
         /// </summary>
-        bool IsFirstInGroup { get; }
+        public bool IsFirstInGroup { get; set; }
 
         /// <summary>
         /// Defines the caption to display for the generated menu item.
         /// </summary>
-        LocalizedStringKey MenuCaptionKey { get; }
+        public LocalizedStringKey MenuCaptionKey { get; set; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        Image MenuIcon { get; }
+        public Image MenuIcon { get; set; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
         /// If true, the display text of the menu item is followed by "...".
         /// </summary>
-        bool OpensDialog { get; }
+        public bool OpensDialog { get; set; }
     }
 }

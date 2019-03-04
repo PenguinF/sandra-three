@@ -70,7 +70,7 @@ namespace Eutherion.Win.UIActions
             /// </summary>
             public readonly bool OpensDialog;
 
-            public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, ContextMenuUIActionInterface contextMenuInterface)
+            public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, IContextMenuUIActionInterface contextMenuInterface)
                 : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
@@ -343,10 +343,10 @@ namespace Eutherion.Win.UIActions
     {
         /// <summary>
         /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>
-        /// given the set of <see cref="ContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
+        /// given the set of <see cref="IContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
         /// </summary>
         /// <param name="actionHandler">
-        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="ContextMenuUIActionInterface"/>s.
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="IContextMenuUIActionInterface"/>s.
         /// </param>
         /// <param name="destination">
         /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
@@ -358,7 +358,7 @@ namespace Eutherion.Win.UIActions
             // Extract all ContextMenuUIActionInterfaces from the handler.
             foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
             {
-                if (interfaceSet.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                if (interfaceSet.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
                     var shortcutKeysInterface = interfaceSet.Get<ShortcutKeysUIActionInterface>();
                     rootMenuNodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));

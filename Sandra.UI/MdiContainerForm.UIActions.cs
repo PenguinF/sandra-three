@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win.AppTemplate;
 using Eutherion.Win.UIActions;
 using System;
 
@@ -47,7 +48,7 @@ namespace Sandra.UI
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
                 },
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     MenuCaptionKey = LocalizedStringKeys.NewGame,
                 },
