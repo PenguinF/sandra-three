@@ -62,7 +62,7 @@ namespace Eutherion.Win.UIActions
         public sealed class Element : UIMenuNode
         {
             public readonly UIAction Action;
-            public readonly ShortcutKeys Shortcut;
+            public readonly IEnumerable<LocalizedStringKey> Shortcut;
 
             /// <summary>
             /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -77,7 +77,7 @@ namespace Eutherion.Win.UIActions
 
                 if (shortcutKeysInterface != null && shortcutKeysInterface.Shortcuts != null)
                 {
-                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
+                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty).DisplayStringParts();
                 }
 
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
@@ -206,7 +206,7 @@ namespace Eutherion.Win.UIActions
         private UIActionToolStripMenuItem(UIMenuNode.Element element)
             : base(element.CaptionKey,
                    element.Icon,
-                   element.Shortcut.DisplayStringParts(),
+                   element.Shortcut,
                    element.OpensDialog)
         {
             Action = element.Action;
