@@ -28,29 +28,23 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
     /// </summary>
-    public sealed class LocalizedString : IDisposable, IWeakEventTarget
+    public class LocalizedString : LocalizedTextProvider, IDisposable, IWeakEventTarget
     {
-        /// <summary>
-        /// Gets the key for this <see cref="LocalizedString"/>.
-        /// </summary>
-        public readonly LocalizedStringKey Key;
-
         /// <summary>
         /// Gets the current localized display text.
         /// </summary>
         public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
 
         public LocalizedString(LocalizedStringKey key)
+            : base(key)
         {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-            DisplayText.Value = Localizer.Current.Localize(Key);
-
+            DisplayText.Value = GetText();
             Localizer.CurrentChanged += Localizer_CurrentChanged;
         }
 
         private void Localizer_CurrentChanged(object sender, EventArgs e)
         {
-            DisplayText.Value = Localizer.Current.Localize(Key);
+            DisplayText.Value = GetText();
         }
 
         public bool IsDisposed { get; private set; }

@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
+using System;
+
 namespace Eutherion.Win
 {
     /// <summary>
@@ -33,5 +36,35 @@ namespace Eutherion.Win
         /// The text from this text provider.
         /// </returns>
         string GetText();
+    }
+
+    /// <summary>
+    /// <see cref="ITextProvider"/> which provides a localized text to a UI element.
+    /// </summary>
+    public class LocalizedTextProvider : ITextProvider
+    {
+        /// <summary>
+        /// Gets the key for this <see cref="LocalizedTextProvider"/>.
+        /// </summary>
+        public readonly LocalizedStringKey Key;
+
+        /// <summary>
+        /// Gets the current localized display text.
+        /// </summary>
+        public string GetText() => Localizer.Current.Localize(Key);
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="LocalizedTextProvider"/> with a specified <see cref="LocalizedStringKey"/>.
+        /// </summary>
+        /// <param name="key">
+        /// The <see cref="LocalizedStringKey"/> for the <see cref="LocalizedTextProvider"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public LocalizedTextProvider(LocalizedStringKey key)
+        {
+            Key = key ?? throw new ArgumentNullException(nameof(key));
+        }
     }
 }
