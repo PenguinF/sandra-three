@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * LocalizedString.cs
+ * LocalizedStringKey.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,14 +19,13 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Diagnostics;
 
 namespace Eutherion.Localization
 {
     /// <summary>
-    /// Represents an immutable identifier for a <see cref="LocalizedString"/>.
+    /// Represents an immutable identifier for a localized string.
     /// </summary>
     [DebuggerDisplay("{Key}")]
     public sealed class LocalizedStringKey : IEquatable<LocalizedStringKey>
@@ -80,42 +79,6 @@ namespace Eutherion.Localization
             if (first is null) return !(second is null);
             if (second is null) return true;
             return first.Key != second.Key || first.DisplayText != second.DisplayText;
-        }
-    }
-
-    /// <summary>
-    /// Represents a localized string, which is updated on a change to <see cref="Localizer.Current"/>.
-    /// </summary>
-    public sealed class LocalizedString : IDisposable, IWeakEventTarget
-    {
-        /// <summary>
-        /// Gets the key for this <see cref="LocalizedString"/>.
-        /// </summary>
-        public readonly LocalizedStringKey Key;
-
-        /// <summary>
-        /// Gets the current localized display text.
-        /// </summary>
-        public readonly ObservableValue<string> DisplayText = new ObservableValue<string>(StringComparer.Ordinal);
-
-        public LocalizedString(LocalizedStringKey key)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-            DisplayText.Value = Localizer.Current.Localize(Key);
-
-            Localizer.CurrentChanged += Localizer_CurrentChanged;
-        }
-
-        private void Localizer_CurrentChanged(object sender, EventArgs e)
-        {
-            DisplayText.Value = Localizer.Current.Localize(Key);
-        }
-
-        public bool IsDisposed { get; private set; }
-
-        public void Dispose()
-        {
-            IsDisposed = true;
         }
     }
 }
