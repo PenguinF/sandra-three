@@ -117,9 +117,13 @@ namespace Eutherion.Win.UIActions
         public static readonly string OpensDialogIndicatorSuffix = "...";
 
         public LocalizedString LocalizedText;
-        public List<LocalizedString> ShortcutKeyDisplayStringParts;
 
-        protected void InitializeFrom(LocalizedStringKey captionKey, Image icon, bool opensDialog)
+        public List<LocalizedString> ShortcutKeyDisplayStringParts { get; private set; }
+
+        protected void InitializeFrom(LocalizedStringKey captionKey,
+                                      Image icon,
+                                      IEnumerable<LocalizedStringKey> displayStringParts,
+                                      bool opensDialog)
         {
             if (LocalizedText != null) LocalizedText.Dispose();
 
@@ -146,6 +150,11 @@ namespace Eutherion.Win.UIActions
 
             ImageScaling = ToolStripItemImageScaling.None;
             Image = icon;
+
+            if (displayStringParts != null)
+            {
+                ShortcutKeyDisplayStringParts = displayStringParts.Select(x => new LocalizedString(x)).ToList();
+            }
         }
 
         /// <summary>
@@ -160,7 +169,7 @@ namespace Eutherion.Win.UIActions
         public void InitializeFrom(UIMenuNode.Container container)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
-            InitializeFrom(container.CaptionKey, container.Icon, false);
+            InitializeFrom(container.CaptionKey, container.Icon, null, false);
         }
 
         protected override void Dispose(bool disposing)
@@ -205,6 +214,7 @@ namespace Eutherion.Win.UIActions
             InitializeFrom(
                 element.CaptionKey,
                 element.Icon,
+                element.Shortcut.DisplayStringParts(),
                 element.OpensDialog);
         }
 
@@ -385,7 +395,6 @@ namespace Eutherion.Win.UIActions
             var menuItem = new UIActionToolStripMenuItem(element.Action);
             menuItem.InitializeFrom(element);
 
-            menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
             menuItem.ShortcutKeyDisplayStringParts.ForEach(
                 x => x.DisplayText.ValueChanged += __ =>
                 menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText.Value)));
