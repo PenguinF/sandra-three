@@ -40,14 +40,17 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly string LangSettingKey = "lang";
 
-        public static string ExecutableFolder { get; private set; }
+        public static readonly string ExecutableFolder;
 
-        public static string ExecutableFileName { get; private set; }
+        public static readonly string ExecutableFileName;
 
-        public static string ExecutableFileNameWithoutExtension { get; private set; }
+        public static readonly string ExecutableFileNameWithoutExtension;
 
-        public static void InitializeExecutablePath(string exePath)
+        static Session()
         {
+            // Store executable folder/filename for later use.
+            string exePath = typeof(Session).Assembly.Location;
+
             ExecutableFolder = Path.GetDirectoryName(exePath);
             ExecutableFileName = Path.GetFileName(exePath);
             ExecutableFileNameWithoutExtension = Path.GetFileNameWithoutExtension(exePath);

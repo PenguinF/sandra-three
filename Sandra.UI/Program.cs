@@ -39,9 +39,6 @@ namespace Sandra.UI
         [STAThread]
         static void Main()
         {
-            // Store executable folder/filename for later use.
-            Session.InitializeExecutablePath(typeof(Program).Assembly.Location);
-
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
                 LocalizedStringKeys.DefaultEnglishTranslations,
