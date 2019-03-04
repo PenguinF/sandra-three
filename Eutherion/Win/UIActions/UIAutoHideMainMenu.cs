@@ -150,7 +150,7 @@ namespace Eutherion.Win.UIActions
         {
             if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface _))
             {
-                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding.Action, binding.DefaultInterfaces, perform =>
+                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding, perform =>
                 {
                     try
                     {
