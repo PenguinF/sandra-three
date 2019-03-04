@@ -34,9 +34,9 @@ namespace Eutherion.Win.UIActions
         public abstract TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor);
 
         /// <summary>
-        /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
+        /// Gets the text to display for this node. If null or empty, no menu item is generated for this node.
         /// </summary>
-        public LocalizedStringKey CaptionKey { get; }
+        public ITextProvider TextProvider { get; }
 
         /// <summary>
         /// Defines the icon to display for this node.
@@ -50,7 +50,7 @@ namespace Eutherion.Win.UIActions
 
         protected UIMenuNode(LocalizedStringKey captionKey)
         {
-            CaptionKey = captionKey;
+            TextProvider = captionKey == null ? null : new LocalizedTextProvider(captionKey);
         }
 
         protected UIMenuNode(LocalizedStringKey captionKey, IImageProvider iconProvider) : this(captionKey)
@@ -60,21 +60,29 @@ namespace Eutherion.Win.UIActions
 
         public sealed class Element : UIMenuNode
         {
-            public readonly UIAction Action;
-            public readonly IEnumerable<LocalizedStringKey> Shortcut;
+            /// <summary>
+            /// Gets the <see cref="UIAction"/> for which this element generates a menu item.
+            /// </summary>
+            public UIAction Action { get; }
+
+            /// <summary>
+            /// Generates the shortcut key to display in the menu item.
+            /// If the enumeration is null or empty, no shortcut key will be shown.
+            /// </summary>
+            public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
 
             /// <summary>
             /// Indicates if a modal dialog will be displayed if the action is invoked.
             /// If true, the display text of the menu item is followed by "...".
             /// </summary>
-            public readonly bool OpensDialog;
+            public bool OpensDialog { get; }
 
             public Element(UIAction action, IContextMenuUIActionInterface contextMenuInterface)
                 : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
 
-                Shortcut = contextMenuInterface.DisplayShortcutKeys;
+                ShortcutKeyDisplayTextProviders = contextMenuInterface.DisplayShortcutKeys?.Select(x => new LocalizedTextProvider(x));
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
                 OpensDialog = contextMenuInterface.OpensDialog;
             }
@@ -112,7 +120,7 @@ namespace Eutherion.Win.UIActions
         public static readonly string OpensDialogIndicatorSuffix = "...";
 
         /// <summary>
-        /// Generates the text to display for the generated menu item.
+        /// Generates the text to display for this menu item.
         /// </summary>
         public ITextProvider TextProvider { get; }
 
@@ -133,16 +141,16 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public bool OpensDialog { get; }
 
-        protected LocalizedToolStripMenuItem(LocalizedStringKey captionKey,
+        protected LocalizedToolStripMenuItem(ITextProvider textProvider,
                                              IImageProvider iconProvider,
-                                             IEnumerable<LocalizedStringKey> displayStringParts,
+                                             IEnumerable<ITextProvider> shortcutKeyDisplayTextProviders,
                                              bool opensDialog)
         {
             ImageScaling = ToolStripItemImageScaling.None;
 
-            TextProvider = captionKey == null ? null : new LocalizedTextProvider(captionKey);
+            TextProvider = textProvider;
             IconProvider = iconProvider;
-            ShortcutKeyDisplayTextProviders = displayStringParts?.Select(x => new LocalizedTextProvider(x));
+            ShortcutKeyDisplayTextProviders = shortcutKeyDisplayTextProviders;
             OpensDialog = opensDialog;
 
             Update();
@@ -198,7 +206,7 @@ namespace Eutherion.Win.UIActions
         public static LocalizedToolStripMenuItem CreateFrom(UIMenuNode.Container container)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
-            return new LocalizedToolStripMenuItem(container.CaptionKey, container.IconProvider, null, false);
+            return new LocalizedToolStripMenuItem(container.TextProvider, container.IconProvider, null, false);
         }
     }
 
@@ -213,9 +221,9 @@ namespace Eutherion.Win.UIActions
         public UIAction Action { get; }
 
         private UIActionToolStripMenuItem(UIMenuNode.Element element)
-            : base(element.CaptionKey,
+            : base(element.TextProvider,
                    element.IconProvider,
-                   element.Shortcut,
+                   element.ShortcutKeyDisplayTextProviders,
                    element.OpensDialog)
         {
             Action = element.Action;
@@ -426,7 +434,7 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (element.CaptionKey == null && element.IconProvider == null) return null;
+            if (element.TextProvider == null && element.IconProvider == null) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
@@ -453,7 +461,7 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (container.CaptionKey == null && container.IconProvider == null) return null;
+            if (container.TextProvider == null && container.IconProvider == null) return null;
 
             var menuItem = LocalizedToolStripMenuItem.CreateFrom(container);
             BuildMenu(container.Nodes, menuItem.DropDownItems);
