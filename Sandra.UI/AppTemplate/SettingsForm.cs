@@ -21,6 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -32,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : UIActionForm
+    public class SettingsForm : UIActionForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -171,6 +172,16 @@ namespace Eutherion.Win.AppTemplate
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
+
+            Localizer.CurrentChanged += CurrentLocalizerChanged;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            if (MainMenuStrip != null)
+            {
+                UIMenu.UpdateMenu(MainMenuStrip.Items);
+            }
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)

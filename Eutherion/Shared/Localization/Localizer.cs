@@ -83,7 +83,7 @@ namespace Eutherion.Localization
 
         internal static readonly WeakEvent<object, EventArgs> event_CurrentChanged = new WeakEvent<object, EventArgs>();
 
-        internal static event Action<object, EventArgs> CurrentChanged
+        public static event Action<object, EventArgs> CurrentChanged
         {
             add => event_CurrentChanged.AddListener(value);
             remove => event_CurrentChanged.RemoveListener(value);

@@ -118,7 +118,7 @@ namespace Eutherion.Win.UIActions
 
         public LocalizedString LocalizedText;
 
-        public List<LocalizedString> ShortcutKeyDisplayStringParts { get; private set; }
+        public IEnumerable<LocalizedStringKey> ShortcutKeyDisplayStringParts { get; private set; }
 
         protected void InitializeFrom(LocalizedStringKey captionKey,
                                       Image icon,
@@ -150,10 +150,23 @@ namespace Eutherion.Win.UIActions
 
             ImageScaling = ToolStripItemImageScaling.None;
             Image = icon;
+            ShortcutKeyDisplayStringParts = displayStringParts;
 
-            if (displayStringParts != null)
+            Update();
+        }
+
+        /// <summary>
+        /// Updates this menu item's properties after a definition change.
+        /// </summary>
+        public void Update()
+        {
+            if (ShortcutKeyDisplayStringParts != null)
             {
-                ShortcutKeyDisplayStringParts = displayStringParts.Select(x => new LocalizedString(x)).ToList();
+                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayStringParts.Select(x => Localizer.Current.Localize(x)));
+            }
+            else
+            {
+                ShortcutKeyDisplayString = string.Empty;
             }
         }
 
@@ -305,6 +318,29 @@ namespace Eutherion.Win.UIActions
                 control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
             }
         }
+
+        /// <summary>
+        /// Updates all menu items in a collection recursively.
+        /// </summary>
+        /// <param name="toolStripItems">
+        /// The items to update.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="toolStripItems"/> is null.
+        /// </exception>
+        public static void UpdateMenu(ToolStripItemCollection toolStripItems)
+        {
+            if (toolStripItems == null) throw new ArgumentNullException(nameof(toolStripItems));
+
+            foreach (ToolStripItem toolStripItem in toolStripItems)
+            {
+                if (toolStripItem is ToolStripDropDownItem dropDownItem)
+                {
+                    if (dropDownItem is LocalizedToolStripMenuItem localizedItem) localizedItem.Update();
+                    UpdateMenu(dropDownItem.DropDownItems);
+                }
+            }
+        }
     }
 
     public struct UIMenuBuilder : IUIMenuTreeVisitor<ToolStripMenuItem>
@@ -394,11 +430,6 @@ namespace Eutherion.Win.UIActions
 
             var menuItem = new UIActionToolStripMenuItem(element.Action);
             menuItem.InitializeFrom(element);
-
-            menuItem.ShortcutKeyDisplayStringParts.ForEach(
-                x => x.DisplayText.ValueChanged += __ =>
-                menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText.Value)));
-            menuItem.Disposed += (_, __) => menuItem.ShortcutKeyDisplayStringParts.ForEach(x => x.Dispose());
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;
