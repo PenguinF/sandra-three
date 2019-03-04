@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -173,7 +172,7 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
 
-            Localizer.CurrentChanged += CurrentLocalizerChanged;
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)

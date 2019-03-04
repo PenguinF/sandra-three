@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
@@ -66,6 +67,8 @@ namespace Eutherion.Win.AppTemplate
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
+        private Localizer currentLocalizer;
+
         private Session(ISettingsProvider settingsProvider,
                         Localizer defaultLocalizer,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
@@ -111,18 +114,18 @@ namespace Eutherion.Win.AppTemplate
                 Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
                 localSettingsCopy);
 
-            CurrentLocalizer = defaultLocalizer;
-
             if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
             {
-                CurrentLocalizer = localizer;
+                currentLocalizer = localizer;
             }
             else
             {
                 // Select best fit.
-                localizer = Localizers.BestFit(registeredLocalizers);
-                if (localizer != null) CurrentLocalizer = localizer;
+                currentLocalizer = Localizers.BestFit(registeredLocalizers);
             }
+
+            // Fall back onto defaults if still null.
+            currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
         }
 
         public SettingProperty<bool> DeveloperMode { get; }
@@ -216,8 +219,37 @@ namespace Eutherion.Win.AppTemplate
         /// </exception>
         public Localizer CurrentLocalizer
         {
-            get => Localizer.Current;
-            set => Localizer.Current = value;
+            get => currentLocalizer;
+            set
+            {
+                if (currentLocalizer != value)
+                {
+                    currentLocalizer = value ?? throw new ArgumentNullException(nameof(value));
+                    event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
+                }
+            }
+        }
+
+        private readonly WeakEvent<object, EventArgs> event_CurrentLocalizerChanged = new WeakEvent<object, EventArgs>();
+
+        /// <summary>
+        /// Occurs when the value of <see cref="CurrentLocalizer"/> is updated.
+        /// </summary>
+        public event Action<object, EventArgs> CurrentLocalizerChanged
+        {
+            add => event_CurrentLocalizerChanged.AddListener(value);
+            remove => event_CurrentLocalizerChanged.RemoveListener(value);
+        }
+
+        /// <summary>
+        /// Notifies listeners that the translations of the given localizer were updated.
+        /// </summary>
+        public void NotifyCurrentLocalizerChanged(Localizer updatedLocalizer)
+        {
+            if (CurrentLocalizer == updatedLocalizer)
+            {
+                event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
+            }
         }
 
         public void Dispose()

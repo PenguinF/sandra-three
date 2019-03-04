@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -68,7 +67,7 @@ namespace Sandra.UI
             Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
             ShowOrHideEditCurrentLanguageItem();
 
-            Localizer.CurrentChanged += CurrentLocalizerChanged;
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)

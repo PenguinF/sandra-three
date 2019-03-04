@@ -128,7 +128,7 @@ namespace Eutherion.Win.AppTemplate
         private void TranslationsChanged(object sender, EventArgs e)
         {
             UpdateDictionary();
-            NotifyChanged();
+            Session.Current.NotifyCurrentLocalizerChanged(this);
         }
 
         // TranslationsChanged only raises another WeakEvent so this does not indirectly leak.

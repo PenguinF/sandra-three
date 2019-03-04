@@ -39,7 +39,7 @@ namespace Eutherion.Win.AppTemplate
             : base(key)
         {
             DisplayText.Value = GetText();
-            Localizer.CurrentChanged += Localizer_CurrentChanged;
+            Session.Current.CurrentLocalizerChanged += Localizer_CurrentChanged;
         }
 
         private void Localizer_CurrentChanged(object sender, EventArgs e)
