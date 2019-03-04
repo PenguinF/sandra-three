@@ -52,7 +52,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        public Image MenuIcon { get; set; }
+        public IImageProvider MenuIcon { get; set; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
@@ -63,5 +63,11 @@ namespace Eutherion.Win.AppTemplate
         IEnumerable<LocalizedStringKey> IContextMenuUIActionInterface.DisplayShortcutKeys
             => Shortcuts == null ? null
             : Shortcuts.FirstOrDefault(x => !x.IsEmpty).DisplayStringParts();
+    }
+
+    public static class CombinedUIActionInterfaceExtensions
+    {
+        public static IImageProvider ToImageProvider(this Image image)
+            => image == null ? null : new ConstantImageProvider(image);
     }
 }

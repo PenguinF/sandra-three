@@ -56,7 +56,8 @@ namespace Eutherion.Win.UIActions
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        Image MenuIcon { get; }
+        IImageProvider MenuIcon { get; }
+        //IconProvider = iconProvider == null ? null : new ConstantImageProvider(iconProvider);
 
         /// <summary>
         /// Defines the shortcut key to display in the menu item.

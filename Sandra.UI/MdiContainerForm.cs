@@ -194,7 +194,7 @@ namespace Sandra.UI
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
-                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe);
+                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe.ToImageProvider());
                 mainMenuRootNodes.Add(langMenu);
                 BindFocusDependentUIActions(langMenu, Session.Current.RegisteredLocalizers.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }

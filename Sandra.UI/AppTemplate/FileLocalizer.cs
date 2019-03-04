@@ -99,7 +99,7 @@ namespace Eutherion.Win.AppTemplate
                             new CombinedUIActionInterface
                             {
                                 MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                                MenuIcon = menuIcon,
+                                MenuIcon = menuIcon.ToImageProvider(),
                             },
                         });
                 }

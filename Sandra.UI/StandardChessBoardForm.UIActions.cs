@@ -41,7 +41,7 @@ namespace Sandra.UI
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = LocalizedStringKeys.FlipBoard,
-                    MenuIcon = Properties.Resources.flip,
+                    MenuIcon = Properties.Resources.flip.ToImageProvider(),
                 },
             });
 

@@ -24,7 +24,6 @@ using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -54,9 +53,9 @@ namespace Eutherion.Win.UIActions
             CaptionKey = captionKey;
         }
 
-        protected UIMenuNode(LocalizedStringKey captionKey, Image icon) : this(captionKey)
+        protected UIMenuNode(LocalizedStringKey captionKey, IImageProvider iconProvider) : this(captionKey)
         {
-            IconProvider = icon == null ? null : new ConstantImageProvider(icon);
+            IconProvider = iconProvider;
         }
 
         public sealed class Element : UIMenuNode
@@ -91,7 +90,7 @@ namespace Eutherion.Win.UIActions
             {
             }
 
-            public Container(LocalizedStringKey captionKey, Image icon) : base(captionKey, icon)
+            public Container(LocalizedStringKey captionKey, IImageProvider iconProvider) : base(captionKey, iconProvider)
             {
             }
 

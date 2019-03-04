@@ -62,7 +62,7 @@ namespace Eutherion.Win.AppTemplate
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Z), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Undo,
-                    MenuIcon = SharedResources.undo,
+                    MenuIcon = SharedResources.undo.ToImageProvider(),
                 },
             });
 
@@ -74,7 +74,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Y), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Redo,
-                    MenuIcon = SharedResources.redo,
+                    MenuIcon = SharedResources.redo.ToImageProvider(),
                 },
             });
 
@@ -87,7 +87,7 @@ namespace Eutherion.Win.AppTemplate
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Add), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomIn,
-                    MenuIcon = SharedResources.zoom_in,
+                    MenuIcon = SharedResources.zoom_in.ToImageProvider(),
                 },
             });
 
@@ -99,7 +99,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.Subtract), },
                     MenuCaptionKey = SharedLocalizedStringKeys.ZoomOut,
-                    MenuIcon = SharedResources.zoom_out,
+                    MenuIcon = SharedResources.zoom_out.ToImageProvider(),
                 },
             });
 
@@ -112,7 +112,7 @@ namespace Eutherion.Win.AppTemplate
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.X), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Cut,
-                    MenuIcon = SharedResources.cut,
+                    MenuIcon = SharedResources.cut.ToImageProvider(),
                 },
             });
 
@@ -124,7 +124,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Copy,
-                    MenuIcon = SharedResources.copy,
+                    MenuIcon = SharedResources.copy.ToImageProvider(),
                 },
             });
 
@@ -136,7 +136,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.V), },
                     MenuCaptionKey = SharedLocalizedStringKeys.Paste,
-                    MenuIcon = SharedResources.paste,
+                    MenuIcon = SharedResources.paste.ToImageProvider(),
                 },
             });
 
@@ -161,7 +161,7 @@ namespace Eutherion.Win.AppTemplate
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.S), },
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.Save,
-                    MenuIcon = SharedResources.save,
+                    MenuIcon = SharedResources.save.ToImageProvider(),
                 },
             });
 

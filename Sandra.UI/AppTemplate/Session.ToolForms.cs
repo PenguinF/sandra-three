@@ -79,7 +79,7 @@ namespace Eutherion.Win.AppTemplate
                 new CombinedUIActionInterface
                 {
                     MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
-                    MenuIcon = SharedResources.settings,
+                    MenuIcon = SharedResources.settings.ToImageProvider(),
                 },
             });
 
@@ -290,7 +290,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     IsFirstInGroup = true,
                     MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
-                    MenuIcon = SharedResources.speech,
+                    MenuIcon = SharedResources.speech.ToImageProvider(),
                 },
             });
 
