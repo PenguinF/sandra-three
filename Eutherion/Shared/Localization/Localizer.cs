@@ -55,7 +55,6 @@ namespace Eutherion.Localization
             public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             {
                 if (localizedStringKey == null) return null;
-                if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
                 return "{" + localizedStringKey.Key + StringUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
             }
         }

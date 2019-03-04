@@ -31,54 +31,34 @@ namespace Eutherion.Localization
     public sealed class LocalizedStringKey : IEquatable<LocalizedStringKey>
     {
         /// <summary>
-        /// Creates a <see cref="LocalizedStringKey"/> that serves as a placeholder key for strings that cannot be localized.
-        /// </summary>
-        public static LocalizedStringKey Unlocalizable(string displayText) => new LocalizedStringKey(null, displayText);
-
-        /// <summary>
         /// Gets the string representation of this <see cref="LocalizedStringKey"/>. 
         /// </summary>
         public readonly string Key;
 
         /// <summary>
-        /// For untranslatable keys, returns the display text.
-        /// </summary>
-        internal readonly string DisplayText;
-
-        private LocalizedStringKey(string key, string displayText)
-        {
-            Key = key;
-            DisplayText = displayText ?? throw new ArgumentNullException(nameof(displayText));
-        }
-
-        /// <summary>
         /// Constructs a new instance of <see cref="LocalizedStringKey"/>.
         /// </summary>
-        public LocalizedStringKey(string key)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-        }
+        public LocalizedStringKey(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
         public bool Equals(LocalizedStringKey other) => other != null
-                                                     && Key == other.Key
-                                                     && DisplayText == other.DisplayText;
+                                                     && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as LocalizedStringKey);
 
-        public override int GetHashCode() => Key != null ? Key.GetHashCode() : DisplayText.GetHashCode();
+        public override int GetHashCode() => Key.GetHashCode();
 
         public static bool operator ==(LocalizedStringKey first, LocalizedStringKey second)
         {
             if (first is null) return second is null;
             if (second is null) return false;
-            return first.Key == second.Key && first.DisplayText == second.DisplayText;
+            return first.Key == second.Key;
         }
 
         public static bool operator !=(LocalizedStringKey first, LocalizedStringKey second)
         {
             if (first is null) return !(second is null);
             if (second is null) return true;
-            return first.Key != second.Key || first.DisplayText != second.DisplayText;
+            return first.Key != second.Key;
         }
     }
 }
