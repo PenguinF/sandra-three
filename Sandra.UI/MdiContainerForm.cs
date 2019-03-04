@@ -134,7 +134,7 @@ namespace Sandra.UI
                 if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
                     // Add a menu item inside the given container which will update itself after focus changes.
-                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, binding.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>(), contextMenuInterface));
+                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
 
                     // Register in a Dictionary to be able to figure out which menu items should be updated.
                     focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());

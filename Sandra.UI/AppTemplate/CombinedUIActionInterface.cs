@@ -22,7 +22,9 @@
 using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Win.UIActions;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace Eutherion.Win.AppTemplate
 {
@@ -57,5 +59,9 @@ namespace Eutherion.Win.AppTemplate
         /// If true, the display text of the menu item is followed by "...".
         /// </summary>
         public bool OpensDialog { get; set; }
+
+        IEnumerable<LocalizedStringKey> IContextMenuUIActionInterface.DisplayShortcutKeys
+            => Shortcuts == null ? null
+            : Shortcuts.FirstOrDefault(x => !x.IsEmpty).DisplayStringParts();
     }
 }

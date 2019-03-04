@@ -70,16 +70,12 @@ namespace Eutherion.Win.UIActions
             /// </summary>
             public readonly bool OpensDialog;
 
-            public Element(UIAction action, IShortcutKeysUIActionInterface shortcutKeysInterface, IContextMenuUIActionInterface contextMenuInterface)
+            public Element(UIAction action, IContextMenuUIActionInterface contextMenuInterface)
                 : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
 
-                if (shortcutKeysInterface != null && shortcutKeysInterface.Shortcuts != null)
-                {
-                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty).DisplayStringParts();
-                }
-
+                Shortcut = contextMenuInterface.DisplayShortcutKeys;
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
                 OpensDialog = contextMenuInterface.OpensDialog;
             }
@@ -360,8 +356,7 @@ namespace Eutherion.Win.UIActions
             {
                 if (interfaceSet.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
-                    var shortcutKeysInterface = interfaceSet.Get<IShortcutKeysUIActionInterface>();
-                    rootMenuNodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
+                    rootMenuNodes.Add(new UIMenuNode.Element(action, contextMenuInterface));
                 }
             }
 

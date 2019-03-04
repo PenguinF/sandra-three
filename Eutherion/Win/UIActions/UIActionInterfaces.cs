@@ -21,6 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Eutherion.Win.UIActions
@@ -56,6 +57,12 @@ namespace Eutherion.Win.UIActions
         /// Defines the image to display for the generated menu item.
         /// </summary>
         Image MenuIcon { get; }
+
+        /// <summary>
+        /// Defines the shortcut key to display in the menu item.
+        /// If the enumeration is null or empty, no shortcut key will be shown.
+        /// </summary>
+        IEnumerable<LocalizedStringKey> DisplayShortcutKeys { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
