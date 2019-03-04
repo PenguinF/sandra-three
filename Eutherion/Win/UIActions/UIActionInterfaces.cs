@@ -32,7 +32,7 @@ namespace Eutherion.Win.UIActions
     public interface IShortcutKeysUIActionInterface : IUIActionInterface
     {
         /// <summary>
-        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
+        /// Array of shortcut keys which will invoke the action.
         /// </summary>
         ShortcutKeys[] Shortcuts { get; }
     }
