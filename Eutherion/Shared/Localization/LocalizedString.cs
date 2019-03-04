@@ -106,7 +106,7 @@ namespace Eutherion.Localization
                 // Examples:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
                 // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {DebugUtilities.ToDefaultParameterListDisplayString(parameters)}";
+                return $"{localizedString} {StringUtilities.ToDefaultParameterListDisplayString(parameters)}";
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * DebugUtilities.cs
+ * StringUtilities.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -22,9 +22,9 @@
 namespace Eutherion.Utils
 {
     /// <summary>
-    /// Contains utility methods.
+    /// Contains utility methods for strings.
     /// </summary>
-    public static class DebugUtilities
+    public static class StringUtilities
     {
         /// <summary>
         /// Generates a display string from an array of parameters in the format "({0}, {1}, ...)".

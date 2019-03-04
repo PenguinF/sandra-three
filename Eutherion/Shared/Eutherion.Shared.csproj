@@ -84,13 +84,13 @@
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
-    <Compile Include="Utils\DebugUtilities.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
     <Compile Include="Utils\ImplementationSet.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
+    <Compile Include="Utils\StringUtilities.cs" />
     <Compile Include="Utils\Union.cs" />
     <Compile Include="Utils\WeakEvent.cs" />
     <Compile Include="Utils\WeakEventInvocationException.cs" />

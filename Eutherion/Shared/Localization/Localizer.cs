@@ -56,7 +56,7 @@ namespace Eutherion.Localization
             {
                 if (localizedStringKey == null) return null;
                 if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
-                return "{" + localizedStringKey.Key + DebugUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
+                return "{" + localizedStringKey.Key + StringUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
             }
         }
 
