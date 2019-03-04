@@ -244,12 +244,9 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Notifies listeners that the translations of the given localizer were updated.
         /// </summary>
-        public void NotifyCurrentLocalizerChanged(Localizer updatedLocalizer)
+        public void NotifyCurrentLocalizerChanged()
         {
-            if (CurrentLocalizer == updatedLocalizer)
-            {
-                event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
-            }
+            event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
         }
 
         public void Dispose()
