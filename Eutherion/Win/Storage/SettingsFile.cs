@@ -255,9 +255,19 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settings"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settings"/> has an unexpected schema.
+        /// </exception>
         public void WriteToFile(SettingObject settings, SettingWriterOptions options)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            if (settings.Schema != TemplateSettings.Schema)
+            {
+                throw new ArgumentException(
+                    $"{nameof(settings)} has an unexpected schema",
+                    nameof(settings));
+            }
 
             string json = SettingWriter.ConvertToJson(
                 settings.Map,
