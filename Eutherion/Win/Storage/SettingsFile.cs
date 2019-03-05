@@ -72,7 +72,19 @@ namespace Eutherion.Win.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.Settings = settingsFile.Load();
+
+            try
+            {
+                // Ensure the directory is created.
+                Directory.CreateDirectory(Path.GetDirectoryName(absoluteFilePath));
+            }
+            catch (Exception exception)
+            {
+                // 'Expected' exceptions can be traced, but rethrow developer errors.
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+            }
+
+            settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.Load());
             return settingsFile;
         }
 
@@ -102,20 +114,27 @@ namespace Eutherion.Win.Storage
             watcher = new FileWatcher(absoluteFilePath);
         }
 
-        private SettingObject Load()
+        private string Load()
         {
-            SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
-
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
-                string fileText = File.ReadAllText(AbsoluteFilePath);
-                SettingReader.ReadWorkingCopy(fileText, workingCopy);
+                return File.ReadAllText(AbsoluteFilePath);
             }
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+                return null;
+            }
+        }
+
+        private SettingObject ReadSettingObject(string fileText)
+        {
+            SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
+
+            if (fileText != null)
+            {
+                SettingReader.ReadWorkingCopy(fileText, workingCopy);
             }
 
             return workingCopy.Commit();
@@ -229,7 +248,8 @@ namespace Eutherion.Win.Storage
 
         private void RaiseSettingsChangedEvent(object state)
         {
-            SettingObject newSettings = (SettingObject)state;
+            string newText = (string)state;
+            SettingObject newSettings = ReadSettingObject(newText);
 
             foreach (var property in ChangedProperties(newSettings))
             {
