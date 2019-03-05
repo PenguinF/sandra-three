@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * FileNameType.cs
+ * IImageProvider.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,28 +19,21 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
-using System.IO;
+using System.Drawing;
 
-namespace Eutherion.Win.Storage
+namespace Eutherion.Win
 {
     /// <summary>
-    /// Specialized PType that only accepts strings that are legal file names.
+    /// Represents a strategy for providing <see cref="Image"/> instances to UI elements.
     /// </summary>
-    public sealed class FileNameType : PType.Filter<string>
+    public interface IImageProvider
     {
-        public static readonly PTypeErrorBuilder FileNameTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
-
-        public static readonly FileNameType Instance = new FileNameType();
-
-        private FileNameType() : base(PType.CLR.String) { }
-
-        public override bool IsValid(string fileName, out ITypeErrorBuilder typeError)
-            => !string.IsNullOrEmpty(fileName)
-            && !fileName.StartsWith(".")
-            && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
-            ? ValidValue(out typeError)
-            : InvalidValue(FileNameTypeError, out typeError);
+        /// <summary>
+        /// Gets the <see cref="Image"/> from this image provider.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Image"/> from this image provider.
+        /// </returns>
+        Image GetImage();
     }
 }

@@ -73,7 +73,7 @@ namespace Eutherion.Win.UIActions
             // Try to find an action with given shortcut.
             return (from actionHandler in EnumerateUIActionHandlers(bottomLevelControl)
                     from interfaceActionPair in actionHandler.InterfaceSets
-                    let shortcuts = interfaceActionPair.Item1.Get<ShortcutKeysUIActionInterface>()?.Shortcuts
+                    let shortcuts = interfaceActionPair.Item1.Get<IShortcutKeysUIActionInterface>()?.Shortcuts
                     where shortcuts != null
                     from registeredShortcut in shortcuts
                         // If the shortcut matches, then try to perform the action.

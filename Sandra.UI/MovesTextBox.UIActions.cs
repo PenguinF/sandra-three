@@ -21,7 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.UIActions;
+using Eutherion.Win.AppTemplate;
 
 namespace Sandra.UI
 {
@@ -33,10 +33,10 @@ namespace Sandra.UI
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.UsePGNPieceSymbols,
+                    MenuTextProvider = LocalizedStringKeys.UsePGNPieceSymbols.ToTextProvider(),
                 },
             });
 
@@ -59,9 +59,9 @@ namespace Sandra.UI
             new UIAction(MovesTextBoxUIActionPrefix + nameof(UseLongAlgebraicNotation)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = LocalizedStringKeys.UseLongAlgebraicNotation,
+                    MenuTextProvider = LocalizedStringKeys.UseLongAlgebraicNotation.ToTextProvider(),
                 },
             });
 

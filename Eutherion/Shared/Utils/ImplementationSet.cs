@@ -36,6 +36,8 @@ namespace Eutherion.Utils
     /// </typeparam>
     public class ImplementationSet<TInterface> : IEnumerable<TInterface>
     {
+        private static readonly Type InterfaceType = typeof(TInterface);
+
         private readonly Dictionary<Type, TInterface> implementations = new Dictionary<Type, TInterface>();
 
         /// <summary>
@@ -102,6 +104,23 @@ namespace Eutherion.Utils
             return implementation;
         }
 
+        private IEnumerable<Type> AssignableTypes(Type actualType)
+        {
+            Type baseType = actualType;
+
+            while (baseType != null && InterfaceType.IsAssignableFrom(baseType) && baseType != InterfaceType)
+            {
+                yield return baseType;
+
+                foreach (var interfaceType in baseType.GetInterfaces().SelectMany(AssignableTypes))
+                {
+                    yield return interfaceType;
+                }
+
+                baseType = baseType.BaseType;
+            }
+        }
+
         /// <summary>
         /// Adds a <typeparamref name="TInterface"/> implementation to this set.
         /// At most one instance of each implementation type is allowed.
@@ -113,12 +132,20 @@ namespace Eutherion.Utils
         /// <paramref name="implementation"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// An instance of the same type as <paramref name="implementation"/> already exists in the set.
+        /// An instance of the same type as <paramref name="implementation"/> already exists in the set
+        /// -or- <paramref name="implementation"/> is an instance of <typeparamref name="TInterface"/>.
         /// </exception>
         public void Add(TInterface implementation)
         {
             if (implementation == null) throw new ArgumentNullException(nameof(implementation));
-            implementations.Add(implementation.GetType(), implementation);
+
+            var actualType = implementation.GetType();
+            if (InterfaceType == actualType)
+            {
+                throw new ArgumentException(nameof(implementation), $"Attempt to add an instance of {InterfaceType.FullName}");
+            }
+
+            AssignableTypes(actualType).ForEach(x => implementations.Add(x, implementation));
         }
 
         /// <summary>

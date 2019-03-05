@@ -120,7 +120,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public void BindEditUIActions(UIActionBindings editBindings)
         {
-            ShortcutKeysUIActionInterface shortcutKeysInterface = null;
+            IShortcutKeysUIActionInterface shortcutKeysInterface = null;
             editBindings
                 .Where(x => x.Interfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
                 .SelectMany(x => shortcutKeysInterface.Shortcuts)

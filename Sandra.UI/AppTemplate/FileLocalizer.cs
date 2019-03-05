@@ -23,7 +23,6 @@ using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
-using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -37,6 +36,38 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public sealed class FileLocalizer : Localizer, IWeakEventTarget
     {
+        private class LanguageMenuItemProvider : ITextProvider, IImageProvider
+        {
+            private readonly FileLocalizer FileLocalizer;
+
+            public LanguageMenuItemProvider(FileLocalizer fileLocalizer)
+                => FileLocalizer = fileLocalizer;
+
+            public string GetText() => FileLocalizer.LanguageName;
+
+            public Image GetImage()
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(FileLocalizer.FlagIconFileName))
+                    {
+                        return Image.FromFile(Path.Combine(Path.GetDirectoryName(FileLocalizer.LanguageFile.AbsoluteFilePath), FileLocalizer.FlagIconFileName));
+                    }
+                }
+                catch (Exception exc)
+                {
+                    exc.Trace();
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the owner <see cref="Session"/> of this localizer.
+        /// </summary>
+        public Session Session { get; }
+
         /// <summary>
         /// Gets the settings file from which this localizer is loaded.
         /// </summary>
@@ -45,21 +76,27 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the name of the language in the language itself, e.g. "English", "Español", "Deutsch", ...
         /// </summary>
-        public string LanguageName { get; }
+        public string LanguageName { get; private set; }
 
         /// <summary>
         /// Gets the file name without extension of the flag icon.
         /// </summary>
-        public string FlagIconFileName { get; }
+        public string FlagIconFileName { get; private set; }
 
         public Dictionary<LocalizedStringKey, string> Dictionary { get; private set; }
 
-        public FileLocalizer(SettingsFile languageFile)
+        public FileLocalizer(Session session, SettingsFile languageFile)
         {
+            Session = session ?? throw new ArgumentNullException(nameof(session));
             LanguageFile = languageFile;
-            LanguageName = languageFile.Settings.GetValue(Localizers.NativeName);
-            FlagIconFileName = languageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
+            UpdateFromFile();
             UpdateDictionary();
+        }
+
+        private void UpdateFromFile()
+        {
+            LanguageName = LanguageFile.Settings.GetValue(Localizers.NativeName);
+            FlagIconFileName = LanguageFile.Settings.TryGetValue(Localizers.FlagIconFile, out string flagIconFile) ? flagIconFile : string.Empty;
         }
 
         private void UpdateDictionary()
@@ -69,7 +106,7 @@ namespace Eutherion.Win.AppTemplate
 
         public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? LocalizedString.ConditionalFormat(displayText, parameters)
+            ? StringUtilities.ConditionalFormat(displayText, parameters)
             : Default.Localize(localizedStringKey, parameters);
 
         private DefaultUIActionBinding switchToLangUIActionBinding;
@@ -80,27 +117,16 @@ namespace Eutherion.Win.AppTemplate
             {
                 if (switchToLangUIActionBinding == null)
                 {
-                    Image menuIcon = null;
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(FlagIconFileName))
-                        {
-                            menuIcon = Image.FromFile(Path.Combine(Path.GetDirectoryName(LanguageFile.AbsoluteFilePath), FlagIconFileName));
-                        }
-                    }
-                    catch (Exception exc)
-                    {
-                        exc.Trace();
-                    }
+                    var languageMenuItemProvider = new LanguageMenuItemProvider(this);
 
                     switchToLangUIActionBinding = new DefaultUIActionBinding(
-                        new UIAction(nameof(FileLocalizer) + "." + LanguageName),
+                        new UIAction(nameof(FileLocalizer) + "." + LanguageFile.AbsoluteFilePath),
                         new ImplementationSet<IUIActionInterface>
                         {
-                            new ContextMenuUIActionInterface
+                            new CombinedUIActionInterface
                             {
-                                MenuCaptionKey = LocalizedStringKey.Unlocalizable(LanguageName),
-                                MenuIcon = menuIcon,
+                                MenuTextProvider = languageMenuItemProvider,
+                                MenuIcon = languageMenuItemProvider,
                             },
                         });
                 }
@@ -113,23 +139,38 @@ namespace Eutherion.Win.AppTemplate
         {
             if (perform)
             {
-                Current = this;
-                Session.Current.AutoSave.Persist(Session.Current.LangSetting, this);
+                Session.CurrentLocalizer = this;
+                Session.AutoSave.Persist(Session.LangSetting, this);
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, Current == this);
+            return new UIActionState(UIActionVisibility.Enabled, Session.CurrentLocalizer == this);
         }
 
         public void EnableLiveUpdates()
         {
             // Can only happen after a message loop has been started.
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.NativeName, FileChanged);
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.FlagIconFile, FileChanged);
             LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
+        }
+
+        private void FileChanged(object sender, EventArgs e)
+        {
+            UpdateFromFile();
+
+            // Always update, whatever the current language is.
+            Session.NotifyCurrentLocalizerChanged();
         }
 
         private void TranslationsChanged(object sender, EventArgs e)
         {
             UpdateDictionary();
-            NotifyChanged();
+
+            if (Session.CurrentLocalizer == this)
+            {
+                // Only update if this FileLocalizer is selected as the current language.
+                Session.NotifyCurrentLocalizerChanged();
+            }
         }
 
         // TranslationsChanged only raises another WeakEvent so this does not indirectly leak.

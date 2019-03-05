@@ -20,8 +20,6 @@
 #endregion
 
 using Eutherion;
-using Eutherion.Localization;
-using Eutherion.UIActions;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
@@ -40,9 +38,6 @@ namespace Sandra.UI
         [STAThread]
         static void Main()
         {
-            // Store executable folder/filename for later use.
-            Session.InitializeExecutablePath(typeof(Program).Assembly.Location);
-
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
                 LocalizedStringKeys.DefaultEnglishTranslations,
@@ -50,9 +45,7 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            Localizer.Current = builtInEnglishLocalizer;
-
-            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer.Dictionary))
+            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer, builtInEnglishLocalizer.Dictionary))
             {
                 Chess.Constants.ForceInitialize();
 

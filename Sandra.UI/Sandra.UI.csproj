@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
+    <Compile Include="AppTemplate\CombinedUIActionInterface.cs" />
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
     <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />
@@ -62,6 +63,9 @@
     <Compile Include="AppTemplate\ListBoxEx.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="AppTemplate\LocalizedConsoleKeys.cs" />
+    <Compile Include="AppTemplate\LocalizedString.cs" />
+    <Compile Include="AppTemplate\LocalizedTextProvider.cs" />
     <Compile Include="AppTemplate\Localizers.cs" />
     <Compile Include="AppTemplate\MenuCaptionBarForm.cs">
       <SubType>Form</SubType>

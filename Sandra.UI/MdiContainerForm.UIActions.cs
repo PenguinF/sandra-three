@@ -21,7 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.UIActions;
+using Eutherion.Win.AppTemplate;
 using System;
 
 namespace Sandra.UI
@@ -43,13 +43,10 @@ namespace Sandra.UI
             new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenNewPlayingBoard)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.N), },
-                },
-                new ContextMenuUIActionInterface
-                {
-                    MenuCaptionKey = LocalizedStringKeys.NewGame,
+                    MenuTextProvider = LocalizedStringKeys.NewGame.ToTextProvider(),
                 },
             });
 

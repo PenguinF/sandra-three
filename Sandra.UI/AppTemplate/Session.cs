@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
@@ -40,14 +41,17 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly string LangSettingKey = "lang";
 
-        public static string ExecutableFolder { get; private set; }
+        public static readonly string ExecutableFolder;
 
-        public static string ExecutableFileName { get; private set; }
+        public static readonly string ExecutableFileName;
 
-        public static string ExecutableFileNameWithoutExtension { get; private set; }
+        public static readonly string ExecutableFileNameWithoutExtension;
 
-        public static void InitializeExecutablePath(string exePath)
+        static Session()
         {
+            // Store executable folder/filename for later use.
+            string exePath = typeof(Session).Assembly.Location;
+
             ExecutableFolder = Path.GetDirectoryName(exePath);
             ExecutableFileName = Path.GetFileName(exePath);
             ExecutableFileNameWithoutExtension = Path.GetFileNameWithoutExtension(exePath);
@@ -56,13 +60,17 @@ namespace Eutherion.Win.AppTemplate
         public static Session Current { get; private set; }
 
         public static Session Configure(ISettingsProvider settingsProvider,
+                                        Localizer defaultLocalizer,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
-            => Current = new Session(settingsProvider, defaultLocalizerDictionary);
+            => Current = new Session(settingsProvider, defaultLocalizer, defaultLocalizerDictionary);
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
+        private Localizer currentLocalizer;
+
         private Session(ISettingsProvider settingsProvider,
+                        Localizer defaultLocalizer,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
@@ -89,7 +97,7 @@ namespace Eutherion.Win.AppTemplate
 
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SharedSettings.LangFolderName);
-            registeredLocalizers = Localizers.ScanLocalizers(Path.Combine(ExecutableFolder, langFolderName));
+            registeredLocalizers = Localizers.ScanLocalizers(this, Path.Combine(ExecutableFolder, langFolderName));
 
             LangSetting = new SettingProperty<FileLocalizer>(
                 new SettingKey(LangSettingKey),
@@ -108,14 +116,16 @@ namespace Eutherion.Win.AppTemplate
 
             if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
             {
-                Localizer.Current = localizer;
+                currentLocalizer = localizer;
             }
             else
             {
                 // Select best fit.
-                localizer = Localizers.BestFit(registeredLocalizers);
-                if (localizer != null) Localizer.Current = localizer;
+                currentLocalizer = Localizers.BestFit(registeredLocalizers);
             }
+
+            // Fall back onto defaults if still null.
+            currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
         }
 
         public SettingProperty<bool> DeveloperMode { get; }
@@ -199,6 +209,44 @@ namespace Eutherion.Win.AppTemplate
             }
 
             new FormStateAutoSaver(this, targetForm, property, formState);
+        }
+
+        /// <summary>
+        /// Gets or sets the current <see cref="Localizer"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// The provided new value for <see cref="CurrentLocalizer"/> is null.
+        /// </exception>
+        public Localizer CurrentLocalizer
+        {
+            get => currentLocalizer;
+            set
+            {
+                if (currentLocalizer != value)
+                {
+                    currentLocalizer = value ?? throw new ArgumentNullException(nameof(value));
+                    event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
+                }
+            }
+        }
+
+        private readonly WeakEvent<object, EventArgs> event_CurrentLocalizerChanged = new WeakEvent<object, EventArgs>();
+
+        /// <summary>
+        /// Occurs when the value of <see cref="CurrentLocalizer"/> is updated.
+        /// </summary>
+        public event Action<object, EventArgs> CurrentLocalizerChanged
+        {
+            add => event_CurrentLocalizerChanged.AddListener(value);
+            remove => event_CurrentLocalizerChanged.RemoveListener(value);
+        }
+
+        /// <summary>
+        /// Notifies listeners that the translations of the given localizer were updated.
+        /// </summary>
+        public void NotifyCurrentLocalizerChanged()
+        {
+            event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
         }
 
         public void Dispose()

@@ -29,30 +29,26 @@ namespace Eutherion.Win.AppTemplate
     public static class JsonErrorInfoExtensions
     {
         public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
-        {
-            const string UnspecifiedMessage = "Unspecified error";
-
-            if (jsonErrorCode == JsonErrorCode.Unspecified)
-            {
-                return LocalizedStringKey.Unlocalizable(UnspecifiedMessage);
-            }
-            else
-            {
-                return new LocalizedStringKey($"JsonError{jsonErrorCode}");
-            }
-        }
+            => new LocalizedStringKey($"JsonError{jsonErrorCode}");
 
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
         /// </summary>
         public static string Message(this JsonErrorInfo jsonErrorInfo, Localizer localizer)
         {
+            const string UnspecifiedMessage = "Unspecified error";
+
             if (jsonErrorInfo is PTypeError typeError)
             {
                 return typeError.GetLocalizedMessage(localizer);
             }
 
-            return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+            if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
+            {
+                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+            }
+
+            return UnspecifiedMessage;
         }
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>

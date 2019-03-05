@@ -19,12 +19,10 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
@@ -62,20 +60,11 @@ namespace Eutherion.Win.UIActions
             HideMainMenu();
         }
 
-        public UIAutoHideMainMenuItem AddMenuItem(LocalizedStringKey captionKey)
+        public UIAutoHideMainMenuItem AddMenuItem(UIMenuNode.Container containerNode)
         {
-            if (captionKey == null) throw new ArgumentNullException(nameof(captionKey));
+            if (containerNode == null) throw new ArgumentNullException(nameof(containerNode));
 
-            UIAutoHideMainMenuItem menuItem = new UIAutoHideMainMenuItem(this, captionKey);
-            MenuItems.Add(menuItem);
-            return menuItem;
-        }
-
-        public UIAutoHideMainMenuItem AddMenuItem(LocalizedStringKey captionKey, Image icon)
-        {
-            if (icon == null) throw new ArgumentNullException(nameof(icon));
-
-            UIAutoHideMainMenuItem menuItem = new UIAutoHideMainMenuItem(this, captionKey, icon);
+            UIAutoHideMainMenuItem menuItem = new UIAutoHideMainMenuItem(this, containerNode);
             MenuItems.Add(menuItem);
             return menuItem;
         }
@@ -128,29 +117,22 @@ namespace Eutherion.Win.UIActions
     public class UIAutoHideMainMenuItem
     {
         private readonly UIAutoHideMainMenu Owner;
-        private readonly LocalizedStringKey CaptionKey;
-        private readonly Image Icon;
+        private readonly UIMenuNode.Container ContainerNode;
         private readonly UIActionHandler DropDownItemsActionHandler;
         private LocalizedToolStripMenuItem MenuItem;
 
-        internal UIAutoHideMainMenuItem(UIAutoHideMainMenu owner, LocalizedStringKey captionKey)
-            : this(owner, captionKey, null)
-        {
-        }
-
-        internal UIAutoHideMainMenuItem(UIAutoHideMainMenu owner, LocalizedStringKey captionKey, Image icon)
+        internal UIAutoHideMainMenuItem(UIAutoHideMainMenu owner, UIMenuNode.Container containerNode)
         {
             Owner = owner;
-            CaptionKey = captionKey;
-            Icon = icon;
+            ContainerNode = containerNode;
             DropDownItemsActionHandler = new UIActionHandler();
         }
 
         public void BindAction(DefaultUIActionBinding binding, bool alwaysVisible)
         {
-            if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface _))
+            if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface _))
             {
-                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding.Action, binding.DefaultInterfaces, perform =>
+                DropDownItemsActionHandler.BindAction(new UIActionBinding(binding, perform =>
                 {
                     try
                     {
@@ -203,8 +185,7 @@ namespace Eutherion.Win.UIActions
         {
             if (MenuItem == null)
             {
-                MenuItem = new LocalizedToolStripMenuItem();
-                MenuItem.InitializeFrom(CaptionKey, Icon, false);
+                MenuItem = LocalizedToolStripMenuItem.CreateFrom(ContainerNode);
                 UIMenuBuilder.BuildMenu(DropDownItemsActionHandler, MenuItem.DropDownItems);
                 MenuItem.Visible = UpdateMenu();
                 MenuItem.DropDownOpening += (_, __) => UpdateMenu();

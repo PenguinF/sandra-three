@@ -76,10 +76,10 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
-                    MenuIcon = SharedResources.settings,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditPreferencesFile.ToTextProvider(),
+                    MenuIcon = SharedResources.settings.ToImageProvider(),
                 },
             });
 
@@ -144,9 +144,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.ShowDefaultSettingsFile,
+                    MenuTextProvider = SharedLocalizedStringKeys.ShowDefaultSettingsFile.ToTextProvider(),
                 },
             });
 
@@ -236,9 +236,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.About,
+                    MenuTextProvider = SharedLocalizedStringKeys.About.ToTextProvider(),
                 },
             });
 
@@ -261,9 +261,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.Credits,
+                    MenuTextProvider = SharedLocalizedStringKeys.Credits.ToTextProvider(),
                 },
             });
 
@@ -286,11 +286,11 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
-                    MenuIcon = SharedResources.speech,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditCurrentLanguage.ToTextProvider(),
+                    MenuIcon = SharedResources.speech.ToImageProvider(),
                 },
             });
 
@@ -300,7 +300,7 @@ namespace Eutherion.Win.AppTemplate
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
 
             // Cannot edit built-in localizer.
-            if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
+            if (!(CurrentLocalizer is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
 
             if (perform)
             {

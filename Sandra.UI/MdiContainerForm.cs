@@ -66,6 +66,13 @@ namespace Sandra.UI
 
             Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
             ShowOrHideEditCurrentLanguageItem();
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            UIMenu.UpdateMenu(MainMenuStrip.Items);
         }
 
         private void ShowOrHideEditCurrentLanguageItem()
@@ -76,15 +83,16 @@ namespace Sandra.UI
             foreach (ToolStripItem item in MainMenuStrip.Items)
             {
                 if (item is LocalizedToolStripMenuItem localizedItem
-                    && localizedItem.LocalizedText != null
-                    && localizedItem.LocalizedText.Key == SharedLocalizedStringKeys.Tools)
+                    && localizedItem.TextProvider is LocalizedTextProvider localizedTextProvider
+                    && localizedTextProvider.Key == SharedLocalizedStringKeys.Tools)
                 {
                     ToolStripItem previousItem = null;
 
                     foreach (ToolStripItem dropDownItem in localizedItem.DropDownItems)
                     {
                         if (dropDownItem is UIActionToolStripMenuItem uiActionItem
-                            && uiActionItem.LocalizedText.Key == SharedLocalizedStringKeys.EditCurrentLanguage)
+                            && uiActionItem.TextProvider is LocalizedTextProvider subLocalizedTextProvider
+                            && subLocalizedTextProvider.Key == SharedLocalizedStringKeys.EditCurrentLanguage)
                         {
                             // Use ActionHandler rather than mainMenuActionHandler because it can return UIActionVisibility.Hidden.
                             var uiActionState = ActionHandler.TryPerformAction(uiActionItem.Action, false);
@@ -124,24 +132,16 @@ namespace Sandra.UI
         {
             foreach (DefaultUIActionBinding binding in bindings)
             {
-                if (binding.DefaultInterfaces.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
-                    // Copy the default binding and remove the ContextMenuUIActionInterface
-                    // which is used below to construct a UIMenuNode.Element directly.
-                    var modifiedBinding = new ImplementationSet<IUIActionInterface>();
-                    if (binding.DefaultInterfaces.TryGet(out ShortcutKeysUIActionInterface shortcutKeysInterface))
-                    {
-                        modifiedBinding.Add(shortcutKeysInterface);
-                    }
-
                     // Add a menu item inside the given container which will update itself after focus changes.
-                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, shortcutKeysInterface, contextMenuInterface));
+                    container.Nodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
 
                     // Register in a Dictionary to be able to figure out which menu items should be updated.
                     focusDependentUIActions.Add(binding.Action, new FocusDependentUIActionState());
 
                     // This also means that if a menu item is clicked, TryPerformAction() is called on the mainMenuActionHandler.
-                    mainMenuActionHandler.BindAction(new UIActionBinding(binding.Action, modifiedBinding, perform =>
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
                     {
                         try
                         {
@@ -195,7 +195,7 @@ namespace Sandra.UI
                     this.BindAction(localizer.SwitchToLangUIActionBinding, localizer.TrySwitchToLang);
                 }
 
-                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe);
+                UIMenuNode.Container langMenu = new UIMenuNode.Container(null, SharedResources.globe.ToImageProvider());
                 mainMenuRootNodes.Add(langMenu);
                 BindFocusDependentUIActions(langMenu, Session.Current.RegisteredLocalizers.Select(x => x.SwitchToLangUIActionBinding).ToArray());
             }
@@ -209,21 +209,21 @@ namespace Sandra.UI
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
             this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
 
-            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File);
+            UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
             mainMenuRootNodes.Add(fileMenu);
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
                                         SharedUIAction.Exit);
 
-            UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game);
+            UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game.ToTextProvider());
             mainMenuRootNodes.Add(gameMenu);
 
             // Add these actions to the "Game" dropdown list.
             BindFocusDependentUIActions(gameMenu,
                                         OpenNewPlayingBoard);
 
-            UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo)
+            UIMenuNode.Container goToMenu = new UIMenuNode.Container(LocalizedStringKeys.GoTo.ToTextProvider())
             {
                 IsFirstInGroup = true,
             };
@@ -252,7 +252,7 @@ namespace Sandra.UI
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);
 
-            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View);
+            UIMenuNode.Container viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
             mainMenuRootNodes.Add(viewMenu);
 
             // Provide ContextMenuUIActionInterfaces for GotoChessBoardForm and GotoMovesForm
@@ -261,11 +261,11 @@ namespace Sandra.UI
                 InteractiveGame.GotoChessBoardForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
-                    new ContextMenuUIActionInterface
+                    new CombinedUIActionInterface
                     {
+                        Shortcuts = InteractiveGame.GotoChessBoardForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
                         IsFirstInGroup = true,
-                        MenuCaptionKey = LocalizedStringKeys.Chessboard,
+                        MenuTextProvider = LocalizedStringKeys.Chessboard.ToTextProvider(),
                     },
                 });
 
@@ -273,10 +273,10 @@ namespace Sandra.UI
                 InteractiveGame.GotoMovesForm.Action,
                 new ImplementationSet<IUIActionInterface>
                 {
-                    InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<ShortcutKeysUIActionInterface>(),
-                    new ContextMenuUIActionInterface
+                    new CombinedUIActionInterface
                     {
-                        MenuCaptionKey = LocalizedStringKeys.Moves,
+                        Shortcuts = InteractiveGame.GotoMovesForm.DefaultInterfaces.Get<IShortcutKeysUIActionInterface>().Shortcuts,
+                        MenuTextProvider = LocalizedStringKeys.Moves.ToTextProvider(),
                     },
                 });
 
@@ -287,7 +287,7 @@ namespace Sandra.UI
                                         SharedUIAction.ZoomIn,
                                         SharedUIAction.ZoomOut);
 
-            UIMenuNode.Container toolsMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools);
+            UIMenuNode.Container toolsMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Tools.ToTextProvider());
             mainMenuRootNodes.Add(toolsMenu);
 
             // Add these actions to the "Tools" dropdown list.
@@ -296,7 +296,7 @@ namespace Sandra.UI
                                         Session.ShowDefaultSettingsFile,
                                         Session.EditCurrentLanguage);
 
-            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help);
+            UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help.ToTextProvider());
             mainMenuRootNodes.Add(helpMenu);
 
             // Add these actions to the "Help" dropdown list.

@@ -19,48 +19,53 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
-using System.Drawing;
+using System.Collections.Generic;
 
 namespace Eutherion.Win.UIActions
 {
     /// <summary>
     /// Defines how a <see cref="UIAction"/> can be invoked by a keyboard shortcut.
     /// </summary>
-    public sealed class ShortcutKeysUIActionInterface : IUIActionInterface
+    public interface IShortcutKeysUIActionInterface : IUIActionInterface
     {
         /// <summary>
-        /// Array of shortcut keys which will invoke the action. The first non-empty shortcut is shown in e.g. the context menu.
+        /// Array of shortcut keys which will invoke the action.
         /// </summary>
-        public ShortcutKeys[] Shortcuts;
+        ShortcutKeys[] Shortcuts { get; }
     }
 
     /// <summary>
     /// Defines how a <see cref="UIAction"/> is shown in a context menu.
     /// </summary>
-    public sealed class ContextMenuUIActionInterface : IUIActionInterface
+    public interface IContextMenuUIActionInterface : IUIActionInterface
     {
         /// <summary>
-        /// Gets or sets if this action is the first in a group of actions.
+        /// Gets if this action is the first in a group of actions.
         /// This will result in a separator generated above the menu item generated for this binding.
         /// </summary>
-        public bool IsFirstInGroup;
+        bool IsFirstInGroup { get; }
 
         /// <summary>
-        /// Defines the caption to display for the generated menu item.
+        /// Defines the text provider used to generate the display text for the menu item.
         /// </summary>
-        public LocalizedStringKey MenuCaptionKey;
+        ITextProvider MenuTextProvider { get; }
 
         /// <summary>
         /// Defines the image to display for the generated menu item.
         /// </summary>
-        public Image MenuIcon;
+        IImageProvider MenuIcon { get; }
+
+        /// <summary>
+        /// Defines the shortcut key to display in the menu item.
+        /// If the enumeration is null or empty, no shortcut key will be shown.
+        /// </summary>
+        IEnumerable<ITextProvider> DisplayShortcutKeys { get; }
 
         /// <summary>
         /// Indicates if a modal dialog will be displayed if the action is invoked.
         /// If true, the display text of the menu item is followed by "...".
         /// </summary>
-        public bool OpensDialog;
+        bool OpensDialog { get; }
     }
 }

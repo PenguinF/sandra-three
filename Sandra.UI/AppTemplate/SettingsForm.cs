@@ -19,8 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : UIActionForm
+    public class SettingsForm : UIActionForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -153,12 +153,12 @@ namespace Eutherion.Win.AppTemplate
             // Initialize menu strip which becomes visible only when the ALT key is pressed.
             autoHideMainMenu = new UIAutoHideMainMenu(this);
 
-            var fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
+            var fileMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()));
             fileMenu.BindActions(
                 SharedUIAction.SaveToFile,
                 SharedUIAction.Close);
 
-            var editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
+            var editMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()));
             editMenu.BindActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
@@ -167,10 +167,20 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.PasteSelectionFromClipBoard,
                 SharedUIAction.SelectAllText);
 
-            var viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
+            var viewMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()));
             viewMenu.BindActions(
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut);
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            if (MainMenuStrip != null)
+            {
+                UIMenu.UpdateMenu(MainMenuStrip.Items);
+            }
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -210,9 +220,9 @@ namespace Eutherion.Win.AppTemplate
                                          let position = (jsonTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
-                                         select Localizer.Current.Localize(
+                                         select Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(Localizer.Current), lineIndex, position })).ToArray();
+                                             new[] { error.Message(Session.Current.CurrentLocalizer), lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

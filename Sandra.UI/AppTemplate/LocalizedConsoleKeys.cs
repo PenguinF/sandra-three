@@ -22,21 +22,21 @@
 using Eutherion.Localization;
 using System.Collections.Generic;
 
-namespace Eutherion.UIActions
+namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// Contains a collection of <see cref="LocalizedStringKey"/>s which generate localized display strings
-    /// for keyboard shortcuts (<see cref="ShortcutKeys"/>).
+    /// for keyboard shortcuts (<see cref="Eutherion.UIActions.ShortcutKeys"/>).
     /// </summary>
     public static class LocalizedConsoleKeys
     {
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="KeyModifiers.Alt"/>.
+        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Alt"/>.
         /// </summary>
         public static readonly LocalizedStringKey ConsoleKeyAlt = new LocalizedStringKey(nameof(ConsoleKeyAlt));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="KeyModifiers.Control"/>.
+        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Control"/>.
         /// </summary>
         public static readonly LocalizedStringKey ConsoleKeyCtrl = new LocalizedStringKey(nameof(ConsoleKeyCtrl));
 
@@ -81,7 +81,7 @@ namespace Eutherion.UIActions
         public static readonly LocalizedStringKey ConsoleKeyRightArrow = new LocalizedStringKey(nameof(ConsoleKeyRightArrow));
 
         /// <summary>
-        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="KeyModifiers.Shift"/>.
+        /// Gets the <see cref="LocalizedStringKey"/> for <see cref="Eutherion.UIActions.KeyModifiers.Shift"/>.
         /// </summary>
         public static readonly LocalizedStringKey ConsoleKeyShift = new LocalizedStringKey(nameof(ConsoleKeyShift));
 

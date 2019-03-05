@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * DebugUtilities.cs
+ * ITextProvider.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,27 +19,19 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Utils
+namespace Eutherion.Win
 {
     /// <summary>
-    /// Contains utility methods.
+    /// Represents a strategy for providing text to UI elements.
     /// </summary>
-    public static class DebugUtilities
+    public interface ITextProvider
     {
         /// <summary>
-        /// Generates a display string from an array of parameters in the format "({0}, {1}, ...)".
+        /// Gets the text from this text provider.
         /// </summary>
-        /// <param name="parameters">
-        /// The array of parameters to format.
-        /// </param>
         /// <returns>
-        /// If <paramref name="parameters"/> is null or empty, returns an empty string.
-        /// If <paramref name="parameters"/> has exactly one element, returns "({0})" where {0} is replaced by the single element.
-        /// If <paramref name="parameters"/> has more than one element, returns "({0}, {1}, ...)" where {0}, {1}... are replaced by elements of the array.
+        /// The text from this text provider.
         /// </returns>
-        public static string ToDefaultParameterListDisplayString(string[] parameters)
-            => parameters == null || parameters.Length == 0
-            ? string.Empty
-            : $"({string.Join(", ", parameters)})";
+        string GetText();
     }
 }

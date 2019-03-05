@@ -19,12 +19,10 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -35,51 +33,55 @@ namespace Eutherion.Win.UIActions
         public abstract TResult Accept<TResult>(IUIMenuTreeVisitor<TResult> visitor);
 
         /// <summary>
-        /// Gets the caption for this node. If null or empty, no menu item is generated for this node.
+        /// Gets the text to display for this node. If null or empty, no menu item is generated for this node.
         /// </summary>
-        public LocalizedStringKey CaptionKey { get; }
+        public ITextProvider TextProvider { get; }
 
         /// <summary>
-        /// Gets the icon to display for this node.
+        /// Defines the icon to display for this node.
         /// </summary>
-        public Image Icon { get; }
+        public IImageProvider IconProvider { get; }
 
         /// <summary>
         /// Gets or sets if this node is the first in a group of nodes.
         /// </summary>
         public bool IsFirstInGroup { get; set; }
 
-        protected UIMenuNode(LocalizedStringKey captionKey)
+        protected UIMenuNode(ITextProvider textProvider)
         {
-            CaptionKey = captionKey;
+            TextProvider = textProvider;
         }
 
-        protected UIMenuNode(LocalizedStringKey captionKey, Image icon) : this(captionKey)
+        protected UIMenuNode(ITextProvider textProvider, IImageProvider iconProvider) : this(textProvider)
         {
-            Icon = icon;
+            IconProvider = iconProvider;
         }
 
         public sealed class Element : UIMenuNode
         {
-            public readonly UIAction Action;
-            public readonly ShortcutKeys Shortcut;
+            /// <summary>
+            /// Gets the <see cref="UIAction"/> for which this element generates a menu item.
+            /// </summary>
+            public UIAction Action { get; }
+
+            /// <summary>
+            /// Generates the shortcut key to display in the menu item.
+            /// If the enumeration is null or empty, no shortcut key will be shown.
+            /// </summary>
+            public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
 
             /// <summary>
             /// Indicates if a modal dialog will be displayed if the action is invoked.
             /// If true, the display text of the menu item is followed by "...".
             /// </summary>
-            public readonly bool OpensDialog;
+            public bool OpensDialog { get; }
 
-            public Element(UIAction action, ShortcutKeysUIActionInterface shortcutKeysInterface, ContextMenuUIActionInterface contextMenuInterface)
-                : base(contextMenuInterface.MenuCaptionKey, contextMenuInterface.MenuIcon)
+            public Element(UIAction action, IContextMenuUIActionInterface contextMenuInterface)
+                : base(contextMenuInterface.MenuTextProvider, contextMenuInterface.MenuIcon)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
 
-                if (shortcutKeysInterface != null && shortcutKeysInterface.Shortcuts != null)
-                {
-                    Shortcut = shortcutKeysInterface.Shortcuts.FirstOrDefault(x => !x.IsEmpty);
-                }
-
+                ShortcutKeyDisplayTextProviders = contextMenuInterface.DisplayShortcutKeys;
                 IsFirstInGroup = contextMenuInterface.IsFirstInGroup;
                 OpensDialog = contextMenuInterface.OpensDialog;
             }
@@ -91,11 +93,11 @@ namespace Eutherion.Win.UIActions
         {
             public readonly List<UIMenuNode> Nodes = new List<UIMenuNode>();
 
-            public Container(LocalizedStringKey captionKey) : base(captionKey)
+            public Container(ITextProvider textProvider) : base(textProvider)
             {
             }
 
-            public Container(LocalizedStringKey captionKey, Image icon) : base(captionKey, icon)
+            public Container(ITextProvider textProvider, IImageProvider iconProvider) : base(textProvider, iconProvider)
             {
             }
 
@@ -116,77 +118,94 @@ namespace Eutherion.Win.UIActions
     {
         public static readonly string OpensDialogIndicatorSuffix = "...";
 
-        public LocalizedString LocalizedText;
-        public List<LocalizedString> ShortcutKeyDisplayStringParts;
+        /// <summary>
+        /// Generates the text to display for this menu item.
+        /// </summary>
+        public ITextProvider TextProvider { get; }
 
         /// <summary>
-        /// Sets up this menu item with the caption and icon from the menu node.
+        /// Generates the image to display for this menu item.
         /// </summary>
-        /// <param name="node">
-        /// The <see cref="UIMenuNode"/> to initialize from.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="node"/> is null.
-        /// </exception>
-        public void InitializeFrom(UIMenuNode node)
-        {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+        public IImageProvider IconProvider { get; }
 
-            InitializeFrom(
-                node.CaptionKey,
-                node.Icon,
-                node is UIMenuNode.Element element && element.OpensDialog);
+        /// <summary>
+        /// Generates the shortcut key to display in the menu item.
+        /// If the enumeration is null or empty, no shortcut key will be shown.
+        /// </summary>
+        public IEnumerable<ITextProvider> ShortcutKeyDisplayTextProviders { get; }
+
+        /// <summary>
+        /// Indicates if a modal dialog will be displayed if the action is invoked.
+        /// If true, the display text of the menu item is followed by "...".
+        /// </summary>
+        public bool OpensDialog { get; }
+
+        protected LocalizedToolStripMenuItem(ITextProvider textProvider,
+                                             IImageProvider iconProvider,
+                                             IEnumerable<ITextProvider> shortcutKeyDisplayTextProviders,
+                                             bool opensDialog)
+        {
+            ImageScaling = ToolStripItemImageScaling.None;
+
+            TextProvider = textProvider;
+            IconProvider = iconProvider;
+            ShortcutKeyDisplayTextProviders = shortcutKeyDisplayTextProviders;
+            OpensDialog = opensDialog;
+
+            Update();
         }
 
         /// <summary>
-        /// Sets up this menu item with the given caption and icon.
+        /// Updates this menu item's properties after a definition change.
         /// </summary>
-        /// <param name="captionKey">
-        /// The localized text to use for the caption.
-        /// </param>
-        /// <param name="icon">
-        /// The icon to show in the menu item.
-        /// </param>
-        /// <param name="opensDialog">
-        /// Whether or not the display text of the menu item is followed by a "...".
-        /// </param>
-        public void InitializeFrom(LocalizedStringKey captionKey, Image icon, bool opensDialog)
+        public void Update()
         {
-            if (LocalizedText != null) LocalizedText.Dispose();
+            string displayText = TextProvider?.GetText();
 
-            if (captionKey != null)
+            if (!string.IsNullOrWhiteSpace(displayText))
             {
-                LocalizedText = new LocalizedString(captionKey);
-
-                // Put opensDialog in an if-condition so it doesn't need to be captured into the closure.
-                if (!opensDialog)
+                if (!OpensDialog)
                 {
                     // Make sure ampersand characters are shown in menu items, instead of giving rise to a mnemonic.
-                    LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&");
+                    Text = displayText.Replace("&", "&&");
                 }
                 else
                 {
                     // Add OpensDialogIndicatorSuffix.
-                    LocalizedText.DisplayText.ValueChanged += displayText => Text = displayText.Replace("&", "&&") + OpensDialogIndicatorSuffix;
+                    Text = displayText.Replace("&", "&&") + OpensDialogIndicatorSuffix;
                 }
             }
             else
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image;
+                Text = string.Empty;
             }
 
-            ImageScaling = ToolStripItemImageScaling.None;
-            Image = icon;
+            Image = IconProvider?.GetImage();
+
+            if (ShortcutKeyDisplayTextProviders != null)
+            {
+                ShortcutKeyDisplayString = string.Join("+", ShortcutKeyDisplayTextProviders.Select(x => x.GetText()));
+            }
+            else
+            {
+                ShortcutKeyDisplayString = string.Empty;
+            }
         }
 
-        protected override void Dispose(bool disposing)
+        /// <summary>
+        /// Creates a menu item with the caption and icon from the menu node.
+        /// </summary>
+        /// <param name="container">
+        /// The <see cref="UIMenuNode.Container"/> to initialize from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="container"/> is null.
+        /// </exception>
+        public static LocalizedToolStripMenuItem CreateFrom(UIMenuNode.Container container)
         {
-            if (disposing)
-            {
-                if (LocalizedText != null) LocalizedText.Dispose();
-            }
-
-            base.Dispose(disposing);
+            if (container == null) throw new ArgumentNullException(nameof(container));
+            return new LocalizedToolStripMenuItem(container.TextProvider, container.IconProvider, null, false);
         }
     }
 
@@ -200,9 +219,28 @@ namespace Eutherion.Win.UIActions
         /// </summary>
         public UIAction Action { get; }
 
-        public UIActionToolStripMenuItem(UIAction action)
+        private UIActionToolStripMenuItem(UIMenuNode.Element element)
+            : base(element.TextProvider,
+                   element.IconProvider,
+                   element.ShortcutKeyDisplayTextProviders,
+                   element.OpensDialog)
         {
-            Action = action;
+            Action = element.Action;
+        }
+
+        /// <summary>
+        /// Creates a new menu item with the caption and icon from the menu node.
+        /// </summary>
+        /// <param name="element">
+        /// The <see cref="UIMenuNode.Element"/> to initialize from.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="element"/> is null.
+        /// </exception>
+        public static UIActionToolStripMenuItem CreateFrom(UIMenuNode.Element element)
+        {
+            if (element == null) throw new ArgumentNullException(nameof(element));
+            return new UIActionToolStripMenuItem(element);
         }
 
         public void Update(UIActionState currentActionState)
@@ -214,18 +252,6 @@ namespace Eutherion.Win.UIActions
 
     public static class UIMenu
     {
-        /// <summary>
-        /// Adds a dynamic <see cref="ContextMenuStrip"/> to a control if it implements <see cref="IUIActionHandlerProvider"/>.
-        /// </summary>
-        public static void AddTo<TUIActionControl>(TUIActionControl control)
-            where TUIActionControl : Control, IUIActionHandlerProvider
-        {
-            if (control != null && control.ActionHandler != null)
-            {
-                control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
-            }
-        }
-
         private class UIMenuStrip<TUIActionControl> : ContextMenuStrip
             where TUIActionControl : Control, IUIActionHandlerProvider
         {
@@ -292,16 +318,51 @@ namespace Eutherion.Win.UIActions
                 }
             }
         }
+
+        /// <summary>
+        /// Adds a dynamic <see cref="ContextMenuStrip"/> to a control if it implements <see cref="IUIActionHandlerProvider"/>.
+        /// </summary>
+        public static void AddTo<TUIActionControl>(TUIActionControl control)
+            where TUIActionControl : Control, IUIActionHandlerProvider
+        {
+            if (control != null && control.ActionHandler != null)
+            {
+                control.ContextMenuStrip = new UIMenuStrip<TUIActionControl>(control);
+            }
+        }
+
+        /// <summary>
+        /// Updates all menu items in a collection recursively.
+        /// </summary>
+        /// <param name="toolStripItems">
+        /// The items to update.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="toolStripItems"/> is null.
+        /// </exception>
+        public static void UpdateMenu(ToolStripItemCollection toolStripItems)
+        {
+            if (toolStripItems == null) throw new ArgumentNullException(nameof(toolStripItems));
+
+            foreach (ToolStripItem toolStripItem in toolStripItems)
+            {
+                if (toolStripItem is ToolStripDropDownItem dropDownItem)
+                {
+                    if (dropDownItem is LocalizedToolStripMenuItem localizedItem) localizedItem.Update();
+                    UpdateMenu(dropDownItem.DropDownItems);
+                }
+            }
+        }
     }
 
     public struct UIMenuBuilder : IUIMenuTreeVisitor<ToolStripMenuItem>
     {
         /// <summary>
         /// Dynamically adds menu items to a <see cref="ToolStripItemCollection"/>
-        /// given the set of <see cref="ContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
+        /// given the set of <see cref="IContextMenuUIActionInterface"/>s which are defined in a <see cref="UIActionHandler"/>.
         /// </summary>
         /// <param name="actionHandler">
-        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="ContextMenuUIActionInterface"/>s.
+        /// The <see cref="UIActionHandler"/> which performs actions and defines the <see cref="IContextMenuUIActionInterface"/>s.
         /// </param>
         /// <param name="destination">
         /// The <see cref="ToolStripItemCollection"/> in which to generate the menu items.
@@ -313,10 +374,9 @@ namespace Eutherion.Win.UIActions
             // Extract all ContextMenuUIActionInterfaces from the handler.
             foreach (var (interfaceSet, action) in actionHandler.InterfaceSets)
             {
-                if (interfaceSet.TryGet(out ContextMenuUIActionInterface contextMenuInterface))
+                if (interfaceSet.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
                 {
-                    var shortcutKeysInterface = interfaceSet.Get<ShortcutKeysUIActionInterface>();
-                    rootMenuNodes.Add(new UIMenuNode.Element(action, shortcutKeysInterface, contextMenuInterface));
+                    rootMenuNodes.Add(new UIMenuNode.Element(action, contextMenuInterface));
                 }
             }
 
@@ -373,20 +433,13 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitElement(UIMenuNode.Element element)
         {
-            if (element.CaptionKey == null && element.Icon == null) return null;
+            if (element.TextProvider == null && element.IconProvider == null) return null;
 
             UIActionState currentActionState = ActionHandler.TryPerformAction(element.Action, false);
 
             if (!currentActionState.Visible) return null;
 
-            var menuItem = new UIActionToolStripMenuItem(element.Action);
-            menuItem.InitializeFrom(element);
-
-            menuItem.ShortcutKeyDisplayStringParts = element.Shortcut.DisplayStringParts().Select(x => new LocalizedString(x)).ToList();
-            menuItem.ShortcutKeyDisplayStringParts.ForEach(
-                x => x.DisplayText.ValueChanged += __ =>
-                menuItem.ShortcutKeyDisplayString = string.Join("+", menuItem.ShortcutKeyDisplayStringParts.Select(y => y.DisplayText.Value)));
-            menuItem.Disposed += (_, __) => menuItem.ShortcutKeyDisplayStringParts.ForEach(x => x.Dispose());
+            var menuItem = UIActionToolStripMenuItem.CreateFrom(element);
             menuItem.Update(currentActionState);
 
             var actionHandler = ActionHandler;
@@ -407,11 +460,9 @@ namespace Eutherion.Win.UIActions
 
         ToolStripMenuItem IUIMenuTreeVisitor<ToolStripMenuItem>.VisitContainer(UIMenuNode.Container container)
         {
-            if (container.CaptionKey == null && container.Icon == null) return null;
+            if (container.TextProvider == null && container.IconProvider == null) return null;
 
-            var menuItem = new LocalizedToolStripMenuItem();
-            menuItem.InitializeFrom(container);
-
+            var menuItem = LocalizedToolStripMenuItem.CreateFrom(container);
             BuildMenu(container.Nodes, menuItem.DropDownItems);
 
             // No empty submenu items.
