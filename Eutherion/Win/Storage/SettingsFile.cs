@@ -33,7 +33,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Reads settings from a file.
     /// </summary>
-    public class SettingsFile
+    public class SettingsFile : LiveTextFile
     {
         /// <summary>
         /// Creates a <see cref="SettingsFile"/> given a valid file path.
@@ -76,11 +76,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Returns the full path to the settings file.
-        /// </summary>
-        public string AbsoluteFilePath { get; }
-
-        /// <summary>
         /// Gets the template settings into which the values from the settings file are loaded.
         /// </summary>
         public SettingObject TemplateSettings { get; }
@@ -99,8 +94,8 @@ namespace Eutherion.Win.Storage
         private Task pollFileChangesBackgroundTask;
 
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
+            : base(absoluteFilePath)
         {
-            AbsoluteFilePath = absoluteFilePath;
             TemplateSettings = templateSettings;
 
             watcher = new FileWatcher(absoluteFilePath);
@@ -119,7 +114,7 @@ namespace Eutherion.Win.Storage
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (LiveTextFile.IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
             return workingCopy.Commit();
@@ -312,7 +307,7 @@ namespace Eutherion.Win.Storage
             }
             catch (Exception exception)
             {
-                if (!LiveTextFile.IsExternalCauseFileException(exception)) throw;
+                if (!IsExternalCauseFileException(exception)) throw;
                 return exception;
             }
         }
