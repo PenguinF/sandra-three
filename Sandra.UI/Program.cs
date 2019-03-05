@@ -92,16 +92,20 @@ namespace Sandra.UI
             // No exception handler for both WriteToFiles.
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
-                Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"),
+                session.DefaultSettings.AbsoluteFilePath,
                 SettingWriterOptions.Default);
 
-            var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
+            SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
+                Path.Combine(Session.ExecutableFolder, "Languages", "en.json"),
+                new SettingCopy(Localizers.CreateLanguageFileSchema()));
+
+            var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
             settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
             settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
             SettingsFile.WriteToFile(
                 settingCopy.Commit(),
-                Path.Combine(Session.ExecutableFolder, "Languages", "en.json"),
+                englishFileFromBuiltIn.AbsoluteFilePath,
                 SettingWriterOptions.SuppressSettingComments);
         }
 #endif
