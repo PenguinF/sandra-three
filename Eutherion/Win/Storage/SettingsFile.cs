@@ -269,12 +269,10 @@ namespace Eutherion.Win.Storage
                     nameof(settings));
             }
 
-            string json = SettingWriter.ConvertToJson(
+            Save(SettingWriter.ConvertToJson(
                 settings.Map,
                 schema: settings.Schema,
-                options: options);
-
-            File.WriteAllText(AbsoluteFilePath, json);
+                options: options));
         }
     }
 }

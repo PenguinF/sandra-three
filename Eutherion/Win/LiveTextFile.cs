@@ -70,5 +70,19 @@ namespace Eutherion.Win
         {
             AbsoluteFilePath = Path.GetFullPath(path);
         }
+
+        /// <summary>
+        /// Saves the text to the file.
+        /// </summary>
+        /// <param name="contents">
+        /// The text to save.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="contents"/> is null.
+        /// </exception>
+        public void Save(string contents)
+        {
+            File.WriteAllText(AbsoluteFilePath, contents);
+        }
     }
 }
