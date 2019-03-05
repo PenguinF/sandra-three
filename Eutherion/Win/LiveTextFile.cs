@@ -21,8 +21,12 @@
 
 using Eutherion.Utils;
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Eutherion.Win
 {
@@ -42,6 +46,14 @@ namespace Eutherion.Win
         /// Returns the full path to the live text file.
         /// </summary>
         public string AbsoluteFilePath { get; }
+
+        private readonly FileWatcher watcher;
+
+        // Thread synchronization fields.
+        private AutoResetEvent fileChangeSignalWaitHandle;
+        private ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private SynchronizationContext sc;
+        private Task pollFileChangesBackgroundTask;
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -70,6 +82,7 @@ namespace Eutherion.Win
         public LiveTextFile(string path)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
+            watcher = new FileWatcher(AbsoluteFilePath);
         }
 
         /// <summary>
@@ -103,6 +116,89 @@ namespace Eutherion.Win
         public void Save(string contents)
         {
             File.WriteAllText(AbsoluteFilePath, contents);
+        }
+
+        readonly WeakEvent<LiveTextFile, EventArgs> event_FileChanged = new WeakEvent<LiveTextFile, EventArgs>();
+
+        /// <summary>
+        /// <see cref="WeakEvent"/> which occurs when the contents of the opened file changed.
+        /// </summary>
+        public event Action<LiveTextFile, EventArgs> FileChanged
+        {
+            add
+            {
+                event_FileChanged.AddListener(value);
+                StartWatching();
+            }
+            remove
+            {
+                event_FileChanged.RemoveListener(value);
+            }
+        }
+
+        protected virtual void OnFileChanged(EventArgs e) => event_FileChanged.Raise(this, e);
+
+        protected void StartWatching()
+        {
+            if (pollFileChangesBackgroundTask == null)
+            {
+                // Capture the synchronization context so events can be posted to it.
+                sc = SynchronizationContext.Current;
+                Debug.Assert(sc != null);
+
+                // Set up file change listener thread.
+                fileChangeSignalWaitHandle = new AutoResetEvent(false);
+                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
+
+                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop());
+            }
+        }
+
+        private void PollFileChangesLoop()
+        {
+            try
+            {
+                for (; ; )
+                {
+                    // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
+                    fileChangeSignalWaitHandle.WaitOne();
+                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
+
+                    bool hasChanges = false;
+                    bool disconnected = false;
+                    while (fileChangeQueue.TryDequeue(out FileChangeType fileChangeType))
+                    {
+                        hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
+                        disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
+                    }
+
+                    if (hasChanges)
+                    {
+                        Load();
+                        sc.Post(RaiseFileChangedEvent, null);
+                    }
+
+                    // Stop the loop if the FileWatcher errored out.
+                    if (disconnected)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
+                // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
+                exception.Trace();
+            }
+
+            watcher.Dispose();
+        }
+
+        private void RaiseFileChangedEvent(object state)
+        {
+            OnFileChanged(EventArgs.Empty);
         }
     }
 }

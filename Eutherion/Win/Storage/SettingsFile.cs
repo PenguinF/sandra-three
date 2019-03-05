@@ -21,12 +21,8 @@
 
 using Eutherion.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Eutherion.Win.Storage
 {
@@ -99,20 +95,10 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public SettingObject Settings { get; private set; }
 
-        private readonly FileWatcher watcher;
-
-        // Thread synchronization fields.
-        private AutoResetEvent fileChangeSignalWaitHandle;
-        private ConcurrentQueue<FileChangeType> fileChangeQueue;
-        private SynchronizationContext sc;
-        private Task pollFileChangesBackgroundTask;
-
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
             : base(absoluteFilePath)
         {
             TemplateSettings = templateSettings;
-
-            watcher = new FileWatcher(absoluteFilePath);
         }
 
         private SettingObject ReadSettingObject(Union<Exception, string> fileTextOrException)
@@ -146,60 +132,7 @@ namespace Eutherion.Win.Storage
             WeakEvent<object, EventArgs> keyedEvent = settingsChangedEvents.GetOrAdd(property.Name, key => new WeakEvent<object, EventArgs>());
             keyedEvent.AddListener(eventHandler);
 
-            if (pollFileChangesBackgroundTask == null)
-            {
-                // Capture the synchronization context so events can be posted to it.
-                sc = SynchronizationContext.Current;
-                Debug.Assert(sc != null);
-
-                // Set up file change listener thread.
-                fileChangeSignalWaitHandle = new AutoResetEvent(false);
-                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
-                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop());
-            }
-        }
-
-        private void PollFileChangesLoop()
-        {
-            try
-            {
-                for (; ; )
-                {
-                    // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
-                    fileChangeSignalWaitHandle.WaitOne();
-                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
-
-                    bool hasChanges = false;
-                    bool disconnected = false;
-                    while (fileChangeQueue.TryDequeue(out FileChangeType fileChangeType))
-                    {
-                        hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
-                        disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
-                    }
-
-                    if (hasChanges)
-                    {
-                        Load();
-                        sc.Post(RaiseSettingsChangedEvent, null);
-                    }
-
-                    // Stop the loop if the FileWatcher errored out.
-                    if (disconnected)
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
-                // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
-                exception.Trace();
-            }
-
-            watcher.Dispose();
+            StartWatching();
         }
 
         private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
@@ -234,8 +167,10 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private void RaiseSettingsChangedEvent(object state)
+        protected override void OnFileChanged(EventArgs e)
         {
+            base.OnFileChanged(e);
+
             SettingObject newSettings = ReadSettingObject(LoadedText);
 
             foreach (var property in ChangedProperties(newSettings))
