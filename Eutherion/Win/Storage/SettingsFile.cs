@@ -51,23 +51,24 @@ namespace Eutherion.Win.Storage
         /// The created <see cref="SettingsFile"/>.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// <paramref name="absoluteFilePath"/> is a zero-length string, contains only white space,
-        /// or contains one or more invalid characters as defined by <see cref="Path.InvalidPathChars"/>.
+        /// <paramref name="absoluteFilePath"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are null.
         /// </exception>
-        /// <exception cref="PathTooLongException">
-        /// The specified path, file name, or both exceed the system-defined maximum length.
-        /// For example, on Windows-based platforms, paths must be less than 248 characters,
-        /// and file names must be less than 260 characters.
+        /// <exception cref="IOException">
+        /// <paramref name="absoluteFilePath"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
         public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
         {
-            if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
