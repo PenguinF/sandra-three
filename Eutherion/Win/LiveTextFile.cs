@@ -71,6 +71,20 @@ namespace Eutherion.Win
             AbsoluteFilePath = Path.GetFullPath(path);
         }
 
+        protected string Load()
+        {
+            try
+            {
+                return File.ReadAllText(AbsoluteFilePath);
+            }
+            catch (Exception exception)
+            {
+                // 'Expected' exceptions can be traced, but rethrow developer errors.
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+                return null;
+            }
+        }
+
         /// <summary>
         /// Saves the text to the file.
         /// </summary>
