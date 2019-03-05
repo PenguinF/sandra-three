@@ -33,7 +33,7 @@ namespace Eutherion.Win
     /// <summary>
     /// References a text file, and watches it for changes on the file system.
     /// </summary>
-    public class LiveTextFile
+    public class LiveTextFile : IDisposable
     {
         protected static bool IsExternalCauseFileException(Exception exception) =>
             exception is IOException ||
@@ -50,6 +50,7 @@ namespace Eutherion.Win
         private readonly FileWatcher watcher;
 
         // Thread synchronization fields.
+        private CancellationTokenSource cts;
         private AutoResetEvent fileChangeSignalWaitHandle;
         private ConcurrentQueue<FileChangeType> fileChangeQueue;
         private SynchronizationContext sc;
@@ -140,30 +141,40 @@ namespace Eutherion.Win
 
         protected void StartWatching()
         {
-            if (pollFileChangesBackgroundTask == null)
+            if (cts == null)
             {
                 // Capture the synchronization context so events can be posted to it.
                 sc = SynchronizationContext.Current;
                 Debug.Assert(sc != null);
 
                 // Set up file change listener thread.
+                cts = new CancellationTokenSource();
                 fileChangeSignalWaitHandle = new AutoResetEvent(false);
                 fileChangeQueue = new ConcurrentQueue<FileChangeType>();
                 watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
-                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop());
+                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
             }
         }
 
-        private void PollFileChangesLoop()
+        private void PollFileChangesLoop(CancellationToken cancellationToken)
         {
             try
             {
                 for (; ; )
                 {
                     // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
+                    if (WaitHandle.WaitAny(new[] { fileChangeSignalWaitHandle, cancellationToken.WaitHandle }) != 0)
+                    {
+                        // cancellationToken was set.
+                        break;
+                    }
+
                     fileChangeSignalWaitHandle.WaitOne();
-                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
+                    while (fileChangeSignalWaitHandle.WaitOne(50))
+                    {
+                        if (cancellationToken.IsCancellationRequested) break;
+                    }
 
                     bool hasChanges = false;
                     bool disconnected = false;
@@ -173,9 +184,12 @@ namespace Eutherion.Win
                         disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
                     }
 
+                    if (cancellationToken.IsCancellationRequested) break;
+
                     if (hasChanges)
                     {
                         Load();
+                        if (cancellationToken.IsCancellationRequested) break;
                         sc.Post(RaiseFileChangedEvent, null);
                     }
 
@@ -185,6 +199,9 @@ namespace Eutherion.Win
                         break;
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception exception)
             {
@@ -199,6 +216,24 @@ namespace Eutherion.Win
         private void RaiseFileChangedEvent(object state)
         {
             OnFileChanged(EventArgs.Empty);
+        }
+
+        public void Dispose()
+        {
+            if (cts != null)
+            {
+                cts.Cancel();
+                try
+                {
+                    pollFileChangesBackgroundTask.Wait();
+                    cts.Dispose();
+                    cts = null;
+                }
+                catch
+                {
+                    // Any exceptions here must be ignored.
+                }
+            }
         }
     }
 }

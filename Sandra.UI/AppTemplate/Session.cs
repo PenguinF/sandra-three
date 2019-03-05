@@ -253,6 +253,9 @@ namespace Eutherion.Win.AppTemplate
         {
             // Wait until the auto-save background task has finished.
             AutoSave.Close();
+            LocalSettings.Dispose();
+            DefaultSettings.Dispose();
+            registeredLocalizers.Values.ForEach(x => x.Dispose());
         }
     }
 
