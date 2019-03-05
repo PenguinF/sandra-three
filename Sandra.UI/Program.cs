@@ -91,7 +91,8 @@ namespace Sandra.UI
         {
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
-                Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"));
+                Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"),
+                SettingWriterOptions.Default);
 
             var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
             settingCopy.AddOrReplace(Localizers.NativeName, "English");

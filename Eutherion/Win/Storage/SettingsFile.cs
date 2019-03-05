@@ -243,35 +243,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Attempts to overwrite the setting file with the current values in <see cref="Settings"/>.
-        /// </summary>
-        /// <returns>
-        /// Null if the operation was successful;
-        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
-        /// </returns>
-        public Exception WriteToFile()
-            => WriteToFile(Settings, AbsoluteFilePath, SettingWriterOptions.Default);
-
-        /// <summary>
-        /// Attempts to overwrite a file with the current values in a settings object.
-        /// </summary>
-        /// <param name="settings">
-        /// The settings to write.
-        /// </param>
-        /// <param name="absoluteFilePath">
-        /// The target file to write to. If the file already exists, it is overwritten.
-        /// </param>
-        /// <returns>
-        /// Null if the operation was successful;
-        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
-        /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath)
-            => WriteToFile(settings, absoluteFilePath, SettingWriterOptions.Default);
-
-        /// <summary>
         /// Attempts to overwrite a file with the current values in a settings object.
         /// </summary>
         /// <param name="settings">

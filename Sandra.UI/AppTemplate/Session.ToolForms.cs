@@ -163,7 +163,7 @@ namespace Eutherion.Win.AppTemplate
                         {
                             // Before opening the possibly non-existent file, write to it.
                             // Ignore exceptions, may be caused by insufficient access rights.
-                            DefaultSettings.WriteToFile();
+                            SettingsFile.WriteToFile(DefaultSettings.Settings, DefaultSettings.AbsoluteFilePath, SettingWriterOptions.Default);
                         }
 
                         return CreateSettingsForm(
