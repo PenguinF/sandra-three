@@ -25,7 +25,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,13 +35,6 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public class SettingsFile
     {
-        private static bool IsExternalCauseFileException(Exception exception) =>
-            exception is IOException ||
-            exception is UnauthorizedAccessException ||
-            exception is FileNotFoundException ||
-            exception is DirectoryNotFoundException ||
-            exception is SecurityException;
-
         /// <summary>
         /// Creates a <see cref="SettingsFile"/> given a valid file path.
         /// </summary>
@@ -127,7 +119,7 @@ namespace Eutherion.Win.Storage
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+                if (LiveTextFile.IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
             return workingCopy.Commit();
@@ -320,7 +312,7 @@ namespace Eutherion.Win.Storage
             }
             catch (Exception exception)
             {
-                if (!IsExternalCauseFileException(exception)) throw;
+                if (!LiveTextFile.IsExternalCauseFileException(exception)) throw;
                 return exception;
             }
         }

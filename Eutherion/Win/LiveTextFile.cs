@@ -19,6 +19,22 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.IO;
+using System.Security;
+
 namespace Eutherion.Win
 {
+    /// <summary>
+    /// References a text file, and watches it for changes on the file system.
+    /// </summary>
+    public class LiveTextFile
+    {
+        public static bool IsExternalCauseFileException(Exception exception) =>
+            exception is IOException ||
+            exception is UnauthorizedAccessException ||
+            exception is FileNotFoundException ||
+            exception is DirectoryNotFoundException ||
+            exception is SecurityException;
+    }
 }
