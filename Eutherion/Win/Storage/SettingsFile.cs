@@ -261,26 +261,17 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
         /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, SettingWriterOptions options)
+        public static void WriteToFile(SettingObject settings, string absoluteFilePath, SettingWriterOptions options)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
 
-            try
-            {
-                string json = SettingWriter.ConvertToJson(
-                    settings.Map,
-                    schema: settings.Schema,
-                    options: options);
+            string json = SettingWriter.ConvertToJson(
+                settings.Map,
+                schema: settings.Schema,
+                options: options);
 
-                File.WriteAllText(absoluteFilePath, json);
-                return null;
-            }
-            catch (Exception exception)
-            {
-                if (!IsExternalCauseFileException(exception)) throw;
-                return exception;
-            }
+            File.WriteAllText(absoluteFilePath, json);
         }
     }
 }

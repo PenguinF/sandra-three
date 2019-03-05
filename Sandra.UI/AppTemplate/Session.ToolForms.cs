@@ -117,15 +117,18 @@ namespace Eutherion.Win.AppTemplate
                                 }
                             }
 
-                            Exception exception = SettingsFile.WriteToFile(
-                                localSettingsExample.Commit(),
-                                LocalSettings.AbsoluteFilePath,
-                                SettingWriterOptions.CommentOutProperties);
-
-                            if (exception != null)
+                            try
                             {
-                                MessageBox.Show(exception.Message);
-                                return null;
+                                SettingsFile.WriteToFile(
+                                    localSettingsExample.Commit(),
+                                    LocalSettings.AbsoluteFilePath,
+                                    SettingWriterOptions.CommentOutProperties);
+                            }
+                            catch (Exception exception)
+                            {
+                                // Ignore this exception.
+                                // When user tries to save the file, it will be more meaningful.
+                                exception.Trace();
                             }
                         }
 
@@ -159,11 +162,22 @@ namespace Eutherion.Win.AppTemplate
                     defaultSettingsFormBox,
                     () =>
                     {
+                        // If the file doesn't exist yet, try to generate it.
                         if (!File.Exists(DefaultSettings.AbsoluteFilePath))
                         {
-                            // Before opening the possibly non-existent file, write to it.
-                            // Ignore exceptions, may be caused by insufficient access rights.
-                            SettingsFile.WriteToFile(DefaultSettings.Settings, DefaultSettings.AbsoluteFilePath, SettingWriterOptions.Default);
+                            try
+                            {
+                                SettingsFile.WriteToFile(
+                                    DefaultSettings.Settings,
+                                    DefaultSettings.AbsoluteFilePath,
+                                    SettingWriterOptions.Default);
+                            }
+                            catch (Exception exception)
+                            {
+                                // Ignore this exception, may be caused by insufficient access rights.
+                                // When user tries to save the file, it will be more meaningful.
+                                exception.Trace();
+                            }
                         }
 
                         return CreateSettingsForm(
@@ -321,10 +335,19 @@ namespace Eutherion.Win.AppTemplate
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
-                            SettingsFile.WriteToFile(
-                                settingCopy.Commit(),
-                                fileLocalizer.LanguageFile.AbsoluteFilePath,
-                                SettingWriterOptions.SuppressSettingComments);
+                            try
+                            {
+                                SettingsFile.WriteToFile(
+                                    settingCopy.Commit(),
+                                    fileLocalizer.LanguageFile.AbsoluteFilePath,
+                                    SettingWriterOptions.SuppressSettingComments);
+                            }
+                            catch (Exception exception)
+                            {
+                                // Ignore this exception, may be caused by insufficient access rights.
+                                // When user tries to save the file, it will be more meaningful.
+                                exception.Trace();
+                            }
                         }
 
                         return CreateSettingsForm(

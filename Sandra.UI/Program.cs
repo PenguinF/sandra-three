@@ -89,6 +89,7 @@ namespace Sandra.UI
         /// </summary>
         private static void GenerateJsonConfigurationFiles(Session session, BuiltInEnglishLocalizer builtInEnglishLocalizer)
         {
+            // No exception handler for both WriteToFiles.
             SettingsFile.WriteToFile(
                 session.DefaultSettings.Settings,
                 Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"),
