@@ -90,9 +90,8 @@ namespace Sandra.UI
         private static void GenerateJsonConfigurationFiles(Session session, BuiltInEnglishLocalizer builtInEnglishLocalizer)
         {
             // No exception handler for both WriteToFiles.
-            SettingsFile.WriteToFile(
+            session.DefaultSettings.WriteToFile(
                 session.DefaultSettings.Settings,
-                session.DefaultSettings.AbsoluteFilePath,
                 SettingWriterOptions.Default);
 
             SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
@@ -103,9 +102,9 @@ namespace Sandra.UI
             settingCopy.AddOrReplace(Localizers.NativeName, "English");
             settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
             settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
-            SettingsFile.WriteToFile(
+
+            englishFileFromBuiltIn.WriteToFile(
                 settingCopy.Commit(),
-                englishFileFromBuiltIn.AbsoluteFilePath,
                 SettingWriterOptions.SuppressSettingComments);
         }
 #endif

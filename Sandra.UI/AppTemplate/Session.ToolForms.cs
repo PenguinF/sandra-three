@@ -119,9 +119,8 @@ namespace Eutherion.Win.AppTemplate
 
                             try
                             {
-                                SettingsFile.WriteToFile(
+                                LocalSettings.WriteToFile(
                                     localSettingsExample.Commit(),
-                                    LocalSettings.AbsoluteFilePath,
                                     SettingWriterOptions.CommentOutProperties);
                             }
                             catch (Exception exception)
@@ -167,9 +166,8 @@ namespace Eutherion.Win.AppTemplate
                         {
                             try
                             {
-                                SettingsFile.WriteToFile(
+                                DefaultSettings.WriteToFile(
                                     DefaultSettings.Settings,
-                                    DefaultSettings.AbsoluteFilePath,
                                     SettingWriterOptions.Default);
                             }
                             catch (Exception exception)
@@ -337,9 +335,8 @@ namespace Eutherion.Win.AppTemplate
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
                             try
                             {
-                                SettingsFile.WriteToFile(
+                                fileLocalizer.LanguageFile.WriteToFile(
                                     settingCopy.Commit(),
-                                    fileLocalizer.LanguageFile.AbsoluteFilePath,
                                     SettingWriterOptions.SuppressSettingComments);
                             }
                             catch (Exception exception)
