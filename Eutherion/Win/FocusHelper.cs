@@ -84,8 +84,8 @@ namespace Eutherion.Win
             };
         }
 
-        // Lazy<T> is thread-safe.
-        static readonly Lazy<FocusHelper> instance = new Lazy<FocusHelper>(() => new FocusHelper());
+        // SafeLazy<T> is thread-safe.
+        static readonly SafeLazy<FocusHelper> instance = new SafeLazy<FocusHelper>(() => new FocusHelper());
 
         /// <summary>
         /// Returns the singleton <see cref="FocusHelper"/> which is created on the thread which first uses it.
