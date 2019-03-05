@@ -84,7 +84,8 @@ namespace Eutherion.Win.Storage
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
-            settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.Load());
+            settingsFile.Load();
+            settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.LoadedText);
             return settingsFile;
         }
 
@@ -114,11 +115,11 @@ namespace Eutherion.Win.Storage
             watcher = new FileWatcher(absoluteFilePath);
         }
 
-        private SettingObject ReadSettingObject(string fileText)
+        private SettingObject ReadSettingObject(Union<Exception, string> fileTextOrException)
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
-            if (fileText != null)
+            if (fileTextOrException.IsOption2(out string fileText))
             {
                 SettingReader.ReadWorkingCopy(fileText, workingCopy);
             }
@@ -180,7 +181,8 @@ namespace Eutherion.Win.Storage
 
                     if (hasChanges)
                     {
-                        sc.Post(RaiseSettingsChangedEvent, Load());
+                        Load();
+                        sc.Post(RaiseSettingsChangedEvent, null);
                     }
 
                     // Stop the loop if the FileWatcher errored out.
@@ -234,8 +236,7 @@ namespace Eutherion.Win.Storage
 
         private void RaiseSettingsChangedEvent(object state)
         {
-            string newText = (string)state;
-            SettingObject newSettings = ReadSettingObject(newText);
+            SettingObject newSettings = ReadSettingObject(LoadedText);
 
             foreach (var property in ChangedProperties(newSettings))
             {

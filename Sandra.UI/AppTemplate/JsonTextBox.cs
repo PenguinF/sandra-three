@@ -26,7 +26,6 @@ using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -136,7 +135,11 @@ namespace Eutherion.Win.AppTemplate
             }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            Text = File.ReadAllText(settingsFile.AbsoluteFilePath);
+            if (settingsFile.LoadedText.IsOption2(out string loadedText))
+            {
+                Text = loadedText;
+            }
+
             EmptyUndoBuffer();
         }
 
@@ -312,7 +315,7 @@ namespace Eutherion.Win.AppTemplate
 
             if (perform)
             {
-                File.WriteAllText(settingsFile.AbsoluteFilePath, Text);
+                settingsFile.Save(Text);
                 SetSavePoint();
             }
 

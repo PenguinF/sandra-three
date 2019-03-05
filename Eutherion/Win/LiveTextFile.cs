@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.IO;
 using System.Security;
@@ -71,17 +72,22 @@ namespace Eutherion.Win
             AbsoluteFilePath = Path.GetFullPath(path);
         }
 
-        protected string Load()
+        /// <summary>
+        /// Gets the loaded file as text in memory, or an exception if it could not be loaded.
+        /// </summary>
+        public Union<Exception, string> LoadedText { get; private set; }
+
+        protected void Load()
         {
             try
             {
-                return File.ReadAllText(AbsoluteFilePath);
+                LoadedText = File.ReadAllText(AbsoluteFilePath);
             }
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
-                return null;
+                LoadedText = exception;
             }
         }
 
