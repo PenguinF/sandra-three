@@ -135,10 +135,9 @@ namespace Eutherion.Win.AppTemplate
             }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
-            if (settingsFile.LoadedText.IsOption2(out string loadedText))
-            {
-                Text = loadedText;
-            }
+            settingsFile.LoadedText.Match(
+                whenOption1: exception => throw exception,
+                whenOption2: loadedText => Text = loadedText);
 
             EmptyUndoBuffer();
         }

@@ -105,10 +105,9 @@ namespace Eutherion.Win.Storage
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
-            if (fileTextOrException.IsOption2(out string fileText))
-            {
-                SettingReader.ReadWorkingCopy(fileText, workingCopy);
-            }
+            fileTextOrException.Match(
+                whenOption1: exception => exception.Trace(),
+                whenOption2: fileText => SettingReader.ReadWorkingCopy(fileText, workingCopy));
 
             return workingCopy.Commit();
         }

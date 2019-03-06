@@ -100,7 +100,7 @@ namespace Eutherion.Win
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+                if (!IsExternalCauseFileException(exception)) throw;
                 LoadedText = exception;
             }
         }
