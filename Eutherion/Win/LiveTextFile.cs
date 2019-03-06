@@ -170,7 +170,6 @@ namespace Eutherion.Win
                         break;
                     }
 
-                    fileChangeSignalWaitHandle.WaitOne();
                     while (fileChangeSignalWaitHandle.WaitOne(50))
                     {
                         if (cancellationToken.IsCancellationRequested) break;
