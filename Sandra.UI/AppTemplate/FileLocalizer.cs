@@ -34,7 +34,7 @@ namespace Eutherion.Win.AppTemplate
     /// Apart from being a <see cref="Localizer"/>, contains properties
     /// to allow construction of <see cref="UIAction"/> bindings and interact with settings.
     /// </summary>
-    public sealed class FileLocalizer : Localizer, IWeakEventTarget
+    public sealed class FileLocalizer : Localizer, IWeakEventTarget, IDisposable
     {
         private class LanguageMenuItemProvider : ITextProvider, IImageProvider
         {
@@ -175,6 +175,12 @@ namespace Eutherion.Win.AppTemplate
 
         // TranslationsChanged only raises another WeakEvent so this does not indirectly leak.
         // FileLocalizers do not go out of scope during the lifetime of the application.
-        bool IWeakEventTarget.IsDisposed => false;
+        public bool IsDisposed { get; private set; }
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+            LanguageFile.Dispose();
+        }
     }
 }
