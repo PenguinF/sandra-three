@@ -116,6 +116,7 @@ namespace Eutherion.Win
         /// </exception>
         public void Save(string contents)
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
             File.WriteAllText(AbsoluteFilePath, contents);
         }
 
