@@ -35,7 +35,7 @@ namespace Eutherion.Win
     /// </summary>
     public class LiveTextFile : IDisposable
     {
-        protected static bool IsExternalCauseFileException(Exception exception) =>
+        private static bool IsExternalCauseFileException(Exception exception) =>
             exception is IOException ||
             exception is UnauthorizedAccessException ||
             exception is FileNotFoundException ||
@@ -83,6 +83,21 @@ namespace Eutherion.Win
         public LiveTextFile(string path)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
+            Load();
+
+            try
+            {
+                // Ensure the directory is created before creating the file watcher.
+                // TODO: Extend FileWatcher so it works even when the directory
+                //       doesn't exist yet.
+                Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
+            }
+            catch (Exception exception)
+            {
+                // 'Expected' exceptions can be traced, but rethrow developer errors.
+                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
+            }
+
             watcher = new FileWatcher(AbsoluteFilePath);
         }
 
@@ -91,7 +106,7 @@ namespace Eutherion.Win
         /// </summary>
         public Union<Exception, string> LoadedText { get; private set; }
 
-        protected void Load()
+        private void Load()
         {
             try
             {

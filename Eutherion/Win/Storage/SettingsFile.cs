@@ -68,19 +68,6 @@ namespace Eutherion.Win.Storage
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-
-            try
-            {
-                // Ensure the directory is created.
-                Directory.CreateDirectory(Path.GetDirectoryName(absoluteFilePath));
-            }
-            catch (Exception exception)
-            {
-                // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
-            }
-
-            settingsFile.Load();
             settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.LoadedText);
             return settingsFile;
         }
