@@ -228,10 +228,7 @@ namespace Eutherion.Win.Storage
                 // If null is returned from the first Load(), the integrity check failed.
                 if (loadedText == null)
                 {
-                    latestAutoSaveFile
-                        = latestAutoSaveFile == autoSaveFile1
-                        ? autoSaveFile2
-                        : autoSaveFile1;
+                    latestAutoSaveFile = Switch(latestAutoSaveFile);
 
                     try
                     {
@@ -370,15 +367,7 @@ namespace Eutherion.Win.Storage
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
-                        FileStream targetFile;
-                        if (lastWrittenToFile == autoSaveFile1)
-                        {
-                            targetFile = autoSaveFile2;
-                        }
-                        else
-                        {
-                            targetFile = autoSaveFile1;
-                        }
+                        FileStream targetFile = Switch(lastWrittenToFile);
 
                         // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                         // Theoretically, two thrown writeExceptions would have the same effect.
@@ -427,6 +416,9 @@ namespace Eutherion.Win.Storage
                 autoSaveFileStream.Dispose();
             }
         }
+
+        private FileStream Switch(FileStream autoSaveFile)
+            => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
 
         private string Load(FileStream autoSaveFile)
         {
