@@ -75,8 +75,20 @@ namespace Eutherion.Win.Storage
         private const byte LastWriteToFileStream2 = 2;
 
         private readonly FileStream autoSaveFileStream;
-        private readonly FileStream autoSaveFileStream1;
-        private readonly FileStream autoSaveFileStream2;
+
+        /// <summary>
+        /// The primary auto-save file.
+        /// </summary>
+        private readonly FileStream autoSaveFile1;
+
+        /// <summary>
+        /// The secondary auto-save file.
+        /// </summary>
+        private readonly FileStream autoSaveFile2;
+
+        /// <summary>
+        /// The Encoder which converts updated text to bytes to write to the auto-save file.
+        /// </summary>
         private readonly Encoder encoder;
 
         /// <summary>
@@ -115,7 +127,7 @@ namespace Eutherion.Win.Storage
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
-        /// Either <see cref="autoSaveFileStream1"/> or <see cref="autoSaveFileStream2"/>, whichever was last written to.
+        /// Either <see cref="autoSaveFile1"/> or <see cref="autoSaveFile2"/>, whichever was last written to.
         /// </summary>
         private FileStream lastWrittenToFileStream;
 
@@ -175,17 +187,17 @@ namespace Eutherion.Win.Storage
 
                 try
                 {
-                    autoSaveFileStream1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
-                    autoSaveFileStream2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
+                    autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
+                    autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
                 }
                 catch
                 {
                     autoSaveFileStream.Dispose();
                     autoSaveFileStream = null;
-                    if (autoSaveFileStream1 != null)
+                    if (autoSaveFile1 != null)
                     {
-                        autoSaveFileStream1.Dispose();
-                        autoSaveFileStream1 = null;
+                        autoSaveFile1.Dispose();
+                        autoSaveFile1 = null;
                     }
                     throw;
                 }
@@ -211,10 +223,10 @@ namespace Eutherion.Win.Storage
                 if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
 
                 FileStream latestAutoSaveFileStream
-                    = autoSaveFileStream2.Length == 0 ? autoSaveFileStream1
-                    : autoSaveFileStream1.Length == 0 ? autoSaveFileStream2
-                    : flag == LastWriteToFileStream2 ? autoSaveFileStream2
-                    : autoSaveFileStream1;
+                    = autoSaveFile2.Length == 0 ? autoSaveFile1
+                    : autoSaveFile1.Length == 0 ? autoSaveFile2
+                    : flag == LastWriteToFileStream2 ? autoSaveFile2
+                    : autoSaveFile1;
 
                 // Load remote settings.
                 List<JsonErrorInfo> errors;
@@ -239,9 +251,9 @@ namespace Eutherion.Win.Storage
                 if (tryOtherAutoSaveStream)
                 {
                     latestAutoSaveFileStream
-                        = latestAutoSaveFileStream == autoSaveFileStream1
-                        ? autoSaveFileStream2
-                        : autoSaveFileStream1;
+                        = latestAutoSaveFileStream == autoSaveFile1
+                        ? autoSaveFile2
+                        : autoSaveFile1;
 
                     try
                     {
@@ -376,9 +388,9 @@ namespace Eutherion.Win.Storage
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
                         FileStream writefileStream;
                         autoSaveFileStream.Seek(0, SeekOrigin.Begin);
-                        if (lastWrittenToFileStream == autoSaveFileStream1)
+                        if (lastWrittenToFileStream == autoSaveFile1)
                         {
-                            writefileStream = autoSaveFileStream2;
+                            writefileStream = autoSaveFile2;
                             // Truncate and append.
                             writefileStream.SetLength(0);
                             // Exactly now signal that autoSaveFileStream2 is the latest.
@@ -386,7 +398,7 @@ namespace Eutherion.Win.Storage
                         }
                         else
                         {
-                            writefileStream = autoSaveFileStream1;
+                            writefileStream = autoSaveFile1;
                             // Truncate and append.
                             writefileStream.SetLength(0);
                             // Exactly now signal that autoSaveFileStream1 is the latest.
@@ -428,8 +440,8 @@ namespace Eutherion.Win.Storage
 
                 // Dispose in opposite order of acquiring the lock on the files,
                 // so that inner files can only be locked if outer files are locked too.
-                autoSaveFileStream2.Dispose();
-                autoSaveFileStream1.Dispose();
+                autoSaveFile2.Dispose();
+                autoSaveFile1.Dispose();
                 autoSaveFileStream.Dispose();
             }
         }
