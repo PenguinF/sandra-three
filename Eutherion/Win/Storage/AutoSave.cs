@@ -372,7 +372,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
-        public static readonly int AutoSaveDelay = 5000;
+        public static readonly int AutoSaveDelay = 1000;
 
         /// <summary>
         /// The primary auto-save file.
