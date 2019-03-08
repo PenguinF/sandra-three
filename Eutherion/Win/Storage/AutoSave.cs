@@ -25,6 +25,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -432,6 +433,7 @@ namespace Eutherion.Win.Storage
         private string Load(FileStream autoSaveFile)
         {
             var streamReader = new StreamReader(autoSaveFile);
+            int.TryParse(streamReader.ReadLine(), out int expectedLength);
             string loadedText = streamReader.ReadToEnd();
             return loadedText;
         }
@@ -446,8 +448,18 @@ namespace Eutherion.Win.Storage
 
         private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
         {
+            const char newLineChar = '\n';
+
             // How much of the output still needs to be written.
             int remainingLength = textToSave.Length;
+
+            // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
+            // The length of its string representation will be smaller than CharBufferSize
+            // until the day string lengths exceed 10¹⁰²⁴ - 2.
+            string firstLine = remainingLength.ToString(CultureInfo.InvariantCulture) + newLineChar;
+            firstLine.CopyTo(0, buffer, 0, firstLine.Length);
+            int firstLineBytes = encoder.GetBytes(buffer, 0, firstLine.Length, encodedBuffer, 0, false);
+            await targetFile.WriteAsync(encodedBuffer, 0, firstLineBytes);
 
             // Number of characters already written from output. Loop invariant therefore is:
             // charactersCopied + remainingLength == output.Length.
