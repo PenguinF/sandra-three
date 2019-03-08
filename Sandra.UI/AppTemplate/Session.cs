@@ -103,7 +103,7 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            AutoSave = new AutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
+            AutoSave = new SettingsAutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
@@ -136,7 +136,7 @@ namespace Eutherion.Win.AppTemplate
 
         public SettingsFile LocalSettings { get; }
 
-        public AutoSave AutoSave { get; }
+        public SettingsAutoSave AutoSave { get; }
 
         public SettingProperty<FileLocalizer> LangSetting { get; }
 
