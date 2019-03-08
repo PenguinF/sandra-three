@@ -211,15 +211,8 @@ namespace Eutherion.Win.Storage
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
-                // Choose auto-save file to load from.
-                int flag = LastWriteToFileStream1;
-                if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
-
-                FileStream latestAutoSaveFile
-                    = autoSaveFile2.Length == 0 ? autoSaveFile1
-                    : autoSaveFile1.Length == 0 ? autoSaveFile2
-                    : flag == LastWriteToFileStream2 ? autoSaveFile2
-                    : autoSaveFile1;
+                // Choose first auto-save file to load from.
+                FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
 
                 string loadedText = null;
                 try
