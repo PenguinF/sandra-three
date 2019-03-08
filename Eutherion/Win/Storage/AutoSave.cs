@@ -215,8 +215,6 @@ namespace Eutherion.Win.Storage
                     : flag == LastWriteToFileStream2 ? autoSaveFile2
                     : autoSaveFile1;
 
-                // Load remote settings.
-                List<JsonErrorInfo> errors;
                 bool tryOtherAutoSaveStream = false;
                 string loadedText = null;
                 try
@@ -265,7 +263,7 @@ namespace Eutherion.Win.Storage
                 {
                     // Load into a copy of localSettings, preserving defaults.
                     var remoteWorkingCopy = localSettings.CreateWorkingCopy();
-                    errors = SettingReader.ReadWorkingCopy(loadedText, remoteWorkingCopy);
+                    List<JsonErrorInfo> errors = SettingReader.ReadWorkingCopy(loadedText, remoteWorkingCopy);
 
                     if (errors.Count > 0)
                     {
