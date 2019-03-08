@@ -198,6 +198,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Initialize encoders and buffers.
+                // Always use UTF8 for auto-saved text files.
                 Encoding encoding = Encoding.UTF8;
                 encoder = encoding.GetEncoder();
                 buffer = new char[CharBufferSize];
