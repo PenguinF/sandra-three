@@ -344,46 +344,53 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Empty the queue, take the latest update from it.
-                SettingCopy latestUpdate = null;
+                bool hasUpdate = updateQueue.TryDequeue(out SettingCopy firstUpdate);
 
-                while (updateQueue.TryDequeue(out SettingCopy update)) latestUpdate = update;
-
-                // Only return if the queue is empty and saved.
-                if (latestUpdate == null && ct.IsCancellationRequested)
+                if (!hasUpdate)
                 {
-                    break;
-                }
-
-                if (latestUpdate != null && !latestUpdate.EqualTo(remoteSettings))
-                {
-                    remoteSettings = latestUpdate.Commit();
-
-                    try
+                    // Only return if the queue is empty and saved.
+                    if (ct.IsCancellationRequested)
                     {
-                        string textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
-
-                        // Alterate between both auto-save files.
-                        // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
-                        FileStream targetFile = Switch(lastWrittenToFile);
-
-                        // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
-                        // Theoretically, two thrown writeExceptions would have the same effect.
-                        // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
-                        targetFile.SetLength(0);
-
-                        // Write the contents to the file.
-                        await WriteToFileAsync(targetFile, textToSave);
-
-                        // Only truncate the other file when completely successful, to indicate that
-                        // the auto-save file which was just saved is in a completely correct format.
-                        lastWrittenToFile.SetLength(0);
-
-                        // Switch to writing to the other file in the next iteration.
-                        lastWrittenToFile = targetFile;
+                        break;
                     }
-                    catch (Exception writeException)
+                }
+                else
+                {
+                    SettingCopy latestUpdate = firstUpdate;
+
+                    while (updateQueue.TryDequeue(out SettingCopy update)) latestUpdate = update;
+
+                    if (!latestUpdate.EqualTo(remoteSettings))
                     {
-                        writeException.Trace();
+                        remoteSettings = latestUpdate.Commit();
+
+                        try
+                        {
+                            string textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
+
+                            // Alterate between both auto-save files.
+                            // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
+                            FileStream targetFile = Switch(lastWrittenToFile);
+
+                            // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
+                            // Theoretically, two thrown writeExceptions would have the same effect.
+                            // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
+                            targetFile.SetLength(0);
+
+                            // Write the contents to the file.
+                            await WriteToFileAsync(targetFile, textToSave);
+
+                            // Only truncate the other file when completely successful, to indicate that
+                            // the auto-save file which was just saved is in a completely correct format.
+                            lastWrittenToFile.SetLength(0);
+
+                            // Switch to writing to the other file in the next iteration.
+                            lastWrittenToFile = targetFile;
+                        }
+                        catch (Exception writeException)
+                        {
+                            writeException.Trace();
+                        }
                     }
                 }
             }
