@@ -277,12 +277,13 @@ namespace Eutherion.Win.Storage
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="FileStream"/> in such a way that:
+        /// a) Create if it doesn't exist, open if it already exists.
+        /// b) Only this process can access it. Protects the folder from deletion as well.
+        /// </summary>
         private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
         {
-            // Create fileStream in such a way that:
-            // a) Create if it doesn't exist, open if it already exists.
-            // b) Only this process can access it. Protects the folder from deletion as well.
-            // It gets automatically closed when the application exits, i.e. no need for IDisposable.
             var autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
                                                     FileMode.OpenOrCreate,
                                                     FileAccess.ReadWrite,
