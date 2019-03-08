@@ -91,11 +91,6 @@ namespace Eutherion.Win.Storage
         public const int DefaultFileStreamBufferSize = 4096;
 
         /// <summary>
-        /// Minimal delay in milliseconds between two auto-save operations.
-        /// </summary>
-        public static readonly int AutoSaveDelay = 5000;
-
-        /// <summary>
         /// Gets the name of the file which acts as an exclusive lock between different instances
         /// of this process which might race to obtain a reference to the auto-save files.
         /// </summary>
@@ -125,21 +120,6 @@ namespace Eutherion.Win.Storage
         /// Settings as they are stored locally.
         /// </summary>
         private SettingObject localSettings;
-
-        /// <summary>
-        /// Contains scheduled updates to the remote settings.
-        /// </summary>
-        private readonly ConcurrentQueue<SettingCopy> updateQueue;
-
-        /// <summary>
-        /// Camcels the long running auto-save background task.
-        /// </summary>
-        private readonly CancellationTokenSource cts;
-
-        /// <summary>
-        /// Long running auto-save background task.
-        /// </summary>
-        private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -247,9 +227,9 @@ namespace Eutherion.Win.Storage
                     autoSaveFile.encodedBuffer = new byte[encoding.GetMaxByteCount(AutoSaveTextFile<SettingCopy>.CharBufferSize)];
 
                     // Set up long running task to keep auto-saving updates.
-                    updateQueue = new ConcurrentQueue<SettingCopy>();
-                    cts = new CancellationTokenSource();
-                    autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
+                    autoSaveFile.updateQueue = new ConcurrentQueue<SettingCopy>();
+                    autoSaveFile.cts = new CancellationTokenSource();
+                    autoSaveFile.autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, autoSaveFile.cts.Token);
                 }
                 catch
                 {
@@ -331,7 +311,7 @@ namespace Eutherion.Win.Storage
                 // Commit to localSettings.
                 localSettings = workingCopy.Commit();
 
-                if (updateQueue != null)
+                if (autoSaveFile != null)
                 {
                     // Persist a copy so its values are not shared with other threads.
                     Persist(localSettings.CreateWorkingCopy());
@@ -348,7 +328,7 @@ namespace Eutherion.Win.Storage
                 {
                     try
                     {
-                        await Task.Delay(AutoSaveDelay, ct);
+                        await Task.Delay(AutoSaveTextFile<SettingCopy>.AutoSaveDelay, ct);
                     }
                     catch
                     {
@@ -357,7 +337,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Empty the queue, take the latest update from it.
-                bool hasUpdate = updateQueue.TryDequeue(out SettingCopy firstUpdate);
+                bool hasUpdate = autoSaveFile.updateQueue.TryDequeue(out SettingCopy firstUpdate);
 
                 if (!hasUpdate)
                 {
@@ -371,7 +351,7 @@ namespace Eutherion.Win.Storage
                 {
                     // Create a local (thread-safe) list of updates to process.
                     List<SettingCopy> updates = new List<SettingCopy> { firstUpdate };
-                    while (updateQueue.TryDequeue(out SettingCopy update)) updates.Add(update);
+                    while (autoSaveFile.updateQueue.TryDequeue(out SettingCopy update)) updates.Add(update);
 
                     try
                     {
@@ -410,12 +390,12 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public void Close()
         {
-            if (cts != null)
+            if (autoSaveFile.cts != null)
             {
-                cts.Cancel();
+                autoSaveFile.cts.Cancel();
                 try
                 {
-                    autoSaveBackgroundTask.Wait();
+                    autoSaveFile.autoSaveBackgroundTask.Wait();
                 }
                 catch
                 {
@@ -437,7 +417,7 @@ namespace Eutherion.Win.Storage
         /// <param name="update">
         /// The update to persist.
         /// </param>
-        public void Persist(SettingCopy update) => updateQueue.Enqueue(update);
+        public void Persist(SettingCopy update) => autoSaveFile.updateQueue.Enqueue(update);
     }
 
     internal class AutoSaveFileParseException : Exception
@@ -522,6 +502,11 @@ namespace Eutherion.Win
         internal const int CharBufferSize = 1024;
 
         /// <summary>
+        /// Minimal delay in milliseconds between two auto-save operations.
+        /// </summary>
+        public static readonly int AutoSaveDelay = 5000;
+
+        /// <summary>
         /// The primary auto-save file.
         /// </summary>
         internal readonly FileStream autoSaveFile1;
@@ -545,6 +530,21 @@ namespace Eutherion.Win
         /// Serves as output for the encoder.
         /// </summary>
         internal byte[] encodedBuffer;
+
+        /// <summary>
+        /// Contains scheduled updates to the remote settings.
+        /// </summary>
+        internal ConcurrentQueue<TUpdate> updateQueue;
+
+        /// <summary>
+        /// Camcels the long running auto-save background task.
+        /// </summary>
+        internal CancellationTokenSource cts;
+
+        /// <summary>
+        /// Long running auto-save background task.
+        /// </summary>
+        internal Task autoSaveBackgroundTask;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
