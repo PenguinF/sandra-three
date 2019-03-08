@@ -314,7 +314,7 @@ namespace Eutherion.Win.Storage
                 if (autoSaveFile != null)
                 {
                     // Persist a copy so its values are not shared with other threads.
-                    Persist(localSettings.CreateWorkingCopy());
+                    autoSaveFile.Persist(localSettings.CreateWorkingCopy());
                 }
             }
         }
@@ -409,15 +409,6 @@ namespace Eutherion.Win.Storage
                 lockFile.Dispose();
             }
         }
-
-        /// <summary>
-        /// Persists an update to the auto-save file.
-        /// Update objects must be thread-safe, or not contain any shared state.
-        /// </summary>
-        /// <param name="update">
-        /// The update to persist.
-        /// </param>
-        public void Persist(SettingCopy update) => autoSaveFile.updateQueue.Enqueue(update);
     }
 
     internal class AutoSaveFileParseException : Exception
@@ -584,6 +575,15 @@ namespace Eutherion.Win
             if (expectedLength != loadedText.Length) return null;
             return loadedText;
         }
+
+        /// <summary>
+        /// Persists an update to the auto-save file.
+        /// Update objects must be thread-safe, or not contain any shared state.
+        /// </summary>
+        /// <param name="update">
+        /// The update to persist.
+        /// </param>
+        public void Persist(TUpdate update) => updateQueue.Enqueue(update);
 
         internal async Task WriteToFileAsync(FileStream targetFile, string textToSave)
         {
