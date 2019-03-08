@@ -40,7 +40,7 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class AutoSave
     {
-        private class SettingsRemoteState
+        private class SettingsRemoteState : AutoSaveTextFile.RemoteState
         {
             /// <summary>
             /// Settings representing how they are currently stored in the auto-save file.
@@ -575,6 +575,16 @@ namespace Eutherion.Win
     /// </remarks>
     public sealed class AutoSaveTextFile
     {
+        /// <summary>
+        /// Responsible for converting an arbitrary but non-empty sequence of persisted updates
+        /// to a string, which can then be saved to the underlying <see cref="FileStream"/>.
+        /// This conversion is done on an arbitrary background thread, and instances of this
+        /// class are expected to be thread-safe.
+        /// </summary>
+        public abstract class RemoteState
+        {
+        }
+
         /// <summary>
         /// The primary auto-save file.
         /// </summary>
