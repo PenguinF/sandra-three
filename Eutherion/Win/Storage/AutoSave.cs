@@ -90,9 +90,6 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public const int DefaultFileStreamBufferSize = 4096;
 
-        // This value seem to be recommended.
-        private const int CharBufferSize = 1024;
-
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
         /// </summary>
@@ -123,21 +120,6 @@ namespace Eutherion.Win.Storage
         /// Contains both auto-save files.
         /// </summary>
         private readonly AutoSaveTextFile autoSaveFile;
-
-        /// <summary>
-        /// The Encoder which converts updated text to bytes to write to the auto-save file.
-        /// </summary>
-        private readonly Encoder encoder;
-
-        /// <summary>
-        /// Serves as input for the encoder.
-        /// </summary>
-        private readonly char[] buffer;
-
-        /// <summary>
-        /// Serves as output for the encoder.
-        /// </summary>
-        private readonly byte[] encodedBuffer;
 
         /// <summary>
         /// Settings as they are stored locally.
@@ -260,9 +242,9 @@ namespace Eutherion.Win.Storage
                     // Initialize encoders and buffers.
                     // Always use UTF8 for auto-saved text files.
                     Encoding encoding = Encoding.UTF8;
-                    encoder = encoding.GetEncoder();
-                    buffer = new char[CharBufferSize];
-                    encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
+                    autoSaveFile.encoder = encoding.GetEncoder();
+                    autoSaveFile.buffer = new char[AutoSaveTextFile.CharBufferSize];
+                    autoSaveFile.encodedBuffer = new byte[encoding.GetMaxByteCount(AutoSaveTextFile.CharBufferSize)];
 
                     // Set up long running task to keep auto-saving updates.
                     updateQueue = new ConcurrentQueue<SettingCopy>();
@@ -405,7 +387,7 @@ namespace Eutherion.Win.Storage
                             targetFile.SetLength(0);
 
                             // Write the contents to the file.
-                            await WriteToFileAsync(targetFile, textToSave);
+                            await autoSaveFile.WriteToFileAsync(targetFile, textToSave);
 
                             // Only truncate the other file when completely successful, to indicate that
                             // the auto-save file which was just saved is in a completely correct format.
@@ -456,66 +438,6 @@ namespace Eutherion.Win.Storage
         /// The update to persist.
         /// </param>
         public void Persist(SettingCopy update) => updateQueue.Enqueue(update);
-
-        private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
-        {
-            const char newLineChar = '\n';
-
-            // How much of the output still needs to be written.
-            int remainingLength = textToSave.Length;
-
-            // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
-            // The length of its string representation will be smaller than CharBufferSize
-            // until the day string lengths exceed 10¹⁰²⁴ - 2.
-            string firstLine = remainingLength.ToString(CultureInfo.InvariantCulture) + newLineChar;
-            firstLine.CopyTo(0, buffer, 0, firstLine.Length);
-            int firstLineBytes = encoder.GetBytes(buffer, 0, firstLine.Length, encodedBuffer, 0, false);
-            await targetFile.WriteAsync(encodedBuffer, 0, firstLineBytes);
-
-            // Number of characters already written from output. Loop invariant therefore is:
-            // charactersCopied + remainingLength == output.Length.
-            int charactersCopied = 0;
-
-            // Fill up the character buffer before doing any writing.
-            for (; ; )
-            {
-                // Determine number of characters to write.
-                // AutoSave.CharBufferSize is known to be equal to buffer.Length.
-                int charWriteCount = CharBufferSize;
-
-                // Remember if this fill up the entire buffer.
-                bool bufferFull = charWriteCount <= remainingLength;
-                if (!bufferFull) charWriteCount = remainingLength;
-
-                // Now copy to the character buffer after checking its range.
-                textToSave.CopyTo(charactersCopied, buffer, 0, charWriteCount);
-
-                // If the buffer is full, call the encoder to convert it into bytes.
-                if (bufferFull)
-                {
-                    int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
-                    await targetFile.WriteAsync(encodedBuffer, 0, bytes);
-                }
-
-                // Update loop variables.
-                charactersCopied += charWriteCount;
-                remainingLength -= charWriteCount;
-
-                if (remainingLength == 0)
-                {
-                    // Process what's left in the buffer and Encoder.
-                    int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
-                    if (bytes > 0)
-                    {
-                        await targetFile.WriteAsync(encodedBuffer, 0, bytes);
-                    }
-
-                    // Make sure everything is written to the file before returning.
-                    await targetFile.FlushAsync();
-                    return;
-                }
-            }
-        }
     }
 
     internal class AutoSaveFileParseException : Exception
@@ -593,6 +515,9 @@ namespace Eutherion.Win
             public abstract void Initialize(string loadedText);
         }
 
+        // This value seem to be recommended.
+        internal const int CharBufferSize = 1024;
+
         /// <summary>
         /// The primary auto-save file.
         /// </summary>
@@ -602,6 +527,21 @@ namespace Eutherion.Win
         /// The secondary auto-save file.
         /// </summary>
         internal readonly FileStream autoSaveFile2;
+
+        /// <summary>
+        /// The Encoder which converts updated text to bytes to write to the auto-save file.
+        /// </summary>
+        internal Encoder encoder;
+
+        /// <summary>
+        /// Serves as input for the encoder.
+        /// </summary>
+        internal char[] buffer;
+
+        /// <summary>
+        /// Serves as output for the encoder.
+        /// </summary>
+        internal byte[] encodedBuffer;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
@@ -640,6 +580,66 @@ namespace Eutherion.Win
             // Integrity check: only allow loading from completed auto-save files.
             if (expectedLength != loadedText.Length) return null;
             return loadedText;
+        }
+
+        internal async Task WriteToFileAsync(FileStream targetFile, string textToSave)
+        {
+            const char newLineChar = '\n';
+
+            // How much of the output still needs to be written.
+            int remainingLength = textToSave.Length;
+
+            // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
+            // The length of its string representation will be smaller than CharBufferSize
+            // until the day string lengths exceed 10¹⁰²⁴ - 2.
+            string firstLine = remainingLength.ToString(CultureInfo.InvariantCulture) + newLineChar;
+            firstLine.CopyTo(0, buffer, 0, firstLine.Length);
+            int firstLineBytes = encoder.GetBytes(buffer, 0, firstLine.Length, encodedBuffer, 0, false);
+            await targetFile.WriteAsync(encodedBuffer, 0, firstLineBytes);
+
+            // Number of characters already written from output. Loop invariant therefore is:
+            // charactersCopied + remainingLength == output.Length.
+            int charactersCopied = 0;
+
+            // Fill up the character buffer before doing any writing.
+            for (; ; )
+            {
+                // Determine number of characters to write.
+                // AutoSave.CharBufferSize is known to be equal to buffer.Length.
+                int charWriteCount = CharBufferSize;
+
+                // Remember if this fill up the entire buffer.
+                bool bufferFull = charWriteCount <= remainingLength;
+                if (!bufferFull) charWriteCount = remainingLength;
+
+                // Now copy to the character buffer after checking its range.
+                textToSave.CopyTo(charactersCopied, buffer, 0, charWriteCount);
+
+                // If the buffer is full, call the encoder to convert it into bytes.
+                if (bufferFull)
+                {
+                    int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
+                    await targetFile.WriteAsync(encodedBuffer, 0, bytes);
+                }
+
+                // Update loop variables.
+                charactersCopied += charWriteCount;
+                remainingLength -= charWriteCount;
+
+                if (remainingLength == 0)
+                {
+                    // Process what's left in the buffer and Encoder.
+                    int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
+                    if (bytes > 0)
+                    {
+                        await targetFile.WriteAsync(encodedBuffer, 0, bytes);
+                    }
+
+                    // Make sure everything is written to the file before returning.
+                    await targetFile.FlushAsync();
+                    return;
+                }
+            }
         }
     }
 }
