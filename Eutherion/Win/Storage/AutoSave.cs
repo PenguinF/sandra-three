@@ -45,9 +45,29 @@ namespace Eutherion.Win.Storage
             /// <summary>
             /// Settings representing how they are currently stored in the auto-save file.
             /// </summary>
-            public SettingObject RemoteSettings;
+            public SettingObject RemoteSettings { get; private set; }
 
             public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
+
+            public void Initialize(string loadedText)
+            {
+                if (loadedText != null)
+                {
+                    // Load into a copy of RemoteSettings, preserving defaults.
+                    var workingCopy = RemoteSettings.CreateWorkingCopy();
+                    var errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
+
+                    if (errors.Count > 0)
+                    {
+                        // Leave RemoteSettings unchanged.
+                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
+                    }
+                    else
+                    {
+                        RemoteSettings = workingCopy.Commit();
+                    }
+                }
+            }
 
             public bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
             {
@@ -249,21 +269,9 @@ namespace Eutherion.Win.Storage
                     }
                 }
 
-                if (loadedText != null)
-                {
-                    // Load into a copy of localSettings, preserving defaults.
-                    var remoteWorkingCopy = localSettings.CreateWorkingCopy();
-                    List<JsonErrorInfo> errors = SettingReader.ReadWorkingCopy(loadedText, remoteWorkingCopy);
-
-                    if (errors.Count > 0)
-                    {
-                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
-                    }
-                    else
-                    {
-                        remoteState.RemoteSettings = remoteWorkingCopy.Commit();
-                    }
-                }
+                // Initialize remote state with the loaded text.
+                // If both reads failed, loadedText == null.
+                remoteState.Initialize(loadedText);
 
                 // Initialize encoders and buffers.
                 // Always use UTF8 for auto-saved text files.
