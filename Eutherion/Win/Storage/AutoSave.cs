@@ -185,51 +185,6 @@ namespace Eutherion.Win.Storage
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
                     autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFile1, autoSaveFile2);
-
-                    // Choose first auto-save file to load from.
-                    FileStream latestAutoSaveFile = autoSaveFile.autoSaveFile1.Length == 0 ? autoSaveFile.autoSaveFile2 : autoSaveFile.autoSaveFile1;
-
-                    string loadedText = null;
-                    try
-                    {
-                        loadedText = autoSaveFile.Load(latestAutoSaveFile);
-                    }
-                    catch (Exception firstLoadException)
-                    {
-                        // Trace and try the other auto-save file as a backup.
-                        firstLoadException.Trace();
-                    }
-
-                    // If null is returned from the first Load(), the integrity check failed.
-                    if (loadedText == null)
-                    {
-                        latestAutoSaveFile = autoSaveFile.Switch(latestAutoSaveFile);
-
-                        try
-                        {
-                            loadedText = autoSaveFile.Load(latestAutoSaveFile);
-                        }
-                        catch (Exception secondLoadException)
-                        {
-                            secondLoadException.Trace();
-                        }
-                    }
-
-                    // Initialize remote state with the loaded text.
-                    // If both reads failed, loadedText == null.
-                    remoteState.Initialize(loadedText);
-
-                    // Initialize encoders and buffers.
-                    // Always use UTF8 for auto-saved text files.
-                    Encoding encoding = Encoding.UTF8;
-                    autoSaveFile.encoder = encoding.GetEncoder();
-                    autoSaveFile.buffer = new char[AutoSaveTextFile<SettingCopy>.CharBufferSize];
-                    autoSaveFile.encodedBuffer = new byte[encoding.GetMaxByteCount(AutoSaveTextFile<SettingCopy>.CharBufferSize)];
-
-                    // Set up long running task to keep auto-saving updates.
-                    autoSaveFile.updateQueue = new ConcurrentQueue<SettingCopy>();
-                    autoSaveFile.cts = new CancellationTokenSource();
-                    autoSaveFile.autoSaveBackgroundTask = autoSaveFile.AutoSaveLoop(latestAutoSaveFile, remoteState, autoSaveFile.cts.Token);
                 }
                 catch
                 {
@@ -256,12 +211,10 @@ namespace Eutherion.Win.Storage
             }
             catch (ArgumentException)
             {
-                autoSaveFile?.Dispose();
                 throw;
             }
             catch (NotSupportedException)
             {
-                autoSaveFile?.Dispose();
                 throw;
             }
             catch (Exception initAutoSaveException)
@@ -425,7 +378,7 @@ namespace Eutherion.Win
         }
 
         // This value seem to be recommended.
-        internal const int CharBufferSize = 1024;
+        private const int CharBufferSize = 1024;
 
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
@@ -435,42 +388,42 @@ namespace Eutherion.Win
         /// <summary>
         /// The primary auto-save file.
         /// </summary>
-        internal readonly FileStream autoSaveFile1;
+        private readonly FileStream autoSaveFile1;
 
         /// <summary>
         /// The secondary auto-save file.
         /// </summary>
-        internal readonly FileStream autoSaveFile2;
+        private readonly FileStream autoSaveFile2;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
         /// </summary>
-        internal Encoder encoder;
+        private readonly Encoder encoder;
 
         /// <summary>
         /// Serves as input for the encoder.
         /// </summary>
-        internal char[] buffer;
+        private readonly char[] buffer;
 
         /// <summary>
         /// Serves as output for the encoder.
         /// </summary>
-        internal byte[] encodedBuffer;
+        private readonly byte[] encodedBuffer;
 
         /// <summary>
         /// Contains scheduled updates to the remote settings.
         /// </summary>
-        internal ConcurrentQueue<TUpdate> updateQueue;
+        private readonly ConcurrentQueue<TUpdate> updateQueue;
 
         /// <summary>
         /// Camcels the long running auto-save background task.
         /// </summary>
-        internal CancellationTokenSource cts;
+        private readonly CancellationTokenSource cts;
 
         /// <summary>
         /// Long running auto-save background task.
         /// </summary>
-        internal Task autoSaveBackgroundTask;
+        private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
@@ -499,12 +452,58 @@ namespace Eutherion.Win
 
             this.autoSaveFile1 = autoSaveFile1 ?? throw new ArgumentNullException(nameof(autoSaveFile1));
             this.autoSaveFile2 = autoSaveFile2 ?? throw new ArgumentNullException(nameof(autoSaveFile2));
+
+            // Immediately attempt to load the saved contents from either FileStream.
+            // Choose first auto-save file to load from.
+            FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
+
+            string loadedText = null;
+            try
+            {
+                loadedText = Load(latestAutoSaveFile);
+            }
+            catch (Exception firstLoadException)
+            {
+                // Trace and try the other auto-save file as a backup.
+                firstLoadException.Trace();
+            }
+
+            // If null is returned from the first Load(), the integrity check failed.
+            if (loadedText == null)
+            {
+                latestAutoSaveFile = Switch(latestAutoSaveFile);
+
+                try
+                {
+                    loadedText = Load(latestAutoSaveFile);
+                }
+                catch (Exception secondLoadException)
+                {
+                    secondLoadException.Trace();
+                }
+            }
+
+            // Initialize remote state with the loaded text.
+            // If both reads failed, loadedText == null.
+            remoteState.Initialize(loadedText);
+
+            // Initialize encoders and buffers.
+            // Always use UTF8 for auto-saved text files.
+            Encoding encoding = Encoding.UTF8;
+            encoder = encoding.GetEncoder();
+            buffer = new char[CharBufferSize];
+            encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
+
+            // Set up long running task to keep auto-saving updates.
+            updateQueue = new ConcurrentQueue<TUpdate>();
+            cts = new CancellationTokenSource();
+            autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
         }
 
-        internal FileStream Switch(FileStream autoSaveFile)
+        private FileStream Switch(FileStream autoSaveFile)
             => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
 
-        internal string Load(FileStream autoSaveFile)
+        private string Load(FileStream autoSaveFile)
         {
             var streamReader = new StreamReader(autoSaveFile);
             int.TryParse(streamReader.ReadLine(), out int expectedLength);
@@ -524,7 +523,7 @@ namespace Eutherion.Win
         /// </param>
         public void Persist(TUpdate update) => updateQueue.Enqueue(update);
 
-        internal async Task WriteToFileAsync(FileStream targetFile, string textToSave)
+        private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
         {
             const char newLineChar = '\n';
 
@@ -584,7 +583,7 @@ namespace Eutherion.Win
             }
         }
 
-        internal async Task AutoSaveLoop(FileStream lastWrittenToFile, RemoteState remoteState, CancellationToken ct)
+        private async Task AutoSaveLoop(FileStream lastWrittenToFile, RemoteState remoteState, CancellationToken ct)
         {
             for (; ; )
             {
@@ -655,17 +654,14 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            if (cts != null)
+            cts.Cancel();
+            try
             {
-                cts.Cancel();
-                try
-                {
-                    autoSaveBackgroundTask.Wait();
-                }
-                catch
-                {
-                    // Have to catch cancelled exceptions.
-                }
+                autoSaveBackgroundTask.Wait();
+            }
+            catch
+            {
+                // Have to catch cancelled exceptions.
             }
 
             // Dispose in opposite order of acquiring the lock on the files,
