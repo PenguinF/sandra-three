@@ -356,10 +356,11 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    SettingCopy latestUpdate = firstUpdate;
+                    // Create a local (thread-safe) list of updates to process.
+                    List<SettingCopy> updates = new List<SettingCopy> { firstUpdate };
+                    while (updateQueue.TryDequeue(out SettingCopy update)) updates.Add(update);
 
-                    while (updateQueue.TryDequeue(out SettingCopy update)) latestUpdate = update;
-
+                    SettingCopy latestUpdate = updates[updates.Count - 1];
                     if (!latestUpdate.EqualTo(remoteSettings))
                     {
                         remoteSettings = latestUpdate.Commit();
