@@ -441,25 +441,12 @@ namespace Eutherion.Win.Storage
 
         private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<JsonErrorInfo> errors)
         {
-            // Reuse one string builder to build keys and values.
-            StringBuilder sb = new StringBuilder();
-
-            // Loop until the entire file is read.
-            for (; ; )
-            {
-                int bytes = autoSaveFileStream.Read(inputBuffer, 0, CharBufferSize);
-                if (bytes == 0) break;
-
-                int chars = decoder.GetChars(inputBuffer, 0, bytes, decodedBuffer, 0);
-                if (chars > 0)
-                {
-                    sb.Append(decodedBuffer, 0, chars);
-                }
-            }
+            var streamReader = new StreamReader(autoSaveFileStream);
+            string loadedText = streamReader.ReadToEnd();
 
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
-            errors = SettingReader.ReadWorkingCopy(sb.ToString(), workingCopy);
+            errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
             return workingCopy.Commit();
         }
 
