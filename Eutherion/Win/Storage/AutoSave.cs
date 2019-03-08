@@ -181,6 +181,10 @@ namespace Eutherion.Win.Storage
 
                 autoSaveFileStream = CreateAutoSaveFileStream(baseDir, AutoSaveFileName);
 
+                // In the unlikely event that both auto-save files generate an error,
+                // just initialize from localSettings so auto-saves within the session are still enabled.
+                remoteSettings = localSettings;
+
                 try
                 {
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
@@ -238,17 +242,10 @@ namespace Eutherion.Win.Storage
                     try
                     {
                         loadedText = Load(latestAutoSaveFile);
-                        if (loadedText == null)
-                        {
-                            remoteSettings = localSettings;
-                        }
                     }
                     catch (Exception secondLoadException)
                     {
-                        // In the unlikely event that both auto-save files generate an error,
-                        // just initialize from localSettings so auto-saves are still enabled.
                         secondLoadException.Trace();
-                        remoteSettings = localSettings;
                     }
                 }
 
@@ -261,7 +258,6 @@ namespace Eutherion.Win.Storage
                     if (errors.Count > 0)
                     {
                         errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
-                        remoteSettings = localSettings;
                     }
                     else
                     {
@@ -269,13 +265,14 @@ namespace Eutherion.Win.Storage
                     }
                 }
 
-                // Override localSettings with remoteSettings.
-                if (remoteSettings != null) localSettings = remoteSettings;
-
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
                 cts = new CancellationTokenSource();
                 autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, cts.Token);
+
+                // Override localSettings with remoteSettings.
+                // This is thread-safe because nothing is yet persisted to either autoSaveFile1 or autoSaveFile2.
+                localSettings = remoteSettings;
             }
             catch (ArgumentException)
             {
