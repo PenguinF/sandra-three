@@ -263,7 +263,11 @@ namespace Eutherion.Win.Storage
 
                 if (loadedText != null)
                 {
-                    remoteSettings = Load(loadedText, out errors);
+                    // Load into a copy of localSettings, preserving defaults.
+                    var remoteWorkingCopy = localSettings.CreateWorkingCopy();
+                    errors = SettingReader.ReadWorkingCopy(loadedText, remoteWorkingCopy);
+                    remoteSettings = remoteWorkingCopy.Commit();
+
                     if (errors.Count > 0)
                     {
                         errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
@@ -450,14 +454,6 @@ namespace Eutherion.Win.Storage
             // Integrity check: only allow loading from completed auto-save files.
             if (expectedLength != loadedText.Length) return null;
             return loadedText;
-        }
-
-        private SettingObject Load(string loadedText, out List<JsonErrorInfo> errors)
-        {
-            // Load into a copy of localSettings, preserving defaults.
-            var workingCopy = localSettings.CreateWorkingCopy();
-            errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
-            return workingCopy.Commit();
         }
 
         private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
