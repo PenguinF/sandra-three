@@ -69,7 +69,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            public bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            public override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
             {
                 SettingCopy latestUpdate = updates[updates.Count - 1];
 
@@ -229,7 +229,7 @@ namespace Eutherion.Win.Storage
                     // Set up long running task to keep auto-saving updates.
                     autoSaveFile.updateQueue = new ConcurrentQueue<SettingCopy>();
                     autoSaveFile.cts = new CancellationTokenSource();
-                    autoSaveFile.autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, autoSaveFile.cts.Token);
+                    autoSaveFile.autoSaveBackgroundTask = autoSaveFile.AutoSaveLoop(latestAutoSaveFile, remoteState, autoSaveFile.cts.Token);
                 }
                 catch
                 {
@@ -251,7 +251,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Override localSettings with RemoteSettings.
-                // This is thread-safe because nothing is yet persisted to either autoSaveFile1 or autoSaveFile2.
+                // This is thread-safe because nothing is yet persisted to autoSaveFile.
                 localSettings = remoteState.RemoteSettings;
             }
             catch (ArgumentException)
@@ -315,72 +315,6 @@ namespace Eutherion.Win.Storage
                 {
                     // Persist a copy so its values are not shared with other threads.
                     autoSaveFile.Persist(localSettings.CreateWorkingCopy());
-                }
-            }
-        }
-
-        private async Task AutoSaveLoop(FileStream lastWrittenToFile, SettingsRemoteState remoteState, CancellationToken ct)
-        {
-            for (; ; )
-            {
-                // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
-                if (!ct.IsCancellationRequested)
-                {
-                    try
-                    {
-                        await Task.Delay(AutoSaveTextFile<SettingCopy>.AutoSaveDelay, ct);
-                    }
-                    catch
-                    {
-                        // If the task was cancelled, empty the queue before leaving this method.
-                    }
-                }
-
-                // Empty the queue, take the latest update from it.
-                bool hasUpdate = autoSaveFile.updateQueue.TryDequeue(out SettingCopy firstUpdate);
-
-                if (!hasUpdate)
-                {
-                    // Only return if the queue is empty and saved.
-                    if (ct.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    // Create a local (thread-safe) list of updates to process.
-                    List<SettingCopy> updates = new List<SettingCopy> { firstUpdate };
-                    while (autoSaveFile.updateQueue.TryDequeue(out SettingCopy update)) updates.Add(update);
-
-                    try
-                    {
-                        if (remoteState.ShouldSave(updates, out string textToSave))
-                        {
-                            // Alterate between both auto-save files.
-                            // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
-                            FileStream targetFile = autoSaveFile.Switch(lastWrittenToFile);
-
-                            // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
-                            // Theoretically, two thrown writeExceptions would have the same effect.
-                            // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
-                            targetFile.SetLength(0);
-
-                            // Write the contents to the file.
-                            await autoSaveFile.WriteToFileAsync(targetFile, textToSave);
-
-                            // Only truncate the other file when completely successful, to indicate that
-                            // the auto-save file which was just saved is in a completely correct format.
-                            lastWrittenToFile.SetLength(0);
-
-                            // Switch to writing to the other file in the next iteration.
-                            lastWrittenToFile = targetFile;
-                        }
-                    }
-                    catch (Exception writeException)
-                    {
-                        writeException.Trace();
-                    }
                 }
             }
         }
@@ -487,6 +421,21 @@ namespace Eutherion.Win
             /// auto-save file could be loaded.
             /// </param>
             public abstract void Initialize(string loadedText);
+
+            /// <summary>
+            /// Converts a non-empty sequence of persisted updates to a string
+            /// so it can be saved to the underlying <see cref="FileStream"/>.
+            /// </summary>
+            /// <param name="updates">
+            /// The non-empty sequence of persisted updates to convert.
+            /// </param>
+            /// <param name="textToSave">
+            /// If this function returns true, the text to save. Otherwise, the default string value.
+            /// </param>
+            /// <returns>
+            /// Whether or not to auto-save the result.
+            /// </returns>
+            public abstract bool ShouldSave(IReadOnlyList<TUpdate> updates, out string textToSave);
         }
 
         // This value seem to be recommended.
@@ -641,6 +590,72 @@ namespace Eutherion.Win
                     // Make sure everything is written to the file before returning.
                     await targetFile.FlushAsync();
                     return;
+                }
+            }
+        }
+
+        internal async Task AutoSaveLoop(FileStream lastWrittenToFile, RemoteState remoteState, CancellationToken ct)
+        {
+            for (; ; )
+            {
+                // If cancellation is requested, stop waiting so the queue can be emptied as quickly as possible.
+                if (!ct.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await Task.Delay(AutoSaveDelay, ct);
+                    }
+                    catch
+                    {
+                        // If the task was cancelled, empty the queue before leaving this method.
+                    }
+                }
+
+                // Empty the queue, take the latest update from it.
+                bool hasUpdate = updateQueue.TryDequeue(out TUpdate firstUpdate);
+
+                if (!hasUpdate)
+                {
+                    // Only return if the queue is empty and saved.
+                    if (ct.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    // Create a local (thread-safe) list of updates to process.
+                    List<TUpdate> updates = new List<TUpdate> { firstUpdate };
+                    while (updateQueue.TryDequeue(out TUpdate update)) updates.Add(update);
+
+                    try
+                    {
+                        if (remoteState.ShouldSave(updates, out string textToSave))
+                        {
+                            // Alterate between both auto-save files.
+                            // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
+                            FileStream targetFile = Switch(lastWrittenToFile);
+
+                            // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
+                            // Theoretically, two thrown writeExceptions would have the same effect.
+                            // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
+                            targetFile.SetLength(0);
+
+                            // Write the contents to the file.
+                            await WriteToFileAsync(targetFile, textToSave);
+
+                            // Only truncate the other file when completely successful, to indicate that
+                            // the auto-save file which was just saved is in a completely correct format.
+                            lastWrittenToFile.SetLength(0);
+
+                            // Switch to writing to the other file in the next iteration.
+                            lastWrittenToFile = targetFile;
+                        }
+                    }
+                    catch (Exception writeException)
+                    {
+                        writeException.Trace();
+                    }
                 }
             }
         }
