@@ -40,7 +40,7 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class AutoSave
     {
-        private class SettingsRemoteState : AutoSaveTextFile.RemoteState
+        private class SettingsRemoteState : AutoSaveTextFile<SettingCopy>.RemoteState
         {
             /// <summary>
             /// Settings representing how they are currently stored in the auto-save file.
@@ -119,7 +119,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Contains both auto-save files.
         /// </summary>
-        private readonly AutoSaveTextFile autoSaveFile;
+        private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
 
         /// <summary>
         /// Settings as they are stored locally.
@@ -204,7 +204,7 @@ namespace Eutherion.Win.Storage
                 {
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
-                    autoSaveFile = new AutoSaveTextFile(remoteState, autoSaveFile1, autoSaveFile2);
+                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFile1, autoSaveFile2);
 
                     // Choose first auto-save file to load from.
                     FileStream latestAutoSaveFile = autoSaveFile.autoSaveFile1.Length == 0 ? autoSaveFile.autoSaveFile2 : autoSaveFile.autoSaveFile1;
@@ -243,8 +243,8 @@ namespace Eutherion.Win.Storage
                     // Always use UTF8 for auto-saved text files.
                     Encoding encoding = Encoding.UTF8;
                     autoSaveFile.encoder = encoding.GetEncoder();
-                    autoSaveFile.buffer = new char[AutoSaveTextFile.CharBufferSize];
-                    autoSaveFile.encodedBuffer = new byte[encoding.GetMaxByteCount(AutoSaveTextFile.CharBufferSize)];
+                    autoSaveFile.buffer = new char[AutoSaveTextFile<SettingCopy>.CharBufferSize];
+                    autoSaveFile.encodedBuffer = new byte[encoding.GetMaxByteCount(AutoSaveTextFile<SettingCopy>.CharBufferSize)];
 
                     // Set up long running task to keep auto-saving updates.
                     updateQueue = new ConcurrentQueue<SettingCopy>();
@@ -461,6 +461,9 @@ namespace Eutherion.Win
     /// to open the <see cref="FileStream"/>s with both <see cref="FileOptions.SequentialScan"/>
     /// and <see cref="FileOptions.Asynchronous"/>.
     /// </summary>
+    /// <typeparam name="TUpdate">
+    /// The type of updates to persist. A non-empty sequence of updates is converted to text which is then saved to the file.
+    /// </typeparam>
     /// <remarks>
     /// The auto-save <see cref="FileStream"/>s A and B go through these phases cyclically:
     ///
@@ -495,7 +498,7 @@ namespace Eutherion.Win
     ///     non-empty, it is already immediately invalid.
     /// (b) After writing the last character to the file, it immediately becomes valid.
     /// </remarks>
-    public sealed class AutoSaveTextFile
+    public sealed class AutoSaveTextFile<TUpdate>
     {
         /// <summary>
         /// Responsible for converting an arbitrary but non-empty sequence of persisted updates
