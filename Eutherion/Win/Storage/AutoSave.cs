@@ -400,8 +400,11 @@ namespace Eutherion.Win.Storage
                         // Spend as little time as possible writing to writefileStream.
                         await WriteToFileAsync(targetFile, textToSave);
 
-                        // Only save when completely successful, to maximize chances that at least
-                        // one of both auto-save files is in a completely correct format.
+                        // Only truncate the other file when completely successful, to indicate that
+                        // the auto-save file which was just saved is in a completely correct format.
+                        lastWrittenToFile.SetLength(0);
+
+                        // Switch to writing to the other file in the next iteration.
                         lastWrittenToFile = targetFile;
                     }
                     catch (Exception writeException)
