@@ -40,6 +40,31 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class AutoSave
     {
+        private class SettingsRemoteState
+        {
+            /// <summary>
+            /// Settings representing how they are currently stored in the auto-save file.
+            /// </summary>
+            public SettingObject RemoteSettings;
+
+            public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
+
+            public bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            {
+                SettingCopy latestUpdate = updates[updates.Count - 1];
+
+                if (!latestUpdate.EqualTo(RemoteSettings))
+                {
+                    RemoteSettings = latestUpdate.Commit();
+                    textToSave = CompactSettingWriter.ConvertToJson(RemoteSettings.Map);
+                    return true;
+                }
+
+                textToSave = default(string);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Documented default value of the 'bufferSize' parameter of the <see cref="FileStream"/> constructor.
         /// </summary>
@@ -103,11 +128,6 @@ namespace Eutherion.Win.Storage
         /// Settings as they are stored locally.
         /// </summary>
         private SettingObject localSettings;
-
-        /// <summary>
-        /// Settings representing how they are currently stored in the auto-save file.
-        /// </summary>
-        private SettingObject remoteSettings;
 
         /// <summary>
         /// Contains scheduled updates to the remote settings.
@@ -179,7 +199,7 @@ namespace Eutherion.Win.Storage
 
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from localSettings so auto-saves within the session are still enabled.
-                remoteSettings = localSettings;
+                var remoteState = new SettingsRemoteState(localSettings);
 
                 try
                 {
@@ -241,7 +261,7 @@ namespace Eutherion.Win.Storage
                     }
                     else
                     {
-                        remoteSettings = remoteWorkingCopy.Commit();
+                        remoteState.RemoteSettings = remoteWorkingCopy.Commit();
                     }
                 }
 
@@ -252,14 +272,14 @@ namespace Eutherion.Win.Storage
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
-                // Set up long running task to keep auto-saving remoteSettings.
+                // Set up long running task to keep auto-saving updates.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
                 cts = new CancellationTokenSource();
-                autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, cts.Token);
+                autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
 
-                // Override localSettings with remoteSettings.
+                // Override localSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to either autoSaveFile1 or autoSaveFile2.
-                localSettings = remoteSettings;
+                localSettings = remoteState.RemoteSettings;
             }
             catch (ArgumentException)
             {
@@ -326,22 +346,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
-        {
-            SettingCopy latestUpdate = updates[updates.Count - 1];
-
-            if (!latestUpdate.EqualTo(remoteSettings))
-            {
-                remoteSettings = latestUpdate.Commit();
-                textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
-                return true;
-            }
-
-            textToSave = default(string);
-            return false;
-        }
-
-        private async Task AutoSaveLoop(FileStream lastWrittenToFile, CancellationToken ct)
+        private async Task AutoSaveLoop(FileStream lastWrittenToFile, SettingsRemoteState remoteState, CancellationToken ct)
         {
             for (; ; )
             {
@@ -377,7 +382,7 @@ namespace Eutherion.Win.Storage
 
                     try
                     {
-                        if (ShouldSave(updates, out string textToSave))
+                        if (remoteState.ShouldSave(updates, out string textToSave))
                         {
                             // Alterate between both auto-save files.
                             // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
