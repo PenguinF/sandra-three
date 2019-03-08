@@ -266,11 +266,11 @@ namespace Eutherion.Win
         private string Load(FileStream autoSaveFile)
         {
             var streamReader = new StreamReader(autoSaveFile);
-            int.TryParse(streamReader.ReadLine(), out int expectedLength);
+            if (!uint.TryParse(streamReader.ReadLine(), out uint expectedLength)) return null;
             string loadedText = streamReader.ReadToEnd();
 
             // Integrity check: only allow loading from completed auto-save files.
-            if (expectedLength != loadedText.Length) return null;
+            if (expectedLength != (uint)loadedText.Length) return null;
             return loadedText;
         }
 
