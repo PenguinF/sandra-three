@@ -204,13 +204,6 @@ namespace Eutherion.Win.Storage
                     throw;
                 }
 
-                // Initialize encoders and buffers.
-                // Always use UTF8 for auto-saved text files.
-                Encoding encoding = Encoding.UTF8;
-                encoder = encoding.GetEncoder();
-                buffer = new char[CharBufferSize];
-                encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
-
                 // Choose first auto-save file to load from.
                 FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
 
@@ -255,6 +248,13 @@ namespace Eutherion.Win.Storage
                         remoteSettings = remoteWorkingCopy.Commit();
                     }
                 }
+
+                // Initialize encoders and buffers.
+                // Always use UTF8 for auto-saved text files.
+                Encoding encoding = Encoding.UTF8;
+                encoder = encoding.GetEncoder();
+                buffer = new char[CharBufferSize];
+                encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
