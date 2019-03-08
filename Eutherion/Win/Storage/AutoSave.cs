@@ -39,9 +39,13 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public sealed class AutoSave
     {
-        // These values seem to be recommended.
+        /// <summary>
+        /// Documented default value of the 'bufferSize' parameter of the <see cref="FileStream"/> constructor.
+        /// </summary>
+        public const int DefaultFileStreamBufferSize = 4096;
+
+        // This value seem to be recommended.
         private const int CharBufferSize = 1024;
-        private const int FileStreamBufferSize = 4096;
 
         /// <summary>
         /// Minimal delay in milliseconds between two auto-save operations.
@@ -294,7 +298,7 @@ namespace Eutherion.Win.Storage
                                                     FileMode.OpenOrCreate,
                                                     FileAccess.ReadWrite,
                                                     FileShare.Read,
-                                                    FileStreamBufferSize,
+                                                    DefaultFileStreamBufferSize,
                                                     FileOptions.SequentialScan);
 
             // Assert capabilities of the file stream.
