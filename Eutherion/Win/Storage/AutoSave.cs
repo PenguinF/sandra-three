@@ -215,27 +215,20 @@ namespace Eutherion.Win.Storage
                     : flag == LastWriteToFileStream2 ? autoSaveFile2
                     : autoSaveFile1;
 
-                bool tryOtherAutoSaveStream = false;
                 string loadedText = null;
                 try
                 {
                     loadedText = Load(latestAutoSaveFile);
-
-                    // If null is returned from the first Load(), the integrity check failed.
-                    if (loadedText == null)
-                    {
-                        tryOtherAutoSaveStream = true;
-                    }
                 }
                 catch (Exception firstLoadException)
                 {
                     // Trace and try the other auto-save file as a backup.
                     // Also use a new decoder.
                     firstLoadException.Trace();
-                    tryOtherAutoSaveStream = true;
                 }
 
-                if (tryOtherAutoSaveStream)
+                // If null is returned from the first Load(), the integrity check failed.
+                if (loadedText == null)
                 {
                     latestAutoSaveFile
                         = latestAutoSaveFile == autoSaveFile1
