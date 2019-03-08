@@ -521,3 +521,50 @@ namespace Eutherion.Win.Storage
             : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
     }
 }
+
+namespace Eutherion.Win
+{
+    /// <summary>
+    /// Encapsulates a pair of <see cref="FileStream"/>s which are used for auto-saving text files.
+    /// This class is tailored for frequent sequential asynchronous writing of text, so it is a good idea
+    /// to open the <see cref="FileStream"/>s with both <see cref="FileOptions.SequentialScan"/>
+    /// and <see cref="FileOptions.Asynchronous"/>.
+    /// </summary>
+    /// <remarks>
+    /// The auto-save <see cref="FileStream"/>s A and B go through these phases cyclically:
+    ///
+    /// (1) A is a valid non-empty state and B is empty.
+    ///     The auto-save loop is waiting for the next auto-save operation.
+    /// (2) B is non-empty and in the process of being written to.
+    /// (3) Writing to B has finished and both A and B are in a valid non-empty state.
+    /// (4) B is a valid non-empty state and A is empty.
+    ///     The auto-save loop is waiting for the next auto-save operation.
+    /// (5) A is non-empty and in the process of being written to.
+    /// (6) Writing to A has finished and both A and B are in a valid non-empty state.
+    /// (7) Back to (1).
+    /// 
+    /// Recovering from crashes is straightforward when the crash happened in phases (1) or (4),
+    /// done by choosing the only non-empty file - and if both files were empty, nothing was saved yet.
+    /// 
+    /// Recovering from phases (3) or (6) can be done by choosing one of both files arbitrarily.
+    /// Distinguishing between both phases is impossible but since these phases are by far the shortest,
+    /// an arbitrary choice carries only little risk and has little impact because then the ignored
+    /// phase is interpreted as being in its preceding phase. (FileInfo.LastWriteTimeUtc would be an idea
+    /// but it turns out not to be precise enough to select the right auto-save file.)
+    /// 
+    /// Recovering from phases (2) or (5) is hardest because it assumes that a file can be in a valid
+    /// as well as an invalid state, and that distinction is made solely based on whether or not
+    /// the last character of the text was already written to the file. With e.g. json this would be
+    /// trivial because its last character is always a closing brace, but for other auto-save file formats
+    /// this is generally not the case.
+    /// 
+    /// The idea therefore is to start with the expected length of the text followed by a fixed newline
+    /// character. This works because:
+    /// (a) This length cannot be zero, and numbers do not start with a zero. So if the file is
+    ///     non-empty, it is already immediately invalid.
+    /// (b) After writing the last character to the file, it immediately becomes valid.
+    /// </remarks>
+    public sealed class AutoSaveTextFile
+    {
+    }
+}
