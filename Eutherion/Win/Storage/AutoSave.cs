@@ -266,12 +266,15 @@ namespace Eutherion.Win.Storage
                     // Load into a copy of localSettings, preserving defaults.
                     var remoteWorkingCopy = localSettings.CreateWorkingCopy();
                     errors = SettingReader.ReadWorkingCopy(loadedText, remoteWorkingCopy);
-                    remoteSettings = remoteWorkingCopy.Commit();
 
                     if (errors.Count > 0)
                     {
                         errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                         remoteSettings = localSettings;
+                    }
+                    else
+                    {
+                        remoteSettings = remoteWorkingCopy.Commit();
                     }
                 }
 
