@@ -371,24 +371,18 @@ namespace Eutherion.Win.Storage
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
                         FileStream targetFile;
-                        autoSaveFileStream.Seek(0, SeekOrigin.Begin);
                         if (lastWrittenToFile == autoSaveFile1)
                         {
                             targetFile = autoSaveFile2;
                             // Truncate and append.
                             targetFile.SetLength(0);
-                            // Exactly now signal that autoSaveFileStream2 is the latest.
-                            autoSaveFileStream.WriteByte(LastWriteToFileStream2);
                         }
                         else
                         {
                             targetFile = autoSaveFile1;
                             // Truncate and append.
                             targetFile.SetLength(0);
-                            // Exactly now signal that autoSaveFileStream1 is the latest.
-                            autoSaveFileStream.WriteByte(LastWriteToFileStream1);
                         }
-                        autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
                         await WriteToFileAsync(targetFile, textToSave);
