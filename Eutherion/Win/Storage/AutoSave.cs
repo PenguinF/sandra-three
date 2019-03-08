@@ -127,11 +127,6 @@ namespace Eutherion.Win.Storage
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
-        /// Either <see cref="autoSaveFile1"/> or <see cref="autoSaveFile2"/>, whichever was last written to.
-        /// </summary>
-        private FileStream lastWrittenToFile;
-
-        /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
         /// </summary>
         /// <param name="appSubFolderName">
@@ -273,16 +268,13 @@ namespace Eutherion.Win.Storage
                     }
                 }
 
-                // Make sure to save to the other file stream first.
-                lastWrittenToFile = latestAutoSaveFile;
-
                 // Override localSettings with remoteSettings.
                 if (remoteSettings != null) localSettings = remoteSettings;
 
                 // Set up long running task to keep auto-saving remoteSettings.
                 updateQueue = new ConcurrentQueue<SettingCopy>();
                 cts = new CancellationTokenSource();
-                autoSaveBackgroundTask = AutoSaveLoop(cts.Token);
+                autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, cts.Token);
             }
             catch (ArgumentException)
             {
@@ -348,7 +340,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private async Task AutoSaveLoop(CancellationToken ct)
+        private async Task AutoSaveLoop(FileStream lastWrittenToFile, CancellationToken ct)
         {
             for (; ; )
             {
