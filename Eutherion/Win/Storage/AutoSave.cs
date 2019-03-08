@@ -24,7 +24,6 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -231,22 +230,12 @@ namespace Eutherion.Win.Storage
         /// b) Only this process can access it. Protects the folder from deletion as well.
         /// </summary>
         private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
-        {
-            var autoSaveFileStream = new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
-                                                    FileMode.OpenOrCreate,
-                                                    FileAccess.ReadWrite,
-                                                    FileShare.Read,
-                                                    DefaultFileStreamBufferSize,
-                                                    FileOptions.SequentialScan | FileOptions.Asynchronous);
-
-            // Assert capabilities of the file stream.
-            Debug.Assert(autoSaveFileStream.CanSeek
-                && autoSaveFileStream.CanRead
-                && autoSaveFileStream.CanWrite
-                && !autoSaveFileStream.CanTimeout);
-
-            return autoSaveFileStream;
-        }
+            => new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
+                              FileMode.OpenOrCreate,
+                              FileAccess.ReadWrite,
+                              FileShare.Read,
+                              DefaultFileStreamBufferSize,
+                              FileOptions.SequentialScan | FileOptions.Asynchronous);
 
         /// <summary>
         /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
@@ -436,22 +425,31 @@ namespace Eutherion.Win
         /// Any existing contents in the file will be overwritten.
         /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
         /// so it takes care of disposing it after use.
+        /// To be used as an auto-save <see cref="FileStream"/>,
+        /// it must support seeking, reading and writing, and not be able to time out.
         /// </param>
         /// <param name="autoSaveFile2">
         /// The secondary <see cref="FileStream"/> to write to.
         /// Any existing contents in the file will be overwritten.
         /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
         /// so it takes care of disposing it after use.
+        /// To be used as an auto-save <see cref="FileStream"/>,
+        /// it must support seeking, reading and writing, and not be able to time out.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/>
+        /// do not have the right capabilities to be used as an auto-save file stream.
         /// </exception>
         public AutoSaveTextFile(RemoteState remoteState, FileStream autoSaveFile1, FileStream autoSaveFile2)
         {
             if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
 
-            this.autoSaveFile1 = autoSaveFile1 ?? throw new ArgumentNullException(nameof(autoSaveFile1));
-            this.autoSaveFile2 = autoSaveFile2 ?? throw new ArgumentNullException(nameof(autoSaveFile2));
+            // Assert capabilities of the file streams.
+            this.autoSaveFile1 = VerifiedFileStream(autoSaveFile1, nameof(autoSaveFile1));
+            this.autoSaveFile2 = VerifiedFileStream(autoSaveFile2, nameof(autoSaveFile2));
 
             // Immediately attempt to load the saved contents from either FileStream.
             // Choose first auto-save file to load from.
@@ -498,6 +496,26 @@ namespace Eutherion.Win
             updateQueue = new ConcurrentQueue<TUpdate>();
             cts = new CancellationTokenSource();
             autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
+        }
+
+        private FileStream VerifiedFileStream(FileStream fileStream, string parameterName)
+        {
+            if (fileStream == null)
+            {
+                throw new ArgumentNullException(parameterName);
+            }
+
+            if (!fileStream.CanSeek
+                || !fileStream.CanRead
+                || !fileStream.CanWrite
+                || fileStream.CanTimeout)
+            {
+                throw new ArgumentException(
+                    $"{parameterName} does not have the right capabilities to be used as an auto-save file stream.",
+                    parameterName);
+            }
+
+            return fileStream;
         }
 
         private FileStream Switch(FileStream autoSaveFile)
