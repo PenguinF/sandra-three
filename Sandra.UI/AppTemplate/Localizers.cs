@@ -167,13 +167,13 @@ namespace Eutherion.Win.AppTemplate
             : InvalidValue(TrimmedStringTypeError);
     }
 
-    public sealed class TranslationDictionaryType : PType.Derived<PMap, Dictionary<LocalizedStringKey, string>>
+    public class TranslationDictionaryType : PType<Dictionary<LocalizedStringKey, string>>
     {
         public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
-        private TranslationDictionaryType() : base(PType.Map) { }
+        private TranslationDictionaryType() { }
 
-        public override PMap GetBaseValue(Dictionary<LocalizedStringKey, string> value)
+        public override PValue GetPValue(Dictionary<LocalizedStringKey, string> value)
         {
             Dictionary<string, PValue> dictionary = new Dictionary<string, PValue>();
 
@@ -188,11 +188,16 @@ namespace Eutherion.Win.AppTemplate
             return new PMap(dictionary);
         }
 
-        public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetTargetValue(PMap value)
+        public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetValidValue(PValue value)
         {
+            if (!(value is PMap map))
+            {
+                return InvalidValue(PType.MapTypeError);
+            }
+
             var dictionary = new Dictionary<LocalizedStringKey, string>();
 
-            foreach (var kv in value)
+            foreach (var kv in map)
             {
                 if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
                 {
