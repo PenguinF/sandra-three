@@ -49,7 +49,7 @@ namespace Eutherion.Win.Storage
 
             public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
 
-            public void Initialize(string loadedText)
+            public override void Initialize(string loadedText)
             {
                 if (loadedText != null)
                 {
@@ -583,6 +583,14 @@ namespace Eutherion.Win
         /// </summary>
         public abstract class RemoteState
         {
+            /// <summary>
+            /// Called after construction of the auto-save file with the loaded text.
+            /// </summary>
+            /// <param name="loadedText">
+            /// The latest text contained in the auto-save file, or null if neither
+            /// auto-save file could be loaded.
+            /// </param>
+            public abstract void Initialize(string loadedText);
         }
 
         /// <summary>
