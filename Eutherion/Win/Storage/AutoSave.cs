@@ -311,7 +311,7 @@ namespace Eutherion.Win.Storage
                                                     FileAccess.ReadWrite,
                                                     FileShare.Read,
                                                     DefaultFileStreamBufferSize,
-                                                    FileOptions.SequentialScan);
+                                                    FileOptions.SequentialScan | FileOptions.Asynchronous);
 
             // Assert capabilities of the file stream.
             Debug.Assert(autoSaveFileStream.CanSeek
@@ -407,7 +407,7 @@ namespace Eutherion.Win.Storage
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        WriteToFile(writefileStream, output);
+                        await WriteToFileAsync(writefileStream, output);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.
@@ -470,7 +470,7 @@ namespace Eutherion.Win.Storage
             return workingCopy.Commit();
         }
 
-        private void WriteToFile(FileStream targetFile, string textToSave)
+        private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
         {
             // How much of the output still needs to be written.
             int remainingLength = textToSave.Length;
@@ -497,7 +497,7 @@ namespace Eutherion.Win.Storage
                 if (bufferFull)
                 {
                     int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
-                    targetFile.Write(encodedBuffer, 0, bytes);
+                    await targetFile.WriteAsync(encodedBuffer, 0, bytes);
                 }
 
                 // Update loop variables.
@@ -510,11 +510,11 @@ namespace Eutherion.Win.Storage
                     int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
                     if (bytes > 0)
                     {
-                        targetFile.Write(encodedBuffer, 0, bytes);
+                        await targetFile.WriteAsync(encodedBuffer, 0, bytes);
                     }
 
-                    // Make sure everything is written to the file.
-                    targetFile.Flush();
+                    // Make sure everything is written to the file before returning.
+                    await targetFile.FlushAsync();
                     return;
                 }
             }
