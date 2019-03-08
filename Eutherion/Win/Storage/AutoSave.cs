@@ -374,17 +374,18 @@ namespace Eutherion.Win.Storage
                         if (lastWrittenToFile == autoSaveFile1)
                         {
                             targetFile = autoSaveFile2;
-                            // Truncate and append.
-                            targetFile.SetLength(0);
                         }
                         else
                         {
                             targetFile = autoSaveFile1;
-                            // Truncate and append.
-                            targetFile.SetLength(0);
                         }
 
-                        // Spend as little time as possible writing to writefileStream.
+                        // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
+                        // Theoretically, two thrown writeExceptions would have the same effect.
+                        // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
+                        targetFile.SetLength(0);
+
+                        // Write the contents to the file.
                         await WriteToFileAsync(targetFile, textToSave);
 
                         // Only truncate the other file when completely successful, to indicate that
