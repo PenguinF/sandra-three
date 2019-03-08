@@ -129,7 +129,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Either <see cref="autoSaveFile1"/> or <see cref="autoSaveFile2"/>, whichever was last written to.
         /// </summary>
-        private FileStream lastWrittenToFileStream;
+        private FileStream lastWrittenToFile;
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSave"/>.
@@ -222,7 +222,7 @@ namespace Eutherion.Win.Storage
                 int flag = LastWriteToFileStream1;
                 if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
 
-                FileStream latestAutoSaveFileStream
+                FileStream latestAutoSaveFile
                     = autoSaveFile2.Length == 0 ? autoSaveFile1
                     : autoSaveFile1.Length == 0 ? autoSaveFile2
                     : flag == LastWriteToFileStream2 ? autoSaveFile2
@@ -233,7 +233,7 @@ namespace Eutherion.Win.Storage
                 bool tryOtherAutoSaveStream = false;
                 try
                 {
-                    remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                    remoteSettings = Load(latestAutoSaveFile, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                     if (errors.Count > 0)
                     {
                         errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
@@ -250,14 +250,14 @@ namespace Eutherion.Win.Storage
 
                 if (tryOtherAutoSaveStream)
                 {
-                    latestAutoSaveFileStream
-                        = latestAutoSaveFileStream == autoSaveFile1
+                    latestAutoSaveFile
+                        = latestAutoSaveFile == autoSaveFile1
                         ? autoSaveFile2
                         : autoSaveFile1;
 
                     try
                     {
-                        remoteSettings = Load(latestAutoSaveFileStream, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                        remoteSettings = Load(latestAutoSaveFile, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
                         if (errors.Count > 0)
                         {
                             errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
@@ -274,7 +274,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Make sure to save to the other file stream first.
-                lastWrittenToFileStream = latestAutoSaveFileStream;
+                lastWrittenToFile = latestAutoSaveFile;
 
                 // Override localSettings with remoteSettings.
                 if (remoteSettings != null) localSettings = remoteSettings;
@@ -382,36 +382,36 @@ namespace Eutherion.Win.Storage
 
                     try
                     {
-                        string output = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
+                        string textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
 
                         // Alterate between both auto-save files.
                         // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
-                        FileStream writefileStream;
+                        FileStream targetFile;
                         autoSaveFileStream.Seek(0, SeekOrigin.Begin);
-                        if (lastWrittenToFileStream == autoSaveFile1)
+                        if (lastWrittenToFile == autoSaveFile1)
                         {
-                            writefileStream = autoSaveFile2;
+                            targetFile = autoSaveFile2;
                             // Truncate and append.
-                            writefileStream.SetLength(0);
+                            targetFile.SetLength(0);
                             // Exactly now signal that autoSaveFileStream2 is the latest.
                             autoSaveFileStream.WriteByte(LastWriteToFileStream2);
                         }
                         else
                         {
-                            writefileStream = autoSaveFile1;
+                            targetFile = autoSaveFile1;
                             // Truncate and append.
-                            writefileStream.SetLength(0);
+                            targetFile.SetLength(0);
                             // Exactly now signal that autoSaveFileStream1 is the latest.
                             autoSaveFileStream.WriteByte(LastWriteToFileStream1);
                         }
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        await WriteToFileAsync(writefileStream, output);
+                        await WriteToFileAsync(targetFile, textToSave);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.
-                        lastWrittenToFileStream = writefileStream;
+                        lastWrittenToFile = targetFile;
                     }
                     catch (Exception writeException)
                     {
