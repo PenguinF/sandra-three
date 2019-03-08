@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * AutoSave.cs
+ * SettingsAutoSave.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -28,11 +28,11 @@ using System.IO;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Manages an auto-save file local to every non-roaming user.
+    /// Manages an auto-save file of settings local to every non-roaming user.
     /// This class is assumed to have a lifetime equal to the application.
     /// See also: <seealso cref="Environment.SpecialFolder.LocalApplicationData"/>
     /// </summary>
-    public sealed class AutoSave
+    public sealed class SettingsAutoSave
     {
         private class SettingsRemoteState : AutoSaveTextFile<SettingCopy>.RemoteState
         {
@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
                     if (errors.Count > 0)
                     {
                         // Leave RemoteSettings unchanged.
-                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
+                        errors.ForEach(x => new SettingsAutoSaveParseException(x).Trace());
                     }
                     else
                     {
@@ -116,7 +116,7 @@ namespace Eutherion.Win.Storage
         private SettingObject localSettings;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="AutoSave"/>.
+        /// Initializes a new instance of <see cref="SettingsAutoSave"/>.
         /// </summary>
         /// <param name="appSubFolderName">
         /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
@@ -135,7 +135,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="NotSupportedException">
         /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
         /// </exception>
-        public AutoSave(string appSubFolderName, SettingCopy workingCopy)
+        public SettingsAutoSave(string appSubFolderName, SettingCopy workingCopy)
         {
             if (appSubFolderName == null)
             {
@@ -268,7 +268,7 @@ namespace Eutherion.Win.Storage
         }
     }
 
-    internal class AutoSaveFileParseException : Exception
+    internal class SettingsAutoSaveParseException : Exception
     {
         public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
         {
@@ -276,7 +276,7 @@ namespace Eutherion.Win.Storage
             return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
         }
 
-        public AutoSaveFileParseException(JsonErrorInfo jsonErrorInfo)
+        public SettingsAutoSaveParseException(JsonErrorInfo jsonErrorInfo)
             : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
     }
 }
