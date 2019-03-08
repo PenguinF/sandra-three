@@ -621,13 +621,12 @@ namespace Eutherion.Win
                     {
                         if (remoteState.ShouldSave(updates, out string textToSave))
                         {
-                            // Alterate between both auto-save files.
-                            // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
+                            // Alternate between both auto-save files.
                             FileStream targetFile = Switch(lastWrittenToFile);
 
                             // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                             // Theoretically, two thrown writeExceptions would have the same effect.
-                            // In other cases, lastWrittenToFile.SetLength(0) below will already have done so.
+                            // In other cases, lastWrittenToFile.SetLength(0) below will already have done this.
                             targetFile.SetLength(0);
 
                             // Write the contents to the file.
