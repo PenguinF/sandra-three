@@ -120,14 +120,9 @@ namespace Eutherion.Win.Storage
         private readonly FileStream lockFile;
 
         /// <summary>
-        /// The primary auto-save file.
+        /// Contains both auto-save files.
         /// </summary>
-        private readonly FileStream autoSaveFile1;
-
-        /// <summary>
-        /// The secondary auto-save file.
-        /// </summary>
-        private readonly FileStream autoSaveFile2;
+        private readonly AutoSaveTextFile autoSaveFile;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
@@ -220,11 +215,14 @@ namespace Eutherion.Win.Storage
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from localSettings so auto-saves within the session are still enabled.
                 var remoteState = new SettingsRemoteState(localSettings);
+                FileStream autoSaveFile1 = null;
+                FileStream autoSaveFile2 = null;
 
                 try
                 {
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
+                    autoSaveFile = new AutoSaveTextFile(autoSaveFile1, autoSaveFile2);
                 }
                 catch
                 {
@@ -232,6 +230,11 @@ namespace Eutherion.Win.Storage
                     // so that inner files can only be locked if outer files are locked too.
                     if (autoSaveFile1 != null)
                     {
+                        if (autoSaveFile2 != null)
+                        {
+                            autoSaveFile2.Dispose();
+                            autoSaveFile2 = null;
+                        }
                         autoSaveFile1.Dispose();
                         autoSaveFile1 = null;
                     }
@@ -241,7 +244,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 // Choose first auto-save file to load from.
-                FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
+                FileStream latestAutoSaveFile = autoSaveFile.autoSaveFile1.Length == 0 ? autoSaveFile.autoSaveFile2 : autoSaveFile.autoSaveFile1;
 
                 string loadedText = null;
                 try
@@ -439,14 +442,14 @@ namespace Eutherion.Win.Storage
 
                 // Dispose in opposite order of acquiring the lock on the files,
                 // so that inner files can only be locked if outer files are locked too.
-                autoSaveFile2.Dispose();
-                autoSaveFile1.Dispose();
+                autoSaveFile.autoSaveFile2.Dispose();
+                autoSaveFile.autoSaveFile1.Dispose();
                 lockFile.Dispose();
             }
         }
 
         private FileStream Switch(FileStream autoSaveFile)
-            => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
+            => autoSaveFile == this.autoSaveFile.autoSaveFile1 ? this.autoSaveFile.autoSaveFile2 : this.autoSaveFile.autoSaveFile1;
 
         private string Load(FileStream autoSaveFile)
         {
@@ -586,5 +589,34 @@ namespace Eutherion.Win
     /// </remarks>
     public sealed class AutoSaveTextFile
     {
+        /// <summary>
+        /// The primary auto-save file.
+        /// </summary>
+        internal readonly FileStream autoSaveFile1;
+
+        /// <summary>
+        /// The secondary auto-save file.
+        /// </summary>
+        internal readonly FileStream autoSaveFile2;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
+        /// </summary>
+        /// <param name="autoSaveFile1">
+        /// The primary <see cref="FileStream"/> to write to.
+        /// Any existing contents in the file will be overwritten.
+        /// </param>
+        /// <param name="autoSaveFile2">
+        /// The secondary <see cref="FileStream"/> to write to.
+        /// Any existing contents in the file will be overwritten.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
+        /// </exception>
+        public AutoSaveTextFile(FileStream autoSaveFile1, FileStream autoSaveFile2)
+        {
+            this.autoSaveFile1 = autoSaveFile1 ?? throw new ArgumentNullException(nameof(autoSaveFile1));
+            this.autoSaveFile2 = autoSaveFile2 ?? throw new ArgumentNullException(nameof(autoSaveFile2));
+        }
     }
 }
