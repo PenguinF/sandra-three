@@ -40,6 +40,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoSaveTextFile.cs" />
     <Compile Include="ConstantImageProvider.cs" />
     <Compile Include="ConstantTextProvider.cs" />
     <Compile Include="Controls\NonSelectableButton.cs">
