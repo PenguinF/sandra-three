@@ -227,7 +227,6 @@ namespace Eutherion.Win.Storage
                 catch (Exception firstLoadException)
                 {
                     // Trace and try the other auto-save file as a backup.
-                    // Also use a new decoder.
                     firstLoadException.Trace();
                 }
 
