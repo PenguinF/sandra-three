@@ -192,13 +192,15 @@ namespace Eutherion.Win.Storage
                 }
                 catch
                 {
-                    autoSaveFileStream.Dispose();
-                    autoSaveFileStream = null;
+                    // Dispose in opposite order of acquiring the lock on the files,
+                    // so that inner files can only be locked if outer files are locked too.
                     if (autoSaveFile1 != null)
                     {
                         autoSaveFile1.Dispose();
                         autoSaveFile1 = null;
                     }
+                    autoSaveFileStream.Dispose();
+                    autoSaveFileStream = null;
                     throw;
                 }
 
