@@ -348,8 +348,8 @@ namespace Eutherion.Win.Storage
 
                 if (updateQueue != null)
                 {
-                    // Enqueue a copy so its values are not shared with other threads.
-                    updateQueue.Enqueue(localSettings.CreateWorkingCopy());
+                    // Persist a copy so its values are not shared with other threads.
+                    Persist(localSettings.CreateWorkingCopy());
                 }
             }
         }
@@ -458,6 +458,15 @@ namespace Eutherion.Win.Storage
             if (expectedLength != loadedText.Length) return null;
             return loadedText;
         }
+
+        /// <summary>
+        /// Persists an update to the auto-save file.
+        /// Update objects must be thread-safe, or not contain any shared state.
+        /// </summary>
+        /// <param name="update">
+        /// The update to persist.
+        /// </param>
+        public void Persist(SettingCopy update) => updateQueue.Enqueue(update);
 
         private async Task WriteToFileAsync(FileStream targetFile, string textToSave)
         {
