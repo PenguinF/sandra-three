@@ -54,13 +54,10 @@ namespace Eutherion.Win.Storage
         public static readonly int AutoSaveDelay = 5000;
 
         /// <summary>
-        /// Gets the name of the file which indicates which of both auto-save files contains the latest data.
+        /// Gets the name of the file which acts as an exclusive lock between different instances
+        /// of this process which might race to obtain a reference to the auto-save files.
         /// </summary>
-        /// <remarks>
-        /// FileInfo.LastWriteTimeUtc would be the alternative but it turns out not to be precise enough
-        /// to select the right auto-save file.
-        /// </remarks>
-        public static readonly string AutoSaveFileName = ".autosave";
+        public static readonly string LockFileName = ".lock";
 
         /// <summary>
         /// Gets the name of the first auto-save file.
@@ -72,7 +69,10 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
 
-        private readonly FileStream autoSaveFileStream;
+        /// <summary>
+        /// The lock file to grant access to the auto-save files by at most one instance of this process.
+        /// </summary>
+        private readonly FileStream lockFile;
 
         /// <summary>
         /// The primary auto-save file.
@@ -173,10 +173,9 @@ namespace Eutherion.Win.Storage
 
             try
             {
-                var localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                var baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
-
-                autoSaveFileStream = CreateAutoSaveFileStream(baseDir, AutoSaveFileName);
+                string localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                DirectoryInfo baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
+                lockFile = CreateAutoSaveFileStream(baseDir, LockFileName);
 
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from localSettings so auto-saves within the session are still enabled.
@@ -196,8 +195,8 @@ namespace Eutherion.Win.Storage
                         autoSaveFile1.Dispose();
                         autoSaveFile1 = null;
                     }
-                    autoSaveFileStream.Dispose();
-                    autoSaveFileStream = null;
+                    lockFile.Dispose();
+                    lockFile = null;
                     throw;
                 }
 
@@ -410,7 +409,7 @@ namespace Eutherion.Win.Storage
                 // so that inner files can only be locked if outer files are locked too.
                 autoSaveFile2.Dispose();
                 autoSaveFile1.Dispose();
-                autoSaveFileStream.Dispose();
+                lockFile.Dispose();
             }
         }
 
