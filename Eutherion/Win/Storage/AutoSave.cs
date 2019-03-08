@@ -72,9 +72,6 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
 
-        private const byte LastWriteToFileStream1 = 1;
-        private const byte LastWriteToFileStream2 = 2;
-
         private readonly FileStream autoSaveFileStream;
 
         /// <summary>
