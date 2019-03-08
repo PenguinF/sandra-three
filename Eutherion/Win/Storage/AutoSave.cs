@@ -218,12 +218,14 @@ namespace Eutherion.Win.Storage
                 // Load remote settings.
                 List<JsonErrorInfo> errors;
                 bool tryOtherAutoSaveStream = false;
+                string loadedText = null;
                 try
                 {
-                    remoteSettings = Load(latestAutoSaveFile, out errors);
-                    if (errors.Count > 0)
+                    loadedText = Load(latestAutoSaveFile);
+
+                    // If null is returned from the first Load(), the integrity check failed.
+                    if (loadedText == null)
                     {
-                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                         tryOtherAutoSaveStream = true;
                     }
                 }
@@ -244,10 +246,9 @@ namespace Eutherion.Win.Storage
 
                     try
                     {
-                        remoteSettings = Load(latestAutoSaveFile, out errors);
-                        if (errors.Count > 0)
+                        loadedText = Load(latestAutoSaveFile);
+                        if (loadedText == null)
                         {
-                            errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                             remoteSettings = localSettings;
                         }
                     }
@@ -256,6 +257,16 @@ namespace Eutherion.Win.Storage
                         // In the unlikely event that both auto-save files generate an error,
                         // just initialize from localSettings so auto-saves are still enabled.
                         secondLoadException.Trace();
+                        remoteSettings = localSettings;
+                    }
+                }
+
+                if (loadedText != null)
+                {
+                    remoteSettings = Load(loadedText, out errors);
+                    if (errors.Count > 0)
+                    {
+                        errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
                         remoteSettings = localSettings;
                     }
                 }
@@ -435,14 +446,17 @@ namespace Eutherion.Win.Storage
             var streamReader = new StreamReader(autoSaveFile);
             int.TryParse(streamReader.ReadLine(), out int expectedLength);
             string loadedText = streamReader.ReadToEnd();
+
+            // Integrity check: only allow loading from completed auto-save files.
+            if (expectedLength != loadedText.Length) return null;
             return loadedText;
         }
 
-        private SettingObject Load(FileStream autoSaveFile, out List<JsonErrorInfo> errors)
+        private SettingObject Load(string loadedText, out List<JsonErrorInfo> errors)
         {
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
-            errors = SettingReader.ReadWorkingCopy(Load(autoSaveFile), workingCopy);
+            errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
             return workingCopy.Commit();
         }
 
