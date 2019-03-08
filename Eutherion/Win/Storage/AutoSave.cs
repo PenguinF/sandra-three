@@ -222,7 +222,7 @@ namespace Eutherion.Win.Storage
                 {
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
-                    autoSaveFile = new AutoSaveTextFile(autoSaveFile1, autoSaveFile2);
+                    autoSaveFile = new AutoSaveTextFile(remoteState, autoSaveFile1, autoSaveFile2);
                 }
                 catch
                 {
@@ -606,6 +606,9 @@ namespace Eutherion.Win
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
         /// </summary>
+        /// <param name="remoteState">
+        /// Object responsible for converting updates to text.
+        /// </param>
         /// <param name="autoSaveFile1">
         /// The primary <see cref="FileStream"/> to write to.
         /// Any existing contents in the file will be overwritten.
@@ -615,10 +618,12 @@ namespace Eutherion.Win
         /// Any existing contents in the file will be overwritten.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
+        /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
         /// </exception>
-        public AutoSaveTextFile(FileStream autoSaveFile1, FileStream autoSaveFile2)
+        public AutoSaveTextFile(RemoteState remoteState, FileStream autoSaveFile1, FileStream autoSaveFile2)
         {
+            if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
+
             this.autoSaveFile1 = autoSaveFile1 ?? throw new ArgumentNullException(nameof(autoSaveFile1));
             this.autoSaveFile2 = autoSaveFile2 ?? throw new ArgumentNullException(nameof(autoSaveFile2));
         }
