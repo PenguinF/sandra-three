@@ -326,6 +326,21 @@ namespace Eutherion.Win.Storage
             }
         }
 
+        private bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+        {
+            SettingCopy latestUpdate = updates[updates.Count - 1];
+
+            if (!latestUpdate.EqualTo(remoteSettings))
+            {
+                remoteSettings = latestUpdate.Commit();
+                textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
+                return true;
+            }
+
+            textToSave = default(string);
+            return false;
+        }
+
         private async Task AutoSaveLoop(FileStream lastWrittenToFile, CancellationToken ct)
         {
             for (; ; )
@@ -360,15 +375,10 @@ namespace Eutherion.Win.Storage
                     List<SettingCopy> updates = new List<SettingCopy> { firstUpdate };
                     while (updateQueue.TryDequeue(out SettingCopy update)) updates.Add(update);
 
-                    SettingCopy latestUpdate = updates[updates.Count - 1];
-                    if (!latestUpdate.EqualTo(remoteSettings))
+                    try
                     {
-                        remoteSettings = latestUpdate.Commit();
-
-                        try
+                        if (ShouldSave(updates, out string textToSave))
                         {
-                            string textToSave = CompactSettingWriter.ConvertToJson(remoteSettings.Map);
-
                             // Alterate between both auto-save files.
                             // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
                             FileStream targetFile = Switch(lastWrittenToFile);
@@ -388,10 +398,10 @@ namespace Eutherion.Win.Storage
                             // Switch to writing to the other file in the next iteration.
                             lastWrittenToFile = targetFile;
                         }
-                        catch (Exception writeException)
-                        {
-                            writeException.Trace();
-                        }
+                    }
+                    catch (Exception writeException)
+                    {
+                        writeException.Trace();
                     }
                 }
             }
