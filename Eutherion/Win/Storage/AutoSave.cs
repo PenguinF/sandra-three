@@ -429,14 +429,18 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private SettingObject Load(FileStream autoSaveFileStream, out List<JsonErrorInfo> errors)
+        private string Load(FileStream autoSaveFile)
         {
-            var streamReader = new StreamReader(autoSaveFileStream);
+            var streamReader = new StreamReader(autoSaveFile);
             string loadedText = streamReader.ReadToEnd();
+            return loadedText;
+        }
 
+        private SettingObject Load(FileStream autoSaveFile, out List<JsonErrorInfo> errors)
+        {
             // Load into a copy of localSettings, preserving defaults.
             var workingCopy = localSettings.CreateWorkingCopy();
-            errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
+            errors = SettingReader.ReadWorkingCopy(Load(autoSaveFile), workingCopy);
             return workingCopy.Commit();
         }
 
