@@ -249,7 +249,7 @@ namespace Eutherion.Win.Storage
                 string loadedText = null;
                 try
                 {
-                    loadedText = Load(latestAutoSaveFile);
+                    loadedText = autoSaveFile.Load(latestAutoSaveFile);
                 }
                 catch (Exception firstLoadException)
                 {
@@ -260,11 +260,11 @@ namespace Eutherion.Win.Storage
                 // If null is returned from the first Load(), the integrity check failed.
                 if (loadedText == null)
                 {
-                    latestAutoSaveFile = Switch(latestAutoSaveFile);
+                    latestAutoSaveFile = autoSaveFile.Switch(latestAutoSaveFile);
 
                     try
                     {
-                        loadedText = Load(latestAutoSaveFile);
+                        loadedText = autoSaveFile.Load(latestAutoSaveFile);
                     }
                     catch (Exception secondLoadException)
                     {
@@ -397,7 +397,7 @@ namespace Eutherion.Win.Storage
                         {
                             // Alterate between both auto-save files.
                             // autoSaveFileStream contains a byte indicating which auto-save file is last written to.
-                            FileStream targetFile = Switch(lastWrittenToFile);
+                            FileStream targetFile = autoSaveFile.Switch(lastWrittenToFile);
 
                             // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                             // Theoretically, two thrown writeExceptions would have the same effect.
@@ -446,20 +446,6 @@ namespace Eutherion.Win.Storage
                 autoSaveFile.autoSaveFile1.Dispose();
                 lockFile.Dispose();
             }
-        }
-
-        private FileStream Switch(FileStream autoSaveFile)
-            => autoSaveFile == this.autoSaveFile.autoSaveFile1 ? this.autoSaveFile.autoSaveFile2 : this.autoSaveFile.autoSaveFile1;
-
-        private string Load(FileStream autoSaveFile)
-        {
-            var streamReader = new StreamReader(autoSaveFile);
-            int.TryParse(streamReader.ReadLine(), out int expectedLength);
-            string loadedText = streamReader.ReadToEnd();
-
-            // Integrity check: only allow loading from completed auto-save files.
-            if (expectedLength != loadedText.Length) return null;
-            return loadedText;
         }
 
         /// <summary>
@@ -617,6 +603,20 @@ namespace Eutherion.Win
         {
             this.autoSaveFile1 = autoSaveFile1 ?? throw new ArgumentNullException(nameof(autoSaveFile1));
             this.autoSaveFile2 = autoSaveFile2 ?? throw new ArgumentNullException(nameof(autoSaveFile2));
+        }
+
+        internal FileStream Switch(FileStream autoSaveFile)
+            => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
+
+        internal string Load(FileStream autoSaveFile)
+        {
+            var streamReader = new StreamReader(autoSaveFile);
+            int.TryParse(streamReader.ReadLine(), out int expectedLength);
+            string loadedText = streamReader.ReadToEnd();
+
+            // Integrity check: only allow loading from completed auto-save files.
+            if (expectedLength != loadedText.Length) return null;
+            return loadedText;
         }
     }
 }
