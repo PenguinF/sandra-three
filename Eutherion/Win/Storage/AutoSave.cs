@@ -256,10 +256,12 @@ namespace Eutherion.Win.Storage
             }
             catch (ArgumentException)
             {
+                autoSaveFile?.Dispose();
                 throw;
             }
             catch (NotSupportedException)
             {
+                autoSaveFile?.Dispose();
                 throw;
             }
             catch (Exception initAutoSaveException)
@@ -324,24 +326,8 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public void Close()
         {
-            if (autoSaveFile.cts != null)
-            {
-                autoSaveFile.cts.Cancel();
-                try
-                {
-                    autoSaveFile.autoSaveBackgroundTask.Wait();
-                }
-                catch
-                {
-                    // Have to catch cancelled exceptions.
-                }
-
-                // Dispose in opposite order of acquiring the lock on the files,
-                // so that inner files can only be locked if outer files are locked too.
-                autoSaveFile.autoSaveFile2.Dispose();
-                autoSaveFile.autoSaveFile1.Dispose();
-                lockFile.Dispose();
-            }
+            autoSaveFile?.Dispose();
+            lockFile?.Dispose();
         }
     }
 
@@ -403,7 +389,7 @@ namespace Eutherion.Win
     ///     non-empty, it is already immediately invalid.
     /// (b) After writing the last character to the file, it immediately becomes valid.
     /// </remarks>
-    public sealed class AutoSaveTextFile<TUpdate>
+    public sealed class AutoSaveTextFile<TUpdate> : IDisposable
     {
         /// <summary>
         /// Responsible for converting an arbitrary but non-empty sequence of persisted updates
@@ -495,10 +481,14 @@ namespace Eutherion.Win
         /// <param name="autoSaveFile1">
         /// The primary <see cref="FileStream"/> to write to.
         /// Any existing contents in the file will be overwritten.
+        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
+        /// so it takes care of disposing it after use.
         /// </param>
         /// <param name="autoSaveFile2">
         /// The secondary <see cref="FileStream"/> to write to.
         /// Any existing contents in the file will be overwritten.
+        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
+        /// so it takes care of disposing it after use.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
@@ -658,6 +648,30 @@ namespace Eutherion.Win
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Finishes auto-saving remaining updates, and releases the locks on the encapsulated <see cref="FileStream"/>s.
+        /// </summary>
+        public void Dispose()
+        {
+            if (cts != null)
+            {
+                cts.Cancel();
+                try
+                {
+                    autoSaveBackgroundTask.Wait();
+                }
+                catch
+                {
+                    // Have to catch cancelled exceptions.
+                }
+            }
+
+            // Dispose in opposite order of acquiring the lock on the files,
+            // so that inner files can only be locked if outer files are locked too.
+            autoSaveFile2.Dispose();
+            autoSaveFile1.Dispose();
         }
     }
 }
