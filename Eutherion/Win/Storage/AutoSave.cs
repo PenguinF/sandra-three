@@ -204,16 +204,6 @@ namespace Eutherion.Win.Storage
                 buffer = new char[CharBufferSize];
                 encodedBuffer = new byte[encoding.GetMaxByteCount(CharBufferSize)];
 
-                // Initialize input buffers small enough so that they don't end up on the large object heap.
-                // buffer and encodedBuffer cannot be reused for this, because the character buffer would not have enough space:
-                //
-                // Encoding.UTF8.GetMaxByteCount(1024) => 3075
-                // Encoding.UTF8.GetMaxCharCount(3075) => 3076
-                //
-                // ...and buffer cannot hold 3076 characters.
-                byte[] inputBuffer = new byte[CharBufferSize];
-                char[] decodedBuffer = new char[encoding.GetMaxCharCount(CharBufferSize)];
-
                 // Choose auto-save file to load from.
                 int flag = LastWriteToFileStream1;
                 if (autoSaveFileStream.Length > 0) flag = autoSaveFileStream.ReadByte();
@@ -229,7 +219,7 @@ namespace Eutherion.Win.Storage
                 bool tryOtherAutoSaveStream = false;
                 try
                 {
-                    remoteSettings = Load(latestAutoSaveFile, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                    remoteSettings = Load(latestAutoSaveFile, out errors);
                     if (errors.Count > 0)
                     {
                         errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
@@ -253,7 +243,7 @@ namespace Eutherion.Win.Storage
 
                     try
                     {
-                        remoteSettings = Load(latestAutoSaveFile, encoding.GetDecoder(), inputBuffer, decodedBuffer, out errors);
+                        remoteSettings = Load(latestAutoSaveFile, out errors);
                         if (errors.Count > 0)
                         {
                             errors.ForEach(x => new AutoSaveFileParseException(x).Trace());
@@ -439,7 +429,7 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private SettingObject Load(FileStream autoSaveFileStream, Decoder decoder, byte[] inputBuffer, char[] decodedBuffer, out List<JsonErrorInfo> errors)
+        private SettingObject Load(FileStream autoSaveFileStream, out List<JsonErrorInfo> errors)
         {
             var streamReader = new StreamReader(autoSaveFileStream);
             string loadedText = streamReader.ReadToEnd();
