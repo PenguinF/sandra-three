@@ -142,7 +142,7 @@ namespace Eutherion.Win
         private readonly byte[] encodedBuffer;
 
         /// <summary>
-        /// Contains scheduled updates to the remote settings.
+        /// Contains scheduled updates to the auto-save file.
         /// </summary>
         private readonly ConcurrentQueue<TUpdate> updateQueue;
 
@@ -227,7 +227,7 @@ namespace Eutherion.Win
             // If both reads failed, loadedText == null.
             remoteState.Initialize(loadedText);
 
-            // Initialize encoders and buffers.
+            // Initialize encoder and buffers.
             // Always use UTF8 for auto-saved text files.
             Encoding encoding = Encoding.UTF8;
             encoder = encoding.GetEncoder();
@@ -306,7 +306,7 @@ namespace Eutherion.Win
             for (; ; )
             {
                 // Determine number of characters to write.
-                // AutoSave.CharBufferSize is known to be equal to buffer.Length.
+                // CharBufferSize is known to be equal to buffer.Length.
                 int charWriteCount = CharBufferSize;
 
                 // Remember if this fill up the entire buffer.
@@ -360,7 +360,7 @@ namespace Eutherion.Win
                     }
                 }
 
-                // Empty the queue, take the latest update from it.
+                // Empty the queue, create a local (thread-safe) list of updates to process.
                 bool hasUpdate = updateQueue.TryDequeue(out TUpdate firstUpdate);
 
                 if (!hasUpdate)
@@ -373,7 +373,6 @@ namespace Eutherion.Win
                 }
                 else
                 {
-                    // Create a local (thread-safe) list of updates to process.
                     List<TUpdate> updates = new List<TUpdate> { firstUpdate };
                     while (updateQueue.TryDequeue(out TUpdate update)) updates.Add(update);
 
