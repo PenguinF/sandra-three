@@ -407,7 +407,7 @@ namespace Eutherion.Win.Storage
                         autoSaveFileStream.Flush();
 
                         // Spend as little time as possible writing to writefileStream.
-                        WriteToFile(output, writefileStream);
+                        WriteToFile(writefileStream, output);
 
                         // Only save when completely successful, to maximize chances that at least
                         // one of both auto-save files is in a completely correct format.
@@ -470,10 +470,10 @@ namespace Eutherion.Win.Storage
             return workingCopy.Commit();
         }
 
-        private void WriteToFile(string output, FileStream outputStream)
+        private void WriteToFile(FileStream targetFile, string textToSave)
         {
             // How much of the output still needs to be written.
-            int remainingLength = output.Length;
+            int remainingLength = textToSave.Length;
 
             // Number of characters already written from output. Loop invariant therefore is:
             // charactersCopied + remainingLength == output.Length.
@@ -491,13 +491,13 @@ namespace Eutherion.Win.Storage
                 if (!bufferFull) charWriteCount = remainingLength;
 
                 // Now copy to the character buffer after checking its range.
-                output.CopyTo(charactersCopied, buffer, 0, charWriteCount);
+                textToSave.CopyTo(charactersCopied, buffer, 0, charWriteCount);
 
                 // If the buffer is full, call the encoder to convert it into bytes.
                 if (bufferFull)
                 {
                     int bytes = encoder.GetBytes(buffer, 0, CharBufferSize, encodedBuffer, 0, false);
-                    outputStream.Write(encodedBuffer, 0, bytes);
+                    targetFile.Write(encodedBuffer, 0, bytes);
                 }
 
                 // Update loop variables.
@@ -510,11 +510,11 @@ namespace Eutherion.Win.Storage
                     int bytes = encoder.GetBytes(buffer, 0, bufferFull ? 0 : charWriteCount, encodedBuffer, 0, true);
                     if (bytes > 0)
                     {
-                        outputStream.Write(encodedBuffer, 0, bytes);
+                        targetFile.Write(encodedBuffer, 0, bytes);
                     }
 
                     // Make sure everything is written to the file.
-                    outputStream.Flush();
+                    targetFile.Flush();
                     return;
                 }
             }
