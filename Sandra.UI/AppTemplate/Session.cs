@@ -61,8 +61,12 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Configure(ISettingsProvider settingsProvider,
                                         Localizer defaultLocalizer,
-                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
-            => Current = new Session(settingsProvider, defaultLocalizer, defaultLocalizerDictionary);
+                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                                        Icon applicationIcon)
+            => Current = new Session(settingsProvider,
+                                     defaultLocalizer,
+                                     defaultLocalizerDictionary,
+                                     applicationIcon);
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
@@ -71,12 +75,14 @@ namespace Eutherion.Win.AppTemplate
 
         private Session(ISettingsProvider settingsProvider,
                         Localizer defaultLocalizer,
-                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
+                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                        Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
 
             // May be null.
             this.defaultLocalizerDictionary = defaultLocalizerDictionary;
+            ApplicationIcon = applicationIcon;
 
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
@@ -90,10 +96,14 @@ namespace Eutherion.Win.AppTemplate
                 settingsProvider.CreateBuiltIn(this));
 
             // Save name of APPDATA subfolder for persistent files.
-            var appDataSubFolderName = GetDefaultSetting(SharedSettings.AppDataSubFolderName);
             AppDataSubFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appDataSubFolderName);
+                GetDefaultSetting(SharedSettings.AppDataSubFolderName));
+
+#if DEBUG
+            // In debug mode, generate default json configuration files from hard coded settings.
+            DeployRuntimeConfigurationFiles();
+#endif
 
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SharedSettings.LangFolderName);
@@ -103,7 +113,9 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            AutoSave = new SettingsAutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
+            AutoSave = new SettingsAutoSave(
+                AppDataSubFolder,
+                settingsProvider.CreateAutoSaveSchema(this));
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
@@ -128,6 +140,8 @@ namespace Eutherion.Win.AppTemplate
             currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
         }
 
+        public Icon ApplicationIcon { get; }
+
         public SettingProperty<bool> DeveloperMode { get; }
 
         public string AppDataSubFolder { get; }
@@ -141,6 +155,16 @@ namespace Eutherion.Win.AppTemplate
         public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
+
+        /// <summary>
+        /// Enables receiving <see cref="LiveTextFile"/> updates on the UI thread.
+        /// </summary>
+        public void SetSynchronizationContext()
+        {
+            DefaultSettings.SetSynchronizationContext();
+            LocalSettings.SetSynchronizationContext();
+            RegisteredLocalizers.ForEach(x => x.LanguageFile.SetSynchronizationContext());
+        }
 
         private string LocalApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
@@ -257,6 +281,34 @@ namespace Eutherion.Win.AppTemplate
             DefaultSettings.Dispose();
             registeredLocalizers.Values.ForEach(x => x.Dispose());
         }
+
+#if DEBUG
+        /// <summary>
+        /// Generates DefaultSettings.json from the loaded default settings in memory,
+        /// and generates Bin/Languages/en.json from the BuiltInEnglishLocalizer.
+        /// </summary>
+        private void DeployRuntimeConfigurationFiles()
+        {
+            // No exception handler for both WriteToFiles.
+            DefaultSettings.WriteToFile(
+                DefaultSettings.Settings,
+                SettingWriterOptions.Default);
+
+            using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
+                Path.Combine(ExecutableFolder, "Languages", "en.json"),
+                new SettingCopy(Localizers.CreateLanguageFileSchema())))
+            {
+                var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
+                settingCopy.AddOrReplace(Localizers.NativeName, "English");
+                settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
+                settingCopy.AddOrReplace(Localizers.Translations, defaultLocalizerDictionary);
+
+                englishFileFromBuiltIn.WriteToFile(
+                    settingCopy.Commit(),
+                    SettingWriterOptions.SuppressSettingComments);
+            }
+        }
+#endif
     }
 
     public interface ISettingsProvider

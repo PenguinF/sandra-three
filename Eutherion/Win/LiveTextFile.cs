@@ -22,11 +22,11 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Eutherion.Win
 {
@@ -50,11 +50,15 @@ namespace Eutherion.Win
         private readonly FileWatcher watcher;
 
         // Thread synchronization fields.
-        private CancellationTokenSource cts;
-        private AutoResetEvent fileChangeSignalWaitHandle;
-        private ConcurrentQueue<FileChangeType> fileChangeQueue;
-        private SynchronizationContext sc;
-        private Task pollFileChangesBackgroundTask;
+        private readonly object updateSentinel = new object(); // Used to synchronize access to the sc/missedUpdates pair.
+        private readonly CancellationTokenSource cts;
+        private readonly AutoResetEvent fileChangeSignalWaitHandle;
+        private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private readonly Task pollFileChangesBackgroundTask;
+
+        private WindowsFormsSynchronizationContext sc;
+        private bool missedUpdates;
+        private bool isDisposed;
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -83,7 +87,6 @@ namespace Eutherion.Win
         public LiveTextFile(string path)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
-            Load();
 
             try
             {
@@ -99,6 +102,17 @@ namespace Eutherion.Win
             }
 
             watcher = new FileWatcher(AbsoluteFilePath);
+
+            // Set up file change listener thread.
+            cts = new CancellationTokenSource();
+            fileChangeSignalWaitHandle = new AutoResetEvent(false);
+            fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+            watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
+
+            // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
+            Load();
+            SetSynchronizationContext();
+            pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
         /// <summary>
@@ -135,41 +149,43 @@ namespace Eutherion.Win
             File.WriteAllText(AbsoluteFilePath, contents);
         }
 
-        readonly WeakEvent<LiveTextFile, EventArgs> event_FileChanged = new WeakEvent<LiveTextFile, EventArgs>();
+        /// <summary>
+        /// Occurs when the contents of the opened file changed.
+        /// </summary>
+        public event Action<LiveTextFile, EventArgs> FileUpdated;
 
         /// <summary>
-        /// <see cref="WeakEvent"/> which occurs when the contents of the opened file changed.
+        /// Raises the <see cref="FileUpdated"/> event.
         /// </summary>
-        public event Action<LiveTextFile, EventArgs> FileChanged
+        /// <param name="e">
+        /// The event data.
+        /// </param>
+        protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
+
+        /// <summary>
+        /// Captures the synchronization context so file update events can be posted to it.
+        /// </summary>
+        public void SetSynchronizationContext()
         {
-            add
+            if (SynchronizationContext.Current is WindowsFormsSynchronizationContext newSynchronizationContext)
             {
-                event_FileChanged.AddListener(value);
-                StartWatching();
-            }
-            remove
-            {
-                event_FileChanged.RemoveListener(value);
-            }
-        }
+                bool mustLoad = false;
 
-        protected virtual void OnFileChanged(EventArgs e) => event_FileChanged.Raise(this, e);
+                lock (updateSentinel)
+                {
+                    if (sc != newSynchronizationContext)
+                    {
+                        sc = newSynchronizationContext;
+                        mustLoad = missedUpdates;
+                        missedUpdates = false;
+                    }
+                }
 
-        protected void StartWatching()
-        {
-            if (cts == null)
-            {
-                // Capture the synchronization context so events can be posted to it.
-                sc = SynchronizationContext.Current;
-                Debug.Assert(sc != null);
-
-                // Set up file change listener thread.
-                cts = new CancellationTokenSource();
-                fileChangeSignalWaitHandle = new AutoResetEvent(false);
-                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
-                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
+                if (mustLoad)
+                {
+                    // Must load again because of missed changes.
+                    Load();
+                }
             }
         }
 
@@ -203,9 +219,18 @@ namespace Eutherion.Win
 
                     if (hasChanges)
                     {
-                        Load();
-                        if (cancellationToken.IsCancellationRequested) break;
-                        sc.Post(RaiseFileChangedEvent, null);
+                        lock (updateSentinel)
+                        {
+                            // If no WindowsFormsSynchronizationContext, don't post anything.
+                            if (sc != null)
+                            {
+                                sc.Post(RaiseFileUpdatedEvent, null);
+                            }
+                            else
+                            {
+                                missedUpdates = true;
+                            }
+                        }
                     }
 
                     // Stop the loop if the FileWatcher errored out.
@@ -228,26 +253,29 @@ namespace Eutherion.Win
             watcher.Dispose();
         }
 
-        private void RaiseFileChangedEvent(object state)
+        private void RaiseFileUpdatedEvent(object state)
         {
-            OnFileChanged(EventArgs.Empty);
+            Load();
+            OnFileUpdated(EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            if (cts != null)
+            if (!isDisposed)
             {
                 cts.Cancel();
+
                 try
                 {
                     pollFileChangesBackgroundTask.Wait();
-                    cts.Dispose();
-                    cts = null;
                 }
                 catch
                 {
                     // Any exceptions here must be ignored.
                 }
+
+                cts.Dispose();
+                isDisposed = true;
             }
         }
     }

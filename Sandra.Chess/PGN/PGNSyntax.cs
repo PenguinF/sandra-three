@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -30,13 +31,12 @@ namespace Sandra.PGN.Temp
         public PGNPlyWithSidelines Parent { get; internal set; }
         public int ParentIndex { get; internal set; }
 
-        // TODO: use System.Collections.Immutable.
         public readonly IReadOnlyList<PGNPlyWithSidelines> Plies;
 
         public PGNLine(IEnumerable<PGNPlyWithSidelines> plies)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
-            var plyList = new List<PGNPlyWithSidelines>(plies);
+            var plyList = new ReadOnlyList<PGNPlyWithSidelines>(plies);
             for (int i = 0; i < plyList.Count; ++i)
             {
                 if (plyList[i].Parent != null) throw new ArgumentException($"{nameof(plyList)}[{i}] already has a parent {nameof(PGNLine)}.");
@@ -82,7 +82,6 @@ namespace Sandra.PGN.Temp
         public int ParentIndex { get; internal set; }
 
         public readonly PGNPly Ply;
-        // TODO: use System.Collections.Immutable.
         public readonly IReadOnlyList<PGNLine> SideLines;
 
         public PGNPlyWithSidelines(PGNPly ply, IEnumerable<PGNLine> sideLines)
@@ -95,7 +94,7 @@ namespace Sandra.PGN.Temp
             Ply = ply;
             if (sideLines != null)
             {
-                var sideLineList = new List<PGNLine>(sideLines);
+                var sideLineList = new ReadOnlyList<PGNLine>(sideLines);
                 for (int i = 0; i < sideLineList.Count; ++i)
                 {
                     if (sideLineList[i].Parent != null) throw new ArgumentException($"{nameof(sideLines)}[{i}] already has a parent {nameof(PGNPlyWithSidelines)}.");

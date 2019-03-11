@@ -157,6 +157,11 @@ namespace Eutherion.Win
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
+        /// Flag to make sure autoSaveBackgroundTask is cancelled at most once.
+        /// </summary>
+        private bool isDisposed;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
         /// </summary>
         /// <param name="remoteState">
@@ -237,7 +242,7 @@ namespace Eutherion.Win
             // Set up long running task to keep auto-saving updates.
             updateQueue = new ConcurrentQueue<TUpdate>();
             cts = new CancellationTokenSource();
-            autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
+            autoSaveBackgroundTask = Task.Run(() => AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token));
         }
 
         private FileStream VerifiedFileStream(FileStream fileStream, string parameterName)
@@ -289,6 +294,9 @@ namespace Eutherion.Win
 
             // How much of the output still needs to be written.
             int remainingLength = textToSave.Length;
+
+            // For zero length text, do not write anything at all.
+            if (remainingLength == 0) return;
 
             // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
             // The length of its string representation will be smaller than CharBufferSize
@@ -412,20 +420,27 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            cts.Cancel();
-            try
+            if (!isDisposed)
             {
-                autoSaveBackgroundTask.Wait();
-            }
-            catch
-            {
-                // Have to catch cancelled exceptions.
-            }
+                cts.Cancel();
 
-            // Dispose in opposite order of acquiring the lock on the files,
-            // so that inner files can only be locked if outer files are locked too.
-            autoSaveFile2.Dispose();
-            autoSaveFile1.Dispose();
+                try
+                {
+                    autoSaveBackgroundTask.Wait();
+                }
+                catch
+                {
+                    // Have to catch cancelled exceptions.
+                }
+
+                cts.Dispose();
+
+                // Dispose in opposite order of acquiring the lock on the files,
+                // so that inner files can only be locked if outer files are locked too.
+                autoSaveFile2.Dispose();
+                autoSaveFile1.Dispose();
+                isDisposed = true;
+            }
         }
     }
 }

@@ -25,7 +25,6 @@ namespace Eutherion.Utils
 {
     /// <summary>
     /// Represents the thread-safe lazy evaluation of a parameterless function.
-    /// If the function calls itself recursively, a deadlock occurs.
     /// </summary>
     /// <typeparam name="TValue">
     /// The type of the evaluated value.
@@ -34,7 +33,6 @@ namespace Eutherion.Utils
     {
         private readonly object Sentinel;
         private Func<TValue> Func;
-        private bool IsEvaluated;
         private TValue EvaluatedValue;
 
         /// <summary>
@@ -61,25 +59,22 @@ namespace Eutherion.Utils
             get
             {
                 // Use well known pattern for implementing thread safety.
-                // It avoids taking a lock in most cases when IsEvaluated was already true.
-                // This also allows for branch prediction on a true value of IsEvaluated.
-                if (!IsEvaluated)
+                // It avoids taking a lock in most cases when Func was already null.
+                // This also allows for branch prediction on a null value of Func.
+                if (Func != null)
                 {
                     lock (Sentinel)
                     {
-                        // Check IsEvaluated again because multiple threads may have been racing for the lock.
-                        if (!IsEvaluated)
+                        // Check Func again because multiple threads may have been racing for the lock.
+                        if (Func != null)
                         {
                             // Evaluate the function inside the lock so any other threads
                             // racing for the evaluated value must wait until it's assigned.
                             EvaluatedValue = Func();
 
-                            // Only here set IsEvaluated to true, because Func() may throw exceptions.
                             // If Func() threw, then it will be re-evaluated by the next caller,
                             // and it will likely throw again.
-                            IsEvaluated = true;
-
-                            // Also release any references a closure may have held implicitly.
+                            // This also releases any references a closure may have held implicitly.
                             Func = null;
                         }
                     }
