@@ -232,14 +232,8 @@ namespace Eutherion.Win.Storage
                               DefaultFileStreamBufferSize,
                               FileOptions.SequentialScan | FileOptions.Asynchronous);
 
-        /// <summary>
-        /// Creates and returns an update operation for the auto-save file.
-        /// </summary>
-        public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
+        private void Persist(SettingCopy workingCopy)
         {
-            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
-            workingCopy.AddOrReplace(property, value);
-
             if (!workingCopy.EqualTo(CurrentSettings))
             {
                 // Commit to CurrentSettings.
@@ -251,6 +245,26 @@ namespace Eutherion.Win.Storage
                     autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy());
                 }
             }
+        }
+
+        /// <summary>
+        /// Persists a value to the auto-save file.
+        /// </summary>
+        public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
+        {
+            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
+            workingCopy.AddOrReplace(property, value);
+            Persist(workingCopy);
+        }
+
+        /// <summary>
+        /// Removes a value from the auto-save file.
+        /// </summary>
+        public void Remove<TValue>(SettingProperty<TValue> property)
+        {
+            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
+            workingCopy.Remove(property);
+            Persist(workingCopy);
         }
 
         /// <summary>
