@@ -157,6 +157,11 @@ namespace Eutherion.Win
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
+        /// Flag to make sure autoSaveBackgroundTask is cancelled at most once.
+        /// </summary>
+        private bool isDisposed;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
         /// </summary>
         /// <param name="remoteState">
@@ -415,20 +420,27 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            cts.Cancel();
-            try
+            if (!isDisposed)
             {
-                autoSaveBackgroundTask.Wait();
-            }
-            catch
-            {
-                // Have to catch cancelled exceptions.
-            }
+                cts.Cancel();
 
-            // Dispose in opposite order of acquiring the lock on the files,
-            // so that inner files can only be locked if outer files are locked too.
-            autoSaveFile2.Dispose();
-            autoSaveFile1.Dispose();
+                try
+                {
+                    autoSaveBackgroundTask.Wait();
+                }
+                catch
+                {
+                    // Have to catch cancelled exceptions.
+                }
+
+                cts.Dispose();
+
+                // Dispose in opposite order of acquiring the lock on the files,
+                // so that inner files can only be locked if outer files are locked too.
+                autoSaveFile2.Dispose();
+                autoSaveFile1.Dispose();
+                isDisposed = true;
+            }
         }
     }
 }
