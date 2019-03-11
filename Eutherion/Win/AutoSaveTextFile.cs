@@ -237,7 +237,7 @@ namespace Eutherion.Win
             // Set up long running task to keep auto-saving updates.
             updateQueue = new ConcurrentQueue<TUpdate>();
             cts = new CancellationTokenSource();
-            autoSaveBackgroundTask = AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token);
+            autoSaveBackgroundTask = Task.Run(() => AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token));
         }
 
         private FileStream VerifiedFileStream(FileStream fileStream, string parameterName)
