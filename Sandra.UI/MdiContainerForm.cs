@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -428,10 +427,9 @@ namespace Sandra.UI
             {
                 return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
             }
-            catch (Exception exc)
+            catch
             {
-                exc.Trace();
-                return null;
+                return Properties.Resources.ResourceManager.GetObject(imageFileKey, Properties.Resources.Culture) as Bitmap;
             }
         }
 
