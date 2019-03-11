@@ -109,6 +109,7 @@ namespace Eutherion.Win
 
             // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
             Load();
+            SetSynchronizationContext();
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
