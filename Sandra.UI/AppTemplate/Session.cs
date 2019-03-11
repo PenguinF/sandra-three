@@ -90,10 +90,9 @@ namespace Eutherion.Win.AppTemplate
                 settingsProvider.CreateBuiltIn(this));
 
             // Save name of APPDATA subfolder for persistent files.
-            var appDataSubFolderName = GetDefaultSetting(SharedSettings.AppDataSubFolderName);
             AppDataSubFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appDataSubFolderName);
+                GetDefaultSetting(SharedSettings.AppDataSubFolderName));
 
 #if DEBUG
             // In debug mode, generate default json configuration files from hard coded settings.
@@ -108,7 +107,9 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            AutoSave = new SettingsAutoSave(appDataSubFolderName, new SettingCopy(settingsProvider.CreateAutoSaveSchema(this)));
+            AutoSave = new SettingsAutoSave(
+                AppDataSubFolder,
+                settingsProvider.CreateAutoSaveSchema(this));
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.

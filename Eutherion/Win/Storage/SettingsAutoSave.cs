@@ -28,9 +28,10 @@ using System.IO;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Manages an auto-save file of settings local to every non-roaming user.
+    /// Manages a pair of auto-save files of settings.
     /// This class is assumed to have a lifetime equal to the application.
-    /// See also: <seealso cref="Environment.SpecialFolder.LocalApplicationData"/>
+    /// The recommended location for the auto-save files is in a subfolder of
+    /// <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
     /// </summary>
     public sealed class SettingsAutoSave
     {
@@ -116,56 +117,57 @@ namespace Eutherion.Win.Storage
         public SettingObject CurrentSettings { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SettingsAutoSave"/>.
+        /// Initializes a new instance of <see cref="SettingsAutoSave"/> which will generate auto-save files
+        /// with names <see cref="AutoSaveFileName1"/> and <see cref="AutoSaveFileName2"/> in the specified folder.
         /// </summary>
-        /// <param name="appSubFolderName">
-        /// The name of the subfolder to use in <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
+        /// <param name="path">
+        /// The location of the folder in which to store the auto-save files.
         /// </param>
-        /// <param name="workingCopy">
-        /// The schema to use.
+        /// <param name="schema">
+        /// The <see cref="SettingSchema"/> to use for the auto-save files.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="appSubFolderName"/> and/or <paramref name="workingCopy"/> are null.
+        /// <paramref name="path"/> and/or <paramref name="schema"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="appSubFolderName"/> is <see cref="string.Empty"/>,
-        /// or contains one or more of the invalid characters defined in <see cref="Path.GetInvalidPathChars"/>,
-        /// or targets a folder which is not a subfolder of <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// The path which is expected to be a directory is actually a file,
+        /// -or- The path contains a network name which cannot be resolved,
+        /// -or- <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// The caller does not have sufficient permissions to create the file or its directory.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to create the file or its directory.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        /// <paramref name="path"/> is invalid.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        /// <paramref name="appSubFolderName"/> contains a colon character (:) that is not part of a drive label ("C:\").
+        /// <paramref name="path"/> is in an invalid format.
         /// </exception>
-        public SettingsAutoSave(string appSubFolderName, SettingCopy workingCopy)
+        public SettingsAutoSave(string path, SettingSchema schema)
         {
-            if (appSubFolderName == null)
+            if (schema == null)
             {
-                throw new ArgumentNullException(nameof(appSubFolderName));
+                throw new ArgumentNullException(nameof(schema));
             }
 
-            if (workingCopy == null)
-            {
-                throw new ArgumentNullException(nameof(workingCopy));
-            }
-
-            // Have to check for string.Empty because Path.Combine will not.
-            if (appSubFolderName.Length == 0)
-            {
-                throw new ArgumentException($"{nameof(appSubFolderName)} is string.Empty.", nameof(appSubFolderName));
-            }
-
-            if (!SubFolderNameType.Instance.IsValid(appSubFolderName, out ITypeErrorBuilder _))
-            {
-                throw new ArgumentException($"{nameof(appSubFolderName)} targets AppData\\Local itself or is not a subfolder.", nameof(appSubFolderName));
-            }
+            // Any exceptions from these two methods should not be caught but propagated to the caller.
+            string absoluteFolder = Path.GetFullPath(path);
+            DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            CurrentSettings = workingCopy.Commit();
+            CurrentSettings = new SettingCopy(schema).Commit();
 
             try
             {
-                string localApplicationFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                DirectoryInfo baseDir = Directory.CreateDirectory(Path.Combine(localApplicationFolder, appSubFolderName));
                 lockFile = CreateAutoSaveFileStream(baseDir, LockFileName);
 
                 // In the unlikely event that both auto-save files generate an error,
