@@ -140,7 +140,7 @@ namespace Eutherion.Win
         /// <summary>
         /// <see cref="WeakEvent"/> which occurs when the contents of the opened file changed.
         /// </summary>
-        public event Action<LiveTextFile, EventArgs> FileChanged
+        public event Action<LiveTextFile, EventArgs> FileUpdated
         {
             add
             {
@@ -153,7 +153,7 @@ namespace Eutherion.Win
             }
         }
 
-        protected virtual void OnFileChanged(EventArgs e) => event_FileChanged.Raise(this, e);
+        protected virtual void OnFileUpdated(EventArgs e) => event_FileChanged.Raise(this, e);
 
         protected void StartWatching()
         {
@@ -205,7 +205,7 @@ namespace Eutherion.Win
                     {
                         Load();
                         if (cancellationToken.IsCancellationRequested) break;
-                        sc.Post(RaiseFileChangedEvent, null);
+                        sc.Post(RaiseFileUpdatedEvent, null);
                     }
 
                     // Stop the loop if the FileWatcher errored out.
@@ -228,9 +228,9 @@ namespace Eutherion.Win
             watcher.Dispose();
         }
 
-        private void RaiseFileChangedEvent(object state)
+        private void RaiseFileUpdatedEvent(object state)
         {
-            OnFileChanged(EventArgs.Empty);
+            OnFileUpdated(EventArgs.Empty);
         }
 
         public void Dispose()

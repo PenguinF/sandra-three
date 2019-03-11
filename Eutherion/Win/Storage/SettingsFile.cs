@@ -153,9 +153,9 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        protected override void OnFileChanged(EventArgs e)
+        protected override void OnFileUpdated(EventArgs e)
         {
-            base.OnFileChanged(e);
+            base.OnFileUpdated(e);
 
             SettingObject newSettings = ReadSettingObject(LoadedText);
 
