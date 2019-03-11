@@ -25,7 +25,6 @@ namespace Eutherion.Utils
 {
     /// <summary>
     /// Represents the thread-safe lazy evaluation of a parameterless function.
-    /// If the function calls itself recursively, a deadlock occurs.
     /// </summary>
     /// <typeparam name="TValue">
     /// The type of the evaluated value.
