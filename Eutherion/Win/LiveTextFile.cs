@@ -196,8 +196,6 @@ namespace Eutherion.Win
 
                     if (hasChanges && sc != null)
                     {
-                        Load();
-                        if (cancellationToken.IsCancellationRequested) break;
                         sc.Post(RaiseFileUpdatedEvent, null);
                     }
 
@@ -223,6 +221,7 @@ namespace Eutherion.Win
 
         private void RaiseFileUpdatedEvent(object state)
         {
+            Load();
             OnFileUpdated(EventArgs.Empty);
         }
 
