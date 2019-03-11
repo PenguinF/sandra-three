@@ -290,6 +290,9 @@ namespace Eutherion.Win
             // How much of the output still needs to be written.
             int remainingLength = textToSave.Length;
 
+            // For zero length text, do not write anything at all.
+            if (remainingLength == 0) return;
+
             // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
             // The length of its string representation will be smaller than CharBufferSize
             // until the day string lengths exceed 10¹⁰²⁴ - 2.
