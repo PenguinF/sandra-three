@@ -19,11 +19,9 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Storage;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -65,19 +63,6 @@ namespace Sandra.UI
                 };
 
                 Application.Run(mdiContainerForm);
-            }
-        }
-
-        internal static Image LoadImage(string imageFileKey)
-        {
-            try
-            {
-                return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
-            }
-            catch (Exception exc)
-            {
-                exc.Trace();
-                return null;
             }
         }
 

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -28,6 +29,7 @@ using Sandra.Chess;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -420,21 +422,34 @@ namespace Sandra.UI
             NewPlayingBoard();
         }
 
-        EnumIndexedArray<ColoredPiece, Image> LoadChessPieceImages()
+        private Image LoadChessPieceImage(string imageFileKey)
+        {
+            try
+            {
+                return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
+            }
+            catch (Exception exc)
+            {
+                exc.Trace();
+                return null;
+            }
+        }
+
+        private EnumIndexedArray<ColoredPiece, Image> LoadChessPieceImages()
         {
             var array = EnumIndexedArray<ColoredPiece, Image>.New();
-            array[ColoredPiece.BlackPawn] = Program.LoadImage("bp");
-            array[ColoredPiece.BlackKnight] = Program.LoadImage("bn");
-            array[ColoredPiece.BlackBishop] = Program.LoadImage("bb");
-            array[ColoredPiece.BlackRook] = Program.LoadImage("br");
-            array[ColoredPiece.BlackQueen] = Program.LoadImage("bq");
-            array[ColoredPiece.BlackKing] = Program.LoadImage("bk");
-            array[ColoredPiece.WhitePawn] = Program.LoadImage("wp");
-            array[ColoredPiece.WhiteKnight] = Program.LoadImage("wn");
-            array[ColoredPiece.WhiteBishop] = Program.LoadImage("wb");
-            array[ColoredPiece.WhiteRook] = Program.LoadImage("wr");
-            array[ColoredPiece.WhiteQueen] = Program.LoadImage("wq");
-            array[ColoredPiece.WhiteKing] = Program.LoadImage("wk");
+            array[ColoredPiece.BlackPawn] = LoadChessPieceImage("bp");
+            array[ColoredPiece.BlackKnight] = LoadChessPieceImage("bn");
+            array[ColoredPiece.BlackBishop] = LoadChessPieceImage("bb");
+            array[ColoredPiece.BlackRook] = LoadChessPieceImage("br");
+            array[ColoredPiece.BlackQueen] = LoadChessPieceImage("bq");
+            array[ColoredPiece.BlackKing] = LoadChessPieceImage("bk");
+            array[ColoredPiece.WhitePawn] = LoadChessPieceImage("wp");
+            array[ColoredPiece.WhiteKnight] = LoadChessPieceImage("wn");
+            array[ColoredPiece.WhiteBishop] = LoadChessPieceImage("wb");
+            array[ColoredPiece.WhiteRook] = LoadChessPieceImage("wr");
+            array[ColoredPiece.WhiteQueen] = LoadChessPieceImage("wq");
+            array[ColoredPiece.WhiteKing] = LoadChessPieceImage("wk");
             return array;
         }
     }
