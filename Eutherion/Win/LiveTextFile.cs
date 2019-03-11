@@ -148,7 +148,7 @@ namespace Eutherion.Win
         /// </param>
         protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
-        protected void StartWatching()
+        public void StartWatching()
         {
             if (cts == null)
             {

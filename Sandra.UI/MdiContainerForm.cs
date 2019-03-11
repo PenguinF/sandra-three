@@ -65,6 +65,7 @@ namespace Sandra.UI
             IndexFocusDependentUIActions(MainMenuStrip.Items);
 
             Session.Current.LocalSettings.RegisterSettingsChangedHandler(Session.Current.DeveloperMode, DeveloperModeChanged);
+            Session.Current.LocalSettings.StartWatching();
             ShowOrHideEditCurrentLanguageItem();
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;

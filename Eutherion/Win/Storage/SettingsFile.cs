@@ -117,8 +117,6 @@ namespace Eutherion.Win.Storage
 
             WeakEvent<object, EventArgs> keyedEvent = settingsChangedEvents.GetOrAdd(property.Name, key => new WeakEvent<object, EventArgs>());
             keyedEvent.AddListener(eventHandler);
-
-            StartWatching();
         }
 
         private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
