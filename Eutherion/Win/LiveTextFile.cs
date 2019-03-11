@@ -135,25 +135,18 @@ namespace Eutherion.Win
             File.WriteAllText(AbsoluteFilePath, contents);
         }
 
-        readonly WeakEvent<LiveTextFile, EventArgs> event_FileChanged = new WeakEvent<LiveTextFile, EventArgs>();
+        /// <summary>
+        /// Occurs when the contents of the opened file changed.
+        /// </summary>
+        public event Action<LiveTextFile, EventArgs> FileUpdated;
 
         /// <summary>
-        /// <see cref="WeakEvent"/> which occurs when the contents of the opened file changed.
+        /// Raises the <see cref="FileUpdated"/> event.
         /// </summary>
-        public event Action<LiveTextFile, EventArgs> FileUpdated
-        {
-            add
-            {
-                event_FileChanged.AddListener(value);
-                StartWatching();
-            }
-            remove
-            {
-                event_FileChanged.RemoveListener(value);
-            }
-        }
-
-        protected virtual void OnFileUpdated(EventArgs e) => event_FileChanged.Raise(this, e);
+        /// <param name="e">
+        /// The event data.
+        /// </param>
+        protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
         protected void StartWatching()
         {
