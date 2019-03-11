@@ -36,6 +36,7 @@ namespace Eutherion.Win.Storage
         {
             public static readonly PType<bool> Boolean = new _BooleanCLRType();
             public static readonly PType<int> Int32 = new _Int32CLRType();
+            public static readonly PType<uint> UInt32 = new _UInt32CLRType();
             public static readonly PType<string> String = new _StringCLRType();
 
             private sealed class _BooleanCLRType : Derived<PBoolean, bool>
@@ -56,6 +57,16 @@ namespace Eutherion.Win.Storage
                     => ValidValue((int)integer.Value);
 
                 public override PInteger GetBaseValue(int value) => new PInteger(value);
+            }
+
+            private sealed class _UInt32CLRType : Derived<PInteger, uint>
+            {
+                public _UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
+
+                public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(PInteger integer)
+                    => ValidValue((uint)integer.Value);
+
+                public override PInteger GetBaseValue(uint value) => new PInteger(value);
             }
 
             private sealed class _StringCLRType : Derived<PString, string>
