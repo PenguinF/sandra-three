@@ -56,6 +56,7 @@ namespace Eutherion.Win
         private readonly Task pollFileChangesBackgroundTask;
 
         private WindowsFormsSynchronizationContext sc;
+        private bool isDisposed;
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -227,18 +228,22 @@ namespace Eutherion.Win
 
         public void Dispose()
         {
-            cts.Cancel();
-
-            try
+            if (!isDisposed)
             {
-                pollFileChangesBackgroundTask.Wait();
-            }
-            catch
-            {
-                // Any exceptions here must be ignored.
-            }
+                cts.Cancel();
 
-            cts.Dispose();
+                try
+                {
+                    pollFileChangesBackgroundTask.Wait();
+                }
+                catch
+                {
+                    // Any exceptions here must be ignored.
+                }
+
+                cts.Dispose();
+                isDisposed = true;
+            }
         }
     }
 }
