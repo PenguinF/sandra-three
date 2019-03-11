@@ -152,7 +152,6 @@ namespace Eutherion.Win.AppTemplate
             LanguageFile.RegisterSettingsChangedHandler(Localizers.NativeName, FileChanged);
             LanguageFile.RegisterSettingsChangedHandler(Localizers.FlagIconFile, FileChanged);
             LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
-            LanguageFile.StartWatching();
         }
 
         private void FileChanged(object sender, EventArgs e)

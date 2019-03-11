@@ -63,6 +63,7 @@ namespace Sandra.UI
                 {
                     // Enable live updates to localizers now a message loop exists.
                     session.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
+                    session.RegisteredLocalizers.ForEach(x => x.LanguageFile.StartWatching());
                 };
 
                 Application.Run(mdiContainerForm);
