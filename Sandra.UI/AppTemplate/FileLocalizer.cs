@@ -91,6 +91,10 @@ namespace Eutherion.Win.AppTemplate
             LanguageFile = languageFile;
             UpdateFromFile();
             UpdateDictionary();
+
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.NativeName, FileChanged);
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.FlagIconFile, FileChanged);
+            LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
         }
 
         private void UpdateFromFile()
@@ -144,14 +148,6 @@ namespace Eutherion.Win.AppTemplate
             }
 
             return new UIActionState(UIActionVisibility.Enabled, Session.CurrentLocalizer == this);
-        }
-
-        public void EnableLiveUpdates()
-        {
-            // Can only happen after a message loop has been started.
-            LanguageFile.RegisterSettingsChangedHandler(Localizers.NativeName, FileChanged);
-            LanguageFile.RegisterSettingsChangedHandler(Localizers.FlagIconFile, FileChanged);
-            LanguageFile.RegisterSettingsChangedHandler(Localizers.Translations, TranslationsChanged);
         }
 
         private void FileChanged(object sender, EventArgs e)

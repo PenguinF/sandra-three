@@ -149,7 +149,6 @@ namespace Eutherion.Win.AppTemplate
         {
             DefaultSettings.SetSynchronizationContext();
             LocalSettings.SetSynchronizationContext();
-            RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
             RegisteredLocalizers.ForEach(x => x.LanguageFile.SetSynchronizationContext());
         }
 
