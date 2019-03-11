@@ -47,6 +47,10 @@ namespace Sandra.UI
 
         public MdiContainerForm()
         {
+#if DEBUG
+            DeployRuntimeConfigurationFiles();
+#endif
+
             IsMdiContainer = true;
             Icon = Properties.Resources.Sandra;
             Text = Session.ExecutableFileNameWithoutExtension;
@@ -421,15 +425,21 @@ namespace Sandra.UI
             NewPlayingBoard();
         }
 
+        private string RuntimePath(string imageFileKey)
+            => Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png");
+
+        private Bitmap DefaultResourceImage(string imageFileKey)
+            => (Bitmap)Properties.Resources.ResourceManager.GetObject(imageFileKey, Properties.Resources.Culture);
+
         private Image LoadChessPieceImage(string imageFileKey)
         {
             try
             {
-                return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
+                return Image.FromFile(RuntimePath(imageFileKey));
             }
             catch
             {
-                return Properties.Resources.ResourceManager.GetObject(imageFileKey, Properties.Resources.Culture) as Bitmap;
+                return DefaultResourceImage(imageFileKey);
             }
         }
 
@@ -450,5 +460,24 @@ namespace Sandra.UI
             array[ColoredPiece.WhiteKing] = LoadChessPieceImage("wk");
             return array;
         }
+
+#if DEBUG
+        private void DeployRuntimePieceImage(string imageFileKey)
+        {
+            var runtimePath = RuntimePath(imageFileKey);
+            Directory.CreateDirectory(Path.GetDirectoryName(runtimePath));
+            DefaultResourceImage(imageFileKey).Save(runtimePath);
+        }
+
+        /// <summary>
+        /// Deploys piece images to the Images folder.
+        /// </summary>
+        private void DeployRuntimeConfigurationFiles()
+        {
+            new[] { "bp", "bn", "bb", "br", "bq", "bk",
+                    "wp", "wn", "wb", "wr", "wq", "wk",
+            }.ForEach(DeployRuntimePieceImage);
+        }
+#endif
     }
 }
