@@ -111,9 +111,9 @@ namespace Eutherion.Win.Storage
         private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
 
         /// <summary>
-        /// Settings as they are stored locally.
+        /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
         /// </summary>
-        private SettingObject localSettings;
+        public SettingObject CurrentSettings { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingsAutoSave"/>.
@@ -160,7 +160,7 @@ namespace Eutherion.Win.Storage
 
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
-            localSettings = workingCopy.Commit();
+            CurrentSettings = workingCopy.Commit();
 
             try
             {
@@ -169,8 +169,8 @@ namespace Eutherion.Win.Storage
                 lockFile = CreateAutoSaveFileStream(baseDir, LockFileName);
 
                 // In the unlikely event that both auto-save files generate an error,
-                // just initialize from localSettings so auto-saves within the session are still enabled.
-                var remoteState = new SettingsRemoteState(localSettings);
+                // just initialize from CurrentSettings so auto-saves within the session are still enabled.
+                var remoteState = new SettingsRemoteState(CurrentSettings);
                 FileStream autoSaveFile1 = null;
                 FileStream autoSaveFile2 = null;
 
@@ -199,9 +199,9 @@ namespace Eutherion.Win.Storage
                     throw;
                 }
 
-                // Override localSettings with RemoteSettings.
+                // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
-                localSettings = remoteState.RemoteSettings;
+                CurrentSettings = remoteState.RemoteSettings;
             }
             catch (ArgumentException)
             {
@@ -233,27 +233,22 @@ namespace Eutherion.Win.Storage
                               FileOptions.SequentialScan | FileOptions.Asynchronous);
 
         /// <summary>
-        /// Gets the <see cref="SettingObject"/> which contains the latest setting values.
-        /// </summary>
-        public SettingObject CurrentSettings => localSettings;
-
-        /// <summary>
         /// Creates and returns an update operation for the auto-save file.
         /// </summary>
         public void Persist<TValue>(SettingProperty<TValue> property, TValue value)
         {
-            SettingCopy workingCopy = localSettings.CreateWorkingCopy();
+            SettingCopy workingCopy = CurrentSettings.CreateWorkingCopy();
             workingCopy.AddOrReplace(property, value);
 
-            if (!workingCopy.EqualTo(localSettings))
+            if (!workingCopy.EqualTo(CurrentSettings))
             {
-                // Commit to localSettings.
-                localSettings = workingCopy.Commit();
+                // Commit to CurrentSettings.
+                CurrentSettings = workingCopy.Commit();
 
                 if (autoSaveFile != null)
                 {
                     // Persist a copy so its values are not shared with other threads.
-                    autoSaveFile.Persist(localSettings.CreateWorkingCopy());
+                    autoSaveFile.Persist(CurrentSettings.CreateWorkingCopy());
                 }
             }
         }
