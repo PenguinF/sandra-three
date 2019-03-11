@@ -22,11 +22,11 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Eutherion.Win
 {
@@ -50,11 +50,12 @@ namespace Eutherion.Win
         private readonly FileWatcher watcher;
 
         // Thread synchronization fields.
-        private CancellationTokenSource cts;
-        private AutoResetEvent fileChangeSignalWaitHandle;
-        private ConcurrentQueue<FileChangeType> fileChangeQueue;
-        private SynchronizationContext sc;
-        private Task pollFileChangesBackgroundTask;
+        private readonly CancellationTokenSource cts;
+        private readonly AutoResetEvent fileChangeSignalWaitHandle;
+        private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
+        private readonly Task pollFileChangesBackgroundTask;
+
+        private WindowsFormsSynchronizationContext sc;
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -99,6 +100,14 @@ namespace Eutherion.Win
             }
 
             watcher = new FileWatcher(AbsoluteFilePath);
+
+            // Set up file change listener thread.
+            cts = new CancellationTokenSource();
+            fileChangeSignalWaitHandle = new AutoResetEvent(false);
+            fileChangeQueue = new ConcurrentQueue<FileChangeType>();
+            watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
+
+            pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
         /// <summary>
@@ -148,22 +157,13 @@ namespace Eutherion.Win
         /// </param>
         protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
-        public void StartWatching()
+        /// <summary>
+        /// Captures the synchronization context so file update events can be posted to it.
+        /// </summary>
+        public void SetSynchronizationContext()
         {
-            if (cts == null)
-            {
-                // Capture the synchronization context so events can be posted to it.
-                sc = SynchronizationContext.Current;
-                Debug.Assert(sc != null);
-
-                // Set up file change listener thread.
-                cts = new CancellationTokenSource();
-                fileChangeSignalWaitHandle = new AutoResetEvent(false);
-                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
-                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
-            }
+            // Capture the synchronization context so events can be posted to it.
+            sc = SynchronizationContext.Current as WindowsFormsSynchronizationContext;
         }
 
         private void PollFileChangesLoop(CancellationToken cancellationToken)
@@ -194,7 +194,7 @@ namespace Eutherion.Win
 
                     if (cancellationToken.IsCancellationRequested) break;
 
-                    if (hasChanges)
+                    if (hasChanges && sc != null)
                     {
                         Load();
                         if (cancellationToken.IsCancellationRequested) break;
@@ -228,20 +228,18 @@ namespace Eutherion.Win
 
         public void Dispose()
         {
-            if (cts != null)
+            cts.Cancel();
+
+            try
             {
-                cts.Cancel();
-                try
-                {
-                    pollFileChangesBackgroundTask.Wait();
-                    cts.Dispose();
-                    cts = null;
-                }
-                catch
-                {
-                    // Any exceptions here must be ignored.
-                }
+                pollFileChangesBackgroundTask.Wait();
             }
+            catch
+            {
+                // Any exceptions here must be ignored.
+            }
+
+            cts.Dispose();
         }
     }
 }

@@ -147,10 +147,10 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public void SetSynchronizationContext()
         {
-            DefaultSettings.StartWatching();
-            LocalSettings.StartWatching();
+            DefaultSettings.SetSynchronizationContext();
+            LocalSettings.SetSynchronizationContext();
             RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
-            RegisteredLocalizers.ForEach(x => x.LanguageFile.StartWatching());
+            RegisteredLocalizers.ForEach(x => x.LanguageFile.SetSynchronizationContext());
         }
 
         private string LocalApplicationDataPath(bool isLocalSchema)
