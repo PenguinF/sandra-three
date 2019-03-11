@@ -52,7 +52,7 @@ namespace Sandra.UI
 #endif
 
             IsMdiContainer = true;
-            Icon = Properties.Resources.Sandra;
+            Icon = Session.Current.ApplicationIcon;
             Text = Session.ExecutableFileNameWithoutExtension;
 
             // Initialize UIActions before building the MainMenuStrip based on it.
@@ -206,13 +206,13 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile(this));
-            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile(this));
+            this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
+            this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
             this.BindAction(SharedUIAction.Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
-            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage(this));
+            this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
             mainMenuRootNodes.Add(fileMenu);

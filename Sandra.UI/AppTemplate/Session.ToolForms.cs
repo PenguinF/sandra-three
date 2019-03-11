@@ -56,9 +56,20 @@ namespace Eutherion.Win.AppTemplate
 
                 if (toolForm.Value != null)
                 {
-                    toolForm.Value.Owner = ownerControl?.TopLevelControl as Form;
-                    toolForm.Value.ShowInTaskbar = false;
-                    toolForm.Value.ShowIcon = false;
+                    if (ownerControl?.TopLevelControl is Form ownerForm)
+                    {
+                        toolForm.Value.Owner = ownerForm;
+                        toolForm.Value.ShowInTaskbar = false;
+                    }
+                    else
+                    {
+                        // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
+                        // Icon must be set and ShowIcon must be true to override that default icon.
+                        toolForm.Value.ShowInTaskbar = true;
+                        toolForm.Value.Icon = ApplicationIcon;
+                        toolForm.Value.ShowIcon = true;
+                    }
+
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
                     toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
                     toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
@@ -92,12 +103,12 @@ namespace Eutherion.Win.AppTemplate
                 ClientSize = new Size(600, 600),
             };
 
-        public UIActionHandlerFunc TryEditPreferencesFile(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryEditPreferencesFile() => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     localSettingsFormBox,
                     () =>
                     {
@@ -152,12 +163,12 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryShowDefaultSettingsFile(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryShowDefaultSettingsFile() => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     defaultSettingsFormBox,
                     () =>
                     {
@@ -234,6 +245,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 ClientSize = new Size(width, height),
                 Text = Path.GetFileName(fileName),
+                ShowIcon = false,
             };
 
             readOnlyTextForm.Controls.Add(textBox);
@@ -306,7 +318,7 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public UIActionHandlerFunc TryEditCurrentLanguage(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage() => perform =>
         {
             // Only enable in developer mode.
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
@@ -317,7 +329,7 @@ namespace Eutherion.Win.AppTemplate
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     languageFormBox,
                     () =>
                     {

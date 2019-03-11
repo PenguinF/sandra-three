@@ -40,7 +40,10 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer, builtInEnglishLocalizer.Dictionary))
+            using (var session = Session.Configure(new SettingsProvider(),
+                                                   builtInEnglishLocalizer,
+                                                   builtInEnglishLocalizer.Dictionary,
+                                                   Properties.Resources.Sandra))
             {
                 Chess.Constants.ForceInitialize();
 

@@ -61,8 +61,12 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Configure(ISettingsProvider settingsProvider,
                                         Localizer defaultLocalizer,
-                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
-            => Current = new Session(settingsProvider, defaultLocalizer, defaultLocalizerDictionary);
+                                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                                        Icon applicationIcon)
+            => Current = new Session(settingsProvider,
+                                     defaultLocalizer,
+                                     defaultLocalizerDictionary,
+                                     applicationIcon);
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
@@ -71,12 +75,14 @@ namespace Eutherion.Win.AppTemplate
 
         private Session(ISettingsProvider settingsProvider,
                         Localizer defaultLocalizer,
-                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary)
+                        Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
+                        Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
 
             // May be null.
             this.defaultLocalizerDictionary = defaultLocalizerDictionary;
+            ApplicationIcon = applicationIcon;
 
             // This depends on ExecutableFileName.
             DeveloperMode = new SettingProperty<bool>(
@@ -133,6 +139,8 @@ namespace Eutherion.Win.AppTemplate
             // Fall back onto defaults if still null.
             currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
         }
+
+        public Icon ApplicationIcon { get; }
 
         public SettingProperty<bool> DeveloperMode { get; }
 
