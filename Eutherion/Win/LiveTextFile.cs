@@ -85,7 +85,6 @@ namespace Eutherion.Win
         public LiveTextFile(string path)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
-            Load();
 
             try
             {
@@ -108,6 +107,8 @@ namespace Eutherion.Win
             fileChangeQueue = new ConcurrentQueue<FileChangeType>();
             watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
+            // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
+            Load();
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
