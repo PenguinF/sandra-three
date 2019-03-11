@@ -20,9 +20,7 @@
 #endregion
 
 using Eutherion.Win.AppTemplate;
-using Eutherion.Win.Storage;
 using System;
-using System.IO;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -46,11 +44,6 @@ namespace Sandra.UI
             {
                 Chess.Constants.ForceInitialize();
 
-#if DEBUG
-                // In debug mode, generate default json configuration files from hard coded settings.
-                GenerateJsonConfigurationFiles(session, builtInEnglishLocalizer);
-#endif
-
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
@@ -65,33 +58,5 @@ namespace Sandra.UI
                 Application.Run(mdiContainerForm);
             }
         }
-
-#if DEBUG
-        /// <summary>
-        /// Generates DefaultSettings.json from the loaded default settings in memory,
-        /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
-        /// </summary>
-        private static void GenerateJsonConfigurationFiles(Session session, BuiltInEnglishLocalizer builtInEnglishLocalizer)
-        {
-            // No exception handler for both WriteToFiles.
-            session.DefaultSettings.WriteToFile(
-                session.DefaultSettings.Settings,
-                SettingWriterOptions.Default);
-
-            using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
-                Path.Combine(Session.ExecutableFolder, "Languages", "en.json"),
-                new SettingCopy(Localizers.CreateLanguageFileSchema())))
-            {
-                var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
-                settingCopy.AddOrReplace(Localizers.NativeName, "English");
-                settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
-                settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
-
-                englishFileFromBuiltIn.WriteToFile(
-                    settingCopy.Commit(),
-                    SettingWriterOptions.SuppressSettingComments);
-            }
-        }
-#endif
     }
 }

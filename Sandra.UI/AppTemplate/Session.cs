@@ -95,6 +95,11 @@ namespace Eutherion.Win.AppTemplate
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 appDataSubFolderName);
 
+#if DEBUG
+            // In debug mode, generate default json configuration files from hard coded settings.
+            DeployRuntimeConfigurationFiles();
+#endif
+
             // Scan Languages subdirectory to load localizers.
             var langFolderName = GetDefaultSetting(SharedSettings.LangFolderName);
             registeredLocalizers = Localizers.ScanLocalizers(this, Path.Combine(ExecutableFolder, langFolderName));
@@ -267,6 +272,34 @@ namespace Eutherion.Win.AppTemplate
             DefaultSettings.Dispose();
             registeredLocalizers.Values.ForEach(x => x.Dispose());
         }
+
+#if DEBUG
+        /// <summary>
+        /// Generates DefaultSettings.json from the loaded default settings in memory,
+        /// and generates Bin/Languages/en.json from the BuiltInEnglishLocalizer.
+        /// </summary>
+        private void DeployRuntimeConfigurationFiles()
+        {
+            // No exception handler for both WriteToFiles.
+            DefaultSettings.WriteToFile(
+                DefaultSettings.Settings,
+                SettingWriterOptions.Default);
+
+            using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
+                Path.Combine(ExecutableFolder, "Languages", "en.json"),
+                new SettingCopy(Localizers.CreateLanguageFileSchema())))
+            {
+                var settingCopy = new SettingCopy(englishFileFromBuiltIn.TemplateSettings.Schema);
+                settingCopy.AddOrReplace(Localizers.NativeName, "English");
+                settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
+                settingCopy.AddOrReplace(Localizers.Translations, defaultLocalizerDictionary);
+
+                englishFileFromBuiltIn.WriteToFile(
+                    settingCopy.Commit(),
+                    SettingWriterOptions.SuppressSettingComments);
+            }
+        }
+#endif
     }
 
     public interface ISettingsProvider
