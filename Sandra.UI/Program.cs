@@ -25,7 +25,6 @@ using Eutherion.Win.Storage;
 using System;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -61,9 +60,8 @@ namespace Sandra.UI
 
                 mdiContainerForm.Load += (_, __) =>
                 {
-                    // Enable live updates to localizers now a message loop exists.
-                    session.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
-                    session.RegisteredLocalizers.ForEach(x => x.LanguageFile.StartWatching());
+                    // Inform session of the current synchronization context once a message loop exists.
+                    session.SetSynchronizationContext();
                 };
 
                 Application.Run(mdiContainerForm);
