@@ -170,6 +170,41 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Generates the text to save to the setting file from the current values in <paramref name="settings"/>.
+        /// </summary>
+        /// <param name="settings">
+        /// The settings to write.
+        /// </param>
+        /// <param name="options">
+        /// Specifies options for writing the settings.
+        /// </param>
+        /// <returns>
+        /// The text to save.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settings"/> has an unexpected schema.
+        /// </exception>
+        public string GenerateJson(SettingObject settings, SettingWriterOptions options)
+        {
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+            if (settings.Schema != TemplateSettings.Schema)
+            {
+                throw new ArgumentException(
+                    $"{nameof(settings)} has an unexpected schema",
+                    nameof(settings));
+            }
+
+            return SettingWriter.ConvertToJson(
+                settings.Map,
+                schema: settings.Schema,
+                options: options);
+        }
+
+        /// <summary>
         /// Attempts to overwrite the setting file with the current values in <paramref name="settings"/>.
         /// </summary>
         /// <param name="settings">
@@ -185,20 +220,6 @@ namespace Eutherion.Win.Storage
         /// <paramref name="settings"/> has an unexpected schema.
         /// </exception>
         public void WriteToFile(SettingObject settings, SettingWriterOptions options)
-        {
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            if (settings.Schema != TemplateSettings.Schema)
-            {
-                throw new ArgumentException(
-                    $"{nameof(settings)} has an unexpected schema",
-                    nameof(settings));
-            }
-
-            Save(SettingWriter.ConvertToJson(
-                settings.Map,
-                schema: settings.Schema,
-                options: options));
-        }
+            => Save(GenerateJson(settings, options));
     }
 }
