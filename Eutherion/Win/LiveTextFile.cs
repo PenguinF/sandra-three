@@ -50,12 +50,14 @@ namespace Eutherion.Win
         private readonly FileWatcher watcher;
 
         // Thread synchronization fields.
+        private readonly object updateSentinel = new object(); // Used to synchronize access to the sc/missedUpdates pair.
         private readonly CancellationTokenSource cts;
         private readonly AutoResetEvent fileChangeSignalWaitHandle;
         private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
         private readonly Task pollFileChangesBackgroundTask;
 
         private WindowsFormsSynchronizationContext sc;
+        private bool missedUpdates;
         private bool isDisposed;
 
         /// <summary>
@@ -165,8 +167,26 @@ namespace Eutherion.Win
         /// </summary>
         public void SetSynchronizationContext()
         {
-            // Capture the synchronization context so events can be posted to it.
-            sc = SynchronizationContext.Current as WindowsFormsSynchronizationContext;
+            if (SynchronizationContext.Current is WindowsFormsSynchronizationContext newSynchronizationContext)
+            {
+                bool mustLoad = false;
+
+                lock (updateSentinel)
+                {
+                    if (sc != newSynchronizationContext)
+                    {
+                        sc = newSynchronizationContext;
+                        mustLoad = missedUpdates;
+                        missedUpdates = false;
+                    }
+                }
+
+                if (mustLoad)
+                {
+                    // Must load again because of missed changes.
+                    Load();
+                }
+            }
         }
 
         private void PollFileChangesLoop(CancellationToken cancellationToken)
@@ -197,9 +217,20 @@ namespace Eutherion.Win
 
                     if (cancellationToken.IsCancellationRequested) break;
 
-                    if (hasChanges && sc != null)
+                    if (hasChanges)
                     {
-                        sc.Post(RaiseFileUpdatedEvent, null);
+                        lock (updateSentinel)
+                        {
+                            // If no WindowsFormsSynchronizationContext, don't post anything.
+                            if (sc != null)
+                            {
+                                sc.Post(RaiseFileUpdatedEvent, null);
+                            }
+                            else
+                            {
+                                missedUpdates = true;
+                            }
+                        }
                     }
 
                     // Stop the loop if the FileWatcher errored out.
