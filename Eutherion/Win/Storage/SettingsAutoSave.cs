@@ -81,11 +81,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Documented default value of the 'bufferSize' parameter of the <see cref="FileStream"/> constructor.
-        /// </summary>
-        public const int DefaultFileStreamBufferSize = 4096;
-
-        /// <summary>
         /// Gets the name of the file which acts as an exclusive lock between different instances
         /// of this process which might race to obtain a reference to the auto-save files.
         /// </summary>
@@ -230,7 +225,7 @@ namespace Eutherion.Win.Storage
                               FileMode.OpenOrCreate,
                               FileAccess.ReadWrite,
                               FileShare.Read,
-                              DefaultFileStreamBufferSize,
+                              FileUtilities.DefaultFileStreamBufferSize,
                               FileOptions.SequentialScan | FileOptions.Asynchronous);
 
         private void Persist(SettingCopy workingCopy)

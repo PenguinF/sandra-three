@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.IO;
+
 namespace Eutherion.Utils
 {
     /// <summary>
@@ -26,5 +28,9 @@ namespace Eutherion.Utils
     /// </summary>
     public static class FileUtilities
     {
+        /// <summary>
+        /// Documented default value of the 'bufferSize' parameter of the <see cref="FileStream"/> constructor.
+        /// </summary>
+        public const int DefaultFileStreamBufferSize = 4096;
     }
 }
