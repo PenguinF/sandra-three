@@ -81,6 +81,14 @@ namespace Eutherion.Win.AppTemplate
         public WorkingCopyTextFile WorkingCopyTextFile { get; }
 
         /// <summary>
+        /// Returns if this <see cref="JsonTextBox"/> contains any unsaved changes.
+        /// If the text file could not be opened, true is returned.
+        /// </summary>
+        public bool ContainsChanges
+            => !ReadOnly
+            && (Modified || WorkingCopyTextFile.LoadException != null);
+
+        /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
         /// </summary>
         private readonly SettingSchema schema;
@@ -331,7 +339,7 @@ namespace Eutherion.Win.AppTemplate
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
-            if (!Modified) return UIActionVisibility.Disabled;
+            if (!ContainsChanges) return UIActionVisibility.Disabled;
 
             if (perform)
             {

@@ -255,7 +255,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
-            Text = jsonTextBox.Modified ? ChangedMarker + fileName : fileName;
+            Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Invalidate to update the save button.
             ActionHandler.Invalidate();
@@ -361,7 +361,7 @@ namespace Eutherion.Win.AppTemplate
         {
             base.OnFormClosing(e);
 
-            if (jsonTextBox.Modified)
+            if (jsonTextBox.ContainsChanges)
             {
                 DialogResult result = MessageBox.Show(
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
