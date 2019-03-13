@@ -118,8 +118,21 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) => Text = ChangedMarker + fileName;
-                jsonTextBox.SavePointReached += (_, __) => Text = fileName;
+                jsonTextBox.SavePointLeft += (_, __) =>
+                {
+                    Text = ChangedMarker + fileName;
+
+                    // Invalidate to update the save button.
+                    ActionHandler.Invalidate();
+                };
+
+                jsonTextBox.SavePointReached += (_, __) =>
+                {
+                    Text = fileName;
+
+                    // Invalidate to update the save button.
+                    ActionHandler.Invalidate();
+                };
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
