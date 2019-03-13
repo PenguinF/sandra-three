@@ -168,7 +168,15 @@ namespace Eutherion.Win.Storage
 
             try
             {
-                lockFile = CreateAutoSaveFileStream(baseDir, LockFileName);
+                // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
+                // Assuming a buffer size of 1 means less allocated memory.
+                lockFile = new FileStream(
+                    Path.Combine(baseDir.FullName, LockFileName),
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.Read,
+                    1,
+                    FileOptions.DeleteOnClose);
 
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from CurrentSettings so auto-saves within the session are still enabled.
