@@ -50,6 +50,7 @@ namespace Eutherion.Win
         private WorkingCopyTextFile(LiveTextFile openTextFile)
         {
             OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
+            LocalCopyText = LoadedText;
         }
 
         /// <summary>

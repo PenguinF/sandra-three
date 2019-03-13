@@ -252,7 +252,7 @@ namespace Eutherion.Win.AppTemplate
             copyingTextFromTextFile = true;
             try
             {
-                Text = WorkingCopyTextFile.LoadedText;
+                Text = WorkingCopyTextFile.LocalCopyText;
             }
             finally
             {
