@@ -58,6 +58,11 @@ namespace Eutherion.Win
         public LiveTextFile OpenTextFile { get; }
 
         /// <summary>
+        /// Returns the full path to the opened text file.
+        /// </summary>
+        public string OpenTextFilePath => OpenTextFile.AbsoluteFilePath;
+
+        /// <summary>
         /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty.
         /// </summary>
         public string LoadedText => OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);

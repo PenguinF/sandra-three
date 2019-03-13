@@ -52,8 +52,6 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        private readonly string fileName;
-
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
                             Func<string> initialTextGenerator,
@@ -65,8 +63,6 @@ namespace Eutherion.Win.AppTemplate
 
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
-
-            fileName = Path.GetFileName(settingsFile.AbsoluteFilePath);
 
             jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator)
             {
@@ -255,6 +251,8 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
+            string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+            string fileName = Path.GetFileName(openTextFilePath);
             Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Invalidate to update the save button.
@@ -363,6 +361,9 @@ namespace Eutherion.Win.AppTemplate
 
             if (jsonTextBox.ContainsChanges)
             {
+                string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+                string fileName = Path.GetFileName(openTextFilePath);
+
                 DialogResult result = MessageBox.Show(
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
