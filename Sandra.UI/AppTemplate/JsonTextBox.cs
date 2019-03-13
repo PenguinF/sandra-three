@@ -101,22 +101,6 @@ namespace Eutherion.Win.AppTemplate
 
             schema = settingsFile.Settings.Schema;
 
-            if (initialTextGenerator != null && !File.Exists(settingsFile.AbsoluteFilePath))
-            {
-                string json = initialTextGenerator();
-
-                try
-                {
-                    settingsFile.Save(json);
-                }
-                catch (Exception exception)
-                {
-                    // Ignore this exception.
-                    // When user tries to save the file, it will be more meaningful.
-                    exception.Trace();
-                }
-            }
-
             BorderStyle = BorderStyle.None;
 
             StyleResetDefault();
@@ -159,6 +143,22 @@ namespace Eutherion.Win.AppTemplate
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {
                 Zoom = zoomFactor;
+            }
+
+            if (initialTextGenerator != null && !File.Exists(settingsFile.AbsoluteFilePath))
+            {
+                string json = initialTextGenerator();
+
+                try
+                {
+                    settingsFile.Save(json);
+                }
+                catch (Exception exception)
+                {
+                    // Ignore this exception.
+                    // When user tries to save the file, it will be more meaningful.
+                    exception.Trace();
+                }
             }
 
             // Set the Text property and use that as input, because it will not exactly match the json string.
