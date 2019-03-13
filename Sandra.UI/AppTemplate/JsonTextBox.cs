@@ -79,6 +79,11 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingsFile settingsFile;
 
         /// <summary>
+        /// Schema which defines what kind of keys and values are valid in the parsed json.
+        /// </summary>
+        private readonly SettingSchema schema;
+
+        /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
@@ -93,6 +98,8 @@ namespace Eutherion.Win.AppTemplate
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator)
         {
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
+
+            schema = settingsFile.Settings.Schema;
 
             if (initialTextGenerator != null && !File.Exists(settingsFile.AbsoluteFilePath))
             {
@@ -191,7 +198,7 @@ namespace Eutherion.Win.AppTemplate
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            parser.TryParse(settingsFile.Settings.Schema, out PMap dummy, out List<JsonErrorInfo> errors);
+            parser.TryParse(schema, out PMap dummy, out List<JsonErrorInfo> errors);
 
             IndicatorClearRange(0, TextLength);
 
