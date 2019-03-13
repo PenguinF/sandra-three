@@ -165,7 +165,7 @@ namespace Eutherion.Win.AppTemplate
             }
             else
             {
-                Text = WorkingCopyTextFile.LoadedText;
+                CopyTextFromTextFile();
             }
 
             EmptyUndoBuffer();
@@ -241,6 +241,25 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
+        private bool copyingTextFromTextFile;
+
+        /// <summary>
+        /// Sets the Text property without updating WorkingCopyTextFile
+        /// when they're known to be the same.
+        /// </summary>
+        private void CopyTextFromTextFile()
+        {
+            copyingTextFromTextFile = true;
+            try
+            {
+                Text = WorkingCopyTextFile.LoadedText;
+            }
+            finally
+            {
+                copyingTextFromTextFile = false;
+            }
+        }
+
         protected override void OnTextChanged(EventArgs e)
         {
             CallTipCancel();
@@ -249,7 +268,11 @@ namespace Eutherion.Win.AppTemplate
 
             string currentText = Text;
 
-            WorkingCopyTextFile.UpdateLocalCopyText(currentText);
+            // This prevents re-entrancy into WorkingCopyTextFile.
+            if (!copyingTextFromTextFile)
+            {
+                WorkingCopyTextFile.UpdateLocalCopyText(currentText);
+            }
 
             ParseAndApplySyntaxHighlighting(currentText);
         }
