@@ -373,7 +373,15 @@ namespace Eutherion.Win.AppTemplate
                 switch (result)
                 {
                     case DialogResult.Yes:
-                        jsonTextBox.TrySaveToFile(true);
+                        try
+                        {
+                            jsonTextBox.TrySaveToFile(true);
+                        }
+                        catch (Exception exception)
+                        {
+                            e.Cancel = true;
+                            MessageBox.Show(exception.Message);
+                        }
                         break;
                     case DialogResult.No:
                         break;
