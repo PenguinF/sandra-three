@@ -247,7 +247,11 @@ namespace Eutherion.Win.AppTemplate
 
             base.OnTextChanged(e);
 
-            ParseAndApplySyntaxHighlighting(Text);
+            string currentText = Text;
+
+            WorkingCopyTextFile.UpdateLocalCopyText(currentText);
+
+            ParseAndApplySyntaxHighlighting(currentText);
         }
 
         private List<JsonErrorInfo> currentErrors;
@@ -343,7 +347,7 @@ namespace Eutherion.Win.AppTemplate
 
             if (perform)
             {
-                WorkingCopyTextFile.Save(Text);
+                WorkingCopyTextFile.Save();
                 SetSavePoint();
             }
 

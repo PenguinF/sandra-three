@@ -73,11 +73,27 @@ namespace Eutherion.Win
         public Exception LoadException => OpenTextFile.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
 
         /// <summary>
+        /// Gets the current local copy version of the text.
+        /// </summary>
+        public string LocalCopyText { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Updates the current working copy of the text.
+        /// </summary>
+        /// <param name="text">
+        /// The current working copy of the text.
+        /// </param>
+        public void UpdateLocalCopyText(string text)
+        {
+            LocalCopyText = text ?? string.Empty;
+        }
+
+        /// <summary>
         /// Saves the text to the file.
         /// </summary>
-        public void Save(string localCopyText)
+        public void Save()
         {
-            OpenTextFile.Save(localCopyText);
+            OpenTextFile.Save(LocalCopyText);
         }
     }
 }
