@@ -27,7 +27,7 @@ namespace Eutherion.Win
     /// <summary>
     /// Holds a pair of <see cref="FileStream"/> objects.
     /// </summary>
-    public class FileStreamPair
+    public class FileStreamPair : IDisposable
     {
         /// <summary>
         /// The primary <see cref="FileStream"/>.
@@ -49,6 +49,30 @@ namespace Eutherion.Win
         {
             FileStream1 = fileStream1 ?? throw new ArgumentNullException(nameof(fileStream1));
             FileStream2 = fileStream2 ?? throw new ArgumentNullException(nameof(fileStream2));
+        }
+
+        /// <summary>
+        /// Returns either <see cref="FileStream1"/> or <see cref="FileStream2"/>, guaranteeing
+        /// that the returned <see cref="FileStream"/> is different from <paramref name="fileStream"/>.
+        /// </summary>
+        /// <param name="fileStream">
+        /// The <see cref="FileStream"/> not to return.
+        /// </param>
+        /// <returns>
+        /// Either <see cref="FileStream1"/> or <see cref="FileStream2"/>, different from <paramref name="fileStream"/>.
+        /// </returns>
+        public FileStream Different(FileStream fileStream)
+            => fileStream == FileStream1 ? FileStream2 : FileStream1;
+
+        /// <summary>
+        /// Disposes of both <see cref="FileStream"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            // Dispose in opposite order of opening the files,
+            // so that inner files can only be locked if outer files are locked too.
+            FileStream2.Dispose();
+            FileStream1.Dispose();
         }
     }
 }

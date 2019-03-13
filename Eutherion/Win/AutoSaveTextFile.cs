@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 namespace Eutherion.Win
 {
     /// <summary>
-    /// Encapsulates a pair of <see cref="FileStream"/>s which are used for auto-saving text files.
+    /// Uses a pair of <see cref="FileStream"/>s for auto-saving text files.
     /// This class is tailored for frequent sequential asynchronous writing of text, so it is a good idea
     /// to open the <see cref="FileStream"/>s with both <see cref="FileOptions.SequentialScan"/>
     /// and <see cref="FileOptions.Asynchronous"/>.
@@ -120,8 +120,6 @@ namespace Eutherion.Win
         /// The auto-save files.
         /// </summary>
         private readonly FileStreamPair autoSaveFiles;
-        private FileStream autoSaveFile1 => autoSaveFiles.FileStream1;
-        private FileStream autoSaveFile2 => autoSaveFiles.FileStream2;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
@@ -206,7 +204,7 @@ namespace Eutherion.Win
             // If null is returned from the first Load(), the integrity check failed.
             if (loadedText == null)
             {
-                latestAutoSaveFile = Switch(latestAutoSaveFile);
+                latestAutoSaveFile = autoSaveFiles.Different(latestAutoSaveFile);
 
                 try
                 {
@@ -247,9 +245,6 @@ namespace Eutherion.Win
                     parameterName);
             }
         }
-
-        private FileStream Switch(FileStream autoSaveFile)
-            => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
 
         private string Load(FileStream autoSaveFile)
         {
@@ -372,7 +367,7 @@ namespace Eutherion.Win
                         if (remoteState.ShouldSave(updates, out string textToSave))
                         {
                             // Alternate between both auto-save files.
-                            FileStream targetFile = Switch(lastWrittenToFile);
+                            FileStream targetFile = autoSaveFiles.Different(lastWrittenToFile);
 
                             // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                             // Theoretically, two thrown writeExceptions would have the same effect.
@@ -399,7 +394,7 @@ namespace Eutherion.Win
         }
 
         /// <summary>
-        /// Finishes auto-saving remaining updates, and releases the locks on the encapsulated <see cref="FileStream"/>s.
+        /// Finishes auto-saving remaining updates, then closes the encapsulated <see cref="FileStream"/>s.
         /// </summary>
         public void Dispose()
         {
@@ -417,11 +412,7 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-
-                // Dispose in opposite order of acquiring the lock on the files,
-                // so that inner files can only be locked if outer files are locked too.
-                autoSaveFile2.Dispose();
-                autoSaveFile1.Dispose();
+                autoSaveFiles.Dispose();
                 isDisposed = true;
             }
         }
