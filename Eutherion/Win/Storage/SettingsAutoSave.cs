@@ -168,7 +168,13 @@ namespace Eutherion.Win.Storage
 
             try
             {
-                lockFile = CreateAutoSaveFileStream(baseDir, LockFileName);
+                lockFile = new FileStream(
+                    Path.Combine(baseDir.FullName, LockFileName),
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.Read,
+                    DefaultFileStreamBufferSize,
+                    FileOptions.SequentialScan | FileOptions.Asynchronous);
 
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from CurrentSettings so auto-saves within the session are still enabled.
