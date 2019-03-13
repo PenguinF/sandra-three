@@ -63,8 +63,10 @@ namespace Eutherion.Win.AppTemplate
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
+            // Set this before calling UpdateChangedMarker().
+            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
             fileName = Path.GetFileName(settingsFile.AbsoluteFilePath);
-            Text = fileName;
 
             jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator)
             {
@@ -89,6 +91,9 @@ namespace Eutherion.Win.AppTemplate
             });
 
             UIMenu.AddTo(jsonTextBox);
+
+            // Initial changed marker.
+            UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
@@ -119,21 +124,8 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) =>
-                {
-                    Text = ChangedMarker + fileName;
-
-                    // Invalidate to update the save button.
-                    ActionHandler.Invalidate();
-                };
-
-                jsonTextBox.SavePointReached += (_, __) =>
-                {
-                    Text = fileName;
-
-                    // Invalidate to update the save button.
-                    ActionHandler.Invalidate();
-                };
+                jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
+                jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -194,7 +186,6 @@ namespace Eutherion.Win.AppTemplate
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
             MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
-            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
             foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
             {
@@ -260,6 +251,14 @@ namespace Eutherion.Win.AppTemplate
             {
                 menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
             }
+        }
+
+        private void UpdateChangedMarker()
+        {
+            Text = jsonTextBox.Modified ? ChangedMarker + fileName : fileName;
+
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
