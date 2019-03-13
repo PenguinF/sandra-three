@@ -56,9 +56,26 @@ namespace Eutherion.Win.AppTemplate
 
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
+                            Func<string> initialTextGenerator,
                             SettingProperty<PersistableFormState> formStateSetting,
                             SettingProperty<int> errorHeightSetting)
         {
+            if (!File.Exists(settingsFile.AbsoluteFilePath))
+            {
+                string json = initialTextGenerator();
+
+                try
+                {
+                    settingsFile.Save(json);
+                }
+                catch (Exception exception)
+                {
+                    // Ignore this exception.
+                    // When user tries to save the file, it will be more meaningful.
+                    exception.Trace();
+                }
+            }
+
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
