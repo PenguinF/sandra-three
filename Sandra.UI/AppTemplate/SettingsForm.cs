@@ -178,6 +178,11 @@ namespace Eutherion.Win.AppTemplate
             Controls.Add(MainMenuStrip);
             MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
 
+            foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+            {
+                mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+            }
+
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
 
@@ -227,6 +232,16 @@ namespace Eutherion.Win.AppTemplate
             }
 
             return menuNodes;
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            var mainMenuItem = (ToolStripMenuItem)sender;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
