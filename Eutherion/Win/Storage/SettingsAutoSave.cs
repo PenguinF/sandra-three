@@ -181,29 +181,19 @@ namespace Eutherion.Win.Storage
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from CurrentSettings so auto-saves within the session are still enabled.
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                FileStream autoSaveFile1 = null;
-                FileStream autoSaveFile2 = null;
+                FileStreamPair autoSaveFiles = null;
 
                 try
                 {
-                    autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
-                    autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
-                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, new FileStreamPair(autoSaveFile1, autoSaveFile2));
+                    autoSaveFiles = FileStreamPair.Create(
+                        () => CreateAutoSaveFileStream(baseDir, AutoSaveFileName1),
+                        () => CreateAutoSaveFileStream(baseDir, AutoSaveFileName2));
+
+                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
                 }
                 catch
                 {
-                    // Dispose in opposite order of acquiring the lock on the files,
-                    // so that inner files can only be locked if outer files are locked too.
-                    if (autoSaveFile1 != null)
-                    {
-                        if (autoSaveFile2 != null)
-                        {
-                            autoSaveFile2.Dispose();
-                            autoSaveFile2 = null;
-                        }
-                        autoSaveFile1.Dispose();
-                        autoSaveFile1 = null;
-                    }
+                    autoSaveFiles?.Dispose();
                     lockFile.Dispose();
                     lockFile = null;
                     throw;

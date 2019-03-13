@@ -30,6 +30,43 @@ namespace Eutherion.Win
     public class FileStreamPair : IDisposable
     {
         /// <summary>
+        /// Creates a <see cref="FileStreamPair"/> from a pair of <see cref="FileStream"/> constructors
+        /// and ensures that if the second constructor fails, the <see cref="FileStream"/> returned
+        /// by the first constructor is properly closed.
+        /// </summary>
+        /// <param name="constructor1">
+        /// The first <see cref="FileStream"/> constructor to use.
+        /// </param>
+        /// <param name="constructor2">
+        /// The second <see cref="FileStream"/> constructor to use.
+        /// </param>
+        /// <returns>
+        /// An initialized <see cref="FileStreamPair"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="constructor1"/> and/or <paramref name="constructor2"/> are null.
+        /// </exception>
+        public static FileStreamPair Create(Func<FileStream> constructor1, Func<FileStream> constructor2)
+        {
+            if (constructor1 == null) throw new ArgumentNullException(nameof(constructor1));
+            if (constructor2 == null) throw new ArgumentNullException(nameof(constructor2));
+
+            FileStream fileStream1 = constructor1();
+            try
+            {
+                return new FileStreamPair(fileStream1, constructor2());
+            }
+            catch
+            {
+                // Who knows, someone may at some point return null from constructor1.
+                // FileStreamPair constructor then throws but need to not turn that
+                // into a NullReferenceException over here.
+                fileStream1?.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// The primary <see cref="FileStream"/>.
         /// </summary>
         public FileStream FileStream1 { get; }
