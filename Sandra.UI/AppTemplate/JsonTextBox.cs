@@ -26,7 +26,6 @@ using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -145,28 +144,19 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            if (initialTextGenerator != null && !File.Exists(settingsFile.AbsoluteFilePath))
-            {
-                string json = initialTextGenerator();
-
-                try
-                {
-                    settingsFile.Save(json);
-                }
-                catch (Exception exception)
-                {
-                    // Ignore this exception.
-                    // When user tries to save the file, it will be more meaningful.
-                    exception.Trace();
-                }
-            }
-
-            // Set the Text property and use that as input, because it will not exactly match the json string.
             settingsFile.LoadedText.Match(
-                whenOption1: exception => throw exception,
-                whenOption2: loadedText => Text = loadedText);
-
-            EmptyUndoBuffer();
+                whenOption1: exception =>
+                {
+                    if (initialTextGenerator != null)
+                    {
+                        Text = initialTextGenerator();
+                    }
+                },
+                whenOption2: loadedText =>
+                {
+                    Text = loadedText;
+                    EmptyUndoBuffer();
+                });
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
