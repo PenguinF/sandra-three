@@ -76,6 +76,9 @@ namespace Eutherion.Win.AppTemplate
                 { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
+            // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
+            this.BindAction(SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile);
+
             jsonTextBox.BindStandardEditUIActions();
 
             jsonTextBox.BindActions(new UIActionBindings
@@ -115,8 +118,21 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) => Text = ChangedMarker + fileName;
-                jsonTextBox.SavePointReached += (_, __) => Text = fileName;
+                jsonTextBox.SavePointLeft += (_, __) =>
+                {
+                    Text = ChangedMarker + fileName;
+
+                    // Invalidate to update the save button.
+                    ActionHandler.Invalidate();
+                };
+
+                jsonTextBox.SavePointReached += (_, __) =>
+                {
+                    Text = fileName;
+
+                    // Invalidate to update the save button.
+                    ActionHandler.Invalidate();
+                };
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -177,6 +193,7 @@ namespace Eutherion.Win.AppTemplate
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
             MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
+            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
             foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
             {
@@ -337,6 +354,41 @@ namespace Eutherion.Win.AppTemplate
                 if (splitterDistance >= 0) splitter.SplitterDistance = splitterDistance;
 
                 splitter.SplitterMoved += (_, __) => Session.Current.AutoSave.Persist(errorHeightSetting, errorsListBox.Height);
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (jsonTextBox.Modified)
+            {
+                DialogResult result = MessageBox.Show(
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button3);
+
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        try
+                        {
+                            jsonTextBox.TrySaveToFile(true);
+                        }
+                        catch (Exception exception)
+                        {
+                            e.Cancel = true;
+                            MessageBox.Show(exception.Message);
+                        }
+                        break;
+                    case DialogResult.No:
+                        break;
+                    default:
+                        e.Cancel = true;
+                        break;
+                }
             }
         }
 

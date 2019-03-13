@@ -55,6 +55,8 @@ namespace Eutherion.UIActions
 
             handlers.Add(binding.Action, binding.Handler);
             interfaceSets.Add((binding.Interfaces, binding.Action));
+
+            Invalidate();
         }
 
         /// <summary>

@@ -44,10 +44,12 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         public static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
         public static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
+        public static readonly LocalizedStringKey SaveChangesQuery = new LocalizedStringKey(nameof(SaveChangesQuery));
         public static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         public static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
         public static readonly LocalizedStringKey Tools = new LocalizedStringKey(nameof(Tools));
         public static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
+        public static readonly LocalizedStringKey UnsavedChangesTitle = new LocalizedStringKey(nameof(UnsavedChangesTitle));
         public static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
         public static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
         public static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
@@ -73,10 +75,12 @@ namespace Eutherion.Win.AppTemplate
                 { Paste, "Paste" },
                 { Redo, "Redo" },
                 { Save, "Save" },
+                { SaveChangesQuery, "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?" },
                 { SelectAll, "Select All" },
                 { ShowDefaultSettingsFile, "Show default settings" },
                 { Tools, "Tools" },
                 { Undo, "Undo" },
+                { UnsavedChangesTitle, "Save changes" },
                 { View, "View" },
                 { ZoomIn, "Zoom in" },
                 { ZoomOut, "Zoom out" },
