@@ -191,7 +191,42 @@ namespace Eutherion.Win.AppTemplate
 
         private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
         {
-            return new List<UIMenuNode>();
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var binding in bindings)
+            {
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                {
+                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    {
+                        try
+                        {
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                        ? UIActionVisibility.Disabled
+                                        : currentActionState;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
+            }
+
+            return menuNodes;
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
