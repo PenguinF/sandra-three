@@ -56,5 +56,13 @@ namespace Eutherion.Win
         /// Gets the opened <see cref="LiveTextFile"/>.
         /// </summary>
         public LiveTextFile OpenTextFile { get; }
+
+        /// <summary>
+        /// Saves the text to the file.
+        /// </summary>
+        public void Save(string localCopyText)
+        {
+            OpenTextFile.Save(localCopyText);
+        }
     }
 }

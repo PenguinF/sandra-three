@@ -336,7 +336,7 @@ namespace Eutherion.Win.AppTemplate
 
             if (perform)
             {
-                WorkingCopyTextFile.OpenTextFile.Save(Text);
+                WorkingCopyTextFile.Save(Text);
                 SetSavePoint();
             }
 
