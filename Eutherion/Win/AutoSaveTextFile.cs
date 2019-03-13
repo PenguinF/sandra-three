@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 namespace Eutherion.Win
 {
     /// <summary>
-    /// Encapsulates a pair of <see cref="FileStream"/>s which are used for auto-saving text files.
+    /// Uses a pair of <see cref="FileStream"/>s for auto-saving text files.
     /// This class is tailored for frequent sequential asynchronous writing of text, so it is a good idea
     /// to open the <see cref="FileStream"/>s with both <see cref="FileOptions.SequentialScan"/>
     /// and <see cref="FileOptions.Asynchronous"/>.
@@ -117,14 +117,9 @@ namespace Eutherion.Win
         public static readonly int AutoSaveDelay = 1000;
 
         /// <summary>
-        /// The primary auto-save file.
+        /// The auto-save files.
         /// </summary>
-        private readonly FileStream autoSaveFile1;
-
-        /// <summary>
-        /// The secondary auto-save file.
-        /// </summary>
-        private readonly FileStream autoSaveFile2;
+        private readonly FileStreamPair autoSaveFiles;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
@@ -167,40 +162,33 @@ namespace Eutherion.Win
         /// <param name="remoteState">
         /// Object responsible for converting updates to text.
         /// </param>
-        /// <param name="autoSaveFile1">
-        /// The primary <see cref="FileStream"/> to write to.
-        /// Any existing contents in the file will be overwritten.
-        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
-        /// so it takes care of disposing it after use.
-        /// To be used as an auto-save <see cref="FileStream"/>,
-        /// it must support seeking, reading and writing, and not be able to time out.
-        /// </param>
-        /// <param name="autoSaveFile2">
-        /// The secondary <see cref="FileStream"/> to write to.
-        /// Any existing contents in the file will be overwritten.
-        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> containing <see cref="FileStream"/>s to write to.
+        /// Any existing contents in the files will be overwritten.
+        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>s
         /// so it takes care of disposing it after use.
         /// To be used as an auto-save <see cref="FileStream"/>,
         /// it must support seeking, reading and writing, and not be able to time out.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
+        /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFiles"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/>
+        /// One or both <see cref="FileStream"/>s in <paramref name="autoSaveFiles"/>
         /// do not have the right capabilities to be used as an auto-save file stream.
         /// </exception>
-        public AutoSaveTextFile(RemoteState remoteState, FileStream autoSaveFile1, FileStream autoSaveFile2)
+        public AutoSaveTextFile(RemoteState remoteState, FileStreamPair autoSaveFiles)
         {
             if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
+            this.autoSaveFiles = autoSaveFiles ?? throw new ArgumentNullException(nameof(autoSaveFiles));
 
             // Assert capabilities of the file streams.
-            this.autoSaveFile1 = VerifiedFileStream(autoSaveFile1, nameof(autoSaveFile1));
-            this.autoSaveFile2 = VerifiedFileStream(autoSaveFile2, nameof(autoSaveFile2));
+            VerifyFileStream(autoSaveFiles.FileStream1, nameof(autoSaveFiles));
+            VerifyFileStream(autoSaveFiles.FileStream2, nameof(autoSaveFiles));
 
             // Immediately attempt to load the saved contents from either FileStream.
             // Choose first auto-save file to load from.
-            FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
+            FileStream latestAutoSaveFile = autoSaveFiles.FileStream1.Length == 0 ? autoSaveFiles.FileStream2 : autoSaveFiles.FileStream1;
 
             string loadedText = null;
             try
@@ -216,7 +204,7 @@ namespace Eutherion.Win
             // If null is returned from the first Load(), the integrity check failed.
             if (loadedText == null)
             {
-                latestAutoSaveFile = Switch(latestAutoSaveFile);
+                latestAutoSaveFile = autoSaveFiles.Different(latestAutoSaveFile);
 
                 try
                 {
@@ -245,28 +233,18 @@ namespace Eutherion.Win
             autoSaveBackgroundTask = Task.Run(() => AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token));
         }
 
-        private FileStream VerifiedFileStream(FileStream fileStream, string parameterName)
+        private void VerifyFileStream(FileStream fileStream, string parameterName)
         {
-            if (fileStream == null)
-            {
-                throw new ArgumentNullException(parameterName);
-            }
-
             if (!fileStream.CanSeek
                 || !fileStream.CanRead
                 || !fileStream.CanWrite
                 || fileStream.CanTimeout)
             {
                 throw new ArgumentException(
-                    $"{parameterName} does not have the right capabilities to be used as an auto-save file stream.",
+                    $"One of the file streams in '{parameterName}' does not have the right capabilities to be used as an auto-save file stream.",
                     parameterName);
             }
-
-            return fileStream;
         }
-
-        private FileStream Switch(FileStream autoSaveFile)
-            => autoSaveFile == autoSaveFile1 ? autoSaveFile2 : autoSaveFile1;
 
         private string Load(FileStream autoSaveFile)
         {
@@ -389,7 +367,7 @@ namespace Eutherion.Win
                         if (remoteState.ShouldSave(updates, out string textToSave))
                         {
                             // Alternate between both auto-save files.
-                            FileStream targetFile = Switch(lastWrittenToFile);
+                            FileStream targetFile = autoSaveFiles.Different(lastWrittenToFile);
 
                             // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                             // Theoretically, two thrown writeExceptions would have the same effect.
@@ -416,7 +394,7 @@ namespace Eutherion.Win
         }
 
         /// <summary>
-        /// Finishes auto-saving remaining updates, and releases the locks on the encapsulated <see cref="FileStream"/>s.
+        /// Finishes auto-saving remaining updates, then closes the encapsulated <see cref="FileStream"/>s.
         /// </summary>
         public void Dispose()
         {
@@ -434,11 +412,7 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-
-                // Dispose in opposite order of acquiring the lock on the files,
-                // so that inner files can only be locked if outer files are locked too.
-                autoSaveFile2.Dispose();
-                autoSaveFile1.Dispose();
+                autoSaveFiles.Dispose();
                 isDisposed = true;
             }
         }

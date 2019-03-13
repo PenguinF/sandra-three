@@ -181,29 +181,20 @@ namespace Eutherion.Win.Storage
                 // In the unlikely event that both auto-save files generate an error,
                 // just initialize from CurrentSettings so auto-saves within the session are still enabled.
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                FileStream autoSaveFile1 = null;
-                FileStream autoSaveFile2 = null;
+                FileStreamPair autoSaveFiles = null;
 
                 try
                 {
-                    autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
-                    autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
-                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFile1, autoSaveFile2);
+                    autoSaveFiles = FileStreamPair.Create(
+                        CreateAutoSaveFileStream,
+                        Path.Combine(baseDir.FullName, AutoSaveFileName1),
+                        Path.Combine(baseDir.FullName, AutoSaveFileName2));
+
+                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
                 }
                 catch
                 {
-                    // Dispose in opposite order of acquiring the lock on the files,
-                    // so that inner files can only be locked if outer files are locked too.
-                    if (autoSaveFile1 != null)
-                    {
-                        if (autoSaveFile2 != null)
-                        {
-                            autoSaveFile2.Dispose();
-                            autoSaveFile2 = null;
-                        }
-                        autoSaveFile1.Dispose();
-                        autoSaveFile1 = null;
-                    }
+                    autoSaveFiles?.Dispose();
                     lockFile.Dispose();
                     lockFile = null;
                     throw;
@@ -234,8 +225,8 @@ namespace Eutherion.Win.Storage
         /// a) Create if it doesn't exist, open if it already exists.
         /// b) Only this process can access it. Protects the folder from deletion as well.
         /// </summary>
-        private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
-            => new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
+        private FileStream CreateAutoSaveFileStream(string autoSaveFilePath)
+            => new FileStream(autoSaveFilePath,
                               FileMode.OpenOrCreate,
                               FileAccess.ReadWrite,
                               FileShare.Read,
