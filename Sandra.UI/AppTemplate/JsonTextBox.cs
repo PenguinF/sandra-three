@@ -26,6 +26,7 @@ using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -83,12 +84,31 @@ namespace Eutherion.Win.AppTemplate
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
+        /// <param name="initialTextGenerator">
+        /// Optional function to generate initial text in case the settings file could not be loaded.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public JsonTextBox(SettingsFile settingsFile)
+        public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator)
         {
             this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
+
+            if (initialTextGenerator != null && !File.Exists(settingsFile.AbsoluteFilePath))
+            {
+                string json = initialTextGenerator();
+
+                try
+                {
+                    settingsFile.Save(json);
+                }
+                catch (Exception exception)
+                {
+                    // Ignore this exception.
+                    // When user tries to save the file, it will be more meaningful.
+                    exception.Trace();
+                }
+            }
 
             BorderStyle = BorderStyle.None;
 
