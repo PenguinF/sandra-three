@@ -173,7 +173,10 @@ namespace Eutherion.Win.AppTemplate
                 SharedUIAction.ZoomIn,
                 SharedUIAction.ZoomOut));
 
-            if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
+            MainMenuStrip = new MenuStrip();
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
+            Controls.Add(MainMenuStrip);
+            MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
