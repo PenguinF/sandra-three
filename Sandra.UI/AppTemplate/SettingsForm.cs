@@ -340,6 +340,33 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (jsonTextBox.Modified)
+            {
+                DialogResult result = MessageBox.Show(
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button3);
+
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        jsonTextBox.TrySaveToFile(true);
+                        break;
+                    case DialogResult.No:
+                        break;
+                    default:
+                        e.Cancel = true;
+                        break;
+                }
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
