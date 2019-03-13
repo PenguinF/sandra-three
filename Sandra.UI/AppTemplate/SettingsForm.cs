@@ -24,6 +24,7 @@ using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -32,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : UIActionForm, IWeakEventTarget
+    public class SettingsForm : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -42,7 +43,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
 
-        private readonly UIAutoHideMainMenu autoHideMainMenu;
+        private readonly UIActionHandler mainMenuActionHandler;
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
@@ -150,27 +151,37 @@ namespace Eutherion.Win.AppTemplate
 
             BindStandardUIActions();
 
-            // Initialize menu strip which becomes visible only when the ALT key is pressed.
-            autoHideMainMenu = new UIAutoHideMainMenu(this);
+            // Initialize menu strip.
+            mainMenuActionHandler = new UIActionHandler();
 
-            var fileMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()));
-            fileMenu.BindActions(
+            var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
+            fileMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.SaveToFile,
-                SharedUIAction.Close);
+                SharedUIAction.Close));
 
-            var editMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()));
-            editMenu.BindActions(
+            var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
+            editMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
                 SharedUIAction.CutSelectionToClipBoard,
                 SharedUIAction.CopySelectionToClipBoard,
                 SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText);
+                SharedUIAction.SelectAllText));
 
-            var viewMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()));
-            viewMenu.BindActions(
+            var viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
+            viewMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut);
+                SharedUIAction.ZoomOut));
+
+            MainMenuStrip = new MenuStrip();
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
+            Controls.Add(MainMenuStrip);
+            MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
+
+            foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+            {
+                mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+            }
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
@@ -180,6 +191,56 @@ namespace Eutherion.Win.AppTemplate
             if (MainMenuStrip != null)
             {
                 UIMenu.UpdateMenu(MainMenuStrip.Items);
+            }
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
+        {
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var binding in bindings)
+            {
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                {
+                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    {
+                        try
+                        {
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                        ? UIActionVisibility.Disabled
+                                        : currentActionState;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
+            }
+
+            return menuNodes;
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            var mainMenuItem = (ToolStripMenuItem)sender;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
             }
         }
 
@@ -279,23 +340,10 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Menu | Keys.Alt))
-            {
-                autoHideMainMenu.ToggleMainMenu();
-                if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
-                return true;
-            }
-
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                autoHideMainMenu.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }
