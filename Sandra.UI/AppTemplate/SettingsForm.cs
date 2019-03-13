@@ -193,6 +193,7 @@ namespace Eutherion.Win.AppTemplate
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
             MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
+            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
             foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
             {
