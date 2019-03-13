@@ -149,19 +149,18 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            WorkingCopyTextFile.OpenTextFile.LoadedText.Match(
-                whenOption1: exception =>
+            if (WorkingCopyTextFile.LoadException != null)
+            {
+                if (initialTextGenerator != null)
                 {
-                    if (initialTextGenerator != null)
-                    {
-                        Text = initialTextGenerator() ?? string.Empty;
-                    }
-                },
-                whenOption2: loadedText =>
-                {
-                    Text = loadedText;
-                    EmptyUndoBuffer();
-                });
+                    Text = initialTextGenerator() ?? string.Empty;
+                }
+            }
+            else
+            {
+                Text = WorkingCopyTextFile.LoadedText;
+                EmptyUndoBuffer();
+            }
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)

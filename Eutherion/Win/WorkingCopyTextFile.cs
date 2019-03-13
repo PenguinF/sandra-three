@@ -58,6 +58,16 @@ namespace Eutherion.Win
         public LiveTextFile OpenTextFile { get; }
 
         /// <summary>
+        /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty.
+        /// </summary>
+        public string LoadedText => OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);
+
+        /// <summary>
+        /// Returns the <see cref="Exception"/> from an unsuccessful attempt to read the file from the file system.
+        /// </summary>
+        public Exception LoadException => OpenTextFile.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
+
+        /// <summary>
         /// Saves the text to the file.
         /// </summary>
         public void Save(string localCopyText)
