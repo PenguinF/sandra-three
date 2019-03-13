@@ -159,16 +159,16 @@ namespace Eutherion.Win.AppTemplate
 
             if (WorkingCopyTextFile.LoadException != null)
             {
-                if (initialTextGenerator != null)
-                {
-                    Text = initialTextGenerator() ?? string.Empty;
-                }
+                Text = initialTextGenerator != null
+                    ? (initialTextGenerator() ?? string.Empty)
+                    : string.Empty;
             }
             else
             {
                 Text = WorkingCopyTextFile.LoadedText;
-                EmptyUndoBuffer();
             }
+
+            EmptyUndoBuffer();
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
