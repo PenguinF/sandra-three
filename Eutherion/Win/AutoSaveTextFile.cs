@@ -164,41 +164,33 @@ namespace Eutherion.Win
         /// <param name="remoteState">
         /// Object responsible for converting updates to text.
         /// </param>
-        /// <param name="autoSaveFile1">
-        /// The primary <see cref="FileStream"/> to write to.
-        /// Any existing contents in the file will be overwritten.
-        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
-        /// so it takes care of disposing it after use.
-        /// To be used as an auto-save <see cref="FileStream"/>,
-        /// it must support seeking, reading and writing, and not be able to time out.
-        /// </param>
-        /// <param name="autoSaveFile2">
-        /// The secondary <see cref="FileStream"/> to write to.
-        /// Any existing contents in the file will be overwritten.
-        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> containing <see cref="FileStream"/>s to write to.
+        /// Any existing contents in the files will be overwritten.
+        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>s
         /// so it takes care of disposing it after use.
         /// To be used as an auto-save <see cref="FileStream"/>,
         /// it must support seeking, reading and writing, and not be able to time out.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/> are null.
+        /// <paramref name="remoteState"/> and/or <paramref name="autoSaveFiles"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="autoSaveFile1"/> and/or <paramref name="autoSaveFile2"/>
+        /// One or both <see cref="FileStream"/>s in <paramref name="autoSaveFiles"/>
         /// do not have the right capabilities to be used as an auto-save file stream.
         /// </exception>
-        public AutoSaveTextFile(RemoteState remoteState, FileStream autoSaveFile1, FileStream autoSaveFile2)
+        public AutoSaveTextFile(RemoteState remoteState, FileStreamPair autoSaveFiles)
         {
             if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
+            this.autoSaveFiles = autoSaveFiles ?? throw new ArgumentNullException(nameof(autoSaveFiles));
 
             // Assert capabilities of the file streams.
-            VerifyFileStream(autoSaveFile1, nameof(autoSaveFile1));
-            VerifyFileStream(autoSaveFile2, nameof(autoSaveFile2));
-            autoSaveFiles = new FileStreamPair(autoSaveFile1, autoSaveFile2);
+            VerifyFileStream(autoSaveFiles.FileStream1, nameof(autoSaveFiles));
+            VerifyFileStream(autoSaveFiles.FileStream2, nameof(autoSaveFiles));
 
             // Immediately attempt to load the saved contents from either FileStream.
             // Choose first auto-save file to load from.
-            FileStream latestAutoSaveFile = autoSaveFile1.Length == 0 ? autoSaveFile2 : autoSaveFile1;
+            FileStream latestAutoSaveFile = autoSaveFiles.FileStream1.Length == 0 ? autoSaveFiles.FileStream2 : autoSaveFiles.FileStream1;
 
             string loadedText = null;
             try
@@ -245,18 +237,13 @@ namespace Eutherion.Win
 
         private void VerifyFileStream(FileStream fileStream, string parameterName)
         {
-            if (fileStream == null)
-            {
-                throw new ArgumentNullException(parameterName);
-            }
-
             if (!fileStream.CanSeek
                 || !fileStream.CanRead
                 || !fileStream.CanWrite
                 || fileStream.CanTimeout)
             {
                 throw new ArgumentException(
-                    $"{parameterName} does not have the right capabilities to be used as an auto-save file stream.",
+                    $"One of the file streams in '{parameterName}' does not have the right capabilities to be used as an auto-save file stream.",
                     parameterName);
             }
         }

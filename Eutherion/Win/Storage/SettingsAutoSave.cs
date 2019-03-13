@@ -188,7 +188,7 @@ namespace Eutherion.Win.Storage
                 {
                     autoSaveFile1 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName1);
                     autoSaveFile2 = CreateAutoSaveFileStream(baseDir, AutoSaveFileName2);
-                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFile1, autoSaveFile2);
+                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, new FileStreamPair(autoSaveFile1, autoSaveFile2));
                 }
                 catch
                 {
