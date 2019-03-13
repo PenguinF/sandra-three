@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.IO;
 
 namespace Eutherion.Win
@@ -28,5 +29,26 @@ namespace Eutherion.Win
     /// </summary>
     public class FileStreamPair
     {
+        /// <summary>
+        /// The primary <see cref="FileStream"/>.
+        /// </summary>
+        public FileStream FileStream1 { get; }
+
+        /// <summary>
+        /// The secondary <see cref="FileStream"/>.
+        /// </summary>
+        public FileStream FileStream2 { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="FileStreamPair"/> from a pair of <see cref="FileStream"/> objects.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fileStream1"/> and/or <paramref name="fileStream2"/> are null.
+        /// </exception>
+        public FileStreamPair(FileStream fileStream1, FileStream fileStream2)
+        {
+            FileStream1 = fileStream1 ?? throw new ArgumentNullException(nameof(fileStream1));
+            FileStream2 = fileStream2 ?? throw new ArgumentNullException(nameof(fileStream2));
+        }
     }
 }

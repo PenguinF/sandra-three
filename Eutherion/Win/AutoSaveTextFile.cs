@@ -117,14 +117,11 @@ namespace Eutherion.Win
         public static readonly int AutoSaveDelay = 1000;
 
         /// <summary>
-        /// The primary auto-save file.
+        /// The auto-save files.
         /// </summary>
-        private readonly FileStream autoSaveFile1;
-
-        /// <summary>
-        /// The secondary auto-save file.
-        /// </summary>
-        private readonly FileStream autoSaveFile2;
+        private readonly FileStreamPair autoSaveFiles;
+        private FileStream autoSaveFile1 => autoSaveFiles.FileStream1;
+        private FileStream autoSaveFile2 => autoSaveFiles.FileStream2;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
@@ -195,8 +192,9 @@ namespace Eutherion.Win
             if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
 
             // Assert capabilities of the file streams.
-            this.autoSaveFile1 = VerifiedFileStream(autoSaveFile1, nameof(autoSaveFile1));
-            this.autoSaveFile2 = VerifiedFileStream(autoSaveFile2, nameof(autoSaveFile2));
+            VerifyFileStream(autoSaveFile1, nameof(autoSaveFile1));
+            VerifyFileStream(autoSaveFile2, nameof(autoSaveFile2));
+            autoSaveFiles = new FileStreamPair(autoSaveFile1, autoSaveFile2);
 
             // Immediately attempt to load the saved contents from either FileStream.
             // Choose first auto-save file to load from.
@@ -245,7 +243,7 @@ namespace Eutherion.Win
             autoSaveBackgroundTask = Task.Run(() => AutoSaveLoop(latestAutoSaveFile, remoteState, cts.Token));
         }
 
-        private FileStream VerifiedFileStream(FileStream fileStream, string parameterName)
+        private void VerifyFileStream(FileStream fileStream, string parameterName)
         {
             if (fileStream == null)
             {
@@ -261,8 +259,6 @@ namespace Eutherion.Win
                     $"{parameterName} does not have the right capabilities to be used as an auto-save file stream.",
                     parameterName);
             }
-
-            return fileStream;
         }
 
         private FileStream Switch(FileStream autoSaveFile)
