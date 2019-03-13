@@ -51,6 +51,7 @@
     </Compile>
     <Compile Include="DragDrop\CursorFromHandle.cs" />
     <Compile Include="DragDrop\DragUtilities.cs" />
+    <Compile Include="FileStreamPair.cs" />
     <Compile Include="FileWatcher.cs" />
     <Compile Include="FocusHelper.cs" />
     <Compile Include="FormExtensions.cs" />
