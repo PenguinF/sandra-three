@@ -154,7 +154,7 @@ namespace Eutherion.Win.AppTemplate
                 {
                     if (initialTextGenerator != null)
                     {
-                        Text = initialTextGenerator();
+                        Text = initialTextGenerator() ?? string.Empty;
                     }
                 },
                 whenOption2: loadedText =>
