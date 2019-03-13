@@ -128,11 +128,13 @@ namespace Eutherion.Win.AppTemplate
                                 }
                             }
 
+                            var json = LocalSettings.GenerateJson(
+                                localSettingsExample.Commit(),
+                                SettingWriterOptions.CommentOutProperties);
+
                             try
                             {
-                                LocalSettings.WriteToFile(
-                                    localSettingsExample.Commit(),
-                                    SettingWriterOptions.CommentOutProperties);
+                                LocalSettings.Save(json);
                             }
                             catch (Exception exception)
                             {
@@ -175,11 +177,13 @@ namespace Eutherion.Win.AppTemplate
                         // If the file doesn't exist yet, try to generate it.
                         if (!File.Exists(DefaultSettings.AbsoluteFilePath))
                         {
+                            var json = DefaultSettings.GenerateJson(
+                                DefaultSettings.Settings,
+                                SettingWriterOptions.Default);
+
                             try
                             {
-                                DefaultSettings.WriteToFile(
-                                    DefaultSettings.Settings,
-                                    SettingWriterOptions.Default);
+                                DefaultSettings.Save(json);
                             }
                             catch (Exception exception)
                             {
@@ -345,11 +349,13 @@ namespace Eutherion.Win.AppTemplate
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
+                            var json = fileLocalizer.LanguageFile.GenerateJson(
+                                settingCopy.Commit(),
+                                SettingWriterOptions.SuppressSettingComments);
+
                             try
                             {
-                                fileLocalizer.LanguageFile.WriteToFile(
-                                    settingCopy.Commit(),
-                                    SettingWriterOptions.SuppressSettingComments);
+                                fileLocalizer.LanguageFile.Save(json);
                             }
                             catch (Exception exception)
                             {
