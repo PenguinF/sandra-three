@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.UIActions;
 using Eutherion.Win.Controls;
 using System;
 using System.Drawing;
@@ -43,6 +44,7 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
+        private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
         public MenuCaptionBarForm()
@@ -69,6 +71,29 @@ namespace Eutherion.Win.AppTemplate
                 UpdateMaximizeButtonIcon();
             };
 
+            // Specialized save button which binds on the SaveToFile UIAction.
+            saveButton = CreateCaptionButton(SharedResources.save);
+            saveButton.Visible = false;
+            saveButton.Click += (_, __) =>
+            {
+                try
+                {
+                    ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                }
+                catch (Exception exc)
+                {
+                    MessageBox.Show(exc.Message);
+                }
+            };
+            ActionHandler.UIActionsInvalidated += _ =>
+            {
+                // Update the save button each time the handler is invalidated.
+                // Some kind of checked state doesn't seem to be supported, so ignore UIActionState.Checked.
+                UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
+                saveButton.Visible = currentActionState.Visible;
+                saveButton.Enabled = currentActionState.Enabled;
+            };
+
             closeButton = CreateCaptionButton(SharedResources.close);
             closeButton.Click += (_, __) => Close();
 
@@ -76,6 +101,7 @@ namespace Eutherion.Win.AppTemplate
 
             Controls.Add(minimizeButton);
             Controls.Add(maximizeButton);
+            Controls.Add(saveButton);
             Controls.Add(closeButton);
 
             ResumeLayout();
@@ -143,6 +169,7 @@ namespace Eutherion.Win.AppTemplate
         {
             minimizeButton.BackColor = MainMenuStrip.BackColor;
             maximizeButton.BackColor = MainMenuStrip.BackColor;
+            saveButton.BackColor = MainMenuStrip.BackColor;
             closeButton.BackColor = MainMenuStrip.BackColor;
         }
 
@@ -191,6 +218,17 @@ namespace Eutherion.Win.AppTemplate
                     captionButtonSize,
                     captionButtonHeight);
 
+                if (saveButton.Visible)
+                {
+                    currentVerticalEdge = currentVerticalEdge - captionButtonSize;
+
+                    saveButton.SetBounds(
+                        currentVerticalEdge,
+                        topEdge,
+                        captionButtonSize,
+                        captionButtonHeight);
+                }
+
                 currentVerticalEdge = currentVerticalEdge - captionButtonSize - closeButtonMargin;
 
                 maximizeButton.SetBounds(
@@ -211,6 +249,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 // Don't mess with visibility, so put buttons outside of the client rectangle.
                 closeButton.SetBounds(-2, -2, 1, 1);
+                saveButton.SetBounds(-2, -2, 1, 1);
                 maximizeButton.SetBounds(-2, -2, 1, 1);
                 minimizeButton.SetBounds(-2, -2, 1, 1);
             }

@@ -76,6 +76,9 @@ namespace Eutherion.Win.AppTemplate
                 { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
+            // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
+            this.BindAction(SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile);
+
             jsonTextBox.BindStandardEditUIActions();
 
             jsonTextBox.BindActions(new UIActionBindings
