@@ -186,8 +186,9 @@ namespace Eutherion.Win.Storage
                 try
                 {
                     autoSaveFiles = FileStreamPair.Create(
-                        () => CreateAutoSaveFileStream(baseDir, AutoSaveFileName1),
-                        () => CreateAutoSaveFileStream(baseDir, AutoSaveFileName2));
+                        CreateAutoSaveFileStream,
+                        Path.Combine(baseDir.FullName, AutoSaveFileName1),
+                        Path.Combine(baseDir.FullName, AutoSaveFileName2));
 
                     autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
                 }
@@ -224,8 +225,8 @@ namespace Eutherion.Win.Storage
         /// a) Create if it doesn't exist, open if it already exists.
         /// b) Only this process can access it. Protects the folder from deletion as well.
         /// </summary>
-        private FileStream CreateAutoSaveFileStream(DirectoryInfo baseDir, string autoSaveFileName)
-            => new FileStream(Path.Combine(baseDir.FullName, autoSaveFileName),
+        private FileStream CreateAutoSaveFileStream(string autoSaveFilePath)
+            => new FileStream(autoSaveFilePath,
                               FileMode.OpenOrCreate,
                               FileAccess.ReadWrite,
                               FileShare.Read,

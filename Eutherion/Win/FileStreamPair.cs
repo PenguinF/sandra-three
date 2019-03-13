@@ -67,6 +67,46 @@ namespace Eutherion.Win
         }
 
         /// <summary>
+        /// Creates a <see cref="FileStreamPair"/> from a parametrized <see cref="FileStream"/> constructor
+        /// and ensures that if creation of the second <see cref="FileStream"/> fails, the first <see cref="FileStream"/>
+        /// is properly closed.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of parameter of the <paramref name="constructor"/>.
+        /// </typeparam>
+        /// <param name="constructor">
+        /// The <see cref="FileStream"/> constructor to use.
+        /// </param>
+        /// <param name="parameter1">
+        /// The value to pass to the <paramref name="constructor"/> to create the first <see cref="FileStream"/>.
+        /// </param>
+        /// <param name="parameter2">
+        /// The value to pass to the <paramref name="constructor"/> to create the second <see cref="FileStream"/>.
+        /// </param>
+        /// <returns>
+        /// An initialized <see cref="FileStreamPair"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="constructor"/> is null.
+        /// </exception>
+        public static FileStreamPair Create<T>(Func<T, FileStream> constructor, T parameter1, T parameter2)
+        {
+            if (constructor == null) throw new ArgumentNullException(nameof(constructor));
+
+            FileStream fileStream1 = constructor(parameter1);
+            try
+            {
+                return new FileStreamPair(fileStream1, constructor(parameter2));
+            }
+            catch
+            {
+                // See remark at other Create() overload.
+                fileStream1?.Dispose();
+                throw;
+            }
+        }
+
+        /// <summary>
         /// The primary <see cref="FileStream"/>.
         /// </summary>
         public FileStream FileStream1 { get; }
