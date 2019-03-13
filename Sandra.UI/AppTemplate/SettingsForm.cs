@@ -33,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : UIActionForm, IWeakEventTarget
+    public class SettingsForm : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
