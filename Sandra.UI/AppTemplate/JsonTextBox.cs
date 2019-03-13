@@ -75,7 +75,10 @@ namespace Eutherion.Win.AppTemplate
             public override Style VisitValue(JsonValue symbol) => owner.ValueStyle;
         }
 
-        private readonly SettingsFile settingsFile;
+        /// <summary>
+        /// Gets the edited text file.
+        /// </summary>
+        public WorkingCopyTextFile WorkingCopyTextFile { get; }
 
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
@@ -96,9 +99,11 @@ namespace Eutherion.Win.AppTemplate
         /// </exception>
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator)
         {
-            this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
+            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
             schema = settingsFile.Settings.Schema;
+
+            WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
 
             BorderStyle = BorderStyle.None;
 
@@ -144,7 +149,7 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            settingsFile.LoadedText.Match(
+            WorkingCopyTextFile.OpenTextFile.LoadedText.Match(
                 whenOption1: exception =>
                 {
                     if (initialTextGenerator != null)
@@ -331,7 +336,7 @@ namespace Eutherion.Win.AppTemplate
 
             if (perform)
             {
-                settingsFile.Save(Text);
+                WorkingCopyTextFile.OpenTextFile.Save(Text);
                 SetSavePoint();
             }
 

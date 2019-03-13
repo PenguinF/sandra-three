@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Win
 {
     /// <summary>
@@ -28,5 +30,31 @@ namespace Eutherion.Win
     /// </summary>
     public sealed class WorkingCopyTextFile
     {
+        /// <summary>
+        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>.
+        /// </summary>
+        /// <param name="openTextFile">
+        /// The open text file.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="WorkingCopyTextFile"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="openTextFile"/> is null.
+        /// </exception>
+        public static WorkingCopyTextFile OpenExisting(LiveTextFile openTextFile)
+        {
+            return new WorkingCopyTextFile(openTextFile);
+        }
+
+        private WorkingCopyTextFile(LiveTextFile openTextFile)
+        {
+            OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
+        }
+
+        /// <summary>
+        /// Gets the opened <see cref="LiveTextFile"/>.
+        /// </summary>
+        public LiveTextFile OpenTextFile { get; }
     }
 }
