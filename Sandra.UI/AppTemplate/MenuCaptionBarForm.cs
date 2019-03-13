@@ -169,7 +169,18 @@ namespace Eutherion.Win.AppTemplate
 
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
                 int topEdge = MainMenuStrip.Height - captionButtonSize - 2;
-                topEdge = topEdge < 0 ? 0 : topEdge / 2;
+                int captionButtonHeight;
+
+                if (topEdge < 0)
+                {
+                    topEdge = 0;
+                    captionButtonHeight = MainMenuStrip.Height - 2;
+                }
+                else
+                {
+                    topEdge = topEdge / 2;
+                    captionButtonHeight = captionButtonSize;
+                }
 
                 // Use a vertical edge variable so buttons can be placed from right to left.
                 int currentVerticalEdge = Width - captionButtonSize - buttonOuterRightMargin;
@@ -178,7 +189,7 @@ namespace Eutherion.Win.AppTemplate
                     currentVerticalEdge,
                     topEdge,
                     captionButtonSize,
-                    captionButtonSize);
+                    captionButtonHeight);
 
                 currentVerticalEdge = currentVerticalEdge - captionButtonSize - closeButtonMargin;
 
@@ -186,7 +197,7 @@ namespace Eutherion.Win.AppTemplate
                     currentVerticalEdge,
                     topEdge,
                     captionButtonSize,
-                    captionButtonSize);
+                    captionButtonHeight);
 
                 currentVerticalEdge = currentVerticalEdge - captionButtonSize;
 
@@ -194,7 +205,7 @@ namespace Eutherion.Win.AppTemplate
                     currentVerticalEdge,
                     topEdge,
                     captionButtonSize,
-                    captionButtonSize);
+                    captionButtonHeight);
             }
             else
             {
