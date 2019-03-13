@@ -24,6 +24,7 @@ using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -42,7 +43,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
 
-        private readonly UIAutoHideMainMenu autoHideMainMenu;
+        private readonly UIActionHandler mainMenuActionHandler;
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
@@ -150,27 +151,29 @@ namespace Eutherion.Win.AppTemplate
 
             BindStandardUIActions();
 
-            // Initialize menu strip which becomes visible only when the ALT key is pressed.
-            autoHideMainMenu = new UIAutoHideMainMenu(this);
+            // Initialize menu strip.
+            mainMenuActionHandler = new UIActionHandler();
 
-            var fileMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider()));
-            fileMenu.BindActions(
+            var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
+            fileMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.SaveToFile,
-                SharedUIAction.Close);
+                SharedUIAction.Close));
 
-            var editMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider()));
-            editMenu.BindActions(
+            var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
+            editMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
                 SharedUIAction.CutSelectionToClipBoard,
                 SharedUIAction.CopySelectionToClipBoard,
                 SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText);
+                SharedUIAction.SelectAllText));
 
-            var viewMenu = autoHideMainMenu.AddMenuItem(new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider()));
-            viewMenu.BindActions(
+            var viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
+            viewMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut);
+                SharedUIAction.ZoomOut));
+
+            if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
         }
@@ -181,6 +184,11 @@ namespace Eutherion.Win.AppTemplate
             {
                 UIMenu.UpdateMenu(MainMenuStrip.Items);
             }
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
+        {
+            return new List<UIMenuNode>();
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -279,23 +287,10 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Menu | Keys.Alt))
-            {
-                autoHideMainMenu.ToggleMainMenu();
-                if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
-                return true;
-            }
-
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                autoHideMainMenu.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }
