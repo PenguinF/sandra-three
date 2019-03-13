@@ -338,7 +338,7 @@ namespace Eutherion.Win.AppTemplate
                     () =>
                     {
                         // Generate translations into language file if empty.
-                        if (fileLocalizer.Dictionary.Count == 0)
+                        if (!File.Exists(fileLocalizer.LanguageFile.AbsoluteFilePath))
                         {
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
