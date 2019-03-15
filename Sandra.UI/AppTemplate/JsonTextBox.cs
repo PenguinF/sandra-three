@@ -48,14 +48,21 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
 
-        private static uint autoSaveFileCounter = 1;
-
         private static FileStream CreateUniqueNewAutoSaveFileStream()
         {
-            return FileUtilities.CreateUniqueFile(
+            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
+            {
+                autoSaveFileCounter = 1;
+            };
+
+            var file = FileUtilities.CreateUniqueFile(
                 Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
                 FileOptions.SequentialScan | FileOptions.Asynchronous,
                 ref autoSaveFileCounter);
+
+            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
+
+            return file;
         }
 
         private static FileStream CreateExistingAutoSaveFileStream(string autoSaveFileName) => new FileStream(
