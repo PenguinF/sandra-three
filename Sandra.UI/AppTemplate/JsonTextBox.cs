@@ -209,6 +209,12 @@ namespace Eutherion.Win.AppTemplate
                     e.AutoSaveFile = new AutoSaveTextFile<string>(
                         new WorkingCopyTextFile.TextAutoSaveState(),
                         fileStreamPair);
+
+                    Session.Current.AutoSave.Persist(
+                        autoSaveSetting,
+                        new AutoSaveFileNamePair(
+                            Path.GetFileName(fileStreamPair.FileStream1.Name),
+                            Path.GetFileName(fileStreamPair.FileStream2.Name)));
                 }
                 catch (Exception autoSaveLoadException)
                 {
