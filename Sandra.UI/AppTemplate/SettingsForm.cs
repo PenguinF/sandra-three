@@ -360,7 +360,8 @@ namespace Eutherion.Win.AppTemplate
         {
             base.OnFormClosing(e);
 
-            if (jsonTextBox.ContainsChanges)
+            // Only show message box if there's no auto save file from which local changes can be recovered.
+            if (jsonTextBox.ContainsChanges && jsonTextBox.WorkingCopyTextFile.AutoSaveFile == null)
             {
                 string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
                 string fileName = Path.GetFileName(openTextFilePath);
