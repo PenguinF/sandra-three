@@ -90,6 +90,7 @@ namespace Eutherion.Win.AppTemplate
             { PType.RangedIntegerTypeError, "Expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PersistableFormState.PersistableFormStateTypeError.LocalizedMessageKey, "" }, // PersistableFormState only used for auto-save.
+            //{ AutoSaveFilePairPType.AutoSaveFilePairTypeError.LocalizedMessageKey, "" }, // AutoSaveFilePairPType only used for auto-save.
             { OpaqueColorType.OpaqueColorTypeError.LocalizedMessageKey, "Expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
             { FileNameType.FileNameTypeError.LocalizedMessageKey, "Expected valid file name for {0}, but found {1}" },
             { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "Expected valid subfolder name for {0}, but found {1}" },
