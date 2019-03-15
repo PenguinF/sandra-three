@@ -123,7 +123,7 @@ namespace Eutherion.Win.AppTemplate
                 // Save points.
                 jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
                 jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
-                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated += (_, __) => UpdateChangedMarker();
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -249,6 +249,11 @@ namespace Eutherion.Win.AppTemplate
             {
                 menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
             }
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        {
+            UpdateChangedMarker();
         }
 
         private void UpdateChangedMarker()
@@ -400,7 +405,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated -= (_, __) => UpdateChangedMarker();
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }
