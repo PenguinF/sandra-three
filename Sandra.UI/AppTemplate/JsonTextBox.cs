@@ -473,7 +473,39 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
+                // Before disposing WorkingCopyTextFile, figure out if the auto-save files can be removed.
+                bool deleteAutoSaveFiles = WorkingCopyTextFile.AutoSaveFile != null && !ContainsChanges;
+
                 WorkingCopyTextFile.Dispose();
+
+                if (deleteAutoSaveFiles)
+                {
+                    // Obtain file names from the auto-save setting since the FileStreamPair is not available.
+                    bool hasValidPair = Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair);
+
+                    Session.Current.AutoSave.Remove(autoSaveSetting);
+
+                    if (hasValidPair)
+                    {
+                        try
+                        {
+                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+
+                        try
+                        {
+                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1));
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+                    }
+                }
             }
 
             base.Dispose(disposing);
