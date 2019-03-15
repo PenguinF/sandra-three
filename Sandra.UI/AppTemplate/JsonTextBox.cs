@@ -363,6 +363,16 @@ namespace Eutherion.Win.AppTemplate
             base.OnDwellEnd(e);
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                WorkingCopyTextFile.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;

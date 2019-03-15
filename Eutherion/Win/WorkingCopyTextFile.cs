@@ -28,7 +28,7 @@ namespace Eutherion.Win
     /// to create a working copy of a text file with local changes which persists across sessions,
     /// and is aware of external updates to the text file on the file system.
     /// </summary>
-    public sealed class WorkingCopyTextFile
+    public sealed class WorkingCopyTextFile : IDisposable
     {
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>.
@@ -74,6 +74,11 @@ namespace Eutherion.Win
         public Exception LoadException => OpenTextFile.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
 
         /// <summary>
+        /// Gets the opened <see cref="AutoSaveTextFile{TUpdate}"/> or null if nothing was auto-saved yet.
+        /// </summary>
+        public AutoSaveTextFile<string> AutoSaveFile { get; private set; }
+
+        /// <summary>
         /// Gets the current local copy version of the text.
         /// </summary>
         public string LocalCopyText { get; private set; } = string.Empty;
@@ -95,6 +100,14 @@ namespace Eutherion.Win
         public void Save()
         {
             OpenTextFile.Save(LocalCopyText);
+        }
+
+        /// <summary>
+        /// Disposes of all owned managed resources.
+        /// </summary>
+        public void Dispose()
+        {
+            AutoSaveFile?.Dispose();
         }
     }
 }
