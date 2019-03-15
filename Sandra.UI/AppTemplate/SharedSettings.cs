@@ -58,6 +58,10 @@ namespace Eutherion.Win.AppTemplate
             SubFolderNameType.Instance,
             new SettingComment(LangFolderNameDescription));
 
+        public static readonly SettingProperty<uint> AutoSaveCounter = new SettingProperty<uint>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(AutoSaveCounter))),
+            PType.CLR.UInt32);
+
         public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
             PersistableFormState.Type);

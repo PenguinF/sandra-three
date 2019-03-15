@@ -138,6 +138,7 @@ namespace Sandra.UI
             return new SettingSchema(
                 session.LangSetting,
                 SettingKeys.Window,
+                SharedSettings.AutoSaveCounter,
                 SharedSettings.DefaultSettingsWindow,
                 SharedSettings.DefaultSettingsErrorHeight,
                 SharedSettings.DefaultSettingsAutoSave,
