@@ -376,7 +376,7 @@ namespace Eutherion.Win.AppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            jsonTextBox.TrySaveToFile(true);
+                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
                         }
                         catch (Exception exception)
                         {
