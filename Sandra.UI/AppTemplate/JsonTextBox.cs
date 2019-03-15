@@ -142,7 +142,16 @@ namespace Eutherion.Win.AppTemplate
             this.autoSaveSetting = autoSaveSetting;
             schema = settingsFile.Settings.Schema;
 
-            WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
+            if (autoSaveSetting != null
+                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
+                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
+            {
+                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
+            }
+            else
+            {
+                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
+            }
 
             BorderStyle = BorderStyle.None;
 
@@ -190,7 +199,9 @@ namespace Eutherion.Win.AppTemplate
 
             WorkingCopyTextFile.QueryAutoSaveFile += WorkingCopyTextFile_QueryAutoSaveFile;
 
-            if (WorkingCopyTextFile.LoadException != null)
+            // Only use initialTextGenerator if nothing was auto-saved.
+            if (WorkingCopyTextFile.LoadException != null
+                && string.IsNullOrEmpty(WorkingCopyTextFile.LocalCopyText))
             {
                 Text = initialTextGenerator != null
                     ? (initialTextGenerator() ?? string.Empty)
@@ -228,9 +239,41 @@ namespace Eutherion.Win.AppTemplate
                 {
                     if (fileStreamPair != null) fileStreamPair.Dispose();
 
-                    // Only trace exceptions resulting from e.g. a missing APPDATA subfolder or insufficient access.
+                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                     autoSaveLoadException.Trace();
                 }
+            }
+        }
+
+        private bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
+                                                  out AutoSaveTextFile<string> autoSaveTextFile,
+                                                  out string autoSavedText)
+        {
+            FileStreamPair fileStreamPair = null;
+
+            try
+            {
+                fileStreamPair = FileStreamPair.Create(
+                    CreateExistingAutoSaveFileStream,
+                    autoSaveFileNamePair.FileName1,
+                    autoSaveFileNamePair.FileName2);
+
+                var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+                autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
+
+                // If the auto-save files don't exist anymore, just use string.Empty as a default.
+                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
+                return true;
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+                autoSaveTextFile = default(AutoSaveTextFile<string>);
+                autoSavedText = default(string);
+                return false;
             }
         }
 
