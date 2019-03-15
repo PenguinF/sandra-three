@@ -44,7 +44,7 @@ namespace Eutherion.Win.Storage
 
             public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
 
-            public override void Initialize(string loadedText)
+            protected internal override void Initialize(string loadedText)
             {
                 if (loadedText != null)
                 {
@@ -64,7 +64,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            public override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            protected internal override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
             {
                 SettingCopy latestUpdate = updates[updates.Count - 1];
 
