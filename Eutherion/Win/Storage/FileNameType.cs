@@ -32,13 +32,21 @@ namespace Eutherion.Win.Storage
         public static readonly PTypeErrorBuilder FileNameTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(FileNameTypeError)));
 
-        public static readonly FileNameType Instance = new FileNameType();
+        public static readonly FileNameType Instance = new FileNameType(allowStartWithDots: false);
 
-        private FileNameType() : base(PType.CLR.String) { }
+        /// <summary>
+        /// <see cref="FileNameType"/> instance that allows file names starting with dots.
+        /// Dangerous to use in settings files, better only use for <see cref="SettingsAutoSave"/>.
+        /// </summary>
+        public static readonly FileNameType InstanceAllowStartWithDots = new FileNameType(allowStartWithDots: true);
+
+        private readonly bool allowStartWithDots;
+
+        private FileNameType(bool allowStartWithDots) : base(PType.CLR.String) => this.allowStartWithDots = allowStartWithDots;
 
         public override bool IsValid(string fileName, out ITypeErrorBuilder typeError)
             => !string.IsNullOrEmpty(fileName)
-            && !fileName.StartsWith(".")
+            && (allowStartWithDots || !fileName.StartsWith("."))
             && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
             ? ValidValue(out typeError)
             : InvalidValue(FileNameTypeError, out typeError);

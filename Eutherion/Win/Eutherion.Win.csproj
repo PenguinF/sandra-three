@@ -98,6 +98,7 @@
     <Compile Include="UIActions\UIMenu.cs" />
     <Compile Include="Utils\KeyUtilities.cs" />
     <Compile Include="WinAPI.cs" />
+    <Compile Include="WorkingCopyTextFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Eutherion.Shared.csproj">

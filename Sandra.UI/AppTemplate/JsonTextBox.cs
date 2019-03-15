@@ -21,11 +21,13 @@
 
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -40,6 +42,36 @@ namespace Eutherion.Win.AppTemplate
         private const int valueStyleIndex = 9;
         private const int stringStyleIndex = 10;
         private const int errorIndicatorIndex = 8;
+
+        /// <summary>
+        /// This results in file names such as ".%_A8.tmp".
+        /// </summary>
+        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
+
+        private static FileStream CreateUniqueNewAutoSaveFileStream()
+        {
+            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
+            {
+                autoSaveFileCounter = 1;
+            };
+
+            var file = FileUtilities.CreateUniqueFile(
+                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
+                FileOptions.SequentialScan | FileOptions.Asynchronous,
+                ref autoSaveFileCounter);
+
+            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
+
+            return file;
+        }
+
+        private static FileStream CreateExistingAutoSaveFileStream(string autoSaveFileName) => new FileStream(
+            Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileName),
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.Read,
+            FileUtilities.DefaultFileStreamBufferSize,
+            FileOptions.Asynchronous | FileOptions.SequentialScan);
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
@@ -75,7 +107,28 @@ namespace Eutherion.Win.AppTemplate
             public override Style VisitValue(JsonValue symbol) => owner.ValueStyle;
         }
 
-        private readonly SettingsFile settingsFile;
+        /// <summary>
+        /// Gets the edited text file.
+        /// </summary>
+        public WorkingCopyTextFile WorkingCopyTextFile { get; }
+
+        /// <summary>
+        /// Returns if this <see cref="JsonTextBox"/> contains any unsaved changes.
+        /// If the text file could not be opened, true is returned.
+        /// </summary>
+        public bool ContainsChanges
+            => !ReadOnly
+            && (Modified || WorkingCopyTextFile.LoadException != null);
+
+        /// <summary>
+        /// Schema which defines what kind of keys and values are valid in the parsed json.
+        /// </summary>
+        private readonly SettingSchema schema;
+
+        /// <summary>
+        /// Setting to use when an auto-save file name pair is generated.
+        /// </summary>
+        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
@@ -83,12 +136,29 @@ namespace Eutherion.Win.AppTemplate
         /// <param name="settingsFile">
         /// The settings file to show and/or edit.
         /// </param>
+        /// <param name="initialTextGenerator">
+        /// Optional function to generate initial text in case the settings file could not be loaded.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public JsonTextBox(SettingsFile settingsFile)
+        public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
-            this.settingsFile = settingsFile ?? throw new ArgumentNullException(nameof(settingsFile));
+            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
+
+            this.autoSaveSetting = autoSaveSetting;
+            schema = settingsFile.Settings.Schema;
+
+            if (autoSaveSetting != null
+                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
+                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
+            {
+                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
+            }
+            else
+            {
+                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
+            }
 
             BorderStyle = BorderStyle.None;
 
@@ -134,12 +204,107 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            // Set the Text property and use that as input, because it will not exactly match the json string.
-            settingsFile.LoadedText.Match(
-                whenOption1: exception => throw exception,
-                whenOption2: loadedText => Text = loadedText);
+            WorkingCopyTextFile.QueryAutoSaveFile += WorkingCopyTextFile_QueryAutoSaveFile;
+            WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+
+            // Only use initialTextGenerator if nothing was auto-saved.
+            if (WorkingCopyTextFile.LoadException != null
+                && string.IsNullOrEmpty(WorkingCopyTextFile.LocalCopyText))
+            {
+                Text = initialTextGenerator != null
+                    ? (initialTextGenerator() ?? string.Empty)
+                    : string.Empty;
+            }
+            else
+            {
+                CopyTextFromTextFile();
+            }
 
             EmptyUndoBuffer();
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        {
+            if (!ContainsChanges)
+            {
+                // Reload the text if different.
+                string reloadedText = WorkingCopyTextFile.LoadedText;
+
+                // Without this check the undo buffer gets an extra empty entry which is weird.
+                if (WorkingCopyTextFile.LocalCopyText != reloadedText)
+                {
+                    Text = reloadedText;
+                    SetSavePoint();
+                }
+            }
+
+            // Make sure to auto-save if ContainsChanges changed but its text did not.
+            // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+            WorkingCopyTextFile.UpdateLocalCopyText(
+                WorkingCopyTextFile.LocalCopyText,
+                ContainsChanges);
+        }
+
+        private void WorkingCopyTextFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
+        {
+            // Only open auto-save files if they can be stored in autoSaveSetting.
+            if (autoSaveSetting != null)
+            {
+                FileStreamPair fileStreamPair = null;
+
+                try
+                {
+                    fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
+                    e.AutoSaveFile = new AutoSaveTextFile<string>(
+                        new WorkingCopyTextFile.TextAutoSaveState(),
+                        fileStreamPair);
+
+                    Session.Current.AutoSave.Persist(
+                        autoSaveSetting,
+                        new AutoSaveFileNamePair(
+                            Path.GetFileName(fileStreamPair.FileStream1.Name),
+                            Path.GetFileName(fileStreamPair.FileStream2.Name)));
+                }
+                catch (Exception autoSaveLoadException)
+                {
+                    if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                    autoSaveLoadException.Trace();
+                }
+            }
+        }
+
+        private bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
+                                                  out AutoSaveTextFile<string> autoSaveTextFile,
+                                                  out string autoSavedText)
+        {
+            FileStreamPair fileStreamPair = null;
+
+            try
+            {
+                fileStreamPair = FileStreamPair.Create(
+                    CreateExistingAutoSaveFileStream,
+                    autoSaveFileNamePair.FileName1,
+                    autoSaveFileNamePair.FileName2);
+
+                var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+                autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
+
+                // If the auto-save files don't exist anymore, just use string.Empty as a default.
+                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
+                return true;
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+                autoSaveTextFile = default(AutoSaveTextFile<string>);
+                autoSavedText = default(string);
+                return false;
+            }
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
@@ -171,7 +336,7 @@ namespace Eutherion.Win.AppTemplate
                 ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
             }
 
-            parser.TryParse(settingsFile.Settings.Schema, out PMap dummy, out List<JsonErrorInfo> errors);
+            parser.TryParse(schema, out PMap dummy, out List<JsonErrorInfo> errors);
 
             IndicatorClearRange(0, TextLength);
 
@@ -212,13 +377,40 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
+        private bool copyingTextFromTextFile;
+
+        /// <summary>
+        /// Sets the Text property without updating WorkingCopyTextFile
+        /// when they're known to be the same.
+        /// </summary>
+        private void CopyTextFromTextFile()
+        {
+            copyingTextFromTextFile = true;
+            try
+            {
+                Text = WorkingCopyTextFile.LocalCopyText;
+            }
+            finally
+            {
+                copyingTextFromTextFile = false;
+            }
+        }
+
         protected override void OnTextChanged(EventArgs e)
         {
             CallTipCancel();
 
             base.OnTextChanged(e);
 
-            ParseAndApplySyntaxHighlighting(Text);
+            string currentText = Text;
+
+            // This prevents re-entrancy into WorkingCopyTextFile.
+            if (!copyingTextFromTextFile)
+            {
+                WorkingCopyTextFile.UpdateLocalCopyText(currentText, ContainsChanges);
+            }
+
+            ParseAndApplySyntaxHighlighting(currentText);
         }
 
         private List<JsonErrorInfo> currentErrors;
@@ -307,14 +499,58 @@ namespace Eutherion.Win.AppTemplate
             base.OnDwellEnd(e);
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+
+                // Before disposing WorkingCopyTextFile, figure out if the auto-save files can be removed.
+                bool deleteAutoSaveFiles = WorkingCopyTextFile.AutoSaveFile != null && !ContainsChanges;
+
+                WorkingCopyTextFile.Dispose();
+
+                if (deleteAutoSaveFiles)
+                {
+                    // Obtain file names from the auto-save setting since the FileStreamPair is not available.
+                    bool hasValidPair = Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair);
+
+                    Session.Current.AutoSave.Remove(autoSaveSetting);
+
+                    if (hasValidPair)
+                    {
+                        try
+                        {
+                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+
+                        try
+                        {
+                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1));
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+                    }
+                }
+            }
+
+            base.Dispose(disposing);
+        }
+
         public UIActionState TrySaveToFile(bool perform)
         {
             if (ReadOnly) return UIActionVisibility.Hidden;
-            if (!Modified) return UIActionVisibility.Disabled;
+            if (!ContainsChanges) return UIActionVisibility.Disabled;
 
             if (perform)
             {
-                settingsFile.Save(Text);
+                WorkingCopyTextFile.Save();
                 SetSavePoint();
             }
 

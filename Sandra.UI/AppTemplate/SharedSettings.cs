@@ -58,6 +58,10 @@ namespace Eutherion.Win.AppTemplate
             SubFolderNameType.Instance,
             new SettingComment(LangFolderNameDescription));
 
+        public static readonly SettingProperty<uint> AutoSaveCounter = new SettingProperty<uint>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(AutoSaveCounter))),
+            PType.CLR.UInt32);
+
         public static readonly SettingProperty<PersistableFormState> DefaultSettingsWindow = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsWindow))),
             PersistableFormState.Type);
@@ -66,6 +70,10 @@ namespace Eutherion.Win.AppTemplate
             new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsErrorHeight))),
             PType.CLR.Int32);
 
+        public static readonly SettingProperty<AutoSaveFileNamePair> DefaultSettingsAutoSave = new SettingProperty<AutoSaveFileNamePair>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(DefaultSettingsAutoSave))),
+            AutoSaveFilePairPType.Instance);
+
         public static readonly SettingProperty<PersistableFormState> PreferencesWindow = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesWindow))),
             PersistableFormState.Type);
@@ -73,6 +81,10 @@ namespace Eutherion.Win.AppTemplate
         public static readonly SettingProperty<int> PreferencesErrorHeight = new SettingProperty<int>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesErrorHeight))),
             PType.CLR.Int32);
+
+        public static readonly SettingProperty<AutoSaveFileNamePair> PreferencesAutoSave = new SettingProperty<AutoSaveFileNamePair>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PreferencesAutoSave))),
+            AutoSaveFilePairPType.Instance);
 
         public static readonly SettingProperty<PersistableFormState> LanguageWindow = new SettingProperty<PersistableFormState>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(LanguageWindow))),

@@ -52,20 +52,20 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        private readonly string fileName;
-
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
+                            Func<string> initialTextGenerator,
                             SettingProperty<PersistableFormState> formStateSetting,
-                            SettingProperty<int> errorHeightSetting)
+                            SettingProperty<int> errorHeightSetting,
+                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            fileName = Path.GetFileName(settingsFile.AbsoluteFilePath);
-            Text = fileName;
+            // Set this before calling UpdateChangedMarker().
+            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            jsonTextBox = new JsonTextBox(settingsFile)
+            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator, autoSaveSetting)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
@@ -88,6 +88,9 @@ namespace Eutherion.Win.AppTemplate
             });
 
             UIMenu.AddTo(jsonTextBox);
+
+            // Initial changed marker.
+            UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
@@ -118,21 +121,9 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) =>
-                {
-                    Text = ChangedMarker + fileName;
-
-                    // Invalidate to update the save button.
-                    ActionHandler.Invalidate();
-                };
-
-                jsonTextBox.SavePointReached += (_, __) =>
-                {
-                    Text = fileName;
-
-                    // Invalidate to update the save button.
-                    ActionHandler.Invalidate();
-                };
+                jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
+                jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -193,7 +184,6 @@ namespace Eutherion.Win.AppTemplate
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
             MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
-            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
             foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
             {
@@ -259,6 +249,21 @@ namespace Eutherion.Win.AppTemplate
             {
                 menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
             }
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        {
+            UpdateChangedMarker();
+        }
+
+        private void UpdateChangedMarker()
+        {
+            string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+            string fileName = Path.GetFileName(openTextFilePath);
+            Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
+
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -361,8 +366,12 @@ namespace Eutherion.Win.AppTemplate
         {
             base.OnFormClosing(e);
 
-            if (jsonTextBox.Modified)
+            // Only show message box if there's no auto save file from which local changes can be recovered.
+            if (jsonTextBox.ContainsChanges && jsonTextBox.WorkingCopyTextFile.AutoSaveFile == null)
             {
+                string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+                string fileName = Path.GetFileName(openTextFilePath);
+
                 DialogResult result = MessageBox.Show(
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
@@ -375,7 +384,7 @@ namespace Eutherion.Win.AppTemplate
                     case DialogResult.Yes:
                         try
                         {
-                            jsonTextBox.TrySaveToFile(true);
+                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
                         }
                         catch (Exception exception)
                         {
@@ -396,6 +405,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

@@ -90,7 +90,7 @@ namespace Eutherion.Win
             /// The latest text contained in the auto-save file, or null if neither
             /// auto-save file could be loaded.
             /// </param>
-            public abstract void Initialize(string loadedText);
+            protected internal abstract void Initialize(string loadedText);
 
             /// <summary>
             /// Converts a non-empty sequence of persisted updates to a string
@@ -105,7 +105,7 @@ namespace Eutherion.Win
             /// <returns>
             /// Whether or not to auto-save the result.
             /// </returns>
-            public abstract bool ShouldSave(IReadOnlyList<TUpdate> updates, out string textToSave);
+            protected internal abstract bool ShouldSave(IReadOnlyList<TUpdate> updates, out string textToSave);
         }
 
         // This value seem to be recommended.

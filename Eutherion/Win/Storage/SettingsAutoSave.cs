@@ -44,7 +44,7 @@ namespace Eutherion.Win.Storage
 
             public SettingsRemoteState(SettingObject defaultSettings) => RemoteSettings = defaultSettings;
 
-            public override void Initialize(string loadedText)
+            protected internal override void Initialize(string loadedText)
             {
                 if (loadedText != null)
                 {
@@ -64,7 +64,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            public override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
+            protected internal override bool ShouldSave(IReadOnlyList<SettingCopy> updates, out string textToSave)
             {
                 SettingCopy latestUpdate = updates[updates.Count - 1];
 
@@ -79,11 +79,6 @@ namespace Eutherion.Win.Storage
                 return false;
             }
         }
-
-        /// <summary>
-        /// Documented default value of the 'bufferSize' parameter of the <see cref="FileStream"/> constructor.
-        /// </summary>
-        public const int DefaultFileStreamBufferSize = 4096;
 
         /// <summary>
         /// Gets the name of the file which acts as an exclusive lock between different instances
@@ -230,7 +225,7 @@ namespace Eutherion.Win.Storage
                               FileMode.OpenOrCreate,
                               FileAccess.ReadWrite,
                               FileShare.Read,
-                              DefaultFileStreamBufferSize,
+                              FileUtilities.DefaultFileStreamBufferSize,
                               FileOptions.SequentialScan | FileOptions.Asynchronous);
 
         private void Persist(SettingCopy workingCopy)

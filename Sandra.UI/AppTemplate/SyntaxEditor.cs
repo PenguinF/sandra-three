@@ -19,8 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.UIActions;
+using Eutherion.Utils;
+using Eutherion.Win.Storage;
 using ScintillaNET;
 using System.Drawing;
 using System.Linq;
@@ -70,5 +73,53 @@ namespace Eutherion.Win.AppTemplate
         /// Gets the default fore color used for displaying line numbers in a syntax editor.
         /// </summary>
         public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
+    }
+
+    /// <summary>
+    /// Represents two file names in the local application data folder.
+    /// </summary>
+    public struct AutoSaveFileNamePair
+    {
+        public string FileName1;
+        public string FileName2;
+
+        public AutoSaveFileNamePair(string fileName1, string fileName2)
+        {
+            FileName1 = fileName1;
+            FileName2 = fileName2;
+        }
+    }
+
+    /// <summary>
+    /// Specialized PType that accepts pairs of legal file names that are used for auto-saving changes in text files.
+    /// </summary>
+    public sealed class AutoSaveFilePairPType : PType<AutoSaveFileNamePair>
+    {
+        public static readonly PTypeErrorBuilder AutoSaveFilePairTypeError
+            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(AutoSaveFilePairTypeError)));
+
+        public static readonly AutoSaveFilePairPType Instance = new AutoSaveFilePairPType();
+
+        private AutoSaveFilePairPType() { }
+
+        public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetValidValue(PValue value)
+        {
+            if (value is PList pair
+                && pair.Count == 2
+                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[0]).IsOption2(out string fileName1)
+                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[1]).IsOption2(out string fileName2))
+            {
+                return ValidValue(new AutoSaveFileNamePair(fileName1, fileName2));
+            }
+
+            return InvalidValue(AutoSaveFilePairTypeError);
+        }
+
+        public override PValue GetPValue(AutoSaveFileNamePair value) => new PList(
+            new PValue[]
+            {
+                FileNameType.InstanceAllowStartWithDots.GetPValue(value.FileName1),
+                FileNameType.InstanceAllowStartWithDots.GetPValue(value.FileName2),
+            });
     }
 }

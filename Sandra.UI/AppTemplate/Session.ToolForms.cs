@@ -96,9 +96,16 @@ namespace Eutherion.Win.AppTemplate
 
         private Form CreateSettingsForm(bool isReadOnly,
                                         SettingsFile settingsFile,
+                                        Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<int> errorHeightSetting)
-            => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
+                                        SettingProperty<int> errorHeightSetting,
+                                        SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+            => new SettingsForm(isReadOnly,
+                                settingsFile,
+                                initialTextGenerator,
+                                formStateSetting,
+                                errorHeightSetting,
+                                autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };
@@ -114,7 +121,7 @@ namespace Eutherion.Win.AppTemplate
                     {
                         // If the file doesn't exist yet, generate a local settings file with a commented out copy
                         // of the default settings to serve as an example, and to show which settings are available.
-                        if (!File.Exists(LocalSettings.AbsoluteFilePath))
+                        string initialTextGenerator()
                         {
                             SettingCopy localSettingsExample = new SettingCopy(LocalSettings.Settings.Schema);
 
@@ -128,25 +135,18 @@ namespace Eutherion.Win.AppTemplate
                                 }
                             }
 
-                            try
-                            {
-                                LocalSettings.WriteToFile(
-                                    localSettingsExample.Commit(),
-                                    SettingWriterOptions.CommentOutProperties);
-                            }
-                            catch (Exception exception)
-                            {
-                                // Ignore this exception.
-                                // When user tries to save the file, it will be more meaningful.
-                                exception.Trace();
-                            }
+                            return LocalSettings.GenerateJson(
+                                localSettingsExample.Commit(),
+                                SettingWriterOptions.CommentOutProperties);
                         }
 
                         return CreateSettingsForm(
                             false,
                             LocalSettings,
+                            initialTextGenerator,
                             SharedSettings.PreferencesWindow,
-                            SharedSettings.PreferencesErrorHeight);
+                            SharedSettings.PreferencesErrorHeight,
+                            SharedSettings.PreferencesAutoSave);
                     });
             }
 
@@ -170,31 +170,13 @@ namespace Eutherion.Win.AppTemplate
                 OpenOrActivateToolForm(
                     null,
                     defaultSettingsFormBox,
-                    () =>
-                    {
-                        // If the file doesn't exist yet, try to generate it.
-                        if (!File.Exists(DefaultSettings.AbsoluteFilePath))
-                        {
-                            try
-                            {
-                                DefaultSettings.WriteToFile(
-                                    DefaultSettings.Settings,
-                                    SettingWriterOptions.Default);
-                            }
-                            catch (Exception exception)
-                            {
-                                // Ignore this exception, may be caused by insufficient access rights.
-                                // When user tries to save the file, it will be more meaningful.
-                                exception.Trace();
-                            }
-                        }
-
-                        return CreateSettingsForm(
-                            !GetSetting(DeveloperMode),
-                            DefaultSettings,
-                            SharedSettings.DefaultSettingsWindow,
-                            SharedSettings.DefaultSettingsErrorHeight);
-                    });
+                    () => CreateSettingsForm(
+                        !GetSetting(DeveloperMode),
+                        DefaultSettings,
+                        () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
+                        SharedSettings.DefaultSettingsWindow,
+                        SharedSettings.DefaultSettingsErrorHeight,
+                        SharedSettings.DefaultSettingsAutoSave));
             }
 
             return UIActionVisibility.Enabled;
@@ -334,7 +316,7 @@ namespace Eutherion.Win.AppTemplate
                     () =>
                     {
                         // Generate translations into language file if empty.
-                        if (fileLocalizer.Dictionary.Count == 0)
+                        string initialTextGenerator()
                         {
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
@@ -345,25 +327,18 @@ namespace Eutherion.Win.AppTemplate
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
-                            try
-                            {
-                                fileLocalizer.LanguageFile.WriteToFile(
-                                    settingCopy.Commit(),
-                                    SettingWriterOptions.SuppressSettingComments);
-                            }
-                            catch (Exception exception)
-                            {
-                                // Ignore this exception, may be caused by insufficient access rights.
-                                // When user tries to save the file, it will be more meaningful.
-                                exception.Trace();
-                            }
+                            return fileLocalizer.LanguageFile.GenerateJson(
+                                settingCopy.Commit(),
+                                SettingWriterOptions.SuppressSettingComments);
                         }
 
                         return CreateSettingsForm(
                             false,
                             fileLocalizer.LanguageFile,
+                            initialTextGenerator,
                             SharedSettings.LanguageWindow,
-                            SharedSettings.LanguageErrorHeight);
+                            SharedSettings.LanguageErrorHeight,
+                            null);
                     });
             }
 
