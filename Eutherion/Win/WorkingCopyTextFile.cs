@@ -79,6 +79,11 @@ namespace Eutherion.Win
         public AutoSaveTextFile<string> AutoSaveFile { get; private set; }
 
         /// <summary>
+        /// Occurs before an auto-save operation when an auto-save file does not yet exist.
+        /// </summary>
+        public event Action<WorkingCopyTextFile, QueryAutoSaveFileEventArgs> QueryAutoSaveFile;
+
+        /// <summary>
         /// Gets the current local copy version of the text.
         /// </summary>
         public string LocalCopyText { get; private set; } = string.Empty;
@@ -92,6 +97,14 @@ namespace Eutherion.Win
         public void UpdateLocalCopyText(string text)
         {
             LocalCopyText = text ?? string.Empty;
+
+            if (AutoSaveFile == null)
+            {
+                // If no listeners, AutoSaveFile remains empty and nothing is auto-saved.
+                var queryAutoSaveFileEventArgs = new QueryAutoSaveFileEventArgs();
+                QueryAutoSaveFile?.Invoke(this, queryAutoSaveFileEventArgs);
+                AutoSaveFile = queryAutoSaveFileEventArgs.AutoSaveFile;
+            }
         }
 
         /// <summary>
@@ -109,5 +122,16 @@ namespace Eutherion.Win
         {
             AutoSaveFile?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="WorkingCopyTextFile.QueryAutoSaveFile"/> event.
+    /// </summary>
+    public class QueryAutoSaveFileEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets or sets the <see cref="AutoSaveTextFile{TUpdate}"/> to use for auto-saving local changes.
+        /// </summary>
+        public AutoSaveTextFile<string> AutoSaveFile { get; set; }
     }
 }
