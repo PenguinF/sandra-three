@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Win
 {
@@ -30,6 +31,34 @@ namespace Eutherion.Win
     /// </summary>
     public sealed class WorkingCopyTextFile : IDisposable
     {
+        /// <summary>
+        /// Contains the remote state for <see cref="WorkingCopyTextFile"/> auto-save files.
+        /// </summary>
+        public class TextAutoSaveState : AutoSaveTextFile<string>.RemoteState
+        {
+            /// <summary>
+            /// Gets the text currently stored in the auto-save file, or null if it could not be loaded.
+            /// </summary>
+            public string LastAutoSavedText { get; private set; }
+
+            protected internal override void Initialize(string loadedText) => LastAutoSavedText = loadedText;
+
+            protected internal override bool ShouldSave(IReadOnlyList<string> updates, out string textToSave)
+            {
+                textToSave = updates[updates.Count - 1];
+
+                if (textToSave != LastAutoSavedText)
+                {
+                    // Remember what was last auto-saved.
+                    LastAutoSavedText = textToSave;
+                    return true;
+                }
+
+                textToSave = default(string);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>.
         /// </summary>
