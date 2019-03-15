@@ -180,6 +180,8 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
+            WorkingCopyTextFile.QueryAutoSaveFile += WorkingCopyTextFile_QueryAutoSaveFile;
+
             if (WorkingCopyTextFile.LoadException != null)
             {
                 Text = initialTextGenerator != null
@@ -192,6 +194,30 @@ namespace Eutherion.Win.AppTemplate
             }
 
             EmptyUndoBuffer();
+        }
+
+        private void WorkingCopyTextFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
+        {
+            // Only open auto-save files if they can be stored in autoSaveSetting.
+            if (autoSaveSetting != null)
+            {
+                FileStreamPair fileStreamPair = null;
+
+                try
+                {
+                    fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
+                    e.AutoSaveFile = new AutoSaveTextFile<string>(
+                        new WorkingCopyTextFile.TextAutoSaveState(),
+                        fileStreamPair);
+                }
+                catch (Exception autoSaveLoadException)
+                {
+                    if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                    // Only trace exceptions resulting from e.g. a missing APPDATA subfolder or insufficient access.
+                    autoSaveLoadException.Trace();
+                }
+            }
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
