@@ -99,7 +99,7 @@ namespace Eutherion.Utils
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(path);
             string extension = Path.GetExtension(path);
 
-            // This counter is appended to the file name to ensure its uniqueness - if FileMode.CreateNew.
+            // This counter is appended to the file name to ensure its uniqueness.
             while (true)
             {
                 string attemptPath
@@ -119,7 +119,6 @@ namespace Eutherion.Utils
                                           DefaultFileStreamBufferSize,
                                           fileOptions);
                 }
-                // TODO: catch UnauthorizedAccessExceptions too?
                 catch (IOException)
                 {
                     // File already exists and is required to have a unique name,
