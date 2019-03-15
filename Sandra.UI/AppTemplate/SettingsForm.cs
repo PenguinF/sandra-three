@@ -56,7 +56,8 @@ namespace Eutherion.Win.AppTemplate
                             SettingsFile settingsFile,
                             Func<string> initialTextGenerator,
                             SettingProperty<PersistableFormState> formStateSetting,
-                            SettingProperty<int> errorHeightSetting)
+                            SettingProperty<int> errorHeightSetting,
+                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
@@ -64,7 +65,7 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator)
+            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator, autoSaveSetting)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,

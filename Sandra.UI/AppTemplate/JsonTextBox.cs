@@ -94,6 +94,11 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingSchema schema;
 
         /// <summary>
+        /// Setting to use when an auto-save file name pair is generated.
+        /// </summary>
+        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
+
+        /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
@@ -105,10 +110,11 @@ namespace Eutherion.Win.AppTemplate
         /// <exception cref="ArgumentNullException">
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
-        public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator)
+        public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
+            this.autoSaveSetting = autoSaveSetting;
             schema = settingsFile.Settings.Schema;
 
             WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);

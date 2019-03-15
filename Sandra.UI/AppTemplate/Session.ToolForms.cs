@@ -98,12 +98,14 @@ namespace Eutherion.Win.AppTemplate
                                         SettingsFile settingsFile,
                                         Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<int> errorHeightSetting)
+                                        SettingProperty<int> errorHeightSetting,
+                                        SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
             => new SettingsForm(isReadOnly,
                                 settingsFile,
                                 initialTextGenerator,
                                 formStateSetting,
-                                errorHeightSetting)
+                                errorHeightSetting,
+                                autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };
@@ -143,7 +145,8 @@ namespace Eutherion.Win.AppTemplate
                             LocalSettings,
                             initialTextGenerator,
                             SharedSettings.PreferencesWindow,
-                            SharedSettings.PreferencesErrorHeight);
+                            SharedSettings.PreferencesErrorHeight,
+                            SharedSettings.PreferencesAutoSave);
                     });
             }
 
@@ -172,7 +175,8 @@ namespace Eutherion.Win.AppTemplate
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsWindow,
-                        SharedSettings.DefaultSettingsErrorHeight));
+                        SharedSettings.DefaultSettingsErrorHeight,
+                        SharedSettings.DefaultSettingsAutoSave));
             }
 
             return UIActionVisibility.Enabled;
@@ -333,7 +337,8 @@ namespace Eutherion.Win.AppTemplate
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
                             SharedSettings.LanguageWindow,
-                            SharedSettings.LanguageErrorHeight);
+                            SharedSettings.LanguageErrorHeight,
+                            null);
                     });
             }
 
