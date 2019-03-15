@@ -21,11 +21,13 @@
 
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -40,6 +42,21 @@ namespace Eutherion.Win.AppTemplate
         private const int valueStyleIndex = 9;
         private const int stringStyleIndex = 10;
         private const int errorIndicatorIndex = 8;
+
+        /// <summary>
+        /// This results in file names such as ".%_A8.tmp".
+        /// </summary>
+        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
+
+        private static uint autoSaveFileCounter = 1;
+
+        private static FileStream CreateUniqueNewAutoSaveFileStream()
+        {
+            return FileUtilities.CreateUniqueFile(
+                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
+                FileOptions.SequentialScan | FileOptions.Asynchronous,
+                ref autoSaveFileCounter);
+        }
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
