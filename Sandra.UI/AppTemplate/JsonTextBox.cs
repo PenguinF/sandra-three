@@ -198,6 +198,7 @@ namespace Eutherion.Win.AppTemplate
             }
 
             WorkingCopyTextFile.QueryAutoSaveFile += WorkingCopyTextFile_QueryAutoSaveFile;
+            WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
             // Only use initialTextGenerator if nothing was auto-saved.
             if (WorkingCopyTextFile.LoadException != null
@@ -213,6 +214,28 @@ namespace Eutherion.Win.AppTemplate
             }
 
             EmptyUndoBuffer();
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        {
+            if (!ContainsChanges)
+            {
+                // Reload the text if different.
+                string reloadedText = WorkingCopyTextFile.LoadedText;
+
+                // Without this check the undo buffer gets an extra empty entry which is weird.
+                if (WorkingCopyTextFile.LocalCopyText != reloadedText)
+                {
+                    Text = reloadedText;
+                    SetSavePoint();
+                }
+            }
+
+            // Make sure to auto-save if ContainsChanges changed but its text did not.
+            // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+            WorkingCopyTextFile.UpdateLocalCopyText(
+                WorkingCopyTextFile.LocalCopyText,
+                ContainsChanges);
         }
 
         private void WorkingCopyTextFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
@@ -473,6 +496,8 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
+                WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+
                 // Before disposing WorkingCopyTextFile, figure out if the auto-save files can be removed.
                 bool deleteAutoSaveFiles = WorkingCopyTextFile.AutoSaveFile != null && !ContainsChanges;
 
