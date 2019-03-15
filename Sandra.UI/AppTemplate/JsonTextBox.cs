@@ -58,6 +58,14 @@ namespace Eutherion.Win.AppTemplate
                 ref autoSaveFileCounter);
         }
 
+        private static FileStream CreateExistingAutoSaveFileStream(string autoSaveFileName) => new FileStream(
+            Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileName),
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.Read,
+            FileUtilities.DefaultFileStreamBufferSize,
+            FileOptions.Asynchronous | FileOptions.SequentialScan);
+
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
 
