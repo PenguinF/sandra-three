@@ -326,7 +326,7 @@ namespace Eutherion.Win.AppTemplate
             // This prevents re-entrancy into WorkingCopyTextFile.
             if (!copyingTextFromTextFile)
             {
-                WorkingCopyTextFile.UpdateLocalCopyText(currentText);
+                WorkingCopyTextFile.UpdateLocalCopyText(currentText, ContainsChanges);
             }
 
             ParseAndApplySyntaxHighlighting(currentText);

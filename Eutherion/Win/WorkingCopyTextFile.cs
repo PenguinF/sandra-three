@@ -123,16 +123,30 @@ namespace Eutherion.Win
         /// <param name="text">
         /// The current working copy of the text.
         /// </param>
-        public void UpdateLocalCopyText(string text)
+        /// <param name="containsChanges">
+        /// Whether or not the text contains changes.
+        /// </param>
+        public void UpdateLocalCopyText(string text, bool containsChanges)
         {
             LocalCopyText = text ?? string.Empty;
 
-            if (AutoSaveFile == null)
+            if (containsChanges)
             {
-                // If no listeners, AutoSaveFile remains empty and nothing is auto-saved.
-                var queryAutoSaveFileEventArgs = new QueryAutoSaveFileEventArgs();
-                QueryAutoSaveFile?.Invoke(this, queryAutoSaveFileEventArgs);
-                AutoSaveFile = queryAutoSaveFileEventArgs.AutoSaveFile;
+                // Auto-save local changes.
+                if (AutoSaveFile == null)
+                {
+                    // If no listeners, AutoSaveFile remains empty and nothing is auto-saved.
+                    var queryAutoSaveFileEventArgs = new QueryAutoSaveFileEventArgs();
+                    QueryAutoSaveFile?.Invoke(this, queryAutoSaveFileEventArgs);
+                    AutoSaveFile = queryAutoSaveFileEventArgs.AutoSaveFile;
+                }
+
+                AutoSaveFile?.Persist(LocalCopyText);
+            }
+            else
+            {
+                // Indicate that there are no local changes.
+                AutoSaveFile?.Persist(string.Empty);
             }
         }
 
