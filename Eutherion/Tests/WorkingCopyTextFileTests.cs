@@ -29,6 +29,11 @@ namespace Eutherion.Win.Tests
     public class FileFixture : IDisposable
     {
         /// <summary>
+        /// Primary target text file path.
+        /// </summary>
+        public string TextFilePath { get; }
+
+        /// <summary>
         /// Gets the path to the primary auto-save file.
         /// </summary>
         public string AutoSaveFilePath1 { get; }
@@ -47,12 +52,14 @@ namespace Eutherion.Win.Tests
         public FileFixture()
         {
             // Path.GetFullPath() prepends the working directory, which is the location of the compiled unit test dll.
+            TextFilePath = Path.GetFullPath("test.txt");
             AutoSaveFilePath1 = Path.GetFullPath("autosave1.txt");
             AutoSaveFilePath2 = Path.GetFullPath("autosave2.txt");
         }
 
         public void Dispose()
         {
+            File.Delete(TextFilePath);
             File.Delete(AutoSaveFilePath1);
             File.Delete(AutoSaveFilePath2);
         }
@@ -80,6 +87,28 @@ namespace Eutherion.Win.Tests
                 CreateAutoSaveFileStream,
                 fileFixture.AutoSaveFilePath1,
                 fileFixture.AutoSaveFilePath2);
+
+        [Fact]
+        public void LiveTextFilePathUnchanged()
+        {
+            using (var textFile = new LiveTextFile(fileFixture.TextFilePath))
+            {
+                Assert.Equal(fileFixture.TextFilePath, textFile.AbsoluteFilePath);
+            }
+        }
+
+        [Fact]
+        public void IllegalFileNames()
+        {
+            // Shouldn't really test what kind of exception System.IO classes throw,
+            // but since they're documented in summaries it's nice to have an overview.
+            // Main thing to be tested here is that creating the LiveTextFile does throw and not pretend to be OK.
+            Assert.Throws<ArgumentNullException>(() => new LiveTextFile(null).Dispose());
+            Assert.Throws<ArgumentException>(() => new LiveTextFile(string.Empty).Dispose());
+            Assert.Throws<ArgumentException>(() => new LiveTextFile("*.?").Dispose());
+            Assert.Throws<ArgumentException>(() => new LiveTextFile(new string(' ', 261)).Dispose());
+            Assert.Throws<PathTooLongException>(() => new LiveTextFile(new string('x', 261)).Dispose());
+        }
 
         [Theory]
         // Wrong lengths, incomplete auto-saves, with and without UTF8 byte order marker.
