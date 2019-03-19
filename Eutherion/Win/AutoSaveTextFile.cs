@@ -248,12 +248,20 @@ namespace Eutherion.Win
 
         private string Load(FileStream autoSaveFile)
         {
-            var streamReader = new StreamReader(autoSaveFile);
+            var streamReader = new StreamReader(autoSaveFile, Encoding.UTF8);
+
+            // Try other file if empty.
             if (!uint.TryParse(streamReader.ReadLine(), out uint expectedLength)) return null;
+            if (expectedLength == 0) return null;
+
             string loadedText = streamReader.ReadToEnd();
 
             // Integrity check: only allow loading from completed auto-save files.
             if (expectedLength != (uint)loadedText.Length) return null;
+
+            // Only accept valid UTF8 files.
+            if (streamReader.CurrentEncoding != Encoding.UTF8) return null;
+
             return loadedText;
         }
 
