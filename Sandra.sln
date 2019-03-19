@@ -14,7 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sandra.UI", "Sandra.UI\Sand
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Shared", "Eutherion\Shared\Eutherion.Shared.csproj", "{AE889497-9B7C-4FD5-B5DA-A3D4158369EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Shared.Tests", "Eutherion\Shared\Tests\Eutherion.Shared.Tests.csproj", "{7C04E52A-0026-4FCA-9D20-B09FC4D77892}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Tests", "Eutherion\Tests\Eutherion.Tests.csproj", "{7C04E52A-0026-4FCA-9D20-B09FC4D77892}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eutherion.Win", "Eutherion\Win\Eutherion.Win.csproj", "{078CB2B5-BF6C-497A-8A0E-2633367E4759}"
 EndProject
