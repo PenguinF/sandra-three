@@ -34,7 +34,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Contains the remote state for <see cref="WorkingCopyTextFile"/> auto-save files.
         /// </summary>
-        public class TextAutoSaveState : AutoSaveTextFile<string>.RemoteState
+        internal class TextAutoSaveState : AutoSaveTextFile<string>.RemoteState
         {
             /// <summary>
             /// Gets the text currently stored in the auto-save file, or null if it could not be loaded.
