@@ -379,5 +379,35 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(expectedAutoSaveText, remoteState2.LastAutoSavedText);
             }
         }
+
+        [Fact]
+        public void ModificationsAreAutoSaved()
+        {
+            string expectedLoadedText = "A";
+            string expectedAutoSaveText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFile = new AutoSaveTextFile<string>(new WorkingCopyTextFile.TextAutoSaveState(), AutoSaveFiles());
+                wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+            }
+
+            // Reloading the WorkingCopyTextFile should restore the auto saved text, even when the original file is deleted.
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+
+            var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+            using (var textFile = new LiveTextFile(filePath))
+            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile, autoSaveTextFile, remoteState.LastAutoSavedText ?? string.Empty))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+            }
+        }
     }
 }
