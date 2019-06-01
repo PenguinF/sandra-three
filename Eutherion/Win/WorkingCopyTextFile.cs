@@ -25,8 +25,8 @@ using System.Collections.Generic;
 namespace Eutherion.Win
 {
     /// <summary>
-    /// Combines a <see cref="AutoSaveTextFile{TUpdate}"/> with a <see cref="LiveTextFile"/>
-    /// to create a working copy of a text file with local changes which persists across sessions,
+    /// Creates a working copy for a <see cref="LiveTextFile"/> which keeps track of local changes
+    /// which persist across sessions using an <see cref="AutoSaveTextFile{TUpdate}"/>,
     /// and is aware of external updates to the text file on the file system.
     /// </summary>
     public sealed class WorkingCopyTextFile : IDisposable
