@@ -79,11 +79,11 @@ namespace Eutherion.Win.AppTemplate
                 && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
                 && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
             {
-                return WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
+                return new WorkingCopyTextFile(settingsFile, autoSaveTextFile, autoSavedText);
             }
             else
             {
-                return WorkingCopyTextFile.OpenExisting(settingsFile);
+                return new WorkingCopyTextFile(settingsFile, null, null);
             }
         }
 

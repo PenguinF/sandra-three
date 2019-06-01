@@ -65,44 +65,13 @@ namespace Eutherion.Win
         /// <param name="openTextFile">
         /// The open text file.
         /// </param>
-        /// <returns>
-        /// The new <see cref="WorkingCopyTextFile"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="openTextFile"/> is null.
-        /// </exception>
-        public static WorkingCopyTextFile OpenExisting(LiveTextFile openTextFile)
-        {
-            return new WorkingCopyTextFile(openTextFile, null, null);
-        }
-
-        /// <summary>
-        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
-        /// with auto-saved local changes.
-        /// </summary>
-        /// <param name="openTextFile">
-        /// The open text file.
-        /// </param>
         /// <param name="autoSaveFile">
         /// The auto-save file that contains local changes.
         /// </param>
         /// <param name="autoSavedText">
         /// The local changes that are loaded initially from the auto-save file.
         /// </param>
-        /// <returns>
-        /// The new <see cref="WorkingCopyTextFile"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="openTextFile"/> and/or <paramref name="autoSaveFile"/> and/or <paramref name="autoSavedText"/> are null.
-        /// </exception>
-        public static WorkingCopyTextFile OpenExisting(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
-        {
-            return new WorkingCopyTextFile(openTextFile,
-                                           autoSaveFile ?? throw new ArgumentNullException(nameof(autoSaveFile)),
-                                           autoSavedText ?? throw new ArgumentNullException(nameof(autoSavedText)));
-        }
-
-        private WorkingCopyTextFile(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
+        public WorkingCopyTextFile(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
         {
             OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
             AutoSaveFile = autoSaveFile;
