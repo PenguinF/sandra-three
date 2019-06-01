@@ -75,16 +75,34 @@ namespace Eutherion.Win.AppTemplate
 
         private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile settingsFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
-            if (autoSaveSetting != null
-                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
-                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
+            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
             {
-                return new WorkingCopyTextFile(settingsFile, autoSaveTextFile, autoSavedText);
+                FileStreamPair fileStreamPair = null;
+
+                try
+                {
+                    fileStreamPair = FileStreamPair.Create(
+                        CreateExistingAutoSaveFileStream,
+                        autoSaveFileNamePair.FileName1,
+                        autoSaveFileNamePair.FileName2);
+
+                    var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+                    var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
+
+                    // If the auto-save files don't exist anymore, just use string.Empty as a default.
+                    var autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
+                    return new WorkingCopyTextFile(settingsFile, autoSaveTextFile, autoSavedText);
+                }
+                catch (Exception autoSaveLoadException)
+                {
+                    if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                    autoSaveLoadException.Trace();
+                }
             }
-            else
-            {
-                return new WorkingCopyTextFile(settingsFile, null, null);
-            }
+
+            return new WorkingCopyTextFile(settingsFile, null, null);
         }
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
@@ -276,38 +294,6 @@ namespace Eutherion.Win.AppTemplate
                     // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                     autoSaveLoadException.Trace();
                 }
-            }
-        }
-
-        private static bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
-                                                         out AutoSaveTextFile<string> autoSaveTextFile,
-                                                         out string autoSavedText)
-        {
-            FileStreamPair fileStreamPair = null;
-
-            try
-            {
-                fileStreamPair = FileStreamPair.Create(
-                    CreateExistingAutoSaveFileStream,
-                    autoSaveFileNamePair.FileName1,
-                    autoSaveFileNamePair.FileName2);
-
-                var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
-                autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
-
-                // If the auto-save files don't exist anymore, just use string.Empty as a default.
-                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
-                return true;
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-                autoSaveTextFile = default(AutoSaveTextFile<string>);
-                autoSavedText = default(string);
-                return false;
             }
         }
 
