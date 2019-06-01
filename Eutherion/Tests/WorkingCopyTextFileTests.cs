@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -112,6 +113,12 @@ namespace Eutherion.Win.Tests
             }
         }
 
+        public void PrepareTargetFile(TargetFile targetFile, string text)
+        {
+            PrepareTargetFile(targetFile, FileState.Text);
+            File.WriteAllText(GetPath(targetFile), text);
+        }
+
         public void PrepareTargetFile(TargetFile targetFile, byte[] fileBytes)
         {
             PrepareTargetFile(targetFile, FileState.Text);
@@ -140,6 +147,14 @@ namespace Eutherion.Win.Tests
             fileFixture.GetPath(TargetFile.AutoSaveFile1),
             fileFixture.GetPath(TargetFile.AutoSaveFile2));
 
+        private void AssertLiveTextFileSuccessfulLoad(string loadedText, WorkingCopyTextFile wcFile)
+        {
+            Assert.Null(wcFile.AutoSaveFile);
+            Assert.Equal(loadedText, wcFile.LoadedText);
+            Assert.Null(wcFile.LoadException);
+            Assert.Equal(loadedText, wcFile.LocalCopyText);
+        }
+
         [Fact]
         public void LiveTextFilePathUnchanged()
         {
@@ -161,6 +176,40 @@ namespace Eutherion.Win.Tests
             Assert.Throws<ArgumentException>(() => new LiveTextFile("*.?").Dispose());
             Assert.Throws<ArgumentException>(() => new LiveTextFile(new string(' ', 261)).Dispose());
             Assert.Throws<PathTooLongException>(() => new LiveTextFile(new string('x', 261)).Dispose());
+        }
+
+        public static IEnumerable<object[]> Texts()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "0" };
+
+            // Null character only.
+            yield return new object[] { "\u0000" };
+
+            // Whitespace and newlines.
+            yield return new object[] { "\n\r\n\n" };
+            yield return new object[] { "\t\v\u000c\u0085\u1680\u3000" };
+
+            // Higher code points, see also JsonTokenizerTests.
+            yield return new object[] { "もの" };
+        }
+
+        // Regular existing files. Make sure encoding or newline convention is not updated as a result of a load.
+        [Theory]
+        [MemberData(nameof(Texts))]
+        public void ExistingFileInitialState(string text)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoad(text, wcFile);
+            }
         }
 
         [Theory]
