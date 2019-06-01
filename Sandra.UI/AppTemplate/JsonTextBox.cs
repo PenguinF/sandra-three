@@ -65,14 +65,6 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        private static FileStream CreateExistingAutoSaveFileStream(string autoSaveFileName) => new FileStream(
-            Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileName),
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite,
-            FileShare.Read,
-            FileUtilities.DefaultFileStreamBufferSize,
-            FileOptions.Asynchronous | FileOptions.SequentialScan);
-
         private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile settingsFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
@@ -82,9 +74,9 @@ namespace Eutherion.Win.AppTemplate
                 try
                 {
                     fileStreamPair = FileStreamPair.Create(
-                        CreateExistingAutoSaveFileStream,
-                        autoSaveFileNamePair.FileName1,
-                        autoSaveFileNamePair.FileName2);
+                        AutoSaveTextFile.OpenExistingAutoSaveFile,
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
 
                     var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
                     var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
