@@ -264,9 +264,7 @@ namespace Eutherion.Win.AppTemplate
                 try
                 {
                     fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
-                    e.AutoSaveFile = new AutoSaveTextFile<string>(
-                        new WorkingCopyTextFile.TextAutoSaveState(),
-                        fileStreamPair);
+                    e.AutoSaveFileStreamPair = fileStreamPair;
 
                     Session.Current.AutoSave.Persist(
                         autoSaveSetting,

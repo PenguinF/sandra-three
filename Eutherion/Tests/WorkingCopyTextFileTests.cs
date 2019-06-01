@@ -417,7 +417,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = new WorkingCopyTextFile(textFile, null))
             {
-                wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFile = new AutoSaveTextFile<string>(new WorkingCopyTextFile.TextAutoSaveState(), AutoSaveFiles());
+                wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFileStreamPair = AutoSaveFiles();
                 wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
             }
 

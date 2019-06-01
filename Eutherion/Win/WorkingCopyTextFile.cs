@@ -186,9 +186,39 @@ namespace Eutherion.Win
     /// </summary>
     public class QueryAutoSaveFileEventArgs : EventArgs
     {
+        private FileStreamPair autoSaveFileStreamPair;
+        internal AutoSaveTextFile<string> AutoSaveFile;
+
         /// <summary>
-        /// Gets or sets the <see cref="AutoSaveTextFile{TUpdate}"/> to use for auto-saving local changes.
+        /// Gets or sets the <see cref="FileStreamPair"/> to use for auto-saving local changes.
         /// </summary>
-        public AutoSaveTextFile<string> AutoSaveFile { get; set; }
+        /// <exception cref="ArgumentException">
+        /// One or both <see cref="FileStream"/>s in the new value for <see cref="AutoSaveFileStreamPair"/>
+        /// do not have the right capabilities to be used as an auto-save file stream.
+        /// </exception>
+        public FileStreamPair AutoSaveFileStreamPair
+        {
+            get => autoSaveFileStreamPair;
+            set
+            {
+                if (autoSaveFileStreamPair != value)
+                {
+                    if (autoSaveFileStreamPair != null)
+                    {
+                        AutoSaveFile.Dispose();
+                        AutoSaveFile = null;
+                    }
+
+                    if (value != null)
+                    {
+                        var autoSaveState = new WorkingCopyTextFile.TextAutoSaveState();
+                        AutoSaveFile = new AutoSaveTextFile<string>(autoSaveState, value);
+                    }
+
+                    // If the AutoSaveTextFile constructor threw, no update must be made to autoSaveFileStreamPair.
+                    autoSaveFileStreamPair = value;
+                }
+            }
+        }
     }
 }
