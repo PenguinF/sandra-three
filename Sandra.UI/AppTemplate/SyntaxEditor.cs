@@ -26,6 +26,7 @@ using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
 
-        protected static FileStream CreateUniqueNewAutoSaveFileStream()
+        private static FileStream CreateUniqueNewAutoSaveFileStream()
         {
             if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
             {
@@ -68,7 +69,7 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        protected static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
             {
@@ -116,7 +117,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Setting to use when an auto-save file name pair is generated.
         /// </summary>
-        protected readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
+        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
 
         protected readonly TextIndex<TTerminal> TextIndex;
 
@@ -210,7 +211,7 @@ namespace Eutherion.Win.AppTemplate
                 ContainsChanges);
         }
 
-        protected void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
+        private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
         {
             // Only open auto-save files if they can be stored in autoSaveSetting.
             if (autoSaveSetting != null)
@@ -277,6 +278,81 @@ namespace Eutherion.Win.AppTemplate
             base.OnTextChanged(e);
         }
 
+        protected List<TError> currentErrors;
+
+        public int CurrentErrorCount
+            => currentErrors == null ? 0 : currentErrors.Count;
+
+        public IEnumerable<TError> CurrentErrors
+            => currentErrors == null ? Enumerable.Empty<TError>() : currentErrors.Enumerate();
+
+        public void ActivateError(int errorIndex)
+        {
+            // Select the text that generated the error.
+            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
+            {
+                // Determine how many lines are visible in the top half of the control.
+                int firstVisibleLine = FirstVisibleLine;
+                int visibleLines = LinesOnScreen;
+                int bottomVisibleLine = firstVisibleLine + visibleLines;
+
+                // Then calculate which line should become the first visible line
+                // so the error line ends up in the middle of the control.
+                var (hotErrorStart, hotErrorLength) = SyntaxDescriptor.GetErrorRange(currentErrors[errorIndex]);
+                int hotErrorLine = LineFromPosition(hotErrorStart);
+
+                // hotErrorLine in view?
+                // Don't include the bottom line, it's likely not completely visible.
+                if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
+                {
+                    int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
+                    if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
+                    FirstVisibleLine = targetFirstVisibleLine;
+                }
+
+                GotoPosition(hotErrorStart);
+                if (hotErrorLength > 0)
+                {
+                    SelectionEnd = hotErrorStart + hotErrorLength;
+                }
+
+                Focus();
+            }
+        }
+
+        private IEnumerable<string> ActiveErrorMessages(int textPosition)
+        {
+            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
+            {
+                foreach (var error in currentErrors)
+                {
+                    var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+
+                    if (errorStart <= textPosition && textPosition < errorStart + errorLength)
+                    {
+                        yield return SyntaxDescriptor.GetErrorMessage(error);
+                    }
+                }
+            }
+        }
+
+        protected override void OnDwellStart(DwellEventArgs e)
+        {
+            base.OnDwellStart(e);
+
+            int textPosition = e.Position;
+            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
+
+            if (toolTipText.Length > 0)
+            {
+                CallTipShow(textPosition, toolTipText);
+            }
+            else
+            {
+                CallTipCancel();
+            }
+        }
+
         protected override void OnDwellEnd(DwellEventArgs e)
         {
             CallTipCancel();
@@ -328,6 +404,15 @@ namespace Eutherion.Win.AppTemplate
     /// </typeparam>
     public abstract class SyntaxDescriptor<TTerminal, TError>
     {
+        /// <summary>
+        /// Gets the start position and the length of the text span of an error.
+        /// </summary>
+        public abstract (int, int) GetErrorRange(TError error);
+
+        /// <summary>
+        /// Gets the localized message of an error.
+        /// </summary>
+        public abstract string GetErrorMessage(TError error);
     }
 
     /// <summary>

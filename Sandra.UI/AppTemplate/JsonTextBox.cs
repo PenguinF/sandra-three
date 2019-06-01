@@ -194,84 +194,11 @@ namespace Eutherion.Win.AppTemplate
             ParseAndApplySyntaxHighlighting(currentText);
         }
 
-        private List<JsonErrorInfo> currentErrors;
-
-        public int CurrentErrorCount
-            => currentErrors == null ? 0 : currentErrors.Count;
-
-        public IEnumerable<JsonErrorInfo> CurrentErrors
-            => currentErrors == null ? Enumerable.Empty<JsonErrorInfo>() : currentErrors.Enumerate();
-
         public event EventHandler CurrentErrorsChanged;
 
         protected virtual void OnCurrentErrorsChanged(EventArgs e)
         {
             CurrentErrorsChanged?.Invoke(this, e);
-        }
-
-        public void ActivateError(int errorIndex)
-        {
-            // Select the text that generated the error.
-            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
-            {
-                // Determine how many lines are visible in the top half of the control.
-                int firstVisibleLine = FirstVisibleLine;
-                int visibleLines = LinesOnScreen;
-                int bottomVisibleLine = firstVisibleLine + visibleLines;
-
-                // Then calculate which line should become the first visible line
-                // so the error line ends up in the middle of the control.
-                var hotError = currentErrors[errorIndex];
-                int hotErrorLine = LineFromPosition(hotError.Start);
-
-                // hotErrorLine in view?
-                // Don't include the bottom line, it's likely not completely visible.
-                if (hotErrorLine < firstVisibleLine || bottomVisibleLine <= hotErrorLine)
-                {
-                    int targetFirstVisibleLine = hotErrorLine - (visibleLines / 2);
-                    if (targetFirstVisibleLine < 0) targetFirstVisibleLine = 0;
-                    FirstVisibleLine = targetFirstVisibleLine;
-                }
-
-                GotoPosition(hotError.Start);
-                if (hotError.Length > 0)
-                {
-                    SelectionEnd = hotError.Start + hotError.Length;
-                }
-
-                Focus();
-            }
-        }
-
-        private IEnumerable<string> ActiveErrorMessages(int textPosition)
-        {
-            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
-            {
-                foreach (var error in currentErrors)
-                {
-                    if (error.Start <= textPosition && textPosition < error.Start + error.Length)
-                    {
-                        yield return error.Message(Session.Current.CurrentLocalizer);
-                    }
-                }
-            }
-        }
-
-        protected override void OnDwellStart(DwellEventArgs e)
-        {
-            base.OnDwellStart(e);
-
-            int textPosition = e.Position;
-            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
-
-            if (toolTipText.Length > 0)
-            {
-                CallTipShow(textPosition, toolTipText);
-            }
-            else
-            {
-                CallTipCancel();
-            }
         }
     }
 
@@ -280,5 +207,8 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
     {
+        public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
+
+        public override string GetErrorMessage(JsonErrorInfo error) => error.Message(Session.Current.CurrentLocalizer);
     }
 }
