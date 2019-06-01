@@ -46,10 +46,6 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private Style CommentStyle => Styles[commentStyleIndex];
-        private Style ValueStyle => Styles[valueStyleIndex];
-        private Style StringStyle => Styles[stringStyleIndex];
-
         internal sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
             private readonly JsonTextBox owner;
@@ -60,11 +56,11 @@ namespace Eutherion.Win.AppTemplate
             }
 
             public override Style DefaultVisit(JsonSymbol symbol) => owner.DefaultStyle;
-            public override Style VisitComment(JsonComment symbol) => owner.CommentStyle;
-            public override Style VisitErrorString(JsonErrorString symbol) => owner.StringStyle;
-            public override Style VisitString(JsonString symbol) => owner.StringStyle;
-            public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.CommentStyle;
-            public override Style VisitValue(JsonValue symbol) => owner.ValueStyle;
+            public override Style VisitComment(JsonComment symbol) => owner.Styles[commentStyleIndex];
+            public override Style VisitErrorString(JsonErrorString symbol) => owner.Styles[stringStyleIndex];
+            public override Style VisitString(JsonString symbol) => owner.Styles[stringStyleIndex];
+            public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.Styles[commentStyleIndex];
+            public override Style VisitValue(JsonValue symbol) => owner.Styles[valueStyleIndex];
         }
 
         /// <summary>
@@ -82,13 +78,13 @@ namespace Eutherion.Win.AppTemplate
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
             : base(new JsonSyntaxDescriptor(settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
         {
-            CommentStyle.ForeColor = commentForeColor;
-            commentFont.CopyTo(CommentStyle);
+            Styles[commentStyleIndex].ForeColor = commentForeColor;
+            commentFont.CopyTo(Styles[commentStyleIndex]);
 
-            ValueStyle.ForeColor = valueForeColor;
-            valueFont.CopyTo(ValueStyle);
+            Styles[valueStyleIndex].ForeColor = valueForeColor;
+            valueFont.CopyTo(Styles[valueStyleIndex]);
 
-            StringStyle.ForeColor = stringForeColor;
+            Styles[stringStyleIndex].ForeColor = stringForeColor;
 
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {
