@@ -19,61 +19,168 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Xunit;
 
 namespace Eutherion.Win.Tests
 {
-    public class FileFixture : IDisposable
+    public enum TargetFile
     {
         /// <summary>
-        /// Primary target text file path.
+        /// The primary target text file.
         /// </summary>
-        public string TextFilePath { get; }
+        PrimaryTextFile,
 
         /// <summary>
-        /// Gets the path to the primary auto-save file.
+        /// The primary auto-save file.
         /// </summary>
-        public string AutoSaveFilePath1 { get; }
+        AutoSaveFile1,
 
         /// <summary>
-        /// Gets the path to the secondary auto-save file.
+        /// The secondary auto-save file.
         /// </summary>
-        public string AutoSaveFilePath2 { get; }
+        AutoSaveFile2,
+    }
 
-        public void PrepareAutoSaveFiles(byte[] autoSaveBytes1, byte[] autoSaveBytes2)
+    public enum FileState
+    {
+        /// <summary>
+        /// The file does not exist.
+        /// </summary>
+        DoesNotExist,
+
+        /// <summary>
+        /// The file is locked and cannot be read from.
+        /// </summary>
+        LockedByAnotherProcess,
+
+        /// <summary>
+        /// The file is a directory.
+        /// </summary>
+        IsDirectory,
+
+        /// <summary>
+        /// The file exists and is readable.
+        /// </summary>
+        Text,
+    }
+
+    public class FileFixture : IDisposable
+    {
+        private class TargetFileState
         {
-            File.WriteAllBytes(AutoSaveFilePath1, autoSaveBytes1);
-            File.WriteAllBytes(AutoSaveFilePath2, autoSaveBytes2);
+            public readonly string FilePath;
+            public FileState CurrentFileState;
+            public FileStream LockedFileStream;
+
+            public TargetFileState(string fileName)
+            {
+                // This prepends the working directory, which is the location of the compiled unit test dll.
+                FilePath = Path.GetFullPath(fileName);
+            }
         }
+
+        private readonly TargetFileState textFileState;
+        private readonly TargetFileState autoSaveFileState1;
+        private readonly TargetFileState autoSaveFileState2;
 
         public FileFixture()
         {
-            // Path.GetFullPath() prepends the working directory, which is the location of the compiled unit test dll.
-            TextFilePath = Path.GetFullPath("test.txt");
-            AutoSaveFilePath1 = Path.GetFullPath("autosave1.txt");
-            AutoSaveFilePath2 = Path.GetFullPath("autosave2.txt");
+            textFileState = new TargetFileState("test.txt");
+            autoSaveFileState1 = new TargetFileState("autosave1.txt");
+            autoSaveFileState2 = new TargetFileState("autosave2.txt");
+        }
+
+        private TargetFileState GetTargetFileState(TargetFile targetFile)
+        {
+            switch (targetFile)
+            {
+                default:
+                case TargetFile.PrimaryTextFile:
+                    return textFileState;
+                case TargetFile.AutoSaveFile1:
+                    return autoSaveFileState1;
+                case TargetFile.AutoSaveFile2:
+                    return autoSaveFileState2;
+            }
+        }
+
+        public string GetPath(TargetFile targetFile) => GetTargetFileState(targetFile).FilePath;
+
+        public void PrepareTargetFile(TargetFile targetFile, FileState newFileState)
+        {
+            var targetFileState = GetTargetFileState(targetFile);
+
+            if (targetFileState.CurrentFileState != newFileState)
+            {
+                if (targetFileState.CurrentFileState == FileState.LockedByAnotherProcess)
+                {
+                    targetFileState.LockedFileStream.Dispose();
+                    targetFileState.LockedFileStream = null;
+                }
+                else if (targetFileState.CurrentFileState == FileState.IsDirectory)
+                {
+                    Directory.Delete(targetFileState.FilePath);
+                }
+
+                targetFileState.CurrentFileState = newFileState;
+
+                if (newFileState == FileState.DoesNotExist)
+                {
+                    File.Delete(targetFileState.FilePath);
+                }
+                else if (newFileState == FileState.LockedByAnotherProcess)
+                {
+                    targetFileState.LockedFileStream = new FileStream(
+                        targetFileState.FilePath,
+                        FileMode.OpenOrCreate,
+                        FileAccess.ReadWrite,
+                        FileShare.None);
+                }
+                else if (newFileState == FileState.IsDirectory)
+                {
+                    File.Delete(targetFileState.FilePath);
+                    Directory.CreateDirectory(targetFileState.FilePath);
+                }
+            }
+        }
+
+        public void PrepareTargetFile(TargetFile targetFile, string text, Encoding encoding = null)
+        {
+            PrepareTargetFile(targetFile, FileState.Text);
+
+            if (encoding == null)
+            {
+                File.WriteAllText(GetPath(targetFile), text);
+            }
+            else
+            {
+                File.WriteAllText(GetPath(targetFile), text, encoding);
+            }
+        }
+
+        public void PrepareTargetFile(TargetFile targetFile, byte[] fileBytes)
+        {
+            PrepareTargetFile(targetFile, FileState.Text);
+            File.WriteAllBytes(GetPath(targetFile), fileBytes);
         }
 
         public void Dispose()
         {
-            File.Delete(TextFilePath);
-            File.Delete(AutoSaveFilePath1);
-            File.Delete(AutoSaveFilePath2);
+            // This removes locks and deletes the files.
+            PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
         }
     }
 
     public class WorkingCopyTextFileTests : IClassFixture<FileFixture>
     {
-        private static FileStream CreateAutoSaveFileStream(string autoSaveFilePath) => new FileStream(
-            autoSaveFilePath,
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite,
-            FileShare.Read,
-            FileUtilities.DefaultFileStreamBufferSize,
-            FileOptions.Asynchronous | FileOptions.SequentialScan);
+        private static string GenerateAutoSaveFileText(string targetResultText)
+            => $"{targetResultText.Length}\n{targetResultText}";
 
         private readonly FileFixture fileFixture;
 
@@ -82,18 +189,52 @@ namespace Eutherion.Win.Tests
             this.fileFixture = fileFixture;
         }
 
-        private FileStreamPair AutoSaveFiles()
-            => FileStreamPair.Create(
-                CreateAutoSaveFileStream,
-                fileFixture.AutoSaveFilePath1,
-                fileFixture.AutoSaveFilePath2);
+        private FileStreamPair AutoSaveFiles() => FileStreamPair.Create(
+            AutoSaveTextFile.OpenExistingAutoSaveFile,
+            fileFixture.GetPath(TargetFile.AutoSaveFile1),
+            fileFixture.GetPath(TargetFile.AutoSaveFile2));
+
+        /// <summary>
+        /// Prepares the first auto-save file with the text, and the second to be empty.
+        /// </summary>
+        private void PrepareAutoSave(string autoSaveText)
+        {
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, GenerateAutoSaveFileText(autoSaveText), Encoding.UTF8);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, GenerateAutoSaveFileText(string.Empty), Encoding.UTF8);
+        }
+
+        private void AssertLiveTextFileSuccessfulLoad(string loadedText, WorkingCopyTextFile wcFile)
+        {
+            Assert.Null(wcFile.AutoSaveFile);
+            Assert.Equal(loadedText, wcFile.LoadedText);
+            Assert.Null(wcFile.LoadException);
+            Assert.Equal(loadedText, wcFile.LocalCopyText);
+        }
+
+        private void AssertLiveTextFileSuccessfulLoadWithAutoSave(string loadedText, string autoSavedText, WorkingCopyTextFile wcFile)
+        {
+            Assert.NotNull(wcFile.AutoSaveFile);
+            Assert.Equal(loadedText, wcFile.LoadedText);
+            Assert.Null(wcFile.LoadException);
+
+            // Convention is that when autoSavedText is empty, it means there were no local changes, so LocalCopyText == LoadedText.
+            if (string.IsNullOrEmpty(autoSavedText))
+            {
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
+            }
+            else
+            {
+                Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+            }
+        }
 
         [Fact]
         public void LiveTextFilePathUnchanged()
         {
-            using (var textFile = new LiveTextFile(fileFixture.TextFilePath))
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            using (var textFile = new LiveTextFile(filePath))
             {
-                Assert.Equal(fileFixture.TextFilePath, textFile.AbsoluteFilePath);
+                Assert.Equal(filePath, textFile.AbsoluteFilePath);
             }
         }
 
@@ -108,6 +249,87 @@ namespace Eutherion.Win.Tests
             Assert.Throws<ArgumentException>(() => new LiveTextFile("*.?").Dispose());
             Assert.Throws<ArgumentException>(() => new LiveTextFile(new string(' ', 261)).Dispose());
             Assert.Throws<PathTooLongException>(() => new LiveTextFile(new string('x', 261)).Dispose());
+        }
+
+        public static IEnumerable<object[]> Texts()
+        {
+            yield return new object[] { "" };
+            yield return new object[] { "0" };
+
+            // Null character only.
+            yield return new object[] { "\u0000" };
+
+            // Whitespace and newlines.
+            yield return new object[] { "\n\r\n\n" };
+            yield return new object[] { "\t\v\u000c\u0085\u1680\u3000" };
+
+            // Higher code points, see also JsonTokenizerTests.
+            yield return new object[] { "もの" };
+        }
+
+        // Regular existing files. Make sure encoding or newline convention is not updated as a result of a load.
+        [Theory]
+        [MemberData(nameof(Texts))]
+        public void ExistingFileInitialState(string text)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoad(text, wcFile);
+            }
+        }
+
+        [Theory]
+        // "Could not find file '...\test.txt'."
+        [InlineData(FileState.DoesNotExist, typeof(FileNotFoundException))]
+        // "The process cannot access the file '...\test.txt' because it is being used by another process."
+        [InlineData(FileState.LockedByAnotherProcess, typeof(IOException))]
+        // "Access to the path '...' is denied."
+        [InlineData(FileState.IsDirectory, typeof(UnauthorizedAccessException))]
+        public void InaccessibleFileInitialState(FileState fileState, Type exceptionType)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+                Assert.Null(wcFile.AutoSaveFile);
+
+                Assert.Equal(string.Empty, wcFile.LoadedText);
+                Assert.IsType(exceptionType, wcFile.LoadException);
+                Assert.Equal(string.Empty, wcFile.LocalCopyText);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Texts))]
+        public void AutoSavedExistingFileInitialState(string autoSaveFileText)
+        {
+            string expectedLoadedText = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            PrepareAutoSave(autoSaveFileText);
+
+            var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+            using (var textFile = new LiveTextFile(filePath))
+            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile, autoSaveTextFile, remoteState.LastAutoSavedText ?? string.Empty))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoadWithAutoSave(expectedLoadedText, autoSaveFileText, wcFile);
+            }
         }
 
         [Theory]
@@ -141,18 +363,50 @@ namespace Eutherion.Win.Tests
             string expectedAutoSaveText = "A";
 
             // Both file permutations should yield the same result.
-            fileFixture.PrepareAutoSaveFiles(invalidFile, validFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, invalidFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, validFile);
             var remoteState1 = new WorkingCopyTextFile.TextAutoSaveState();
             using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState1, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, remoteState1.LastAutoSavedText);
             }
 
-            fileFixture.PrepareAutoSaveFiles(validFile, invalidFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, validFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, invalidFile);
             var remoteState2 = new WorkingCopyTextFile.TextAutoSaveState();
             using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState2, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, remoteState2.LastAutoSavedText);
+            }
+        }
+
+        [Fact]
+        public void ModificationsAreAutoSaved()
+        {
+            string expectedLoadedText = "A";
+            string expectedAutoSaveText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFile = new AutoSaveTextFile<string>(new WorkingCopyTextFile.TextAutoSaveState(), AutoSaveFiles());
+                wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+            }
+
+            // Reloading the WorkingCopyTextFile should restore the auto saved text, even when the original file is deleted.
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+
+            var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+            using (var textFile = new LiveTextFile(filePath))
+            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile, autoSaveTextFile, remoteState.LastAutoSavedText ?? string.Empty))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
             }
         }
     }
