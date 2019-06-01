@@ -454,6 +454,7 @@ namespace Eutherion.Win.Tests
         public void UpdatesBlockedAfterDispose()
         {
             WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
+            Assert.Throws<InvalidOperationException>(wcFile.Save);
             wcFile.Dispose();
             Assert.Throws<ObjectDisposedException>(wcFile.Save);
             Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));

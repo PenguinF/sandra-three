@@ -194,6 +194,11 @@ namespace Eutherion.Win
         {
             ThrowIfDisposed();
 
+            if (OpenTextFile == null)
+            {
+                throw new InvalidOperationException();
+            }
+
             OpenTextFile.Save(LocalCopyText);
         }
 
