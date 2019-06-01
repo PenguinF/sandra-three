@@ -251,6 +251,18 @@ namespace Eutherion.Win.Tests
             Assert.Throws<PathTooLongException>(() => new LiveTextFile(new string('x', 261)).Dispose());
         }
 
+        [Fact]
+        public void NewFileInitialState()
+        {
+            using (var wcFile = new WorkingCopyTextFile(null, null))
+            {
+                Assert.Null(wcFile.OpenTextFile);
+                Assert.Null(wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoad(string.Empty, wcFile);
+            }
+        }
+
         public static IEnumerable<object[]> Texts()
         {
             yield return new object[] { "" };
@@ -307,6 +319,21 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(string.Empty, wcFile.LoadedText);
                 Assert.IsType(exceptionType, wcFile.LoadException);
                 Assert.Equal(string.Empty, wcFile.LocalCopyText);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Texts))]
+        public void AutoSavedNewFileInitialState(string autoSaveFileText)
+        {
+            PrepareAutoSave(autoSaveFileText);
+
+            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            {
+                Assert.Null(wcFile.OpenTextFile);
+                Assert.Null(wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, autoSaveFileText, wcFile);
             }
         }
 

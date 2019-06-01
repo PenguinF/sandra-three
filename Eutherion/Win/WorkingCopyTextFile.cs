@@ -64,7 +64,7 @@ namespace Eutherion.Win
         /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// </summary>
         /// <param name="openTextFile">
-        /// The open text file.
+        /// The open text file, or null to create a new file.
         /// </param>
         /// <param name="autoSaveFiles">
         /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
@@ -72,7 +72,7 @@ namespace Eutherion.Win
         /// </param>
         public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
         {
-            OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
+            OpenTextFile = openTextFile;
 
             if (autoSaveFiles != null)
             {
@@ -100,19 +100,21 @@ namespace Eutherion.Win
         public LiveTextFile OpenTextFile { get; }
 
         /// <summary>
-        /// Returns the full path to the opened text file.
+        /// Returns the full path to the opened text file, or null for new files.
         /// </summary>
-        public string OpenTextFilePath => OpenTextFile.AbsoluteFilePath;
+        public string OpenTextFilePath => OpenTextFile?.AbsoluteFilePath;
 
         /// <summary>
-        /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty.
+        /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty. For new files it returns string.Empty.
         /// </summary>
-        public string LoadedText => OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);
+        public string LoadedText
+            => OpenTextFile == null ? string.Empty
+            : OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);
 
         /// <summary>
         /// Returns the <see cref="Exception"/> from an unsuccessful attempt to read the file from the file system.
         /// </summary>
-        public Exception LoadException => OpenTextFile.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
+        public Exception LoadException => OpenTextFile?.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
 
         /// <summary>
         /// Gets the opened <see cref="AutoSaveTextFile{TUpdate}"/> or null if nothing was auto-saved yet.
