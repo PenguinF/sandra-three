@@ -36,6 +36,9 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting.
     /// </summary>
+    /// <typeparam name="TTerminal">
+    /// The type of terminal symbol to display.
+    /// </typeparam>
     public abstract class SyntaxEditor<TTerminal> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
