@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -47,7 +48,7 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
-        private readonly JsonTextBox jsonTextBox;
+        private readonly SyntaxEditor<JsonSymbol, JsonErrorInfo> jsonTextBox;
 
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
@@ -65,11 +66,27 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator, autoSaveSetting)
+            var jsonStyleSelector = new JsonStyleSelector();
+
+            jsonTextBox = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
+                new JsonSyntaxDescriptor(jsonStyleSelector, settingsFile),
+                settingsFile,
+                initialTextGenerator,
+                autoSaveSetting)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
             };
+
+            jsonStyleSelector.InitializeStyles(jsonTextBox);
+
+            // Initialize zoom factor and listen to changes.
+            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
+            {
+                jsonTextBox.Zoom = zoomFactor;
+            }
+
+            jsonTextBox.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
 
             jsonTextBox.BindActions(new UIActionBindings
             {
@@ -123,7 +140,7 @@ namespace Eutherion.Win.AppTemplate
                 // Save points.
                 jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
                 jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
-                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+                jsonTextBox.CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -258,7 +275,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
-            string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+            string openTextFilePath = jsonTextBox.CodeFile.OpenTextFilePath;
             string fileName = Path.GetFileName(openTextFilePath);
             Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
 
@@ -367,9 +384,9 @@ namespace Eutherion.Win.AppTemplate
             base.OnFormClosing(e);
 
             // Only show message box if there's no auto save file from which local changes can be recovered.
-            if (jsonTextBox.ContainsChanges && jsonTextBox.WorkingCopyTextFile.AutoSaveFile == null)
+            if (jsonTextBox.ContainsChanges && jsonTextBox.CodeFile.AutoSaveFile == null)
             {
-                string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+                string openTextFilePath = jsonTextBox.CodeFile.OpenTextFilePath;
                 string fileName = Path.GetFileName(openTextFilePath);
 
                 DialogResult result = MessageBox.Show(
@@ -405,7 +422,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                jsonTextBox.CodeFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

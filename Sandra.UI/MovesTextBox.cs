@@ -35,7 +35,7 @@ namespace Sandra.UI
     /// <summary>
     /// Represents a read-only Windows rich text box which displays a list of chess moves.
     /// </summary>
-    public partial class MovesTextBox : SyntaxEditor<IPGNTerminalSymbol>
+    public partial class MovesTextBox : ScintillaEx
     {
         private const int activeMoveStyleIndex = 8;
 
@@ -46,12 +46,25 @@ namespace Sandra.UI
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
+        private readonly TextIndex<IPGNTerminalSymbol> TextIndex;
+
+        private Style DefaultStyle => Styles[Style.Default];
         private Style ActiveMoveStyle => Styles[activeMoveStyleIndex];
+
+        private void ApplyStyle(TextElement<IPGNTerminalSymbol> element, Style style)
+            => ApplyStyle(style, element.Start, element.Length);
 
         private int CaretPosition;
 
         public MovesTextBox()
         {
+            TextIndex = new TextIndex<IPGNTerminalSymbol>();
+
+            HScrollBar = false;
+            VScrollBar = true;
+
+            Margins.ForEach(x => x.Width = 0);
+
             BorderStyle = BorderStyle.None;
             ReadOnly = true;
             WrapMode = WrapMode.Whitespace;

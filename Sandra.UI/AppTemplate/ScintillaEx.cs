@@ -33,7 +33,8 @@ using System.Windows.Forms;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks.
+    /// Represents a <see cref="Scintilla"/> control which exposes a number of <see cref="UIAction"/> hooks
+    /// and a mouse-wheel event handler.
     /// </summary>
     public class ScintillaEx : Scintilla, IUIActionHandlerProvider
     {
@@ -56,10 +57,20 @@ namespace Eutherion.Win.AppTemplate
             ClearCmdKey(Keys.Control | Keys.F);
             ClearCmdKey(Keys.Control | Keys.H);
             ClearCmdKey(Keys.Control | Keys.L);
+            ClearCmdKey(Keys.Control | Keys.N);
             ClearCmdKey(Keys.Control | Keys.R);
             ClearCmdKey(Keys.Control | Keys.U);
             ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
             ClearCmdKey(Keys.OemMinus | Keys.Control);
+        }
+
+        protected void ApplyStyle(Style style, int start, int length)
+        {
+            if (style != null)
+            {
+                StartStyling(start);
+                SetStyling(length, style.Index);
+            }
         }
 
         /// <summary>
