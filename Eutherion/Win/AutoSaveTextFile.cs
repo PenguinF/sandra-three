@@ -155,7 +155,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets if this <see cref="AutoSaveTextFile{TUpdate}"/> is disposed.
         /// </summary>
-        private bool isDisposed;
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile{TUpdate}"/>.
@@ -407,7 +407,7 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            if (!isDisposed)
+            if (!IsDisposed)
             {
                 cts.Cancel();
 
@@ -422,7 +422,7 @@ namespace Eutherion.Win
 
                 cts.Dispose();
                 AutoSaveFiles.Dispose();
-                isDisposed = true;
+                IsDisposed = true;
             }
         }
     }
