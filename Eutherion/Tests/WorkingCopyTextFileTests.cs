@@ -448,5 +448,29 @@ namespace Eutherion.Win.Tests
             wcFile.Dispose();
             Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
         }
+
+        [Fact]
+        public void AutoSaveCleanedUpIfNoModifications()
+        {
+            string loadedText = "A";
+            string autoSaveText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
+            PrepareAutoSave(autoSaveText);
+
+            WorkingCopyTextFile wcFile;
+            using (var textFile = new LiveTextFile(filePath))
+            {
+                wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles());
+                wcFile.UpdateLocalCopyText(loadedText, containsChanges: false);
+                wcFile.Dispose();
+
+                // Assert that the auto-save files have been deleted.
+                Assert.Null(wcFile.AutoSaveFile);
+                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
+                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
+            }
+        }
     }
 }
