@@ -60,19 +60,30 @@ namespace Eutherion.Win
         }
 
         /// <summary>
-        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>.
+        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
+        /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// </summary>
         /// <param name="openTextFile">
         /// The open text file.
         /// </param>
-        /// <param name="autoSaveFile">
-        /// The auto-save file that contains local changes.
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
+        /// or null to not load from an auto-save file.
         /// </param>
-        /// <param name="autoSavedText">
-        /// The local changes that are loaded initially from the auto-save file.
-        /// </param>
-        public WorkingCopyTextFile(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
+        public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
         {
+            AutoSaveTextFile<string> autoSaveFile = null;
+            string autoSavedText = null;
+
+            if (autoSaveFiles != null)
+            {
+                var remoteState = new TextAutoSaveState();
+                autoSaveFile = new AutoSaveTextFile<string>(remoteState, autoSaveFiles);
+
+                // If the auto-save files don't exist anymore, just use string.Empty as a default.
+                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
+            }
+
             OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
             AutoSaveFile = autoSaveFile;
 
