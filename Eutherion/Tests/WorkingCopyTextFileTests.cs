@@ -455,6 +455,7 @@ namespace Eutherion.Win.Tests
         {
             WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
             wcFile.Dispose();
+            Assert.Throws<ObjectDisposedException>(wcFile.Save);
             Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
         }
 

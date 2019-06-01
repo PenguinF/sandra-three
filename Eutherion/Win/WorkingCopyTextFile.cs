@@ -142,6 +142,15 @@ namespace Eutherion.Win
         /// </summary>
         public bool IsDisposed { get; private set; }
 
+        private void ThrowIfDisposed()
+        {
+            if (IsDisposed)
+            {
+                var displayFilePath = OpenTextFile == null ? "<Untitled>" : "\"" + OpenTextFile.AbsoluteFilePath + "\"";
+                throw new ObjectDisposedException($"{nameof(WorkingCopyTextFile)}({displayFilePath})");
+            }
+        }
+
         /// <summary>
         /// Updates the current working copy of the text.
         /// </summary>
@@ -153,11 +162,7 @@ namespace Eutherion.Win
         /// </param>
         public void UpdateLocalCopyText(string text, bool containsChanges)
         {
-            if (IsDisposed)
-            {
-                var displayFilePath = OpenTextFile == null ? "<Untitled>" : "\"" + OpenTextFile.AbsoluteFilePath + "\"";
-                throw new ObjectDisposedException($"{nameof(WorkingCopyTextFile)}({displayFilePath})");
-            }
+            ThrowIfDisposed();
 
             LocalCopyText = text ?? string.Empty;
 
@@ -187,6 +192,8 @@ namespace Eutherion.Win
         /// </summary>
         public void Save()
         {
+            ThrowIfDisposed();
+
             OpenTextFile.Save(LocalCopyText);
         }
 
