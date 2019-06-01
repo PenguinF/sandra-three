@@ -132,6 +132,11 @@ namespace Eutherion.Win
         public string LocalCopyText { get; private set; } = string.Empty;
 
         /// <summary>
+        /// Gets if this <see cref="WorkingCopyTextFile"/> is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
+
+        /// <summary>
         /// Updates the current working copy of the text.
         /// </summary>
         /// <param name="text">
@@ -142,6 +147,12 @@ namespace Eutherion.Win
         /// </param>
         public void UpdateLocalCopyText(string text, bool containsChanges)
         {
+            if (IsDisposed)
+            {
+                var displayFilePath = OpenTextFile == null ? "<Untitled>" : "\"" + OpenTextFile.AbsoluteFilePath + "\"";
+                throw new ObjectDisposedException($"{nameof(WorkingCopyTextFile)}({displayFilePath})");
+            }
+
             LocalCopyText = text ?? string.Empty;
 
             if (containsChanges)
@@ -177,7 +188,11 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            AutoSaveFile?.Dispose();
+            if (!IsDisposed)
+            {
+                AutoSaveFile?.Dispose();
+                IsDisposed = true;
+            }
         }
     }
 

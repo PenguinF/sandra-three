@@ -430,5 +430,23 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
             }
         }
+
+        [Fact]
+        public void AllowMultipleDispose()
+        {
+            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
+            wcFile.Dispose();
+            Assert.True(wcFile.IsDisposed);
+            wcFile.Dispose();
+            Assert.True(wcFile.IsDisposed);
+        }
+
+        [Fact]
+        public void UpdatesBlockedAfterDispose()
+        {
+            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
+            wcFile.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
+        }
     }
 }
