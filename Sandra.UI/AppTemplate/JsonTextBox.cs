@@ -73,6 +73,20 @@ namespace Eutherion.Win.AppTemplate
             FileUtilities.DefaultFileStreamBufferSize,
             FileOptions.Asynchronous | FileOptions.SequentialScan);
 
+        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile settingsFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        {
+            if (autoSaveSetting != null
+                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
+                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
+            {
+                return WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
+            }
+            else
+            {
+                return WorkingCopyTextFile.OpenExisting(settingsFile);
+            }
+        }
+
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
 
@@ -148,17 +162,7 @@ namespace Eutherion.Win.AppTemplate
 
             this.autoSaveSetting = autoSaveSetting;
             schema = settingsFile.Settings.Schema;
-
-            if (autoSaveSetting != null
-                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
-                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
-            {
-                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
-            }
-            else
-            {
-                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
-            }
+            WorkingCopyTextFile = OpenWorkingCopyTextFile(settingsFile, autoSaveSetting);
 
             BorderStyle = BorderStyle.None;
 
@@ -275,9 +279,9 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        private bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
-                                                  out AutoSaveTextFile<string> autoSaveTextFile,
-                                                  out string autoSavedText)
+        private static bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
+                                                         out AutoSaveTextFile<string> autoSaveTextFile,
+                                                         out string autoSavedText)
         {
             FileStreamPair fileStreamPair = null;
 
