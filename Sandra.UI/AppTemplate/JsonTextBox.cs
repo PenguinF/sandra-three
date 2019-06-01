@@ -49,19 +49,6 @@ namespace Eutherion.Win.AppTemplate
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
             : base(new JsonSyntaxDescriptor(new JsonStyleSelector(), settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
         {
-            ((JsonSyntaxDescriptor)SyntaxDescriptor).styleSelector.InitializeStyles(this);
-
-            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
-            {
-                Zoom = zoomFactor;
-            }
-        }
-
-        protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
-        {
-            // Not only raise the event, but also save the zoom factor setting.
-            base.OnZoomFactorChanged(e);
-            Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
         }
     }
 

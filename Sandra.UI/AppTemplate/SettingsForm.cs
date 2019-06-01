@@ -71,6 +71,15 @@ namespace Eutherion.Win.AppTemplate
                 ReadOnly = isReadOnly,
             };
 
+            ((JsonSyntaxDescriptor)jsonTextBox.SyntaxDescriptor).styleSelector.InitializeStyles(jsonTextBox);
+
+            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
+            {
+                jsonTextBox.Zoom = zoomFactor;
+            }
+
+            jsonTextBox.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
+
             jsonTextBox.BindActions(new UIActionBindings
             {
                 { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
