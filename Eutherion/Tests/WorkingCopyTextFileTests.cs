@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.IO;
 using Xunit;
@@ -99,14 +98,6 @@ namespace Eutherion.Win.Tests
 
     public class WorkingCopyTextFileTests : IClassFixture<FileFixture>
     {
-        private static FileStream CreateAutoSaveFileStream(string autoSaveFilePath) => new FileStream(
-            autoSaveFilePath,
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite,
-            FileShare.Read,
-            FileUtilities.DefaultFileStreamBufferSize,
-            FileOptions.Asynchronous | FileOptions.SequentialScan);
-
         private readonly FileFixture fileFixture;
 
         public WorkingCopyTextFileTests(FileFixture fileFixture)
@@ -115,7 +106,7 @@ namespace Eutherion.Win.Tests
         }
 
         private FileStreamPair AutoSaveFiles() => FileStreamPair.Create(
-            CreateAutoSaveFileStream,
+            AutoSaveTextFile.OpenExistingAutoSaveFile,
             fileFixture.GetPath(TargetFile.AutoSaveFile1),
             fileFixture.GetPath(TargetFile.AutoSaveFile2));
 

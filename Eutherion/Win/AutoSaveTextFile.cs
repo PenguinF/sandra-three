@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -424,5 +425,55 @@ namespace Eutherion.Win
                 isDisposed = true;
             }
         }
+    }
+
+    /// <summary>
+    /// Contains utility methods for <see cref="AutoSaveTextFile{TUpdate}"/>.
+    /// </summary>
+    public static class AutoSaveTextFile
+    {
+        /// <summary>
+        /// Opens an existing file in such a way that it can be used as an auto-save <see cref="FileStream"/>.
+        /// Only this process can write to the <see cref="FileStream"/>.
+        /// If the file does not exist, it is created.
+        /// </summary>
+        /// <param name="autoSaveFilePath">
+        /// The relative or absolute path to the auto-save file.
+        /// </param>
+        /// <returns>
+        /// The open auto-save <see cref="FileStream"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="autoSaveFilePath"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="autoSaveFilePath"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// Part of the path which is expected to be a directory is actually a file,
+        /// -or- The path contains a network name which cannot be resolved,
+        /// -or- <paramref name="autoSaveFilePath"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// The caller does not have sufficient permissions to open or create the file.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to open or create the file.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        /// <paramref name="autoSaveFilePath"/> is invalid.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="autoSaveFilePath"/> is in an invalid format.
+        /// </exception>
+        public static FileStream OpenExistingAutoSaveFile(string autoSaveFilePath)
+            => new FileStream(autoSaveFilePath,
+                              FileMode.OpenOrCreate,
+                              FileAccess.ReadWrite,
+                              FileShare.Read,
+                              FileUtilities.DefaultFileStreamBufferSize,
+                              FileOptions.SequentialScan | FileOptions.Asynchronous);
     }
 }
