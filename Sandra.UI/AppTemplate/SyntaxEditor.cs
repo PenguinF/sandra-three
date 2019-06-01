@@ -39,7 +39,10 @@ namespace Eutherion.Win.AppTemplate
     /// <typeparam name="TTerminal">
     /// The type of terminal symbol to display.
     /// </typeparam>
-    public abstract class SyntaxEditor<TTerminal> : ScintillaEx
+    /// <typeparam name="TError">
+    /// The type of error to display.
+    /// </typeparam>
+    public abstract class SyntaxEditor<TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
 
@@ -98,7 +101,7 @@ namespace Eutherion.Win.AppTemplate
         public WorkingCopyTextFile CodeFile { get; }
 
         /// <summary>
-        /// Returns if this <see cref="SyntaxEditor{TTerminal}"/> contains any unsaved changes.
+        /// Returns if this <see cref="SyntaxEditor{TTerminal, TError}"/> contains any unsaved changes.
         /// If the text file could not be opened, true is returned.
         /// </summary>
         public bool ContainsChanges
@@ -117,7 +120,7 @@ namespace Eutherion.Win.AppTemplate
         private Style CallTipStyle => Styles[Style.CallTip];
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal}"/>.
+        /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal, TError}"/>.
         /// </summary>
         /// <param name="codeFile">
         /// The code file to show and/or edit.

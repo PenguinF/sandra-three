@@ -32,7 +32,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Represents a syntax editor which displays a json settings file.
     /// </summary>
-    public class JsonTextBox : SyntaxEditor<JsonSymbol>
+    public class JsonTextBox : SyntaxEditor<JsonSymbol, JsonErrorInfo>
     {
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
