@@ -134,8 +134,8 @@ namespace Eutherion.Win.AppTemplate
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
         {
-            var styleSelector = new JsonStyleSelector((JsonTextBox)syntaxEditor);
-            return styleSelector.Visit(terminalSymbol);
+            var styleSelector = new JsonStyleSelector();
+            return styleSelector.Visit(terminalSymbol, syntaxEditor);
         }
 
         public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
@@ -146,20 +146,24 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// A style selector for json syntax highlighting.
     /// </summary>
-    public class JsonStyleSelector : JsonSymbolVisitor<Style>
+    public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<JsonSymbol, JsonErrorInfo>, Style>
     {
-        private readonly JsonTextBox owner;
+        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.DefaultStyle;
 
-        public JsonStyleSelector(JsonTextBox owner)
-        {
-            this.owner = owner;
-        }
+        public override Style VisitComment(JsonComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[JsonTextBox.commentStyleIndex];
 
-        public override Style DefaultVisit(JsonSymbol symbol) => owner.DefaultStyle;
-        public override Style VisitComment(JsonComment symbol) => owner.Styles[JsonTextBox.commentStyleIndex];
-        public override Style VisitErrorString(JsonErrorString symbol) => owner.Styles[JsonTextBox.stringStyleIndex];
-        public override Style VisitString(JsonString symbol) => owner.Styles[JsonTextBox.stringStyleIndex];
-        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.Styles[JsonTextBox.commentStyleIndex];
-        public override Style VisitValue(JsonValue symbol) => owner.Styles[JsonTextBox.valueStyleIndex];
+        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[JsonTextBox.stringStyleIndex];
+
+        public override Style VisitString(JsonString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[JsonTextBox.stringStyleIndex];
+
+        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[JsonTextBox.commentStyleIndex];
+
+        public override Style VisitValue(JsonValue symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+            => syntaxEditor.Styles[JsonTextBox.valueStyleIndex];
     }
 }
