@@ -34,7 +34,7 @@ namespace Eutherion.Win.Storage
         public static readonly PTypeErrorBuilder SubFolderNameTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(SubFolderNameTypeError)));
 
-        public static SubFolderNameType Instance = new SubFolderNameType();
+        public static readonly SubFolderNameType Instance = new SubFolderNameType();
 
         private readonly char[] InvalidRelativeFolderChars;
 

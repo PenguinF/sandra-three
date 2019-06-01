@@ -73,9 +73,14 @@ namespace Eutherion.Win.DragDrop
             {
                 using (var g = Graphics.FromImage(copy))
                 {
+                    g.InterpolationMode = InterpolationMode.Default;
+                    g.SmoothingMode = SmoothingMode.None;
+                    g.CompositingMode = CompositingMode.SourceCopy;
+                    g.DrawImage(image, imageRectangle);
+
                     g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                     g.SmoothingMode = SmoothingMode.HighQuality;
-                    g.DrawImage(image, imageRectangle);
+                    g.CompositingMode = CompositingMode.SourceOver;
                     overlayCursor.Draw(g, cursorRectangle);
                 }
 

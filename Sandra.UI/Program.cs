@@ -19,15 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
-using Eutherion.Localization;
-using Eutherion.UIActions;
 using Eutherion.Win.AppTemplate;
-using Eutherion.Win.Storage;
 using System;
-using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -40,9 +33,6 @@ namespace Sandra.UI
         [STAThread]
         static void Main()
         {
-            // Store executable folder/filename for later use.
-            Session.InitializeExecutablePath(typeof(Program).Assembly.Location);
-
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
                 LocalizedStringKeys.DefaultEnglishTranslations,
@@ -50,16 +40,12 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            Localizer.Current = builtInEnglishLocalizer;
-
-            using (var session = Session.Configure(new SettingsProvider(), builtInEnglishLocalizer.Dictionary))
+            using (var session = Session.Configure(new SettingsProvider(),
+                                                   builtInEnglishLocalizer,
+                                                   builtInEnglishLocalizer.Dictionary,
+                                                   Properties.Resources.Sandra))
             {
                 Chess.Constants.ForceInitialize();
-
-#if DEBUG
-                // In debug mode, generate default json configuration files from hard coded settings.
-                GenerateJsonConfigurationFiles(session, builtInEnglishLocalizer);
-#endif
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
@@ -68,47 +54,12 @@ namespace Sandra.UI
 
                 mdiContainerForm.Load += (_, __) =>
                 {
-                    // Enable live updates to localizers now a message loop exists.
-                    session.RegisteredLocalizers.ForEach(x => x.EnableLiveUpdates());
+                    // Inform session of the current synchronization context once a message loop exists.
+                    session.SetSynchronizationContext();
                 };
 
                 Application.Run(mdiContainerForm);
             }
         }
-
-        internal static Image LoadImage(string imageFileKey)
-        {
-            try
-            {
-                return Image.FromFile(Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png"));
-            }
-            catch (Exception exc)
-            {
-                exc.Trace();
-                return null;
-            }
-        }
-
-#if DEBUG
-        /// <summary>
-        /// Generates DefaultSettings.json from the loaded default settings in memory,
-        /// and Bin/Languages/en.json from the BuiltInEnglishLocalizer.
-        /// </summary>
-        private static void GenerateJsonConfigurationFiles(Session session, BuiltInEnglishLocalizer builtInEnglishLocalizer)
-        {
-            SettingsFile.WriteToFile(
-                session.DefaultSettings.Settings,
-                Path.Combine(Session.ExecutableFolder, "DefaultSettings.json"));
-
-            var settingCopy = new SettingCopy(Localizers.CreateLanguageFileSchema());
-            settingCopy.AddOrReplace(Localizers.NativeName, "English");
-            settingCopy.AddOrReplace(Localizers.FlagIconFile, "flag-uk.png");
-            settingCopy.AddOrReplace(Localizers.Translations, builtInEnglishLocalizer.Dictionary);
-            SettingsFile.WriteToFile(
-                settingCopy.Commit(),
-                Path.Combine(Session.ExecutableFolder, "Languages", "en.json"),
-                SettingWriterOptions.SuppressSettingComments);
-        }
-#endif
     }
 }

@@ -21,7 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
-using Eutherion.Win.UIActions;
+using Eutherion.Win.AppTemplate;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -36,15 +36,12 @@ namespace Sandra.UI
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(FlipBoard)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.F), },
-                },
-                new ContextMenuUIActionInterface
-                {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.FlipBoard,
-                    MenuIcon = Properties.Resources.flip,
+                    MenuTextProvider = LocalizedStringKeys.FlipBoard.ToTextProvider(),
+                    MenuIcon = Properties.Resources.flip.ToImageProvider(),
                 },
             });
 
@@ -58,14 +55,11 @@ namespace Sandra.UI
             new UIAction(StandardChessBoardFormUIActionPrefix + nameof(TakeScreenshot)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ShortcutKeysUIActionInterface
+                new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.C), },
-                },
-                new ContextMenuUIActionInterface
-                {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = LocalizedStringKeys.CopyDiagramToClipboard,
+                    MenuTextProvider = LocalizedStringKeys.CopyDiagramToClipboard.ToTextProvider(),
                 },
             });
 

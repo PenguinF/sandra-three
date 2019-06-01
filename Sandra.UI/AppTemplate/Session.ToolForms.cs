@@ -56,9 +56,20 @@ namespace Eutherion.Win.AppTemplate
 
                 if (toolForm.Value != null)
                 {
-                    toolForm.Value.Owner = ownerControl?.TopLevelControl as Form;
-                    toolForm.Value.ShowInTaskbar = false;
-                    toolForm.Value.ShowIcon = false;
+                    if (ownerControl?.TopLevelControl is Form ownerForm)
+                    {
+                        toolForm.Value.Owner = ownerForm;
+                        toolForm.Value.ShowInTaskbar = false;
+                    }
+                    else
+                    {
+                        // If ShowInTaskbar = true, the task bar displays a default icon if none is provided.
+                        // Icon must be set and ShowIcon must be true to override that default icon.
+                        toolForm.Value.ShowInTaskbar = true;
+                        toolForm.Value.Icon = ApplicationIcon;
+                        toolForm.Value.ShowIcon = true;
+                    }
+
                     toolForm.Value.StartPosition = FormStartPosition.CenterScreen;
                     toolForm.Value.MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2);
                     toolForm.Value.FormClosed += (_, __) => toolForm.Value = null;
@@ -76,34 +87,41 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditPreferencesFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditPreferencesFile,
-                    MenuIcon = SharedResources.settings,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditPreferencesFile.ToTextProvider(),
+                    MenuIcon = SharedResources.settings.ToImageProvider(),
                 },
             });
 
         private Form CreateSettingsForm(bool isReadOnly,
                                         SettingsFile settingsFile,
+                                        Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<int> errorHeightSetting)
-            => new SettingsForm(isReadOnly, settingsFile, formStateSetting, errorHeightSetting)
+                                        SettingProperty<int> errorHeightSetting,
+                                        SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+            => new SettingsForm(isReadOnly,
+                                settingsFile,
+                                initialTextGenerator,
+                                formStateSetting,
+                                errorHeightSetting,
+                                autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };
 
-        public UIActionHandlerFunc TryEditPreferencesFile(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryEditPreferencesFile() => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     localSettingsFormBox,
                     () =>
                     {
                         // If the file doesn't exist yet, generate a local settings file with a commented out copy
                         // of the default settings to serve as an example, and to show which settings are available.
-                        if (!File.Exists(LocalSettings.AbsoluteFilePath))
+                        string initialTextGenerator()
                         {
                             SettingCopy localSettingsExample = new SettingCopy(LocalSettings.Settings.Schema);
 
@@ -117,23 +135,18 @@ namespace Eutherion.Win.AppTemplate
                                 }
                             }
 
-                            Exception exception = SettingsFile.WriteToFile(
+                            return LocalSettings.GenerateJson(
                                 localSettingsExample.Commit(),
-                                LocalSettings.AbsoluteFilePath,
                                 SettingWriterOptions.CommentOutProperties);
-
-                            if (exception != null)
-                            {
-                                MessageBox.Show(exception.Message);
-                                return null;
-                            }
                         }
 
                         return CreateSettingsForm(
                             false,
                             LocalSettings,
+                            initialTextGenerator,
                             SharedSettings.PreferencesWindow,
-                            SharedSettings.PreferencesErrorHeight);
+                            SharedSettings.PreferencesErrorHeight,
+                            SharedSettings.PreferencesAutoSave);
                     });
             }
 
@@ -144,34 +157,26 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowDefaultSettingsFile)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.ShowDefaultSettingsFile,
+                    MenuTextProvider = SharedLocalizedStringKeys.ShowDefaultSettingsFile.ToTextProvider(),
                 },
             });
 
-        public UIActionHandlerFunc TryShowDefaultSettingsFile(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryShowDefaultSettingsFile() => perform =>
         {
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     defaultSettingsFormBox,
-                    () =>
-                    {
-                        if (!File.Exists(DefaultSettings.AbsoluteFilePath))
-                        {
-                            // Before opening the possibly non-existent file, write to it.
-                            // Ignore exceptions, may be caused by insufficient access rights.
-                            DefaultSettings.WriteToFile();
-                        }
-
-                        return CreateSettingsForm(
-                            !GetSetting(DeveloperMode),
-                            DefaultSettings,
-                            SharedSettings.DefaultSettingsWindow,
-                            SharedSettings.DefaultSettingsErrorHeight);
-                    });
+                    () => CreateSettingsForm(
+                        !GetSetting(DeveloperMode),
+                        DefaultSettings,
+                        () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
+                        SharedSettings.DefaultSettingsWindow,
+                        SharedSettings.DefaultSettingsErrorHeight,
+                        SharedSettings.DefaultSettingsAutoSave));
             }
 
             return UIActionVisibility.Enabled;
@@ -222,6 +227,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 ClientSize = new Size(width, height),
                 Text = Path.GetFileName(fileName),
+                ShowIcon = false,
             };
 
             readOnlyTextForm.Controls.Add(textBox);
@@ -236,9 +242,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(OpenAbout)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.About,
+                    MenuTextProvider = SharedLocalizedStringKeys.About.ToTextProvider(),
                 },
             });
 
@@ -261,9 +267,9 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(ShowCredits)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
-                    MenuCaptionKey = SharedLocalizedStringKeys.Credits,
+                    MenuTextProvider = SharedLocalizedStringKeys.Credits.ToTextProvider(),
                 },
             });
 
@@ -286,31 +292,31 @@ namespace Eutherion.Win.AppTemplate
             new UIAction(SessionUIActionPrefix + nameof(EditCurrentLanguage)),
             new ImplementationSet<IUIActionInterface>
             {
-                new ContextMenuUIActionInterface
+                new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuCaptionKey = SharedLocalizedStringKeys.EditCurrentLanguage,
-                    MenuIcon = SharedResources.speech,
+                    MenuTextProvider = SharedLocalizedStringKeys.EditCurrentLanguage.ToTextProvider(),
+                    MenuIcon = SharedResources.speech.ToImageProvider(),
                 },
             });
 
-        public UIActionHandlerFunc TryEditCurrentLanguage(Control ownerControl) => perform =>
+        public UIActionHandlerFunc TryEditCurrentLanguage() => perform =>
         {
             // Only enable in developer mode.
             if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
 
             // Cannot edit built-in localizer.
-            if (!(Localizer.Current is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
+            if (!(CurrentLocalizer is FileLocalizer fileLocalizer)) return UIActionVisibility.Hidden;
 
             if (perform)
             {
                 OpenOrActivateToolForm(
-                    ownerControl,
+                    null,
                     languageFormBox,
                     () =>
                     {
                         // Generate translations into language file if empty.
-                        if (fileLocalizer.Dictionary.Count == 0)
+                        string initialTextGenerator()
                         {
                             var settingCopy = new SettingCopy(fileLocalizer.LanguageFile.Settings.Schema);
 
@@ -321,17 +327,18 @@ namespace Eutherion.Win.AppTemplate
 
                             // And overwrite the existing language file with this.
                             // This doesn't preserve trivia such as comments, whitespace, or even the order in which properties are given.
-                            SettingsFile.WriteToFile(
+                            return fileLocalizer.LanguageFile.GenerateJson(
                                 settingCopy.Commit(),
-                                fileLocalizer.LanguageFile.AbsoluteFilePath,
                                 SettingWriterOptions.SuppressSettingComments);
                         }
 
                         return CreateSettingsForm(
                             false,
                             fileLocalizer.LanguageFile,
+                            initialTextGenerator,
                             SharedSettings.LanguageWindow,
-                            SharedSettings.LanguageErrorHeight);
+                            SharedSettings.LanguageErrorHeight,
+                            null);
                     });
             }
 

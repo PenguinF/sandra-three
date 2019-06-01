@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,7 +32,7 @@ namespace Eutherion.Win.AppTemplate
 
         public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             => Dictionary.TryGetValue(localizedStringKey, out string displayText)
-            ? LocalizedString.ConditionalFormat(displayText, parameters)
+            ? StringUtilities.ConditionalFormat(displayText, parameters)
             : Default.Localize(localizedStringKey, parameters);
 
         public BuiltInEnglishLocalizer(params IEnumerable<KeyValuePair<LocalizedStringKey, string>>[] subDictionaries)

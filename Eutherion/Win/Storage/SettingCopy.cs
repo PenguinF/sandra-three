@@ -98,6 +98,25 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Removes a value associated with a property.
+        /// </summary>
+        /// <param name="property">
+        /// The property for which to remove the value.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="property"/> is null.
+        /// </exception>
+        public void Remove<TValue>(SettingProperty<TValue> property)
+        {
+            if (property == null) throw new ArgumentNullException(nameof(property));
+
+            if (Schema.ContainsProperty(property))
+            {
+                KeyValueMapping.Remove(property.Name);
+            }
+        }
+
+        /// <summary>
         /// Reverts to the state of a <see cref="SettingObject"/>.
         /// </summary>
         /// <param name="settingObject">

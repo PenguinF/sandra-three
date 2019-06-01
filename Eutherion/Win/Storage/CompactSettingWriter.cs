@@ -26,7 +26,7 @@ using System.Text;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Used by <see cref="AutoSave"/> to convert a <see cref="PMap"/> to its compact representation in JSON.
+    /// Used by <see cref="SettingsAutoSave"/> to convert a <see cref="PMap"/> to its compact representation in JSON.
     /// </summary>
     internal class CompactSettingWriter : PValueVisitor
     {

@@ -39,7 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LinqExtensions.cs" />
-    <Compile Include="Localization\LocalizedString.cs" />
+    <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Text\Json\JsonBooleanLiteralSyntax.cs" />
@@ -75,7 +75,6 @@
     <Compile Include="UIActions\DefaultUIActionBinding.cs" />
     <Compile Include="UIActions\IUIActionHandlerProvider.cs" />
     <Compile Include="UIActions\IUIActionInterface.cs" />
-    <Compile Include="UIActions\LocalizedConsoleKeys.cs" />
     <Compile Include="UIActions\ShortcutKeys.cs" />
     <Compile Include="UIActions\UIAction.cs" />
     <Compile Include="UIActions\UIActionBinding.cs" />
@@ -84,13 +83,15 @@
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\Box.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
-    <Compile Include="Utils\DebugUtilities.cs" />
     <Compile Include="Utils\EnumHelper.cs" />
     <Compile Include="Utils\EnumIndexedArray.cs" />
+    <Compile Include="Utils\FileUtilities.cs" />
     <Compile Include="Utils\HandlerIsAnonymousException.cs" />
     <Compile Include="Utils\ImplementationSet.cs" />
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
+    <Compile Include="Utils\SafeLazy.cs" />
+    <Compile Include="Utils\StringUtilities.cs" />
     <Compile Include="Utils\Union.cs" />
     <Compile Include="Utils\WeakEvent.cs" />
     <Compile Include="Utils\WeakEventInvocationException.cs" />

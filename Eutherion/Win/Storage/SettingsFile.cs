@@ -21,28 +21,16 @@
 
 using Eutherion.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Security;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Reads settings from a file.
     /// </summary>
-    public class SettingsFile
+    public class SettingsFile : LiveTextFile
     {
-        private static bool IsExternalCauseFileException(Exception exception) =>
-            exception is IOException ||
-            exception is UnauthorizedAccessException ||
-            exception is FileNotFoundException ||
-            exception is DirectoryNotFoundException ||
-            exception is SecurityException;
-
         /// <summary>
         /// Creates a <see cref="SettingsFile"/> given a valid file path.
         /// </summary>
@@ -59,34 +47,30 @@ namespace Eutherion.Win.Storage
         /// The created <see cref="SettingsFile"/>.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// <paramref name="absoluteFilePath"/> is a zero-length string, contains only white space,
-        /// or contains one or more invalid characters as defined by <see cref="Path.InvalidPathChars"/>.
+        /// <paramref name="absoluteFilePath"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="absoluteFilePath"/> and/or <paramref name="workingCopy"/> are null.
         /// </exception>
-        /// <exception cref="PathTooLongException">
-        /// The specified path, file name, or both exceed the system-defined maximum length.
-        /// For example, on Windows-based platforms, paths must be less than 248 characters,
-        /// and file names must be less than 260 characters.
+        /// <exception cref="IOException">
+        /// <paramref name="absoluteFilePath"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// <paramref name="absoluteFilePath"/> is in an invalid format.
         /// </exception>
         public static SettingsFile Create(string absoluteFilePath, SettingCopy workingCopy)
         {
-            if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
             if (workingCopy == null) throw new ArgumentNullException(nameof(workingCopy));
 
             var settingsFile = new SettingsFile(absoluteFilePath, workingCopy.Commit());
-            settingsFile.Settings = settingsFile.Load();
+            settingsFile.Settings = settingsFile.ReadSettingObject(settingsFile.LoadedText);
             return settingsFile;
         }
-
-        /// <summary>
-        /// Returns the full path to the settings file.
-        /// </summary>
-        public string AbsoluteFilePath { get; }
 
         /// <summary>
         /// Gets the template settings into which the values from the settings file are loaded.
@@ -98,37 +82,19 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public SettingObject Settings { get; private set; }
 
-        private readonly FileWatcher watcher;
-
-        // Thread synchronization fields.
-        private AutoResetEvent fileChangeSignalWaitHandle;
-        private ConcurrentQueue<FileChangeType> fileChangeQueue;
-        private SynchronizationContext sc;
-        private Task pollFileChangesBackgroundTask;
-
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
+            : base(absoluteFilePath)
         {
-            AbsoluteFilePath = absoluteFilePath;
             TemplateSettings = templateSettings;
-
-            watcher = new FileWatcher(absoluteFilePath);
         }
 
-        private SettingObject Load()
+        private SettingObject ReadSettingObject(Union<Exception, string> fileTextOrException)
         {
             SettingCopy workingCopy = TemplateSettings.CreateWorkingCopy();
 
-            try
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(AbsoluteFilePath));
-                string fileText = File.ReadAllText(AbsoluteFilePath);
-                SettingReader.ReadWorkingCopy(fileText, workingCopy);
-            }
-            catch (Exception exception)
-            {
-                // 'Expected' exceptions can be traced, but rethrow developer errors.
-                if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
-            }
+            fileTextOrException.Match(
+                whenOption1: exception => exception.Trace(),
+                whenOption2: fileText => SettingReader.ReadWorkingCopy(fileText, workingCopy));
 
             return workingCopy.Commit();
         }
@@ -151,60 +117,6 @@ namespace Eutherion.Win.Storage
 
             WeakEvent<object, EventArgs> keyedEvent = settingsChangedEvents.GetOrAdd(property.Name, key => new WeakEvent<object, EventArgs>());
             keyedEvent.AddListener(eventHandler);
-
-            if (pollFileChangesBackgroundTask == null)
-            {
-                // Capture the synchronization context so events can be posted to it.
-                sc = SynchronizationContext.Current;
-                Debug.Assert(sc != null);
-
-                // Set up file change listener thread.
-                fileChangeSignalWaitHandle = new AutoResetEvent(false);
-                fileChangeQueue = new ConcurrentQueue<FileChangeType>();
-                watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-                pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop());
-            }
-        }
-
-        private void PollFileChangesLoop()
-        {
-            try
-            {
-                for (; ; )
-                {
-                    // Wait for a signal, then a tiny delay to buffer updates, and only then raise the event.
-                    fileChangeSignalWaitHandle.WaitOne();
-                    while (fileChangeSignalWaitHandle.WaitOne(50)) ;
-
-                    bool hasChanges = false;
-                    bool disconnected = false;
-                    while (fileChangeQueue.TryDequeue(out FileChangeType fileChangeType))
-                    {
-                        hasChanges |= fileChangeType != FileChangeType.ErrorUnspecified;
-                        disconnected |= fileChangeType == FileChangeType.ErrorUnspecified;
-                    }
-
-                    if (hasChanges)
-                    {
-                        sc.Post(RaiseSettingsChangedEvent, Load());
-                    }
-
-                    // Stop the loop if the FileWatcher errored out.
-                    if (disconnected)
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
-                // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
-                exception.Trace();
-            }
-
-            watcher.Dispose();
         }
 
         private IEnumerable<SettingProperty> ChangedProperties(SettingObject newSettings)
@@ -239,9 +151,11 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        private void RaiseSettingsChangedEvent(object state)
+        protected override void OnFileUpdated(EventArgs e)
         {
-            SettingObject newSettings = (SettingObject)state;
+            base.OnFileUpdated(e);
+
+            SettingObject newSettings = ReadSettingObject(LoadedText);
 
             foreach (var property in ChangedProperties(newSettings))
             {
@@ -256,73 +170,56 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Attempts to overwrite the setting file with the current values in <see cref="Settings"/>.
-        /// </summary>
-        /// <returns>
-        /// Null if the operation was successful;
-        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
-        /// </returns>
-        public Exception WriteToFile()
-            => WriteToFile(Settings, AbsoluteFilePath, SettingWriterOptions.Default);
-
-        /// <summary>
-        /// Attempts to overwrite a file with the current values in a settings object.
+        /// Generates the text to save to the setting file from the current values in <paramref name="settings"/>.
         /// </summary>
         /// <param name="settings">
         /// The settings to write.
-        /// </param>
-        /// <param name="absoluteFilePath">
-        /// The target file to write to. If the file already exists, it is overwritten.
-        /// </param>
-        /// <returns>
-        /// Null if the operation was successful;
-        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
-        /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath)
-            => WriteToFile(settings, absoluteFilePath, SettingWriterOptions.Default);
-
-        /// <summary>
-        /// Attempts to overwrite a file with the current values in a settings object.
-        /// </summary>
-        /// <param name="settings">
-        /// The settings to write.
-        /// </param>
-        /// <param name="absoluteFilePath">
-        /// The target file to write to. If the file already exists, it is overwritten.
         /// </param>
         /// <param name="options">
         /// Specifies options for writing the settings.
         /// </param>
         /// <returns>
-        /// Null if the operation was successful;
-        /// otherwise the <see cref="Exception"/> which caused the operation to fail.
+        /// The text to save.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="settings"/> and/or <paramref name="absoluteFilePath"/> is null.
+        /// <paramref name="settings"/> is null.
         /// </exception>
-        public static Exception WriteToFile(SettingObject settings, string absoluteFilePath, SettingWriterOptions options)
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settings"/> has an unexpected schema.
+        /// </exception>
+        public string GenerateJson(SettingObject settings, SettingWriterOptions options)
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
-            if (absoluteFilePath == null) throw new ArgumentNullException(nameof(absoluteFilePath));
 
-            try
+            if (settings.Schema != TemplateSettings.Schema)
             {
-                string json = SettingWriter.ConvertToJson(
-                    settings.Map,
-                    schema: settings.Schema,
-                    options: options);
+                throw new ArgumentException(
+                    $"{nameof(settings)} has an unexpected schema",
+                    nameof(settings));
+            }
 
-                File.WriteAllText(absoluteFilePath, json);
-                return null;
-            }
-            catch (Exception exception)
-            {
-                if (!IsExternalCauseFileException(exception)) throw;
-                return exception;
-            }
+            return SettingWriter.ConvertToJson(
+                settings.Map,
+                schema: settings.Schema,
+                options: options);
         }
+
+        /// <summary>
+        /// Attempts to overwrite the setting file with the current values in <paramref name="settings"/>.
+        /// </summary>
+        /// <param name="settings">
+        /// The settings to write.
+        /// </param>
+        /// <param name="options">
+        /// Specifies options for writing the settings.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="settings"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="settings"/> has an unexpected schema.
+        /// </exception>
+        public void WriteToFile(SettingObject settings, SettingWriterOptions options)
+            => Save(GenerateJson(settings, options));
     }
 }

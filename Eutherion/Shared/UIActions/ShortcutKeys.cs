@@ -19,9 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using System;
-using System.Collections.Generic;
 
 namespace Eutherion.UIActions
 {
@@ -96,70 +94,5 @@ namespace Eutherion.UIActions
         /// Returns if this shortcut key is empty. This ignores the key modifiers.
         /// </summary>
         public bool IsEmpty => Key == 0;
-
-        /// <summary>
-        /// Enumerates the <see cref="LocalizedStringKey"/>s which combined construct a localized display string for this shortcut.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="LocalizedStringKey"/>s enumerable which combined construct a localized display string for this shortcut.
-        /// </returns>
-        public IEnumerable<LocalizedStringKey> DisplayStringParts()
-        {
-            if (IsEmpty) yield break;
-
-            if (Modifiers.HasFlag(KeyModifiers.Control)) yield return LocalizedConsoleKeys.ConsoleKeyCtrl;
-            if (Modifiers.HasFlag(KeyModifiers.Shift)) yield return LocalizedConsoleKeys.ConsoleKeyShift;
-            if (Modifiers.HasFlag(KeyModifiers.Alt)) yield return LocalizedConsoleKeys.ConsoleKeyAlt;
-
-            if (Key >= ConsoleKey.D0 && Key <= ConsoleKey.D9) yield return LocalizedStringKey.Unlocalizable(Convert.ToString((int)Key - (int)ConsoleKey.D0));
-            else
-            {
-                switch (Key)
-                {
-                    case ConsoleKey.Add:
-                        yield return LocalizedStringKey.Unlocalizable("+");
-                        break;
-                    case ConsoleKey.Subtract:
-                        yield return LocalizedStringKey.Unlocalizable("-");
-                        break;
-                    case ConsoleKey.Multiply:
-                        yield return LocalizedStringKey.Unlocalizable("*");
-                        break;
-                    case ConsoleKey.Divide:
-                        yield return LocalizedStringKey.Unlocalizable("/");
-                        break;
-                    case ConsoleKey.Delete:
-                        yield return LocalizedConsoleKeys.ConsoleKeyDelete;
-                        break;
-                    case ConsoleKey.LeftArrow:
-                        yield return LocalizedConsoleKeys.ConsoleKeyLeftArrow;
-                        break;
-                    case ConsoleKey.RightArrow:
-                        yield return LocalizedConsoleKeys.ConsoleKeyRightArrow;
-                        break;
-                    case ConsoleKey.UpArrow:
-                        yield return LocalizedConsoleKeys.ConsoleKeyUpArrow;
-                        break;
-                    case ConsoleKey.DownArrow:
-                        yield return LocalizedConsoleKeys.ConsoleKeyDownArrow;
-                        break;
-                    case ConsoleKey.Home:
-                        yield return LocalizedConsoleKeys.ConsoleKeyHome;
-                        break;
-                    case ConsoleKey.End:
-                        yield return LocalizedConsoleKeys.ConsoleKeyEnd;
-                        break;
-                    case ConsoleKey.PageUp:
-                        yield return LocalizedConsoleKeys.ConsoleKeyPageUp;
-                        break;
-                    case ConsoleKey.PageDown:
-                        yield return LocalizedConsoleKeys.ConsoleKeyPageDown;
-                        break;
-                    default:
-                        yield return LocalizedStringKey.Unlocalizable(Key.ToString());
-                        break;
-                }
-            }
-        }
     }
 }

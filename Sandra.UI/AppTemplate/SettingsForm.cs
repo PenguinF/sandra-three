@@ -19,11 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -32,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : UIActionForm
+    public class SettingsForm : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -42,7 +43,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingProperty<PersistableFormState> formStateSetting;
         private readonly SettingProperty<int> errorHeightSetting;
 
-        private readonly UIAutoHideMainMenu autoHideMainMenu;
+        private readonly UIActionHandler mainMenuActionHandler;
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
@@ -51,20 +52,20 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        private readonly string fileName;
-
         public SettingsForm(bool isReadOnly,
                             SettingsFile settingsFile,
+                            Func<string> initialTextGenerator,
                             SettingProperty<PersistableFormState> formStateSetting,
-                            SettingProperty<int> errorHeightSetting)
+                            SettingProperty<int> errorHeightSetting,
+                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            fileName = Path.GetFileName(settingsFile.AbsoluteFilePath);
-            Text = fileName;
+            // Set this before calling UpdateChangedMarker().
+            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            jsonTextBox = new JsonTextBox(settingsFile)
+            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator, autoSaveSetting)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
@@ -75,6 +76,9 @@ namespace Eutherion.Win.AppTemplate
                 { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
             });
 
+            // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
+            this.BindAction(SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile);
+
             jsonTextBox.BindStandardEditUIActions();
 
             jsonTextBox.BindActions(new UIActionBindings
@@ -84,6 +88,9 @@ namespace Eutherion.Win.AppTemplate
             });
 
             UIMenu.AddTo(jsonTextBox);
+
+            // Initial changed marker.
+            UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
@@ -114,8 +121,9 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) => Text = ChangedMarker + fileName;
-                jsonTextBox.SavePointReached += (_, __) => Text = fileName;
+                jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
+                jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
                 // Interaction between settingsTextBox and errorsTextBox.
                 jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
@@ -150,27 +158,112 @@ namespace Eutherion.Win.AppTemplate
 
             BindStandardUIActions();
 
-            // Initialize menu strip which becomes visible only when the ALT key is pressed.
-            autoHideMainMenu = new UIAutoHideMainMenu(this);
+            // Initialize menu strip.
+            mainMenuActionHandler = new UIActionHandler();
 
-            var fileMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.File);
-            fileMenu.BindActions(
+            var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
+            fileMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.SaveToFile,
-                SharedUIAction.Close);
+                SharedUIAction.Close));
 
-            var editMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.Edit);
-            editMenu.BindActions(
+            var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
+            editMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.Undo,
                 SharedUIAction.Redo,
                 SharedUIAction.CutSelectionToClipBoard,
                 SharedUIAction.CopySelectionToClipBoard,
                 SharedUIAction.PasteSelectionFromClipBoard,
-                SharedUIAction.SelectAllText);
+                SharedUIAction.SelectAllText));
 
-            var viewMenu = autoHideMainMenu.AddMenuItem(SharedLocalizedStringKeys.View);
-            viewMenu.BindActions(
+            var viewMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.View.ToTextProvider());
+            viewMenu.Nodes.AddRange(BindMainMenuItemActions(
                 SharedUIAction.ZoomIn,
-                SharedUIAction.ZoomOut);
+                SharedUIAction.ZoomOut));
+
+            MainMenuStrip = new MenuStrip();
+            UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
+            Controls.Add(MainMenuStrip);
+            MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
+
+            foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
+            {
+                mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+            }
+
+            Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        private void CurrentLocalizerChanged(object sender, EventArgs e)
+        {
+            if (MainMenuStrip != null)
+            {
+                UIMenu.UpdateMenu(MainMenuStrip.Items);
+            }
+        }
+
+        private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
+        {
+            var menuNodes = new List<UIMenuNode>();
+
+            foreach (var binding in bindings)
+            {
+                if (binding.DefaultInterfaces.TryGet(out IContextMenuUIActionInterface contextMenuInterface))
+                {
+                    menuNodes.Add(new UIMenuNode.Element(binding.Action, contextMenuInterface));
+
+                    mainMenuActionHandler.BindAction(new UIActionBinding(binding, perform =>
+                    {
+                        try
+                        {
+                            // Try to find a UIActionHandler that is willing to validate/perform the given action.
+                            foreach (var actionHandler in UIActionUtilities.EnumerateUIActionHandlers(FocusHelper.GetFocusedControl()))
+                            {
+                                UIActionState currentActionState = actionHandler.TryPerformAction(binding.Action, perform);
+                                if (currentActionState.UIActionVisibility != UIActionVisibility.Parent)
+                                {
+                                    return currentActionState.UIActionVisibility == UIActionVisibility.Hidden
+                                        ? UIActionVisibility.Disabled
+                                        : currentActionState;
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show(e.Message);
+                        }
+
+                        // No handler in the chain that processes the UIAction actively, so set to disabled.
+                        return UIActionVisibility.Disabled;
+                    }));
+                }
+            }
+
+            return menuNodes;
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            var mainMenuItem = (ToolStripMenuItem)sender;
+
+            foreach (var menuItem in mainMenuItem.DropDownItems.OfType<UIActionToolStripMenuItem>())
+            {
+                menuItem.Update(mainMenuActionHandler.TryPerformAction(menuItem.Action, false));
+            }
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        {
+            UpdateChangedMarker();
+        }
+
+        private void UpdateChangedMarker()
+        {
+            string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+            string fileName = Path.GetFileName(openTextFilePath);
+            Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
+
+            // Invalidate to update the save button.
+            ActionHandler.Invalidate();
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)
@@ -210,9 +303,9 @@ namespace Eutherion.Win.AppTemplate
                                          let position = (jsonTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
-                                         select Localizer.Current.Localize(
+                                         select Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(Localizer.Current), lineIndex, position })).ToArray();
+                                             new[] { error.Message(Session.Current.CurrentLocalizer), lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;
@@ -269,23 +362,50 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (keyData == (Keys.Menu | Keys.Alt))
-            {
-                autoHideMainMenu.ToggleMainMenu();
-                if (MainMenuStrip != null) MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
-                return true;
-            }
+            base.OnFormClosing(e);
 
-            return base.ProcessCmdKey(ref msg, keyData);
+            // Only show message box if there's no auto save file from which local changes can be recovered.
+            if (jsonTextBox.ContainsChanges && jsonTextBox.WorkingCopyTextFile.AutoSaveFile == null)
+            {
+                string openTextFilePath = jsonTextBox.WorkingCopyTextFile.OpenTextFilePath;
+                string fileName = Path.GetFileName(openTextFilePath);
+
+                DialogResult result = MessageBox.Show(
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button3);
+
+                switch (result)
+                {
+                    case DialogResult.Yes:
+                        try
+                        {
+                            ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, true);
+                        }
+                        catch (Exception exception)
+                        {
+                            e.Cancel = true;
+                            MessageBox.Show(exception.Message);
+                        }
+                        break;
+                    case DialogResult.No:
+                        break;
+                    default:
+                        e.Cancel = true;
+                        break;
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                autoHideMainMenu.Dispose();
+                jsonTextBox.WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

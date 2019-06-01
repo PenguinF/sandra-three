@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Utils;
-using System;
 
 namespace Eutherion.Localization
 {
@@ -39,54 +38,13 @@ namespace Eutherion.Localization
         /// </summary>
         public abstract string Localize(LocalizedStringKey localizedStringKey, string[] parameters);
 
-        /// <summary>
-        /// Notifies localizers that the translations of this language were updated.
-        /// </summary>
-        protected void NotifyChanged()
-        {
-            if (Current == this)
-            {
-                event_CurrentChanged.Raise(null, EventArgs.Empty);
-            }
-        }
-
         private sealed class DefaultLocalizer : Localizer
         {
             public override string Localize(LocalizedStringKey localizedStringKey, string[] parameters)
             {
                 if (localizedStringKey == null) return null;
-                if (localizedStringKey.Key == null) return localizedStringKey.DisplayText;
-                return "{" + localizedStringKey.Key + DebugUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
+                return "{" + localizedStringKey.Key + StringUtilities.ToDefaultParameterListDisplayString(parameters) + "}";
             }
-        }
-
-        private static Localizer current;
-
-        /// <summary>
-        /// Gets or sets the current <see cref="Localizer"/>.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// The provided new value for <see cref="Current"/> is null.
-        /// </exception>
-        public static Localizer Current
-        {
-            get => current;
-            set
-            {
-                if (current != value)
-                {
-                    current = value ?? throw new ArgumentNullException(nameof(value));
-                    event_CurrentChanged.Raise(null, EventArgs.Empty);
-                }
-            }
-        }
-
-        internal static readonly WeakEvent<object, EventArgs> event_CurrentChanged = new WeakEvent<object, EventArgs>();
-
-        internal static event Action<object, EventArgs> CurrentChanged
-        {
-            add => event_CurrentChanged.AddListener(value);
-            remove => event_CurrentChanged.RemoveListener(value);
         }
 
         /// <summary>
@@ -94,10 +52,5 @@ namespace Eutherion.Localization
         /// which provides a default localized string for each <see cref="LocalizedStringKey"/>.
         /// </summary>
         public static readonly Localizer Default = new DefaultLocalizer();
-
-        static Localizer()
-        {
-            current = Default;
-        }
     }
 }

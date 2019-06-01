@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;

@@ -29,30 +29,26 @@ namespace Eutherion.Win.AppTemplate
     public static class JsonErrorInfoExtensions
     {
         public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
-        {
-            const string UnspecifiedMessage = "Unspecified error";
-
-            if (jsonErrorCode == JsonErrorCode.Unspecified)
-            {
-                return LocalizedStringKey.Unlocalizable(UnspecifiedMessage);
-            }
-            else
-            {
-                return new LocalizedStringKey($"JsonError{jsonErrorCode}");
-            }
-        }
+            => new LocalizedStringKey($"JsonError{jsonErrorCode}");
 
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
         /// </summary>
         public static string Message(this JsonErrorInfo jsonErrorInfo, Localizer localizer)
         {
+            const string UnspecifiedMessage = "Unspecified error";
+
             if (jsonErrorInfo is PTypeError typeError)
             {
                 return typeError.GetLocalizedMessage(localizer);
             }
 
-            return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+            if (jsonErrorInfo.ErrorCode != JsonErrorCode.Unspecified)
+            {
+                return localizer.Localize(GetLocalizedStringKey(jsonErrorInfo.ErrorCode), jsonErrorInfo.Parameters);
+            }
+
+            return UnspecifiedMessage;
         }
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
@@ -94,6 +90,7 @@ namespace Eutherion.Win.AppTemplate
             { PType.RangedIntegerTypeError, "Expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PersistableFormState.PersistableFormStateTypeError.LocalizedMessageKey, "" }, // PersistableFormState only used for auto-save.
+            //{ AutoSaveFilePairPType.AutoSaveFilePairTypeError.LocalizedMessageKey, "" }, // AutoSaveFilePairPType only used for auto-save.
             { OpaqueColorType.OpaqueColorTypeError.LocalizedMessageKey, "Expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
             { FileNameType.FileNameTypeError.LocalizedMessageKey, "Expected valid file name for {0}, but found {1}" },
             { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "Expected valid subfolder name for {0}, but found {1}" },
