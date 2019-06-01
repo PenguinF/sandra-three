@@ -30,29 +30,6 @@ using System.Drawing;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Represents a syntax editor which displays a json settings file.
-    /// </summary>
-    public class JsonTextBox : SyntaxEditor<JsonSymbol, JsonErrorInfo>
-    {
-        /// <summary>
-        /// Initializes a new instance of a <see cref="JsonTextBox"/>.
-        /// </summary>
-        /// <param name="settingsFile">
-        /// The settings file to show and/or edit.
-        /// </param>
-        /// <param name="initialTextGenerator">
-        /// Optional function to generate initial text in case the settings file could not be loaded.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="settingsFile"/> is null.
-        /// </exception>
-        public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            : base(new JsonSyntaxDescriptor(new JsonStyleSelector(), settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
-        {
-        }
-    }
-
-    /// <summary>
     /// Describes the interaction between json syntax and a syntax editor.
     /// </summary>
     public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
@@ -65,7 +42,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Style selector for syntax highlighting.
         /// </summary>
-        internal readonly JsonStyleSelector styleSelector;
+        private readonly JsonStyleSelector styleSelector;
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.

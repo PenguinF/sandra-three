@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -47,7 +48,7 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
-        private readonly JsonTextBox jsonTextBox;
+        private readonly SyntaxEditor<JsonSymbol, JsonErrorInfo> jsonTextBox;
 
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
@@ -65,14 +66,21 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            jsonTextBox = new JsonTextBox(settingsFile, initialTextGenerator, autoSaveSetting)
+            var jsonStyleSelector = new JsonStyleSelector();
+
+            jsonTextBox = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
+                new JsonSyntaxDescriptor(jsonStyleSelector, settingsFile),
+                settingsFile,
+                initialTextGenerator,
+                autoSaveSetting)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
             };
 
-            ((JsonSyntaxDescriptor)jsonTextBox.SyntaxDescriptor).styleSelector.InitializeStyles(jsonTextBox);
+            jsonStyleSelector.InitializeStyles(jsonTextBox);
 
+            // Initialize zoom factor and listen to changes.
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {
                 jsonTextBox.Zoom = zoomFactor;

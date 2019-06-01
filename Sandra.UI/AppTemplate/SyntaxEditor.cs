@@ -43,7 +43,7 @@ namespace Eutherion.Win.AppTemplate
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public abstract class SyntaxEditor<TTerminal, TError> : ScintillaEx
+    public class SyntaxEditor<TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
 
