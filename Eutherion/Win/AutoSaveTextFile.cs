@@ -153,12 +153,12 @@ namespace Eutherion.Win
         private readonly Task autoSaveBackgroundTask;
 
         /// <summary>
-        /// Flag to make sure autoSaveBackgroundTask is cancelled at most once.
+        /// Gets if this <see cref="AutoSaveTextFile{TUpdate}"/> is disposed.
         /// </summary>
         private bool isDisposed;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="AutoSaveTextFile"/>.
+        /// Initializes a new instance of <see cref="AutoSaveTextFile{TUpdate}"/>.
         /// </summary>
         /// <param name="remoteState">
         /// Object responsible for converting updates to text.
@@ -166,7 +166,7 @@ namespace Eutherion.Win
         /// <param name="autoSaveFiles">
         /// The <see cref="FileStreamPair"/> containing <see cref="FileStream"/>s to write to.
         /// Any existing contents in the files will be overwritten.
-        /// <see cref="AutoSaveTextFile"/> assumes ownership of the <see cref="FileStream"/>s
+        /// <see cref="AutoSaveTextFile{TUpdate}"/> assumes ownership of the <see cref="FileStream"/>s
         /// so it takes care of disposing it after use.
         /// To be used as an auto-save <see cref="FileStream"/>,
         /// it must support seeking, reading and writing, and not be able to time out.
