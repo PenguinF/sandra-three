@@ -34,9 +34,9 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class JsonTextBox : SyntaxEditor<JsonSymbol, JsonErrorInfo>
     {
-        private const int commentStyleIndex = 8;
-        private const int valueStyleIndex = 9;
-        private const int stringStyleIndex = 10;
+        internal const int commentStyleIndex = 8;
+        internal const int valueStyleIndex = 9;
+        internal const int stringStyleIndex = 10;
 
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -45,23 +45,6 @@ namespace Eutherion.Win.AppTemplate
         private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
-
-        internal sealed class StyleSelector : JsonSymbolVisitor<Style>
-        {
-            private readonly JsonTextBox owner;
-
-            public StyleSelector(JsonTextBox owner)
-            {
-                this.owner = owner;
-            }
-
-            public override Style DefaultVisit(JsonSymbol symbol) => owner.DefaultStyle;
-            public override Style VisitComment(JsonComment symbol) => owner.Styles[commentStyleIndex];
-            public override Style VisitErrorString(JsonErrorString symbol) => owner.Styles[stringStyleIndex];
-            public override Style VisitString(JsonString symbol) => owner.Styles[stringStyleIndex];
-            public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.Styles[commentStyleIndex];
-            public override Style VisitValue(JsonValue symbol) => owner.Styles[valueStyleIndex];
-        }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
@@ -151,12 +134,32 @@ namespace Eutherion.Win.AppTemplate
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
         {
-            var styleSelector = new JsonTextBox.StyleSelector((JsonTextBox)syntaxEditor);
+            var styleSelector = new JsonStyleSelector((JsonTextBox)syntaxEditor);
             return styleSelector.Visit(terminalSymbol);
         }
 
         public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
 
         public override string GetErrorMessage(JsonErrorInfo error) => error.Message(Session.Current.CurrentLocalizer);
+    }
+
+    /// <summary>
+    /// A style selector for json syntax highlighting.
+    /// </summary>
+    public class JsonStyleSelector : JsonSymbolVisitor<Style>
+    {
+        private readonly JsonTextBox owner;
+
+        public JsonStyleSelector(JsonTextBox owner)
+        {
+            this.owner = owner;
+        }
+
+        public override Style DefaultVisit(JsonSymbol symbol) => owner.DefaultStyle;
+        public override Style VisitComment(JsonComment symbol) => owner.Styles[JsonTextBox.commentStyleIndex];
+        public override Style VisitErrorString(JsonErrorString symbol) => owner.Styles[JsonTextBox.stringStyleIndex];
+        public override Style VisitString(JsonString symbol) => owner.Styles[JsonTextBox.stringStyleIndex];
+        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => owner.Styles[JsonTextBox.commentStyleIndex];
+        public override Style VisitValue(JsonValue symbol) => owner.Styles[JsonTextBox.valueStyleIndex];
     }
 }

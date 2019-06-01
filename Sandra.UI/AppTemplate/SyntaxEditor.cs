@@ -121,7 +121,7 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly TextIndex<TTerminal> TextIndex;
 
-        protected Style DefaultStyle => Styles[Style.Default];
+        public Style DefaultStyle => Styles[Style.Default];
         private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CallTipStyle => Styles[Style.CallTip];
 
