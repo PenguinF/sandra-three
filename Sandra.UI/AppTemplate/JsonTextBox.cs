@@ -34,18 +34,6 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class JsonTextBox : SyntaxEditor<JsonSymbol, JsonErrorInfo>
     {
-        internal const int commentStyleIndex = 8;
-        internal const int valueStyleIndex = 9;
-        internal const int stringStyleIndex = 10;
-
-        private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
-        private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
-
-        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
-        private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
-
-        private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
-
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
         /// </summary>
@@ -59,15 +47,9 @@ namespace Eutherion.Win.AppTemplate
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            : base(new JsonSyntaxDescriptor(settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
+            : base(new JsonSyntaxDescriptor(new JsonStyleSelector(), settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
         {
-            Styles[commentStyleIndex].ForeColor = commentForeColor;
-            commentFont.CopyTo(Styles[commentStyleIndex]);
-
-            Styles[valueStyleIndex].ForeColor = valueForeColor;
-            valueFont.CopyTo(Styles[valueStyleIndex]);
-
-            Styles[stringStyleIndex].ForeColor = stringForeColor;
+            ((JsonSyntaxDescriptor)SyntaxDescriptor).styleSelector.InitializeStyles(this);
 
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {
@@ -94,22 +76,28 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingSchema schema;
 
         /// <summary>
+        /// Style selector for syntax highlighting.
+        /// </summary>
+        internal readonly JsonStyleSelector styleSelector;
+
+        /// <summary>
         /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
         /// </summary>
         /// <param name="styleSelector">
         /// The style selector for syntax highlighting.
         /// </param>
-        /// <param name="schema">
-        /// The schema which defines what kind of keys and values are valid in the parsed json.
+        /// <param name="settingsFile">
+        /// The settings file containing schema which defines what kind of keys and values are valid in the parsed json.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="styleSelector"/> and/or <paramref name="schema"/> are null.
+        /// <paramref name="styleSelector"/> and/or <paramref name="settingsFile"/> are null.
         /// </exception>
-        public JsonSyntaxDescriptor(SettingsFile settingsFile)
+        public JsonSyntaxDescriptor(JsonStyleSelector styleSelector, SettingsFile settingsFile)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
             schema = settingsFile.Settings.Schema;
+            this.styleSelector = styleSelector ?? throw new ArgumentNullException(nameof(styleSelector));
         }
 
         public override (IEnumerable<TextElement<JsonSymbol>>, List<JsonErrorInfo>) Parse(string code)
@@ -133,10 +121,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
-        {
-            var styleSelector = new JsonStyleSelector();
-            return styleSelector.Visit(terminalSymbol, syntaxEditor);
-        }
+            => styleSelector.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
 
@@ -148,22 +133,45 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<JsonSymbol, JsonErrorInfo>, Style>
     {
+        private const int commentStyleIndex = 8;
+        private const int valueStyleIndex = 9;
+        private const int stringStyleIndex = 10;
+
+        private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
+        private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
+
+        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
+        private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
+
+        private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
+
+        public void InitializeStyles(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        {
+            syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
+            commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
+
+            syntaxEditor.Styles[valueStyleIndex].ForeColor = valueForeColor;
+            valueFont.CopyTo(syntaxEditor.Styles[valueStyleIndex]);
+
+            syntaxEditor.Styles[stringStyleIndex].ForeColor = stringForeColor;
+        }
+
         public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
         public override Style VisitComment(JsonComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[JsonTextBox.commentStyleIndex];
+            => syntaxEditor.Styles[commentStyleIndex];
 
         public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[JsonTextBox.stringStyleIndex];
+            => syntaxEditor.Styles[stringStyleIndex];
 
         public override Style VisitString(JsonString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[JsonTextBox.stringStyleIndex];
+            => syntaxEditor.Styles[stringStyleIndex];
 
         public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[JsonTextBox.commentStyleIndex];
+            => syntaxEditor.Styles[commentStyleIndex];
 
         public override Style VisitValue(JsonValue symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[JsonTextBox.valueStyleIndex];
+            => syntaxEditor.Styles[valueStyleIndex];
     }
 }
