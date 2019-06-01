@@ -72,32 +72,26 @@ namespace Eutherion.Win
         /// </param>
         public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
         {
-            AutoSaveTextFile<string> autoSaveFile = null;
-            string autoSavedText = null;
+            OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
 
             if (autoSaveFiles != null)
             {
                 var remoteState = new TextAutoSaveState();
-                autoSaveFile = new AutoSaveTextFile<string>(remoteState, autoSaveFiles);
+                AutoSaveFile = new AutoSaveTextFile<string>(remoteState, autoSaveFiles);
+                string autoSavedText = remoteState.LastAutoSavedText;
 
-                // If the auto-save files don't exist anymore, just use string.Empty as a default.
-                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
-            }
-
-            OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
-            AutoSaveFile = autoSaveFile;
-
-            if (autoSaveFile != null && !string.IsNullOrEmpty(autoSavedText))
-            {
-                LocalCopyText = autoSavedText;
-            }
-            else
-            {
                 // Interpret empty auto-saved text as there being no changes.
                 // Has the slightly odd effect that when someone deletes all text from the editor,
                 // and then closes+reopens the application, the loaded text is shown.
-                LocalCopyText = LoadedText;
+                if (!string.IsNullOrEmpty(autoSavedText))
+                {
+                    LocalCopyText = autoSavedText;
+                    return;
+                }
             }
+
+            // Initialize with the loaded text if no initial auto-saved text or corrupt auto-save files.
+            LocalCopyText = LoadedText;
         }
 
         /// <summary>
