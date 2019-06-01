@@ -120,7 +120,7 @@ namespace Eutherion.Win
         /// <summary>
         /// The auto-save files.
         /// </summary>
-        private readonly FileStreamPair autoSaveFiles;
+        internal readonly FileStreamPair AutoSaveFiles;
 
         /// <summary>
         /// The Encoder which converts updated text to bytes to write to the auto-save file.
@@ -155,7 +155,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets if this <see cref="AutoSaveTextFile{TUpdate}"/> is disposed.
         /// </summary>
-        private bool isDisposed;
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="AutoSaveTextFile{TUpdate}"/>.
@@ -181,7 +181,7 @@ namespace Eutherion.Win
         public AutoSaveTextFile(RemoteState remoteState, FileStreamPair autoSaveFiles)
         {
             if (remoteState == null) throw new ArgumentNullException(nameof(remoteState));
-            this.autoSaveFiles = autoSaveFiles ?? throw new ArgumentNullException(nameof(autoSaveFiles));
+            AutoSaveFiles = autoSaveFiles ?? throw new ArgumentNullException(nameof(autoSaveFiles));
 
             // Assert capabilities of the file streams.
             VerifyFileStream(autoSaveFiles.FileStream1, nameof(autoSaveFiles));
@@ -376,7 +376,7 @@ namespace Eutherion.Win
                         if (remoteState.ShouldSave(updates, out string textToSave))
                         {
                             // Alternate between both auto-save files.
-                            FileStream targetFile = autoSaveFiles.Different(lastWrittenToFile);
+                            FileStream targetFile = AutoSaveFiles.Different(lastWrittenToFile);
 
                             // Only truly necessary in the first iteration if the targetFile was initially a corrupt non-empty file.
                             // Theoretically, two thrown writeExceptions would have the same effect.
@@ -407,7 +407,7 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            if (!isDisposed)
+            if (!IsDisposed)
             {
                 cts.Cancel();
 
@@ -421,8 +421,8 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-                autoSaveFiles.Dispose();
-                isDisposed = true;
+                AutoSaveFiles.Dispose();
+                IsDisposed = true;
             }
         }
     }

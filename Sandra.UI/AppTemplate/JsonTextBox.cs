@@ -65,13 +65,32 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        private static FileStream CreateExistingAutoSaveFileStream(string autoSaveFileName) => new FileStream(
-            Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileName),
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite,
-            FileShare.Read,
-            FileUtilities.DefaultFileStreamBufferSize,
-            FileOptions.Asynchronous | FileOptions.SequentialScan);
+        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile settingsFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        {
+            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
+            {
+                FileStreamPair fileStreamPair = null;
+
+                try
+                {
+                    fileStreamPair = FileStreamPair.Create(
+                        AutoSaveTextFile.OpenExistingAutoSaveFile,
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                    return new WorkingCopyTextFile(settingsFile, fileStreamPair);
+                }
+                catch (Exception autoSaveLoadException)
+                {
+                    if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                    autoSaveLoadException.Trace();
+                }
+            }
+
+            return new WorkingCopyTextFile(settingsFile, null);
+        }
 
         private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
         private static readonly Font callTipFont = new Font("Segoe UI", 10);
@@ -148,17 +167,7 @@ namespace Eutherion.Win.AppTemplate
 
             this.autoSaveSetting = autoSaveSetting;
             schema = settingsFile.Settings.Schema;
-
-            if (autoSaveSetting != null
-                && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair)
-                && OpenExistingAutoSaveTextFile(autoSaveFileNamePair, out AutoSaveTextFile<string> autoSaveTextFile, out string autoSavedText))
-            {
-                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile, autoSaveTextFile, autoSavedText);
-            }
-            else
-            {
-                WorkingCopyTextFile = WorkingCopyTextFile.OpenExisting(settingsFile);
-            }
+            WorkingCopyTextFile = OpenWorkingCopyTextFile(settingsFile, autoSaveSetting);
 
             BorderStyle = BorderStyle.None;
 
@@ -255,9 +264,7 @@ namespace Eutherion.Win.AppTemplate
                 try
                 {
                     fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
-                    e.AutoSaveFile = new AutoSaveTextFile<string>(
-                        new WorkingCopyTextFile.TextAutoSaveState(),
-                        fileStreamPair);
+                    e.AutoSaveFileStreamPair = fileStreamPair;
 
                     Session.Current.AutoSave.Persist(
                         autoSaveSetting,
@@ -272,38 +279,6 @@ namespace Eutherion.Win.AppTemplate
                     // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                     autoSaveLoadException.Trace();
                 }
-            }
-        }
-
-        private bool OpenExistingAutoSaveTextFile(AutoSaveFileNamePair autoSaveFileNamePair,
-                                                  out AutoSaveTextFile<string> autoSaveTextFile,
-                                                  out string autoSavedText)
-        {
-            FileStreamPair fileStreamPair = null;
-
-            try
-            {
-                fileStreamPair = FileStreamPair.Create(
-                    CreateExistingAutoSaveFileStream,
-                    autoSaveFileNamePair.FileName1,
-                    autoSaveFileNamePair.FileName2);
-
-                var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
-                autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, fileStreamPair);
-
-                // If the auto-save files don't exist anymore, just use string.Empty as a default.
-                autoSavedText = remoteState.LastAutoSavedText ?? string.Empty;
-                return true;
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-                autoSaveTextFile = default(AutoSaveTextFile<string>);
-                autoSavedText = default(string);
-                return false;
             }
         }
 
@@ -504,39 +479,12 @@ namespace Eutherion.Win.AppTemplate
             if (disposing)
             {
                 WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
-
-                // Before disposing WorkingCopyTextFile, figure out if the auto-save files can be removed.
-                bool deleteAutoSaveFiles = WorkingCopyTextFile.AutoSaveFile != null && !ContainsChanges;
-
                 WorkingCopyTextFile.Dispose();
 
-                if (deleteAutoSaveFiles)
+                // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
+                if (autoSaveSetting != null && WorkingCopyTextFile.AutoSaveFile == null)
                 {
-                    // Obtain file names from the auto-save setting since the FileStreamPair is not available.
-                    bool hasValidPair = Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair);
-
                     Session.Current.AutoSave.Remove(autoSaveSetting);
-
-                    if (hasValidPair)
-                    {
-                        try
-                        {
-                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-                        }
-                        catch (Exception deleteException)
-                        {
-                            deleteException.Trace();
-                        }
-
-                        try
-                        {
-                            File.Delete(Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1));
-                        }
-                        catch (Exception deleteException)
-                        {
-                            deleteException.Trace();
-                        }
-                    }
                 }
             }
 

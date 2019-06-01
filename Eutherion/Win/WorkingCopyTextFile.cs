@@ -21,12 +21,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Eutherion.Win
 {
     /// <summary>
-    /// Combines a <see cref="AutoSaveTextFile{TUpdate}"/> with a <see cref="LiveTextFile"/>
-    /// to create a working copy of a text file with local changes which persists across sessions,
+    /// Creates a working copy for a <see cref="LiveTextFile"/> which keeps track of local changes
+    /// which persist across sessions using an <see cref="AutoSaveTextFile{TUpdate}"/>,
     /// and is aware of external updates to the text file on the file system.
     /// </summary>
     public sealed class WorkingCopyTextFile : IDisposable
@@ -34,7 +35,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Contains the remote state for <see cref="WorkingCopyTextFile"/> auto-save files.
         /// </summary>
-        public class TextAutoSaveState : AutoSaveTextFile<string>.RemoteState
+        internal class TextAutoSaveState : AutoSaveTextFile<string>.RemoteState
         {
             /// <summary>
             /// Gets the text currently stored in the auto-save file, or null if it could not be loaded.
@@ -59,65 +60,44 @@ namespace Eutherion.Win
             }
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>.
-        /// </summary>
-        /// <param name="openTextFile">
-        /// The open text file.
-        /// </param>
-        /// <returns>
-        /// The new <see cref="WorkingCopyTextFile"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="openTextFile"/> is null.
-        /// </exception>
-        public static WorkingCopyTextFile OpenExisting(LiveTextFile openTextFile)
-        {
-            return new WorkingCopyTextFile(openTextFile, null, null);
-        }
+        // Keep a reference to the auto-save state, but don't access it until after disposing AutoSaveFile,
+        // because it is updated from a background thread.
+        // After disposing, its final LastAutoSavedText can be used to find out if the auto-save files can be deleted.
+        private TextAutoSaveState autoSaveState;
 
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
-        /// with auto-saved local changes.
+        /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// </summary>
         /// <param name="openTextFile">
-        /// The open text file.
+        /// The open text file, or null to create a new file.
         /// </param>
-        /// <param name="autoSaveFile">
-        /// The auto-save file that contains local changes.
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
+        /// or null to not load from an auto-save file.
         /// </param>
-        /// <param name="autoSavedText">
-        /// The local changes that are loaded initially from the auto-save file.
-        /// </param>
-        /// <returns>
-        /// The new <see cref="WorkingCopyTextFile"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="openTextFile"/> and/or <paramref name="autoSaveFile"/> and/or <paramref name="autoSavedText"/> are null.
-        /// </exception>
-        public static WorkingCopyTextFile OpenExisting(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
+        public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
         {
-            return new WorkingCopyTextFile(openTextFile,
-                                           autoSaveFile ?? throw new ArgumentNullException(nameof(autoSaveFile)),
-                                           autoSavedText ?? throw new ArgumentNullException(nameof(autoSavedText)));
-        }
+            OpenTextFile = openTextFile;
 
-        private WorkingCopyTextFile(LiveTextFile openTextFile, AutoSaveTextFile<string> autoSaveFile, string autoSavedText)
-        {
-            OpenTextFile = openTextFile ?? throw new ArgumentNullException(nameof(openTextFile));
-            AutoSaveFile = autoSaveFile;
+            if (autoSaveFiles != null)
+            {
+                autoSaveState = new TextAutoSaveState();
+                AutoSaveFile = new AutoSaveTextFile<string>(autoSaveState, autoSaveFiles);
+                string autoSavedText = autoSaveState.LastAutoSavedText;
 
-            if (autoSaveFile != null && !string.IsNullOrEmpty(autoSavedText))
-            {
-                LocalCopyText = autoSavedText;
-            }
-            else
-            {
                 // Interpret empty auto-saved text as there being no changes.
                 // Has the slightly odd effect that when someone deletes all text from the editor,
                 // and then closes+reopens the application, the loaded text is shown.
-                LocalCopyText = LoadedText;
+                if (!string.IsNullOrEmpty(autoSavedText))
+                {
+                    LocalCopyText = autoSavedText;
+                    return;
+                }
             }
+
+            // Initialize with the loaded text if no initial auto-saved text or corrupt auto-save files.
+            LocalCopyText = LoadedText;
         }
 
         /// <summary>
@@ -126,19 +106,21 @@ namespace Eutherion.Win
         public LiveTextFile OpenTextFile { get; }
 
         /// <summary>
-        /// Returns the full path to the opened text file.
+        /// Returns the full path to the opened text file, or null for new files.
         /// </summary>
-        public string OpenTextFilePath => OpenTextFile.AbsoluteFilePath;
+        public string OpenTextFilePath => OpenTextFile?.AbsoluteFilePath;
 
         /// <summary>
-        /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty.
+        /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty. For new files it returns string.Empty.
         /// </summary>
-        public string LoadedText => OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);
+        public string LoadedText
+            => OpenTextFile == null ? string.Empty
+            : OpenTextFile.LoadedText.Match(whenOption1: e => string.Empty, whenOption2: text => text);
 
         /// <summary>
         /// Returns the <see cref="Exception"/> from an unsuccessful attempt to read the file from the file system.
         /// </summary>
-        public Exception LoadException => OpenTextFile.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
+        public Exception LoadException => OpenTextFile?.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
 
         /// <summary>
         /// Gets the opened <see cref="AutoSaveTextFile{TUpdate}"/> or null if nothing was auto-saved yet.
@@ -156,6 +138,20 @@ namespace Eutherion.Win
         public string LocalCopyText { get; private set; } = string.Empty;
 
         /// <summary>
+        /// Gets if this <see cref="WorkingCopyTextFile"/> is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
+
+        private void ThrowIfDisposed()
+        {
+            if (IsDisposed)
+            {
+                var displayFilePath = OpenTextFile == null ? "<Untitled>" : "\"" + OpenTextFile.AbsoluteFilePath + "\"";
+                throw new ObjectDisposedException($"{nameof(WorkingCopyTextFile)}({displayFilePath})");
+            }
+        }
+
+        /// <summary>
         /// Updates the current working copy of the text.
         /// </summary>
         /// <param name="text">
@@ -166,6 +162,8 @@ namespace Eutherion.Win
         /// </param>
         public void UpdateLocalCopyText(string text, bool containsChanges)
         {
+            ThrowIfDisposed();
+
             LocalCopyText = text ?? string.Empty;
 
             if (containsChanges)
@@ -176,6 +174,7 @@ namespace Eutherion.Win
                     // If no listeners, AutoSaveFile remains empty and nothing is auto-saved.
                     var queryAutoSaveFileEventArgs = new QueryAutoSaveFileEventArgs();
                     QueryAutoSaveFile?.Invoke(this, queryAutoSaveFileEventArgs);
+                    autoSaveState = queryAutoSaveFileEventArgs.AutoSaveState;
                     AutoSaveFile = queryAutoSaveFileEventArgs.AutoSaveFile;
                 }
 
@@ -193,6 +192,13 @@ namespace Eutherion.Win
         /// </summary>
         public void Save()
         {
+            ThrowIfDisposed();
+
+            if (OpenTextFile == null)
+            {
+                throw new InvalidOperationException();
+            }
+
             OpenTextFile.Save(LocalCopyText);
         }
 
@@ -201,7 +207,41 @@ namespace Eutherion.Win
         /// </summary>
         public void Dispose()
         {
-            AutoSaveFile?.Dispose();
+            if (!IsDisposed)
+            {
+                if (AutoSaveFile != null)
+                {
+                    // Dispose first, then check if the files are empty.
+                    AutoSaveFile.Dispose();
+
+                    if (string.IsNullOrEmpty(autoSaveState.LastAutoSavedText))
+                    {
+                        // Remove auto-save files.
+                        try
+                        {
+                            File.Delete(AutoSaveFile.AutoSaveFiles.FileStream1.Name);
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+
+                        try
+                        {
+                            File.Delete(AutoSaveFile.AutoSaveFiles.FileStream2.Name);
+                        }
+                        catch (Exception deleteException)
+                        {
+                            deleteException.Trace();
+                        }
+
+                        AutoSaveFile = null;
+                        autoSaveState = null;
+                    }
+                }
+
+                IsDisposed = true;
+            }
         }
     }
 
@@ -210,9 +250,42 @@ namespace Eutherion.Win
     /// </summary>
     public class QueryAutoSaveFileEventArgs : EventArgs
     {
+        private FileStreamPair autoSaveFileStreamPair;
+        internal WorkingCopyTextFile.TextAutoSaveState AutoSaveState;
+        internal AutoSaveTextFile<string> AutoSaveFile;
+
         /// <summary>
-        /// Gets or sets the <see cref="AutoSaveTextFile{TUpdate}"/> to use for auto-saving local changes.
+        /// Gets or sets the <see cref="FileStreamPair"/> to use for auto-saving local changes.
         /// </summary>
-        public AutoSaveTextFile<string> AutoSaveFile { get; set; }
+        /// <exception cref="ArgumentException">
+        /// One or both <see cref="FileStream"/>s in the new value for <see cref="AutoSaveFileStreamPair"/>
+        /// do not have the right capabilities to be used as an auto-save file stream.
+        /// </exception>
+        public FileStreamPair AutoSaveFileStreamPair
+        {
+            get => autoSaveFileStreamPair;
+            set
+            {
+                if (autoSaveFileStreamPair != value)
+                {
+                    if (autoSaveFileStreamPair != null)
+                    {
+                        AutoSaveFile.Dispose();
+                        AutoSaveFile = null;
+                        AutoSaveState = null;
+                    }
+
+                    if (value != null)
+                    {
+                        var autoSaveState = new WorkingCopyTextFile.TextAutoSaveState();
+                        AutoSaveFile = new AutoSaveTextFile<string>(autoSaveState, value);
+                        AutoSaveState = autoSaveState;
+                    }
+
+                    // If the AutoSaveTextFile constructor threw, no update must be made to autoSaveFileStreamPair.
+                    autoSaveFileStreamPair = value;
+                }
+            }
+        }
     }
 }
