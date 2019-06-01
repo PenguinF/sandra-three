@@ -106,12 +106,12 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            WorkingCopyTextFile.QueryAutoSaveFile += WorkingCopyTextFile_QueryAutoSaveFile;
-            WorkingCopyTextFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
+            CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
 
             // Only use initialTextGenerator if nothing was auto-saved.
-            if (WorkingCopyTextFile.LoadException != null
-                && string.IsNullOrEmpty(WorkingCopyTextFile.LocalCopyText))
+            if (CodeFile.LoadException != null
+                && string.IsNullOrEmpty(CodeFile.LocalCopyText))
             {
                 Text = initialTextGenerator != null
                     ? (initialTextGenerator() ?? string.Empty)
@@ -130,10 +130,10 @@ namespace Eutherion.Win.AppTemplate
             if (!ContainsChanges)
             {
                 // Reload the text if different.
-                string reloadedText = WorkingCopyTextFile.LoadedText;
+                string reloadedText = CodeFile.LoadedText;
 
                 // Without this check the undo buffer gets an extra empty entry which is weird.
-                if (WorkingCopyTextFile.LocalCopyText != reloadedText)
+                if (CodeFile.LocalCopyText != reloadedText)
                 {
                     Text = reloadedText;
                     SetSavePoint();
@@ -142,12 +142,12 @@ namespace Eutherion.Win.AppTemplate
 
             // Make sure to auto-save if ContainsChanges changed but its text did not.
             // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-            WorkingCopyTextFile.UpdateLocalCopyText(
-                WorkingCopyTextFile.LocalCopyText,
+            CodeFile.UpdateLocalCopyText(
+                CodeFile.LocalCopyText,
                 ContainsChanges);
         }
 
-        private void WorkingCopyTextFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
+        private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
         {
             // Only open auto-save files if they can be stored in autoSaveSetting.
             if (autoSaveSetting != null)
@@ -256,7 +256,7 @@ namespace Eutherion.Win.AppTemplate
             copyingTextFromTextFile = true;
             try
             {
-                Text = WorkingCopyTextFile.LocalCopyText;
+                Text = CodeFile.LocalCopyText;
             }
             finally
             {
@@ -275,7 +275,7 @@ namespace Eutherion.Win.AppTemplate
             // This prevents re-entrancy into WorkingCopyTextFile.
             if (!copyingTextFromTextFile)
             {
-                WorkingCopyTextFile.UpdateLocalCopyText(currentText, ContainsChanges);
+                CodeFile.UpdateLocalCopyText(currentText, ContainsChanges);
             }
 
             ParseAndApplySyntaxHighlighting(currentText);
@@ -371,11 +371,11 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                WorkingCopyTextFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
-                WorkingCopyTextFile.Dispose();
+                CodeFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                CodeFile.Dispose();
 
                 // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
-                if (autoSaveSetting != null && WorkingCopyTextFile.AutoSaveFile == null)
+                if (autoSaveSetting != null && CodeFile.AutoSaveFile == null)
                 {
                     Session.Current.AutoSave.Remove(autoSaveSetting);
                 }
@@ -391,7 +391,7 @@ namespace Eutherion.Win.AppTemplate
 
             if (perform)
             {
-                WorkingCopyTextFile.Save();
+                CodeFile.Save();
                 SetSavePoint();
             }
 

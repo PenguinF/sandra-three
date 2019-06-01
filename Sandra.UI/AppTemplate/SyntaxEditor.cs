@@ -91,7 +91,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the edited text file.
         /// </summary>
-        public WorkingCopyTextFile WorkingCopyTextFile { get; }
+        public WorkingCopyTextFile CodeFile { get; }
 
         /// <summary>
         /// Returns if this <see cref="SyntaxEditor{TTerminal}"/> contains any unsaved changes.
@@ -99,7 +99,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public bool ContainsChanges
             => !ReadOnly
-            && (Modified || WorkingCopyTextFile.LoadException != null);
+            && (Modified || CodeFile.LoadException != null);
 
         /// <summary>
         /// Setting to use when an auto-save file name pair is generated.
@@ -125,7 +125,7 @@ namespace Eutherion.Win.AppTemplate
                             SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.autoSaveSetting = autoSaveSetting;
-            WorkingCopyTextFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
+            CodeFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
 
             TextIndex = new TextIndex<TTerminal>();
 
