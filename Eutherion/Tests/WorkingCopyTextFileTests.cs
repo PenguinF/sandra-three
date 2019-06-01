@@ -61,25 +61,10 @@ namespace Eutherion.Win.Tests
         private readonly TargetFileState autoSaveFileState1;
         private readonly TargetFileState autoSaveFileState2;
 
-        /// <summary>
-        /// Primary target text file path.
-        /// </summary>
-        public string TextFilePath => GetPath(TargetFile.PrimaryTextFile);
-
-        /// <summary>
-        /// Gets the path to the primary auto-save file.
-        /// </summary>
-        public string AutoSaveFilePath1 => GetPath(TargetFile.AutoSaveFile1);
-
-        /// <summary>
-        /// Gets the path to the secondary auto-save file.
-        /// </summary>
-        public string AutoSaveFilePath2 => GetPath(TargetFile.AutoSaveFile2);
-
         public void PrepareAutoSaveFiles(byte[] autoSaveBytes1, byte[] autoSaveBytes2)
         {
-            File.WriteAllBytes(AutoSaveFilePath1, autoSaveBytes1);
-            File.WriteAllBytes(AutoSaveFilePath2, autoSaveBytes2);
+            File.WriteAllBytes(GetPath(TargetFile.AutoSaveFile1), autoSaveBytes1);
+            File.WriteAllBytes(GetPath(TargetFile.AutoSaveFile2), autoSaveBytes2);
         }
 
         public FileFixture()
@@ -107,9 +92,9 @@ namespace Eutherion.Win.Tests
 
         public void Dispose()
         {
-            File.Delete(TextFilePath);
-            File.Delete(AutoSaveFilePath1);
-            File.Delete(AutoSaveFilePath2);
+            File.Delete(GetPath(TargetFile.PrimaryTextFile));
+            File.Delete(GetPath(TargetFile.AutoSaveFile1));
+            File.Delete(GetPath(TargetFile.AutoSaveFile2));
         }
     }
 
@@ -130,18 +115,18 @@ namespace Eutherion.Win.Tests
             this.fileFixture = fileFixture;
         }
 
-        private FileStreamPair AutoSaveFiles()
-            => FileStreamPair.Create(
-                CreateAutoSaveFileStream,
-                fileFixture.AutoSaveFilePath1,
-                fileFixture.AutoSaveFilePath2);
+        private FileStreamPair AutoSaveFiles() => FileStreamPair.Create(
+            CreateAutoSaveFileStream,
+            fileFixture.GetPath(TargetFile.AutoSaveFile1),
+            fileFixture.GetPath(TargetFile.AutoSaveFile2));
 
         [Fact]
         public void LiveTextFilePathUnchanged()
         {
-            using (var textFile = new LiveTextFile(fileFixture.TextFilePath))
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            using (var textFile = new LiveTextFile(filePath))
             {
-                Assert.Equal(fileFixture.TextFilePath, textFile.AbsoluteFilePath);
+                Assert.Equal(filePath, textFile.AbsoluteFilePath);
             }
         }
 
