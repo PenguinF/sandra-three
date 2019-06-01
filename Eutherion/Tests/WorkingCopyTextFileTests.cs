@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Xunit;
 
 namespace Eutherion.Win.Tests
@@ -147,10 +148,18 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        public void PrepareTargetFile(TargetFile targetFile, string text)
+        public void PrepareTargetFile(TargetFile targetFile, string text, Encoding encoding = null)
         {
             PrepareTargetFile(targetFile, FileState.Text);
-            File.WriteAllText(GetPath(targetFile), text);
+
+            if (encoding == null)
+            {
+                File.WriteAllText(GetPath(targetFile), text);
+            }
+            else
+            {
+                File.WriteAllText(GetPath(targetFile), text, encoding);
+            }
         }
 
         public void PrepareTargetFile(TargetFile targetFile, byte[] fileBytes)
@@ -170,6 +179,9 @@ namespace Eutherion.Win.Tests
 
     public class WorkingCopyTextFileTests : IClassFixture<FileFixture>
     {
+        private static string GenerateAutoSaveFileText(string targetResultText)
+            => $"{targetResultText.Length}\n{targetResultText}";
+
         private readonly FileFixture fileFixture;
 
         public WorkingCopyTextFileTests(FileFixture fileFixture)
@@ -182,12 +194,38 @@ namespace Eutherion.Win.Tests
             fileFixture.GetPath(TargetFile.AutoSaveFile1),
             fileFixture.GetPath(TargetFile.AutoSaveFile2));
 
+        /// <summary>
+        /// Prepares the first auto-save file with the text, and the second to be empty.
+        /// </summary>
+        private void PrepareAutoSave(string autoSaveText)
+        {
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, GenerateAutoSaveFileText(autoSaveText), Encoding.UTF8);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, GenerateAutoSaveFileText(string.Empty), Encoding.UTF8);
+        }
+
         private void AssertLiveTextFileSuccessfulLoad(string loadedText, WorkingCopyTextFile wcFile)
         {
             Assert.Null(wcFile.AutoSaveFile);
             Assert.Equal(loadedText, wcFile.LoadedText);
             Assert.Null(wcFile.LoadException);
             Assert.Equal(loadedText, wcFile.LocalCopyText);
+        }
+
+        private void AssertLiveTextFileSuccessfulLoadWithAutoSave(string loadedText, string autoSavedText, WorkingCopyTextFile wcFile)
+        {
+            Assert.NotNull(wcFile.AutoSaveFile);
+            Assert.Equal(loadedText, wcFile.LoadedText);
+            Assert.Null(wcFile.LoadException);
+
+            // Convention is that when autoSavedText is empty, it means there were no local changes, so LocalCopyText == LoadedText.
+            if (string.IsNullOrEmpty(autoSavedText))
+            {
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
+            }
+            else
+            {
+                Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+            }
         }
 
         [Fact]
@@ -269,6 +307,28 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(string.Empty, wcFile.LoadedText);
                 Assert.IsType(exceptionType, wcFile.LoadException);
                 Assert.Equal(string.Empty, wcFile.LocalCopyText);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Texts))]
+        public void AutoSavedExistingFileInitialState(string autoSaveFileText)
+        {
+            string expectedLoadedText = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            PrepareAutoSave(autoSaveFileText);
+
+            var remoteState = new WorkingCopyTextFile.TextAutoSaveState();
+            using (var textFile = new LiveTextFile(filePath))
+            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile, autoSaveTextFile, remoteState.LastAutoSavedText ?? string.Empty))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+
+                AssertLiveTextFileSuccessfulLoadWithAutoSave(expectedLoadedText, autoSaveFileText, wcFile);
             }
         }
 
