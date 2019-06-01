@@ -96,6 +96,11 @@ namespace Eutherion.Win.AppTemplate
         }
 
         /// <summary>
+        /// Gets the syntax descriptor.
+        /// </summary>
+        public SyntaxDescriptor<TTerminal, TError> SyntaxDescriptor { get; }
+
+        /// <summary>
         /// Gets the edited text file.
         /// </summary>
         public WorkingCopyTextFile CodeFile { get; }
@@ -122,15 +127,23 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal, TError}"/>.
         /// </summary>
+        /// <param name="syntaxDescriptor">
+        /// The syntax descriptor.
+        /// </param>
         /// <param name="codeFile">
         /// The code file to show and/or edit.
         /// </param>
         /// <param name="autoSaveSetting">
         /// The setting property to use to auto-save the file names of the file pair used for auto-saving local changes.
         /// </param>
-        public SyntaxEditor(LiveTextFile codeFile,
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="syntaxDescriptor"/> is null.
+        /// </exception>
+        public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+                            LiveTextFile codeFile,
                             SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
+            SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             this.autoSaveSetting = autoSaveSetting;
             CodeFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
 
@@ -302,6 +315,19 @@ namespace Eutherion.Win.AppTemplate
 
             return UIActionVisibility.Enabled;
         }
+    }
+
+    /// <summary>
+    /// Describes the interaction between a syntax and how a <see cref="SyntaxDescriptor{TTerminal, TError}"/> displays it.
+    /// </summary>
+    /// <typeparam name="TTerminal">
+    /// The type of terminal symbol to display.
+    /// </typeparam>
+    /// <typeparam name="TError">
+    /// The type of error to display.
+    /// </typeparam>
+    public abstract class SyntaxDescriptor<TTerminal, TError>
+    {
     }
 
     /// <summary>

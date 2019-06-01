@@ -85,7 +85,7 @@ namespace Eutherion.Win.AppTemplate
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            : base(settingsFile, autoSaveSetting)
+            : base(new JsonSyntaxDescriptor(), settingsFile, autoSaveSetting)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
@@ -273,5 +273,12 @@ namespace Eutherion.Win.AppTemplate
                 CallTipCancel();
             }
         }
+    }
+
+    /// <summary>
+    /// Describes the interaction between json syntax and a syntax editor.
+    /// </summary>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
+    {
     }
 }
