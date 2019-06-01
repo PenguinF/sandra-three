@@ -20,13 +20,11 @@
 #endregion
 
 using Eutherion.Text.Json;
-using Eutherion.UIActions;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 
 namespace Eutherion.Win.AppTemplate
@@ -106,9 +104,6 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
             }
 
-            CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
-            CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
-
             // Only use initialTextGenerator if nothing was auto-saved.
             if (CodeFile.LoadException != null
                 && string.IsNullOrEmpty(CodeFile.LocalCopyText))
@@ -123,56 +118,6 @@ namespace Eutherion.Win.AppTemplate
             }
 
             EmptyUndoBuffer();
-        }
-
-        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
-        {
-            if (!ContainsChanges)
-            {
-                // Reload the text if different.
-                string reloadedText = CodeFile.LoadedText;
-
-                // Without this check the undo buffer gets an extra empty entry which is weird.
-                if (CodeFile.LocalCopyText != reloadedText)
-                {
-                    Text = reloadedText;
-                    SetSavePoint();
-                }
-            }
-
-            // Make sure to auto-save if ContainsChanges changed but its text did not.
-            // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-            CodeFile.UpdateLocalCopyText(
-                CodeFile.LocalCopyText,
-                ContainsChanges);
-        }
-
-        private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
-        {
-            // Only open auto-save files if they can be stored in autoSaveSetting.
-            if (autoSaveSetting != null)
-            {
-                FileStreamPair fileStreamPair = null;
-
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
-                    e.AutoSaveFileStreamPair = fileStreamPair;
-
-                    Session.Current.AutoSave.Persist(
-                        autoSaveSetting,
-                        new AutoSaveFileNamePair(
-                            Path.GetFileName(fileStreamPair.FileStream1.Name),
-                            Path.GetFileName(fileStreamPair.FileStream2.Name)));
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
-                }
-            }
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
@@ -234,40 +179,8 @@ namespace Eutherion.Win.AppTemplate
             OnCurrentErrorsChanged(EventArgs.Empty);
         }
 
-        private int displayedMaxLineNumberLength;
-
-        private int GetMaxLineNumberLength(int maxLineNumberToDisplay)
-        {
-            if (maxLineNumberToDisplay <= 9) return 1;
-            if (maxLineNumberToDisplay <= 99) return 2;
-            if (maxLineNumberToDisplay <= 999) return 3;
-            if (maxLineNumberToDisplay <= 9999) return 4;
-            return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
-        }
-
-        private bool copyingTextFromTextFile;
-
-        /// <summary>
-        /// Sets the Text property without updating WorkingCopyTextFile
-        /// when they're known to be the same.
-        /// </summary>
-        private void CopyTextFromTextFile()
-        {
-            copyingTextFromTextFile = true;
-            try
-            {
-                Text = CodeFile.LocalCopyText;
-            }
-            finally
-            {
-                copyingTextFromTextFile = false;
-            }
-        }
-
         protected override void OnTextChanged(EventArgs e)
         {
-            CallTipCancel();
-
             base.OnTextChanged(e);
 
             string currentText = Text;
@@ -359,43 +272,6 @@ namespace Eutherion.Win.AppTemplate
             {
                 CallTipCancel();
             }
-        }
-
-        protected override void OnDwellEnd(DwellEventArgs e)
-        {
-            CallTipCancel();
-            base.OnDwellEnd(e);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                CodeFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
-                CodeFile.Dispose();
-
-                // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
-                if (autoSaveSetting != null && CodeFile.AutoSaveFile == null)
-                {
-                    Session.Current.AutoSave.Remove(autoSaveSetting);
-                }
-            }
-
-            base.Dispose(disposing);
-        }
-
-        public UIActionState TrySaveToFile(bool perform)
-        {
-            if (ReadOnly) return UIActionVisibility.Hidden;
-            if (!ContainsChanges) return UIActionVisibility.Disabled;
-
-            if (perform)
-            {
-                CodeFile.Save();
-                SetSavePoint();
-            }
-
-            return UIActionVisibility.Enabled;
         }
     }
 }
