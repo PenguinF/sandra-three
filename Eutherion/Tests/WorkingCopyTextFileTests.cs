@@ -26,22 +26,55 @@ using Xunit;
 
 namespace Eutherion.Win.Tests
 {
+    public enum TargetFile
+    {
+        /// <summary>
+        /// The primary target text file.
+        /// </summary>
+        PrimaryTextFile,
+
+        /// <summary>
+        /// The primary auto-save file.
+        /// </summary>
+        AutoSaveFile1,
+
+        /// <summary>
+        /// The secondary auto-save file.
+        /// </summary>
+        AutoSaveFile2,
+    }
+
     public class FileFixture : IDisposable
     {
+        private class TargetFileState
+        {
+            public readonly string FilePath;
+
+            public TargetFileState(string fileName)
+            {
+                // This prepends the working directory, which is the location of the compiled unit test dll.
+                FilePath = Path.GetFullPath(fileName);
+            }
+        }
+
+        private readonly TargetFileState textFileState;
+        private readonly TargetFileState autoSaveFileState1;
+        private readonly TargetFileState autoSaveFileState2;
+
         /// <summary>
         /// Primary target text file path.
         /// </summary>
-        public string TextFilePath { get; }
+        public string TextFilePath => GetPath(TargetFile.PrimaryTextFile);
 
         /// <summary>
         /// Gets the path to the primary auto-save file.
         /// </summary>
-        public string AutoSaveFilePath1 { get; }
+        public string AutoSaveFilePath1 => GetPath(TargetFile.AutoSaveFile1);
 
         /// <summary>
         /// Gets the path to the secondary auto-save file.
         /// </summary>
-        public string AutoSaveFilePath2 { get; }
+        public string AutoSaveFilePath2 => GetPath(TargetFile.AutoSaveFile2);
 
         public void PrepareAutoSaveFiles(byte[] autoSaveBytes1, byte[] autoSaveBytes2)
         {
@@ -51,11 +84,26 @@ namespace Eutherion.Win.Tests
 
         public FileFixture()
         {
-            // Path.GetFullPath() prepends the working directory, which is the location of the compiled unit test dll.
-            TextFilePath = Path.GetFullPath("test.txt");
-            AutoSaveFilePath1 = Path.GetFullPath("autosave1.txt");
-            AutoSaveFilePath2 = Path.GetFullPath("autosave2.txt");
+            textFileState = new TargetFileState("test.txt");
+            autoSaveFileState1 = new TargetFileState("autosave1.txt");
+            autoSaveFileState2 = new TargetFileState("autosave2.txt");
         }
+
+        private TargetFileState GetTargetFileState(TargetFile targetFile)
+        {
+            switch (targetFile)
+            {
+                default:
+                case TargetFile.PrimaryTextFile:
+                    return textFileState;
+                case TargetFile.AutoSaveFile1:
+                    return autoSaveFileState1;
+                case TargetFile.AutoSaveFile2:
+                    return autoSaveFileState2;
+            }
+        }
+
+        public string GetPath(TargetFile targetFile) => GetTargetFileState(targetFile).FilePath;
 
         public void Dispose()
         {
