@@ -61,12 +61,6 @@ namespace Eutherion.Win.Tests
         private readonly TargetFileState autoSaveFileState1;
         private readonly TargetFileState autoSaveFileState2;
 
-        public void PrepareAutoSaveFiles(byte[] autoSaveBytes1, byte[] autoSaveBytes2)
-        {
-            File.WriteAllBytes(GetPath(TargetFile.AutoSaveFile1), autoSaveBytes1);
-            File.WriteAllBytes(GetPath(TargetFile.AutoSaveFile2), autoSaveBytes2);
-        }
-
         public FileFixture()
         {
             textFileState = new TargetFileState("test.txt");
@@ -89,6 +83,11 @@ namespace Eutherion.Win.Tests
         }
 
         public string GetPath(TargetFile targetFile) => GetTargetFileState(targetFile).FilePath;
+
+        public void PrepareTargetFile(TargetFile targetFile, byte[] fileBytes)
+        {
+            File.WriteAllBytes(GetPath(targetFile), fileBytes);
+        }
 
         public void Dispose()
         {
@@ -174,14 +173,16 @@ namespace Eutherion.Win.Tests
             string expectedAutoSaveText = "A";
 
             // Both file permutations should yield the same result.
-            fileFixture.PrepareAutoSaveFiles(invalidFile, validFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, invalidFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, validFile);
             var remoteState1 = new WorkingCopyTextFile.TextAutoSaveState();
             using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState1, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, remoteState1.LastAutoSavedText);
             }
 
-            fileFixture.PrepareAutoSaveFiles(validFile, invalidFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, validFile);
+            fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, invalidFile);
             var remoteState2 = new WorkingCopyTextFile.TextAutoSaveState();
             using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState2, AutoSaveFiles()))
             {
