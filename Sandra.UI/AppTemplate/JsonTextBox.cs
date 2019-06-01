@@ -21,7 +21,6 @@
 
 using Eutherion.Text.Json;
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
@@ -29,7 +28,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
@@ -41,59 +39,6 @@ namespace Eutherion.Win.AppTemplate
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
         private const int stringStyleIndex = 10;
-        private const int errorIndicatorIndex = 8;
-
-        /// <summary>
-        /// This results in file names such as ".%_A8.tmp".
-        /// </summary>
-        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
-
-        private static FileStream CreateUniqueNewAutoSaveFileStream()
-        {
-            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
-            {
-                autoSaveFileCounter = 1;
-            };
-
-            var file = FileUtilities.CreateUniqueFile(
-                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
-                FileOptions.SequentialScan | FileOptions.Asynchronous,
-                ref autoSaveFileCounter);
-
-            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
-
-            return file;
-        }
-
-        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile settingsFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-        {
-            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
-            {
-                FileStreamPair fileStreamPair = null;
-
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                    return new WorkingCopyTextFile(settingsFile, fileStreamPair);
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
-                }
-            }
-
-            return new WorkingCopyTextFile(settingsFile, null);
-        }
-
-        private static readonly Color callTipBackColor = Color.FromArgb(48, 32, 32);
-        private static readonly Font callTipFont = new Font("Segoe UI", 10);
 
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -103,8 +48,6 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        private Style CallTipStyle => Styles[Style.CallTip];
-        private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CommentStyle => Styles[commentStyleIndex];
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
@@ -127,27 +70,9 @@ namespace Eutherion.Win.AppTemplate
         }
 
         /// <summary>
-        /// Gets the edited text file.
-        /// </summary>
-        public WorkingCopyTextFile WorkingCopyTextFile { get; }
-
-        /// <summary>
-        /// Returns if this <see cref="JsonTextBox"/> contains any unsaved changes.
-        /// If the text file could not be opened, true is returned.
-        /// </summary>
-        public bool ContainsChanges
-            => !ReadOnly
-            && (Modified || WorkingCopyTextFile.LoadException != null);
-
-        /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
         /// </summary>
         private readonly SettingSchema schema;
-
-        /// <summary>
-        /// Setting to use when an auto-save file name pair is generated.
-        /// </summary>
-        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
@@ -162,31 +87,11 @@ namespace Eutherion.Win.AppTemplate
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+            : base(settingsFile, autoSaveSetting)
         {
             if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
-            this.autoSaveSetting = autoSaveSetting;
             schema = settingsFile.Settings.Schema;
-            WorkingCopyTextFile = OpenWorkingCopyTextFile(settingsFile, autoSaveSetting);
-
-            BorderStyle = BorderStyle.None;
-
-            StyleResetDefault();
-            DefaultStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
-            DefaultStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
-            DefaultSyntaxEditorStyle.Font.CopyTo(DefaultStyle);
-            StyleClearAll();
-
-            SetSelectionBackColor(true, DefaultSyntaxEditorStyle.ForeColor);
-            SetSelectionForeColor(true, DefaultSyntaxEditorStyle.BackColor);
-
-            LineNumberStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
-            LineNumberStyle.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
-            DefaultSyntaxEditorStyle.Font.CopyTo(LineNumberStyle);
-
-            CallTipStyle.BackColor = callTipBackColor;
-            CallTipStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
-            callTipFont.CopyTo(CallTipStyle);
 
             CommentStyle.ForeColor = commentForeColor;
             commentFont.CopyTo(CommentStyle);
@@ -195,18 +100,6 @@ namespace Eutherion.Win.AppTemplate
             valueFont.CopyTo(ValueStyle);
 
             StringStyle.ForeColor = stringForeColor;
-
-            Indicators[errorIndicatorIndex].Style = IndicatorStyle.Squiggle;
-            Indicators[errorIndicatorIndex].ForeColor = Color.Red;
-            IndicatorCurrent = errorIndicatorIndex;
-
-            Margins[0].BackColor = DefaultSyntaxEditorStyle.BackColor;
-            Margins[1].BackColor = DefaultSyntaxEditorStyle.BackColor;
-
-            CaretForeColor = DefaultSyntaxEditorStyle.ForeColor;
-
-            // Enable dwell events.
-            MouseDwellTime = SystemInformation.MouseHoverTime;
 
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
             {

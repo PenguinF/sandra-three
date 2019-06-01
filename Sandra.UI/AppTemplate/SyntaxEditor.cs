@@ -24,8 +24,11 @@ using Eutherion.Text;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
+using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
@@ -34,18 +37,132 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public abstract class SyntaxEditor<TTerminal> : ScintillaEx
     {
+        private const int ErrorIndicatorIndex = 8;
+
+        /// <summary>
+        /// This results in file names such as ".%_A8.tmp".
+        /// </summary>
+        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
+
+        protected static FileStream CreateUniqueNewAutoSaveFileStream()
+        {
+            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
+            {
+                autoSaveFileCounter = 1;
+            };
+
+            var file = FileUtilities.CreateUniqueFile(
+                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
+                FileOptions.SequentialScan | FileOptions.Asynchronous,
+                ref autoSaveFileCounter);
+
+            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
+
+            return file;
+        }
+
+        protected static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        {
+            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
+            {
+                FileStreamPair fileStreamPair = null;
+
+                try
+                {
+                    fileStreamPair = FileStreamPair.Create(
+                        AutoSaveTextFile.OpenExistingAutoSaveFile,
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                    return new WorkingCopyTextFile(codeFile, fileStreamPair);
+                }
+                catch (Exception autoSaveLoadException)
+                {
+                    if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                    autoSaveLoadException.Trace();
+                }
+            }
+
+            return new WorkingCopyTextFile(codeFile, null);
+        }
+
+        /// <summary>
+        /// Gets the edited text file.
+        /// </summary>
+        public WorkingCopyTextFile WorkingCopyTextFile { get; }
+
+        /// <summary>
+        /// Returns if this <see cref="SyntaxEditor{TTerminal}"/> contains any unsaved changes.
+        /// If the text file could not be opened, true is returned.
+        /// </summary>
+        public bool ContainsChanges
+            => !ReadOnly
+            && (Modified || WorkingCopyTextFile.LoadException != null);
+
+        /// <summary>
+        /// Setting to use when an auto-save file name pair is generated.
+        /// </summary>
+        protected readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
+
         protected readonly TextIndex<TTerminal> TextIndex;
 
         protected Style DefaultStyle => Styles[Style.Default];
+        private Style LineNumberStyle => Styles[Style.LineNumber];
+        private Style CallTipStyle => Styles[Style.CallTip];
 
-        public SyntaxEditor()
+        /// <summary>
+        /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal}"/>.
+        /// </summary>
+        /// <param name="codeFile">
+        /// The code file to show and/or edit.
+        /// </param>
+        /// <param name="autoSaveSetting">
+        /// The setting property to use to auto-save the file names of the file pair used for auto-saving local changes.
+        /// </param>
+        public SyntaxEditor(LiveTextFile codeFile,
+                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
+            this.autoSaveSetting = autoSaveSetting;
+            WorkingCopyTextFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
+
             TextIndex = new TextIndex<TTerminal>();
 
             HScrollBar = false;
             VScrollBar = true;
 
+            BorderStyle = BorderStyle.None;
+
+            StyleResetDefault();
+            DefaultStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
+            DefaultStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
+            DefaultSyntaxEditorStyle.Font.CopyTo(DefaultStyle);
+            StyleClearAll();
+
+            SetSelectionBackColor(true, DefaultSyntaxEditorStyle.ForeColor);
+            SetSelectionForeColor(true, DefaultSyntaxEditorStyle.BackColor);
+
+            CaretForeColor = DefaultSyntaxEditorStyle.ForeColor;
+
+            CallTipStyle.BackColor = DefaultSyntaxEditorStyle.CallTipBackColor;
+            CallTipStyle.ForeColor = DefaultSyntaxEditorStyle.ForeColor;
+            DefaultSyntaxEditorStyle.CallTipFont.CopyTo(CallTipStyle);
+
             Margins.ForEach(x => x.Width = 0);
+            Margins[0].BackColor = DefaultSyntaxEditorStyle.BackColor;
+            Margins[1].BackColor = DefaultSyntaxEditorStyle.BackColor;
+
+            LineNumberStyle.BackColor = DefaultSyntaxEditorStyle.BackColor;
+            LineNumberStyle.ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
+            DefaultSyntaxEditorStyle.Font.CopyTo(LineNumberStyle);
+
+            Indicators[ErrorIndicatorIndex].Style = IndicatorStyle.Squiggle;
+            Indicators[ErrorIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.ErrorColor;
+            IndicatorCurrent = ErrorIndicatorIndex;
+
+            // Enable dwell events.
+            MouseDwellTime = SystemInformation.MouseHoverTime;
         }
 
         protected void ApplyStyle(TextElement<TTerminal> element, Style style)
@@ -65,6 +182,11 @@ namespace Eutherion.Win.AppTemplate
         /// Gets the default fore color used for displaying line numbers in a syntax editor.
         /// </summary>
         public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
+
+        public static readonly Color ErrorColor = Color.Red;
+
+        public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
+        public static readonly Font CallTipFont = new Font("Segoe UI", 10);
     }
 
     /// <summary>
