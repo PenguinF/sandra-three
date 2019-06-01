@@ -390,18 +390,16 @@ namespace Eutherion.Win.Tests
             // Both file permutations should yield the same result.
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, invalidFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, validFile);
-            var remoteState1 = new WorkingCopyTextFile.TextAutoSaveState();
-            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState1, AutoSaveFiles()))
+            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
             {
-                Assert.Equal(expectedAutoSaveText, remoteState1.LastAutoSavedText);
+                AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
             }
 
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, validFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, invalidFile);
-            var remoteState2 = new WorkingCopyTextFile.TextAutoSaveState();
-            using (var autoSaveTextFile = new AutoSaveTextFile<string>(remoteState2, AutoSaveFiles()))
+            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
             {
-                Assert.Equal(expectedAutoSaveText, remoteState2.LastAutoSavedText);
+                AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
             }
         }
 
