@@ -119,7 +119,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
 
-        protected readonly TextIndex<TTerminal> TextIndex;
+        private readonly TextIndex<TTerminal> TextIndex;
 
         protected Style DefaultStyle => Styles[Style.Default];
         private Style LineNumberStyle => Styles[Style.LineNumber];
@@ -134,6 +134,9 @@ namespace Eutherion.Win.AppTemplate
         /// <param name="codeFile">
         /// The code file to show and/or edit.
         /// </param>
+        /// <param name="initialTextGenerator">
+        /// Optional function to generate initial text in case the code file could not be loaded and was not auto-saved.
+        /// </param>
         /// <param name="autoSaveSetting">
         /// The setting property to use to auto-save the file names of the file pair used for auto-saving local changes.
         /// </param>
@@ -142,6 +145,7 @@ namespace Eutherion.Win.AppTemplate
         /// </exception>
         public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
                             LiveTextFile codeFile,
+                            Func<string> initialTextGenerator,
                             SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
@@ -187,6 +191,20 @@ namespace Eutherion.Win.AppTemplate
 
             CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
             CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+
+            // Only use initialTextGenerator if nothing was auto-saved.
+            if (CodeFile.LoadException != null && string.IsNullOrEmpty(CodeFile.LocalCopyText))
+            {
+                Text = initialTextGenerator != null
+                    ? (initialTextGenerator() ?? string.Empty)
+                    : string.Empty;
+            }
+            else
+            {
+                CopyTextFromTextFile();
+            }
+
+            EmptyUndoBuffer();
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
@@ -239,13 +257,13 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        protected bool copyingTextFromTextFile;
+        private bool copyingTextFromTextFile;
 
         /// <summary>
         /// Sets the Text property without updating WorkingCopyTextFile
         /// when they're known to be the same.
         /// </summary>
-        protected void CopyTextFromTextFile()
+        private void CopyTextFromTextFile()
         {
             copyingTextFromTextFile = true;
             try
@@ -258,12 +276,9 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        protected void ApplyStyle(TextElement<TTerminal> element, Style style)
-            => ApplyStyle(style, element.Start, element.Length);
+        private int displayedMaxLineNumberLength;
 
-        protected int displayedMaxLineNumberLength;
-
-        protected int GetMaxLineNumberLength(int maxLineNumberToDisplay)
+        private int GetMaxLineNumberLength(int maxLineNumberToDisplay)
         {
             if (maxLineNumberToDisplay <= 9) return 1;
             if (maxLineNumberToDisplay <= 99) return 2;
@@ -276,15 +291,63 @@ namespace Eutherion.Win.AppTemplate
         {
             CallTipCancel();
             base.OnTextChanged(e);
+
+            string code = Text;
+
+            // This prevents re-entrancy into WorkingCopyTextFile.
+            if (!copyingTextFromTextFile)
+            {
+                CodeFile.UpdateLocalCopyText(code, ContainsChanges);
+            }
+
+            int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
+            if (displayedMaxLineNumberLength != maxLineNumberLength)
+            {
+                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
+                Margins[1].Width = TextWidth(Style.LineNumber, "0");
+                displayedMaxLineNumberLength = maxLineNumberLength;
+            }
+
+            TextIndex.Clear();
+
+            var (tokens, errors) = SyntaxDescriptor.Parse(code);
+            tokens.ForEach(TextIndex.AppendTerminalSymbol);
+
+            foreach (var textElement in TextIndex.Elements)
+            {
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), textElement.Start, textElement.Length);
+            }
+
+            IndicatorClearRange(0, TextLength);
+
+            if (errors.Count == 0)
+            {
+                currentErrors = null;
+            }
+            else
+            {
+                currentErrors = errors;
+
+                foreach (var error in errors)
+                {
+                    var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+
+                    IndicatorFillRange(errorStart, errorLength);
+                }
+            }
+
+            CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        protected List<TError> currentErrors;
+        private List<TError> currentErrors;
 
         public int CurrentErrorCount
             => currentErrors == null ? 0 : currentErrors.Count;
 
         public IEnumerable<TError> CurrentErrors
             => currentErrors == null ? Enumerable.Empty<TError>() : currentErrors.Enumerate();
+
+        public event EventHandler CurrentErrorsChanged;
 
         public void ActivateError(int errorIndex)
         {
@@ -404,6 +467,16 @@ namespace Eutherion.Win.AppTemplate
     /// </typeparam>
     public abstract class SyntaxDescriptor<TTerminal, TError>
     {
+        /// <summary>
+        /// Parses the code, yielding lists of tokens and errors.
+        /// </summary>
+        public abstract (IEnumerable<TextElement<TTerminal>>, List<TError>) Parse(string code);
+
+        /// <summary>
+        /// Gets the style for a terminal symbol.
+        /// </summary>
+        public abstract Style GetStyle(SyntaxEditor<TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
+
         /// <summary>
         /// Gets the start position and the length of the text span of an error.
         /// </summary>

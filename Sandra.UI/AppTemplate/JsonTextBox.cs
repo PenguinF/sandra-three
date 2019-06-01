@@ -19,13 +19,13 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 
 namespace Eutherion.Win.AppTemplate
 {
@@ -50,7 +50,7 @@ namespace Eutherion.Win.AppTemplate
         private Style ValueStyle => Styles[valueStyleIndex];
         private Style StringStyle => Styles[stringStyleIndex];
 
-        private sealed class StyleSelector : JsonSymbolVisitor<Style>
+        internal sealed class StyleSelector : JsonSymbolVisitor<Style>
         {
             private readonly JsonTextBox owner;
 
@@ -68,11 +68,6 @@ namespace Eutherion.Win.AppTemplate
         }
 
         /// <summary>
-        /// Schema which defines what kind of keys and values are valid in the parsed json.
-        /// </summary>
-        private readonly SettingSchema schema;
-
-        /// <summary>
         /// Initializes a new instance of a <see cref="JsonTextBox"/>.
         /// </summary>
         /// <param name="settingsFile">
@@ -85,12 +80,8 @@ namespace Eutherion.Win.AppTemplate
         /// <paramref name="settingsFile"/> is null.
         /// </exception>
         public JsonTextBox(SettingsFile settingsFile, Func<string> initialTextGenerator, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            : base(new JsonSyntaxDescriptor(), settingsFile, autoSaveSetting)
+            : base(new JsonSyntaxDescriptor(settingsFile), settingsFile, initialTextGenerator, autoSaveSetting)
         {
-            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
-
-            schema = settingsFile.Settings.Schema;
-
             CommentStyle.ForeColor = commentForeColor;
             commentFont.CopyTo(CommentStyle);
 
@@ -103,21 +94,6 @@ namespace Eutherion.Win.AppTemplate
             {
                 Zoom = zoomFactor;
             }
-
-            // Only use initialTextGenerator if nothing was auto-saved.
-            if (CodeFile.LoadException != null
-                && string.IsNullOrEmpty(CodeFile.LocalCopyText))
-            {
-                Text = initialTextGenerator != null
-                    ? (initialTextGenerator() ?? string.Empty)
-                    : string.Empty;
-            }
-            else
-            {
-                CopyTextFromTextFile();
-            }
-
-            EmptyUndoBuffer();
         }
 
         protected override void OnZoomFactorChanged(ZoomFactorChangedEventArgs e)
@@ -126,38 +102,43 @@ namespace Eutherion.Win.AppTemplate
             base.OnZoomFactorChanged(e);
             Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
         }
+    }
 
-        private void ParseAndApplySyntaxHighlighting(string json)
+    /// <summary>
+    /// Describes the interaction between json syntax and a syntax editor.
+    /// </summary>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
+    {
+        /// <summary>
+        /// Schema which defines what kind of keys and values are valid in the parsed json.
+        /// </summary>
+        private readonly SettingSchema schema;
+
+        /// <summary>
+        /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
+        /// </summary>
+        /// <param name="styleSelector">
+        /// The style selector for syntax highlighting.
+        /// </param>
+        /// <param name="schema">
+        /// The schema which defines what kind of keys and values are valid in the parsed json.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="styleSelector"/> and/or <paramref name="schema"/> are null.
+        /// </exception>
+        public JsonSyntaxDescriptor(SettingsFile settingsFile)
         {
-            int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
-            if (displayedMaxLineNumberLength != maxLineNumberLength)
-            {
-                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
-                Margins[1].Width = TextWidth(Style.LineNumber, "0");
-                displayedMaxLineNumberLength = maxLineNumberLength;
-            }
+            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
 
-            TextIndex.Clear();
+            schema = settingsFile.Settings.Schema;
+        }
 
-            var parser = new SettingReader(json);
-            parser.Tokens.ForEach(TextIndex.AppendTerminalSymbol);
-
-            var styleSelector = new StyleSelector(this);
-
-            foreach (var textElement in TextIndex.Elements)
-            {
-                ApplyStyle(textElement, styleSelector.Visit(textElement.TerminalSymbol));
-            }
-
+        public override (IEnumerable<TextElement<JsonSymbol>>, List<JsonErrorInfo>) Parse(string code)
+        {
+            var parser = new SettingReader(code);
             parser.TryParse(schema, out PMap dummy, out List<JsonErrorInfo> errors);
 
-            IndicatorClearRange(0, TextLength);
-
-            if (errors.Count == 0)
-            {
-                currentErrors = null;
-            }
-            else
+            if (errors.Count > 0)
             {
                 errors.Sort((x, y)
                     => x.Start < y.Start ? -1
@@ -167,46 +148,17 @@ namespace Eutherion.Win.AppTemplate
                     : x.ErrorCode < y.ErrorCode ? -1
                     : x.ErrorCode > y.ErrorCode ? 1
                     : 0);
-
-                currentErrors = errors;
-
-                foreach (var error in errors)
-                {
-                    IndicatorFillRange(error.Start, error.Length);
-                }
             }
 
-            OnCurrentErrorsChanged(EventArgs.Empty);
+            return (parser.Tokens, errors);
         }
 
-        protected override void OnTextChanged(EventArgs e)
+        public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
         {
-            base.OnTextChanged(e);
-
-            string currentText = Text;
-
-            // This prevents re-entrancy into WorkingCopyTextFile.
-            if (!copyingTextFromTextFile)
-            {
-                CodeFile.UpdateLocalCopyText(currentText, ContainsChanges);
-            }
-
-            ParseAndApplySyntaxHighlighting(currentText);
+            var styleSelector = new JsonTextBox.StyleSelector((JsonTextBox)syntaxEditor);
+            return styleSelector.Visit(terminalSymbol);
         }
 
-        public event EventHandler CurrentErrorsChanged;
-
-        protected virtual void OnCurrentErrorsChanged(EventArgs e)
-        {
-            CurrentErrorsChanged?.Invoke(this, e);
-        }
-    }
-
-    /// <summary>
-    /// Describes the interaction between json syntax and a syntax editor.
-    /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
-    {
         public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
 
         public override string GetErrorMessage(JsonErrorInfo error) => error.Message(Session.Current.CurrentLocalizer);
