@@ -205,6 +205,7 @@ namespace Eutherion.Win.Tests
 
         private void AssertLiveTextFileSuccessfulLoad(string loadedText, WorkingCopyTextFile wcFile)
         {
+            Assert.False(wcFile.IsDisposed);
             Assert.Null(wcFile.AutoSaveFile);
             Assert.Equal(loadedText, wcFile.LoadedText);
             Assert.Null(wcFile.LoadException);
@@ -213,7 +214,9 @@ namespace Eutherion.Win.Tests
 
         private void AssertLiveTextFileSuccessfulLoadWithAutoSave(string loadedText, string autoSavedText, WorkingCopyTextFile wcFile)
         {
+            Assert.False(wcFile.IsDisposed);
             Assert.NotNull(wcFile.AutoSaveFile);
+            Assert.False(wcFile.AutoSaveFile.IsDisposed);
             Assert.Equal(loadedText, wcFile.LoadedText);
             Assert.Null(wcFile.LoadException);
 
@@ -428,6 +431,12 @@ namespace Eutherion.Win.Tests
             using (var wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.NotNull(wcFile.AutoSaveFile);
+
+                // Assert that the auto-save file is still there, but disposed.
+                wcFile.Dispose();
+                Assert.NotNull(wcFile.AutoSaveFile);
+                Assert.True(wcFile.AutoSaveFile.IsDisposed);
             }
         }
 
