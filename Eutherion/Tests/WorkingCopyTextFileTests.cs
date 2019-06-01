@@ -43,11 +43,25 @@ namespace Eutherion.Win.Tests
         AutoSaveFile2,
     }
 
+    public enum FileState
+    {
+        /// <summary>
+        /// The file does not exist.
+        /// </summary>
+        DoesNotExist,
+
+        /// <summary>
+        /// The file exists and is readable.
+        /// </summary>
+        Text,
+    }
+
     public class FileFixture : IDisposable
     {
         private class TargetFileState
         {
             public readonly string FilePath;
+            public FileState CurrentFileState;
 
             public TargetFileState(string fileName)
             {
@@ -83,16 +97,32 @@ namespace Eutherion.Win.Tests
 
         public string GetPath(TargetFile targetFile) => GetTargetFileState(targetFile).FilePath;
 
+        public void PrepareTargetFile(TargetFile targetFile, FileState newFileState)
+        {
+            var targetFileState = GetTargetFileState(targetFile);
+
+            if (targetFileState.CurrentFileState != newFileState)
+            {
+                targetFileState.CurrentFileState = newFileState;
+
+                if (newFileState == FileState.DoesNotExist)
+                {
+                    File.Delete(targetFileState.FilePath);
+                }
+            }
+        }
+
         public void PrepareTargetFile(TargetFile targetFile, byte[] fileBytes)
         {
+            PrepareTargetFile(targetFile, FileState.Text);
             File.WriteAllBytes(GetPath(targetFile), fileBytes);
         }
 
         public void Dispose()
         {
-            File.Delete(GetPath(TargetFile.PrimaryTextFile));
-            File.Delete(GetPath(TargetFile.AutoSaveFile1));
-            File.Delete(GetPath(TargetFile.AutoSaveFile2));
+            PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
         }
     }
 
