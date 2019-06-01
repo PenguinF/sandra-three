@@ -52,6 +52,16 @@ namespace Eutherion.Win.Tests
         DoesNotExist,
 
         /// <summary>
+        /// The file is locked and cannot be read from.
+        /// </summary>
+        LockedByAnotherProcess,
+
+        /// <summary>
+        /// The file is a directory.
+        /// </summary>
+        IsDirectory,
+
+        /// <summary>
         /// The file exists and is readable.
         /// </summary>
         Text,
@@ -63,6 +73,7 @@ namespace Eutherion.Win.Tests
         {
             public readonly string FilePath;
             public FileState CurrentFileState;
+            public FileStream LockedFileStream;
 
             public TargetFileState(string fileName)
             {
@@ -104,11 +115,34 @@ namespace Eutherion.Win.Tests
 
             if (targetFileState.CurrentFileState != newFileState)
             {
+                if (targetFileState.CurrentFileState == FileState.LockedByAnotherProcess)
+                {
+                    targetFileState.LockedFileStream.Dispose();
+                    targetFileState.LockedFileStream = null;
+                }
+                else if (targetFileState.CurrentFileState == FileState.IsDirectory)
+                {
+                    Directory.Delete(targetFileState.FilePath);
+                }
+
                 targetFileState.CurrentFileState = newFileState;
 
                 if (newFileState == FileState.DoesNotExist)
                 {
                     File.Delete(targetFileState.FilePath);
+                }
+                else if (newFileState == FileState.LockedByAnotherProcess)
+                {
+                    targetFileState.LockedFileStream = new FileStream(
+                        targetFileState.FilePath,
+                        FileMode.OpenOrCreate,
+                        FileAccess.ReadWrite,
+                        FileShare.None);
+                }
+                else if (newFileState == FileState.IsDirectory)
+                {
+                    File.Delete(targetFileState.FilePath);
+                    Directory.CreateDirectory(targetFileState.FilePath);
                 }
             }
         }
@@ -127,6 +161,7 @@ namespace Eutherion.Win.Tests
 
         public void Dispose()
         {
+            // This removes locks and deletes the files.
             PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
@@ -209,6 +244,31 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
 
                 AssertLiveTextFileSuccessfulLoad(text, wcFile);
+            }
+        }
+
+        [Theory]
+        // "Could not find file '...\test.txt'."
+        [InlineData(FileState.DoesNotExist, typeof(FileNotFoundException))]
+        // "The process cannot access the file '...\test.txt' because it is being used by another process."
+        [InlineData(FileState.LockedByAnotherProcess, typeof(IOException))]
+        // "Access to the path '...' is denied."
+        [InlineData(FileState.IsDirectory, typeof(UnauthorizedAccessException))]
+        public void InaccessibleFileInitialState(FileState fileState, Type exceptionType)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
+
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.OpenExisting(textFile))
+            {
+                Assert.Same(textFile, wcFile.OpenTextFile);
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+                Assert.Null(wcFile.AutoSaveFile);
+
+                Assert.Equal(string.Empty, wcFile.LoadedText);
+                Assert.IsType(exceptionType, wcFile.LoadException);
+                Assert.Equal(string.Empty, wcFile.LocalCopyText);
             }
         }
 
