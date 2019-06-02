@@ -316,6 +316,7 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
+                missedUpdates = false;
                 IsDisposed = true;
             }
         }
