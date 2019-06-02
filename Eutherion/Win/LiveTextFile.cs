@@ -26,7 +26,6 @@ using System.IO;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Eutherion.Win
 {
@@ -56,7 +55,7 @@ namespace Eutherion.Win
         private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
         private readonly Task pollFileChangesBackgroundTask;
 
-        private WindowsFormsSynchronizationContext sc;
+        private SynchronizationContext sc;
         private bool missedUpdates;
         private bool isDisposed;
 
@@ -202,11 +201,11 @@ namespace Eutherion.Win
         protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
         /// <summary>
-        /// Captures the synchronization context so file update events can be posted to it.
+        /// Captures the synchronization context of the current thread on which to post file update events.
         /// </summary>
         public void CaptureSynchronizationContext()
         {
-            var newSynchronizationContext = (WindowsFormsSynchronizationContext)SynchronizationContext.Current;
+            var newSynchronizationContext = SynchronizationContext.Current;
 
             bool mustLoad = false;
 
@@ -259,7 +258,7 @@ namespace Eutherion.Win
                     {
                         lock (updateSentinel)
                         {
-                            // If no WindowsFormsSynchronizationContext, don't post anything.
+                            // If no SynchronizationContext, don't post anything.
                             if (sc != null)
                             {
                                 sc.Post(RaiseFileUpdatedEvent, null);
