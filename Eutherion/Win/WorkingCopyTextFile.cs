@@ -60,6 +60,8 @@ namespace Eutherion.Win
             }
         }
 
+        private readonly bool isTextFileOwner;
+
         // Keep a reference to the auto-save state, but don't access it until after disposing AutoSaveFile,
         // because it is updated from a background thread.
         // After disposing, its final LastAutoSavedText can be used to find out if the auto-save files can be deleted.
@@ -113,6 +115,7 @@ namespace Eutherion.Win
 
         private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {
+            this.isTextFileOwner = isTextFileOwner;
             OpenTextFile = openTextFile;
 
             if (autoSaveFiles != null)
