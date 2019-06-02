@@ -161,9 +161,9 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public void SetSynchronizationContext()
         {
-            DefaultSettings.SetSynchronizationContext();
-            LocalSettings.SetSynchronizationContext();
-            RegisteredLocalizers.ForEach(x => x.LanguageFile.SetSynchronizationContext());
+            DefaultSettings.CaptureSynchronizationContext();
+            LocalSettings.CaptureSynchronizationContext();
+            RegisteredLocalizers.ForEach(x => x.LanguageFile.CaptureSynchronizationContext());
         }
 
         private string LocalApplicationDataPath(bool isLocalSchema)

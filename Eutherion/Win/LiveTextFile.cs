@@ -111,7 +111,7 @@ namespace Eutherion.Win
 
             // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
             Load();
-            SetSynchronizationContext();
+            CaptureSynchronizationContext();
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
@@ -165,7 +165,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Captures the synchronization context so file update events can be posted to it.
         /// </summary>
-        public void SetSynchronizationContext()
+        public void CaptureSynchronizationContext()
         {
             if (SynchronizationContext.Current is WindowsFormsSynchronizationContext newSynchronizationContext)
             {
