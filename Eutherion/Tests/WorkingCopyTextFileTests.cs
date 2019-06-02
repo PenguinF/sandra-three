@@ -407,6 +407,32 @@ namespace Eutherion.Win.Tests
         }
 
         [Fact]
+        public void ExistingFileOwnership()
+        {
+            string text = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
+
+            // wcFile does not own textFile: textFile must still be open after wcFile is disposed.
+            var textFile = new LiveTextFile(filePath);
+            var wcFile = new WorkingCopyTextFile(textFile, null);
+            wcFile.Dispose();
+            Assert.NotNull(wcFile.OpenTextFile);
+            Assert.False(textFile.IsDisposed);
+            textFile.Dispose();
+            Assert.True(textFile.IsDisposed);
+
+            // wcFile owns textFile: textFile must be disposed together with wcFile.
+            wcFile = WorkingCopyTextFile.Open(filePath, null);
+            textFile = wcFile.OpenTextFile;
+            Assert.False(textFile.IsDisposed);
+            wcFile.Dispose();
+            Assert.NotNull(wcFile.OpenTextFile);
+            Assert.True(textFile.IsDisposed);
+        }
+
+        [Fact]
         public void ModificationsAreAutoSaved()
         {
             string expectedLoadedText = "A";

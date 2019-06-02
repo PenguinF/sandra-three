@@ -247,6 +247,11 @@ namespace Eutherion.Win
         {
             if (!IsDisposed)
             {
+                if (isTextFileOwner && OpenTextFile != null)
+                {
+                    OpenTextFile.Dispose();
+                }
+
                 if (AutoSaveFile != null)
                 {
                     // Dispose first, then check if the files are empty.
