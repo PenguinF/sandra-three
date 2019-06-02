@@ -56,6 +56,7 @@ namespace Eutherion.Win
         private readonly Task pollFileChangesBackgroundTask;
 
         private SynchronizationContext sc;
+        private Union<Exception, string> loadedText;
         private bool missedUpdates;
 
         /// <summary>
@@ -160,19 +161,19 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the loaded file as text in memory, or an exception if it could not be loaded.
         /// </summary>
-        public Union<Exception, string> LoadedText { get; private set; }
+        public Union<Exception, string> LoadedText => loadedText;
 
         private void Load()
         {
             try
             {
-                LoadedText = File.ReadAllText(AbsoluteFilePath);
+                loadedText = File.ReadAllText(AbsoluteFilePath);
             }
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (!IsExternalCauseFileException(exception)) throw;
-                LoadedText = exception;
+                loadedText = exception;
             }
         }
 
