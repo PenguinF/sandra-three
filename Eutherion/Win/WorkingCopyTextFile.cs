@@ -68,6 +68,8 @@ namespace Eutherion.Win
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
         /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
+        /// Use this constructor for <see cref="LiveTextFile"/> instances which must remain live after this
+        /// <see cref="WorkingCopyTextFile"/> is disposed.
         /// </summary>
         /// <param name="openTextFile">
         /// The open text file, or null to create a new file.
@@ -77,6 +79,11 @@ namespace Eutherion.Win
         /// or null to not load from an auto-save file.
         /// </param>
         public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
+            : this(openTextFile, autoSaveFiles, isTextFileOwner: false)
+        {
+        }
+
+        private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {
             OpenTextFile = openTextFile;
 
