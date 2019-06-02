@@ -143,6 +143,7 @@ namespace Eutherion.Win
                 if (!string.IsNullOrEmpty(autoSavedText))
                 {
                     LocalCopyText = autoSavedText;
+                    ContainsChanges = true;
                     return;
                 }
             }
@@ -189,6 +190,11 @@ namespace Eutherion.Win
         public string LocalCopyText { get; private set; } = string.Empty;
 
         /// <summary>
+        /// Returns if the text contains any unsaved changes.
+        /// </summary>
+        public bool ContainsChanges { get; private set; }
+
+        /// <summary>
         /// Gets if this <see cref="WorkingCopyTextFile"/> is disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
@@ -216,6 +222,7 @@ namespace Eutherion.Win
             ThrowIfDisposed();
 
             LocalCopyText = text ?? string.Empty;
+            ContainsChanges = containsChanges;
 
             if (containsChanges)
             {

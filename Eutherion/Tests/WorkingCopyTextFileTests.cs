@@ -210,6 +210,7 @@ namespace Eutherion.Win.Tests
             Assert.Equal(loadedText, wcFile.LoadedText);
             Assert.Null(wcFile.LoadException);
             Assert.Equal(loadedText, wcFile.LocalCopyText);
+            Assert.False(wcFile.ContainsChanges);
         }
 
         private void AssertLiveTextFileSuccessfulLoadWithAutoSave(string loadedText, string autoSavedText, WorkingCopyTextFile wcFile)
@@ -224,10 +225,12 @@ namespace Eutherion.Win.Tests
             if (string.IsNullOrEmpty(autoSavedText))
             {
                 Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
             else
             {
                 Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
             }
         }
 
@@ -322,6 +325,7 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(string.Empty, wcFile.LoadedText);
                 Assert.IsType(exceptionType, wcFile.LoadException);
                 Assert.Equal(string.Empty, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
         }
 
@@ -451,6 +455,7 @@ namespace Eutherion.Win.Tests
             {
                 wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFileStreamPair = AutoSaveFiles();
                 wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+                Assert.True(wcFile.ContainsChanges);
             }
 
             // Reloading the WorkingCopyTextFile should restore the auto saved text, even when the original file is deleted.
@@ -460,12 +465,14 @@ namespace Eutherion.Win.Tests
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
                 Assert.NotNull(wcFile.AutoSaveFile);
 
                 // Assert that the auto-save file is still there, but disposed.
                 wcFile.Dispose();
                 Assert.NotNull(wcFile.AutoSaveFile);
                 Assert.True(wcFile.AutoSaveFile.IsDisposed);
+                Assert.True(wcFile.ContainsChanges);
             }
         }
 
@@ -508,13 +515,16 @@ namespace Eutherion.Win.Tests
                 // Assert transitions between auto-save states.
                 Assert.NotNull(wcFile.AutoSaveFile);
                 Assert.Equal(autoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
                 wcFile.UpdateLocalCopyText(loadedText, containsChanges: false);
                 Assert.NotNull(wcFile.AutoSaveFile);
                 Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
                 wcFile.Dispose();
 
                 // Assert that the auto-save files have been deleted.
                 Assert.Null(wcFile.AutoSaveFile);
+                Assert.False(wcFile.ContainsChanges);
                 Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
                 Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
             }
