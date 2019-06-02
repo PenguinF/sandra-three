@@ -57,7 +57,12 @@ namespace Eutherion.Win
 
         private SynchronizationContext sc;
         private Union<Exception, string> loadedText;
-        private bool missedUpdates;
+
+        /// <summary>
+        /// Gets if this <see cref="LiveTextFile"/> was updated and <see cref="LoadedText"/>
+        /// will be reloaded on the next call.
+        /// </summary>
+        public bool IsDirty { get; private set; }
 
         /// <summary>
         /// Gets if this <see cref="LiveTextFile"/> is disposed.
@@ -219,8 +224,8 @@ namespace Eutherion.Win
                 if (sc != newSynchronizationContext)
                 {
                     sc = newSynchronizationContext;
-                    mustLoad = missedUpdates;
-                    missedUpdates = false;
+                    mustLoad = IsDirty;
+                    IsDirty = false;
                 }
             }
 
@@ -270,7 +275,7 @@ namespace Eutherion.Win
                             }
                             else
                             {
-                                missedUpdates = true;
+                                IsDirty = true;
                             }
                         }
                     }
@@ -317,7 +322,7 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-                missedUpdates = false;
+                IsDirty = false;
                 IsDisposed = true;
             }
         }
