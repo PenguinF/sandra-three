@@ -603,5 +603,30 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(newLoadedText, wcFile.LoadedText);
             }
         }
+
+        [Theory]
+        // First and last value must be different or WorkingCopyTextFile will load with ContaisChanges == false.
+        [InlineData("A", "B", "C")]
+        [InlineData("A", "A", "C")]
+        [InlineData("A", "C", "C")]
+        public void TextNotAutoUpdatedWithLocalChanges(string oldLoadedText, string newLoadedText, string autoSavedText)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+            PrepareAutoSave(autoSavedText);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+
+                // Assert that LoadedText is updated but LocalCopyText is not.
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+            }
+        }
     }
 }
