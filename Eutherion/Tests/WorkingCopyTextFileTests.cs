@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace Eutherion.Win.Tests
@@ -575,6 +576,31 @@ namespace Eutherion.Win.Tests
 
                 // Assert that the auto-save files have been deleted.
                 AssertNoAutoSaveFiles(wcFile);
+            }
+        }
+
+        [Fact]
+        public void TextAutoUpdated()
+        {
+            string oldLoadedText = "A";
+            string newLoadedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
+            {
+                // Use an EventWaitHandle to wait for the event to occur.
+                // This works because the event will get raised on a background thread.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+
+                // Simulate that the opened text file was updated remotely.
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+
+                // Assert that the loaded text is updated automatically.
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
             }
         }
     }
