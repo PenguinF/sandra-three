@@ -144,6 +144,7 @@ namespace Eutherion.Win
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
+            IsDirty = true;
             watcher = new FileWatcher(AbsoluteFilePath);
 
             // Set up file change listener thread.
@@ -151,9 +152,6 @@ namespace Eutherion.Win
             fileChangeSignalWaitHandle = new AutoResetEvent(false);
             fileChangeQueue = new ConcurrentQueue<FileChangeType>();
             watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
-
-            // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
-            Load();
 
             if (captureSynchronizationContext)
             {
@@ -166,7 +164,30 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the loaded file as text in memory, or an exception if it could not be loaded.
         /// </summary>
-        public Union<Exception, string> LoadedText => loadedText;
+        public Union<Exception, string> LoadedText
+        {
+            get
+            {
+                if (IsDirty)
+                {
+                    bool mustLoad = false;
+
+                    lock (updateSentinel)
+                    {
+                        mustLoad = IsDirty;
+                        IsDirty = false;
+                    }
+
+                    if (mustLoad)
+                    {
+                        // Must load again because of missed changes.
+                        Load();
+                    }
+                }
+
+                return loadedText;
+            }
+        }
 
         private void Load()
         {
@@ -215,25 +236,8 @@ namespace Eutherion.Win
         /// </summary>
         public void CaptureSynchronizationContext()
         {
-            var newSynchronizationContext = SynchronizationContext.Current;
-
-            bool mustLoad = false;
-
-            lock (updateSentinel)
-            {
-                if (sc != newSynchronizationContext)
-                {
-                    sc = newSynchronizationContext;
-                    mustLoad = IsDirty;
-                    IsDirty = false;
-                }
-            }
-
-            if (mustLoad)
-            {
-                // Must load again because of missed changes.
-                Load();
-            }
+            // No need to lock because sc cannot be reset to null here.
+            sc = SynchronizationContext.Current;
         }
 
         private void PollFileChangesLoop(CancellationToken cancellationToken)
@@ -268,14 +272,12 @@ namespace Eutherion.Win
                     {
                         lock (updateSentinel)
                         {
+                            IsDirty = true;
+
                             // If no SynchronizationContext, don't post anything.
                             if (sc != null)
                             {
                                 sc.Post(RaiseFileUpdatedEvent, null);
-                            }
-                            else
-                            {
-                                IsDirty = true;
                             }
                         }
                     }
@@ -302,7 +304,6 @@ namespace Eutherion.Win
 
         private void RaiseFileUpdatedEvent(object state)
         {
-            Load();
             OnFileUpdated(EventArgs.Empty);
         }
 
