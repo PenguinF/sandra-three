@@ -209,24 +209,48 @@ namespace Eutherion.Win.AppTemplate
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
-            if (!(!ReadOnly && (Modified || CodeFile.LoadException != null)))
+            if (CodeFile.LoadException != null)
             {
-                // Reload the text if different.
-                string reloadedText = CodeFile.LoadedText;
-
-                // Without this check the undo buffer gets an extra empty entry which is weird.
-                if (CodeFile.LocalCopyText != reloadedText)
+                if (!(!ReadOnly && (Modified || true)))
                 {
-                    Text = reloadedText;
-                    SetSavePoint();
-                }
-            }
+                    // Reload the text if different.
+                    string reloadedText = CodeFile.LoadedText;
 
-            // Make sure to auto-save if ContainsChanges changed but its text did not.
-            // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-            CodeFile.UpdateLocalCopyText(
-                CodeFile.LocalCopyText,
-                !ReadOnly && (Modified || CodeFile.LoadException != null));
+                    // Without this check the undo buffer gets an extra empty entry which is weird.
+                    if (CodeFile.LocalCopyText != reloadedText)
+                    {
+                        Text = reloadedText;
+                        SetSavePoint();
+                    }
+                }
+
+                // Make sure to auto-save if ContainsChanges changed but its text did not.
+                // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+                CodeFile.UpdateLocalCopyText(
+                    CodeFile.LocalCopyText,
+                    !ReadOnly && (Modified || true));
+            }
+            else
+            {
+                if (!(!ReadOnly && (Modified || false)))
+                {
+                    // Reload the text if different.
+                    string reloadedText = CodeFile.LoadedText;
+
+                    // Without this check the undo buffer gets an extra empty entry which is weird.
+                    if (CodeFile.LocalCopyText != reloadedText)
+                    {
+                        Text = reloadedText;
+                        SetSavePoint();
+                    }
+                }
+
+                // Make sure to auto-save if ContainsChanges changed but its text did not.
+                // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+                CodeFile.UpdateLocalCopyText(
+                    CodeFile.LocalCopyText,
+                    !ReadOnly && (Modified || false));
+            }
         }
 
         private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
