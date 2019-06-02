@@ -57,7 +57,11 @@ namespace Eutherion.Win
 
         private SynchronizationContext sc;
         private bool missedUpdates;
-        private bool isDisposed;
+
+        /// <summary>
+        /// Gets if this <see cref="LiveTextFile"/> is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -298,7 +302,7 @@ namespace Eutherion.Win
 
         public void Dispose()
         {
-            if (!isDisposed)
+            if (!IsDisposed)
             {
                 cts.Cancel();
 
@@ -312,7 +316,7 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-                isDisposed = true;
+                IsDisposed = true;
             }
         }
     }
