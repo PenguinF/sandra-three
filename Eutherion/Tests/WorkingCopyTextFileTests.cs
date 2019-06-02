@@ -415,21 +415,25 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
 
             // wcFile does not own textFile: textFile must still be open after wcFile is disposed.
-            var textFile = new LiveTextFile(filePath);
-            var wcFile = new WorkingCopyTextFile(textFile, null);
-            wcFile.Dispose();
-            Assert.NotNull(wcFile.OpenTextFile);
-            Assert.False(textFile.IsDisposed);
-            textFile.Dispose();
-            Assert.True(textFile.IsDisposed);
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            {
+                wcFile.Dispose();
+                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.False(textFile.IsDisposed);
+                textFile.Dispose();
+                Assert.True(textFile.IsDisposed);
+            }
 
             // wcFile owns textFile: textFile must be disposed together with wcFile.
-            wcFile = WorkingCopyTextFile.Open(filePath, null);
-            textFile = wcFile.OpenTextFile;
-            Assert.False(textFile.IsDisposed);
-            wcFile.Dispose();
-            Assert.NotNull(wcFile.OpenTextFile);
-            Assert.True(textFile.IsDisposed);
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
+            {
+                var textFile = wcFile.OpenTextFile;
+                Assert.False(textFile.IsDisposed);
+                wcFile.Dispose();
+                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.True(textFile.IsDisposed);
+            }
         }
 
         [Fact]
@@ -443,8 +447,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
 
-            using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
             {
                 wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFileStreamPair = AutoSaveFiles();
                 wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
@@ -469,21 +472,25 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void AllowMultipleDispose()
         {
-            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
-            wcFile.Dispose();
-            Assert.True(wcFile.IsDisposed);
-            wcFile.Dispose();
-            Assert.True(wcFile.IsDisposed);
+            using (var wcFile = new WorkingCopyTextFile(null, null))
+            {
+                wcFile.Dispose();
+                Assert.True(wcFile.IsDisposed);
+                wcFile.Dispose();
+                Assert.True(wcFile.IsDisposed);
+            }
         }
 
         [Fact]
         public void UpdatesBlockedAfterDispose()
         {
-            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
-            Assert.Throws<InvalidOperationException>(wcFile.Save);
-            wcFile.Dispose();
-            Assert.Throws<ObjectDisposedException>(wcFile.Save);
-            Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
+            using (var wcFile = new WorkingCopyTextFile(null, null))
+            {
+                Assert.Throws<InvalidOperationException>(wcFile.Save);
+                wcFile.Dispose();
+                Assert.Throws<ObjectDisposedException>(wcFile.Save);
+                Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
+            }
         }
 
         [Fact]
@@ -496,11 +503,14 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
             PrepareAutoSave(autoSaveText);
 
-            WorkingCopyTextFile wcFile;
-            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
-                wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles());
+                // Assert transitions between auto-save states.
+                Assert.NotNull(wcFile.AutoSaveFile);
+                Assert.Equal(autoSaveText, wcFile.LocalCopyText);
                 wcFile.UpdateLocalCopyText(loadedText, containsChanges: false);
+                Assert.NotNull(wcFile.AutoSaveFile);
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
                 wcFile.Dispose();
 
                 // Assert that the auto-save files have been deleted.
