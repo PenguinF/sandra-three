@@ -648,5 +648,33 @@ namespace Eutherion.Win.Tests
                 AssertNoAutoSaveFiles(wcFile);
             }
         }
+
+        [Theory]
+        [InlineData(FileState.DoesNotExist)]
+        [InlineData(FileState.IsDirectory)]
+        // Skip LockedByAnotherProcess, because then the LoadedTextChanged event isn't raised.
+        public void FailedAutoUpdate(FileState fileState)
+        {
+            string loadedText = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
+                ewh.WaitOne();
+
+                // LocalCopyText should still be intact even though LoadedText is cleared.
+                wcFile.Dispose();
+                Assert.Equal(string.Empty, wcFile.LoadedText);
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+                Assert.NotNull(wcFile.AutoSaveFile);
+            }
+        }
     }
 }
