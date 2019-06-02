@@ -85,6 +85,40 @@ namespace Eutherion.Win
         /// <paramref name="path"/> is in an invalid format.
         /// </exception>
         public LiveTextFile(string path)
+            : this(path, captureSynchronizationContext: true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="LiveTextFile"/>
+        /// watching a file at a specific path.
+        /// </summary>
+        /// <param name="path">
+        /// The path of the file to watch.
+        /// </param>
+        /// <param name="captureSynchronizationContext">
+        /// True to immediately capture the current synchronization context to raise file updated events on,
+        /// false otherwise. If no synchronization context is captured, the <see cref="FileUpdated"/>
+        /// event is not raised.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public LiveTextFile(string path, bool captureSynchronizationContext)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
 
@@ -111,7 +145,12 @@ namespace Eutherion.Win
 
             // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
             Load();
-            CaptureSynchronizationContext();
+
+            if (captureSynchronizationContext)
+            {
+                CaptureSynchronizationContext();
+            }
+
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
@@ -167,25 +206,24 @@ namespace Eutherion.Win
         /// </summary>
         public void CaptureSynchronizationContext()
         {
-            if (SynchronizationContext.Current is WindowsFormsSynchronizationContext newSynchronizationContext)
+            var newSynchronizationContext = (WindowsFormsSynchronizationContext)SynchronizationContext.Current;
+
+            bool mustLoad = false;
+
+            lock (updateSentinel)
             {
-                bool mustLoad = false;
-
-                lock (updateSentinel)
+                if (sc != newSynchronizationContext)
                 {
-                    if (sc != newSynchronizationContext)
-                    {
-                        sc = newSynchronizationContext;
-                        mustLoad = missedUpdates;
-                        missedUpdates = false;
-                    }
+                    sc = newSynchronizationContext;
+                    mustLoad = missedUpdates;
+                    missedUpdates = false;
                 }
+            }
 
-                if (mustLoad)
-                {
-                    // Must load again because of missed changes.
-                    Load();
-                }
+            if (mustLoad)
+            {
+                // Must load again because of missed changes.
+                Load();
             }
         }
 
