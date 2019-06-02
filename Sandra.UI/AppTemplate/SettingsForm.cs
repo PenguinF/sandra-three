@@ -422,7 +422,6 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                jsonTextBox.CodeFile.LoadedTextChanged -= CodeFile_LoadedTextChanged;
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

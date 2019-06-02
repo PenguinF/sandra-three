@@ -426,7 +426,6 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                CodeFile.LoadedTextChanged -= CodeFile_LoadedTextChanged;
                 CodeFile.Dispose();
 
                 // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
