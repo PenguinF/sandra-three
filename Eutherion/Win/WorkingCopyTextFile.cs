@@ -66,6 +66,34 @@ namespace Eutherion.Win
         private TextAutoSaveState autoSaveState;
 
         /// <summary>
+        /// Initializes a new <see cref="WorkingCopyTextFile"/> from a file path and a <see cref="FileStreamPair"/>
+        /// from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
+        /// </summary>
+        /// <param name="path">
+        /// The path of the file to load and watch, or null to create a new file.
+        /// </param>
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
+        /// or null to not load from an auto-save file.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public static WorkingCopyTextFile Open(string path, FileStreamPair autoSaveFiles)
+            => new WorkingCopyTextFile(path == null ? null : new LiveTextFile(path), autoSaveFiles, isTextFileOwner: true);
+
+        /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
         /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// Use this constructor for <see cref="LiveTextFile"/> instances which must remain live after this
