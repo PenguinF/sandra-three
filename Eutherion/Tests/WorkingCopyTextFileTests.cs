@@ -601,6 +601,8 @@ namespace Eutherion.Win.Tests
 
                 // Assert that the loaded text is updated automatically.
                 Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(newLoadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
         }
 
@@ -639,12 +641,9 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
             PrepareAutoSave(autoSavedText);
 
-            using (var ewh = new ManualResetEvent(false))
             using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
-                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
                 wcFile.Save();
-                ewh.WaitOne();
                 wcFile.Dispose();
                 AssertNoAutoSaveFiles(wcFile);
             }

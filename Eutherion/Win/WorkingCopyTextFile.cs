@@ -181,6 +181,7 @@ namespace Eutherion.Win
 
         /// <summary>
         /// Occurs when the contents of the opened file changed.
+        /// The event is not raised when there are no changes and the contents of the file remain the same.
         /// </summary>
         public event Action<WorkingCopyTextFile, EventArgs> LoadedTextChanged;
 
@@ -277,7 +278,42 @@ namespace Eutherion.Win
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
-            => LoadedTextChanged?.Invoke(this, e);
+        {
+            bool raiseEvent = true;
+
+            if (!ContainsChanges)
+            {
+                if (LoadException != null)
+                {
+                    // Make sure to auto-save the text.
+                    // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+                    UpdateLocalCopyText(LocalCopyText, containsChanges: true);
+                }
+                else
+                {
+                    // Reload the text if different.
+                    string reloadedText = LoadedText ?? string.Empty;
+
+                    // Without this check the undo buffer gets an extra empty entry which is weird.
+                    if (LocalCopyText != reloadedText)
+                    {
+                        UpdateLocalCopyText(reloadedText, containsChanges: false);
+                    }
+                    else
+                    {
+                        // Block raising the event when:
+                        // - ContainsChanges is false;
+                        // - The reloaded text is exactly the same as LocalCopyText.
+                        raiseEvent = false;
+                    }
+                }
+            }
+
+            if (raiseEvent)
+            {
+                LoadedTextChanged?.Invoke(this, e);
+            }
+        }
 
         /// <summary>
         /// Disposes of all owned managed resources.
