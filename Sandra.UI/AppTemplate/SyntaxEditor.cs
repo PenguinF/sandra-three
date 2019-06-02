@@ -209,7 +209,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
-            if (!ContainsChanges)
+            if (!(!ReadOnly && (Modified || CodeFile.LoadException != null)))
             {
                 // Reload the text if different.
                 string reloadedText = CodeFile.LoadedText;
@@ -226,7 +226,7 @@ namespace Eutherion.Win.AppTemplate
             // This covers the case in which the file was saved and unmodified, but then deleted remotely.
             CodeFile.UpdateLocalCopyText(
                 CodeFile.LocalCopyText,
-                ContainsChanges);
+                !ReadOnly && (Modified || CodeFile.LoadException != null));
         }
 
         private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
