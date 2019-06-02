@@ -214,39 +214,30 @@ namespace Eutherion.Win.AppTemplate
                 if (ReadOnly)
                 {
                     // If read-only, just reload with an empty text.
-                    if (TextLength > 0)
+                    if (!string.IsNullOrEmpty(CodeFile.LocalCopyText))
                     {
-                        Text = string.Empty;
-                        SetSavePoint();
+                        CodeFile.UpdateLocalCopyText(string.Empty, containsChanges: false);
+                        CopyTextFromTextFile();
                     }
                 }
                 else if (!CodeFile.ContainsChanges)
                 {
                     // Make sure to auto-save the text.
                     // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-                    CodeFile.UpdateLocalCopyText(CodeFile.LocalCopyText, true);
+                    CodeFile.UpdateLocalCopyText(CodeFile.LocalCopyText, containsChanges: true);
                 }
             }
-            else
+            else if (!CodeFile.ContainsChanges)
             {
-                if (!(!ReadOnly && (Modified || false)))
+                // Reload the text if different.
+                string reloadedText = CodeFile.LoadedText;
+
+                // Without this check the undo buffer gets an extra empty entry which is weird.
+                if (CodeFile.LocalCopyText != reloadedText)
                 {
-                    // Reload the text if different.
-                    string reloadedText = CodeFile.LoadedText;
-
-                    // Without this check the undo buffer gets an extra empty entry which is weird.
-                    if (CodeFile.LocalCopyText != reloadedText)
-                    {
-                        Text = reloadedText;
-                        SetSavePoint();
-                    }
+                    CodeFile.UpdateLocalCopyText(reloadedText, containsChanges: false);
+                    CopyTextFromTextFile();
                 }
-
-                // Make sure to auto-save if ContainsChanges changed but its text did not.
-                // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-                CodeFile.UpdateLocalCopyText(
-                    CodeFile.LocalCopyText,
-                    !ReadOnly && (Modified || false));
             }
         }
 
@@ -290,6 +281,7 @@ namespace Eutherion.Win.AppTemplate
             try
             {
                 Text = CodeFile.LocalCopyText;
+                SetSavePoint();
             }
             finally
             {
