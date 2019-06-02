@@ -55,7 +55,7 @@ namespace Sandra.UI
                 mdiContainerForm.Load += (_, __) =>
                 {
                     // Inform session of the current synchronization context once a message loop exists.
-                    session.SetSynchronizationContext();
+                    session.CaptureSynchronizationContext();
                 };
 
                 Application.Run(mdiContainerForm);

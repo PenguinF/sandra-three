@@ -159,11 +159,11 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Enables receiving <see cref="LiveTextFile"/> updates on the UI thread.
         /// </summary>
-        public void SetSynchronizationContext()
+        public void CaptureSynchronizationContext()
         {
-            DefaultSettings.SetSynchronizationContext();
-            LocalSettings.SetSynchronizationContext();
-            RegisteredLocalizers.ForEach(x => x.LanguageFile.SetSynchronizationContext());
+            DefaultSettings.CaptureSynchronizationContext();
+            LocalSettings.CaptureSynchronizationContext();
+            RegisteredLocalizers.ForEach(x => x.LanguageFile.CaptureSynchronizationContext());
         }
 
         private string LocalApplicationDataPath(bool isLocalSchema)

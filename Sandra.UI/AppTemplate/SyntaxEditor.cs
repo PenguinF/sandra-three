@@ -320,7 +320,7 @@ namespace Eutherion.Win.AppTemplate
 
             IndicatorClearRange(0, TextLength);
 
-            if (errors.Count == 0)
+            if (errors == null || errors.Count == 0)
             {
                 currentErrors = null;
             }

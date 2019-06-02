@@ -26,7 +26,6 @@ using System.IO;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Eutherion.Win
 {
@@ -56,9 +55,19 @@ namespace Eutherion.Win
         private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
         private readonly Task pollFileChangesBackgroundTask;
 
-        private WindowsFormsSynchronizationContext sc;
-        private bool missedUpdates;
-        private bool isDisposed;
+        private SynchronizationContext sc;
+        private Union<Exception, string> loadedText;
+
+        /// <summary>
+        /// Gets if this <see cref="LiveTextFile"/> was updated and <see cref="LoadedText"/>
+        /// will be reloaded on the next call.
+        /// </summary>
+        public bool IsDirty { get; private set; }
+
+        /// <summary>
+        /// Gets if this <see cref="LiveTextFile"/> is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="LiveTextFile"/>
@@ -85,6 +94,40 @@ namespace Eutherion.Win
         /// <paramref name="path"/> is in an invalid format.
         /// </exception>
         public LiveTextFile(string path)
+            : this(path, captureSynchronizationContext: true)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="LiveTextFile"/>
+        /// watching a file at a specific path.
+        /// </summary>
+        /// <param name="path">
+        /// The path of the file to watch.
+        /// </param>
+        /// <param name="captureSynchronizationContext">
+        /// True to immediately capture the current synchronization context to raise file updated events on,
+        /// false otherwise. If no synchronization context is captured, the <see cref="FileUpdated"/>
+        /// event is not raised.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public LiveTextFile(string path, bool captureSynchronizationContext)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
 
@@ -101,6 +144,7 @@ namespace Eutherion.Win
                 if (IsExternalCauseFileException(exception)) exception.Trace(); else throw;
             }
 
+            IsDirty = true;
             watcher = new FileWatcher(AbsoluteFilePath);
 
             // Set up file change listener thread.
@@ -109,28 +153,53 @@ namespace Eutherion.Win
             fileChangeQueue = new ConcurrentQueue<FileChangeType>();
             watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
-            // Load first version only now, so no changes between the first Load() and EnableRaisingEvents can be missed.
-            Load();
-            SetSynchronizationContext();
+            if (captureSynchronizationContext)
+            {
+                sc = SynchronizationContext.Current;
+            }
+
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
 
         /// <summary>
         /// Gets the loaded file as text in memory, or an exception if it could not be loaded.
         /// </summary>
-        public Union<Exception, string> LoadedText { get; private set; }
+        public Union<Exception, string> LoadedText
+        {
+            get
+            {
+                if (IsDirty)
+                {
+                    bool mustLoad = false;
+
+                    lock (updateSentinel)
+                    {
+                        mustLoad = IsDirty;
+                        IsDirty = false;
+                    }
+
+                    if (mustLoad)
+                    {
+                        // Must load again because of missed changes.
+                        Load();
+                    }
+                }
+
+                return loadedText;
+            }
+        }
 
         private void Load()
         {
             try
             {
-                LoadedText = File.ReadAllText(AbsoluteFilePath);
+                loadedText = File.ReadAllText(AbsoluteFilePath);
             }
             catch (Exception exception)
             {
                 // 'Expected' exceptions can be traced, but rethrow developer errors.
                 if (!IsExternalCauseFileException(exception)) throw;
-                LoadedText = exception;
+                loadedText = exception;
             }
         }
 
@@ -163,29 +232,17 @@ namespace Eutherion.Win
         protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
         /// <summary>
-        /// Captures the synchronization context so file update events can be posted to it.
+        /// Captures the synchronization context of the current thread on which to post file update events.
         /// </summary>
-        public void SetSynchronizationContext()
+        public void CaptureSynchronizationContext()
         {
-            if (SynchronizationContext.Current is WindowsFormsSynchronizationContext newSynchronizationContext)
+            // No need to lock because sc cannot be reset to null here.
+            sc = SynchronizationContext.Current;
+
+            // Immediately raise the FileUpdated event if dirty.
+            if (IsDirty)
             {
-                bool mustLoad = false;
-
-                lock (updateSentinel)
-                {
-                    if (sc != newSynchronizationContext)
-                    {
-                        sc = newSynchronizationContext;
-                        mustLoad = missedUpdates;
-                        missedUpdates = false;
-                    }
-                }
-
-                if (mustLoad)
-                {
-                    // Must load again because of missed changes.
-                    Load();
-                }
+                RaiseFileUpdatedEvent(null);
             }
         }
 
@@ -221,14 +278,12 @@ namespace Eutherion.Win
                     {
                         lock (updateSentinel)
                         {
-                            // If no WindowsFormsSynchronizationContext, don't post anything.
+                            IsDirty = true;
+
+                            // If no SynchronizationContext, don't post anything.
                             if (sc != null)
                             {
                                 sc.Post(RaiseFileUpdatedEvent, null);
-                            }
-                            else
-                            {
-                                missedUpdates = true;
                             }
                         }
                     }
@@ -255,13 +310,12 @@ namespace Eutherion.Win
 
         private void RaiseFileUpdatedEvent(object state)
         {
-            Load();
             OnFileUpdated(EventArgs.Empty);
         }
 
         public void Dispose()
         {
-            if (!isDisposed)
+            if (!IsDisposed)
             {
                 cts.Cancel();
 
@@ -275,7 +329,8 @@ namespace Eutherion.Win
                 }
 
                 cts.Dispose();
-                isDisposed = true;
+                IsDirty = false;
+                IsDisposed = true;
             }
         }
     }

@@ -33,6 +33,8 @@ namespace Eutherion.Win.Storage
     {
         /// <summary>
         /// Creates a <see cref="SettingsFile"/> given a valid file path.
+        /// The <see cref="LiveTextFile.FileUpdated"/> event is not raised until
+        /// the current synchronization context is captured explicitly.
         /// </summary>
         /// <param name="absoluteFilePath">
         /// The absolute file path from which to load the settings file.
@@ -83,7 +85,7 @@ namespace Eutherion.Win.Storage
         public SettingObject Settings { get; private set; }
 
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
-            : base(absoluteFilePath)
+            : base(absoluteFilePath, captureSynchronizationContext: false)
         {
             TemplateSettings = templateSettings;
         }
