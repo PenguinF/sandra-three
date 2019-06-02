@@ -209,34 +209,34 @@ namespace Eutherion.Win.AppTemplate
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
-            if (CodeFile.LoadException != null)
+            if (ReadOnly && CodeFile.LoadException != null)
             {
-                if (ReadOnly)
+                // If read-only and the file becomes unavailable, just reload with an empty text.
+                if (!string.IsNullOrEmpty(CodeFile.LocalCopyText))
                 {
-                    // If read-only, just reload with an empty text.
-                    if (!string.IsNullOrEmpty(CodeFile.LocalCopyText))
-                    {
-                        CodeFile.UpdateLocalCopyText(string.Empty, containsChanges: false);
-                        CopyTextFromTextFile();
-                    }
+                    CodeFile.UpdateLocalCopyText(string.Empty, containsChanges: false);
+                    CopyTextFromTextFile();
                 }
-                else if (!CodeFile.ContainsChanges)
+            }
+            else if (!CodeFile.ContainsChanges)
+            {
+                if (CodeFile.LoadException != null)
                 {
                     // Make sure to auto-save the text.
                     // This covers the case in which the file was saved and unmodified, but then deleted remotely.
                     CodeFile.UpdateLocalCopyText(CodeFile.LocalCopyText, containsChanges: true);
                 }
-            }
-            else if (!CodeFile.ContainsChanges)
-            {
-                // Reload the text if different.
-                string reloadedText = CodeFile.LoadedText;
-
-                // Without this check the undo buffer gets an extra empty entry which is weird.
-                if (CodeFile.LocalCopyText != reloadedText)
+                else
                 {
-                    CodeFile.UpdateLocalCopyText(reloadedText, containsChanges: false);
-                    CopyTextFromTextFile();
+                    // Reload the text if different.
+                    string reloadedText = CodeFile.LoadedText;
+
+                    // Without this check the undo buffer gets an extra empty entry which is weird.
+                    if (CodeFile.LocalCopyText != reloadedText)
+                    {
+                        CodeFile.UpdateLocalCopyText(reloadedText, containsChanges: false);
+                        CopyTextFromTextFile();
+                    }
                 }
             }
         }
