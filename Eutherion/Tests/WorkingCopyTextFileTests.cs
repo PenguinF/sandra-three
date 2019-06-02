@@ -628,5 +628,26 @@ namespace Eutherion.Win.Tests
                 Assert.True(wcFile.ContainsChanges);
             }
         }
+
+        [Fact]
+        public void SaveRemovesAutoSave()
+        {
+            string loadedText = "A";
+            string autoSavedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
+            PrepareAutoSave(autoSavedText);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                wcFile.Save();
+                ewh.WaitOne();
+                wcFile.Dispose();
+                AssertNoAutoSaveFiles(wcFile);
+            }
+        }
     }
 }

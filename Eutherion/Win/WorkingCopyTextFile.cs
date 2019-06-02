@@ -268,6 +268,12 @@ namespace Eutherion.Win
             }
 
             OpenTextFile.Save(LocalCopyText);
+
+            // Make sure ContainsChanges is false after saving.
+            // This assumes that the OpenTextFile.FileUpdated event is raised on this thread,
+            // so can only be called after this method returns.
+            // As a consequence, LoadedText also still has its old value.
+            ContainsChanges = false;
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
