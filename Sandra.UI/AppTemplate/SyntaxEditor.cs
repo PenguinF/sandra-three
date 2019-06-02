@@ -211,24 +211,21 @@ namespace Eutherion.Win.AppTemplate
         {
             if (CodeFile.LoadException != null)
             {
-                if (!(!ReadOnly && (Modified || true)))
+                if (ReadOnly)
                 {
-                    // Reload the text if different.
-                    string reloadedText = CodeFile.LoadedText;
-
-                    // Without this check the undo buffer gets an extra empty entry which is weird.
-                    if (CodeFile.LocalCopyText != reloadedText)
+                    // If read-only, just reload with an empty text.
+                    if (TextLength > 0)
                     {
-                        Text = reloadedText;
+                        Text = string.Empty;
                         SetSavePoint();
                     }
                 }
-
-                // Make sure to auto-save if ContainsChanges changed but its text did not.
-                // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-                CodeFile.UpdateLocalCopyText(
-                    CodeFile.LocalCopyText,
-                    !ReadOnly && (Modified || true));
+                else if (!CodeFile.ContainsChanges)
+                {
+                    // Make sure to auto-save the text.
+                    // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+                    CodeFile.UpdateLocalCopyText(CodeFile.LocalCopyText, true);
+                }
             }
             else
             {
