@@ -82,7 +82,7 @@ namespace Eutherion.Win.AppTemplate
                         Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
                         Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
 
-                    return new WorkingCopyTextFile(codeFile, fileStreamPair);
+                    return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
                 }
                 catch (Exception autoSaveLoadException)
                 {
@@ -93,7 +93,7 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
 
-            return new WorkingCopyTextFile(codeFile, null);
+            return WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Eutherion.Win.AppTemplate
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
             CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
-            CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Only use initialTextGenerator if nothing was auto-saved.
             if (CodeFile.LoadException != null && string.IsNullOrEmpty(CodeFile.LocalCopyText))
@@ -207,26 +207,24 @@ namespace Eutherion.Win.AppTemplate
             EmptyUndoBuffer();
         }
 
-        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
-            if (!ContainsChanges)
+            if (!CodeFile.ContainsChanges)
             {
-                // Reload the text if different.
-                string reloadedText = CodeFile.LoadedText;
-
-                // Without this check the undo buffer gets an extra empty entry which is weird.
-                if (CodeFile.LocalCopyText != reloadedText)
+                if (ReadOnly && CodeFile.LoadException != null)
                 {
-                    Text = reloadedText;
-                    SetSavePoint();
+                    // If read-only and the file becomes unavailable, just reload with an empty text.
+                    if (!string.IsNullOrEmpty(CodeFile.LocalCopyText))
+                    {
+                        CodeFile.UpdateLocalCopyText(string.Empty, containsChanges: false);
+                        CopyTextFromTextFile();
+                    }
+                }
+                else
+                {
+                    CopyTextFromTextFile();
                 }
             }
-
-            // Make sure to auto-save if ContainsChanges changed but its text did not.
-            // This covers the case in which the file was saved and unmodified, but then deleted remotely.
-            CodeFile.UpdateLocalCopyText(
-                CodeFile.LocalCopyText,
-                ContainsChanges);
         }
 
         private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
@@ -269,6 +267,7 @@ namespace Eutherion.Win.AppTemplate
             try
             {
                 Text = CodeFile.LocalCopyText;
+                SetSavePoint();
             }
             finally
             {
@@ -426,7 +425,6 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                CodeFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
                 CodeFile.Dispose();
 
                 // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.

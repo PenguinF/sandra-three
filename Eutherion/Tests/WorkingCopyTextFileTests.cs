@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Xunit;
 
 namespace Eutherion.Win.Tests
@@ -210,6 +211,7 @@ namespace Eutherion.Win.Tests
             Assert.Equal(loadedText, wcFile.LoadedText);
             Assert.Null(wcFile.LoadException);
             Assert.Equal(loadedText, wcFile.LocalCopyText);
+            Assert.False(wcFile.ContainsChanges);
         }
 
         private void AssertLiveTextFileSuccessfulLoadWithAutoSave(string loadedText, string autoSavedText, WorkingCopyTextFile wcFile)
@@ -224,11 +226,22 @@ namespace Eutherion.Win.Tests
             if (string.IsNullOrEmpty(autoSavedText))
             {
                 Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
             else
             {
                 Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
             }
+        }
+
+        private void AssertNoAutoSaveFiles(WorkingCopyTextFile wcFile)
+        {
+            // Assert that the auto-save files have been deleted.
+            Assert.Null(wcFile.AutoSaveFile);
+            Assert.False(wcFile.ContainsChanges);
+            Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
+            Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
         }
 
         [Fact]
@@ -257,7 +270,7 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void NewFileInitialState()
         {
-            using (var wcFile = new WorkingCopyTextFile(null, null))
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
@@ -291,7 +304,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -313,7 +326,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -322,6 +335,7 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(string.Empty, wcFile.LoadedText);
                 Assert.IsType(exceptionType, wcFile.LoadException);
                 Assert.Equal(string.Empty, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
         }
 
@@ -331,7 +345,7 @@ namespace Eutherion.Win.Tests
         {
             PrepareAutoSave(autoSaveFileText);
 
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
@@ -351,7 +365,7 @@ namespace Eutherion.Win.Tests
             PrepareAutoSave(autoSaveFileText);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -393,16 +407,46 @@ namespace Eutherion.Win.Tests
             // Both file permutations should yield the same result.
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, invalidFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, validFile);
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
             }
 
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, validFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, invalidFile);
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
+            }
+        }
+
+        [Fact]
+        public void ExistingFileOwnership()
+        {
+            string text = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
+
+            // wcFile does not own textFile: textFile must still be open after wcFile is disposed.
+            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
+            {
+                wcFile.Dispose();
+                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.False(textFile.IsDisposed);
+                textFile.Dispose();
+                Assert.True(textFile.IsDisposed);
+            }
+
+            // wcFile owns textFile: textFile must be disposed together with wcFile.
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
+            {
+                var textFile = wcFile.OpenTextFile;
+                Assert.False(textFile.IsDisposed);
+                wcFile.Dispose();
+                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.True(textFile.IsDisposed);
             }
         }
 
@@ -417,47 +461,95 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
 
-            using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
             {
                 wcFile.QueryAutoSaveFile += (_, e) => e.AutoSaveFileStreamPair = AutoSaveFiles();
                 wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+                Assert.True(wcFile.ContainsChanges);
             }
 
             // Reloading the WorkingCopyTextFile should restore the auto saved text, even when the original file is deleted.
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
 
-            using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
                 Assert.NotNull(wcFile.AutoSaveFile);
 
                 // Assert that the auto-save file is still there, but disposed.
                 wcFile.Dispose();
                 Assert.NotNull(wcFile.AutoSaveFile);
                 Assert.True(wcFile.AutoSaveFile.IsDisposed);
+                Assert.True(wcFile.ContainsChanges);
+            }
+        }
+
+        [Fact]
+        public void DiscardAutosavedModificationsIfFileUpdatedWithSameContents()
+        {
+            // This asserts that there are no changes after the following transitions:
+            // 1) Open existing file with text "A".
+            // 2) Make local modification, change text to "B", this is auto-saved.
+            // 3) Dispose the WorkingCopyTextFile.
+            // 4) Update existing file with contents "B".
+            // 5) Reload WorkingCopyTextFile from the auto-save files.
+            //    -> Should detect that the contents of the file match the auto-saved modifications.
+
+            string expectedLoadedText = "A";
+            string expectedAutoSaveText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+                Assert.True(wcFile.ContainsChanges);
+            }
+
+            // Assert that the auto-save actually happened.
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+            }
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedAutoSaveText);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+                Assert.NotNull(wcFile.AutoSaveFile);
+                wcFile.Dispose();
+                AssertNoAutoSaveFiles(wcFile);
             }
         }
 
         [Fact]
         public void AllowMultipleDispose()
         {
-            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
-            wcFile.Dispose();
-            Assert.True(wcFile.IsDisposed);
-            wcFile.Dispose();
-            Assert.True(wcFile.IsDisposed);
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
+            {
+                wcFile.Dispose();
+                Assert.True(wcFile.IsDisposed);
+                wcFile.Dispose();
+                Assert.True(wcFile.IsDisposed);
+            }
         }
 
         [Fact]
         public void UpdatesBlockedAfterDispose()
         {
-            WorkingCopyTextFile wcFile = new WorkingCopyTextFile(null, null);
-            Assert.Throws<InvalidOperationException>(wcFile.Save);
-            wcFile.Dispose();
-            Assert.Throws<ObjectDisposedException>(wcFile.Save);
-            Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
+            {
+                Assert.Throws<InvalidOperationException>(wcFile.Save);
+                wcFile.Dispose();
+                Assert.Throws<ObjectDisposedException>(wcFile.Save);
+                Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
+            }
         }
 
         [Fact]
@@ -470,17 +562,145 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
             PrepareAutoSave(autoSaveText);
 
-            WorkingCopyTextFile wcFile;
-            using (var textFile = new LiveTextFile(filePath))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
-                wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles());
+                // Assert transitions between auto-save states.
+                Assert.NotNull(wcFile.AutoSaveFile);
+                Assert.Equal(autoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
                 wcFile.UpdateLocalCopyText(loadedText, containsChanges: false);
+                Assert.NotNull(wcFile.AutoSaveFile);
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
                 wcFile.Dispose();
 
                 // Assert that the auto-save files have been deleted.
-                Assert.Null(wcFile.AutoSaveFile);
-                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
-                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
+                AssertNoAutoSaveFiles(wcFile);
+            }
+        }
+
+        [Fact]
+        public void TextAutoUpdated()
+        {
+            string oldLoadedText = "A";
+            string newLoadedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
+            {
+                // Use an EventWaitHandle to wait for the event to occur.
+                // This works because the event will get raised on a background thread.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+
+                // Simulate that the opened text file was updated remotely.
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+
+                // Assert that the loaded text is updated automatically.
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(newLoadedText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
+
+        [Theory]
+        // First and last value must be different or WorkingCopyTextFile will load with ContaisChanges == false.
+        [InlineData("A", "B", "C")]
+        [InlineData("A", "A", "C")]
+        [InlineData("A", "C", "C")]
+        public void TextNotAutoUpdatedWithLocalChanges(string oldLoadedText, string newLoadedText, string autoSavedText)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+            PrepareAutoSave(autoSavedText);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+
+                // Assert that LoadedText is updated but LocalCopyText is not.
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+            }
+        }
+
+        [Fact]
+        public void SaveRemovesAutoSave()
+        {
+            string loadedText = "A";
+            string autoSavedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
+            PrepareAutoSave(autoSavedText);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.Save();
+                wcFile.Dispose();
+                AssertNoAutoSaveFiles(wcFile);
+            }
+        }
+
+        [Theory]
+        [InlineData(FileState.DoesNotExist)]
+        [InlineData(FileState.IsDirectory)]
+        // Skip LockedByAnotherProcess, because then the LoadedTextChanged event isn't raised.
+        public void FailedAutoUpdate(FileState fileState)
+        {
+            string loadedText = "A";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, loadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
+                ewh.WaitOne();
+
+                // LocalCopyText should still be intact even though LoadedText is cleared.
+                wcFile.Dispose();
+                Assert.Equal(string.Empty, wcFile.LoadedText);
+                Assert.Equal(loadedText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+                Assert.NotNull(wcFile.AutoSaveFile);
+            }
+        }
+
+        [Fact]
+        public void FailedSaveThenAutoUpdate()
+        {
+            string oldLoadedText = "A";
+            string newLoadedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.LockedByAnotherProcess);
+                Assert.Throws<IOException>(wcFile.Save);
+
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(newLoadedText, wcFile.LocalCopyText);
+
+                // Auto-updating should still work after being locked by another process.
+                Assert.False(wcFile.ContainsChanges);
             }
         }
     }

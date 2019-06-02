@@ -60,25 +60,81 @@ namespace Eutherion.Win
             }
         }
 
+        private readonly bool isTextFileOwner;
+
         // Keep a reference to the auto-save state, but don't access it until after disposing AutoSaveFile,
         // because it is updated from a background thread.
         // After disposing, its final LastAutoSavedText can be used to find out if the auto-save files can be deleted.
         private TextAutoSaveState autoSaveState;
 
         /// <summary>
-        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
-        /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
+        /// Initializes a new <see cref="WorkingCopyTextFile"/> from a file path and a <see cref="FileStreamPair"/>
+        /// from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// </summary>
-        /// <param name="openTextFile">
-        /// The open text file, or null to create a new file.
+        /// <param name="path">
+        /// The path of the file to load and watch, or null to create a new file.
         /// </param>
         /// <param name="autoSaveFiles">
         /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
         /// or null to not load from an auto-save file.
         /// </param>
-        public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        /// <returns>
+        /// The new <see cref="WorkingCopyTextFile"/>.
+        /// </returns>
+        public static WorkingCopyTextFile Open(string path, FileStreamPair autoSaveFiles)
+            => new WorkingCopyTextFile(
+                path == null ? null : new LiveTextFile(path),
+                autoSaveFiles,
+                isTextFileOwner: true);
+
+        /// <summary>
+        /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
+        /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
+        /// Use this constructor for <see cref="LiveTextFile"/> instances which must remain live after this
+        /// <see cref="WorkingCopyTextFile"/> is disposed.
+        /// </summary>
+        /// <param name="openTextFile">
+        /// The open text file.
+        /// </param>
+        /// <param name="autoSaveFiles">
+        /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
+        /// or null to not load from an auto-save file.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="WorkingCopyTextFile"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="openTextFile"/> is null.
+        /// </exception>
+        public static WorkingCopyTextFile FromLiveTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
+            => new WorkingCopyTextFile(
+                openTextFile ?? throw new ArgumentNullException(nameof(openTextFile)),
+                autoSaveFiles,
+                isTextFileOwner: false);
+
+        private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {
+            this.isTextFileOwner = isTextFileOwner;
             OpenTextFile = openTextFile;
+
+            if (openTextFile != null)
+            {
+                openTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            }
 
             if (autoSaveFiles != null)
             {
@@ -89,9 +145,10 @@ namespace Eutherion.Win
                 // Interpret empty auto-saved text as there being no changes.
                 // Has the slightly odd effect that when someone deletes all text from the editor,
                 // and then closes+reopens the application, the loaded text is shown.
-                if (!string.IsNullOrEmpty(autoSavedText))
+                if (!string.IsNullOrEmpty(autoSavedText) && autoSavedText != LoadedText)
                 {
                     LocalCopyText = autoSavedText;
+                    ContainsChanges = true;
                     return;
                 }
             }
@@ -123,6 +180,12 @@ namespace Eutherion.Win
         public Exception LoadException => OpenTextFile?.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
 
         /// <summary>
+        /// Occurs when the contents of the opened file changed.
+        /// The event is not raised when there are no changes and the contents of the file remain the same.
+        /// </summary>
+        public event Action<WorkingCopyTextFile, EventArgs> LoadedTextChanged;
+
+        /// <summary>
         /// Gets the opened <see cref="AutoSaveTextFile{TUpdate}"/> or null if nothing was auto-saved yet.
         /// </summary>
         public AutoSaveTextFile<string> AutoSaveFile { get; private set; }
@@ -136,6 +199,11 @@ namespace Eutherion.Win
         /// Gets the current local copy version of the text.
         /// </summary>
         public string LocalCopyText { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// Returns if the text contains any unsaved changes.
+        /// </summary>
+        public bool ContainsChanges { get; private set; }
 
         /// <summary>
         /// Gets if this <see cref="WorkingCopyTextFile"/> is disposed.
@@ -165,6 +233,7 @@ namespace Eutherion.Win
             ThrowIfDisposed();
 
             LocalCopyText = text ?? string.Empty;
+            ContainsChanges = containsChanges;
 
             if (containsChanges)
             {
@@ -200,6 +269,50 @@ namespace Eutherion.Win
             }
 
             OpenTextFile.Save(LocalCopyText);
+
+            // Make sure ContainsChanges is false after saving.
+            // This assumes that the OpenTextFile.FileUpdated event is raised on this thread,
+            // so can only be called after this method returns.
+            // As a consequence, LoadedText also still has its old value.
+            ContainsChanges = false;
+        }
+
+        private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
+        {
+            bool raiseEvent = true;
+
+            if (!ContainsChanges)
+            {
+                if (LoadException != null)
+                {
+                    // Make sure to auto-save the text.
+                    // This covers the case in which the file was saved and unmodified, but then deleted remotely.
+                    UpdateLocalCopyText(LocalCopyText, containsChanges: true);
+                }
+                else
+                {
+                    // Reload the text if different.
+                    string reloadedText = LoadedText ?? string.Empty;
+
+                    // Without this check the undo buffer gets an extra empty entry which is weird.
+                    if (LocalCopyText != reloadedText)
+                    {
+                        UpdateLocalCopyText(reloadedText, containsChanges: false);
+                    }
+                    else
+                    {
+                        // Block raising the event when:
+                        // - ContainsChanges is false;
+                        // - The reloaded text is exactly the same as LocalCopyText.
+                        raiseEvent = false;
+                    }
+                }
+            }
+
+            if (raiseEvent)
+            {
+                LoadedTextChanged?.Invoke(this, e);
+            }
         }
 
         /// <summary>
@@ -209,12 +322,22 @@ namespace Eutherion.Win
         {
             if (!IsDisposed)
             {
+                if (OpenTextFile != null)
+                {
+                    OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+
+                    if (isTextFileOwner)
+                    {
+                        OpenTextFile.Dispose();
+                    }
+                }
+
                 if (AutoSaveFile != null)
                 {
                     // Dispose first, then check if the files are empty.
                     AutoSaveFile.Dispose();
 
-                    if (string.IsNullOrEmpty(autoSaveState.LastAutoSavedText))
+                    if (!ContainsChanges)
                     {
                         // Remove auto-save files.
                         try
