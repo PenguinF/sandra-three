@@ -92,8 +92,14 @@ namespace Eutherion.Win
         /// <exception cref="NotSupportedException">
         /// <paramref name="path"/> is in an invalid format.
         /// </exception>
+        /// <returns>
+        /// The new <see cref="WorkingCopyTextFile"/>.
+        /// </returns>
         public static WorkingCopyTextFile Open(string path, FileStreamPair autoSaveFiles)
-            => new WorkingCopyTextFile(path == null ? null : new LiveTextFile(path), autoSaveFiles, isTextFileOwner: true);
+            => new WorkingCopyTextFile(
+                path == null ? null : new LiveTextFile(path),
+                autoSaveFiles,
+                isTextFileOwner: true);
 
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from an open <see cref="LiveTextFile"/>
@@ -102,16 +108,23 @@ namespace Eutherion.Win
         /// <see cref="WorkingCopyTextFile"/> is disposed.
         /// </summary>
         /// <param name="openTextFile">
-        /// The open text file, or null to create a new file.
+        /// The open text file.
         /// </param>
         /// <param name="autoSaveFiles">
         /// The <see cref="FileStreamPair"/> from which to load the auto-save file that contains local changes,
         /// or null to not load from an auto-save file.
         /// </param>
-        public WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
-            : this(openTextFile, autoSaveFiles, isTextFileOwner: false)
-        {
-        }
+        /// <returns>
+        /// The new <see cref="WorkingCopyTextFile"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="openTextFile"/> is null.
+        /// </exception>
+        public static WorkingCopyTextFile FromLiveTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles)
+            => new WorkingCopyTextFile(
+                openTextFile ?? throw new ArgumentNullException(nameof(openTextFile)),
+                autoSaveFiles,
+                isTextFileOwner: false);
 
         private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {

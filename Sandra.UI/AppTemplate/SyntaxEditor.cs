@@ -82,7 +82,7 @@ namespace Eutherion.Win.AppTemplate
                         Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
                         Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
 
-                    return new WorkingCopyTextFile(codeFile, fileStreamPair);
+                    return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
                 }
                 catch (Exception autoSaveLoadException)
                 {
@@ -93,7 +93,7 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
 
-            return new WorkingCopyTextFile(codeFile, null);
+            return WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
         }
 
         /// <summary>

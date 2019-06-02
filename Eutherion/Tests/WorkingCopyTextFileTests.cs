@@ -257,7 +257,7 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void NewFileInitialState()
         {
-            using (var wcFile = new WorkingCopyTextFile(null, null))
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
@@ -291,7 +291,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -313,7 +313,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -331,7 +331,7 @@ namespace Eutherion.Win.Tests
         {
             PrepareAutoSave(autoSaveFileText);
 
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
@@ -351,7 +351,7 @@ namespace Eutherion.Win.Tests
             PrepareAutoSave(autoSaveFileText);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
@@ -393,14 +393,14 @@ namespace Eutherion.Win.Tests
             // Both file permutations should yield the same result.
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, invalidFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, validFile);
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
             }
 
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile1, validFile);
             fileFixture.PrepareTargetFile(TargetFile.AutoSaveFile2, invalidFile);
-            using (var wcFile = new WorkingCopyTextFile(null, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
                 AssertLiveTextFileSuccessfulLoadWithAutoSave(string.Empty, expectedAutoSaveText, wcFile);
             }
@@ -416,7 +416,7 @@ namespace Eutherion.Win.Tests
 
             // wcFile does not own textFile: textFile must still be open after wcFile is disposed.
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, null))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
                 wcFile.Dispose();
                 Assert.NotNull(wcFile.OpenTextFile);
@@ -457,7 +457,7 @@ namespace Eutherion.Win.Tests
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
 
             using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = new WorkingCopyTextFile(textFile, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
                 Assert.NotNull(wcFile.AutoSaveFile);
@@ -472,7 +472,7 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void AllowMultipleDispose()
         {
-            using (var wcFile = new WorkingCopyTextFile(null, null))
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
                 wcFile.Dispose();
                 Assert.True(wcFile.IsDisposed);
@@ -484,7 +484,7 @@ namespace Eutherion.Win.Tests
         [Fact]
         public void UpdatesBlockedAfterDispose()
         {
-            using (var wcFile = new WorkingCopyTextFile(null, null))
+            using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
                 Assert.Throws<InvalidOperationException>(wcFile.Save);
                 wcFile.Dispose();
