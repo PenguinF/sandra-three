@@ -159,7 +159,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Enables receiving <see cref="LiveTextFile"/> updates on the UI thread.
         /// </summary>
-        public void SetSynchronizationContext()
+        public void CaptureSynchronizationContext()
         {
             DefaultSettings.CaptureSynchronizationContext();
             LocalSettings.CaptureSynchronizationContext();
