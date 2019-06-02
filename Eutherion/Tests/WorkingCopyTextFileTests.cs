@@ -234,6 +234,15 @@ namespace Eutherion.Win.Tests
             }
         }
 
+        private void AssertNoAutoSaveFiles(WorkingCopyTextFile wcFile)
+        {
+            // Assert that the auto-save files have been deleted.
+            Assert.Null(wcFile.AutoSaveFile);
+            Assert.False(wcFile.ContainsChanges);
+            Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
+            Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
+        }
+
         [Fact]
         public void LiveTextFilePathUnchanged()
         {
@@ -461,8 +470,7 @@ namespace Eutherion.Win.Tests
             // Reloading the WorkingCopyTextFile should restore the auto saved text, even when the original file is deleted.
             fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
 
-            using (var textFile = new LiveTextFile(filePath))
-            using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
                 Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
                 Assert.True(wcFile.ContainsChanges);
@@ -473,6 +481,49 @@ namespace Eutherion.Win.Tests
                 Assert.NotNull(wcFile.AutoSaveFile);
                 Assert.True(wcFile.AutoSaveFile.IsDisposed);
                 Assert.True(wcFile.ContainsChanges);
+            }
+        }
+
+        [Fact]
+        public void DiscardAutosavedModificationsIfFileUpdatedWithSameContents()
+        {
+            // This asserts that there are no changes after the following transitions:
+            // 1) Open existing file with text "A".
+            // 2) Make local modification, change text to "B", this is auto-saved.
+            // 3) Dispose the WorkingCopyTextFile.
+            // 4) Update existing file with contents "B".
+            // 5) Reload WorkingCopyTextFile from the auto-save files.
+            //    -> Should detect that the contents of the file match the auto-saved modifications.
+
+            string expectedLoadedText = "A";
+            string expectedAutoSaveText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedLoadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                wcFile.UpdateLocalCopyText(expectedAutoSaveText, containsChanges: true);
+                Assert.True(wcFile.ContainsChanges);
+            }
+
+            // Assert that the auto-save actually happened.
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.True(wcFile.ContainsChanges);
+            }
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, expectedAutoSaveText);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                Assert.Equal(expectedAutoSaveText, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+                Assert.NotNull(wcFile.AutoSaveFile);
+                wcFile.Dispose();
+                AssertNoAutoSaveFiles(wcFile);
             }
         }
 
@@ -523,10 +574,7 @@ namespace Eutherion.Win.Tests
                 wcFile.Dispose();
 
                 // Assert that the auto-save files have been deleted.
-                Assert.Null(wcFile.AutoSaveFile);
-                Assert.False(wcFile.ContainsChanges);
-                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile1)));
-                Assert.False(File.Exists(fileFixture.GetPath(TargetFile.AutoSaveFile2)));
+                AssertNoAutoSaveFiles(wcFile);
             }
         }
     }

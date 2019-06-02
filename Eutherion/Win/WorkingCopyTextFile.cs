@@ -140,7 +140,7 @@ namespace Eutherion.Win
                 // Interpret empty auto-saved text as there being no changes.
                 // Has the slightly odd effect that when someone deletes all text from the editor,
                 // and then closes+reopens the application, the loaded text is shown.
-                if (!string.IsNullOrEmpty(autoSavedText))
+                if (!string.IsNullOrEmpty(autoSavedText) && autoSavedText != LoadedText)
                 {
                     LocalCopyText = autoSavedText;
                     ContainsChanges = true;
