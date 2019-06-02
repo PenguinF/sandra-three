@@ -131,6 +131,11 @@ namespace Eutherion.Win
             this.isTextFileOwner = isTextFileOwner;
             OpenTextFile = openTextFile;
 
+            if (openTextFile != null)
+            {
+                openTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            }
+
             if (autoSaveFiles != null)
             {
                 autoSaveState = new TextAutoSaveState();
@@ -173,6 +178,11 @@ namespace Eutherion.Win
         /// Returns the <see cref="Exception"/> from an unsuccessful attempt to read the file from the file system.
         /// </summary>
         public Exception LoadException => OpenTextFile?.LoadedText.Match(whenOption1: e => e, whenOption2: _ => null);
+
+        /// <summary>
+        /// Occurs when the contents of the opened file changed.
+        /// </summary>
+        public event Action<WorkingCopyTextFile, EventArgs> LoadedTextChanged;
 
         /// <summary>
         /// Gets the opened <see cref="AutoSaveTextFile{TUpdate}"/> or null if nothing was auto-saved yet.
@@ -260,6 +270,9 @@ namespace Eutherion.Win
             OpenTextFile.Save(LocalCopyText);
         }
 
+        private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
+            => LoadedTextChanged?.Invoke(this, e);
+
         /// <summary>
         /// Disposes of all owned managed resources.
         /// </summary>
@@ -267,9 +280,14 @@ namespace Eutherion.Win
         {
             if (!IsDisposed)
             {
-                if (isTextFileOwner && OpenTextFile != null)
+                if (OpenTextFile != null)
                 {
-                    OpenTextFile.Dispose();
+                    OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+
+                    if (isTextFileOwner)
+                    {
+                        OpenTextFile.Dispose();
+                    }
                 }
 
                 if (AutoSaveFile != null)

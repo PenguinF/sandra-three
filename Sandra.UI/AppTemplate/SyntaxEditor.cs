@@ -190,7 +190,7 @@ namespace Eutherion.Win.AppTemplate
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
             CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
-            CodeFile.OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Only use initialTextGenerator if nothing was auto-saved.
             if (CodeFile.LoadException != null && string.IsNullOrEmpty(CodeFile.LocalCopyText))
@@ -207,7 +207,7 @@ namespace Eutherion.Win.AppTemplate
             EmptyUndoBuffer();
         }
 
-        private void OpenTextFile_FileUpdated(LiveTextFile sender, EventArgs e)
+        private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
             if (!ContainsChanges)
             {
@@ -426,7 +426,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
-                CodeFile.OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                CodeFile.LoadedTextChanged -= CodeFile_LoadedTextChanged;
                 CodeFile.Dispose();
 
                 // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
