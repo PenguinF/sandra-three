@@ -277,7 +277,7 @@ namespace Eutherion.Win
                     // Dispose first, then check if the files are empty.
                     AutoSaveFile.Dispose();
 
-                    if (string.IsNullOrEmpty(autoSaveState.LastAutoSavedText))
+                    if (!ContainsChanges)
                     {
                         // Remove auto-save files.
                         try
