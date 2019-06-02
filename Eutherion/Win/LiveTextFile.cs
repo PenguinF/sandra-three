@@ -155,7 +155,7 @@ namespace Eutherion.Win
 
             if (captureSynchronizationContext)
             {
-                CaptureSynchronizationContext();
+                sc = SynchronizationContext.Current;
             }
 
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
@@ -238,6 +238,12 @@ namespace Eutherion.Win
         {
             // No need to lock because sc cannot be reset to null here.
             sc = SynchronizationContext.Current;
+
+            // Immediately raise the FileUpdated event if dirty.
+            if (IsDirty)
+            {
+                RaiseFileUpdatedEvent(null);
+            }
         }
 
         private void PollFileChangesLoop(CancellationToken cancellationToken)
