@@ -676,5 +676,32 @@ namespace Eutherion.Win.Tests
                 Assert.NotNull(wcFile.AutoSaveFile);
             }
         }
+
+        [Fact]
+        public void FailedSaveThenAutoUpdate()
+        {
+            string oldLoadedText = "A";
+            string newLoadedText = "B";
+
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, oldLoadedText);
+            PrepareAutoSave(string.Empty);
+
+            using (var ewh = new ManualResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.LockedByAnotherProcess);
+                Assert.Throws<IOException>(wcFile.Save);
+
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
+                ewh.WaitOne();
+                Assert.Equal(newLoadedText, wcFile.LoadedText);
+                Assert.Equal(newLoadedText, wcFile.LocalCopyText);
+
+                // Auto-updating should still work after being locked by another process.
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
     }
 }
