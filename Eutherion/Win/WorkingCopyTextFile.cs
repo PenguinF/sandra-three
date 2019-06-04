@@ -155,7 +155,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the opened <see cref="LiveTextFile"/>.
         /// </summary>
-        public LiveTextFile OpenTextFile { get; }
+        internal LiveTextFile OpenTextFile { get; }
 
         /// <summary>
         /// Returns the full path to the opened text file, or null for new files.
