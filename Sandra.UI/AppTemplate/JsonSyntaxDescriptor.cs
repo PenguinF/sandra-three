@@ -47,20 +47,18 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
         /// </summary>
+        /// <param name="schema">
+        /// The schema which defines what kind of keys and values are valid in the parsed json.
+        /// </param>
         /// <param name="styleSelector">
         /// The style selector for syntax highlighting.
         /// </param>
-        /// <param name="settingsFile">
-        /// The settings file containing schema which defines what kind of keys and values are valid in the parsed json.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="styleSelector"/> and/or <paramref name="settingsFile"/> are null.
+        /// <paramref name="styleSelector"/> and/or <paramref name="schema"/> are null.
         /// </exception>
-        public JsonSyntaxDescriptor(JsonStyleSelector styleSelector, SettingsFile settingsFile)
+        public JsonSyntaxDescriptor(SettingSchema schema, JsonStyleSelector styleSelector)
         {
-            if (settingsFile == null) throw new ArgumentNullException(nameof(settingsFile));
-
-            schema = settingsFile.Settings.Schema;
+            this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
             this.styleSelector = styleSelector ?? throw new ArgumentNullException(nameof(styleSelector));
         }
 
@@ -87,9 +85,11 @@ namespace Eutherion.Win.AppTemplate
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
             => styleSelector.Visit(terminalSymbol, syntaxEditor);
 
-        public override (int, int) GetErrorRange(JsonErrorInfo error) => (error.Start, error.Length);
+        public override (int, int) GetErrorRange(JsonErrorInfo error)
+            => (error.Start, error.Length);
 
-        public override string GetErrorMessage(JsonErrorInfo error) => error.Message(Session.Current.CurrentLocalizer);
+        public override string GetErrorMessage(JsonErrorInfo error)
+            => error.Message(Session.Current.CurrentLocalizer);
     }
 
     /// <summary>

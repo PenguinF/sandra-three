@@ -69,7 +69,7 @@ namespace Eutherion.Win.AppTemplate
             var jsonStyleSelector = new JsonStyleSelector();
 
             jsonTextBox = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
-                new JsonSyntaxDescriptor(jsonStyleSelector, settingsFile),
+                new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector),
                 settingsFile,
                 initialTextGenerator,
                 autoSaveSetting)
