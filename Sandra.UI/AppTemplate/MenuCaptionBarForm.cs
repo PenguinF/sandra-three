@@ -38,7 +38,7 @@ namespace Eutherion.Win.AppTemplate
     {
         private const int MainMenuHorizontalMargin = 8;
 
-        private const int buttonOuterRightMargin = 12;
+        private const int buttonOuterRightMargin = 4;
         private const int closeButtonMargin = 4;
         private const int captionButtonSize = 24;
 
@@ -226,7 +226,7 @@ namespace Eutherion.Win.AppTemplate
                 }
 
                 // Use a vertical edge variable so buttons can be placed from right to left.
-                int currentVerticalEdge = Width - captionButtonSize - buttonOuterRightMargin;
+                int currentVerticalEdge = ClientSize.Width - captionButtonSize - buttonOuterRightMargin;
 
                 closeButton.SetBounds(
                     currentVerticalEdge,
