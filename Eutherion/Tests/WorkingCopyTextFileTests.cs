@@ -545,9 +545,9 @@ namespace Eutherion.Win.Tests
         {
             using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
-                Assert.Throws<InvalidOperationException>(wcFile.Save);
+                Assert.Throws<InvalidOperationException>(() => wcFile.Save());
                 wcFile.Dispose();
-                Assert.Throws<ObjectDisposedException>(wcFile.Save);
+                Assert.Throws<ObjectDisposedException>(() => wcFile.Save());
                 Assert.Throws<ObjectDisposedException>(() => wcFile.UpdateLocalCopyText(string.Empty, false));
             }
         }
@@ -691,7 +691,7 @@ namespace Eutherion.Win.Tests
             using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
                 fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.LockedByAnotherProcess);
-                Assert.Throws<IOException>(wcFile.Save);
+                Assert.Throws<IOException>(() => wcFile.Save());
 
                 wcFile.LoadedTextChanged += (_, __) => ewh.Set();
                 fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, newLoadedText);
