@@ -223,6 +223,16 @@ namespace Eutherion.Win.AppTemplate
                 if (process != null) process.Dispose();
             };
 
+            // Use a panel with padding to add some margin around the textBox.
+            var fillPanel = new Panel
+            {
+                BackColor = Color.LightGray,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(6),
+            };
+
+            fillPanel.Controls.Add(textBox);
+
             var readOnlyTextForm = new UIActionForm
             {
                 ClientSize = new Size(width, height),
@@ -230,7 +240,7 @@ namespace Eutherion.Win.AppTemplate
                 ShowIcon = false,
             };
 
-            readOnlyTextForm.Controls.Add(textBox);
+            readOnlyTextForm.Controls.Add(fillPanel);
 
             // This adds a Close menu item to the context menu of the textBox.
             textBox.BindActions(readOnlyTextForm.StandardUIActionBindings);
