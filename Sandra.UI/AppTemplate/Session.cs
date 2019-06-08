@@ -95,7 +95,7 @@ namespace Eutherion.Win.AppTemplate
                 Path.Combine(ExecutableFolder, DefaultSettingsFileName),
                 settingsProvider.CreateBuiltIn(this));
 
-            // Save name of APPDATA subfolder for persistent files.
+            // Save name of LOCALAPPDATA subfolder for persistent files.
             AppDataSubFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 GetDefaultSetting(SharedSettings.AppDataSubFolderName));
