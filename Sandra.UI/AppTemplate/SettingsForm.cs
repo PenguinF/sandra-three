@@ -147,6 +147,7 @@ namespace Eutherion.Win.AppTemplate
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
+                noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
                 errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
