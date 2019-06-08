@@ -62,11 +62,6 @@ namespace Eutherion.Win
 
         private readonly bool isTextFileOwner;
 
-        // Keep a reference to the auto-save state, but don't access it until after disposing AutoSaveFile,
-        // because it is updated from a background thread.
-        // After disposing, its final LastAutoSavedText can be used to find out if the auto-save files can be deleted.
-        private TextAutoSaveState autoSaveState;
-
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from a file path and a <see cref="FileStreamPair"/>
         /// from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
@@ -138,7 +133,7 @@ namespace Eutherion.Win
 
             if (autoSaveFiles != null)
             {
-                autoSaveState = new TextAutoSaveState();
+                var autoSaveState = new TextAutoSaveState();
                 AutoSaveFile = new AutoSaveTextFile<string>(autoSaveState, autoSaveFiles);
                 string autoSavedText = autoSaveState.LastAutoSavedText;
 
@@ -160,7 +155,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the opened <see cref="LiveTextFile"/>.
         /// </summary>
-        public LiveTextFile OpenTextFile { get; }
+        internal LiveTextFile OpenTextFile { get; }
 
         /// <summary>
         /// Returns the full path to the opened text file, or null for new files.
@@ -243,7 +238,6 @@ namespace Eutherion.Win
                     // If no listeners, AutoSaveFile remains empty and nothing is auto-saved.
                     var queryAutoSaveFileEventArgs = new QueryAutoSaveFileEventArgs();
                     QueryAutoSaveFile?.Invoke(this, queryAutoSaveFileEventArgs);
-                    autoSaveState = queryAutoSaveFileEventArgs.AutoSaveState;
                     AutoSaveFile = queryAutoSaveFileEventArgs.AutoSaveFile;
                 }
 
@@ -359,7 +353,6 @@ namespace Eutherion.Win
                         }
 
                         AutoSaveFile = null;
-                        autoSaveState = null;
                     }
                 }
 
@@ -374,7 +367,6 @@ namespace Eutherion.Win
     public class QueryAutoSaveFileEventArgs : EventArgs
     {
         private FileStreamPair autoSaveFileStreamPair;
-        internal WorkingCopyTextFile.TextAutoSaveState AutoSaveState;
         internal AutoSaveTextFile<string> AutoSaveFile;
 
         /// <summary>
@@ -395,14 +387,12 @@ namespace Eutherion.Win
                     {
                         AutoSaveFile.Dispose();
                         AutoSaveFile = null;
-                        AutoSaveState = null;
                     }
 
                     if (value != null)
                     {
                         var autoSaveState = new WorkingCopyTextFile.TextAutoSaveState();
                         AutoSaveFile = new AutoSaveTextFile<string>(autoSaveState, value);
-                        AutoSaveState = autoSaveState;
                     }
 
                     // If the AutoSaveTextFile constructor threw, no update must be made to autoSaveFileStreamPair.

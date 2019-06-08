@@ -23,11 +23,9 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using Eutherion.Win.UIActions;
-using Eutherion.Win.Utils;
 using ScintillaNET;
 using System;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -54,14 +52,22 @@ namespace Eutherion.Win.AppTemplate
             //https://scintilla.org/CommandValues.html
             //https://sourceforge.net/p/scintilla/code/ci/default/tree/src/KeyMap.h
             //https://sourceforge.net/p/scintilla/code/ci/default/tree/src/KeyMap.cxx
+            ClearCmdKey(Keys.Control | Keys.A);
+            ClearCmdKey(Keys.Control | Keys.C);
             ClearCmdKey(Keys.Control | Keys.F);
             ClearCmdKey(Keys.Control | Keys.H);
             ClearCmdKey(Keys.Control | Keys.L);
             ClearCmdKey(Keys.Control | Keys.N);
             ClearCmdKey(Keys.Control | Keys.R);
             ClearCmdKey(Keys.Control | Keys.U);
-            ClearCmdKey(Keys.Oemplus | Keys.Shift | Keys.Control);
-            ClearCmdKey(Keys.OemMinus | Keys.Control);
+            ClearCmdKey(Keys.Control | Keys.V);
+            ClearCmdKey(Keys.Control | Keys.X);
+            ClearCmdKey(Keys.Control | Keys.Y);
+            ClearCmdKey(Keys.Control | Keys.Z);
+            ClearCmdKey(Keys.Control | Keys.Add);
+            ClearCmdKey(Keys.Control | Keys.Subtract);
+            ClearCmdKey(Keys.Control | Keys.Oemplus | Keys.Shift);
+            ClearCmdKey(Keys.Control | Keys.OemMinus);
         }
 
         protected void ApplyStyle(Style style, int start, int length)
@@ -124,22 +130,7 @@ namespace Eutherion.Win.AppTemplate
         /// Binds the regular cut/copy/paste/select-all UIActions to this textbox.
         /// </summary>
         public void BindStandardEditUIActions()
-            => BindEditUIActions(StandardUIActionBindings);
-
-        /// <summary>
-        /// Binds a collection of UIActions to this textbox.
-        /// </summary>
-        public void BindEditUIActions(UIActionBindings editBindings)
-        {
-            IShortcutKeysUIActionInterface shortcutKeysInterface = null;
-            editBindings
-                .Where(x => x.Interfaces.TryGet(out shortcutKeysInterface) && shortcutKeysInterface.Shortcuts != null)
-                .SelectMany(x => shortcutKeysInterface.Shortcuts)
-                .Select(KeyUtilities.ToKeys)
-                .ForEach(ClearCmdKey);
-
-            this.BindActions(editBindings);
-        }
+            => this.BindActions(StandardUIActionBindings);
 
         public UIActionState TryUndo(bool perform)
         {

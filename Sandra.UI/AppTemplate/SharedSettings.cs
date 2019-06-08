@@ -30,7 +30,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly string DefaultLangFolderName = "Languages";
 
         private static readonly string AppDataSubFolderNameDescription
-            = "Subfolder of %APPDATA%/Local which should be used to store persistent data. "
+            = "Subfolder of %LOCALAPPDATA% which should be used to store persistent data. "
             + "This includes the auto-save file, or e.g. a preferences file. "
             + "Backward slashes ('\\') must be escaped in json strings (e.g. \"C:\\\\Temp\\\\temp.txt\"). "
             + "Instead, forward slashes ('/') can be used to separate directories as well.";
@@ -41,7 +41,7 @@ namespace Eutherion.Win.AppTemplate
             new SettingComment(AppDataSubFolderNameDescription));
 
         private static readonly string LocalPreferencesFileNameDescription
-            = "File name in the %APPDATA%/Local subfolder which contains the user-specific preferences.";
+            = "File name in the %LOCALAPPDATA% subfolder which contains the user-specific preferences.";
 
         public static readonly SettingProperty<string> LocalPreferencesFileName = new SettingProperty<string>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(LocalPreferencesFileName))),

@@ -69,7 +69,7 @@ namespace Eutherion.Win.AppTemplate
             var jsonStyleSelector = new JsonStyleSelector();
 
             jsonTextBox = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
-                new JsonSyntaxDescriptor(jsonStyleSelector, settingsFile),
+                new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector),
                 settingsFile,
                 initialTextGenerator,
                 autoSaveSetting)
@@ -147,6 +147,7 @@ namespace Eutherion.Win.AppTemplate
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
+                noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
                 errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
