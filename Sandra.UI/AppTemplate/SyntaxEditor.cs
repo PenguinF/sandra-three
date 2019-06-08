@@ -107,12 +107,18 @@ namespace Eutherion.Win.AppTemplate
         public WorkingCopyTextFile CodeFile { get; }
 
         /// <summary>
+        /// Flag to keep track of whether or not the text should still appear modified
+        /// even if the control is at its save-point.
+        /// </summary>
+        private bool containsChangesAtSavePoint;
+
+        /// <summary>
         /// Returns if this <see cref="SyntaxEditor{TTerminal, TError}"/> contains any unsaved changes.
         /// If the text file could not be opened, true is returned.
         /// </summary>
         public bool ContainsChanges
             => !ReadOnly
-            && (Modified || CodeFile.LoadException != null);
+            && (Modified || containsChangesAtSavePoint);
 
         /// <summary>
         /// Setting to use when an auto-save file name pair is generated.
@@ -193,7 +199,8 @@ namespace Eutherion.Win.AppTemplate
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Only use initialTextGenerator if nothing was auto-saved.
-            if (CodeFile.LoadException != null && string.IsNullOrEmpty(CodeFile.LocalCopyText))
+            containsChangesAtSavePoint = CodeFile.ContainsChanges;
+            if (CodeFile.LoadException != null && CodeFile.AutoSaveFile == null)
             {
                 Text = initialTextGenerator != null
                     ? (initialTextGenerator() ?? string.Empty)
@@ -209,7 +216,9 @@ namespace Eutherion.Win.AppTemplate
 
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
-            if (!CodeFile.ContainsChanges)
+            containsChangesAtSavePoint = CodeFile.ContainsChanges;
+
+            if (!containsChangesAtSavePoint)
             {
                 if (ReadOnly && CodeFile.LoadException != null)
                 {
@@ -447,6 +456,7 @@ namespace Eutherion.Win.AppTemplate
             if (perform)
             {
                 CodeFile.Save();
+                containsChangesAtSavePoint = CodeFile.ContainsChanges;
                 SetSavePoint();
             }
 
