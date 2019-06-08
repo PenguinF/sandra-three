@@ -339,6 +339,39 @@ namespace Eutherion.Win.Tests
             }
         }
 
+        private void TestInaccessibleFileWithAutoSaveInitialState(FileState fileState, Type exceptionType, string autoSavedText)
+        {
+            string filePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, fileState);
+
+            using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
+            {
+                Assert.Equal(filePath, wcFile.OpenTextFilePath);
+                Assert.NotNull(wcFile.AutoSaveFile);
+
+                Assert.Equal(string.Empty, wcFile.LoadedText);
+                Assert.IsType(exceptionType, wcFile.LoadException);
+                Assert.Equal(autoSavedText, wcFile.LocalCopyText);
+                Assert.Equal(!string.IsNullOrEmpty(autoSavedText), wcFile.ContainsChanges);
+            }
+        }
+
+        [Theory]
+        [InlineData(FileState.DoesNotExist, typeof(FileNotFoundException))]
+        [InlineData(FileState.LockedByAnotherProcess, typeof(IOException))]
+        [InlineData(FileState.IsDirectory, typeof(UnauthorizedAccessException))]
+        public void InaccessibleFileWithAutoSaveInitialState(FileState fileState, Type exceptionType)
+        {
+            // Test both empty and non-empty auto-save files.
+            string autoSaveText = string.Empty;
+            PrepareAutoSave(autoSaveText);
+            TestInaccessibleFileWithAutoSaveInitialState(fileState, exceptionType, autoSaveText);
+
+            autoSaveText = "A";
+            PrepareAutoSave(autoSaveText);
+            TestInaccessibleFileWithAutoSaveInitialState(fileState, exceptionType, autoSaveText);
+        }
+
         [Theory]
         [MemberData(nameof(Texts))]
         public void AutoSavedNewFileInitialState(string autoSaveFileText)
