@@ -147,10 +147,9 @@ namespace Eutherion.Win.AppTemplate
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
-                noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors();
-
-                // Does an initial DisplayErrors() as well, because settingsTextBox might already contain errors.
                 errorLocationString = new LocalizedString(SharedLocalizedStringKeys.ErrorLocation);
+
+                noErrorsString.DisplayText.ValueChanged += _ => DisplayErrors();
                 errorLocationString.DisplayText.ValueChanged += _ => DisplayErrors();
 
                 errorsListBox.DoubleClick += (_, __) => ActivateSelectedError();
