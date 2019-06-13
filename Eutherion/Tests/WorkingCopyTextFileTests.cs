@@ -886,5 +886,40 @@ namespace Eutherion.Win.Tests
                 Assert.False(wcFile.ContainsChanges);
             }
         }
+
+        [Fact]
+        public void ReplaceWithIllegalPath()
+        {
+            string text1 = "A";
+            string text2 = "B";
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text1);
+
+            using (var ewh = new AutoResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            {
+                var liveTextFile = wcFile.OpenTextFile;
+
+                // Lock the second file before attempting to overwrite it.
+                fileFixture.PrepareTargetFile(TargetFile.SecondaryTextFile, FileState.LockedByAnotherProcess);
+
+                // This should throw, and leave the old OpenTextFile intact.
+                Assert.Throws<IOException>(() => wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile)));
+
+                Assert.Same(liveTextFile, wcFile.OpenTextFile);
+                Assert.False(liveTextFile.IsDisposed);
+                Assert.Equal(text1, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+
+                // Verify that auto-updates still work.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text2);
+                ewh.WaitOne();
+
+                Assert.Equal(text2, wcFile.LoadedText);
+                Assert.Equal(text2, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
     }
 }

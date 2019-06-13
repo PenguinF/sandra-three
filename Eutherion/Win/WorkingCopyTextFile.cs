@@ -317,23 +317,35 @@ namespace Eutherion.Win
             if (OpenTextFile == null || !Path.GetFullPath(path).Equals(OpenTextFilePath, StringComparison.OrdinalIgnoreCase))
             {
                 // Open new text file before disposing the old one.
+                var oldOpenTextFile = OpenTextFile;
                 var newOpenTextFile = new LiveTextFile(path);
 
-                if (OpenTextFile != null)
+                try
                 {
-                    OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
-                    OpenTextFile.Dispose();
+                    // Save to the new file before replacing the old one.
+                    newOpenTextFile.Save(LocalCopyText);
+                }
+                catch
+                {
+                    newOpenTextFile.Dispose();
+                    throw;
+                }
+
+                if (oldOpenTextFile != null)
+                {
+                    oldOpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                    oldOpenTextFile.Dispose();
                 }
 
                 OpenTextFile = newOpenTextFile;
-
-                if (OpenTextFile != null)
-                {
-                    OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
-                }
+                newOpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            }
+            else
+            {
+                // Just save to the same OpenTextFile.
+                OpenTextFile.Save(LocalCopyText);
             }
 
-            OpenTextFile.Save(LocalCopyText);
             ContainsChanges = false;
         }
 
