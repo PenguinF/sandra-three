@@ -76,21 +76,16 @@ namespace Eutherion.Win.AppTemplate
             try
             {
                 fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
-                return codeFile == null
-                    ? WorkingCopyTextFile.Open(null, fileStreamPair)
-                    : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
             }
             catch (Exception autoSaveLoadException)
             {
-                if (fileStreamPair != null) fileStreamPair.Dispose();
-
                 // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                 autoSaveLoadException.Trace();
             }
 
             return codeFile == null
-                ? WorkingCopyTextFile.Open(null, null)
-                : WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
+                ? WorkingCopyTextFile.Open(null, fileStreamPair)
+                : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
         }
 
         /// <summary>

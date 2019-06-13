@@ -31,10 +31,18 @@ namespace Eutherion.Win.AppTemplate
         {
             if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
             {
-                return FileStreamPair.Create(
+                var fileStreamPair = FileStreamPair.Create(
                     AutoSaveTextFile.OpenExistingAutoSaveFile,
                     Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
                     Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
+                    && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
+                {
+                    return fileStreamPair;
+                }
+
+                fileStreamPair.Dispose();
             }
 
             return null;
