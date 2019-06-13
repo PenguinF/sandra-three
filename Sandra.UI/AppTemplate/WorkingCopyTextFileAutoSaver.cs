@@ -81,7 +81,6 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly Session ownerSession;
         private readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
-
         private readonly WorkingCopyTextFile workingCopyTextFile;
 
         public WorkingCopyTextFileAutoSaver(
@@ -125,9 +124,9 @@ namespace Eutherion.Win.AppTemplate
         {
             // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
             if (workingCopyTextFile.AutoSaveFile == null
-                && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair _))
+                && ownerSession.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair _))
             {
-                Session.Current.AutoSave.Remove(autoSaveProperty);
+                ownerSession.AutoSave.Remove(autoSaveProperty);
             }
         }
     }
