@@ -354,6 +354,9 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TrySaveToFile(bool perform)
         {
+            // Use "Save as..." if there's no back-end file.
+            if (CodeFile.OpenTextFilePath == null) return TrySaveAs(perform);
+
             if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!ContainsChanges) return UIActionVisibility.Disabled;
@@ -364,6 +367,14 @@ namespace Eutherion.Win.AppTemplate
                 containsChangesAtSavePoint = CodeFile.ContainsChanges;
                 SetSavePoint();
             }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TrySaveAs(bool perform)
+        {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+            if (ReadOnly) return UIActionVisibility.Hidden;
 
             return UIActionVisibility.Enabled;
         }

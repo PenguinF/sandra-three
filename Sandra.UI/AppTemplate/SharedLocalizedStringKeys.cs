@@ -44,6 +44,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         public static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
         public static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
+        public static readonly LocalizedStringKey SaveAs = new LocalizedStringKey(nameof(SaveAs));
         public static readonly LocalizedStringKey SaveChangesQuery = new LocalizedStringKey(nameof(SaveChangesQuery));
         public static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         public static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
@@ -76,6 +77,7 @@ namespace Eutherion.Win.AppTemplate
                 { Paste, "Paste" },
                 { Redo, "Redo" },
                 { Save, "Save" },
+                { SaveAs, "Save as" },
                 { SaveChangesQuery, "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?" },
                 { SelectAll, "Select All" },
                 { ShowDefaultSettingsFile, "Show default settings" },

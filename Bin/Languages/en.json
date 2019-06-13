@@ -58,6 +58,7 @@
     "Paste": "Paste",
     "Redo": "Redo",
     "Save": "Save",
+    "SaveAs": "Save as",
     "SaveChangesQuery": "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?",
     "SelectAll": "Select All",
     "ShowDefaultSettingsFile": "Show default settings",

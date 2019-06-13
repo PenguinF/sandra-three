@@ -90,6 +90,14 @@ namespace Eutherion.Win.AppTemplate
             // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
             this.BindAction(SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile);
 
+            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
+            {
+                SyntaxEditor.BindActions(new UIActionBindings
+                {
+                    { SharedUIAction.SaveAs, SyntaxEditor.TrySaveAs },
+                });
+            }
+
             SyntaxEditor.BindStandardEditUIActions();
 
             SyntaxEditor.BindActions(new UIActionBindings
@@ -174,9 +182,20 @@ namespace Eutherion.Win.AppTemplate
             mainMenuActionHandler = new UIActionHandler();
 
             var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
-            fileMenu.Nodes.AddRange(BindMainMenuItemActions(
-                SharedUIAction.SaveToFile,
-                SharedUIAction.Close));
+
+            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
+            {
+                fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                    SharedUIAction.SaveToFile,
+                    SharedUIAction.SaveAs,
+                    SharedUIAction.Close));
+            }
+            else
+            {
+                fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                    SharedUIAction.SaveToFile,
+                    SharedUIAction.Close));
+            }
 
             var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
             editMenu.Nodes.AddRange(BindMainMenuItemActions(

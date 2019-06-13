@@ -58,6 +58,7 @@
     "Paste": "Plakken",
     "Redo": "Opnieuw",
     "Save": "Opslaan",
+    "SaveAs": "Opslaan als",
     "SaveChangesQuery": "'{0}' bevat wijzigingen die nog niet zijn opgeslagen en die verloren gaan als dit venster wordt gesloten. Alsnog opslaan?",
     "SelectAll": "Alles selecteren",
     "ShowDefaultSettingsFile": "Standaard instellingen tonen",
