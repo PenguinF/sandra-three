@@ -89,6 +89,21 @@ namespace Eutherion.Win.Tests
             }
         }
 
+        // All variations on "test1.txt".
+        public static IEnumerable<object[]> AlternativePrimaryTextFilePaths()
+        {
+            yield return new object[] { "test1.txt" };
+            yield return new object[] { "TEST1.TXT" };
+#if DEBUG
+            // It's not very healthy to take dependencies on build paths but impact is low.
+            yield return new object[] { "../Debug/TEST1.TXT" };
+            yield return new object[] { "..\\DEBUG\\test1.TXT" };
+#else
+            yield return new object[] { "../Release/TEST1.TXT" };
+            yield return new object[] { "..\\RELEASE\\test1.TXT" };
+#endif
+        }
+
         private readonly TargetFileState textFileState1;
         private readonly TargetFileState textFileState2;
         private readonly TargetFileState autoSaveFileState1;
@@ -792,6 +807,47 @@ namespace Eutherion.Win.Tests
 
                 // Also assert that the ObjectDisposedException has precedence.
                 Assert.Throws<ObjectDisposedException>(() => wcFile.Replace(replacePath));
+            }
+        }
+
+        public static IEnumerable<object[]> PrimaryTextFilePaths() => FileFixture.AlternativePrimaryTextFilePaths();
+
+        [Theory]
+        [MemberData(nameof(PrimaryTextFilePaths))]
+        public void ReplaceWithSamePath(string filePath)
+        {
+            string text1 = "A";
+            string text2 = "B";
+            string text3 = "C";
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text1);
+
+            using (var ewh = new AutoResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            {
+                var liveTextFile = wcFile.OpenTextFile;
+
+                // Evaluate LoadedText so IsDirty becomes false.
+                Assert.Equal(text1, wcFile.LoadedText);
+
+                // This should have no effect other than that the local changes are saved.
+                wcFile.UpdateLocalCopyText(text2, containsChanges: true);
+                wcFile.Replace(filePath);
+
+                // Assert that the OpenTextFile is unchanged.
+                Assert.Same(liveTextFile, wcFile.OpenTextFile);
+                Assert.False(liveTextFile.IsDisposed);
+                Assert.Equal(text2, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+
+                // Verify that auto-updates still work.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text3);
+                ewh.WaitOne();
+
+                Assert.Equal(text3, wcFile.LoadedText);
+                Assert.Equal(text3, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
             }
         }
 

@@ -312,20 +312,25 @@ namespace Eutherion.Win
                 throw new InvalidOperationException();
             }
 
-            // Open new text file before disposing the old one.
-            var newOpenTextFile = new LiveTextFile(path);
-
-            if (OpenTextFile != null)
+            // Only update OpenTextFile if actually different.
+            // Assume we're on a Windows case insensitive file system.
+            if (OpenTextFile == null || !Path.GetFullPath(path).Equals(OpenTextFilePath, StringComparison.OrdinalIgnoreCase))
             {
-                OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
-                OpenTextFile.Dispose();
-            }
+                // Open new text file before disposing the old one.
+                var newOpenTextFile = new LiveTextFile(path);
 
-            OpenTextFile = newOpenTextFile;
+                if (OpenTextFile != null)
+                {
+                    OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                    OpenTextFile.Dispose();
+                }
 
-            if (OpenTextFile != null)
-            {
-                OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+                OpenTextFile = newOpenTextFile;
+
+                if (OpenTextFile != null)
+                {
+                    OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+                }
             }
 
             OpenTextFile.Save(LocalCopyText);
