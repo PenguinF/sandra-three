@@ -36,6 +36,11 @@ namespace Eutherion.Win.Tests
         PrimaryTextFile,
 
         /// <summary>
+        /// The secondary target text file.
+        /// </summary>
+        SecondaryTextFile,
+
+        /// <summary>
         /// The primary auto-save file.
         /// </summary>
         AutoSaveFile1,
@@ -84,13 +89,15 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        private readonly TargetFileState textFileState;
+        private readonly TargetFileState textFileState1;
+        private readonly TargetFileState textFileState2;
         private readonly TargetFileState autoSaveFileState1;
         private readonly TargetFileState autoSaveFileState2;
 
         public FileFixture()
         {
-            textFileState = new TargetFileState("test.txt");
+            textFileState1 = new TargetFileState("test1.txt");
+            textFileState2 = new TargetFileState("test2.txt");
             autoSaveFileState1 = new TargetFileState("autosave1.txt");
             autoSaveFileState2 = new TargetFileState("autosave2.txt");
         }
@@ -101,7 +108,9 @@ namespace Eutherion.Win.Tests
             {
                 default:
                 case TargetFile.PrimaryTextFile:
-                    return textFileState;
+                    return textFileState1;
+                case TargetFile.SecondaryTextFile:
+                    return textFileState2;
                 case TargetFile.AutoSaveFile1:
                     return autoSaveFileState1;
                 case TargetFile.AutoSaveFile2:
@@ -173,6 +182,7 @@ namespace Eutherion.Win.Tests
         {
             // This removes locks and deletes the files.
             PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.SecondaryTextFile, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
         }
@@ -483,9 +493,10 @@ namespace Eutherion.Win.Tests
             using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
             {
                 var textFile = wcFile.OpenTextFile;
+                Assert.NotNull(textFile);
                 Assert.False(textFile.IsDisposed);
                 wcFile.Dispose();
-                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.True(textFile.IsDisposed);
             }
         }
