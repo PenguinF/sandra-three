@@ -69,25 +69,6 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-        {
-            FileStreamPair fileStreamPair = null;
-
-            try
-            {
-                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-            }
-
-            return codeFile == null
-                ? WorkingCopyTextFile.Open(null, fileStreamPair)
-                : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
-        }
-
         /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
@@ -146,7 +127,22 @@ namespace Eutherion.Win.AppTemplate
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             if (autoSaveSetting != null) autoSaver = new WorkingCopyTextFileAutoSaver(autoSaveSetting);
-            CodeFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
+
+            FileStreamPair fileStreamPair = null;
+
+            try
+            {
+                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+            }
+
+            CodeFile = codeFile == null
+                ? WorkingCopyTextFile.Open(null, fileStreamPair)
+                : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
 
             TextIndex = new TextIndex<TTerminal>();
 
