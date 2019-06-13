@@ -55,7 +55,7 @@ namespace Sandra.UI
                 var syntaxDescriptor = new PGNSyntaxDescriptor();
 
                 var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
-                    true,
+                    SyntaxEditorCodeAccessOption.Default,
                     syntaxDescriptor,
                     WorkingCopyTextFile.Open(null, null),
                     null,

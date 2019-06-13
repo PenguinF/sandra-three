@@ -94,7 +94,7 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        private Form CreateSettingsForm(bool isReadOnly,
+        private Form CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                         SettingsFile settingsFile,
                                         Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
@@ -122,7 +122,7 @@ namespace Eutherion.Win.AppTemplate
             }
 
             var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
-                isReadOnly,
+                codeAccessOption,
                 syntaxDescriptor,
                 codeFile,
                 initialTextGenerator,
@@ -171,7 +171,7 @@ namespace Eutherion.Win.AppTemplate
                         }
 
                         return CreateSettingsForm(
-                            false,
+                            SyntaxEditorCodeAccessOption.FixedFile,
                             LocalSettings,
                             initialTextGenerator,
                             SharedSettings.PreferencesWindow,
@@ -201,7 +201,7 @@ namespace Eutherion.Win.AppTemplate
                     null,
                     defaultSettingsFormBox,
                     () => CreateSettingsForm(
-                        !GetSetting(DeveloperMode),
+                        GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsWindow,
@@ -373,7 +373,7 @@ namespace Eutherion.Win.AppTemplate
                         }
 
                         return CreateSettingsForm(
-                            false,
+                            SyntaxEditorCodeAccessOption.FixedFile,
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
                             SharedSettings.LanguageWindow,

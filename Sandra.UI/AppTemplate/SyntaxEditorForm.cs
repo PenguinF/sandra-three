@@ -54,7 +54,7 @@ namespace Eutherion.Win.AppTemplate
 
         public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
 
-        public SyntaxEditorForm(bool isReadOnly,
+        public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                 SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
                                 Func<string> initialTextGenerator,
@@ -71,7 +71,7 @@ namespace Eutherion.Win.AppTemplate
             SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile, initialTextGenerator)
             {
                 Dock = DockStyle.Fill,
-                ReadOnly = isReadOnly,
+                ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,
             };
 
             // Initialize zoom factor and listen to changes.
@@ -477,5 +477,26 @@ namespace Eutherion.Win.AppTemplate
 
             return UIActionVisibility.Enabled;
         }
+    }
+
+    /// <summary>
+    /// Specifies options for accessing the code file opened by a syntax editor.
+    /// </summary>
+    public enum SyntaxEditorCodeAccessOption
+    {
+        /// <summary>
+        /// The code file is editable and can be saved under a different name.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// The code file is editable but cannot be saved under a different name.
+        /// </summary>
+        FixedFile,
+
+        /// <summary>
+        /// The code file is read-only.
+        /// </summary>
+        ReadOnly,
     }
 }
