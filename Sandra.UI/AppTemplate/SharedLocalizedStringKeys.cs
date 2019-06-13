@@ -27,6 +27,7 @@ namespace Eutherion.Win.AppTemplate
     public static class SharedLocalizedStringKeys
     {
         public static readonly LocalizedStringKey About = new LocalizedStringKey(nameof(About));
+        public static readonly LocalizedStringKey AllFiles = new LocalizedStringKey(nameof(AllFiles));
         public static readonly LocalizedStringKey Close = new LocalizedStringKey(nameof(Close));
         public static readonly LocalizedStringKey Copy = new LocalizedStringKey(nameof(Copy));
         public static readonly LocalizedStringKey Credits = new LocalizedStringKey(nameof(Credits));
@@ -40,6 +41,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
         public static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
         public static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
+        public static readonly LocalizedStringKey JsonFiles = new LocalizedStringKey(nameof(JsonFiles));
         public static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
         public static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         public static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
@@ -60,6 +62,7 @@ namespace Eutherion.Win.AppTemplate
             => new Dictionary<LocalizedStringKey, string>
             {
                 { About, $"About {appName}" },
+                { AllFiles, "All files" },
                 { Close, "Close" },
                 { Copy, "Copy" },
                 { Credits, "Show credits" },
@@ -73,6 +76,7 @@ namespace Eutherion.Win.AppTemplate
                 { GoToNextLocation, "Go to next location" },
                 { GoToPreviousLocation, "Go to previous location" },
                 { Help, "Help" },
+                { JsonFiles, "Json files" },
                 { NoErrorsMessage, "(No errors)" },
                 { Paste, "Paste" },
                 { Redo, "Redo" },

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Win.AppTemplate;
 using ScintillaNET;
@@ -31,6 +32,12 @@ namespace Sandra.UI
     /// </summary>
     public class PGNSyntaxDescriptor : SyntaxDescriptor<PGNSymbol, PGNErrorInfo>
     {
+        public static readonly string JsonFileExtension = "pgn";
+
+        public override string FileExtension => JsonFileExtension;
+
+        public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PGNFiles;
+
         public override (IEnumerable<TextElement<PGNSymbol>>, List<PGNErrorInfo>) Parse(string code)
             => (new TextElement<PGNSymbol>[] { new TextElement<PGNSymbol>(new PGNSymbol()) { Length = code.Length } }, new List<PGNErrorInfo>());
 

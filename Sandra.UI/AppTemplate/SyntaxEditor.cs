@@ -28,6 +28,7 @@ using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -377,6 +378,39 @@ namespace Eutherion.Win.AppTemplate
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!CodeFile.IsTextFileOwner) return UIActionVisibility.Hidden;
 
+            if (perform)
+            {
+                string extension = SyntaxDescriptor.FileExtension;
+                var extensionLocalizedKey = SyntaxDescriptor.FileExtensionLocalizedKey;
+
+                var saveFileDialog = new SaveFileDialog
+                {
+                    AutoUpgradeEnabled = true,
+                    DereferenceLinks = true,
+                    DefaultExt = extension,
+                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    SupportMultiDottedExtensions = true,
+                    RestoreDirectory = true,
+                    Title = Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveAs),
+                    ValidateNames = true,
+                };
+
+                if (CodeFile.OpenTextFilePath != null)
+                {
+                    saveFileDialog.InitialDirectory = Path.GetDirectoryName(CodeFile.OpenTextFilePath);
+                    saveFileDialog.FileName = Path.GetFileName(CodeFile.OpenTextFilePath);
+                }
+
+                var dialogResult = saveFileDialog.ShowDialog(TopLevelControl as Form);
+                if (dialogResult == DialogResult.OK)
+                {
+                    using (LiveTextFile newCodeFile = new LiveTextFile(saveFileDialog.FileName))
+                    {
+                        newCodeFile.Save(Text);
+                    }
+                }
+            }
+
             return UIActionVisibility.Enabled;
         }
     }
@@ -392,6 +426,16 @@ namespace Eutherion.Win.AppTemplate
     /// </typeparam>
     public abstract class SyntaxDescriptor<TTerminal, TError>
     {
+        /// <summary>
+        /// Gets the default file extension for this syntax.
+        /// </summary>
+        public abstract string FileExtension { get; }
+
+        /// <summary>
+        /// Gets the localized description for the default file extension.
+        /// </summary>
+        public abstract LocalizedStringKey FileExtensionLocalizedKey { get; }
+
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.
         /// </summary>
