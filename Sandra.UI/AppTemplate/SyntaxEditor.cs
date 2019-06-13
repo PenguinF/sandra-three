@@ -130,10 +130,8 @@ namespace Eutherion.Win.AppTemplate
             => !ReadOnly
             && (Modified || containsChangesAtSavePoint);
 
-        /// <summary>
-        /// Setting to use when an auto-save file name pair is generated.
-        /// </summary>
-        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
+        private readonly WorkingCopyTextFileAutoSaver autoSaver;
+        private SettingProperty<AutoSaveFileNamePair> autoSaveSetting => autoSaver?.autoSaveProperty;
 
         private readonly TextIndex<TTerminal> TextIndex;
 
@@ -165,7 +163,7 @@ namespace Eutherion.Win.AppTemplate
                             SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
-            this.autoSaveSetting = autoSaveSetting;
+            if (autoSaveSetting != null) autoSaver = new WorkingCopyTextFileAutoSaver(autoSaveSetting);
             CodeFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
 
             TextIndex = new TextIndex<TTerminal>();

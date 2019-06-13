@@ -19,9 +19,21 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Win.Storage;
+using System;
+
 namespace Eutherion.Win.AppTemplate
 {
     public class WorkingCopyTextFileAutoSaver
     {
+        /// <summary>
+        /// Setting to use when an auto-save file name pair is generated.
+        /// </summary>
+        internal readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
+
+        public WorkingCopyTextFileAutoSaver(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        {
+            this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
+        }
     }
 }
