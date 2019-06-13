@@ -158,7 +158,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the opened <see cref="LiveTextFile"/>.
         /// </summary>
-        internal LiveTextFile OpenTextFile { get; }
+        internal LiveTextFile OpenTextFile { get; private set; }
 
         /// <summary>
         /// Returns the full path to the opened text file, or null for new files.
@@ -272,6 +272,62 @@ namespace Eutherion.Win
             // so can only be called after this method returns.
             // As a consequence, LoadedText also still has its old value.
             ContainsChanges = false;
+        }
+
+        /// <summary>
+        /// Replaces the current open text file with another.
+        /// This typically occurs right before saving to a different path.
+        /// </summary>
+        /// <param name="path">
+        /// The path of the file to load and watch.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// <see cref="IsTextFileOwner"/> is false, making this operation invalid.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// This <see cref="WorkingCopyTextFile"/> is disposed.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public void ReplaceOpenTextFile(string path)
+        {
+            ThrowIfDisposed();
+
+            if (!IsTextFileOwner)
+            {
+                throw new InvalidOperationException();
+            }
+
+            // Open new text file before disposing the old one.
+            var newOpenTextFile = new LiveTextFile(path);
+
+            if (OpenTextFile != null)
+            {
+                OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                OpenTextFile.Dispose();
+            }
+
+            OpenTextFile = newOpenTextFile;
+
+            if (OpenTextFile != null)
+            {
+                OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            }
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
