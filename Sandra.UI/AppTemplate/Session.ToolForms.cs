@@ -80,6 +80,7 @@ namespace Eutherion.Win.AppTemplate
             if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
             {
                 toolForm.Value.Visible = true;
+                toolForm.Value.Deminimize();
                 toolForm.Value.Activate();
             }
         }
