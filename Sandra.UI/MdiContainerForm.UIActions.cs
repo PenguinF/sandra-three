@@ -66,6 +66,9 @@ namespace Sandra.UI
                 {
                     MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                     ClientSize = new Size(400, 400),
+                    ShowInTaskbar = true,
+                    Icon = Session.Current.ApplicationIcon,
+                    ShowIcon = true,
                 };
 
                 pgnForm.EnsureActivated();
