@@ -134,6 +134,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryUndo(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!CanUndo) return UIActionVisibility.Disabled;
             if (perform) Undo();
@@ -142,6 +143,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryRedo(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!CanRedo) return UIActionVisibility.Disabled;
             if (perform) Redo();
@@ -150,6 +152,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryCutSelectionToClipBoard(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
             if (perform) Cut();
@@ -158,6 +161,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryCopySelectionToClipBoard(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (SelectionStart == SelectionEnd) return UIActionVisibility.Disabled;
             if (perform) Copy();
             return UIActionVisibility.Enabled;
@@ -165,6 +169,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryPasteSelectionFromClipBoard(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!Clipboard.ContainsText()) return UIActionVisibility.Disabled;
             if (perform) Paste();
@@ -173,6 +178,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TrySelectAllText(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (TextLength == 0) return UIActionVisibility.Disabled;
             if (perform) SelectAll();
             return UIActionVisibility.Enabled;
@@ -180,6 +186,8 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TryZoomIn(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+
             int zoomFactor = Zoom;
             if (zoomFactor >= ScintillaZoomFactor.MaxDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
@@ -188,11 +196,14 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
                 OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
+
             return UIActionVisibility.Enabled;
         }
 
         public UIActionState TryZoomOut(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+
             int zoomFactor = Zoom;
             if (zoomFactor <= ScintillaZoomFactor.MinDiscreteValue) return UIActionVisibility.Disabled;
             if (perform)
@@ -201,6 +212,7 @@ namespace Eutherion.Win.AppTemplate
                 Zoom = zoomFactor;
                 OnZoomFactorChanged(new ZoomFactorChangedEventArgs(zoomFactor));
             }
+
             return UIActionVisibility.Enabled;
         }
     }
