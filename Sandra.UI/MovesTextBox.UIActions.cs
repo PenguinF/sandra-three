@@ -42,6 +42,8 @@ namespace Sandra.UI
 
         public UIActionState TryUsePGNPieceSymbols(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+
             if (perform)
             {
                 moveFormattingOption
@@ -67,6 +69,8 @@ namespace Sandra.UI
 
         public UIActionState TryUseLongAlgebraicNotation(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+
             if (perform)
             {
                 moveFormattingOption
