@@ -375,6 +375,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CodeFile.IsTextFileOwner) return UIActionVisibility.Hidden;
 
             return UIActionVisibility.Enabled;
         }
