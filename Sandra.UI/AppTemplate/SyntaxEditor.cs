@@ -89,7 +89,9 @@ namespace Eutherion.Win.AppTemplate
             try
             {
                 fileStreamPair = OpenAutoSaveFileStreamPair(autoSaveSetting);
-                return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
+                return codeFile == null
+                    ? WorkingCopyTextFile.Open(null, fileStreamPair)
+                    : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
             }
             catch (Exception autoSaveLoadException)
             {
@@ -99,7 +101,9 @@ namespace Eutherion.Win.AppTemplate
                 autoSaveLoadException.Trace();
             }
 
-            return WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
+            return codeFile == null
+                ? WorkingCopyTextFile.Open(null, null)
+                : WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
         }
 
         /// <summary>
