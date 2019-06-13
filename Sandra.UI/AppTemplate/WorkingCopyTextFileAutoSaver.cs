@@ -27,7 +27,7 @@ namespace Eutherion.Win.AppTemplate
 {
     public class WorkingCopyTextFileAutoSaver
     {
-        internal static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        private static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
         {
             if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
             {
@@ -53,9 +53,24 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         internal readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
 
+        /// <summary>
+        /// Gets the <see cref="FileStreamPair"/> that is currently used for auto-saving.
+        /// </summary>
+        public FileStreamPair AutoSaveFileStreamPair { get; private set; }
+
         public WorkingCopyTextFileAutoSaver(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
         {
             this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
+
+            try
+            {
+                AutoSaveFileStreamPair = OpenAutoSaveFileStreamPair(autoSaveProperty);
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+            }
         }
     }
 }

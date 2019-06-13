@@ -128,17 +128,7 @@ namespace Eutherion.Win.AppTemplate
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             if (autoSaveSetting != null) autoSaver = new WorkingCopyTextFileAutoSaver(autoSaveSetting);
 
-            FileStreamPair fileStreamPair = null;
-
-            try
-            {
-                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-            }
+            FileStreamPair fileStreamPair = autoSaver?.AutoSaveFileStreamPair;
 
             CodeFile = codeFile == null
                 ? WorkingCopyTextFile.Open(null, fileStreamPair)
