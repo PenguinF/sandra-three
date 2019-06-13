@@ -27,22 +27,30 @@ namespace Eutherion.Win.AppTemplate
 {
     public class WorkingCopyTextFileAutoSaver
     {
-        private static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        internal static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
         {
-            if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+            try
             {
-                var fileStreamPair = FileStreamPair.Create(
-                    AutoSaveTextFile.OpenExistingAutoSaveFile,
-                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
-                    && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
+                if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
                 {
-                    return fileStreamPair;
-                }
+                    var fileStreamPair = FileStreamPair.Create(
+                        AutoSaveTextFile.OpenExistingAutoSaveFile,
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
 
-                fileStreamPair.Dispose();
+                    if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
+                        && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
+                    {
+                        return fileStreamPair;
+                    }
+
+                    fileStreamPair.Dispose();
+                }
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
             }
 
             return null;
@@ -58,19 +66,16 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public FileStreamPair AutoSaveFileStreamPair { get; private set; }
 
-        public WorkingCopyTextFileAutoSaver(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        private readonly WorkingCopyTextFile workingCopyTextFile;
+
+        public WorkingCopyTextFileAutoSaver(
+            SettingProperty<AutoSaveFileNamePair> autoSaveProperty,
+            FileStreamPair autoSaveFileStreamPair,
+            WorkingCopyTextFile workingCopyTextFile)
         {
             this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
-
-            try
-            {
-                AutoSaveFileStreamPair = OpenAutoSaveFileStreamPair(autoSaveProperty);
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-            }
+            AutoSaveFileStreamPair = autoSaveFileStreamPair;
+            this.workingCopyTextFile = workingCopyTextFile ?? throw new ArgumentNullException(nameof(workingCopyTextFile));
         }
     }
 }

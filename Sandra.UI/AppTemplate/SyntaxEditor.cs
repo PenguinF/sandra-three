@@ -125,13 +125,25 @@ namespace Eutherion.Win.AppTemplate
                             SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
-            if (autoSaveSetting != null) autoSaver = new WorkingCopyTextFileAutoSaver(autoSaveSetting);
 
-            FileStreamPair fileStreamPair = autoSaver?.AutoSaveFileStreamPair;
+            FileStreamPair fileStreamPair = null;
+
+            if (autoSaveSetting != null)
+            {
+                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
+            }
 
             CodeFile = codeFile == null
                 ? WorkingCopyTextFile.Open(null, fileStreamPair)
                 : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
+
+            if (autoSaveSetting != null)
+            {
+                autoSaver = new WorkingCopyTextFileAutoSaver(
+                    autoSaveSetting,
+                    fileStreamPair,
+                    CodeFile);
+            }
 
             TextIndex = new TextIndex<TTerminal>();
 
