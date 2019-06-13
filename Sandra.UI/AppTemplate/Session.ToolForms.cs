@@ -111,6 +111,7 @@ namespace Eutherion.Win.AppTemplate
                 initialTextGenerator,
                 formStateSetting,
                 errorHeightSetting,
+                SharedSettings.JsonZoom,
                 autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),

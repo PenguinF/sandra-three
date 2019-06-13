@@ -56,10 +56,11 @@ namespace Eutherion.Win.AppTemplate
 
         public SyntaxEditorForm(bool isReadOnly,
                                 JsonSyntaxDescriptor syntaxDescriptor,
-                                SettingsFile settingsFile,
+                                LiveTextFile codeFile,
                                 Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
+                                SettingProperty<int> zoomSetting,
                                 SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
@@ -70,7 +71,7 @@ namespace Eutherion.Win.AppTemplate
 
             SyntaxEditor = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
                 syntaxDescriptor,
-                settingsFile,
+                codeFile,
                 initialTextGenerator,
                 autoSaveSetting)
             {
@@ -79,12 +80,12 @@ namespace Eutherion.Win.AppTemplate
             };
 
             // Initialize zoom factor and listen to changes.
-            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
+            if (Session.Current.TryGetAutoSaveValue(zoomSetting, out int zoomFactor))
             {
                 SyntaxEditor.Zoom = zoomFactor;
             }
 
-            SyntaxEditor.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
+            SyntaxEditor.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(zoomSetting, e.ZoomFactor);
 
             SyntaxEditor.BindActions(new UIActionBindings
             {
