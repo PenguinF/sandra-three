@@ -754,5 +754,45 @@ namespace Eutherion.Win.Tests
                 Assert.False(wcFile.ContainsChanges);
             }
         }
+
+        private void PrepareForReplaceTest(string primaryLoadedText, string secondaryLoadedText)
+        {
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, primaryLoadedText);
+            fileFixture.PrepareTargetFile(TargetFile.SecondaryTextFile, secondaryLoadedText);
+        }
+
+        [Fact]
+        public void ReplaceFailsWhenDisposed()
+        {
+            PrepareForReplaceTest("A", "B");
+
+            var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null);
+            var liveTextFile = wcFile.OpenTextFile;
+            wcFile.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => wcFile.ReplaceOpenTextFile(fileFixture.GetPath(TargetFile.SecondaryTextFile)));
+            Assert.Same(liveTextFile, wcFile.OpenTextFile);
+        }
+
+        [Fact]
+        public void ReplaceFailsWhenNotOwner()
+        {
+            PrepareForReplaceTest("A", "B");
+
+            using (var textFile = new LiveTextFile(fileFixture.GetPath(TargetFile.PrimaryTextFile)))
+            {
+                string replacePath = fileFixture.GetPath(TargetFile.SecondaryTextFile);
+
+                var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null);
+                using (wcFile)
+                {
+                    Assert.Throws<InvalidOperationException>(() => wcFile.ReplaceOpenTextFile(replacePath));
+                    Assert.Same(textFile, wcFile.OpenTextFile);
+                }
+
+                // Also assert that the ObjectDisposedException has precedence.
+                Assert.Throws<ObjectDisposedException>(() => wcFile.ReplaceOpenTextFile(replacePath));
+            }
+        }
     }
 }
