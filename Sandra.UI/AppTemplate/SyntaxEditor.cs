@@ -94,7 +94,6 @@ namespace Eutherion.Win.AppTemplate
             && (Modified || containsChangesAtSavePoint);
 
         private readonly WorkingCopyTextFileAutoSaver autoSaver;
-        private SettingProperty<AutoSaveFileNamePair> autoSaveSetting => autoSaver?.autoSaveProperty;
 
         private readonly TextIndex<TTerminal> TextIndex;
 
@@ -215,7 +214,7 @@ namespace Eutherion.Win.AppTemplate
         private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
         {
             // Only open auto-save files if they can be stored in autoSaveSetting.
-            if (autoSaveSetting != null)
+            if (autoSaver != null)
             {
                 FileStreamPair fileStreamPair = null;
 
@@ -225,7 +224,7 @@ namespace Eutherion.Win.AppTemplate
                     e.AutoSaveFileStreamPair = fileStreamPair;
 
                     Session.Current.AutoSave.Persist(
-                        autoSaveSetting,
+                        autoSaver.autoSaveProperty,
                         new AutoSaveFileNamePair(
                             Path.GetFileName(fileStreamPair.FileStream1.Name),
                             Path.GetFileName(fileStreamPair.FileStream2.Name)));
@@ -413,11 +412,11 @@ namespace Eutherion.Win.AppTemplate
                 CodeFile.Dispose();
 
                 // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
-                if (autoSaveSetting != null
+                if (autoSaver != null
                     && CodeFile.AutoSaveFile == null
-                    && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair _))
+                    && Session.Current.TryGetAutoSaveValue(autoSaver.autoSaveProperty, out AutoSaveFileNamePair _))
                 {
-                    Session.Current.AutoSave.Remove(autoSaveSetting);
+                    Session.Current.AutoSave.Remove(autoSaver.autoSaveProperty);
                 }
             }
 
