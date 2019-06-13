@@ -68,9 +68,7 @@ namespace Sandra.UI
                     ClientSize = new Size(400, 400),
                 };
 
-                pgnForm.Visible = true;
-                pgnForm.Deminimize();
-                pgnForm.Activate();
+                pgnForm.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;

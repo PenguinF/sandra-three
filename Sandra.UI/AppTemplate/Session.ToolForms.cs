@@ -77,11 +77,9 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
 
-            if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
+            if (toolForm.Value != null)
             {
-                toolForm.Value.Visible = true;
-                toolForm.Value.Deminimize();
-                toolForm.Value.Activate();
+                toolForm.Value.EnsureActivated();
             }
         }
 
