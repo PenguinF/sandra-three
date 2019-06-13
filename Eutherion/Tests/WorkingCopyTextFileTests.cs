@@ -272,6 +272,7 @@ namespace Eutherion.Win.Tests
         {
             using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
 
@@ -306,6 +307,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
 
@@ -328,6 +330,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
                 Assert.Null(wcFile.AutoSaveFile);
@@ -346,6 +349,7 @@ namespace Eutherion.Win.Tests
 
             using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
                 Assert.NotNull(wcFile.AutoSaveFile);
 
@@ -380,6 +384,7 @@ namespace Eutherion.Win.Tests
 
             using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
 
@@ -400,6 +405,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
 
@@ -465,6 +471,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 wcFile.Dispose();
                 Assert.NotNull(wcFile.OpenTextFile);
                 Assert.False(textFile.IsDisposed);

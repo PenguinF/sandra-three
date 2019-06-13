@@ -60,7 +60,10 @@ namespace Eutherion.Win
             }
         }
 
-        private readonly bool isTextFileOwner;
+        /// <summary>
+        /// Gets if this <see cref="WorkingCopyTextFile"/> was created with the <see cref="Open(string, FileStreamPair)"/> method.
+        /// </summary>
+        public bool IsTextFileOwner { get; }
 
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from a file path and a <see cref="FileStreamPair"/>
@@ -123,7 +126,7 @@ namespace Eutherion.Win
 
         private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {
-            this.isTextFileOwner = isTextFileOwner;
+            IsTextFileOwner = isTextFileOwner;
             OpenTextFile = openTextFile;
 
             if (openTextFile != null)
@@ -320,7 +323,7 @@ namespace Eutherion.Win
                 {
                     OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
 
-                    if (isTextFileOwner)
+                    if (IsTextFileOwner)
                     {
                         OpenTextFile.Dispose();
                     }
