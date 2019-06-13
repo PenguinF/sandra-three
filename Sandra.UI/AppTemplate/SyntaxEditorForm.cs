@@ -48,6 +48,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
 
+        private readonly LocalizedString untitledString;
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
@@ -67,10 +68,7 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(
-                syntaxDescriptor,
-                codeFile,
-                initialTextGenerator)
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile, initialTextGenerator)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
@@ -102,8 +100,9 @@ namespace Eutherion.Win.AppTemplate
 
             UIMenu.AddTo(SyntaxEditor);
 
-            // Initial changed marker.
-            UpdateChangedMarker();
+            // Changed marker.
+            untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
+            untitledString.DisplayText.ValueChanged += _ => UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
@@ -264,6 +263,19 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        private string CodeFilePathDisplayString
+        {
+            get
+            {
+                string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
+
+                // Use untitledString for new files that are not yet saved.
+                return openTextFilePath == null
+                    ? untitledString.DisplayText.Value
+                    : Path.GetFileName(openTextFilePath);
+            }
+        }
+
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
             UpdateChangedMarker();
@@ -271,8 +283,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
-            string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
-            string fileName = Path.GetFileName(openTextFilePath);
+            string fileName = CodeFilePathDisplayString;
             Text = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Invalidate to update the save button.
@@ -386,11 +397,8 @@ namespace Eutherion.Win.AppTemplate
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (SyntaxEditor.ContainsChanges && SyntaxEditor.CodeFile.AutoSaveFile == null)
             {
-                string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
-                string fileName = Path.GetFileName(openTextFilePath);
-
                 DialogResult result = MessageBox.Show(
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { CodeFilePathDisplayString }),
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -422,6 +430,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
+                untitledString?.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }

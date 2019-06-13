@@ -50,6 +50,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey Tools = new LocalizedStringKey(nameof(Tools));
         public static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
         public static readonly LocalizedStringKey UnsavedChangesTitle = new LocalizedStringKey(nameof(UnsavedChangesTitle));
+        public static readonly LocalizedStringKey Untitled = new LocalizedStringKey(nameof(Untitled));
         public static readonly LocalizedStringKey View = new LocalizedStringKey(nameof(View));
         public static readonly LocalizedStringKey ZoomIn = new LocalizedStringKey(nameof(ZoomIn));
         public static readonly LocalizedStringKey ZoomOut = new LocalizedStringKey(nameof(ZoomOut));
@@ -81,6 +82,7 @@ namespace Eutherion.Win.AppTemplate
                 { Tools, "Tools" },
                 { Undo, "Undo" },
                 { UnsavedChangesTitle, "Save changes" },
+                { Untitled, "Untitled" },
                 { View, "View" },
                 { ZoomIn, "Zoom in" },
                 { ZoomOut, "Zoom out" },
