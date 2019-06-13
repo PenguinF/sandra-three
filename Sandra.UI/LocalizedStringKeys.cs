@@ -41,8 +41,10 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey LastMove = new LocalizedStringKey(nameof(LastMove));
         internal static readonly LocalizedStringKey Moves = new LocalizedStringKey(nameof(Moves));
         internal static readonly LocalizedStringKey NewGame = new LocalizedStringKey(nameof(NewGame));
+        internal static readonly LocalizedStringKey NewGameFile = new LocalizedStringKey(nameof(NewGameFile));
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
+        internal static readonly LocalizedStringKey OpenGameFile = new LocalizedStringKey(nameof(OpenGameFile));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
@@ -68,8 +70,10 @@ namespace Sandra.UI
             { LastMove, "Last move" },
             { Moves, "Moves" },
             { NewGame, "New game" },
+            { NewGameFile, "New game file" },
             { NextLine, "Next line" },
             { NextMove, "Next move" },
+            { OpenGameFile, "Open game file" },
             { PieceSymbols, "NBRQK" },
             { PreviousLine, "Previous line" },
             { PreviousMove, "Previous move" },

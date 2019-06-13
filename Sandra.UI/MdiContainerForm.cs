@@ -206,9 +206,12 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
+            this.BindAction(NewPGNFile, TryNewPGNFile);
+            this.BindAction(OpenPGNFile, TryOpenPGNFile);
+            this.BindAction(SharedUIAction.Exit, TryExit);
+
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
             this.BindAction(Session.ShowDefaultSettingsFile, Session.Current.TryShowDefaultSettingsFile());
-            this.BindAction(SharedUIAction.Exit, TryExit);
             this.BindAction(OpenNewPlayingBoard, TryOpenNewPlayingBoard);
             this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
@@ -219,6 +222,8 @@ namespace Sandra.UI
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
+                                        NewPGNFile,
+                                        OpenPGNFile,
                                         SharedUIAction.Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game.ToTextProvider());

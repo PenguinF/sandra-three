@@ -33,6 +33,40 @@ namespace Sandra.UI
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
+        public static readonly DefaultUIActionBinding NewPGNFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPGNFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
+                    IsFirstInGroup = true,
+                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
+                },
+            });
+
+        public UIActionState TryNewPGNFile(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding OpenPGNFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPGNFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
+                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
+                    OpensDialog = true,
+                },
+            });
+
+        public UIActionState TryOpenPGNFile(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
         public UIActionState TryExit(bool perform)
         {
             if (perform) Close();
