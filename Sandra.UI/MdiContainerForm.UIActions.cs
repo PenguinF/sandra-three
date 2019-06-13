@@ -21,8 +21,11 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
 using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -47,6 +50,29 @@ namespace Sandra.UI
 
         public UIActionState TryNewPGNFile(bool perform)
         {
+            if (perform)
+            {
+                var syntaxDescriptor = new PGNSyntaxDescriptor();
+
+                var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                    true,
+                    syntaxDescriptor,
+                    null,
+                    null,
+                    SettingKeys.PGNWindow,
+                    SettingKeys.PGNErrorHeight,
+                    SettingKeys.PGNZoom,
+                    null)
+                {
+                    MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                    ClientSize = new Size(400, 400),
+                };
+
+                pgnForm.Visible = true;
+                pgnForm.Deminimize();
+                pgnForm.Activate();
+            }
+
             return UIActionVisibility.Enabled;
         }
 

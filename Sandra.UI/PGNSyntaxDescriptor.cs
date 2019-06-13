@@ -19,6 +19,46 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using Eutherion.Win.AppTemplate;
+using ScintillaNET;
+using System.Collections.Generic;
+
 namespace Sandra.UI
 {
+    /// <summary>
+    /// Describes the interaction between PGN syntax and a syntax editor.
+    /// </summary>
+    public class PGNSyntaxDescriptor : SyntaxDescriptor<PGNSymbol, PGNErrorInfo>
+    {
+        public override (IEnumerable<TextElement<PGNSymbol>>, List<PGNErrorInfo>) Parse(string code)
+            => (new TextElement<PGNSymbol>[] { new TextElement<PGNSymbol>(new PGNSymbol()) { Length = code.Length } }, new List<PGNErrorInfo>());
+
+        public override Style GetStyle(SyntaxEditor<PGNSymbol, PGNErrorInfo> syntaxEditor, PGNSymbol terminalSymbol)
+            => syntaxEditor.DefaultStyle;
+
+        public override (int, int) GetErrorRange(PGNErrorInfo error)
+            => (error.Start, error.Length);
+
+        public override string GetErrorMessage(PGNErrorInfo error)
+            => error.Message;
+    }
+
+    public class PGNSymbol
+    {
+    }
+
+    public class PGNErrorInfo
+    {
+        public int Start { get; }
+        public int Length { get; }
+        public string Message { get; }
+
+        public PGNErrorInfo(int start, int length, string message)
+        {
+            Start = start;
+            Length = length;
+            Message = message;
+        }
+    }
 }
