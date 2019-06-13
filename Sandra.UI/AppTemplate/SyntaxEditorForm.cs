@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -34,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SyntaxEditorForm : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm<TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -52,10 +51,10 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        public SyntaxEditor<JsonSymbol, JsonErrorInfo> SyntaxEditor { get; }
+        public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
 
         public SyntaxEditorForm(bool isReadOnly,
-                                JsonSyntaxDescriptor syntaxDescriptor,
+                                SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
                                 LiveTextFile codeFile,
                                 Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
@@ -69,7 +68,7 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            SyntaxEditor = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(
                 syntaxDescriptor,
                 codeFile,
                 initialTextGenerator,
@@ -315,13 +314,17 @@ namespace Eutherion.Win.AppTemplate
                 else
                 {
                     var errorMessages = (from error in SyntaxEditor.CurrentErrors
-                                         let lineIndex = (SyntaxEditor.LineFromPosition(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
-                                         let position = (SyntaxEditor.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let errorRange = SyntaxEditor.SyntaxDescriptor.GetErrorRange(error)
+                                         let errorStart = errorRange.Item1
+                                         let errorLength = errorRange.Item2
+                                         let errorMessage = SyntaxEditor.SyntaxDescriptor.GetErrorMessage(error)
+                                         let lineIndex = (SyntaxEditor.LineFromPosition(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
                                          select Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(Session.Current.CurrentLocalizer), lineIndex, position })).ToArray();
+                                             new[] { errorMessage, lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

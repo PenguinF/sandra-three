@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -104,7 +105,7 @@ namespace Eutherion.Win.AppTemplate
             var jsonStyleSelector = new JsonStyleSelector();
             var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector);
 
-            var settingsForm = new SyntaxEditorForm(
+            var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
                 isReadOnly,
                 syntaxDescriptor,
                 settingsFile,
