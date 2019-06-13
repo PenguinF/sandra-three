@@ -100,12 +100,12 @@ namespace Eutherion.Win.AppTemplate
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            => new SettingsForm(isReadOnly,
-                                settingsFile,
-                                initialTextGenerator,
-                                formStateSetting,
-                                errorHeightSetting,
-                                autoSaveSetting)
+            => new SyntaxEditorForm(isReadOnly,
+                                    settingsFile,
+                                    initialTextGenerator,
+                                    formStateSetting,
+                                    errorHeightSetting,
+                                    autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };

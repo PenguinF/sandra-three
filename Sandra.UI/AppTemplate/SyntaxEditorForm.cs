@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SettingsForm.cs
+ * SyntaxEditorForm.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -34,7 +34,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -53,12 +53,12 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        public SettingsForm(bool isReadOnly,
-                            SettingsFile settingsFile,
-                            Func<string> initialTextGenerator,
-                            SettingProperty<PersistableFormState> formStateSetting,
-                            SettingProperty<int> errorHeightSetting,
-                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        public SyntaxEditorForm(bool isReadOnly,
+                                SettingsFile settingsFile,
+                                Func<string> initialTextGenerator,
+                                SettingProperty<PersistableFormState> formStateSetting,
+                                SettingProperty<int> errorHeightSetting,
+                                SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
