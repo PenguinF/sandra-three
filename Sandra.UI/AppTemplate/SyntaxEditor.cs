@@ -69,26 +69,13 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        private static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-        {
-            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
-            {
-                return FileStreamPair.Create(
-                    AutoSaveTextFile.OpenExistingAutoSaveFile,
-                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-            }
-
-            return null;
-        }
-
         private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             FileStreamPair fileStreamPair = null;
 
             try
             {
-                fileStreamPair = OpenAutoSaveFileStreamPair(autoSaveSetting);
+                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
                 return codeFile == null
                     ? WorkingCopyTextFile.Open(null, fileStreamPair)
                     : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);

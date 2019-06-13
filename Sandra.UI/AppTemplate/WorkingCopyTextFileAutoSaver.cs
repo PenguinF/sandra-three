@@ -21,11 +21,25 @@
 
 using Eutherion.Win.Storage;
 using System;
+using System.IO;
 
 namespace Eutherion.Win.AppTemplate
 {
     public class WorkingCopyTextFileAutoSaver
     {
+        internal static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        {
+            if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+            {
+                return FileStreamPair.Create(
+                    AutoSaveTextFile.OpenExistingAutoSaveFile,
+                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Setting to use when an auto-save file name pair is generated.
         /// </summary>
