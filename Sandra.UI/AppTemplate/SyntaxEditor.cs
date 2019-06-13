@@ -28,7 +28,6 @@ using ScintillaNET;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -46,28 +45,6 @@ namespace Eutherion.Win.AppTemplate
     public class SyntaxEditor<TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
-
-        /// <summary>
-        /// This results in file names such as ".%_A8.tmp".
-        /// </summary>
-        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
-
-        private static FileStream CreateUniqueNewAutoSaveFileStream()
-        {
-            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
-            {
-                autoSaveFileCounter = 1;
-            };
-
-            var file = FileUtilities.CreateUniqueFile(
-                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
-                FileOptions.SequentialScan | FileOptions.Asynchronous,
-                ref autoSaveFileCounter);
-
-            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
-
-            return file;
-        }
 
         /// <summary>
         /// Gets the syntax descriptor.
@@ -140,6 +117,7 @@ namespace Eutherion.Win.AppTemplate
             if (autoSaveSetting != null)
             {
                 autoSaver = new WorkingCopyTextFileAutoSaver(
+                    Session.Current,
                     autoSaveSetting,
                     fileStreamPair,
                     CodeFile);
@@ -182,7 +160,6 @@ namespace Eutherion.Win.AppTemplate
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
-            CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Only use initialTextGenerator if nothing was auto-saved.
@@ -219,34 +196,6 @@ namespace Eutherion.Win.AppTemplate
                 else
                 {
                     CopyTextFromTextFile();
-                }
-            }
-        }
-
-        private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
-        {
-            // Only open auto-save files if they can be stored in autoSaveSetting.
-            if (autoSaver != null)
-            {
-                FileStreamPair fileStreamPair = null;
-
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
-                    e.AutoSaveFileStreamPair = fileStreamPair;
-
-                    Session.Current.AutoSave.Persist(
-                        autoSaver.autoSaveProperty,
-                        new AutoSaveFileNamePair(
-                            Path.GetFileName(fileStreamPair.FileStream1.Name),
-                            Path.GetFileName(fileStreamPair.FileStream2.Name)));
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
                 }
             }
         }

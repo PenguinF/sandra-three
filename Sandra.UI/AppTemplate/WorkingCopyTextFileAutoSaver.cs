@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using System;
 using System.IO;
@@ -27,6 +28,28 @@ namespace Eutherion.Win.AppTemplate
 {
     public class WorkingCopyTextFileAutoSaver
     {
+        /// <summary>
+        /// This results in file names such as ".%_A8.tmp".
+        /// </summary>
+        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
+
+        private static FileStream CreateUniqueNewAutoSaveFileStream()
+        {
+            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
+            {
+                autoSaveFileCounter = 1;
+            };
+
+            var file = FileUtilities.CreateUniqueFile(
+                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
+                FileOptions.SequentialScan | FileOptions.Asynchronous,
+                ref autoSaveFileCounter);
+
+            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
+
+            return file;
+        }
+
         internal static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
         {
             try
@@ -56,9 +79,7 @@ namespace Eutherion.Win.AppTemplate
             return null;
         }
 
-        /// <summary>
-        /// Setting to use when an auto-save file name pair is generated.
-        /// </summary>
+        private readonly Session ownerSession;
         internal readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
 
         /// <summary>
@@ -69,13 +90,42 @@ namespace Eutherion.Win.AppTemplate
         private readonly WorkingCopyTextFile workingCopyTextFile;
 
         public WorkingCopyTextFileAutoSaver(
+            Session ownerSession,
             SettingProperty<AutoSaveFileNamePair> autoSaveProperty,
             FileStreamPair autoSaveFileStreamPair,
             WorkingCopyTextFile workingCopyTextFile)
         {
+            this.ownerSession = ownerSession ?? throw new ArgumentNullException(nameof(ownerSession));
             this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
             AutoSaveFileStreamPair = autoSaveFileStreamPair;
             this.workingCopyTextFile = workingCopyTextFile ?? throw new ArgumentNullException(nameof(workingCopyTextFile));
+
+            workingCopyTextFile.QueryAutoSaveFile += QueryAutoSaveFile;
+        }
+
+        private void QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
+        {
+            // Only open auto-save files if they can be stored in autoSaveSetting.
+            FileStreamPair fileStreamPair = null;
+
+            try
+            {
+                fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
+                e.AutoSaveFileStreamPair = fileStreamPair;
+
+                ownerSession.AutoSave.Persist(
+                    autoSaveProperty,
+                    new AutoSaveFileNamePair(
+                        Path.GetFileName(fileStreamPair.FileStream1.Name),
+                        Path.GetFileName(fileStreamPair.FileStream2.Name)));
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+            }
         }
     }
 }
