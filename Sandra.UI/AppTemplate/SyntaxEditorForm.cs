@@ -55,6 +55,7 @@ namespace Eutherion.Win.AppTemplate
         public SyntaxEditor<JsonSymbol, JsonErrorInfo> SyntaxEditor { get; }
 
         public SyntaxEditorForm(bool isReadOnly,
+                                JsonSyntaxDescriptor syntaxDescriptor,
                                 SettingsFile settingsFile,
                                 Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
@@ -67,10 +68,8 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            var jsonStyleSelector = new JsonStyleSelector();
-
             SyntaxEditor = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
-                new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector),
+                syntaxDescriptor,
                 settingsFile,
                 initialTextGenerator,
                 autoSaveSetting)
@@ -78,8 +77,6 @@ namespace Eutherion.Win.AppTemplate
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,
             };
-
-            jsonStyleSelector.InitializeStyles(SyntaxEditor);
 
             // Initialize zoom factor and listen to changes.
             if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))

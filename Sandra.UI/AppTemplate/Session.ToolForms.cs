@@ -100,15 +100,26 @@ namespace Eutherion.Win.AppTemplate
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            => new SyntaxEditorForm(isReadOnly,
-                                    settingsFile,
-                                    initialTextGenerator,
-                                    formStateSetting,
-                                    errorHeightSetting,
-                                    autoSaveSetting)
+        {
+            var jsonStyleSelector = new JsonStyleSelector();
+            var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector);
+
+            var settingsForm = new SyntaxEditorForm(
+                isReadOnly,
+                syntaxDescriptor,
+                settingsFile,
+                initialTextGenerator,
+                formStateSetting,
+                errorHeightSetting,
+                autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };
+
+            jsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+
+            return settingsForm;
+        }
 
         public UIActionHandlerFunc TryEditPreferencesFile() => perform =>
         {
