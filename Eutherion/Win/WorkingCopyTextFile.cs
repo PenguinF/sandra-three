@@ -275,11 +275,10 @@ namespace Eutherion.Win
         }
 
         /// <summary>
-        /// Replaces the current open text file with another.
-        /// This typically occurs right before saving to a different path.
+        /// Replaces the current open text file with another and overwrites the file with the current text.
         /// </summary>
         /// <param name="path">
-        /// The path of the file to load and watch.
+        /// The path of the file to overwrite and watch.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="path"/> is null.
@@ -304,7 +303,7 @@ namespace Eutherion.Win
         /// <exception cref="NotSupportedException">
         /// <paramref name="path"/> is in an invalid format.
         /// </exception>
-        public void ReplaceOpenTextFile(string path)
+        public void Replace(string path)
         {
             ThrowIfDisposed();
 
@@ -328,6 +327,9 @@ namespace Eutherion.Win
             {
                 OpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
             }
+
+            OpenTextFile.Save(LocalCopyText);
+            ContainsChanges = false;
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)

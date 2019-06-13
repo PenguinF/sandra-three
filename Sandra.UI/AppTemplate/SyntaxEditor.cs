@@ -404,8 +404,7 @@ namespace Eutherion.Win.AppTemplate
                 var dialogResult = saveFileDialog.ShowDialog(TopLevelControl as Form);
                 if (dialogResult == DialogResult.OK)
                 {
-                    CodeFile.ReplaceOpenTextFile(saveFileDialog.FileName);
-                    CodeFile.Save();
+                    CodeFile.Replace(saveFileDialog.FileName);
                     containsChangesAtSavePoint = CodeFile.ContainsChanges;
                     SetSavePoint();
                 }
