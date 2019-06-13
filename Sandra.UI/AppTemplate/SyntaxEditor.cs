@@ -119,7 +119,6 @@ namespace Eutherion.Win.AppTemplate
                 autoSaver = new WorkingCopyTextFileAutoSaver(
                     Session.Current,
                     autoSaveSetting,
-                    fileStreamPair,
                     CodeFile);
             }
 
@@ -371,14 +370,7 @@ namespace Eutherion.Win.AppTemplate
             if (disposing)
             {
                 CodeFile.Dispose();
-
-                // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
-                if (autoSaver != null
-                    && CodeFile.AutoSaveFile == null
-                    && Session.Current.TryGetAutoSaveValue(autoSaver.autoSaveProperty, out AutoSaveFileNamePair _))
-                {
-                    Session.Current.AutoSave.Remove(autoSaver.autoSaveProperty);
-                }
+                autoSaver?.Dispose();
             }
 
             base.Dispose(disposing);

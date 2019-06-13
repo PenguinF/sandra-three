@@ -26,7 +26,7 @@ using System.IO;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class WorkingCopyTextFileAutoSaver
+    public class WorkingCopyTextFileAutoSaver : IDisposable
     {
         /// <summary>
         /// This results in file names such as ".%_A8.tmp".
@@ -80,24 +80,17 @@ namespace Eutherion.Win.AppTemplate
         }
 
         private readonly Session ownerSession;
-        internal readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
-
-        /// <summary>
-        /// Gets the <see cref="FileStreamPair"/> that is currently used for auto-saving.
-        /// </summary>
-        public FileStreamPair AutoSaveFileStreamPair { get; private set; }
+        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
 
         private readonly WorkingCopyTextFile workingCopyTextFile;
 
         public WorkingCopyTextFileAutoSaver(
             Session ownerSession,
             SettingProperty<AutoSaveFileNamePair> autoSaveProperty,
-            FileStreamPair autoSaveFileStreamPair,
             WorkingCopyTextFile workingCopyTextFile)
         {
             this.ownerSession = ownerSession ?? throw new ArgumentNullException(nameof(ownerSession));
             this.autoSaveProperty = autoSaveProperty ?? throw new ArgumentNullException(nameof(autoSaveProperty));
-            AutoSaveFileStreamPair = autoSaveFileStreamPair;
             this.workingCopyTextFile = workingCopyTextFile ?? throw new ArgumentNullException(nameof(workingCopyTextFile));
 
             workingCopyTextFile.QueryAutoSaveFile += QueryAutoSaveFile;
@@ -125,6 +118,16 @@ namespace Eutherion.Win.AppTemplate
 
                 // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                 autoSaveLoadException.Trace();
+            }
+        }
+
+        public void Dispose()
+        {
+            // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
+            if (workingCopyTextFile.AutoSaveFile == null
+                && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair _))
+            {
+                Session.Current.AutoSave.Remove(autoSaveProperty);
             }
         }
     }
