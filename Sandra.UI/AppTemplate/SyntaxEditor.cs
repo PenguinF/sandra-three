@@ -450,6 +450,7 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TrySaveToFile(bool perform)
         {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!ContainsChanges) return UIActionVisibility.Disabled;
 
