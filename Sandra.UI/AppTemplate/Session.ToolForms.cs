@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -79,6 +80,7 @@ namespace Eutherion.Win.AppTemplate
             if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
             {
                 toolForm.Value.Visible = true;
+                toolForm.Value.Deminimize();
                 toolForm.Value.Activate();
             }
         }
@@ -100,15 +102,27 @@ namespace Eutherion.Win.AppTemplate
                                         SettingProperty<PersistableFormState> formStateSetting,
                                         SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-            => new SettingsForm(isReadOnly,
-                                settingsFile,
-                                initialTextGenerator,
-                                formStateSetting,
-                                errorHeightSetting,
-                                autoSaveSetting)
+        {
+            var jsonStyleSelector = new JsonStyleSelector();
+            var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector);
+
+            var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
+                isReadOnly,
+                syntaxDescriptor,
+                settingsFile,
+                initialTextGenerator,
+                formStateSetting,
+                errorHeightSetting,
+                SharedSettings.JsonZoom,
+                autoSaveSetting)
             {
                 ClientSize = new Size(600, 600),
             };
+
+            jsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+
+            return settingsForm;
+        }
 
         public UIActionHandlerFunc TryEditPreferencesFile() => perform =>
         {

@@ -76,9 +76,6 @@
     </Compile>
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="AppTemplate\Session.ToolForms.cs" />
-    <Compile Include="AppTemplate\SettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="AppTemplate\SharedLocalizedStringKeys.cs" />
     <Compile Include="AppTemplate\SharedResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -89,6 +86,9 @@
     <Compile Include="AppTemplate\SharedUIAction.cs" />
     <Compile Include="AppTemplate\SyntaxEditor.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="AppTemplate\SyntaxEditorForm.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="AppTemplate\UIActionForm.cs">
       <SubType>Form</SubType>

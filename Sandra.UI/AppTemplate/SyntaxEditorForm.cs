@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SettingsForm.cs
+ * SyntaxEditorForm.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text.Json;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -34,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SettingsForm : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm<TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -48,17 +47,20 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
-        private readonly SyntaxEditor<JsonSymbol, JsonErrorInfo> jsonTextBox;
 
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        public SettingsForm(bool isReadOnly,
-                            SettingsFile settingsFile,
-                            Func<string> initialTextGenerator,
-                            SettingProperty<PersistableFormState> formStateSetting,
-                            SettingProperty<int> errorHeightSetting,
-                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
+
+        public SyntaxEditorForm(bool isReadOnly,
+                                SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+                                LiveTextFile codeFile,
+                                Func<string> initialTextGenerator,
+                                SettingProperty<PersistableFormState> formStateSetting,
+                                SettingProperty<int> errorHeightSetting,
+                                SettingProperty<int> zoomSetting,
+                                SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
@@ -66,11 +68,9 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            var jsonStyleSelector = new JsonStyleSelector();
-
-            jsonTextBox = new SyntaxEditor<JsonSymbol, JsonErrorInfo>(
-                new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector),
-                settingsFile,
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(
+                syntaxDescriptor,
+                codeFile,
                 initialTextGenerator,
                 autoSaveSetting)
             {
@@ -78,43 +78,41 @@ namespace Eutherion.Win.AppTemplate
                 ReadOnly = isReadOnly,
             };
 
-            jsonStyleSelector.InitializeStyles(jsonTextBox);
-
             // Initialize zoom factor and listen to changes.
-            if (Session.Current.TryGetAutoSaveValue(SharedSettings.JsonZoom, out int zoomFactor))
+            if (Session.Current.TryGetAutoSaveValue(zoomSetting, out int zoomFactor))
             {
-                jsonTextBox.Zoom = zoomFactor;
+                SyntaxEditor.Zoom = zoomFactor;
             }
 
-            jsonTextBox.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(SharedSettings.JsonZoom, e.ZoomFactor);
+            SyntaxEditor.ZoomFactorChanged += (_, e) => Session.Current.AutoSave.Persist(zoomSetting, e.ZoomFactor);
 
-            jsonTextBox.BindActions(new UIActionBindings
+            SyntaxEditor.BindActions(new UIActionBindings
             {
-                { SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile },
+                { SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile },
             });
 
             // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
-            this.BindAction(SharedUIAction.SaveToFile, jsonTextBox.TrySaveToFile);
+            this.BindAction(SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile);
 
-            jsonTextBox.BindStandardEditUIActions();
+            SyntaxEditor.BindStandardEditUIActions();
 
-            jsonTextBox.BindActions(new UIActionBindings
+            SyntaxEditor.BindActions(new UIActionBindings
             {
                 { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
                 { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
             });
 
-            UIMenu.AddTo(jsonTextBox);
+            UIMenu.AddTo(SyntaxEditor);
 
             // Initial changed marker.
             UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
-            if (jsonTextBox.ReadOnly && jsonTextBox.CurrentErrorCount == 0)
+            if (SyntaxEditor.ReadOnly && SyntaxEditor.CurrentErrorCount == 0)
             {
                 // No errors while read-only: do not display an errors textbox.
-                Controls.Add(jsonTextBox);
+                Controls.Add(SyntaxEditor);
             }
             else
             {
@@ -138,12 +136,12 @@ namespace Eutherion.Win.AppTemplate
                 UIMenu.AddTo(errorsListBox);
 
                 // Save points.
-                jsonTextBox.SavePointLeft += (_, __) => UpdateChangedMarker();
-                jsonTextBox.SavePointReached += (_, __) => UpdateChangedMarker();
-                jsonTextBox.CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
+                SyntaxEditor.SavePointLeft += (_, __) => UpdateChangedMarker();
+                SyntaxEditor.SavePointReached += (_, __) => UpdateChangedMarker();
+                SyntaxEditor.CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
                 // Interaction between settingsTextBox and errorsTextBox.
-                jsonTextBox.CurrentErrorsChanged += (_, __) => DisplayErrors();
+                SyntaxEditor.CurrentErrorsChanged += (_, __) => DisplayErrors();
 
                 // Assume that if this display text changes, that of errorLocationString changes too.
                 noErrorsString = new LocalizedString(SharedLocalizedStringKeys.NoErrorsMessage);
@@ -163,7 +161,7 @@ namespace Eutherion.Win.AppTemplate
                     Orientation = Orientation.Horizontal,
                 };
 
-                splitter.Panel1.Controls.Add(jsonTextBox);
+                splitter.Panel1.Controls.Add(SyntaxEditor);
                 splitter.Panel2.Controls.Add(errorsListBox);
 
                 // Copy background color.
@@ -275,9 +273,9 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
-            string openTextFilePath = jsonTextBox.CodeFile.OpenTextFilePath;
+            string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
             string fileName = Path.GetFileName(openTextFilePath);
-            Text = jsonTextBox.ContainsChanges ? ChangedMarker + fileName : fileName;
+            Text = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Invalidate to update the save button.
             ActionHandler.Invalidate();
@@ -296,7 +294,7 @@ namespace Eutherion.Win.AppTemplate
             var index = errorsListBox.SelectedIndex;
             if (0 <= index && index < errorsListBox.Items.Count)
             {
-                jsonTextBox.ActivateError(index);
+                SyntaxEditor.ActivateError(index);
             }
         }
 
@@ -306,7 +304,7 @@ namespace Eutherion.Win.AppTemplate
 
             try
             {
-                if (jsonTextBox.CurrentErrorCount == 0)
+                if (SyntaxEditor.CurrentErrorCount == 0)
                 {
                     errorsListBox.Items.Clear();
                     errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
@@ -315,14 +313,18 @@ namespace Eutherion.Win.AppTemplate
                 }
                 else
                 {
-                    var errorMessages = (from error in jsonTextBox.CurrentErrors
-                                         let lineIndex = (jsonTextBox.LineFromPosition(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
-                                         let position = (jsonTextBox.GetColumn(error.Start) + 1).ToString(CultureInfo.InvariantCulture)
+                    var errorMessages = (from error in SyntaxEditor.CurrentErrors
+                                         let errorRange = SyntaxEditor.SyntaxDescriptor.GetErrorRange(error)
+                                         let errorStart = errorRange.Item1
+                                         let errorLength = errorRange.Item2
+                                         let errorMessage = SyntaxEditor.SyntaxDescriptor.GetErrorMessage(error)
+                                         let lineIndex = (SyntaxEditor.LineFromPosition(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
                                          select Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { error.Message(Session.Current.CurrentLocalizer), lineIndex, position })).ToArray();
+                                             new[] { errorMessage, lineIndex, position })).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;
@@ -384,9 +386,9 @@ namespace Eutherion.Win.AppTemplate
             base.OnFormClosing(e);
 
             // Only show message box if there's no auto save file from which local changes can be recovered.
-            if (jsonTextBox.ContainsChanges && jsonTextBox.CodeFile.AutoSaveFile == null)
+            if (SyntaxEditor.ContainsChanges && SyntaxEditor.CodeFile.AutoSaveFile == null)
             {
-                string openTextFilePath = jsonTextBox.CodeFile.OpenTextFilePath;
+                string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
                 string fileName = Path.GetFileName(openTextFilePath);
 
                 DialogResult result = MessageBox.Show(
@@ -433,7 +435,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = jsonTextBox.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrorCount;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)
@@ -453,7 +455,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = jsonTextBox.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrorCount;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)
