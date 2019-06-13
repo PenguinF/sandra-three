@@ -69,28 +69,34 @@ namespace Eutherion.Win.AppTemplate
             return file;
         }
 
-        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        private static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
             {
-                FileStreamPair fileStreamPair = null;
+                return FileStreamPair.Create(
+                    AutoSaveTextFile.OpenExistingAutoSaveFile,
+                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                    Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+            }
 
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
+            return null;
+        }
 
-                    return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
+        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+        {
+            FileStreamPair fileStreamPair = null;
 
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
-                }
+            try
+            {
+                fileStreamPair = OpenAutoSaveFileStreamPair(autoSaveSetting);
+                return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                if (fileStreamPair != null) fileStreamPair.Dispose();
+
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
             }
 
             return WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
