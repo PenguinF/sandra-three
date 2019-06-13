@@ -93,6 +93,7 @@
     <Compile Include="AppTemplate\UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="AppTemplate\WorkingCopyTextFileAutoSaver.cs" />
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
