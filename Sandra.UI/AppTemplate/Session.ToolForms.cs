@@ -104,20 +104,38 @@ namespace Eutherion.Win.AppTemplate
             var jsonStyleSelector = new JsonStyleSelector();
             var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector);
 
+            WorkingCopyTextFile codeFile;
+            WorkingCopyTextFileAutoSaver autoSaver;
+
+            if (autoSaveSetting == null)
+            {
+                codeFile = WorkingCopyTextFile.FromLiveTextFile(settingsFile, null);
+                autoSaver = null;
+            }
+            else
+            {
+                codeFile = WorkingCopyTextFile.FromLiveTextFile(
+                    settingsFile,
+                    WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting));
+
+                autoSaver = new WorkingCopyTextFileAutoSaver(this, autoSaveSetting, codeFile);
+            }
+
             var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
                 isReadOnly,
                 syntaxDescriptor,
-                settingsFile,
+                codeFile,
                 initialTextGenerator,
                 formStateSetting,
                 errorHeightSetting,
-                SharedSettings.JsonZoom,
-                autoSaveSetting)
+                SharedSettings.JsonZoom)
             {
                 ClientSize = new Size(600, 600),
             };
 
             jsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+
+            if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
             return settingsForm;
         }

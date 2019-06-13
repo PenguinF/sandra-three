@@ -55,12 +55,11 @@ namespace Eutherion.Win.AppTemplate
 
         public SyntaxEditorForm(bool isReadOnly,
                                 SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
-                                LiveTextFile codeFile,
+                                WorkingCopyTextFile codeFile,
                                 Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
-                                SettingProperty<int> zoomSetting,
-                                SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+                                SettingProperty<int> zoomSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
@@ -71,8 +70,7 @@ namespace Eutherion.Win.AppTemplate
             SyntaxEditor = new SyntaxEditor<TTerminal, TError>(
                 syntaxDescriptor,
                 codeFile,
-                initialTextGenerator,
-                autoSaveSetting)
+                initialTextGenerator)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = isReadOnly,

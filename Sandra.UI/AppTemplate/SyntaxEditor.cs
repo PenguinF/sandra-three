@@ -70,8 +70,6 @@ namespace Eutherion.Win.AppTemplate
             => !ReadOnly
             && (Modified || containsChangesAtSavePoint);
 
-        private readonly WorkingCopyTextFileAutoSaver autoSaver;
-
         private readonly TextIndex<TTerminal> TextIndex;
 
         public Style DefaultStyle => Styles[Style.Default];
@@ -86,41 +84,20 @@ namespace Eutherion.Win.AppTemplate
         /// </param>
         /// <param name="codeFile">
         /// The code file to show and/or edit.
+        /// It is disposed together with this <see cref="SyntaxEditor{TTerminal, TError}"/>.
         /// </param>
         /// <param name="initialTextGenerator">
         /// Optional function to generate initial text in case the code file could not be loaded and was not auto-saved.
         /// </param>
-        /// <param name="autoSaveSetting">
-        /// The setting property to use to auto-save the file names of the file pair used for auto-saving local changes.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="syntaxDescriptor"/> is null.
+        /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
         public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
-                            LiveTextFile codeFile,
-                            Func<string> initialTextGenerator,
-                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+                            WorkingCopyTextFile codeFile,
+                            Func<string> initialTextGenerator)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
-
-            FileStreamPair fileStreamPair = null;
-
-            if (autoSaveSetting != null)
-            {
-                fileStreamPair = WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting);
-            }
-
-            CodeFile = codeFile == null
-                ? WorkingCopyTextFile.Open(null, fileStreamPair)
-                : WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
-
-            if (autoSaveSetting != null)
-            {
-                autoSaver = new WorkingCopyTextFileAutoSaver(
-                    Session.Current,
-                    autoSaveSetting,
-                    CodeFile);
-            }
+            CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
 
             TextIndex = new TextIndex<TTerminal>();
 
@@ -370,7 +347,6 @@ namespace Eutherion.Win.AppTemplate
             if (disposing)
             {
                 CodeFile.Dispose();
-                autoSaver?.Dispose();
             }
 
             base.Dispose(disposing);

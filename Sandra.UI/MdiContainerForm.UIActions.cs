@@ -57,12 +57,11 @@ namespace Sandra.UI
                 var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
                     true,
                     syntaxDescriptor,
-                    null,
+                    WorkingCopyTextFile.Open(null, null),
                     null,
                     SettingKeys.PGNWindow,
                     SettingKeys.PGNErrorHeight,
-                    SettingKeys.PGNZoom,
-                    null)
+                    SettingKeys.PGNZoom)
                 {
                     MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                     ClientSize = new Size(400, 400),
