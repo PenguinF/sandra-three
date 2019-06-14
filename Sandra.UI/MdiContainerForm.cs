@@ -450,14 +450,14 @@ namespace Sandra.UI
             NewPlayingBoard();
         }
 
-        private void OpenPgnForm(string pgnFileName, bool isReadOnly)
+        private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
         {
             var syntaxDescriptor = new PgnSyntaxDescriptor();
 
             var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                 syntaxDescriptor,
-                WorkingCopyTextFile.Open(pgnFileName, null),
+                WorkingCopyTextFile.Open(normalizedPgnFileName, null),
                 null,
                 SettingKeys.PgnWindow,
                 SettingKeys.PgnErrorHeight,
@@ -471,6 +471,8 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
+            AddPgnForm(normalizedPgnFileName, pgnForm);
+
             pgnForm.EnsureActivated();
         }
 
@@ -482,7 +484,19 @@ namespace Sandra.UI
 
         private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
         {
-            OpenPgnForm(pgnFileName, isReadOnly);
+            // Normalize the file name so it gets indexed correctly.
+            string normalizedPgnFileName = Path.GetFullPath(pgnFileName);
+
+            if (!OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>> pgnForms))
+            {
+                // File path not open yet, initialize new PGN Form.
+                OpenPgnForm(normalizedPgnFileName, isReadOnly);
+            }
+            else
+            {
+                // Just activate the first Form in the list.
+                pgnForms[0].EnsureActivated();
+            }
         }
 
         private string RuntimePath(string imageFileKey)
