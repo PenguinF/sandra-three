@@ -832,6 +832,8 @@ namespace Eutherion.Win.Tests
 
                 // This should have no effect other than that the local changes are saved.
                 wcFile.UpdateLocalCopyText(text2, containsChanges: true);
+                bool eventRaised = false;
+                wcFile.OpenTextFilePathChanged += (_, __) => eventRaised = true;
                 wcFile.Replace(filePath);
 
                 // Assert that the OpenTextFile is unchanged.
@@ -839,6 +841,7 @@ namespace Eutherion.Win.Tests
                 Assert.False(liveTextFile.IsDisposed);
                 Assert.Equal(text2, wcFile.LocalCopyText);
                 Assert.False(wcFile.ContainsChanges);
+                Assert.False(eventRaised);
 
                 // Verify that auto-updates still work.
                 wcFile.LoadedTextChanged += (_, __) => ewh.Set();
@@ -864,6 +867,8 @@ namespace Eutherion.Win.Tests
             using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
             {
                 var liveTextFile = wcFile.OpenTextFile;
+                string previousOpenTextFilePath = null;
+                wcFile.OpenTextFilePathChanged += (_, e) => previousOpenTextFilePath = e.PreviousOpenTextFilePath;
                 wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile));
 
                 // Assert that the OpenTextFile was replaced, and the old one disposed.
@@ -874,6 +879,9 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(text1, wcFile.LoadedText);
                 Assert.Equal(text1, wcFile.LocalCopyText);
                 Assert.False(wcFile.ContainsChanges);
+
+                // Assert that the OpenTextFilePathChanged event was raised.
+                Assert.Equal(fileFixture.GetPath(TargetFile.PrimaryTextFile), previousOpenTextFilePath);
 
                 // Verify that auto-updates work on the second file, not the first.
                 wcFile.LoadedTextChanged += (_, __) => ewh.Set();
