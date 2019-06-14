@@ -183,18 +183,24 @@ namespace Eutherion.Win.AppTemplate
 
             var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
 
-            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
+            switch (codeAccessOption)
             {
-                fileMenu.Nodes.AddRange(BindMainMenuItemActions(
-                    SharedUIAction.SaveToFile,
-                    SharedUIAction.SaveAs,
-                    SharedUIAction.Close));
-            }
-            else
-            {
-                fileMenu.Nodes.AddRange(BindMainMenuItemActions(
-                    SharedUIAction.SaveToFile,
-                    SharedUIAction.Close));
+                default:
+                case SyntaxEditorCodeAccessOption.Default:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.SaveAs,
+                        SharedUIAction.Close));
+                    break;
+                case SyntaxEditorCodeAccessOption.FixedFile:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.Close));
+                    break;
+                case SyntaxEditorCodeAccessOption.ReadOnly:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.Close));
+                    break;
             }
 
             var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
