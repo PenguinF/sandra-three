@@ -496,7 +496,7 @@ namespace Sandra.UI
             OpenPgnForm(null, isReadOnly: false);
         }
 
-        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        public void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
         {
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = Path.GetFullPath(pgnFileName);
