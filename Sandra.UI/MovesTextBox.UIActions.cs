@@ -29,32 +29,32 @@ namespace Sandra.UI
     {
         public const string MovesTextBoxUIActionPrefix = nameof(MovesTextBox) + ".";
 
-        public static readonly DefaultUIActionBinding UsePGNPieceSymbols = new DefaultUIActionBinding(
-            new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePGNPieceSymbols)),
+        public static readonly DefaultUIActionBinding UsePgnPieceSymbols = new DefaultUIActionBinding(
+            new UIAction(MovesTextBoxUIActionPrefix + nameof(UsePgnPieceSymbols)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
                 {
                     IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.UsePGNPieceSymbols.ToTextProvider(),
+                    MenuTextProvider = LocalizedStringKeys.UsePgnPieceSymbols.ToTextProvider(),
                 },
             });
 
-        public UIActionState TryUsePGNPieceSymbols(bool perform)
+        public UIActionState TryUsePgnPieceSymbols(bool perform)
         {
             if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
 
             if (perform)
             {
                 moveFormattingOption
-                    = moveFormattingOption == MoveFormattingOption.UsePGN
+                    = moveFormattingOption == MoveFormattingOption.UsePgn
                     ? MoveFormattingOption.UseLocalizedShortAlgebraic
-                    : MoveFormattingOption.UsePGN;
+                    : MoveFormattingOption.UsePgn;
 
                 UpdateMoveFormatter();
             }
 
-            return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UsePGN);
+            return new UIActionState(UIActionVisibility.Enabled, moveFormattingOption == MoveFormattingOption.UsePgn);
         }
 
         public static readonly DefaultUIActionBinding UseLongAlgebraicNotation = new DefaultUIActionBinding(

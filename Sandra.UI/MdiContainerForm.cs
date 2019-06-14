@@ -206,8 +206,8 @@ namespace Sandra.UI
             }
 
             // Actions which have their handler in this instance.
-            this.BindAction(NewPGNFile, TryNewPGNFile);
-            this.BindAction(OpenPGNFile, TryOpenPGNFile);
+            this.BindAction(NewPgnFile, TryNewPgnFile);
+            this.BindAction(OpenPgnFile, TryOpenPgnFile);
             this.BindAction(SharedUIAction.Exit, TryExit);
 
             this.BindAction(Session.EditPreferencesFile, Session.Current.TryEditPreferencesFile());
@@ -222,8 +222,8 @@ namespace Sandra.UI
 
             // Add these actions to the "File" dropdown list.
             BindFocusDependentUIActions(fileMenu,
-                                        NewPGNFile,
-                                        OpenPGNFile,
+                                        NewPgnFile,
+                                        OpenPgnFile,
                                         SharedUIAction.Exit);
 
             UIMenuNode.Container gameMenu = new UIMenuNode.Container(LocalizedStringKeys.Game.ToTextProvider());
@@ -257,7 +257,7 @@ namespace Sandra.UI
                                         InteractiveGame.DemoteActiveVariation,
                                         InteractiveGame.BreakActiveVariation,
                                         InteractiveGame.DeleteActiveVariation,
-                                        MovesTextBox.UsePGNPieceSymbols,
+                                        MovesTextBox.UsePgnPieceSymbols,
                                         MovesTextBox.UseLongAlgebraicNotation,
                                         StandardChessBoardForm.FlipBoard,
                                         StandardChessBoardForm.TakeScreenshot);

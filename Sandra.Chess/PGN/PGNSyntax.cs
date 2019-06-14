@@ -23,30 +23,30 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace Sandra.PGN.Temp
+namespace Sandra.PgnDeprecated
 {
-    public sealed class PGNLine
+    public sealed class PgnLine
     {
         // Null for the root move list.
-        public PGNPlyWithSidelines Parent { get; internal set; }
+        public PgnPlyWithSidelines Parent { get; internal set; }
         public int ParentIndex { get; internal set; }
 
-        public readonly IReadOnlyList<PGNPlyWithSidelines> Plies;
+        public readonly IReadOnlyList<PgnPlyWithSidelines> Plies;
 
-        public PGNLine(IEnumerable<PGNPlyWithSidelines> plies)
+        public PgnLine(IEnumerable<PgnPlyWithSidelines> plies)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
-            var plyList = new ReadOnlyList<PGNPlyWithSidelines>(plies);
+            var plyList = new ReadOnlyList<PgnPlyWithSidelines>(plies);
             for (int i = 0; i < plyList.Count; ++i)
             {
-                if (plyList[i].Parent != null) throw new ArgumentException($"{nameof(plyList)}[{i}] already has a parent {nameof(PGNLine)}.");
+                if (plyList[i].Parent != null) throw new ArgumentException($"{nameof(plyList)}[{i}] already has a parent {nameof(PgnLine)}.");
                 plyList[i].Parent = this;
                 plyList[i].ParentIndex = i;
             }
             Plies = plyList;
         }
 
-        public IEnumerable<IPGNTerminalSymbol> GenerateTerminalSymbols()
+        public IEnumerable<IPgnTerminalSymbol> GenerateTerminalSymbols()
         {
             bool precededByFormattedMoveSymbol = false;
             bool emitSpace = false;
@@ -76,28 +76,28 @@ namespace Sandra.PGN.Temp
         }
     }
 
-    public sealed class PGNPlyWithSidelines
+    public sealed class PgnPlyWithSidelines
     {
-        public PGNLine Parent { get; internal set; }
+        public PgnLine Parent { get; internal set; }
         public int ParentIndex { get; internal set; }
 
-        public readonly PGNPly Ply;
-        public readonly IReadOnlyList<PGNLine> SideLines;
+        public readonly PgnPly Ply;
+        public readonly IReadOnlyList<PgnLine> SideLines;
 
-        public PGNPlyWithSidelines(PGNPly ply, IEnumerable<PGNLine> sideLines)
+        public PgnPlyWithSidelines(PgnPly ply, IEnumerable<PgnLine> sideLines)
         {
             if (ply != null)
             {
-                if (ply.Parent != null) throw new ArgumentException($"{nameof(ply)} already has a parent {nameof(PGNPlyWithSidelines)}.");
+                if (ply.Parent != null) throw new ArgumentException($"{nameof(ply)} already has a parent {nameof(PgnPlyWithSidelines)}.");
                 ply.Parent = this;
             }
             Ply = ply;
             if (sideLines != null)
             {
-                var sideLineList = new ReadOnlyList<PGNLine>(sideLines);
+                var sideLineList = new ReadOnlyList<PgnLine>(sideLines);
                 for (int i = 0; i < sideLineList.Count; ++i)
                 {
-                    if (sideLineList[i].Parent != null) throw new ArgumentException($"{nameof(sideLines)}[{i}] already has a parent {nameof(PGNPlyWithSidelines)}.");
+                    if (sideLineList[i].Parent != null) throw new ArgumentException($"{nameof(sideLines)}[{i}] already has a parent {nameof(PgnPlyWithSidelines)}.");
                     sideLineList[i].Parent = this;
                     sideLineList[i].ParentIndex = i;
                 }
@@ -106,22 +106,22 @@ namespace Sandra.PGN.Temp
         }
     }
 
-    public sealed class PGNPly
+    public sealed class PgnPly
     {
-        public PGNPlyWithSidelines Parent { get; internal set; }
+        public PgnPlyWithSidelines Parent { get; internal set; }
 
         public readonly int PlyCount;
         public readonly string Notation;
         public readonly Chess.Variation Variation;
 
-        public PGNPly(int plyCount, string notation, Chess.Variation variation)
+        public PgnPly(int plyCount, string notation, Chess.Variation variation)
         {
             PlyCount = plyCount;
             Notation = notation ?? throw new ArgumentNullException(nameof(notation));
             Variation = variation ?? throw new ArgumentNullException(nameof(variation));
         }
 
-        public IEnumerable<IPGNTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
+        public IEnumerable<IPgnTerminalSymbol> GenerateTerminalSymbols(bool precededByFormattedMoveSymbol)
         {
             if (PlyCount % 2 == 0)
             {
@@ -138,16 +138,16 @@ namespace Sandra.PGN.Temp
         }
     }
 
-    public interface IPGNTerminalSymbol : IEquatable<IPGNTerminalSymbol>
+    public interface IPgnTerminalSymbol : IEquatable<IPgnTerminalSymbol>
     {
-        void Accept(PGNTerminalSymbolVisitor visitor);
-        TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor);
+        void Accept(PgnTerminalSymbolVisitor visitor);
+        TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor);
     }
 
-    public abstract class PGNTerminalSymbolVisitor
+    public abstract class PgnTerminalSymbolVisitor
     {
-        public virtual void DefaultVisit(IPGNTerminalSymbol symbol) { }
-        public virtual void Visit(IPGNTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void DefaultVisit(IPgnTerminalSymbol symbol) { }
+        public virtual void Visit(IPgnTerminalSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => DefaultVisit(symbol);
         public virtual void VisitMoveCounterSymbol(MoveCounterSymbol symbol) => DefaultVisit(symbol);
@@ -156,10 +156,10 @@ namespace Sandra.PGN.Temp
         public virtual void VisitSpaceSymbol(SpaceSymbol symbol) => DefaultVisit(symbol);
     }
 
-    public abstract class PGNTerminalSymbolVisitor<TResult>
+    public abstract class PgnTerminalSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(IPGNTerminalSymbol symbol) => default(TResult);
-        public virtual TResult Visit(IPGNTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult DefaultVisit(IPgnTerminalSymbol symbol) => default(TResult);
+        public virtual TResult Visit(IPgnTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
         public virtual TResult VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitMoveCounterSymbol(MoveCounterSymbol symbol) => DefaultVisit(symbol);
@@ -168,114 +168,114 @@ namespace Sandra.PGN.Temp
         public virtual TResult VisitSpaceSymbol(SpaceSymbol symbol) => DefaultVisit(symbol);
     }
 
-    public sealed class SpaceSymbol : IPGNTerminalSymbol
+    public sealed class SpaceSymbol : IPgnTerminalSymbol
     {
         public const string SpaceText = " ";
 
         public static readonly SpaceSymbol Value = new SpaceSymbol();
 
-        public bool Equals(IPGNTerminalSymbol other) => other is SpaceSymbol;
+        public bool Equals(IPgnTerminalSymbol other) => other is SpaceSymbol;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSpaceSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitSpaceSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSpaceSymbol(this);
     }
 
-    public sealed class SideLineStartSymbol : IPGNTerminalSymbol
+    public sealed class SideLineStartSymbol : IPgnTerminalSymbol
     {
         public const string SideLineStartText = "(";
 
-        public readonly PGNLine SideLine;
+        public readonly PgnLine SideLine;
 
-        public SideLineStartSymbol(PGNLine sideLine)
+        public SideLineStartSymbol(PgnLine sideLine)
         {
             if (sideLine == null) throw new ArgumentNullException(nameof(sideLine));
             if (sideLine.Plies.Count == 0) throw new ArgumentException($"{nameof(sideLine)}.{nameof(sideLine.Plies)} must be one or greater.");
             SideLine = sideLine;
         }
 
-        public bool Equals(IPGNTerminalSymbol other)
+        public bool Equals(IPgnTerminalSymbol other)
             => other is SideLineStartSymbol
             && SideLine.Plies[0].Ply.Variation == ((SideLineStartSymbol)other).SideLine.Plies[0].Ply.Variation;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineStartSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitSideLineStartSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineStartSymbol(this);
     }
 
-    public sealed class SideLineEndSymbol : IPGNTerminalSymbol
+    public sealed class SideLineEndSymbol : IPgnTerminalSymbol
     {
         public const string SideLineEndText = ")";
 
-        public readonly PGNLine SideLine;
+        public readonly PgnLine SideLine;
 
-        public SideLineEndSymbol(PGNLine sideLine)
+        public SideLineEndSymbol(PgnLine sideLine)
         {
             if (sideLine == null) throw new ArgumentNullException(nameof(sideLine));
             if (sideLine.Plies.Count == 0) throw new ArgumentException($"{nameof(sideLine)}.{nameof(sideLine.Plies)} must be one or greater.");
             SideLine = sideLine;
         }
 
-        public bool Equals(IPGNTerminalSymbol other)
+        public bool Equals(IPgnTerminalSymbol other)
             => other is SideLineEndSymbol
             && SideLine.Plies[0].Ply.Variation == ((SideLineEndSymbol)other).SideLine.Plies[0].Ply.Variation;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitSideLineEndSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineEndSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitSideLineEndSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSideLineEndSymbol(this);
     }
 
-    public sealed class BlackToMoveEllipsisSymbol : IPGNTerminalSymbol
+    public sealed class BlackToMoveEllipsisSymbol : IPgnTerminalSymbol
     {
         public const string EllipsisText = "..";
 
-        public readonly PGNPly Ply;
+        public readonly PgnPly Ply;
 
-        public BlackToMoveEllipsisSymbol(PGNPly ply)
+        public BlackToMoveEllipsisSymbol(PgnPly ply)
         {
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(IPGNTerminalSymbol other)
+        public bool Equals(IPgnTerminalSymbol other)
             => other is BlackToMoveEllipsisSymbol
             && Ply.Variation == ((BlackToMoveEllipsisSymbol)other).Ply.Variation;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBlackToMoveEllipsisSymbol(this);
     }
 
-    public sealed class MoveCounterSymbol : IPGNTerminalSymbol
+    public sealed class MoveCounterSymbol : IPgnTerminalSymbol
     {
-        public readonly PGNPly Ply;
+        public readonly PgnPly Ply;
 
-        public MoveCounterSymbol(PGNPly ply)
+        public MoveCounterSymbol(PgnPly ply)
         {
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(IPGNTerminalSymbol other)
+        public bool Equals(IPgnTerminalSymbol other)
             => other is MoveCounterSymbol
             && Ply.Variation == ((MoveCounterSymbol)other).Ply.Variation;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitMoveCounterSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMoveCounterSymbol(this);
     }
 
-    public sealed class FormattedMoveSymbol : IPGNTerminalSymbol
+    public sealed class FormattedMoveSymbol : IPgnTerminalSymbol
     {
-        public readonly PGNPly Ply;
+        public readonly PgnPly Ply;
 
-        public FormattedMoveSymbol(PGNPly ply)
+        public FormattedMoveSymbol(PgnPly ply)
         {
             Ply = ply ?? throw new ArgumentNullException(nameof(ply));
         }
 
-        public bool Equals(IPGNTerminalSymbol other)
+        public bool Equals(IPgnTerminalSymbol other)
             => other is FormattedMoveSymbol
             && Ply.Variation == ((FormattedMoveSymbol)other).Ply.Variation;
 
-        public void Accept(PGNTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
-        public TResult Accept<TResult>(PGNTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
+        public void Accept(PgnTerminalSymbolVisitor visitor) => visitor.VisitFormattedMoveSymbol(this);
+        public TResult Accept<TResult>(PgnTerminalSymbolVisitor<TResult> visitor) => visitor.VisitFormattedMoveSymbol(this);
     }
 
-    public class PGNTerminalSymbolTextGenerator : PGNTerminalSymbolVisitor<string>
+    public class PgnTerminalSymbolTextGenerator : PgnTerminalSymbolVisitor<string>
     {
         public override string VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => BlackToMoveEllipsisSymbol.EllipsisText;
         public override string VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Notation;
@@ -285,19 +285,19 @@ namespace Sandra.PGN.Temp
         public override string VisitSpaceSymbol(SpaceSymbol symbol) => SpaceSymbol.SpaceText;
     }
 
-    public class PGNMoveSearcher : PGNTerminalSymbolVisitor<bool>
+    public class PgnMoveSearcher : PgnTerminalSymbolVisitor<bool>
     {
         private readonly Chess.MoveTree needle;
-        public PGNMoveSearcher(Chess.MoveTree needle) { this.needle = needle; }
+        public PgnMoveSearcher(Chess.MoveTree needle) { this.needle = needle; }
         public override bool VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply.Variation.MoveTree == needle;
     }
 
-    public class PGNActivePlyDetector : PGNTerminalSymbolVisitor<PGNPly>
+    public class PgnActivePlyDetector : PgnTerminalSymbolVisitor<PgnPly>
     {
-        public override PGNPly VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => symbol.Ply;
-        public override PGNPly VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply;
-        public override PGNPly VisitMoveCounterSymbol(MoveCounterSymbol symbol) => symbol.Ply;
-        public override PGNPly VisitSideLineEndSymbol(SideLineEndSymbol symbol) => symbol.SideLine.Plies[symbol.SideLine.Plies.Count - 1].Ply;
-        public override PGNPly VisitSideLineStartSymbol(SideLineStartSymbol symbol) => symbol.SideLine.Plies[0].Ply;
+        public override PgnPly VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => symbol.Ply;
+        public override PgnPly VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => symbol.Ply;
+        public override PgnPly VisitMoveCounterSymbol(MoveCounterSymbol symbol) => symbol.Ply;
+        public override PgnPly VisitSideLineEndSymbol(SideLineEndSymbol symbol) => symbol.SideLine.Plies[symbol.SideLine.Plies.Count - 1].Ply;
+        public override PgnPly VisitSideLineStartSymbol(SideLineStartSymbol symbol) => symbol.SideLine.Plies[0].Ply;
     }
 }

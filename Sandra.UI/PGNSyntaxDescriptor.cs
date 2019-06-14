@@ -30,38 +30,38 @@ namespace Sandra.UI
     /// <summary>
     /// Describes the interaction between PGN syntax and a syntax editor.
     /// </summary>
-    public class PGNSyntaxDescriptor : SyntaxDescriptor<PGNSymbol, PGNErrorInfo>
+    public class PgnSyntaxDescriptor : SyntaxDescriptor<PgnSymbol, PgnErrorInfo>
     {
-        public static readonly string JsonFileExtension = "pgn";
+        public static readonly string PgnFileExtension = "pgn";
 
-        public override string FileExtension => JsonFileExtension;
+        public override string FileExtension => PgnFileExtension;
 
-        public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PGNFiles;
+        public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
-        public override (IEnumerable<TextElement<PGNSymbol>>, List<PGNErrorInfo>) Parse(string code)
-            => (new TextElement<PGNSymbol>[] { new TextElement<PGNSymbol>(new PGNSymbol()) { Length = code.Length } }, new List<PGNErrorInfo>());
+        public override (IEnumerable<TextElement<PgnSymbol>>, List<PgnErrorInfo>) Parse(string code)
+            => (new TextElement<PgnSymbol>[] { new TextElement<PgnSymbol>(new PgnSymbol()) { Length = code.Length } }, new List<PgnErrorInfo>());
 
-        public override Style GetStyle(SyntaxEditor<PGNSymbol, PGNErrorInfo> syntaxEditor, PGNSymbol terminalSymbol)
+        public override Style GetStyle(SyntaxEditor<PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;
 
-        public override (int, int) GetErrorRange(PGNErrorInfo error)
+        public override (int, int) GetErrorRange(PgnErrorInfo error)
             => (error.Start, error.Length);
 
-        public override string GetErrorMessage(PGNErrorInfo error)
+        public override string GetErrorMessage(PgnErrorInfo error)
             => error.Message;
     }
 
-    public class PGNSymbol
+    public class PgnSymbol
     {
     }
 
-    public class PGNErrorInfo
+    public class PgnErrorInfo
     {
         public int Start { get; }
         public int Length { get; }
         public string Message { get; }
 
-        public PGNErrorInfo(int start, int length, string message)
+        public PgnErrorInfo(int start, int length, string message)
         {
             Start = start;
             Length = length;

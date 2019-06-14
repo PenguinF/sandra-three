@@ -45,14 +45,14 @@ namespace Sandra.UI
         internal static readonly LocalizedStringKey NextLine = new LocalizedStringKey(nameof(NextLine));
         internal static readonly LocalizedStringKey NextMove = new LocalizedStringKey(nameof(NextMove));
         internal static readonly LocalizedStringKey OpenGameFile = new LocalizedStringKey(nameof(OpenGameFile));
-        internal static readonly LocalizedStringKey PGNFiles = new LocalizedStringKey(nameof(PGNFiles));
+        internal static readonly LocalizedStringKey PgnFiles = new LocalizedStringKey(nameof(PgnFiles));
         internal static readonly LocalizedStringKey PieceSymbols = new LocalizedStringKey(nameof(PieceSymbols));
         internal static readonly LocalizedStringKey PreviousLine = new LocalizedStringKey(nameof(PreviousLine));
         internal static readonly LocalizedStringKey PreviousMove = new LocalizedStringKey(nameof(PreviousMove));
         internal static readonly LocalizedStringKey PromoteLine = new LocalizedStringKey(nameof(PromoteLine));
         internal static readonly LocalizedStringKey StartOfGame = new LocalizedStringKey(nameof(StartOfGame));
         internal static readonly LocalizedStringKey UseLongAlgebraicNotation = new LocalizedStringKey(nameof(UseLongAlgebraicNotation));
-        internal static readonly LocalizedStringKey UsePGNPieceSymbols = new LocalizedStringKey(nameof(UsePGNPieceSymbols));
+        internal static readonly LocalizedStringKey UsePgnPieceSymbols = new LocalizedStringKey(nameof(UsePgnPieceSymbols));
 
         internal static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishTranslations => new Dictionary<LocalizedStringKey, string>
         {
@@ -75,14 +75,14 @@ namespace Sandra.UI
             { NextLine, "Next line" },
             { NextMove, "Next move" },
             { OpenGameFile, "Open game file" },
-            { PGNFiles, "Portable game notation files" },
+            { PgnFiles, "Portable game notation files" },
             { PieceSymbols, "NBRQK" },
             { PreviousLine, "Previous line" },
             { PreviousMove, "Previous move" },
             { PromoteLine, "Promote line" },
             { StartOfGame, "Start of game" },
             { UseLongAlgebraicNotation, "Use long algebraic notation" },
-            { UsePGNPieceSymbols, "Use PGN notation" },
+            { UsePgnPieceSymbols, "Use PGN notation" },
         };
     }
 }

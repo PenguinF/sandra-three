@@ -22,7 +22,7 @@
 using Eutherion.Text;
 using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;
-using Sandra.PGN.Temp;
+using Sandra.PgnDeprecated;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
@@ -46,19 +46,19 @@ namespace Sandra.UI
         private static readonly Color activeMoveForeColor = Color.DarkRed;
         private static readonly Font activeMoveFont = new Font("Candara", 10, FontStyle.Bold);
 
-        private readonly TextIndex<IPGNTerminalSymbol> TextIndex;
+        private readonly TextIndex<IPgnTerminalSymbol> TextIndex;
 
         private Style DefaultStyle => Styles[Style.Default];
         private Style ActiveMoveStyle => Styles[activeMoveStyleIndex];
 
-        private void ApplyStyle(TextElement<IPGNTerminalSymbol> element, Style style)
+        private void ApplyStyle(TextElement<IPgnTerminalSymbol> element, Style style)
             => ApplyStyle(style, element.Start, element.Length);
 
         private int CaretPosition;
 
         public MovesTextBox()
         {
-            TextIndex = new TextIndex<IPGNTerminalSymbol>();
+            TextIndex = new TextIndex<IPgnTerminalSymbol>();
 
             HScrollBar = false;
             VScrollBar = true;
@@ -82,7 +82,7 @@ namespace Sandra.UI
             // This initializes moveFormatter.
             localizedPieceSymbols.DisplayText.ValueChanged += _ =>
             {
-                if (moveFormatter == null || moveFormattingOption != MoveFormattingOption.UsePGN)
+                if (moveFormatter == null || moveFormattingOption != MoveFormattingOption.UsePgn)
                 {
                     UpdateMoveFormatter();
                 }
@@ -113,14 +113,14 @@ namespace Sandra.UI
         /// <summary>
         /// Standardized PGN notation for pieces.
         /// </summary>
-        private const string PGNPieceSymbols = "NBRQK";
+        private const string PgnPieceSymbols = "NBRQK";
 
         private readonly LocalizedString localizedPieceSymbols = new LocalizedString(LocalizedStringKeys.PieceSymbols);
 
         private enum MoveFormattingOption
         {
             UseLocalizedShortAlgebraic,
-            UsePGN,
+            UsePgn,
             UseLocalizedLongAlgebraic,
         }
 
@@ -153,9 +153,9 @@ namespace Sandra.UI
             }
 
             string pieceSymbols;
-            if (moveFormattingOption == MoveFormattingOption.UsePGN)
+            if (moveFormattingOption == MoveFormattingOption.UsePgn)
             {
-                pieceSymbols = PGNPieceSymbols;
+                pieceSymbols = PgnPieceSymbols;
             }
             else
             {
@@ -163,7 +163,7 @@ namespace Sandra.UI
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.
-                    pieceSymbols = PGNPieceSymbols;
+                    pieceSymbols = PgnPieceSymbols;
                 }
             }
 
@@ -223,7 +223,7 @@ namespace Sandra.UI
             }
         }
 
-        private PGNLine GeneratePGNLine(Chess.Game game, List<PGNPlyWithSidelines> moveList)
+        private PgnLine GeneratePgnLine(Chess.Game game, List<PgnPlyWithSidelines> moveList)
         {
             for (; ; )
             {
@@ -231,53 +231,53 @@ namespace Sandra.UI
                 Chess.MoveTree current = game.ActiveTree;
                 int plyCount = current.PlyCount;
 
-                List<PGNLine> sideLines = null;
+                List<PgnLine> sideLines = null;
                 foreach (var sideLine in current.SideLines)
                 {
-                    if (sideLines == null) sideLines = new List<PGNLine>();
+                    if (sideLines == null) sideLines = new List<PgnLine>();
 
                     // Add the first ply of the side line to the list, then generate the rest of the side line.
-                    sideLines.Add(GeneratePGNLine(game, new List<PGNPlyWithSidelines>
+                    sideLines.Add(GeneratePgnLine(game, new List<PgnPlyWithSidelines>
                     {
-                        new PGNPlyWithSidelines(new PGNPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
+                        new PgnPlyWithSidelines(new PgnPly(plyCount, moveFormatter.FormatMove(game, sideLine.Move), sideLine), null)
                     }));
 
                     // Reset active tree after going into each side line.
                     game.SetActiveTree(current);
                 }
 
-                PGNPly ply = null;
+                PgnPly ply = null;
                 if (current.MainLine != null)
                 {
-                    ply = new PGNPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
+                    ply = new PgnPly(plyCount, moveFormatter.FormatMove(game, current.MainLine.Move), current.MainLine);
                 }
 
                 if (ply != null || sideLines != null)
                 {
-                    moveList.Add(new PGNPlyWithSidelines(ply, sideLines));
+                    moveList.Add(new PgnPlyWithSidelines(ply, sideLines));
                 }
 
                 if (current.MainLine == null)
                 {
-                    return new PGNLine(moveList);
+                    return new PgnLine(moveList);
                 }
             }
         }
 
-        private IEnumerable<IPGNTerminalSymbol> GeneratePGNTerminalSymbols()
+        private IEnumerable<IPgnTerminalSymbol> GeneratePgnTerminalSymbols()
         {
             if (game != null)
             {
                 // Copy the game to be able to format moves correctly without affecting game.Game.ActiveTree.
                 Chess.Game copiedGame = game.Game.Copy();
 
-                return GeneratePGNLine(copiedGame, new List<PGNPlyWithSidelines>()).GenerateTerminalSymbols();
+                return GeneratePgnLine(copiedGame, new List<PgnPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
-            return Enumerable.Empty<IPGNTerminalSymbol>();
+            return Enumerable.Empty<IPgnTerminalSymbol>();
         }
 
-        private TextElement<IPGNTerminalSymbol> currentActiveMoveStyleElement;
+        private TextElement<IPgnTerminalSymbol> currentActiveMoveStyleElement;
 
         private void RefreshText()
         {
@@ -294,13 +294,13 @@ namespace Sandra.UI
 
         private void UpdateText()
         {
-            List<IPGNTerminalSymbol> updatedTerminalSymbols = GeneratePGNTerminalSymbols().ToList();
+            List<IPgnTerminalSymbol> updatedTerminalSymbols = GeneratePgnTerminalSymbols().ToList();
 
             int existingElementCount = TextIndex.Elements.Count;
             int updatedElementCount = updatedTerminalSymbols.Count;
 
-            PGNMoveSearcher activeTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-            TextElement<IPGNTerminalSymbol> newActiveMoveElement = null;
+            PgnMoveSearcher activeTreeSearcher = new PgnMoveSearcher(game.Game.ActiveTree);
+            TextElement<IPgnTerminalSymbol> newActiveMoveElement = null;
 
             // Instead of clearing and updating the entire textbox, compare the elements one by one.
             int minLength = Math.Min(existingElementCount, updatedElementCount);
@@ -347,7 +347,7 @@ namespace Sandra.UI
             }
 
             // Append new element texts.
-            PGNTerminalSymbolTextGenerator textGenerator = new PGNTerminalSymbolTextGenerator();
+            PgnTerminalSymbolTextGenerator textGenerator = new PgnTerminalSymbolTextGenerator();
             while (agreeIndex < updatedElementCount)
             {
                 var updatedTerminalSymbol = updatedTerminalSymbols[agreeIndex];
@@ -399,11 +399,11 @@ namespace Sandra.UI
         {
             if (game != null)
             {
-                TextElement<IPGNTerminalSymbol> elementBefore = TextIndex.GetElementBefore(selectionStart);
-                TextElement<IPGNTerminalSymbol> elementAfter = TextIndex.GetElementAfter(selectionStart);
+                TextElement<IPgnTerminalSymbol> elementBefore = TextIndex.GetElementBefore(selectionStart);
+                TextElement<IPgnTerminalSymbol> elementAfter = TextIndex.GetElementAfter(selectionStart);
 
-                TextElement<IPGNTerminalSymbol> activeElement = elementBefore;
-                PGNPly pgnPly;
+                TextElement<IPgnTerminalSymbol> activeElement = elementBefore;
+                PgnPly pgnPly;
 
                 if (activeElement == null)
                 {
@@ -420,7 +420,7 @@ namespace Sandra.UI
                         activeElement = elementAfter;
                     }
 
-                    pgnPly = new PGNActivePlyDetector().Visit(activeElement.TerminalSymbol);
+                    pgnPly = new PgnActivePlyDetector().Visit(activeElement.TerminalSymbol);
                 }
 
                 Chess.MoveTree newActiveTree = pgnPly == null ? game.Game.MoveTree : pgnPly.Variation.MoveTree;
@@ -449,8 +449,8 @@ namespace Sandra.UI
                     ActionHandler.Invalidate();
 
                     // Search for the current active move element to set its font.
-                    PGNMoveSearcher newActiveTreeSearcher = new PGNMoveSearcher(game.Game.ActiveTree);
-                    foreach (TextElement<IPGNTerminalSymbol> textElement in TextIndex.Elements)
+                    PgnMoveSearcher newActiveTreeSearcher = new PgnMoveSearcher(game.Game.ActiveTree);
+                    foreach (TextElement<IPgnTerminalSymbol> textElement in TextIndex.Elements)
                     {
                         if (newActiveTreeSearcher.Visit(textElement.TerminalSymbol))
                         {
