@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -39,6 +40,25 @@ namespace Sandra.UI
     /// </summary>
     public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
     {
+        /// <summary>
+        /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
+        /// </summary>
+        private readonly Dictionary<string, List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>>> OpenPgnForms
+            = new Dictionary<string, List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>>>(StringComparer.OrdinalIgnoreCase);
+
+        private void RemovePgnForm(string key, SyntaxEditorForm<PgnSymbol, PgnErrorInfo> pgnForm)
+        {
+            // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
+            var pgnForms = OpenPgnForms[key ?? string.Empty];
+            pgnForms.Remove(pgnForm);
+            if (pgnForms.Count == 0) OpenPgnForms.Remove(key ?? string.Empty);
+        }
+
+        private void AddPgnForm(string key, SyntaxEditorForm<PgnSymbol, PgnErrorInfo> pgnForm)
+        {
+            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>>()).Add(pgnForm);
+        }
+
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
         // Separate action handler and root menu node for building the MainMenuStrip.
