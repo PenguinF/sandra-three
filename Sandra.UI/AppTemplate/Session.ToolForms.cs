@@ -116,7 +116,7 @@ namespace Eutherion.Win.AppTemplate
             {
                 codeFile = WorkingCopyTextFile.FromLiveTextFile(
                     settingsFile,
-                    WorkingCopyTextFileAutoSaver.OpenAutoSaveFileStreamPair(autoSaveSetting));
+                    OpenAutoSaveFileStreamPair(autoSaveSetting));
 
                 autoSaver = new WorkingCopyTextFileAutoSaver(this, autoSaveSetting, codeFile);
             }

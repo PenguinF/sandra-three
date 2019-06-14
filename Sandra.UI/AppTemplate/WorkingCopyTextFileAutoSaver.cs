@@ -33,52 +33,6 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
 
-        private static FileStream CreateUniqueNewAutoSaveFileStream()
-        {
-            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
-            {
-                autoSaveFileCounter = 1;
-            };
-
-            var file = FileUtilities.CreateUniqueFile(
-                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
-                FileOptions.SequentialScan | FileOptions.Asynchronous,
-                ref autoSaveFileCounter);
-
-            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
-
-            return file;
-        }
-
-        internal static FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
-        {
-            try
-            {
-                if (autoSaveProperty != null && Session.Current.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
-                {
-                    var fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                    if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
-                        && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
-                    {
-                        return fileStreamPair;
-                    }
-
-                    fileStreamPair.Dispose();
-                }
-            }
-            catch (Exception autoSaveLoadException)
-            {
-                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                autoSaveLoadException.Trace();
-            }
-
-            return null;
-        }
-
         private readonly Session ownerSession;
         private readonly SettingProperty<AutoSaveFileNamePair> autoSaveProperty;
         private readonly WorkingCopyTextFile workingCopyTextFile;
@@ -93,6 +47,23 @@ namespace Eutherion.Win.AppTemplate
             this.workingCopyTextFile = workingCopyTextFile ?? throw new ArgumentNullException(nameof(workingCopyTextFile));
 
             workingCopyTextFile.QueryAutoSaveFile += QueryAutoSaveFile;
+        }
+
+        private FileStream CreateUniqueNewAutoSaveFileStream()
+        {
+            if (!ownerSession.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
+            {
+                autoSaveFileCounter = 1;
+            };
+
+            var file = FileUtilities.CreateUniqueFile(
+                Path.Combine(ownerSession.AppDataSubFolder, AutoSavedLocalChangesFileName),
+                FileOptions.SequentialScan | FileOptions.Asynchronous,
+                ref autoSaveFileCounter);
+
+            ownerSession.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
+
+            return file;
         }
 
         private void QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
