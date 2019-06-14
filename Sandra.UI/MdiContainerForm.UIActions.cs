@@ -90,6 +90,50 @@ namespace Sandra.UI
 
         public UIActionState TryOpenPGNFile(bool perform)
         {
+            if (perform)
+            {
+                var syntaxDescriptor = new PGNSyntaxDescriptor();
+
+                string extension = syntaxDescriptor.FileExtension;
+                var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
+
+                var openFileDialog = new OpenFileDialog
+                {
+                    AutoUpgradeEnabled = true,
+                    DereferenceLinks = true,
+                    DefaultExt = extension,
+                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    SupportMultiDottedExtensions = true,
+                    RestoreDirectory = true,
+                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
+                    ValidateNames = true,
+                    CheckFileExists = false,
+                    ShowReadOnly = true,
+                };
+
+                var dialogResult = openFileDialog.ShowDialog(this);
+                if (dialogResult == DialogResult.OK)
+                {
+                    var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                        openFileDialog.ReadOnlyChecked ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                        syntaxDescriptor,
+                        WorkingCopyTextFile.Open(openFileDialog.FileName, null),
+                        null,
+                        SettingKeys.PGNWindow,
+                        SettingKeys.PGNErrorHeight,
+                        SettingKeys.PGNZoom)
+                    {
+                        MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                        ClientSize = new Size(400, 400),
+                        ShowInTaskbar = true,
+                        Icon = Session.Current.ApplicationIcon,
+                        ShowIcon = true,
+                    };
+
+                    pgnForm.EnsureActivated();
+                }
+            }
+
             return UIActionVisibility.Enabled;
         }
 
