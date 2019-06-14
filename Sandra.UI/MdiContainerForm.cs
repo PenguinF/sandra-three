@@ -453,6 +453,29 @@ namespace Sandra.UI
             pgnForm.EnsureActivated();
         }
 
+        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        {
+            var syntaxDescriptor = new PgnSyntaxDescriptor();
+
+            var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
+                isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                syntaxDescriptor,
+                WorkingCopyTextFile.Open(pgnFileName, null),
+                null,
+                SettingKeys.PgnWindow,
+                SettingKeys.PgnErrorHeight,
+                SettingKeys.PgnZoom)
+            {
+                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                ClientSize = new Size(400, 400),
+                ShowInTaskbar = true,
+                Icon = Session.Current.ApplicationIcon,
+                ShowIcon = true,
+            };
+
+            pgnForm.EnsureActivated();
+        }
+
         private string RuntimePath(string imageFileKey)
             => Path.Combine(Session.ExecutableFolder, "Images", imageFileKey + ".png");
 
