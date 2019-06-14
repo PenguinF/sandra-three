@@ -42,8 +42,8 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonSymbol symbol) => default(TResult);
-        public virtual TResult Visit(JsonSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult DefaultVisit(JsonSymbol symbol) => default;
+        public virtual TResult Visit(JsonSymbol symbol) => symbol == null ? default : symbol.Accept(this);
         public virtual TResult VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComma(JsonComma symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComment(JsonComment symbol) => DefaultVisit(symbol);
@@ -61,8 +61,8 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonSymbolVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonSymbol symbol, T arg) => default(TResult);
-        public virtual TResult Visit(JsonSymbol symbol, T arg) => symbol == null ? default(TResult) : symbol.Accept(this, arg);
+        public virtual TResult DefaultVisit(JsonSymbol symbol, T arg) => default;
+        public virtual TResult Visit(JsonSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
         public virtual TResult VisitColon(JsonColon symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitComma(JsonComma symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitComment(JsonComment symbol, T arg) => DefaultVisit(symbol, arg);

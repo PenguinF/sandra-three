@@ -44,8 +44,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class JsonSyntaxNodeVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntaxNode node) => default(TResult);
-        public virtual TResult Visit(JsonSyntaxNode node) => node == null ? default(TResult) : node.Accept(this);
+        public virtual TResult DefaultVisit(JsonSyntaxNode node) => default;
+        public virtual TResult Visit(JsonSyntaxNode node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitListSyntax(JsonListSyntax node) => DefaultVisit(node);
@@ -61,8 +61,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class JsonSyntaxNodeVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntaxNode node, T arg) => default(TResult);
-        public virtual TResult Visit(JsonSyntaxNode node, T arg) => node == null ? default(TResult) : node.Accept(this, arg);
+        public virtual TResult DefaultVisit(JsonSyntaxNode node, T arg) => default;
+        public virtual TResult Visit(JsonSyntaxNode node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitListSyntax(JsonListSyntax node, T arg) => DefaultVisit(node, arg);
