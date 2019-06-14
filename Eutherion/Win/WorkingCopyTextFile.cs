@@ -168,6 +168,11 @@ namespace Eutherion.Win
         public string OpenTextFilePath => OpenTextFile?.AbsoluteFilePath;
 
         /// <summary>
+        /// Occurs after <see cref="OpenTextFilePath"/> was updated.
+        /// </summary>
+        public event Action<WorkingCopyTextFile, OpenTextFilePathChangedEventArgs> OpenTextFilePathChanged;
+
+        /// <summary>
         /// Gets the loaded file as text in memory. If it could not be loaded, returns string.Empty. For new files it returns string.Empty.
         /// </summary>
         public string LoadedText
@@ -314,9 +319,10 @@ namespace Eutherion.Win
                 throw new InvalidOperationException();
             }
 
-            // Only update OpenTextFile if actually different.
+            // Only update OpenTextFile and raise event if actually different.
             // Assume we're on a Windows case insensitive file system.
-            if (OpenTextFile == null || !Path.GetFullPath(path).Equals(OpenTextFilePath, StringComparison.OrdinalIgnoreCase))
+            string previousOpenTextFilePath = OpenTextFilePath;
+            if (OpenTextFile == null || !Path.GetFullPath(path).Equals(previousOpenTextFilePath, StringComparison.OrdinalIgnoreCase))
             {
                 // Open new text file before disposing the old one.
                 var oldOpenTextFile = OpenTextFile;
@@ -341,14 +347,19 @@ namespace Eutherion.Win
 
                 OpenTextFile = newOpenTextFile;
                 newOpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+                ContainsChanges = false;
+
+                // Raise event when everything is completed.
+                OpenTextFilePathChanged?.Invoke(
+                    this,
+                    new OpenTextFilePathChangedEventArgs(previousOpenTextFilePath));
             }
             else
             {
                 // Just save to the same OpenTextFile.
                 OpenTextFile.Save(LocalCopyText);
+                ContainsChanges = false;
             }
-
-            ContainsChanges = false;
         }
 
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
@@ -439,6 +450,26 @@ namespace Eutherion.Win
                 IsDisposed = true;
             }
         }
+    }
+
+    /// <summary>
+    /// Provides data for the <see cref="WorkingCopyTextFile.OpenTextFilePathChanged"/> event.
+    /// </summary>
+    public class OpenTextFilePathChangedEventArgs : EventArgs
+    {
+        /// <summary>
+        /// Gets the previous value of <see cref="WorkingCopyTextFile.OpenTextFilePath"/>.
+        /// </summary>
+        public string PreviousOpenTextFilePath { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="OpenTextFilePathChangedEventArgs"/>.
+        /// </summary>
+        /// <param name="previousOpenTextFilePath">
+        /// The previous value of <see cref="WorkingCopyTextFile.OpenTextFilePath"/>.
+        /// </param>
+        public OpenTextFilePathChangedEventArgs(string previousOpenTextFilePath)
+            => PreviousOpenTextFilePath = previousOpenTextFilePath;
     }
 
     /// <summary>

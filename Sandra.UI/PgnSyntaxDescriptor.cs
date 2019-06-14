@@ -24,6 +24,7 @@ using Eutherion.Text;
 using Eutherion.Win.AppTemplate;
 using ScintillaNET;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.UI
 {
@@ -39,7 +40,11 @@ namespace Sandra.UI
         public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
         public override (IEnumerable<TextElement<PgnSymbol>>, List<PgnErrorInfo>) Parse(string code)
-            => (new TextElement<PgnSymbol>[] { new TextElement<PgnSymbol>(new PgnSymbol()) { Length = code.Length } }, new List<PgnErrorInfo>());
+        {
+            int length = code.Length;
+            if (length == 0) return (Enumerable.Empty<TextElement<PgnSymbol>>(), new List<PgnErrorInfo>());
+            return (new TextElement<PgnSymbol>[] { new TextElement<PgnSymbol>(new PgnSymbol()) { Length = length } }, new List<PgnErrorInfo>());
+        }
 
         public override Style GetStyle(SyntaxEditor<PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;

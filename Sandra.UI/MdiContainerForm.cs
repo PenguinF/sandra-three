@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
@@ -34,11 +35,32 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
+    using PgnForm = SyntaxEditorForm<PgnSymbol, PgnErrorInfo>;
+
     /// <summary>
     /// Main MdiContainer Form.
     /// </summary>
     public partial class MdiContainerForm : MenuCaptionBarForm, IWeakEventTarget
     {
+        /// <summary>
+        /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
+        /// </summary>
+        private readonly Dictionary<string, List<PgnForm>> OpenPgnForms
+            = new Dictionary<string, List<PgnForm>>(StringComparer.OrdinalIgnoreCase);
+
+        private void RemovePgnForm(string key, PgnForm pgnForm)
+        {
+            // Remove from the list it's currently in, and remove the list from the index altogether once it's empty.
+            var pgnForms = OpenPgnForms[key ?? string.Empty];
+            pgnForms.Remove(pgnForm);
+            if (pgnForms.Count == 0) OpenPgnForms.Remove(key ?? string.Empty);
+        }
+
+        private void AddPgnForm(string key, PgnForm pgnForm)
+        {
+            OpenPgnForms.GetOrAdd(key ?? string.Empty, _ => new List<PgnForm>()).Add(pgnForm);
+        }
+
         public EnumIndexedArray<ColoredPiece, Image> PieceImages { get; private set; }
 
         // Separate action handler and root menu node for building the MainMenuStrip.
@@ -428,6 +450,73 @@ namespace Sandra.UI
             PieceImages = LoadChessPieceImages();
 
             NewPlayingBoard();
+        }
+
+        private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
+        {
+            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
+            var syntaxDescriptor = new PgnSyntaxDescriptor();
+
+            var pgnForm = new PgnForm(
+                isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                syntaxDescriptor,
+                pgnFile,
+                null,
+                SettingKeys.PgnWindow,
+                SettingKeys.PgnErrorHeight,
+                SettingKeys.PgnZoom)
+            {
+                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                ClientSize = new Size(600, 600),
+                ShowInTaskbar = true,
+                Icon = Session.Current.ApplicationIcon,
+                ShowIcon = true,
+                StartPosition = FormStartPosition.CenterScreen,
+            };
+
+            // Don't index read-only PgnForms.
+            if (!isReadOnly)
+            {
+                AddPgnForm(normalizedPgnFileName, pgnForm);
+
+                // Re-index when pgnFile.OpenTextFilePath changes.
+                pgnFile.OpenTextFilePathChanged += (_, e) =>
+                {
+                    RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
+                    AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                };
+
+                // Remove from index when pgnForm is closed.
+                pgnForm.Disposed += (_, __) =>
+                {
+                    RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                };
+            }
+
+            pgnForm.EnsureActivated();
+        }
+
+        private void OpenNewPgnFile()
+        {
+            // Never create as read-only.
+            OpenPgnForm(null, isReadOnly: false);
+        }
+
+        public void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        {
+            // Normalize the file name so it gets indexed correctly.
+            string normalizedPgnFileName = Path.GetFullPath(pgnFileName);
+
+            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<PgnForm> pgnForms))
+            {
+                // File path not open yet, initialize new PGN Form.
+                OpenPgnForm(normalizedPgnFileName, isReadOnly);
+            }
+            else
+            {
+                // Just activate the first Form in the list.
+                pgnForms[0].EnsureActivated();
+            }
         }
 
         private string RuntimePath(string imageFileKey)

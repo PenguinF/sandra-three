@@ -21,6 +21,7 @@
 
 using Eutherion.Win.AppTemplate;
 using System;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
@@ -31,7 +32,7 @@ namespace Sandra.UI
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
@@ -56,6 +57,30 @@ namespace Sandra.UI
                 {
                     // Inform session of the current synchronization context once a message loop exists.
                     session.CaptureSynchronizationContext();
+                };
+
+                mdiContainerForm.Shown += (_, __) =>
+                {
+                    // Interpret each command line argument as a file to open.
+                    args.ForEach(pgnFileName =>
+                    {
+                        // Catch exception for each open action individually.
+                        try
+                        {
+                            mdiContainerForm.OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
+                        }
+                        catch (Exception exception)
+                        {
+                            // For now, show the exception to the user.
+                            // Maybe user has no access to the path, or the given file name is not a valid.
+                            // TODO: analyze what error conditions can occur and handle them appropriately.
+                            MessageBox.Show(
+                                $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                                pgnFileName,
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                        }
+                    });
                 };
 
                 Application.Run(mdiContainerForm);
