@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PGNSyntax.cs
+ * PgnSyntaxDeprecated.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *

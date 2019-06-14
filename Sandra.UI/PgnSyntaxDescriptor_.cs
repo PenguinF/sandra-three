@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PGNSyntaxDescriptor.cs
+ * PgnSyntaxDescriptor.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
