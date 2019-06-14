@@ -452,12 +452,13 @@ namespace Sandra.UI
 
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
         {
+            var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
             var syntaxDescriptor = new PgnSyntaxDescriptor();
 
             var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                 syntaxDescriptor,
-                WorkingCopyTextFile.Open(normalizedPgnFileName, null),
+                pgnFile,
                 null,
                 SettingKeys.PgnWindow,
                 SettingKeys.PgnErrorHeight,
@@ -472,6 +473,19 @@ namespace Sandra.UI
             };
 
             AddPgnForm(normalizedPgnFileName, pgnForm);
+
+            // Re-index when pgnFile.OpenTextFilePath changes.
+            pgnFile.OpenTextFilePathChanged += (_, e) =>
+            {
+                RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
+                AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
+            };
+
+            // Remove from index when pgnForm is closed.
+            pgnForm.Disposed += (_, __) =>
+            {
+                RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
+            };
 
             pgnForm.EnsureActivated();
         }
