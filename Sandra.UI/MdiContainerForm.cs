@@ -444,10 +444,11 @@ namespace Sandra.UI
                 SettingKeys.PgnZoom)
             {
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
-                ClientSize = new Size(400, 400),
+                ClientSize = new Size(600, 600),
                 ShowInTaskbar = true,
                 Icon = Session.Current.ApplicationIcon,
                 ShowIcon = true,
+                StartPosition = FormStartPosition.CenterScreen,
             };
 
             pgnForm.EnsureActivated();
