@@ -472,20 +472,24 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
-            AddPgnForm(normalizedPgnFileName, pgnForm);
-
-            // Re-index when pgnFile.OpenTextFilePath changes.
-            pgnFile.OpenTextFilePathChanged += (_, e) =>
+            // Don't index read-only PgnForms.
+            if (!isReadOnly)
             {
-                RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
-                AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
-            };
+                AddPgnForm(normalizedPgnFileName, pgnForm);
 
-            // Remove from index when pgnForm is closed.
-            pgnForm.Disposed += (_, __) =>
-            {
-                RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
-            };
+                // Re-index when pgnFile.OpenTextFilePath changes.
+                pgnFile.OpenTextFilePathChanged += (_, e) =>
+                {
+                    RemovePgnForm(e.PreviousOpenTextFilePath, pgnForm);
+                    AddPgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                };
+
+                // Remove from index when pgnForm is closed.
+                pgnForm.Disposed += (_, __) =>
+                {
+                    RemovePgnForm(pgnFile.OpenTextFilePath, pgnForm);
+                };
+            }
 
             pgnForm.EnsureActivated();
         }
@@ -501,7 +505,7 @@ namespace Sandra.UI
             // Normalize the file name so it gets indexed correctly.
             string normalizedPgnFileName = Path.GetFullPath(pgnFileName);
 
-            if (!OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>> pgnForms))
+            if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<SyntaxEditorForm<PgnSymbol, PgnErrorInfo>> pgnForms))
             {
                 // File path not open yet, initialize new PGN Form.
                 OpenPgnForm(normalizedPgnFileName, isReadOnly);
