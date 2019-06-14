@@ -430,30 +430,7 @@ namespace Sandra.UI
             NewPlayingBoard();
         }
 
-        private void OpenNewPgnFile()
-        {
-            var syntaxDescriptor = new PgnSyntaxDescriptor();
-
-            var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
-                SyntaxEditorCodeAccessOption.Default,
-                syntaxDescriptor,
-                WorkingCopyTextFile.Open(null, null),
-                null,
-                SettingKeys.PgnWindow,
-                SettingKeys.PgnErrorHeight,
-                SettingKeys.PgnZoom)
-            {
-                MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
-                ClientSize = new Size(400, 400),
-                ShowInTaskbar = true,
-                Icon = Session.Current.ApplicationIcon,
-                ShowIcon = true,
-            };
-
-            pgnForm.EnsureActivated();
-        }
-
-        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        private void OpenPgnForm(string pgnFileName, bool isReadOnly)
         {
             var syntaxDescriptor = new PgnSyntaxDescriptor();
 
@@ -474,6 +451,17 @@ namespace Sandra.UI
             };
 
             pgnForm.EnsureActivated();
+        }
+
+        private void OpenNewPgnFile()
+        {
+            // Never create as read-only.
+            OpenPgnForm(null, isReadOnly: false);
+        }
+
+        private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
+        {
+            OpenPgnForm(pgnFileName, isReadOnly);
         }
 
         private string RuntimePath(string imageFileKey)
