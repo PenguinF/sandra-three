@@ -863,25 +863,37 @@ namespace Eutherion.Win.Tests
 
             PrepareForReplaceTest(text1, text2);
 
+            string primaryFilePath = fileFixture.GetPath(TargetFile.PrimaryTextFile);
+            string secondaryFilePath = fileFixture.GetPath(TargetFile.SecondaryTextFile);
+
             using (var ewh = new AutoResetEvent(false))
-            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            using (var wcFile = WorkingCopyTextFile.Open(primaryFilePath, null))
             {
+                // Get a reference to wcFile.OpenTextFile before it is replaced.
                 var liveTextFile = wcFile.OpenTextFile;
+
+                // Register event before doing the actual replace.
                 string previousOpenTextFilePath = null;
-                wcFile.OpenTextFilePathChanged += (_, e) => previousOpenTextFilePath = e.PreviousOpenTextFilePath;
-                wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile));
+                wcFile.OpenTextFilePathChanged += (_, e) =>
+                {
+                    // This variable is later checked to assert that this code is actually called.
+                    previousOpenTextFilePath = e.PreviousOpenTextFilePath;
 
-                // Assert that the OpenTextFile was replaced, and the old one disposed.
-                Assert.NotSame(liveTextFile, wcFile.OpenTextFile);
-                Assert.True(liveTextFile.IsDisposed);
+                    // Assert that the OpenTextFile was replaced, and the old one disposed.
+                    Assert.NotSame(liveTextFile, wcFile.OpenTextFile);
+                    Assert.True(liveTextFile.IsDisposed);
 
-                // Assert that the second file was overwritten.
-                Assert.Equal(text1, wcFile.LoadedText);
-                Assert.Equal(text1, wcFile.LocalCopyText);
-                Assert.False(wcFile.ContainsChanges);
+                    // Assert that the second file was overwritten.
+                    Assert.Equal(secondaryFilePath, wcFile.OpenTextFilePath);
+                    Assert.Equal(text1, wcFile.LoadedText);
+                    Assert.Equal(text1, wcFile.LocalCopyText);
+                    Assert.False(wcFile.ContainsChanges);
+                };
 
-                // Assert that the OpenTextFilePathChanged event was raised.
-                Assert.Equal(fileFixture.GetPath(TargetFile.PrimaryTextFile), previousOpenTextFilePath);
+                wcFile.Replace(secondaryFilePath);
+
+                // Assert that the OpenTextFilePathChanged event was indeed raised.
+                Assert.Equal(primaryFilePath, previousOpenTextFilePath);
 
                 // Verify that auto-updates work on the second file, not the first.
                 wcFile.LoadedTextChanged += (_, __) => ewh.Set();
