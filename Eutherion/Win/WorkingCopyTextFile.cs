@@ -104,6 +104,8 @@ namespace Eutherion.Win
         /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// Use this constructor for <see cref="LiveTextFile"/> instances which must remain live after this
         /// <see cref="WorkingCopyTextFile"/> is disposed.
+        /// It is not possible to use <see cref="Replace(string)"/> on <see cref="WorkingCopyTextFile"/> instances
+        /// created with this method.
         /// </summary>
         /// <param name="openTextFile">
         /// The open text file.
