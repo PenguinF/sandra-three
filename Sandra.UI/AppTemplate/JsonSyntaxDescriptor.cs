@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Win.Storage;
@@ -34,6 +35,8 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
     {
+        public static readonly string JsonFileExtension = "json";
+
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
         /// </summary>
@@ -61,6 +64,10 @@ namespace Eutherion.Win.AppTemplate
             this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
             this.styleSelector = styleSelector ?? throw new ArgumentNullException(nameof(styleSelector));
         }
+
+        public override string FileExtension => JsonFileExtension;
+
+        public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
         public override (IEnumerable<TextElement<JsonSymbol>>, List<JsonErrorInfo>) Parse(string code)
         {

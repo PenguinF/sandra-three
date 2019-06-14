@@ -48,55 +48,6 @@ namespace Eutherion.Win.AppTemplate
         private const int ErrorIndicatorIndex = 8;
 
         /// <summary>
-        /// This results in file names such as ".%_A8.tmp".
-        /// </summary>
-        private static readonly string AutoSavedLocalChangesFileName = ".%.tmp";
-
-        private static FileStream CreateUniqueNewAutoSaveFileStream()
-        {
-            if (!Session.Current.TryGetAutoSaveValue(SharedSettings.AutoSaveCounter, out uint autoSaveFileCounter))
-            {
-                autoSaveFileCounter = 1;
-            };
-
-            var file = FileUtilities.CreateUniqueFile(
-                Path.Combine(Session.Current.AppDataSubFolder, AutoSavedLocalChangesFileName),
-                FileOptions.SequentialScan | FileOptions.Asynchronous,
-                ref autoSaveFileCounter);
-
-            Session.Current.AutoSave.Persist(SharedSettings.AutoSaveCounter, autoSaveFileCounter);
-
-            return file;
-        }
-
-        private static WorkingCopyTextFile OpenWorkingCopyTextFile(LiveTextFile codeFile, SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
-        {
-            if (autoSaveSetting != null && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair autoSaveFileNamePair))
-            {
-                FileStreamPair fileStreamPair = null;
-
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(Session.Current.AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                    return WorkingCopyTextFile.FromLiveTextFile(codeFile, fileStreamPair);
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
-                }
-            }
-
-            return WorkingCopyTextFile.FromLiveTextFile(codeFile, null);
-        }
-
-        /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
         public SyntaxDescriptor<TTerminal, TError> SyntaxDescriptor { get; }
@@ -120,11 +71,6 @@ namespace Eutherion.Win.AppTemplate
             => !ReadOnly
             && (Modified || containsChangesAtSavePoint);
 
-        /// <summary>
-        /// Setting to use when an auto-save file name pair is generated.
-        /// </summary>
-        private readonly SettingProperty<AutoSaveFileNamePair> autoSaveSetting;
-
         private readonly TextIndex<TTerminal> TextIndex;
 
         public Style DefaultStyle => Styles[Style.Default];
@@ -139,24 +85,20 @@ namespace Eutherion.Win.AppTemplate
         /// </param>
         /// <param name="codeFile">
         /// The code file to show and/or edit.
+        /// It is disposed together with this <see cref="SyntaxEditor{TTerminal, TError}"/>.
         /// </param>
         /// <param name="initialTextGenerator">
         /// Optional function to generate initial text in case the code file could not be loaded and was not auto-saved.
         /// </param>
-        /// <param name="autoSaveSetting">
-        /// The setting property to use to auto-save the file names of the file pair used for auto-saving local changes.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="syntaxDescriptor"/> is null.
+        /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
         public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
-                            LiveTextFile codeFile,
-                            Func<string> initialTextGenerator,
-                            SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+                            WorkingCopyTextFile codeFile,
+                            Func<string> initialTextGenerator)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
-            this.autoSaveSetting = autoSaveSetting;
-            CodeFile = OpenWorkingCopyTextFile(codeFile, autoSaveSetting);
+            CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
 
             TextIndex = new TextIndex<TTerminal>();
 
@@ -195,7 +137,6 @@ namespace Eutherion.Win.AppTemplate
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
-            CodeFile.QueryAutoSaveFile += CodeFile_QueryAutoSaveFile;
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
             // Only use initialTextGenerator if nothing was auto-saved.
@@ -232,34 +173,6 @@ namespace Eutherion.Win.AppTemplate
                 else
                 {
                     CopyTextFromTextFile();
-                }
-            }
-        }
-
-        private void CodeFile_QueryAutoSaveFile(WorkingCopyTextFile sender, QueryAutoSaveFileEventArgs e)
-        {
-            // Only open auto-save files if they can be stored in autoSaveSetting.
-            if (autoSaveSetting != null)
-            {
-                FileStreamPair fileStreamPair = null;
-
-                try
-                {
-                    fileStreamPair = FileStreamPair.Create(CreateUniqueNewAutoSaveFileStream, CreateUniqueNewAutoSaveFileStream);
-                    e.AutoSaveFileStreamPair = fileStreamPair;
-
-                    Session.Current.AutoSave.Persist(
-                        autoSaveSetting,
-                        new AutoSaveFileNamePair(
-                            Path.GetFileName(fileStreamPair.FileStream1.Name),
-                            Path.GetFileName(fileStreamPair.FileStream2.Name)));
-                }
-                catch (Exception autoSaveLoadException)
-                {
-                    if (fileStreamPair != null) fileStreamPair.Dispose();
-
-                    // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
-                    autoSaveLoadException.Trace();
                 }
             }
         }
@@ -435,14 +348,6 @@ namespace Eutherion.Win.AppTemplate
             if (disposing)
             {
                 CodeFile.Dispose();
-
-                // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
-                if (autoSaveSetting != null
-                    && CodeFile.AutoSaveFile == null
-                    && Session.Current.TryGetAutoSaveValue(autoSaveSetting, out AutoSaveFileNamePair _))
-                {
-                    Session.Current.AutoSave.Remove(autoSaveSetting);
-                }
             }
 
             base.Dispose(disposing);
@@ -450,6 +355,9 @@ namespace Eutherion.Win.AppTemplate
 
         public UIActionState TrySaveToFile(bool perform)
         {
+            // Use "Save as..." if there's no back-end file.
+            if (CodeFile.OpenTextFilePath == null) return TrySaveAs(perform);
+
             if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
             if (ReadOnly) return UIActionVisibility.Hidden;
             if (!ContainsChanges) return UIActionVisibility.Disabled;
@@ -459,6 +367,47 @@ namespace Eutherion.Win.AppTemplate
                 CodeFile.Save();
                 containsChangesAtSavePoint = CodeFile.ContainsChanges;
                 SetSavePoint();
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TrySaveAs(bool perform)
+        {
+            if (IsDisposed || Disposing) return UIActionVisibility.Hidden;
+            if (ReadOnly) return UIActionVisibility.Hidden;
+            if (!CodeFile.IsTextFileOwner) return UIActionVisibility.Hidden;
+
+            if (perform)
+            {
+                string extension = SyntaxDescriptor.FileExtension;
+                var extensionLocalizedKey = SyntaxDescriptor.FileExtensionLocalizedKey;
+
+                var saveFileDialog = new SaveFileDialog
+                {
+                    AutoUpgradeEnabled = true,
+                    DereferenceLinks = true,
+                    DefaultExt = extension,
+                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    SupportMultiDottedExtensions = true,
+                    RestoreDirectory = true,
+                    Title = Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveAs),
+                    ValidateNames = true,
+                };
+
+                if (CodeFile.OpenTextFilePath != null)
+                {
+                    saveFileDialog.InitialDirectory = Path.GetDirectoryName(CodeFile.OpenTextFilePath);
+                    saveFileDialog.FileName = Path.GetFileName(CodeFile.OpenTextFilePath);
+                }
+
+                var dialogResult = saveFileDialog.ShowDialog(TopLevelControl as Form);
+                if (dialogResult == DialogResult.OK)
+                {
+                    CodeFile.Replace(saveFileDialog.FileName);
+                    containsChangesAtSavePoint = CodeFile.ContainsChanges;
+                    SetSavePoint();
+                }
             }
 
             return UIActionVisibility.Enabled;
@@ -476,6 +425,16 @@ namespace Eutherion.Win.AppTemplate
     /// </typeparam>
     public abstract class SyntaxDescriptor<TTerminal, TError>
     {
+        /// <summary>
+        /// Gets the default file extension for this syntax.
+        /// </summary>
+        public abstract string FileExtension { get; }
+
+        /// <summary>
+        /// Gets the localized description for the default file extension.
+        /// </summary>
+        public abstract LocalizedStringKey FileExtensionLocalizedKey { get; }
+
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.
         /// </summary>

@@ -93,6 +93,7 @@
     <Compile Include="AppTemplate\UIActionForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="AppTemplate\WorkingCopyTextFileAutoSaver.cs" />
     <Compile Include="InteractiveGame.cs" />
     <Compile Include="InteractiveGame.UIActions.cs">
       <DependentUpon>InteractiveGame.cs</DependentUpon>
@@ -112,6 +113,7 @@
       <DependentUpon>MovesTextBox.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PGNSyntaxDescriptor.cs" />
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -48,19 +48,19 @@ namespace Eutherion.Win.AppTemplate
         private readonly SplitContainer splitter;
         private readonly ListBoxEx errorsListBox;
 
+        private readonly LocalizedString untitledString;
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
         public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
 
-        public SyntaxEditorForm(bool isReadOnly,
+        public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                 SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
-                                LiveTextFile codeFile,
+                                WorkingCopyTextFile codeFile,
                                 Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
-                                SettingProperty<int> zoomSetting,
-                                SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
+                                SettingProperty<int> zoomSetting)
         {
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
@@ -68,14 +68,10 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(
-                syntaxDescriptor,
-                codeFile,
-                initialTextGenerator,
-                autoSaveSetting)
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile, initialTextGenerator)
             {
                 Dock = DockStyle.Fill,
-                ReadOnly = isReadOnly,
+                ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,
             };
 
             // Initialize zoom factor and listen to changes.
@@ -94,6 +90,14 @@ namespace Eutherion.Win.AppTemplate
             // Bind to this MenuCaptionBarForm as well so the save button is shown in the caption area.
             this.BindAction(SharedUIAction.SaveToFile, SyntaxEditor.TrySaveToFile);
 
+            if (codeAccessOption == SyntaxEditorCodeAccessOption.Default)
+            {
+                SyntaxEditor.BindActions(new UIActionBindings
+                {
+                    { SharedUIAction.SaveAs, SyntaxEditor.TrySaveAs },
+                });
+            }
+
             SyntaxEditor.BindStandardEditUIActions();
 
             SyntaxEditor.BindActions(new UIActionBindings
@@ -104,8 +108,9 @@ namespace Eutherion.Win.AppTemplate
 
             UIMenu.AddTo(SyntaxEditor);
 
-            // Initial changed marker.
-            UpdateChangedMarker();
+            // Changed marker.
+            untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
+            untitledString.DisplayText.ValueChanged += _ => UpdateChangedMarker();
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
@@ -177,9 +182,26 @@ namespace Eutherion.Win.AppTemplate
             mainMenuActionHandler = new UIActionHandler();
 
             var fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
-            fileMenu.Nodes.AddRange(BindMainMenuItemActions(
-                SharedUIAction.SaveToFile,
-                SharedUIAction.Close));
+
+            switch (codeAccessOption)
+            {
+                default:
+                case SyntaxEditorCodeAccessOption.Default:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.SaveAs,
+                        SharedUIAction.Close));
+                    break;
+                case SyntaxEditorCodeAccessOption.FixedFile:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.SaveToFile,
+                        SharedUIAction.Close));
+                    break;
+                case SyntaxEditorCodeAccessOption.ReadOnly:
+                    fileMenu.Nodes.AddRange(BindMainMenuItemActions(
+                        SharedUIAction.Close));
+                    break;
+            }
 
             var editMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Edit.ToTextProvider());
             editMenu.Nodes.AddRange(BindMainMenuItemActions(
@@ -266,6 +288,19 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
+        private string CodeFilePathDisplayString
+        {
+            get
+            {
+                string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
+
+                // Use untitledString for new files that are not yet saved.
+                return openTextFilePath == null
+                    ? untitledString.DisplayText.Value
+                    : Path.GetFileName(openTextFilePath);
+            }
+        }
+
         private void CodeFile_LoadedTextChanged(WorkingCopyTextFile sender, EventArgs e)
         {
             UpdateChangedMarker();
@@ -273,8 +308,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateChangedMarker()
         {
-            string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
-            string fileName = Path.GetFileName(openTextFilePath);
+            string fileName = CodeFilePathDisplayString;
             Text = SyntaxEditor.ContainsChanges ? ChangedMarker + fileName : fileName;
 
             // Invalidate to update the save button.
@@ -388,11 +422,8 @@ namespace Eutherion.Win.AppTemplate
             // Only show message box if there's no auto save file from which local changes can be recovered.
             if (SyntaxEditor.ContainsChanges && SyntaxEditor.CodeFile.AutoSaveFile == null)
             {
-                string openTextFilePath = SyntaxEditor.CodeFile.OpenTextFilePath;
-                string fileName = Path.GetFileName(openTextFilePath);
-
                 DialogResult result = MessageBox.Show(
-                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { fileName }),
+                    Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.SaveChangesQuery, new[] { CodeFilePathDisplayString }),
                     Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.UnsavedChangesTitle),
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -424,6 +455,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (disposing)
             {
+                untitledString?.Dispose();
                 noErrorsString?.Dispose();
                 errorLocationString?.Dispose();
             }
@@ -470,5 +502,26 @@ namespace Eutherion.Win.AppTemplate
 
             return UIActionVisibility.Enabled;
         }
+    }
+
+    /// <summary>
+    /// Specifies options for accessing the code file opened by a syntax editor.
+    /// </summary>
+    public enum SyntaxEditorCodeAccessOption
+    {
+        /// <summary>
+        /// The code file is editable and can be saved under a different name.
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// The code file is editable but cannot be saved under a different name.
+        /// </summary>
+        FixedFile,
+
+        /// <summary>
+        /// The code file is read-only.
+        /// </summary>
+        ReadOnly,
     }
 }

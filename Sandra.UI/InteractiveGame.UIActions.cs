@@ -22,6 +22,7 @@
 using Eutherion;
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
 using Eutherion.Win.Forms;
 using Eutherion.Win.UIActions;
@@ -121,11 +122,7 @@ namespace Sandra.UI
                     };
                 }
 
-                if (!chessBoardForm.ContainsFocus)
-                {
-                    chessBoardForm.Visible = true;
-                    chessBoardForm.Activate();
-                }
+                chessBoardForm.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;
@@ -218,11 +215,7 @@ namespace Sandra.UI
                     };
                 }
 
-                if (!movesForm.ContainsFocus)
-                {
-                    movesForm.Visible = true;
-                    movesForm.Activate();
-                }
+                movesForm.EnsureActivated();
             }
 
             return UIActionVisibility.Enabled;

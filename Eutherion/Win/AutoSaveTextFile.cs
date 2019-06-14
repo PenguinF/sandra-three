@@ -177,6 +177,7 @@ namespace Eutherion.Win
         /// <exception cref="ArgumentException">
         /// One or both <see cref="FileStream"/>s in <paramref name="autoSaveFiles"/>
         /// do not have the right capabilities to be used as an auto-save file stream.
+        /// See also: <seealso cref="CanAutoSaveTo"/>.
         /// </exception>
         public AutoSaveTextFile(RemoteState remoteState, FileStreamPair autoSaveFiles)
         {
@@ -236,10 +237,7 @@ namespace Eutherion.Win
 
         private void VerifyFileStream(FileStream fileStream, string parameterName)
         {
-            if (!fileStream.CanSeek
-                || !fileStream.CanRead
-                || !fileStream.CanWrite
-                || fileStream.CanTimeout)
+            if (!AutoSaveTextFile.CanAutoSaveTo(fileStream))
             {
                 throw new ArgumentException(
                     $"One of the file streams in '{parameterName}' does not have the right capabilities to be used as an auto-save file stream.",
@@ -432,6 +430,29 @@ namespace Eutherion.Win
     /// </summary>
     public static class AutoSaveTextFile
     {
+        /// <summary>
+        /// Returns if a <see cref="FileStream"/> has the right capabilities to be used for an <see cref="AutoSaveTextFile{TUpdate}"/>.
+        /// The <see cref="FileStream"/> must support seeking, reading, writing, and must be guaranteed to not time-out.
+        /// </summary>
+        /// <param name="fileStream">
+        /// The <see cref="FileStream"/> to check.
+        /// </param>
+        /// <returns>
+        /// Whether or not the <see cref="FileStream"/> has sufficient capabilities to be used for an <see cref="AutoSaveTextFile{TUpdate}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fileStream"/> is null.
+        /// </exception>
+        public static bool CanAutoSaveTo(FileStream fileStream)
+        {
+            if (fileStream == null) throw new ArgumentNullException(nameof(fileStream));
+
+            return fileStream.CanSeek
+                && fileStream.CanRead
+                && fileStream.CanWrite
+                && !fileStream.CanTimeout;
+        }
+
         /// <summary>
         /// Opens an existing file in such a way that it can be used as an auto-save <see cref="FileStream"/>.
         /// Only this process can write to the <see cref="FileStream"/>.

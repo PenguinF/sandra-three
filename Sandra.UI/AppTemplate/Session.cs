@@ -235,6 +235,35 @@ namespace Eutherion.Win.AppTemplate
             new FormStateAutoSaver(this, targetForm, property, formState);
         }
 
+        public FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        {
+            try
+            {
+                if (autoSaveProperty != null && TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+                {
+                    var fileStreamPair = FileStreamPair.Create(
+                        AutoSaveTextFile.OpenExistingAutoSaveFile,
+                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                    if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
+                        && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
+                    {
+                        return fileStreamPair;
+                    }
+
+                    fileStreamPair.Dispose();
+                }
+            }
+            catch (Exception autoSaveLoadException)
+            {
+                // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
+                autoSaveLoadException.Trace();
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Gets or sets the current <see cref="Localizer"/>.
         /// </summary>

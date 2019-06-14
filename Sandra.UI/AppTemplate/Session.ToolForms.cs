@@ -77,11 +77,9 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
 
-            if (toolForm.Value != null && !toolForm.Value.ContainsFocus)
+            if (toolForm.Value != null)
             {
-                toolForm.Value.Visible = true;
-                toolForm.Value.Deminimize();
-                toolForm.Value.Activate();
+                toolForm.Value.EnsureActivated();
             }
         }
 
@@ -96,7 +94,7 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        private Form CreateSettingsForm(bool isReadOnly,
+        private Form CreateSettingsForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                         SettingsFile settingsFile,
                                         Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
@@ -106,20 +104,38 @@ namespace Eutherion.Win.AppTemplate
             var jsonStyleSelector = new JsonStyleSelector();
             var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema, jsonStyleSelector);
 
+            WorkingCopyTextFile codeFile;
+            WorkingCopyTextFileAutoSaver autoSaver;
+
+            if (autoSaveSetting == null)
+            {
+                codeFile = WorkingCopyTextFile.FromLiveTextFile(settingsFile, null);
+                autoSaver = null;
+            }
+            else
+            {
+                codeFile = WorkingCopyTextFile.FromLiveTextFile(
+                    settingsFile,
+                    OpenAutoSaveFileStreamPair(autoSaveSetting));
+
+                autoSaver = new WorkingCopyTextFileAutoSaver(this, autoSaveSetting, codeFile);
+            }
+
             var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
-                isReadOnly,
+                codeAccessOption,
                 syntaxDescriptor,
-                settingsFile,
+                codeFile,
                 initialTextGenerator,
                 formStateSetting,
                 errorHeightSetting,
-                SharedSettings.JsonZoom,
-                autoSaveSetting)
+                SharedSettings.JsonZoom)
             {
                 ClientSize = new Size(600, 600),
             };
 
             jsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+
+            if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
             return settingsForm;
         }
@@ -155,7 +171,7 @@ namespace Eutherion.Win.AppTemplate
                         }
 
                         return CreateSettingsForm(
-                            false,
+                            SyntaxEditorCodeAccessOption.FixedFile,
                             LocalSettings,
                             initialTextGenerator,
                             SharedSettings.PreferencesWindow,
@@ -185,7 +201,7 @@ namespace Eutherion.Win.AppTemplate
                     null,
                     defaultSettingsFormBox,
                     () => CreateSettingsForm(
-                        !GetSetting(DeveloperMode),
+                        GetSetting(DeveloperMode) ? SyntaxEditorCodeAccessOption.FixedFile : SyntaxEditorCodeAccessOption.ReadOnly,
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsWindow,
@@ -357,7 +373,7 @@ namespace Eutherion.Win.AppTemplate
                         }
 
                         return CreateSettingsForm(
-                            false,
+                            SyntaxEditorCodeAccessOption.FixedFile,
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
                             SharedSettings.LanguageWindow,

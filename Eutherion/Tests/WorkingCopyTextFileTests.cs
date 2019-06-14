@@ -36,6 +36,11 @@ namespace Eutherion.Win.Tests
         PrimaryTextFile,
 
         /// <summary>
+        /// The secondary target text file.
+        /// </summary>
+        SecondaryTextFile,
+
+        /// <summary>
         /// The primary auto-save file.
         /// </summary>
         AutoSaveFile1,
@@ -84,13 +89,30 @@ namespace Eutherion.Win.Tests
             }
         }
 
-        private readonly TargetFileState textFileState;
+        // All variations on "test1.txt".
+        public static IEnumerable<object[]> AlternativePrimaryTextFilePaths()
+        {
+            yield return new object[] { "test1.txt" };
+            yield return new object[] { "TEST1.TXT" };
+#if DEBUG
+            // It's not very healthy to take dependencies on build paths but impact is low.
+            yield return new object[] { "../Debug/TEST1.TXT" };
+            yield return new object[] { "..\\DEBUG\\test1.TXT" };
+#else
+            yield return new object[] { "../Release/TEST1.TXT" };
+            yield return new object[] { "..\\RELEASE\\test1.TXT" };
+#endif
+        }
+
+        private readonly TargetFileState textFileState1;
+        private readonly TargetFileState textFileState2;
         private readonly TargetFileState autoSaveFileState1;
         private readonly TargetFileState autoSaveFileState2;
 
         public FileFixture()
         {
-            textFileState = new TargetFileState("test.txt");
+            textFileState1 = new TargetFileState("test1.txt");
+            textFileState2 = new TargetFileState("test2.txt");
             autoSaveFileState1 = new TargetFileState("autosave1.txt");
             autoSaveFileState2 = new TargetFileState("autosave2.txt");
         }
@@ -101,7 +123,9 @@ namespace Eutherion.Win.Tests
             {
                 default:
                 case TargetFile.PrimaryTextFile:
-                    return textFileState;
+                    return textFileState1;
+                case TargetFile.SecondaryTextFile:
+                    return textFileState2;
                 case TargetFile.AutoSaveFile1:
                     return autoSaveFileState1;
                 case TargetFile.AutoSaveFile2:
@@ -173,6 +197,7 @@ namespace Eutherion.Win.Tests
         {
             // This removes locks and deletes the files.
             PrepareTargetFile(TargetFile.PrimaryTextFile, FileState.DoesNotExist);
+            PrepareTargetFile(TargetFile.SecondaryTextFile, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile1, FileState.DoesNotExist);
             PrepareTargetFile(TargetFile.AutoSaveFile2, FileState.DoesNotExist);
         }
@@ -272,6 +297,7 @@ namespace Eutherion.Win.Tests
         {
             using (var wcFile = WorkingCopyTextFile.Open(null, null))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
 
@@ -306,6 +332,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
 
@@ -328,6 +355,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
                 Assert.Null(wcFile.AutoSaveFile);
@@ -346,6 +374,7 @@ namespace Eutherion.Win.Tests
 
             using (var wcFile = WorkingCopyTextFile.Open(filePath, AutoSaveFiles()))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
                 Assert.NotNull(wcFile.AutoSaveFile);
 
@@ -380,6 +409,7 @@ namespace Eutherion.Win.Tests
 
             using (var wcFile = WorkingCopyTextFile.Open(null, AutoSaveFiles()))
             {
+                Assert.True(wcFile.IsTextFileOwner);
                 Assert.Null(wcFile.OpenTextFile);
                 Assert.Null(wcFile.OpenTextFilePath);
 
@@ -400,6 +430,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, AutoSaveFiles()))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.Equal(filePath, wcFile.OpenTextFilePath);
 
@@ -465,6 +496,7 @@ namespace Eutherion.Win.Tests
             using (var textFile = new LiveTextFile(filePath))
             using (var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null))
             {
+                Assert.False(wcFile.IsTextFileOwner);
                 wcFile.Dispose();
                 Assert.NotNull(wcFile.OpenTextFile);
                 Assert.False(textFile.IsDisposed);
@@ -476,9 +508,10 @@ namespace Eutherion.Win.Tests
             using (var wcFile = WorkingCopyTextFile.Open(filePath, null))
             {
                 var textFile = wcFile.OpenTextFile;
+                Assert.NotNull(textFile);
                 Assert.False(textFile.IsDisposed);
                 wcFile.Dispose();
-                Assert.NotNull(wcFile.OpenTextFile);
+                Assert.Same(textFile, wcFile.OpenTextFile);
                 Assert.True(textFile.IsDisposed);
             }
         }
@@ -733,6 +766,158 @@ namespace Eutherion.Win.Tests
                 Assert.Equal(newLoadedText, wcFile.LocalCopyText);
 
                 // Auto-updating should still work after being locked by another process.
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
+
+        private void PrepareForReplaceTest(string primaryLoadedText, string secondaryLoadedText)
+        {
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, primaryLoadedText);
+            fileFixture.PrepareTargetFile(TargetFile.SecondaryTextFile, secondaryLoadedText);
+        }
+
+        [Fact]
+        public void ReplaceFailsWhenDisposed()
+        {
+            PrepareForReplaceTest("A", "B");
+
+            var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null);
+            var liveTextFile = wcFile.OpenTextFile;
+            wcFile.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile)));
+            Assert.Same(liveTextFile, wcFile.OpenTextFile);
+        }
+
+        [Fact]
+        public void ReplaceFailsWhenNotOwner()
+        {
+            PrepareForReplaceTest("A", "B");
+
+            using (var textFile = new LiveTextFile(fileFixture.GetPath(TargetFile.PrimaryTextFile)))
+            {
+                string replacePath = fileFixture.GetPath(TargetFile.SecondaryTextFile);
+
+                var wcFile = WorkingCopyTextFile.FromLiveTextFile(textFile, null);
+                using (wcFile)
+                {
+                    Assert.Throws<InvalidOperationException>(() => wcFile.Replace(replacePath));
+                    Assert.Same(textFile, wcFile.OpenTextFile);
+                }
+
+                // Also assert that the ObjectDisposedException has precedence.
+                Assert.Throws<ObjectDisposedException>(() => wcFile.Replace(replacePath));
+            }
+        }
+
+        public static IEnumerable<object[]> PrimaryTextFilePaths() => FileFixture.AlternativePrimaryTextFilePaths();
+
+        [Theory]
+        [MemberData(nameof(PrimaryTextFilePaths))]
+        public void ReplaceWithSamePath(string filePath)
+        {
+            string text1 = "A";
+            string text2 = "B";
+            string text3 = "C";
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text1);
+
+            using (var ewh = new AutoResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            {
+                var liveTextFile = wcFile.OpenTextFile;
+
+                // Evaluate LoadedText so IsDirty becomes false.
+                Assert.Equal(text1, wcFile.LoadedText);
+
+                // This should have no effect other than that the local changes are saved.
+                wcFile.UpdateLocalCopyText(text2, containsChanges: true);
+                wcFile.Replace(filePath);
+
+                // Assert that the OpenTextFile is unchanged.
+                Assert.Same(liveTextFile, wcFile.OpenTextFile);
+                Assert.False(liveTextFile.IsDisposed);
+                Assert.Equal(text2, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+
+                // Verify that auto-updates still work.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text3);
+                ewh.WaitOne();
+
+                Assert.Equal(text3, wcFile.LoadedText);
+                Assert.Equal(text3, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
+
+        [Fact]
+        public void ReplaceWithDifferentPath()
+        {
+            string text1 = "A";
+            string text2 = "B";
+            string text3 = "C";
+
+            PrepareForReplaceTest(text1, text2);
+
+            using (var ewh = new AutoResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            {
+                var liveTextFile = wcFile.OpenTextFile;
+                wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile));
+
+                // Assert that the OpenTextFile was replaced, and the old one disposed.
+                Assert.NotSame(liveTextFile, wcFile.OpenTextFile);
+                Assert.True(liveTextFile.IsDisposed);
+
+                // Assert that the second file was overwritten.
+                Assert.Equal(text1, wcFile.LoadedText);
+                Assert.Equal(text1, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+
+                // Verify that auto-updates work on the second file, not the first.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.SecondaryTextFile, text2);
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text3);
+                ewh.WaitOne();
+
+                Assert.Equal(text2, wcFile.LoadedText);
+                Assert.Equal(text2, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+            }
+        }
+
+        [Fact]
+        public void ReplaceWithIllegalPath()
+        {
+            string text1 = "A";
+            string text2 = "B";
+
+            fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text1);
+
+            using (var ewh = new AutoResetEvent(false))
+            using (var wcFile = WorkingCopyTextFile.Open(fileFixture.GetPath(TargetFile.PrimaryTextFile), null))
+            {
+                var liveTextFile = wcFile.OpenTextFile;
+
+                // Lock the second file before attempting to overwrite it.
+                fileFixture.PrepareTargetFile(TargetFile.SecondaryTextFile, FileState.LockedByAnotherProcess);
+
+                // This should throw, and leave the old OpenTextFile intact.
+                Assert.Throws<IOException>(() => wcFile.Replace(fileFixture.GetPath(TargetFile.SecondaryTextFile)));
+
+                Assert.Same(liveTextFile, wcFile.OpenTextFile);
+                Assert.False(liveTextFile.IsDisposed);
+                Assert.Equal(text1, wcFile.LocalCopyText);
+                Assert.False(wcFile.ContainsChanges);
+
+                // Verify that auto-updates still work.
+                wcFile.LoadedTextChanged += (_, __) => ewh.Set();
+                fileFixture.PrepareTargetFile(TargetFile.PrimaryTextFile, text2);
+                ewh.WaitOne();
+
+                Assert.Equal(text2, wcFile.LoadedText);
+                Assert.Equal(text2, wcFile.LocalCopyText);
                 Assert.False(wcFile.ContainsChanges);
             }
         }

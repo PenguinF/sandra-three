@@ -43,5 +43,21 @@ namespace Eutherion.Win
                 WinAPI.ShowWindow(new HandleRef(form, form.Handle), SW_RESTORE);
             }
         }
+
+        /// <summary>
+        /// If a <see cref="Form"/> doesn't contain the focus, shows, deminimizes, and activates it.
+        /// </summary>
+        /// <param name="form">
+        /// The <see cref="Form"/> to activate.
+        /// </param>
+        public static void EnsureActivated(this Form form)
+        {
+            if (!form.ContainsFocus)
+            {
+                form.Visible = true;
+                form.Deminimize();
+                form.Activate();
+            }
+        }
     }
 }

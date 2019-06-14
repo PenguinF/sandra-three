@@ -21,8 +21,11 @@
 
 using Eutherion.UIActions;
 using Eutherion.Utils;
+using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
 using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -32,6 +35,107 @@ namespace Sandra.UI
     public partial class MdiContainerForm
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
+
+        public static readonly DefaultUIActionBinding NewPGNFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPGNFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
+                    IsFirstInGroup = true,
+                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
+                },
+            });
+
+        public UIActionState TryNewPGNFile(bool perform)
+        {
+            if (perform)
+            {
+                var syntaxDescriptor = new PGNSyntaxDescriptor();
+
+                var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                    SyntaxEditorCodeAccessOption.Default,
+                    syntaxDescriptor,
+                    WorkingCopyTextFile.Open(null, null),
+                    null,
+                    SettingKeys.PGNWindow,
+                    SettingKeys.PGNErrorHeight,
+                    SettingKeys.PGNZoom)
+                {
+                    MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                    ClientSize = new Size(400, 400),
+                    ShowInTaskbar = true,
+                    Icon = Session.Current.ApplicationIcon,
+                    ShowIcon = true,
+                };
+
+                pgnForm.EnsureActivated();
+            }
+
+            return UIActionVisibility.Enabled;
+        }
+
+        public static readonly DefaultUIActionBinding OpenPGNFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPGNFile)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
+                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
+                    OpensDialog = true,
+                },
+            });
+
+        public UIActionState TryOpenPGNFile(bool perform)
+        {
+            if (perform)
+            {
+                var syntaxDescriptor = new PGNSyntaxDescriptor();
+
+                string extension = syntaxDescriptor.FileExtension;
+                var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
+
+                var openFileDialog = new OpenFileDialog
+                {
+                    AutoUpgradeEnabled = true,
+                    DereferenceLinks = true,
+                    DefaultExt = extension,
+                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
+                    SupportMultiDottedExtensions = true,
+                    RestoreDirectory = true,
+                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
+                    ValidateNames = true,
+                    CheckFileExists = false,
+                    ShowReadOnly = true,
+                };
+
+                var dialogResult = openFileDialog.ShowDialog(this);
+                if (dialogResult == DialogResult.OK)
+                {
+                    var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                        openFileDialog.ReadOnlyChecked ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
+                        syntaxDescriptor,
+                        WorkingCopyTextFile.Open(openFileDialog.FileName, null),
+                        null,
+                        SettingKeys.PGNWindow,
+                        SettingKeys.PGNErrorHeight,
+                        SettingKeys.PGNZoom)
+                    {
+                        MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
+                        ClientSize = new Size(400, 400),
+                        ShowInTaskbar = true,
+                        Icon = Session.Current.ApplicationIcon,
+                        ShowIcon = true,
+                    };
+
+                    pgnForm.EnsureActivated();
+                }
+            }
+
+            return UIActionVisibility.Enabled;
+        }
 
         public UIActionState TryExit(bool perform)
         {

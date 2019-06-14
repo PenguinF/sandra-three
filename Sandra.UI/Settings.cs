@@ -54,6 +54,18 @@ namespace Sandra.UI
             new SettingKey(SettingKey.ToSnakeCase(nameof(Window))),
             PersistableFormState.Type);
 
+        public static readonly SettingProperty<PersistableFormState> PGNWindow = new SettingProperty<PersistableFormState>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PGNWindow))),
+            PersistableFormState.Type);
+
+        public static readonly SettingProperty<int> PGNErrorHeight = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PGNErrorHeight))),
+            PType.CLR.Int32);
+
+        public static readonly SettingProperty<int> PGNZoom = new SettingProperty<int>(
+            new SettingKey(SettingKey.ToSnakeCase(nameof(PGNZoom))),
+            ScintillaZoomFactor.Instance);
+
         public static readonly SettingProperty<MovesTextBox.MFOSettingValue> Notation = new SettingProperty<MovesTextBox.MFOSettingValue>(
             new SettingKey(SettingKey.ToSnakeCase(nameof(Notation))),
             new PType.Enumeration<MovesTextBox.MFOSettingValue>(EnumHelper<MovesTextBox.MFOSettingValue>.AllValues));
@@ -139,6 +151,9 @@ namespace Sandra.UI
                 session.LangSetting,
                 SettingKeys.Window,
                 SharedSettings.AutoSaveCounter,
+                SettingKeys.PGNWindow,
+                SettingKeys.PGNErrorHeight,
+                SettingKeys.PGNZoom,
                 SharedSettings.DefaultSettingsWindow,
                 SharedSettings.DefaultSettingsErrorHeight,
                 SharedSettings.DefaultSettingsAutoSave,

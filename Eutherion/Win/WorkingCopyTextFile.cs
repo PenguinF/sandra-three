@@ -60,7 +60,10 @@ namespace Eutherion.Win
             }
         }
 
-        private readonly bool isTextFileOwner;
+        /// <summary>
+        /// Gets if this <see cref="WorkingCopyTextFile"/> was created with the <see cref="Open(string, FileStreamPair)"/> method.
+        /// </summary>
+        public bool IsTextFileOwner { get; }
 
         /// <summary>
         /// Initializes a new <see cref="WorkingCopyTextFile"/> from a file path and a <see cref="FileStreamPair"/>
@@ -101,6 +104,8 @@ namespace Eutherion.Win
         /// and a <see cref="FileStreamPair"/> from which to load an <see cref="AutoSaveTextFile{TUpdate}"/> with auto-saved local changes.
         /// Use this constructor for <see cref="LiveTextFile"/> instances which must remain live after this
         /// <see cref="WorkingCopyTextFile"/> is disposed.
+        /// It is not possible to use <see cref="Replace(string)"/> on <see cref="WorkingCopyTextFile"/> instances
+        /// created with this method.
         /// </summary>
         /// <param name="openTextFile">
         /// The open text file.
@@ -123,7 +128,7 @@ namespace Eutherion.Win
 
         private WorkingCopyTextFile(LiveTextFile openTextFile, FileStreamPair autoSaveFiles, bool isTextFileOwner)
         {
-            this.isTextFileOwner = isTextFileOwner;
+            IsTextFileOwner = isTextFileOwner;
             OpenTextFile = openTextFile;
 
             if (openTextFile != null)
@@ -155,7 +160,7 @@ namespace Eutherion.Win
         /// <summary>
         /// Gets the opened <see cref="LiveTextFile"/>.
         /// </summary>
-        internal LiveTextFile OpenTextFile { get; }
+        internal LiveTextFile OpenTextFile { get; private set; }
 
         /// <summary>
         /// Returns the full path to the opened text file, or null for new files.
@@ -271,6 +276,81 @@ namespace Eutherion.Win
             ContainsChanges = false;
         }
 
+        /// <summary>
+        /// Replaces the current open text file with another and overwrites the file with the current text.
+        /// </summary>
+        /// <param name="path">
+        /// The path of the file to overwrite and watch.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// <see cref="IsTextFileOwner"/> is false, making this operation invalid.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// This <see cref="WorkingCopyTextFile"/> is disposed.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public void Replace(string path)
+        {
+            ThrowIfDisposed();
+
+            if (!IsTextFileOwner)
+            {
+                throw new InvalidOperationException();
+            }
+
+            // Only update OpenTextFile if actually different.
+            // Assume we're on a Windows case insensitive file system.
+            if (OpenTextFile == null || !Path.GetFullPath(path).Equals(OpenTextFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                // Open new text file before disposing the old one.
+                var oldOpenTextFile = OpenTextFile;
+                var newOpenTextFile = new LiveTextFile(path);
+
+                try
+                {
+                    // Save to the new file before replacing the old one.
+                    newOpenTextFile.Save(LocalCopyText);
+                }
+                catch
+                {
+                    newOpenTextFile.Dispose();
+                    throw;
+                }
+
+                if (oldOpenTextFile != null)
+                {
+                    oldOpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
+                    oldOpenTextFile.Dispose();
+                }
+
+                OpenTextFile = newOpenTextFile;
+                newOpenTextFile.FileUpdated += OpenTextFile_FileUpdated;
+            }
+            else
+            {
+                // Just save to the same OpenTextFile.
+                OpenTextFile.Save(LocalCopyText);
+            }
+
+            ContainsChanges = false;
+        }
+
         private void OpenTextFile_FileUpdated(LiveTextFile _, EventArgs e)
         {
             bool raiseEvent = true;
@@ -320,7 +400,7 @@ namespace Eutherion.Win
                 {
                     OpenTextFile.FileUpdated -= OpenTextFile_FileUpdated;
 
-                    if (isTextFileOwner)
+                    if (IsTextFileOwner)
                     {
                         OpenTextFile.Dispose();
                     }

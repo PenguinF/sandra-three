@@ -165,6 +165,22 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
+        public static readonly DefaultUIActionBinding SaveAs = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(SaveAs)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    Shortcuts = new[]
+                    {
+                        new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.S),
+                        new ShortcutKeys(ConsoleKey.F12),
+                    },
+                    MenuTextProvider = SharedLocalizedStringKeys.SaveAs.ToTextProvider(),
+                    OpensDialog = true,
+                },
+            });
+
         public static readonly DefaultUIActionBinding GoToPreviousLocation = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
             new ImplementationSet<IUIActionInterface>
