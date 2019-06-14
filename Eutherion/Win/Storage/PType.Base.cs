@@ -208,7 +208,7 @@ namespace Eutherion.Win.Storage
 
             public override sealed T GetBaseValue(T value)
             {
-                if (!IsValid(value, out ITypeErrorBuilder _))
+                if (!IsValid(value, out _))
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(value),

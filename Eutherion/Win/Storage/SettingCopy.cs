@@ -91,7 +91,7 @@ namespace Eutherion.Win.Storage
             if (property == null) throw new ArgumentNullException(nameof(property));
             if (value == null) throw new ArgumentNullException(nameof(value));
 
-            if (Schema.ContainsProperty(property) && property.IsValidValue(value, out ITypeErrorBuilder _))
+            if (Schema.ContainsProperty(property) && property.IsValidValue(value, out _))
             {
                 KeyValueMapping[property.Name] = value;
             }

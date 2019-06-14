@@ -95,7 +95,7 @@ namespace Eutherion.Win.AppTemplate
         {
             // If auto-save files have been deleted, remove from Session.Current.AutoSave as well.
             if (workingCopyTextFile.AutoSaveFile == null
-                && ownerSession.TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair _))
+                && ownerSession.TryGetAutoSaveValue(autoSaveProperty, out _))
             {
                 ownerSession.AutoSave.Remove(autoSaveProperty);
             }

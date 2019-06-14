@@ -36,8 +36,8 @@ namespace Sandra.UI
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
 
-        public static readonly DefaultUIActionBinding NewPGNFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPGNFile)),
+        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPgnFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -48,20 +48,20 @@ namespace Sandra.UI
                 },
             });
 
-        public UIActionState TryNewPGNFile(bool perform)
+        public UIActionState TryNewPgnFile(bool perform)
         {
             if (perform)
             {
-                var syntaxDescriptor = new PGNSyntaxDescriptor();
+                var syntaxDescriptor = new PgnSyntaxDescriptor();
 
-                var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
                     SyntaxEditorCodeAccessOption.Default,
                     syntaxDescriptor,
                     WorkingCopyTextFile.Open(null, null),
                     null,
-                    SettingKeys.PGNWindow,
-                    SettingKeys.PGNErrorHeight,
-                    SettingKeys.PGNZoom)
+                    SettingKeys.PgnWindow,
+                    SettingKeys.PgnErrorHeight,
+                    SettingKeys.PgnZoom)
                 {
                     MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                     ClientSize = new Size(400, 400),
@@ -76,8 +76,8 @@ namespace Sandra.UI
             return UIActionVisibility.Enabled;
         }
 
-        public static readonly DefaultUIActionBinding OpenPGNFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPGNFile)),
+        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
+            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPgnFile)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
@@ -88,11 +88,11 @@ namespace Sandra.UI
                 },
             });
 
-        public UIActionState TryOpenPGNFile(bool perform)
+        public UIActionState TryOpenPgnFile(bool perform)
         {
             if (perform)
             {
-                var syntaxDescriptor = new PGNSyntaxDescriptor();
+                var syntaxDescriptor = new PgnSyntaxDescriptor();
 
                 string extension = syntaxDescriptor.FileExtension;
                 var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
@@ -114,14 +114,14 @@ namespace Sandra.UI
                 var dialogResult = openFileDialog.ShowDialog(this);
                 if (dialogResult == DialogResult.OK)
                 {
-                    var pgnForm = new SyntaxEditorForm<PGNSymbol, PGNErrorInfo>(
+                    var pgnForm = new SyntaxEditorForm<PgnSymbol, PgnErrorInfo>(
                         openFileDialog.ReadOnlyChecked ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                         syntaxDescriptor,
                         WorkingCopyTextFile.Open(openFileDialog.FileName, null),
                         null,
-                        SettingKeys.PGNWindow,
-                        SettingKeys.PGNErrorHeight,
-                        SettingKeys.PGNZoom)
+                        SettingKeys.PgnWindow,
+                        SettingKeys.PgnErrorHeight,
+                        SettingKeys.PgnZoom)
                     {
                         MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
                         ClientSize = new Size(400, 400),

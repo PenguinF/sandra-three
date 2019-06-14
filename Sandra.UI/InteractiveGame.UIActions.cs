@@ -195,7 +195,7 @@ namespace Sandra.UI
                         { BreakActiveVariation, TryBreakActiveVariation },
                         { DeleteActiveVariation, TryDeleteActiveVariation },
 
-                        { MovesTextBox.UsePGNPieceSymbols, movesTextBox.TryUsePGNPieceSymbols },
+                        { MovesTextBox.UsePgnPieceSymbols, movesTextBox.TryUsePgnPieceSymbols },
                         { MovesTextBox.UseLongAlgebraicNotation, movesTextBox.TryUseLongAlgebraicNotation },
                     });
 

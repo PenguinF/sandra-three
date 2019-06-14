@@ -57,8 +57,8 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public abstract class PValueVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(PValue value) => default(TResult);
-        public virtual TResult Visit(PValue value) => value == null ? default(TResult) : value.Accept(this);
+        public virtual TResult DefaultVisit(PValue value) => default;
+        public virtual TResult Visit(PValue value) => value == null ? default : value.Accept(this);
         public virtual TResult VisitBoolean(PBoolean value) => DefaultVisit(value);
         public virtual TResult VisitInteger(PInteger value) => DefaultVisit(value);
         public virtual TResult VisitList(PList value) => DefaultVisit(value);
@@ -73,8 +73,8 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public abstract class PValueVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(PValue value, T arg) => default(TResult);
-        public virtual TResult Visit(PValue value, T arg) => value == null ? default(TResult) : value.Accept(this, arg);
+        public virtual TResult DefaultVisit(PValue value, T arg) => default;
+        public virtual TResult Visit(PValue value, T arg) => value == null ? default : value.Accept(this, arg);
         public virtual TResult VisitBoolean(PBoolean value, T arg) => DefaultVisit(value, arg);
         public virtual TResult VisitInteger(PInteger value, T arg) => DefaultVisit(value, arg);
         public virtual TResult VisitList(PList value, T arg) => DefaultVisit(value, arg);
@@ -90,7 +90,7 @@ namespace Eutherion.Win.Storage
     {
         public bool Value;
 
-        public PBoolean(bool value) { Value = value; }
+        public PBoolean(bool value) => Value = value;
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitBoolean(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitBoolean(this);
@@ -104,7 +104,7 @@ namespace Eutherion.Win.Storage
     {
         public BigInteger Value;
 
-        public PInteger(BigInteger value) { Value = value; }
+        public PInteger(BigInteger value) => Value = value;
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitInteger(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitInteger(this);
@@ -118,7 +118,7 @@ namespace Eutherion.Win.Storage
     {
         public string Value;
 
-        public PString(string value) { Value = value; }
+        public PString(string value) => Value = value;
 
         void PValue.Accept(PValueVisitor visitor) => visitor.VisitString(this);
         TResult PValue.Accept<TResult>(PValueVisitor<TResult> visitor) => visitor.VisitString(this);
