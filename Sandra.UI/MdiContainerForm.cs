@@ -560,7 +560,15 @@ namespace Sandra.UI
         {
             var runtimePath = RuntimePath(imageFileKey);
             Directory.CreateDirectory(Path.GetDirectoryName(runtimePath));
-            DefaultResourceImage(imageFileKey).Save(runtimePath);
+
+            try
+            {
+                DefaultResourceImage(imageFileKey).Save(runtimePath);
+            }
+            catch
+            {
+                // Likely the image file has been locked.
+            }
         }
 
         /// <summary>
