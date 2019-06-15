@@ -48,9 +48,13 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton closeButton;
 
         /// <summary>
-        /// Gets or sets the currently used hover color of the close button when the save button is visible and enabled.
+        /// Gets or sets the currently used hover color of the close button.
         /// </summary>
-        public Color UnsavedModificationsCloseButtonHoverColor { get; set; }
+        public Color CloseButtonHoverColor
+        {
+            get => closeButton.FlatAppearance.MouseOverBackColor;
+            set => closeButton.FlatAppearance.MouseOverBackColor = value;
+        }
 
         public MenuCaptionBarForm()
         {
@@ -98,17 +102,6 @@ namespace Eutherion.Win.AppTemplate
                 UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
                 saveButton.Visible = currentActionState.Visible;
                 saveButton.Enabled = currentActionState.Enabled;
-
-                // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-                if (UnsavedModificationsCloseButtonHoverColor.A < 255)
-                {
-                    // No transparency (for now?)
-                    closeButton.FlatAppearance.MouseOverBackColor = default;
-                }
-                else
-                {
-                    closeButton.FlatAppearance.MouseOverBackColor = currentActionState.Enabled ? UnsavedModificationsCloseButtonHoverColor : default;
-                }
             };
 
             closeButton = CreateCaptionButton(SharedResources.close);
