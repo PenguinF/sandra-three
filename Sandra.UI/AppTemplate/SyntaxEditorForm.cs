@@ -57,7 +57,6 @@ namespace Eutherion.Win.AppTemplate
         public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                 SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
-                                Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
                                 SettingProperty<int> zoomSetting)
@@ -68,7 +67,7 @@ namespace Eutherion.Win.AppTemplate
             // Set this before calling UpdateChangedMarker().
             UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile, initialTextGenerator)
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,

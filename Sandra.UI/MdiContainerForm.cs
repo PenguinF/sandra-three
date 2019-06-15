@@ -461,7 +461,6 @@ namespace Sandra.UI
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
                 syntaxDescriptor,
                 pgnFile,
-                null,
                 SettingKeys.PgnWindow,
                 SettingKeys.PgnErrorHeight,
                 SettingKeys.PgnZoom)

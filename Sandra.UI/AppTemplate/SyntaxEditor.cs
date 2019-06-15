@@ -87,15 +87,11 @@ namespace Eutherion.Win.AppTemplate
         /// The code file to show and/or edit.
         /// It is disposed together with this <see cref="SyntaxEditor{TTerminal, TError}"/>.
         /// </param>
-        /// <param name="initialTextGenerator">
-        /// Optional function to generate initial text in case the code file could not be loaded and was not auto-saved.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
         public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
-                            WorkingCopyTextFile codeFile,
-                            Func<string> initialTextGenerator)
+                            WorkingCopyTextFile codeFile)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
@@ -141,17 +137,7 @@ namespace Eutherion.Win.AppTemplate
 
             // Only use initialTextGenerator if nothing was auto-saved.
             containsChangesAtSavePoint = CodeFile.ContainsChanges;
-            if (CodeFile.LoadException != null && CodeFile.AutoSaveFile == null)
-            {
-                Text = initialTextGenerator != null
-                    ? (initialTextGenerator() ?? string.Empty)
-                    : string.Empty;
-            }
-            else
-            {
-                CopyTextFromTextFile();
-            }
-
+            CopyTextFromTextFile();
             EmptyUndoBuffer();
         }
 
