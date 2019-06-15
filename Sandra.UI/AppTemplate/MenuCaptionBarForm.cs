@@ -90,6 +90,7 @@ namespace Eutherion.Win.AppTemplate
                     MessageBox.Show(exc.Message);
                 }
             };
+
             ActionHandler.UIActionsInvalidated += _ =>
             {
                 // Update the save button each time the handler is invalidated.
@@ -102,11 +103,11 @@ namespace Eutherion.Win.AppTemplate
                 if (UnsavedModificationsCloseButtonHoverColor.A < 255)
                 {
                     // No transparency (for now?)
-                    closeButton.FlatAppearance.MouseOverBackColor = default(Color);
+                    closeButton.FlatAppearance.MouseOverBackColor = default;
                 }
                 else
                 {
-                    closeButton.FlatAppearance.MouseOverBackColor = currentActionState.Enabled ? UnsavedModificationsCloseButtonHoverColor : default(Color);
+                    closeButton.FlatAppearance.MouseOverBackColor = currentActionState.Enabled ? UnsavedModificationsCloseButtonHoverColor : default;
                 }
             };
 
