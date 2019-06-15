@@ -37,6 +37,8 @@ namespace Eutherion.Win.AppTemplate
     {
         private const string ChangedMarker = "• ";
 
+        private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
+
         private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
         private static readonly Font normalFont = new Font("Calibri", 10);
 
@@ -57,7 +59,6 @@ namespace Eutherion.Win.AppTemplate
         public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
                                 SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
-                                Func<string> initialTextGenerator,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
                                 SettingProperty<int> zoomSetting)
@@ -65,10 +66,7 @@ namespace Eutherion.Win.AppTemplate
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            // Set this before calling UpdateChangedMarker().
-            UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
-
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile, initialTextGenerator)
+            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,
@@ -313,6 +311,13 @@ namespace Eutherion.Win.AppTemplate
 
             // Invalidate to update the save button.
             ActionHandler.Invalidate();
+
+            // Must guard call to ReadOnly, it throws an AccessViolationException if the control is already disposed.
+            if (!IsDisposed && !Disposing && !SyntaxEditor.ReadOnly)
+            {
+                // If something can be saved, closing is dangerous, therefore use a reddish hover color.
+                CloseButtonHoverColor = SyntaxEditor.ContainsChanges ? UnsavedModificationsCloseButtonHoverColor : default;
+            }
         }
 
         private void ErrorsListBox_KeyDown(object sender, KeyEventArgs e)

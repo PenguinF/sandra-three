@@ -121,11 +121,22 @@ namespace Eutherion.Win.AppTemplate
                 autoSaver = new WorkingCopyTextFileAutoSaver(this, autoSaveSetting, codeFile);
             }
 
+            // Generate initial text in case the code file could not be loaded and was not auto-saved.
+            if (codeFile.LoadException != null && codeFile.AutoSaveFile == null && initialTextGenerator != null)
+            {
+                // This pretends that the text is what's actually saved in the settings file.
+                // Conceptually this is correct because the generated text is reproducible,
+                // so the application's behavior is the same whether or not the file is saved.
+                // Can therefore also safely disable the save action.
+                codeFile.UpdateLocalCopyText(
+                    initialTextGenerator() ?? string.Empty,
+                    containsChanges: false);
+            }
+
             var settingsForm = new SyntaxEditorForm<JsonSymbol, JsonErrorInfo>(
                 codeAccessOption,
                 syntaxDescriptor,
                 codeFile,
-                initialTextGenerator,
                 formStateSetting,
                 errorHeightSetting,
                 SharedSettings.JsonZoom)
