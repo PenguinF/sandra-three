@@ -20,7 +20,9 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -31,6 +33,37 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public abstract class SingleInstanceMainForm : Form
     {
+        private const int WM_COPYDATA = 0x4A;
+
+        private class SafePinnedByteArray : IDisposable
+        {
+            private readonly GCHandle gcHandle;
+
+            public IntPtr Pointer { get; }
+
+            public SafePinnedByteArray(byte[] bytes)
+            {
+                // This means that we don't have to use unsafe code with the 'fixed' keyword, as in:
+                // fixed (byte* bytePtr = bytes)
+                // {
+                //    IntPtr intPtr = (IntPtr)bytePtr;
+                // }
+                gcHandle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+                Pointer = gcHandle.AddrOfPinnedObject();
+            }
+
+            public void Dispose()
+            {
+                gcHandle.Free();
+                GC.SuppressFinalize(this);
+            }
+
+            ~SafePinnedByteArray()
+            {
+                gcHandle.Free();
+            }
+        }
+
         private Session session;
 
         /// <summary>
@@ -88,6 +121,38 @@ namespace Eutherion.Win.AppTemplate
 
         internal void NotifyExistingInstance(HandleRef remoteWindowHandle, byte[] remoteExpectedMagic)
         {
+            // Send a WM_COPYDATA message to the SingleInstanceMainForm of the existing instance of the application.
+            string messageToSendToExistingInstance = GetMessageToSendToExistingInstance();
+            byte[] encodedMessage = Encoding.UTF8.GetBytes(messageToSendToExistingInstance);
+
+            // Prefix the message to send with the expected magic.
+            byte[] msg = new byte[checked(remoteExpectedMagic.Length + encodedMessage.Length)];
+            Array.Copy(remoteExpectedMagic, 0, msg, 0, remoteExpectedMagic.Length);
+            Array.Copy(encodedMessage, 0, msg, remoteExpectedMagic.Length, encodedMessage.Length);
+
+            using (var safePinnedMsg = new SafePinnedByteArray(msg))
+            {
+                COPYDATASTRUCT copyData = default;
+                copyData.dwData = IntPtr.Zero;
+                copyData.cbData = msg.Length;
+                copyData.lpData = safePinnedMsg.Pointer;
+
+                IntPtr copyDataBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(copyData));
+                try
+                {
+                    Marshal.StructureToPtr(copyData, copyDataBuffer, false);
+
+                    // SendMessage only returns when the receiving process has completed the call.
+                    WinAPI.SendMessage(remoteWindowHandle, WM_COPYDATA, IntPtr.Zero, copyDataBuffer);
+
+                    int error = Marshal.GetLastWin32Error();
+                    if (error != 0) throw new Win32Exception(error);
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(copyDataBuffer);
+                }
+            }
         }
     }
 }
