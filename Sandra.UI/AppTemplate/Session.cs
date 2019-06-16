@@ -145,54 +145,54 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
+            string lockFileName = Path.Combine(AppDataSubFolder, LockFileName);
+
             // Create the folder on startup.
             Directory.CreateDirectory(AppDataSubFolder);
 
-            // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
             // Assuming a buffer size of 1 means less allocated memory.
             lockFile = new FileStream(
-                Path.Combine(AppDataSubFolder, LockFileName),
+                lockFileName,
                 FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
+                FileAccess.Write,
                 FileShare.Read,
-                1,
-                FileOptions.DeleteOnClose);
-
-            FileStreamPair autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+                1);
 
             try
             {
+                FileStreamPair autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+
                 AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
+
+                // After creating the auto-save file, look for a local preferences file.
+                // Create a working copy with correct schema first.
+                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
+
+                // And then create the local settings file which can overwrite values in default settings.
+                LocalSettings = SettingsFile.Create(
+                    Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
+                    localSettingsCopy);
+
+                if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
+                {
+                    currentLocalizer = localizer;
+                }
+                else
+                {
+                    // Select best fit.
+                    currentLocalizer = Localizers.BestFit(registeredLocalizers);
+                }
+
+                // Fall back onto defaults if still null.
+                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
             }
             catch
             {
                 // Must dispose here, because Dispose() is never called if an exception
                 // is thrown in a constructor.
-                lockFile.Dispose();
+                ReleaseLockFile(lockFile);
                 throw;
             }
-
-            // After creating the auto-save file, look for a local preferences file.
-            // Create a working copy with correct schema first.
-            SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
-
-            // And then create the local settings file which can overwrite values in default settings.
-            LocalSettings = SettingsFile.Create(
-                Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
-                localSettingsCopy);
-
-            if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
-            {
-                currentLocalizer = localizer;
-            }
-            else
-            {
-                // Select best fit.
-                currentLocalizer = Localizers.BestFit(registeredLocalizers);
-            }
-
-            // Fall back onto defaults if still null.
-            currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
         }
 
         public Icon ApplicationIcon { get; }
@@ -354,13 +354,29 @@ namespace Eutherion.Win.AppTemplate
             event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
         }
 
+        private static void ReleaseLockFile(FileStream lockFile)
+        {
+            // Clear the lock file, release the lock on it, and attempt to delete it.
+            lockFile.SetLength(0);
+            lockFile.Dispose();
+
+            try
+            {
+                File.Delete(lockFile.Name);
+            }
+            catch
+            {
+                // Just ignore any exception thrown from File.Delete.
+            }
+        }
+
         public void Dispose()
         {
             // Wait until the auto-save background task has finished.
             AutoSave.Close();
 
             // Only after AutoSave has completed its work can the lock file be closed.
-            lockFile.Dispose();
+            ReleaseLockFile(lockFile);
 
             // Stop watching settings files.
             LocalSettings.Dispose();
