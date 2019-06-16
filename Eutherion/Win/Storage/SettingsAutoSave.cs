@@ -78,12 +78,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the name of the file which acts as an exclusive lock between different instances
-        /// of this process which might race to obtain a reference to the auto-save files.
-        /// </summary>
-        public static readonly string LockFileName = ".lock";
-
-        /// <summary>
         /// Gets the name of the first auto-save file.
         /// </summary>
         public static readonly string AutoSaveFileName1 = ".autosave1";
@@ -92,11 +86,6 @@ namespace Eutherion.Win.Storage
         /// Gets the name of the second auto-save file.
         /// </summary>
         public static readonly string AutoSaveFileName2 = ".autosave2";
-
-        /// <summary>
-        /// The lock file to grant access to the auto-save files by at most one instance of this process.
-        /// </summary>
-        private readonly FileStream lockFile;
 
         /// <summary>
         /// Contains both auto-save files.
@@ -124,16 +113,6 @@ namespace Eutherion.Win.Storage
             // don't throw but just disable auto-saving and use initial empty settings.
             CurrentSettings = new SettingCopy(schema).Commit();
 
-            // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
-            // Assuming a buffer size of 1 means less allocated memory.
-            lockFile = new FileStream(
-                Path.Combine(baseDir.FullName, LockFileName),
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.Read,
-                1,
-                FileOptions.DeleteOnClose);
-
             try
             {
                 // In the unlikely event that both auto-save files generate an error,
@@ -153,8 +132,6 @@ namespace Eutherion.Win.Storage
                 catch
                 {
                     autoSaveFiles?.Dispose();
-                    lockFile.Dispose();
-                    lockFile = null;
                     throw;
                 }
 
@@ -219,7 +196,6 @@ namespace Eutherion.Win.Storage
         public void Close()
         {
             autoSaveFile?.Dispose();
-            lockFile?.Dispose();
         }
     }
 

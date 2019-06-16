@@ -47,6 +47,12 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly string ExecutableFileNameWithoutExtension;
 
+        /// <summary>
+        /// Gets the name of the file which acts as an exclusive lock between different instances
+        /// of this process which might race to obtain a reference to the auto-save files.
+        /// </summary>
+        public static readonly string LockFileName = ".lock";
+
         static Session()
         {
             // Store executable folder/filename for later use.
@@ -72,6 +78,11 @@ namespace Eutherion.Win.AppTemplate
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
+
+        /// <summary>
+        /// The lock file to grant access to the auto-save files by at most one instance of this process.
+        /// </summary>
+        private readonly FileStream lockFile;
 
         private Localizer currentLocalizer;
 
@@ -128,7 +139,27 @@ namespace Eutherion.Win.AppTemplate
             string absoluteFolder = Path.GetFullPath(AppDataSubFolder);
             DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
 
-            AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), baseDir);
+            // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
+            // Assuming a buffer size of 1 means less allocated memory.
+            lockFile = new FileStream(
+                Path.Combine(baseDir.FullName, LockFileName),
+                FileMode.OpenOrCreate,
+                FileAccess.ReadWrite,
+                FileShare.Read,
+                1,
+                FileOptions.DeleteOnClose);
+
+            try
+            {
+                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), baseDir);
+            }
+            catch
+            {
+                // Must dispose here, because Dispose() is never called if an exception
+                // is thrown in a constructor.
+                lockFile.Dispose();
+                throw;
+            }
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
@@ -309,6 +340,11 @@ namespace Eutherion.Win.AppTemplate
         {
             // Wait until the auto-save background task has finished.
             AutoSave.Close();
+
+            // Only after AutoSave has completed its work can the lock file be closed.
+            lockFile.Dispose();
+
+            // Stop watching settings files.
             LocalSettings.Dispose();
             DefaultSettings.Dispose();
             registeredLocalizers.Values.ForEach(x => x.Dispose());
