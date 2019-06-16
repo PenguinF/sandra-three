@@ -47,6 +47,8 @@ namespace Sandra.UI
         private readonly Dictionary<string, List<PgnForm>> OpenPgnForms
             = new Dictionary<string, List<PgnForm>>(StringComparer.OrdinalIgnoreCase);
 
+        private MdiContainerForm mdiContainerForm;
+
         public SandraChessMainForm(string[] commandLineArgs)
         {
             this.commandLineArgs = commandLineArgs;
@@ -82,6 +84,13 @@ namespace Sandra.UI
         protected override void ReceivedMessageFromAnotherInstance(string message)
         {
             string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (mdiContainerForm != null && mdiContainerForm.IsHandleCreated && !mdiContainerForm.IsDisposed)
+            {
+                // Activate mdiContainerForm before opening pgn files.
+                mdiContainerForm.EnsureActivated();
+            }
+
             OpenCommandLineArgs(receivedCommandLineArgs);
         }
 
@@ -95,7 +104,7 @@ namespace Sandra.UI
             }
             else
             {
-                var mdiContainerForm = new MdiContainerForm();
+                mdiContainerForm = new MdiContainerForm();
 
                 mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
                 mdiContainerForm.FormClosed += (_, __) => Close();
