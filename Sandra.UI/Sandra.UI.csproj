@@ -84,6 +84,9 @@
     </Compile>
     <Compile Include="AppTemplate\SharedSettings.cs" />
     <Compile Include="AppTemplate\SharedUIAction.cs" />
+    <Compile Include="AppTemplate\SingleInstanceMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppTemplate\SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -126,6 +129,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyStore.cs" />
+    <Compile Include="SandraChessMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="StandardChessBoardForm.cs">
       <SubType>Form</SubType>

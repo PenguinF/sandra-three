@@ -27,6 +27,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -37,6 +39,12 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public partial class Session : IDisposable
     {
+        // Constants for managing the lock file.
+        private const int WindowHandleLengthInBytes = 8;
+        private const int MagicLengthInBytes = 16;
+        private const int MaxRetryAttemptsForLockFile = 20;
+        private const int PauseTimeBeforeLockRetry = 100;
+
         public static readonly string DefaultSettingsFileName = "DefaultSettings.json";
 
         public static readonly string LangSettingKey = "lang";
@@ -46,6 +54,22 @@ namespace Eutherion.Win.AppTemplate
         public static readonly string ExecutableFileName;
 
         public static readonly string ExecutableFileNameWithoutExtension;
+
+        /// <summary>
+        /// Gets the name of the file which acts as an exclusive lock between different instances
+        /// of this process which might race to obtain a reference to the auto-save files.
+        /// </summary>
+        public static readonly string LockFileName = ".lock";
+
+        /// <summary>
+        /// Gets the name of the first auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName1 = ".autosave1";
+
+        /// <summary>
+        /// Gets the name of the second auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName2 = ".autosave2";
 
         static Session()
         {
@@ -59,26 +83,62 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Current { get; private set; }
 
-        public static Session Configure(ISettingsProvider settingsProvider,
+        public static Session Configure(SingleInstanceMainForm singleInstanceMainForm,
+                                        ISettingsProvider settingsProvider,
                                         Localizer defaultLocalizer,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
                                         Icon applicationIcon)
-            => Current = new Session(settingsProvider,
-                                     defaultLocalizer,
-                                     defaultLocalizerDictionary,
-                                     applicationIcon);
+        {
+            var session = new Session(singleInstanceMainForm,
+                                      settingsProvider,
+                                      defaultLocalizer,
+                                      defaultLocalizerDictionary,
+                                      applicationIcon);
+
+            // Use nullcheck on AutoSave to check if the initialization sequence completed.
+            if (session.AutoSave != null)
+            {
+                Current = session;
+            }
+            else
+            {
+                session.Dispose();
+            }
+
+            return Current;
+        }
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
 
+        /// <summary>
+        /// The lock file to grant access to the auto-save files by at most one instance of this process.
+        /// </summary>
+        private readonly FileStream lockFile;
+
+        /// <summary>
+        /// Contains a generated sequence of 16 bytes which is written to the lock file,
+        /// and is different for each new instance of the application.
+        /// </summary>
+        internal readonly byte[] TodaysMagic;
+
         private Localizer currentLocalizer;
 
-        private Session(ISettingsProvider settingsProvider,
+        private Session(SingleInstanceMainForm singleInstanceMainForm,
+                        ISettingsProvider settingsProvider,
                         Localizer defaultLocalizer,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
                         Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
+            if (singleInstanceMainForm == null) throw new ArgumentNullException(nameof(singleInstanceMainForm));
+
+            if (!singleInstanceMainForm.IsHandleCreated
+                || singleInstanceMainForm.Disposing
+                || singleInstanceMainForm.IsDisposed)
+            {
+                throw new InvalidOperationException($"{nameof(singleInstanceMainForm)} should have its handle created.");
+            }
 
             // May be null.
             this.defaultLocalizerDictionary = defaultLocalizerDictionary;
@@ -113,31 +173,152 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            AutoSave = new SettingsAutoSave(
-                AppDataSubFolder,
-                settingsProvider.CreateAutoSaveSchema(this));
+            // Now attempt to get exclusive write access to the .lock file so it becomes a safe mutex.
+            string lockFileName = Path.Combine(AppDataSubFolder, LockFileName);
+            FileStreamPair autoSaveFiles = null;
 
-            // After creating the auto-save file, look for a local preferences file.
-            // Create a working copy with correct schema first.
-            SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
-
-            // And then create the local settings file which can overwrite values in default settings.
-            LocalSettings = SettingsFile.Create(
-                Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
-                localSettingsCopy);
-
-            if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
+            // Retry a maximum number of times.
+            int remainingRetryAttempts = MaxRetryAttemptsForLockFile;
+            while (remainingRetryAttempts >= 0)
             {
-                currentLocalizer = localizer;
-            }
-            else
-            {
-                // Select best fit.
-                currentLocalizer = Localizers.BestFit(registeredLocalizers);
+                try
+                {
+                    // Create the folder on startup.
+                    Directory.CreateDirectory(AppDataSubFolder);
+
+                    // If this call doesn't throw, exclusive access to the mutex file is obtained.
+                    // Then this process is the first instance.
+                    // Use a buffer size of 24 rather than the default 4096.
+                    lockFile = new FileStream(
+                        lockFileName,
+                        FileMode.OpenOrCreate,
+                        FileAccess.Write,
+                        FileShare.Read,
+                        WindowHandleLengthInBytes + MagicLengthInBytes);
+
+                    try
+                    {
+                        // Immediately empty the file.
+                        lockFile.SetLength(0);
+
+                        // Write the window handle to the lock file.
+                        // Use BitConverter to convert to and from byte[].
+                        byte[] buffer = BitConverter.GetBytes(singleInstanceMainForm.Handle.ToInt64());
+                        lockFile.Write(buffer, 0, WindowHandleLengthInBytes);
+
+                        // Generate a magic GUID for this instance.
+                        // The byte array has a length of 16.
+                        TodaysMagic = Guid.NewGuid().ToByteArray();
+                        lockFile.Write(TodaysMagic, 0, MagicLengthInBytes);
+                        lockFile.Flush();
+
+                        autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+
+                        // Loop exit point 1: successful write to lockFile. Can auto-save.
+                        break;
+                    }
+                    catch
+                    {
+                        ReleaseLockFile(lockFile);
+                        lockFile = null;
+                    }
+                }
+                catch
+                {
+                    // Not the first instance.
+                    // Then try opening the lock file as read-only.
+                    try
+                    {
+                        // If opening as read-only succeeds, read the contents as bytes.
+                        FileStream existingLockFile = new FileStream(
+                            lockFileName,
+                            FileMode.Open,
+                            FileAccess.Read,
+                            FileShare.ReadWrite,
+                            WindowHandleLengthInBytes + MagicLengthInBytes);
+
+                        using (existingLockFile)
+                        {
+                            byte[] lockFileBytes = new byte[WindowHandleLengthInBytes + MagicLengthInBytes];
+                            int totalBytesRead = 0;
+                            int remainingBytes = WindowHandleLengthInBytes + MagicLengthInBytes;
+                            while (remainingBytes > 0)
+                            {
+                                int bytesRead = existingLockFile.Read(lockFileBytes, totalBytesRead, remainingBytes);
+                                if (bytesRead == 0) break; // Unexpected EOF?
+                                totalBytesRead += bytesRead;
+                                remainingBytes -= bytesRead;
+                            }
+
+                            // For checking that EOF has been reached, evaluate ReadByte() == -1.
+                            if (remainingBytes == 0 && existingLockFile.ReadByte() == -1)
+                            {
+                                // Parse out the remote window handle and the magic bytes it is expecting.
+                                long longValue = BitConverter.ToInt64(lockFileBytes, 0);
+                                HandleRef remoteWindowHandle = new HandleRef(null, new IntPtr(longValue));
+
+                                byte[] remoteExpectedMagic = new byte[MagicLengthInBytes];
+                                Array.Copy(lockFileBytes, 8, remoteExpectedMagic, 0, MagicLengthInBytes);
+
+                                // Tell the singleInstanceMainForm that another instance is active.
+                                // Not a clean design to have callbacks going back and forth.
+                                // Hard to refactor since we're inside a loop.
+                                singleInstanceMainForm.NotifyExistingInstance(remoteWindowHandle, remoteExpectedMagic);
+
+                                // Reference remoteWindowHandle here so it won't be GC'ed until method returns.
+                                GC.KeepAlive(remoteWindowHandle);
+
+                                // Loop exit point 2: successful read of the lock file owned by an existing instance.
+                                return;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                // If any of the above steps fail, this might be caused by the other instance
+                // shutting down for example, or still being in its startup phase.
+                // In this case, sleep for 100 ms and retry the whole process.
+                Thread.Sleep(PauseTimeBeforeLockRetry);
+                remainingRetryAttempts--;
+
+                // Loop exit point 3: proceed without auto-saving settings if even after 2 seconds the lock file couldn't be accessed.
             }
 
-            // Fall back onto defaults if still null.
-            currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
+            try
+            {
+                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
+
+                // After creating the auto-save file, look for a local preferences file.
+                // Create a working copy with correct schema first.
+                SettingCopy localSettingsCopy = new SettingCopy(settingsProvider.CreateLocalSettingsSchema(this));
+
+                // And then create the local settings file which can overwrite values in default settings.
+                LocalSettings = SettingsFile.Create(
+                    Path.Combine(AppDataSubFolder, GetDefaultSetting(SharedSettings.LocalPreferencesFileName)),
+                    localSettingsCopy);
+
+                if (TryGetAutoSaveValue(LangSetting, out FileLocalizer localizer))
+                {
+                    currentLocalizer = localizer;
+                }
+                else
+                {
+                    // Select best fit.
+                    currentLocalizer = Localizers.BestFit(registeredLocalizers);
+                }
+
+                // Fall back onto defaults if still null.
+                currentLocalizer = currentLocalizer ?? defaultLocalizer ?? Localizer.Default;
+            }
+            catch
+            {
+                // Must dispose here, because Dispose() is never called if an exception is thrown in a constructor.
+                ReleaseLockFile(lockFile);
+                throw;
+            }
         }
 
         public Icon ApplicationIcon { get; }
@@ -155,16 +336,6 @@ namespace Eutherion.Win.AppTemplate
         public SettingProperty<FileLocalizer> LangSetting { get; }
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
-
-        /// <summary>
-        /// Enables receiving <see cref="LiveTextFile"/> updates on the UI thread.
-        /// </summary>
-        public void CaptureSynchronizationContext()
-        {
-            DefaultSettings.CaptureSynchronizationContext();
-            LocalSettings.CaptureSynchronizationContext();
-            RegisteredLocalizers.ForEach(x => x.LanguageFile.CaptureSynchronizationContext());
-        }
 
         private string LocalApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
@@ -235,30 +406,37 @@ namespace Eutherion.Win.AppTemplate
             new FormStateAutoSaver(this, targetForm, property, formState);
         }
 
-        public FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        private FileStreamPair OpenAutoSaveFileStreamPair(AutoSaveFileNamePair autoSaveFileNamePair)
         {
             try
             {
-                if (autoSaveProperty != null && TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+                var fileStreamPair = FileStreamPair.Create(
+                    AutoSaveTextFile.OpenExistingAutoSaveFile,
+                    Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                    Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
+                    && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
                 {
-                    var fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                    if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
-                        && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
-                    {
-                        return fileStreamPair;
-                    }
-
-                    fileStreamPair.Dispose();
+                    return fileStreamPair;
                 }
+
+                fileStreamPair.Dispose();
             }
             catch (Exception autoSaveLoadException)
             {
                 // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                 autoSaveLoadException.Trace();
+            }
+
+            return null;
+        }
+
+        public FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        {
+            if (autoSaveProperty != null && TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+            {
+                return OpenAutoSaveFileStreamPair(autoSaveFileNamePair);
             }
 
             return null;
@@ -302,11 +480,35 @@ namespace Eutherion.Win.AppTemplate
             event_CurrentLocalizerChanged.Raise(null, EventArgs.Empty);
         }
 
+        private static void ReleaseLockFile(FileStream lockFile)
+        {
+            if (lockFile != null)
+            {
+                // Clear the lock file, release the lock on it, and attempt to delete it.
+                lockFile.SetLength(0);
+                lockFile.Dispose();
+
+                try
+                {
+                    File.Delete(lockFile.Name);
+                }
+                catch
+                {
+                    // Just ignore any exception thrown from File.Delete.
+                }
+            }
+        }
+
         public void Dispose()
         {
             // Wait until the auto-save background task has finished.
-            AutoSave.Close();
-            LocalSettings.Dispose();
+            AutoSave?.Close();
+
+            // Only after AutoSave has completed its work can the lock file be closed.
+            ReleaseLockFile(lockFile);
+
+            // Stop watching settings files.
+            LocalSettings?.Dispose();
             DefaultSettings.Dispose();
             registeredLocalizers.Values.ForEach(x => x.Dispose());
         }

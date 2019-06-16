@@ -22,6 +22,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Eutherion.Win
 {
@@ -121,10 +122,19 @@ namespace Eutherion.Win
         public IntPtr hbmColor;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct COPYDATASTRUCT
+    {
+        public IntPtr dwData;
+        public int cbData;
+        public IntPtr lpData;
+    }
+
     /// <summary>
     /// Contains P/Invoke definitions for the Windows API.
     /// </summary>
-    internal static class WinAPI
+    [SuppressUnmanagedCodeSecurity]
+    public static class WinAPI
     {
         const string Gdi32 = "gdi32.dll";
 
@@ -134,7 +144,7 @@ namespace Eutherion.Win
         const string User32 = "user32.dll";
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
+        internal static extern IntPtr CreateIconIndirect([In] ref ICONINFO iconInfo);
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
         public static extern bool DestroyIcon(HandleRef hIcon);
@@ -143,12 +153,12 @@ namespace Eutherion.Win
         public static extern IntPtr GetFocus();
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
-        public static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
+        internal static extern bool GetIconInfo(HandleRef hIcon, ref ICONINFO info);
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern bool HideCaret(HandleRef hWnd);
 
-        [DllImport(User32, CharSet = CharSet.Auto)]
+        [DllImport(User32, CharSet = CharSet.Auto, SetLastError = true)]
         public static extern IntPtr SendMessage(HandleRef hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport(User32, CharSet = CharSet.Auto, ExactSpelling = true)]

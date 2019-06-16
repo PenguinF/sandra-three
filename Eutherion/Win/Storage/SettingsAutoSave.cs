@@ -23,15 +23,11 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Manages a pair of auto-save files of settings.
-    /// This class is assumed to have a lifetime equal to the application.
-    /// The recommended location for the auto-save files is in a subfolder of
-    /// <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
     /// </summary>
     public sealed class SettingsAutoSave
     {
@@ -81,27 +77,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the name of the file which acts as an exclusive lock between different instances
-        /// of this process which might race to obtain a reference to the auto-save files.
-        /// </summary>
-        public static readonly string LockFileName = ".lock";
-
-        /// <summary>
-        /// Gets the name of the first auto-save file.
-        /// </summary>
-        public static readonly string AutoSaveFileName1 = ".autosave1";
-
-        /// <summary>
-        /// Gets the name of the second auto-save file.
-        /// </summary>
-        public static readonly string AutoSaveFileName2 = ".autosave2";
-
-        /// <summary>
-        /// The lock file to grant access to the auto-save files by at most one instance of this process.
-        /// </summary>
-        private readonly FileStream lockFile;
-
-        /// <summary>
         /// Contains both auto-save files.
         /// </summary>
         private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
@@ -113,105 +88,42 @@ namespace Eutherion.Win.Storage
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingsAutoSave"/> which will generate auto-save files
-        /// with names <see cref="AutoSaveFileName1"/> and <see cref="AutoSaveFileName2"/> in the specified folder.
+        /// using the specified <see cref="FileStreamPair"/>.
         /// </summary>
-        /// <param name="path">
-        /// The location of the folder in which to store the auto-save files.
-        /// </param>
         /// <param name="schema">
         /// The <see cref="SettingSchema"/> to use for the auto-save files.
         /// </param>
+        /// <param name="autoSaveFiles">
+        /// The optional <see cref="FileStreamPair"/> containing <see cref="System.IO.FileStream"/>s to write to.
+        /// Any existing contents in the files will be overwritten.
+        /// <see cref="AutoSaveTextFile{TUpdate}"/> assumes ownership of the <see cref="System.IO.FileStream"/>s
+        /// so it takes care of disposing it after use.
+        /// To be used as an auto-save <see cref="System.IO.FileStream"/>,
+        /// it must support seeking, reading and writing, and not be able to time out.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="path"/> and/or <paramref name="schema"/> are null.
+        /// <paramref name="schema"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
-        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
-        /// or is a relative path and its absolute path could not be resolved.
+        /// One or both <see cref="System.IO.FileStream"/>s in <paramref name="autoSaveFiles"/>
+        /// do not have the right capabilities to be used as an auto-save file stream.
+        /// See also: <seealso cref="AutoSaveTextFile.CanAutoSaveTo(System.IO.FileStream)"/>.
         /// </exception>
-        /// <exception cref="IOException">
-        /// The path which is expected to be a directory is actually a file,
-        /// -or- The path contains a network name which cannot be resolved,
-        /// -or- <paramref name="path"/> is longer than its maximum length (this is OS specific).
-        /// </exception>
-        /// <exception cref="UnauthorizedAccessException">
-        /// The caller does not have sufficient permissions to create the file or its directory.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The caller does not have sufficient permissions to create the file or its directory.
-        /// </exception>
-        /// <exception cref="DirectoryNotFoundException">
-        /// <paramref name="path"/> is invalid.
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// <paramref name="path"/> is in an invalid format.
-        /// </exception>
-        public SettingsAutoSave(string path, SettingSchema schema)
+        public SettingsAutoSave(SettingSchema schema, FileStreamPair autoSaveFiles)
         {
-            if (schema == null)
-            {
-                throw new ArgumentNullException(nameof(schema));
-            }
-
-            // Any exceptions from these two methods should not be caught but propagated to the caller.
-            string absoluteFolder = Path.GetFullPath(path);
-            DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
-
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
             CurrentSettings = new SettingCopy(schema).Commit();
 
-            try
+            // If autoSaveFiles is null, just initialize from CurrentSettings so auto-saves within the session are still enabled.
+            if (autoSaveFiles != null)
             {
-                // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
-                // Assuming a buffer size of 1 means less allocated memory.
-                lockFile = new FileStream(
-                    Path.Combine(baseDir.FullName, LockFileName),
-                    FileMode.OpenOrCreate,
-                    FileAccess.ReadWrite,
-                    FileShare.Read,
-                    1,
-                    FileOptions.DeleteOnClose);
-
-                // In the unlikely event that both auto-save files generate an error,
-                // just initialize from CurrentSettings so auto-saves within the session are still enabled.
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                FileStreamPair autoSaveFiles = null;
-
-                try
-                {
-                    autoSaveFiles = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(baseDir.FullName, AutoSaveFileName1),
-                        Path.Combine(baseDir.FullName, AutoSaveFileName2));
-
-                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
-                }
-                catch
-                {
-                    autoSaveFiles?.Dispose();
-                    lockFile.Dispose();
-                    lockFile = null;
-                    throw;
-                }
+                autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
 
                 // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
                 CurrentSettings = remoteState.RemoteSettings;
-            }
-            catch (ArgumentException)
-            {
-                throw;
-            }
-            catch (NotSupportedException)
-            {
-                throw;
-            }
-            catch (Exception initAutoSaveException)
-            {
-                // Throw exceptions caused by dev errors.
-                // Trace the rest. (IOException, PlatformNotSupportedException, UnauthorizedAccessException, ...)
-                initAutoSaveException.Trace();
             }
         }
 
@@ -256,7 +168,6 @@ namespace Eutherion.Win.Storage
         public void Close()
         {
             autoSaveFile?.Dispose();
-            lockFile?.Dispose();
         }
     }
 
