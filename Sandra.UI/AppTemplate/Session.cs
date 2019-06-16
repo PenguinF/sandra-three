@@ -135,14 +135,13 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            // Any exceptions from these two methods should not be caught but propagated to the caller.
-            string absoluteFolder = Path.GetFullPath(AppDataSubFolder);
-            DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
+            // Create the folder on startup.
+            DirectoryInfo appDataSubDirectory = Directory.CreateDirectory(AppDataSubFolder);
 
             // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
             // Assuming a buffer size of 1 means less allocated memory.
             lockFile = new FileStream(
-                Path.Combine(baseDir.FullName, LockFileName),
+                Path.Combine(appDataSubDirectory.FullName, LockFileName),
                 FileMode.OpenOrCreate,
                 FileAccess.ReadWrite,
                 FileShare.Read,
@@ -151,7 +150,7 @@ namespace Eutherion.Win.AppTemplate
 
             try
             {
-                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), baseDir);
+                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), appDataSubDirectory);
             }
             catch
             {
