@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -40,6 +41,8 @@ namespace Eutherion.Win.AppTemplate
         // Constants for managing the lock file.
         private const int WindowHandleLengthInBytes = 8;
         private const int MagicLengthInBytes = 16;
+        private const int MaxRetryAttemptsForLockFile = 20;
+        private const int PauseTimeBeforeLockRetry = 100;
 
         public static readonly string DefaultSettingsFileName = "DefaultSettings.json";
 
@@ -173,76 +176,99 @@ namespace Eutherion.Win.AppTemplate
             string lockFileName = Path.Combine(AppDataSubFolder, LockFileName);
             FileStreamPair autoSaveFiles = null;
 
-            try
+            // Retry a maximum number of times.
+            int remainingRetryAttempts = MaxRetryAttemptsForLockFile;
+            while (remainingRetryAttempts >= 0)
             {
-                // Create the folder on startup.
-                Directory.CreateDirectory(AppDataSubFolder);
-
-                // If this call doesn't throw, exclusive access to the mutex file is obtained.
-                // Then this process is the first instance.
-                // Use a buffer size of 24 rather than the default 4096.
-                lockFile = new FileStream(
-                    lockFileName,
-                    FileMode.OpenOrCreate,
-                    FileAccess.Write,
-                    FileShare.Read,
-                    WindowHandleLengthInBytes + MagicLengthInBytes);
-
-                // Immediately empty the file.
-                lockFile.SetLength(0);
-
-                // Write the window handle to the lock file.
-                // Use BitConverter to convert to and from byte[].
-                byte[] buffer = BitConverter.GetBytes(singleInstanceMainForm.Handle.ToInt64());
-                lockFile.Write(buffer, 0, WindowHandleLengthInBytes);
-
-                // Generate a magic GUID for this instance.
-                // The byte array has a length of 16.
-                todaysMagic = Guid.NewGuid().ToByteArray();
-                lockFile.Write(todaysMagic, 0, MagicLengthInBytes);
-                lockFile.Flush();
-
-                autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
-            }
-            catch
-            {
-                // Not the first instance.
-                // Then try opening the lock file as read-only.
                 try
                 {
-                    // If opening as read-only succeeds, read the contents as bytes.
-                    FileStream existingLockFile = new FileStream(
+                    // Create the folder on startup.
+                    Directory.CreateDirectory(AppDataSubFolder);
+
+                    // If this call doesn't throw, exclusive access to the mutex file is obtained.
+                    // Then this process is the first instance.
+                    // Use a buffer size of 24 rather than the default 4096.
+                    lockFile = new FileStream(
                         lockFileName,
-                        FileMode.Open,
-                        FileAccess.Read,
-                        FileShare.ReadWrite,
+                        FileMode.OpenOrCreate,
+                        FileAccess.Write,
+                        FileShare.Read,
                         WindowHandleLengthInBytes + MagicLengthInBytes);
 
-                    using (existingLockFile)
+                    try
                     {
-                        byte[] lockFileBytes = new byte[WindowHandleLengthInBytes + MagicLengthInBytes];
-                        int totalBytesRead = 0;
-                        int remainingBytes = WindowHandleLengthInBytes + MagicLengthInBytes;
-                        while (remainingBytes > 0)
-                        {
-                            int bytesRead = existingLockFile.Read(lockFileBytes, totalBytesRead, remainingBytes);
-                            if (bytesRead == 0) break; // Unexpected EOF?
-                            totalBytesRead += bytesRead;
-                            remainingBytes -= bytesRead;
-                        }
+                        // Immediately empty the file.
+                        lockFile.SetLength(0);
 
-                        // For checking that EOF has been reached, evaluate ReadByte() == -1.
-                        if (remainingBytes == 0 && existingLockFile.ReadByte() == -1)
-                        {
-                            return;
-                        }
+                        // Write the window handle to the lock file.
+                        // Use BitConverter to convert to and from byte[].
+                        byte[] buffer = BitConverter.GetBytes(singleInstanceMainForm.Handle.ToInt64());
+                        lockFile.Write(buffer, 0, WindowHandleLengthInBytes);
+
+                        // Generate a magic GUID for this instance.
+                        // The byte array has a length of 16.
+                        todaysMagic = Guid.NewGuid().ToByteArray();
+                        lockFile.Write(todaysMagic, 0, MagicLengthInBytes);
+                        lockFile.Flush();
+
+                        autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+
+                        // Loop exit point 1: successful write to lockFile. Can auto-save.
+                        break;
+                    }
+                    catch
+                    {
+                        ReleaseLockFile(lockFile);
+                        lockFile = null;
                     }
                 }
                 catch
                 {
+                    // Not the first instance.
+                    // Then try opening the lock file as read-only.
+                    try
+                    {
+                        // If opening as read-only succeeds, read the contents as bytes.
+                        FileStream existingLockFile = new FileStream(
+                            lockFileName,
+                            FileMode.Open,
+                            FileAccess.Read,
+                            FileShare.ReadWrite,
+                            WindowHandleLengthInBytes + MagicLengthInBytes);
+
+                        using (existingLockFile)
+                        {
+                            byte[] lockFileBytes = new byte[WindowHandleLengthInBytes + MagicLengthInBytes];
+                            int totalBytesRead = 0;
+                            int remainingBytes = WindowHandleLengthInBytes + MagicLengthInBytes;
+                            while (remainingBytes > 0)
+                            {
+                                int bytesRead = existingLockFile.Read(lockFileBytes, totalBytesRead, remainingBytes);
+                                if (bytesRead == 0) break; // Unexpected EOF?
+                                totalBytesRead += bytesRead;
+                                remainingBytes -= bytesRead;
+                            }
+
+                            // For checking that EOF has been reached, evaluate ReadByte() == -1.
+                            if (remainingBytes == 0 && existingLockFile.ReadByte() == -1)
+                            {
+                                // Loop exit point 2: successful read of the lock file owned by an existing instance.
+                                return;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
                 }
 
-                // Proceed without auto-saving settings.
+                // If any of the above steps fail, this might be caused by the other instance
+                // shutting down for example, or still being in its startup phase.
+                // In this case, sleep for 100 ms and retry the whole process.
+                Thread.Sleep(PauseTimeBeforeLockRetry);
+                remainingRetryAttempts--;
+
+                // Loop exit point 3: proceed without auto-saving settings if even after 2 seconds the lock file couldn't be accessed.
             }
 
             try
@@ -273,8 +299,7 @@ namespace Eutherion.Win.AppTemplate
             }
             catch
             {
-                // Must dispose here, because Dispose() is never called if an exception
-                // is thrown in a constructor.
+                // Must dispose here, because Dispose() is never called if an exception is thrown in a constructor.
                 ReleaseLockFile(lockFile);
                 throw;
             }
