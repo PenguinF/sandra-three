@@ -72,6 +72,19 @@ namespace Sandra.UI
                                      Properties.Resources.Sandra);
         }
 
+        protected override string GetMessageToSendToExistingInstance()
+        {
+            // \n is a good separator character because it's illegal in file/path names
+            // and cannot be easily constructed as part of a command line argument.
+            return string.Join("\n", commandLineArgs);
+        }
+
+        protected override void ReceivedMessageFromAnotherInstance(string message)
+        {
+            string[] receivedCommandLineArgs = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            OpenCommandLineArgs(receivedCommandLineArgs);
+        }
+
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -84,36 +97,37 @@ namespace Sandra.UI
             {
                 var mdiContainerForm = new MdiContainerForm();
 
-                mdiContainerForm.Shown += (_, __) =>
-                {
-                    // Interpret each command line argument as a file to open.
-                    commandLineArgs.ForEach(pgnFileName =>
-                    {
-                        // Catch exception for each open action individually.
-                        try
-                        {
-                            OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
-                        }
-                        catch (Exception exception)
-                        {
-                            // For now, show the exception to the user.
-                            // Maybe user has no access to the path, or the given file name is not a valid.
-                            // TODO: analyze what error conditions can occur and handle them appropriately.
-                            MessageBox.Show(
-                                $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                                pgnFileName,
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
-                        }
-                    });
-                };
-
+                mdiContainerForm.Shown += (_, __) => OpenCommandLineArgs(commandLineArgs);
                 mdiContainerForm.FormClosed += (_, __) => Close();
 
                 Visible = false;
 
                 mdiContainerForm.Show();
             }
+        }
+
+        private void OpenCommandLineArgs(string[] commandLineArgs)
+        {
+            // Interpret each command line argument as a file to open.
+            commandLineArgs.ForEach(pgnFileName =>
+            {
+                // Catch exception for each open action individually.
+                try
+                {
+                    OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
+                }
+                catch (Exception exception)
+                {
+                    // For now, show the exception to the user.
+                    // Maybe user has no access to the path, or the given file name is not a valid.
+                    // TODO: analyze what error conditions can occur and handle them appropriately.
+                    MessageBox.Show(
+                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                        pgnFileName,
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            });
         }
 
         private void RemovePgnForm(string key, PgnForm pgnForm)
