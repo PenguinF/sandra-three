@@ -29,9 +29,6 @@ namespace Eutherion.Win.Storage
 {
     /// <summary>
     /// Manages a pair of auto-save files of settings.
-    /// This class is assumed to have a lifetime equal to the application.
-    /// The recommended location for the auto-save files is in a subfolder of
-    /// <see cref="Environment.SpecialFolder.LocalApplicationData"/>.
     /// </summary>
     public sealed class SettingsAutoSave
     {
@@ -115,48 +112,14 @@ namespace Eutherion.Win.Storage
         /// Initializes a new instance of <see cref="SettingsAutoSave"/> which will generate auto-save files
         /// with names <see cref="AutoSaveFileName1"/> and <see cref="AutoSaveFileName2"/> in the specified folder.
         /// </summary>
-        /// <param name="path">
-        /// The location of the folder in which to store the auto-save files.
-        /// </param>
         /// <param name="schema">
         /// The <see cref="SettingSchema"/> to use for the auto-save files.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="path"/> and/or <paramref name="schema"/> are null.
+        /// <paramref name="schema"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
-        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
-        /// or is a relative path and its absolute path could not be resolved.
-        /// </exception>
-        /// <exception cref="IOException">
-        /// The path which is expected to be a directory is actually a file,
-        /// -or- The path contains a network name which cannot be resolved,
-        /// -or- <paramref name="path"/> is longer than its maximum length (this is OS specific).
-        /// </exception>
-        /// <exception cref="UnauthorizedAccessException">
-        /// The caller does not have sufficient permissions to create the file or its directory.
-        /// </exception>
-        /// <exception cref="System.Security.SecurityException">
-        /// The caller does not have sufficient permissions to create the file or its directory.
-        /// </exception>
-        /// <exception cref="DirectoryNotFoundException">
-        /// <paramref name="path"/> is invalid.
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// <paramref name="path"/> is in an invalid format.
-        /// </exception>
-        public SettingsAutoSave(string path, SettingSchema schema)
+        public SettingsAutoSave(SettingSchema schema, DirectoryInfo baseDir)
         {
-            if (schema == null)
-            {
-                throw new ArgumentNullException(nameof(schema));
-            }
-
-            // Any exceptions from these two methods should not be caught but propagated to the caller.
-            string absoluteFolder = Path.GetFullPath(path);
-            DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
-
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
             CurrentSettings = new SettingCopy(schema).Commit();

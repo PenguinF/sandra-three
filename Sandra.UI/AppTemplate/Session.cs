@@ -124,9 +124,11 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
-            AutoSave = new SettingsAutoSave(
-                AppDataSubFolder,
-                settingsProvider.CreateAutoSaveSchema(this));
+            // Any exceptions from these two methods should not be caught but propagated to the caller.
+            string absoluteFolder = Path.GetFullPath(AppDataSubFolder);
+            DirectoryInfo baseDir = Directory.CreateDirectory(absoluteFolder);
+
+            AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), baseDir);
 
             // After creating the auto-save file, look for a local preferences file.
             // Create a working copy with correct schema first.
