@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -29,5 +30,28 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public abstract class SingleInstanceMainForm : Form
     {
+        private Session session;
+
+        /// <summary>
+        /// Called when a handle is created and a <see cref="Session"/> for this
+        /// <see cref="SingleInstanceMainForm"/> must be configured.
+        /// </summary>
+        /// <returns>
+        /// The initialized session.
+        /// </returns>
+        public abstract Session RequestSession();
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            session = RequestSession();
+            base.OnHandleCreated(e);
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            base.OnHandleDestroyed(e);
+            session?.Dispose();
+            session = null;
+        }
     }
 }

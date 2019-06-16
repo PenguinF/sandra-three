@@ -40,7 +40,6 @@ namespace Sandra.UI
         public const string SandraChessMainFormUIActionPrefix = nameof(SandraChessMainForm) + ".";
 
         private readonly string[] commandLineArgs;
-        private Session session;
 
         /// <summary>
         /// List of open PGN files indexed by their path. New PGN files are indexed under the empty path.
@@ -57,7 +56,7 @@ namespace Sandra.UI
             WindowState = FormWindowState.Minimized;
         }
 
-        protected override void OnHandleCreated(EventArgs e)
+        public override Session RequestSession()
         {
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
@@ -66,12 +65,10 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            session = Session.Configure(new SettingsProvider(),
-                                        builtInEnglishLocalizer,
-                                        builtInEnglishLocalizer.Dictionary,
-                                        Properties.Resources.Sandra);
-
-            base.OnHandleCreated(e);
+            return Session.Configure(new SettingsProvider(),
+                                     builtInEnglishLocalizer,
+                                     builtInEnglishLocalizer.Dictionary,
+                                     Properties.Resources.Sandra);
         }
 
         protected override void OnLoad(EventArgs e)
@@ -109,13 +106,6 @@ namespace Sandra.UI
             Visible = false;
 
             mdiContainerForm.Show();
-        }
-
-        protected override void OnHandleDestroyed(EventArgs e)
-        {
-            base.OnHandleDestroyed(e);
-
-            session?.Dispose();
         }
 
         private void RemovePgnForm(string key, PgnForm pgnForm)
