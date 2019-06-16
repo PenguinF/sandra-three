@@ -84,6 +84,9 @@
     </Compile>
     <Compile Include="AppTemplate\SharedSettings.cs" />
     <Compile Include="AppTemplate\SharedUIAction.cs" />
+    <Compile Include="AppTemplate\SingleInstanceMainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppTemplate\SyntaxEditor.cs">
       <SubType>Component</SubType>
     </Compile>
