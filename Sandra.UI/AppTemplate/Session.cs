@@ -59,11 +59,13 @@ namespace Eutherion.Win.AppTemplate
 
         public static Session Current { get; private set; }
 
-        public static Session Configure(ISettingsProvider settingsProvider,
+        public static Session Configure(SingleInstanceMainForm singleInstanceMainForm,
+                                        ISettingsProvider settingsProvider,
                                         Localizer defaultLocalizer,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
                                         Icon applicationIcon)
-            => Current = new Session(settingsProvider,
+            => Current = new Session(singleInstanceMainForm,
+                                     settingsProvider,
                                      defaultLocalizer,
                                      defaultLocalizerDictionary,
                                      applicationIcon);
@@ -73,12 +75,21 @@ namespace Eutherion.Win.AppTemplate
 
         private Localizer currentLocalizer;
 
-        private Session(ISettingsProvider settingsProvider,
+        private Session(SingleInstanceMainForm singleInstanceMainForm,
+                        ISettingsProvider settingsProvider,
                         Localizer defaultLocalizer,
                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
                         Icon applicationIcon)
         {
             if (settingsProvider == null) throw new ArgumentNullException(nameof(settingsProvider));
+            if (singleInstanceMainForm == null) throw new ArgumentNullException(nameof(singleInstanceMainForm));
+
+            if (!singleInstanceMainForm.IsHandleCreated
+                || singleInstanceMainForm.Disposing
+                || singleInstanceMainForm.IsDisposed)
+            {
+                throw new InvalidOperationException($"{nameof(singleInstanceMainForm)} should have its handle created.");
+            }
 
             // May be null.
             this.defaultLocalizerDictionary = defaultLocalizerDictionary;

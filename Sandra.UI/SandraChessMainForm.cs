@@ -65,7 +65,8 @@ namespace Sandra.UI
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
                 JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
 
-            return Session.Configure(new SettingsProvider(),
+            return Session.Configure(this,
+                                     new SettingsProvider(),
                                      builtInEnglishLocalizer,
                                      builtInEnglishLocalizer.Dictionary,
                                      Properties.Resources.Sandra);
