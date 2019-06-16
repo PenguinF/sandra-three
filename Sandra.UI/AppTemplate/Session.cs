@@ -508,7 +508,7 @@ namespace Eutherion.Win.AppTemplate
             ReleaseLockFile(lockFile);
 
             // Stop watching settings files.
-            LocalSettings.Dispose();
+            LocalSettings?.Dispose();
             DefaultSettings.Dispose();
             registeredLocalizers.Values.ForEach(x => x.Dispose());
         }
