@@ -156,16 +156,6 @@ namespace Eutherion.Win.AppTemplate
 
         public IEnumerable<FileLocalizer> RegisteredLocalizers => registeredLocalizers.Select(kv => kv.Value);
 
-        /// <summary>
-        /// Enables receiving <see cref="LiveTextFile"/> updates on the UI thread.
-        /// </summary>
-        public void CaptureSynchronizationContext()
-        {
-            DefaultSettings.CaptureSynchronizationContext();
-            LocalSettings.CaptureSynchronizationContext();
-            RegisteredLocalizers.ForEach(x => x.LanguageFile.CaptureSynchronizationContext());
-        }
-
         private string LocalApplicationDataPath(bool isLocalSchema)
             => !isLocalSchema ? string.Empty :
             $" ({AppDataSubFolder})";

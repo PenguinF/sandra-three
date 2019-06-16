@@ -49,13 +49,13 @@ namespace Eutherion.Win
         private readonly FileWatcher watcher;
 
         // Thread synchronization fields.
-        private readonly object updateSentinel = new object(); // Used to synchronize access to the sc/missedUpdates pair.
+        private readonly object updateSentinel = new object(); // Used to synchronize access to IsDirty.
         private readonly CancellationTokenSource cts;
         private readonly AutoResetEvent fileChangeSignalWaitHandle;
         private readonly ConcurrentQueue<FileChangeType> fileChangeQueue;
         private readonly Task pollFileChangesBackgroundTask;
 
-        private SynchronizationContext sc;
+        private readonly SynchronizationContext sc;
         private Union<Exception, string> loadedText;
 
         /// <summary>
@@ -94,40 +94,6 @@ namespace Eutherion.Win
         /// <paramref name="path"/> is in an invalid format.
         /// </exception>
         public LiveTextFile(string path)
-            : this(path, captureSynchronizationContext: true)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="LiveTextFile"/>
-        /// watching a file at a specific path.
-        /// </summary>
-        /// <param name="path">
-        /// The path of the file to watch.
-        /// </param>
-        /// <param name="captureSynchronizationContext">
-        /// True to immediately capture the current synchronization context to raise file updated events on,
-        /// false otherwise. If no synchronization context is captured, the <see cref="FileUpdated"/>
-        /// event is not raised.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="path"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
-        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
-        /// or is a relative path and its absolute path could not be resolved.
-        /// </exception>
-        /// <exception cref="IOException">
-        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
-        /// </exception>
-        /// <exception cref="SecurityException">
-        /// The caller does not have sufficient permissions to read the file.
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// <paramref name="path"/> is in an invalid format.
-        /// </exception>
-        public LiveTextFile(string path, bool captureSynchronizationContext)
         {
             AbsoluteFilePath = Path.GetFullPath(path);
 
@@ -153,10 +119,8 @@ namespace Eutherion.Win
             fileChangeQueue = new ConcurrentQueue<FileChangeType>();
             watcher.EnableRaisingEvents(fileChangeSignalWaitHandle, fileChangeQueue);
 
-            if (captureSynchronizationContext)
-            {
-                sc = SynchronizationContext.Current;
-            }
+            // Capture synchronization context to raise events.
+            sc = SynchronizationContext.Current;
 
             pollFileChangesBackgroundTask = Task.Run(() => PollFileChangesLoop(cts.Token));
         }
@@ -168,7 +132,7 @@ namespace Eutherion.Win
         {
             get
             {
-                if (IsDirty)
+                while (IsDirty)
                 {
                     bool mustLoad = false;
 
@@ -231,21 +195,6 @@ namespace Eutherion.Win
         /// </param>
         protected virtual void OnFileUpdated(EventArgs e) => FileUpdated?.Invoke(this, e);
 
-        /// <summary>
-        /// Captures the synchronization context of the current thread on which to post file update events.
-        /// </summary>
-        public void CaptureSynchronizationContext()
-        {
-            // No need to lock because sc cannot be reset to null here.
-            sc = SynchronizationContext.Current;
-
-            // Immediately raise the FileUpdated event if dirty.
-            if (IsDirty)
-            {
-                RaiseFileUpdatedEvent(null);
-            }
-        }
-
         private void PollFileChangesLoop(CancellationToken cancellationToken)
         {
             try
@@ -279,12 +228,7 @@ namespace Eutherion.Win
                         lock (updateSentinel)
                         {
                             IsDirty = true;
-
-                            // If no SynchronizationContext, don't post anything.
-                            if (sc != null)
-                            {
-                                sc.Post(RaiseFileUpdatedEvent, null);
-                            }
+                            sc.Post(RaiseFileUpdatedEvent, null);
                         }
                     }
 

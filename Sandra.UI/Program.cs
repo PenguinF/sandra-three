@@ -80,12 +80,6 @@ namespace Sandra.UI
 
                 var mdiContainerForm = new MdiContainerForm();
 
-                mdiContainerForm.Load += (_, __) =>
-                {
-                    // Inform session of the current synchronization context once a message loop exists.
-                    session.CaptureSynchronizationContext();
-                };
-
                 mdiContainerForm.Shown += (_, __) =>
                 {
                     // Interpret each command line argument as a file to open.

@@ -85,7 +85,7 @@ namespace Eutherion.Win.Storage
         public SettingObject Settings { get; private set; }
 
         private SettingsFile(string absoluteFilePath, SettingObject templateSettings)
-            : base(absoluteFilePath, captureSynchronizationContext: false)
+            : base(absoluteFilePath)
         {
             TemplateSettings = templateSettings;
         }
