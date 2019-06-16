@@ -53,6 +53,16 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public static readonly string LockFileName = ".lock";
 
+        /// <summary>
+        /// Gets the name of the first auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName1 = ".autosave1";
+
+        /// <summary>
+        /// Gets the name of the second auto-save file.
+        /// </summary>
+        public static readonly string AutoSaveFileName2 = ".autosave2";
+
         static Session()
         {
             // Store executable folder/filename for later use.
@@ -136,21 +146,23 @@ namespace Eutherion.Win.AppTemplate
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
             // Create the folder on startup.
-            DirectoryInfo appDataSubDirectory = Directory.CreateDirectory(AppDataSubFolder);
+            Directory.CreateDirectory(AppDataSubFolder);
 
             // Specify DeleteOnClose so the lock file is automatically deleted when this process exits.
             // Assuming a buffer size of 1 means less allocated memory.
             lockFile = new FileStream(
-                Path.Combine(appDataSubDirectory.FullName, LockFileName),
+                Path.Combine(AppDataSubFolder, LockFileName),
                 FileMode.OpenOrCreate,
                 FileAccess.ReadWrite,
                 FileShare.Read,
                 1,
                 FileOptions.DeleteOnClose);
 
+            FileStreamPair autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+
             try
             {
-                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), appDataSubDirectory);
+                AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
             }
             catch
             {
@@ -268,30 +280,37 @@ namespace Eutherion.Win.AppTemplate
             new FormStateAutoSaver(this, targetForm, property, formState);
         }
 
-        public FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        private FileStreamPair OpenAutoSaveFileStreamPair(AutoSaveFileNamePair autoSaveFileNamePair)
         {
             try
             {
-                if (autoSaveProperty != null && TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+                var fileStreamPair = FileStreamPair.Create(
+                    AutoSaveTextFile.OpenExistingAutoSaveFile,
+                    Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName1),
+                    Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName2));
+
+                if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
+                    && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
                 {
-                    var fileStreamPair = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName1),
-                        Path.Combine(AppDataSubFolder, autoSaveFileNamePair.FileName2));
-
-                    if (AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream1)
-                        && AutoSaveTextFile.CanAutoSaveTo(fileStreamPair.FileStream2))
-                    {
-                        return fileStreamPair;
-                    }
-
-                    fileStreamPair.Dispose();
+                    return fileStreamPair;
                 }
+
+                fileStreamPair.Dispose();
             }
             catch (Exception autoSaveLoadException)
             {
                 // Only trace exceptions resulting from e.g. a missing LOCALAPPDATA subfolder or insufficient access.
                 autoSaveLoadException.Trace();
+            }
+
+            return null;
+        }
+
+        public FileStreamPair OpenAutoSaveFileStreamPair(SettingProperty<AutoSaveFileNamePair> autoSaveProperty)
+        {
+            if (autoSaveProperty != null && TryGetAutoSaveValue(autoSaveProperty, out AutoSaveFileNamePair autoSaveFileNamePair))
+            {
+                return OpenAutoSaveFileStreamPair(autoSaveFileNamePair);
             }
 
             return null;

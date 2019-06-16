@@ -23,7 +23,6 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Eutherion.Win.Storage
 {
@@ -78,16 +77,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the name of the first auto-save file.
-        /// </summary>
-        public static readonly string AutoSaveFileName1 = ".autosave1";
-
-        /// <summary>
-        /// Gets the name of the second auto-save file.
-        /// </summary>
-        public static readonly string AutoSaveFileName2 = ".autosave2";
-
-        /// <summary>
         /// Contains both auto-save files.
         /// </summary>
         private readonly AutoSaveTextFile<SettingCopy> autoSaveFile;
@@ -99,59 +88,42 @@ namespace Eutherion.Win.Storage
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingsAutoSave"/> which will generate auto-save files
-        /// with names <see cref="AutoSaveFileName1"/> and <see cref="AutoSaveFileName2"/> in the specified folder.
+        /// using the specified <see cref="FileStreamPair"/>.
         /// </summary>
         /// <param name="schema">
         /// The <see cref="SettingSchema"/> to use for the auto-save files.
         /// </param>
+        /// <param name="autoSaveFiles">
+        /// The optional <see cref="FileStreamPair"/> containing <see cref="System.IO.FileStream"/>s to write to.
+        /// Any existing contents in the files will be overwritten.
+        /// <see cref="AutoSaveTextFile{TUpdate}"/> assumes ownership of the <see cref="System.IO.FileStream"/>s
+        /// so it takes care of disposing it after use.
+        /// To be used as an auto-save <see cref="System.IO.FileStream"/>,
+        /// it must support seeking, reading and writing, and not be able to time out.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="schema"/> is null.
         /// </exception>
-        public SettingsAutoSave(SettingSchema schema, DirectoryInfo baseDir)
+        /// <exception cref="ArgumentException">
+        /// One or both <see cref="System.IO.FileStream"/>s in <paramref name="autoSaveFiles"/>
+        /// do not have the right capabilities to be used as an auto-save file stream.
+        /// See also: <seealso cref="AutoSaveTextFile.CanAutoSaveTo(System.IO.FileStream)"/>.
+        /// </exception>
+        public SettingsAutoSave(SettingSchema schema, FileStreamPair autoSaveFiles)
         {
             // If exclusive access to the auto-save file cannot be acquired, because e.g. an instance is already running,
             // don't throw but just disable auto-saving and use initial empty settings.
             CurrentSettings = new SettingCopy(schema).Commit();
 
-            try
+            // If autoSaveFiles is null, just initialize from CurrentSettings so auto-saves within the session are still enabled.
+            if (autoSaveFiles != null)
             {
-                // In the unlikely event that both auto-save files generate an error,
-                // just initialize from CurrentSettings so auto-saves within the session are still enabled.
                 var remoteState = new SettingsRemoteState(CurrentSettings);
-                FileStreamPair autoSaveFiles = null;
-
-                try
-                {
-                    autoSaveFiles = FileStreamPair.Create(
-                        AutoSaveTextFile.OpenExistingAutoSaveFile,
-                        Path.Combine(baseDir.FullName, AutoSaveFileName1),
-                        Path.Combine(baseDir.FullName, AutoSaveFileName2));
-
-                    autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
-                }
-                catch
-                {
-                    autoSaveFiles?.Dispose();
-                    throw;
-                }
+                autoSaveFile = new AutoSaveTextFile<SettingCopy>(remoteState, autoSaveFiles);
 
                 // Override CurrentSettings with RemoteSettings.
                 // This is thread-safe because nothing is yet persisted to autoSaveFile.
                 CurrentSettings = remoteState.RemoteSettings;
-            }
-            catch (ArgumentException)
-            {
-                throw;
-            }
-            catch (NotSupportedException)
-            {
-                throw;
-            }
-            catch (Exception initAutoSaveException)
-            {
-                // Throw exceptions caused by dev errors.
-                // Trace the rest. (IOException, PlatformNotSupportedException, UnauthorizedAccessException, ...)
-                initAutoSaveException.Trace();
             }
         }
 
