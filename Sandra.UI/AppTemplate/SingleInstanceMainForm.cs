@@ -41,9 +41,19 @@ namespace Eutherion.Win.AppTemplate
         /// </returns>
         public abstract Session RequestSession();
 
+        protected bool HasSession => session != null;
+
         protected override void OnHandleCreated(EventArgs e)
         {
-            session = RequestSession();
+            try
+            {
+                session = RequestSession();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Fatal initialization error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
             base.OnHandleCreated(e);
         }
 

@@ -76,37 +76,44 @@ namespace Sandra.UI
         {
             base.OnLoad(e);
 
-            var mdiContainerForm = new MdiContainerForm();
-
-            mdiContainerForm.Shown += (_, __) =>
+            if (!HasSession)
             {
-                // Interpret each command line argument as a file to open.
-                commandLineArgs.ForEach(pgnFileName =>
+                Close();
+            }
+            else
+            {
+                var mdiContainerForm = new MdiContainerForm();
+
+                mdiContainerForm.Shown += (_, __) =>
                 {
-                    // Catch exception for each open action individually.
-                    try
+                    // Interpret each command line argument as a file to open.
+                    commandLineArgs.ForEach(pgnFileName =>
                     {
-                        OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
-                    }
-                    catch (Exception exception)
-                    {
-                        // For now, show the exception to the user.
-                        // Maybe user has no access to the path, or the given file name is not a valid.
-                        // TODO: analyze what error conditions can occur and handle them appropriately.
-                        MessageBox.Show(
-                        $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                        pgnFileName,
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                    }
-                });
-            };
+                        // Catch exception for each open action individually.
+                        try
+                        {
+                            OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
+                        }
+                        catch (Exception exception)
+                        {
+                            // For now, show the exception to the user.
+                            // Maybe user has no access to the path, or the given file name is not a valid.
+                            // TODO: analyze what error conditions can occur and handle them appropriately.
+                            MessageBox.Show(
+                                $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                                pgnFileName,
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Information);
+                        }
+                    });
+                };
 
-            mdiContainerForm.FormClosed += (_, __) => Close();
+                mdiContainerForm.FormClosed += (_, __) => Close();
 
-            Visible = false;
+                Visible = false;
 
-            mdiContainerForm.Show();
+                mdiContainerForm.Show();
+            }
         }
 
         private void RemovePgnForm(string key, PgnForm pgnForm)
