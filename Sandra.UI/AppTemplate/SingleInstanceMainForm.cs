@@ -132,10 +132,12 @@ namespace Eutherion.Win.AppTemplate
 
             using (var safePinnedMsg = new SafePinnedByteArray(msg))
             {
-                COPYDATASTRUCT copyData = default;
-                copyData.dwData = IntPtr.Zero;
-                copyData.cbData = msg.Length;
-                copyData.lpData = safePinnedMsg.Pointer;
+                var copyData = new COPYDATASTRUCT
+                {
+                    dwData = IntPtr.Zero,
+                    cbData = msg.Length,
+                    lpData = safePinnedMsg.Pointer,
+                };
 
                 IntPtr copyDataBuffer = Marshal.AllocHGlobal(Marshal.SizeOf(copyData));
                 try
@@ -199,12 +201,17 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_COPYDATA && session != null)
+            if (m.Msg == WM_COPYDATA)
             {
-                ReceiveCopyDataMessage(m);
+                if (session != null)
+                {
+                    ReceiveCopyDataMessage(m);
+                }
             }
-
-            base.WndProc(ref m);
+            else
+            {
+                base.WndProc(ref m);
+            }
         }
     }
 }
