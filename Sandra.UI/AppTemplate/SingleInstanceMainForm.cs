@@ -154,5 +154,57 @@ namespace Eutherion.Win.AppTemplate
                 }
             }
         }
+
+        private void ReceiveCopyDataMessage(Message m)
+        {
+            var msg = Marshal.PtrToStructure<COPYDATASTRUCT>(m.LParam);
+
+            // Ignore message if it's too short to contain the magic value.
+            int magicLength = session.TodaysMagic.Length;
+            int encodedMessageLength = msg.cbData;
+            if (encodedMessageLength < magicLength) return;
+
+            byte[] encodedMessage = new byte[encodedMessageLength];
+            Marshal.Copy(msg.lpData, encodedMessage, 0, encodedMessageLength);
+
+            // Compare with today's magic. Ignore message if there's a mismatch.
+            // This guards against e.g. WM_COPYDATA broadcast messages.
+            // Of course this is not 100% secure against anything malicious
+            // but one would have to write code targeted specifically for this application.
+            for (int i = 0; i < magicLength; i++) if (session.TodaysMagic[i] != encodedMessage[i]) return;
+
+            // If only the magic value, shortcut return. This will only activate the window.
+            if (encodedMessageLength == magicLength)
+            {
+                ReceivedMessageFromAnotherInstance(string.Empty);
+            }
+            else
+            {
+                try
+                {
+                    // Parse out the message.
+                    string message = Encoding.UTF8.GetString(
+                        encodedMessage,
+                        magicLength, 
+                        encodedMessage.Length - magicLength);
+
+                    ReceivedMessageFromAnotherInstance(message);
+                }
+                catch
+                {
+                    // If the string is not in UTF8, ignore the message completely.
+                }
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_COPYDATA && session != null)
+            {
+                ReceiveCopyDataMessage(m);
+            }
+
+            base.WndProc(ref m);
+        }
     }
 }

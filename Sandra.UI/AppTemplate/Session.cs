@@ -120,7 +120,7 @@ namespace Eutherion.Win.AppTemplate
         /// Contains a generated sequence of 16 bytes which is written to the lock file,
         /// and is different for each new instance of the application.
         /// </summary>
-        private readonly byte[] todaysMagic;
+        internal readonly byte[] TodaysMagic;
 
         private Localizer currentLocalizer;
 
@@ -208,8 +208,8 @@ namespace Eutherion.Win.AppTemplate
 
                         // Generate a magic GUID for this instance.
                         // The byte array has a length of 16.
-                        todaysMagic = Guid.NewGuid().ToByteArray();
-                        lockFile.Write(todaysMagic, 0, MagicLengthInBytes);
+                        TodaysMagic = Guid.NewGuid().ToByteArray();
+                        lockFile.Write(TodaysMagic, 0, MagicLengthInBytes);
                         lockFile.Flush();
 
                         autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
