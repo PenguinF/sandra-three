@@ -23,7 +23,6 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;
 using System;
-using System.Windows.Forms;
 
 namespace Sandra.UI
 {
@@ -33,69 +32,6 @@ namespace Sandra.UI
     public partial class MdiContainerForm
     {
         public const string MdiContainerFormUIActionPrefix = nameof(MdiContainerForm) + ".";
-
-        public static readonly DefaultUIActionBinding NewPgnFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(NewPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control | KeyModifiers.Shift, ConsoleKey.N), },
-                    IsFirstInGroup = true,
-                    MenuTextProvider = LocalizedStringKeys.NewGameFile.ToTextProvider(),
-                },
-            });
-
-        public UIActionState TryNewPgnFile(bool perform)
-        {
-            if (perform) OpenNewPgnFile();
-            return UIActionVisibility.Enabled;
-        }
-
-        public static readonly DefaultUIActionBinding OpenPgnFile = new DefaultUIActionBinding(
-            new UIAction(MdiContainerFormUIActionPrefix + nameof(OpenPgnFile)),
-            new ImplementationSet<IUIActionInterface>
-            {
-                new CombinedUIActionInterface
-                {
-                    Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Control, ConsoleKey.O), },
-                    MenuTextProvider = LocalizedStringKeys.OpenGameFile.ToTextProvider(),
-                    OpensDialog = true,
-                },
-            });
-
-        public UIActionState TryOpenPgnFile(bool perform)
-        {
-            if (perform)
-            {
-                var syntaxDescriptor = new PgnSyntaxDescriptor();
-
-                string extension = syntaxDescriptor.FileExtension;
-                var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
-
-                var openFileDialog = new OpenFileDialog
-                {
-                    AutoUpgradeEnabled = true,
-                    DereferenceLinks = true,
-                    DefaultExt = extension,
-                    Filter = $"{Session.Current.CurrentLocalizer.Localize(extensionLocalizedKey)} (*.{extension})|*.{extension}|{Session.Current.CurrentLocalizer.Localize(SharedLocalizedStringKeys.AllFiles)} (*.*)|*.*",
-                    SupportMultiDottedExtensions = true,
-                    RestoreDirectory = true,
-                    Title = Session.Current.CurrentLocalizer.Localize(LocalizedStringKeys.OpenGameFile),
-                    ValidateNames = true,
-                    CheckFileExists = false,
-                    ShowReadOnly = true,
-                };
-
-                var dialogResult = openFileDialog.ShowDialog(this);
-                if (dialogResult == DialogResult.OK)
-                {
-                    OpenOrActivatePgnFile(openFileDialog.FileName, openFileDialog.ReadOnlyChecked);
-                }
-            }
-
-            return UIActionVisibility.Enabled;
-        }
 
         public UIActionState TryExit(bool perform)
         {

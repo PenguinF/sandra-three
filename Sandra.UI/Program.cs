@@ -19,15 +19,15 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Win.AppTemplate;
 using System;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Sandra.UI
 {
     static class Program
     {
+        internal static SandraChessMainForm MainForm { get; private set; }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -40,83 +40,8 @@ namespace Sandra.UI
             Application.SetCompatibleTextRenderingDefault(false);
             Control.CheckForIllegalCrossThreadCalls = true;
 
-            Application.Run(new SandraChessMainForm(args));
-        }
-
-        private class SandraChessMainForm : SingleInstanceMainForm
-        {
-            private readonly string[] commandLineArgs;
-            private Session session;
-
-            public SandraChessMainForm(string[] commandLineArgs)
-            {
-                this.commandLineArgs = commandLineArgs;
-
-                // This hides the window at startup.
-                ShowInTaskbar = false;
-                WindowState = FormWindowState.Minimized;
-            }
-
-            protected override void OnHandleCreated(EventArgs e)
-            {
-                // Use built-in localizer if none is provided.
-                var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
-                    LocalizedStringKeys.DefaultEnglishTranslations,
-                    LocalizedConsoleKeys.DefaultEnglishTranslations,
-                    SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
-                    JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
-
-                session = Session.Configure(new SettingsProvider(),
-                                            builtInEnglishLocalizer,
-                                            builtInEnglishLocalizer.Dictionary,
-                                            Properties.Resources.Sandra);
-
-                base.OnHandleCreated(e);
-            }
-
-            protected override void OnLoad(EventArgs e)
-            {
-                base.OnLoad(e);
-
-                var mdiContainerForm = new MdiContainerForm();
-
-                mdiContainerForm.Shown += (_, __) =>
-                {
-                    // Interpret each command line argument as a file to open.
-                    commandLineArgs.ForEach(pgnFileName =>
-                    {
-                        // Catch exception for each open action individually.
-                        try
-                        {
-                            mdiContainerForm.OpenOrActivatePgnFile(pgnFileName, isReadOnly: false);
-                        }
-                        catch (Exception exception)
-                        {
-                            // For now, show the exception to the user.
-                            // Maybe user has no access to the path, or the given file name is not a valid.
-                            // TODO: analyze what error conditions can occur and handle them appropriately.
-                            MessageBox.Show(
-                            $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                            pgnFileName,
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information);
-                        }
-                    });
-                };
-
-                mdiContainerForm.FormClosed += (_, __) => Close();
-
-                Visible = false;
-
-                mdiContainerForm.Show();
-            }
-
-            protected override void OnHandleDestroyed(EventArgs e)
-            {
-                base.OnHandleDestroyed(e);
-
-                session?.Dispose();
-            }
+            MainForm = new SandraChessMainForm(args);
+            Application.Run(MainForm);
         }
     }
 }
