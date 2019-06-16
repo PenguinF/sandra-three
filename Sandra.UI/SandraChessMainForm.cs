@@ -115,7 +115,7 @@ namespace Sandra.UI
             }
         }
 
-        private void OpenCommandLineArgs(string[] commandLineArgs)
+        internal void OpenCommandLineArgs(string[] commandLineArgs)
         {
             // Interpret each command line argument as a file to open.
             commandLineArgs.ForEach(pgnFileName =>

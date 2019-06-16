@@ -73,6 +73,38 @@ namespace Sandra.UI
             ShowOrHideEditCurrentLanguageItem();
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+
+            AllowDrop = true;
+        }
+
+        protected override void OnDragEnter(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragEnter(e);
+        }
+
+        protected override void OnDragOver(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+
+            base.OnDragOver(e);
+        }
+
+        protected override void OnDragDrop(DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                Program.MainForm.OpenCommandLineArgs((string[])e.Data.GetData(DataFormats.FileDrop));
+            }
+
+            base.OnDragDrop(e);
         }
 
         private void CurrentLocalizerChanged(object sender, EventArgs e)
