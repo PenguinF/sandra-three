@@ -37,6 +37,10 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public partial class Session : IDisposable
     {
+        // Constants for managing the lock file.
+        private const int WindowHandleLengthInBytes = 8;
+        private const int MagicLengthInBytes = 16;
+
         public static readonly string DefaultSettingsFileName = "DefaultSettings.json";
 
         public static readonly string LangSettingKey = "lang";
@@ -93,6 +97,12 @@ namespace Eutherion.Win.AppTemplate
         /// The lock file to grant access to the auto-save files by at most one instance of this process.
         /// </summary>
         private readonly FileStream lockFile;
+
+        /// <summary>
+        /// Contains a generated sequence of 16 bytes which is written to the lock file,
+        /// and is different for each new instance of the application.
+        /// </summary>
+        private readonly byte[] todaysMagic;
 
         private Localizer currentLocalizer;
 
@@ -156,13 +166,27 @@ namespace Eutherion.Win.AppTemplate
 
                 // If this call doesn't throw, exclusive access to the mutex file is obtained.
                 // Then this process is the first instance.
-                // Assuming a buffer size of 1 means less allocated memory.
+                // Use a buffer size of 24 rather than the default 4096.
                 lockFile = new FileStream(
                     lockFileName,
                     FileMode.OpenOrCreate,
                     FileAccess.Write,
                     FileShare.Read,
-                    1);
+                    WindowHandleLengthInBytes + MagicLengthInBytes);
+
+                // Immediately empty the file.
+                lockFile.SetLength(0);
+
+                // Write the window handle to the lock file.
+                // Use BitConverter to convert to and from byte[].
+                byte[] buffer = BitConverter.GetBytes(singleInstanceMainForm.Handle.ToInt64());
+                lockFile.Write(buffer, 0, WindowHandleLengthInBytes);
+
+                // Generate a magic GUID for this instance.
+                // The byte array has a length of 16.
+                todaysMagic = Guid.NewGuid().ToByteArray();
+                lockFile.Write(todaysMagic, 0, MagicLengthInBytes);
+                lockFile.Flush();
 
                 autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
             }
