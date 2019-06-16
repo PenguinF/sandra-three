@@ -84,11 +84,25 @@ namespace Eutherion.Win.AppTemplate
                                         Localizer defaultLocalizer,
                                         Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary,
                                         Icon applicationIcon)
-            => Current = new Session(singleInstanceMainForm,
-                                     settingsProvider,
-                                     defaultLocalizer,
-                                     defaultLocalizerDictionary,
-                                     applicationIcon);
+        {
+            var session = new Session(singleInstanceMainForm,
+                                      settingsProvider,
+                                      defaultLocalizer,
+                                      defaultLocalizerDictionary,
+                                      applicationIcon);
+
+            // Use nullcheck on AutoSave to check if the initialization sequence completed.
+            if (session.AutoSave != null)
+            {
+                Current = session;
+            }
+            else
+            {
+                session.Dispose();
+            }
+
+            return Current;
+        }
 
         private readonly Dictionary<LocalizedStringKey, string> defaultLocalizerDictionary;
         private readonly Dictionary<string, FileLocalizer> registeredLocalizers;
@@ -193,6 +207,41 @@ namespace Eutherion.Win.AppTemplate
             catch
             {
                 // Not the first instance.
+                // Then try opening the lock file as read-only.
+                try
+                {
+                    // If opening as read-only succeeds, read the contents as bytes.
+                    FileStream existingLockFile = new FileStream(
+                        lockFileName,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.ReadWrite,
+                        WindowHandleLengthInBytes + MagicLengthInBytes);
+
+                    using (existingLockFile)
+                    {
+                        byte[] lockFileBytes = new byte[WindowHandleLengthInBytes + MagicLengthInBytes];
+                        int totalBytesRead = 0;
+                        int remainingBytes = WindowHandleLengthInBytes + MagicLengthInBytes;
+                        while (remainingBytes > 0)
+                        {
+                            int bytesRead = existingLockFile.Read(lockFileBytes, totalBytesRead, remainingBytes);
+                            if (bytesRead == 0) break; // Unexpected EOF?
+                            totalBytesRead += bytesRead;
+                            remainingBytes -= bytesRead;
+                        }
+
+                        // For checking that EOF has been reached, evaluate ReadByte() == -1.
+                        if (remainingBytes == 0 && existingLockFile.ReadByte() == -1)
+                        {
+                            return;
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
                 // Proceed without auto-saving settings.
             }
 
