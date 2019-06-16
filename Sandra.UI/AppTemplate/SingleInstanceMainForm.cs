@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
@@ -62,6 +63,10 @@ namespace Eutherion.Win.AppTemplate
             base.OnHandleDestroyed(e);
             session?.Dispose();
             session = null;
+        }
+
+        internal void NotifyExistingInstance(HandleRef remoteWindowHandle, byte[] remoteExpectedMagic)
+        {
         }
     }
 }

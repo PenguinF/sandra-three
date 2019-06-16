@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -252,6 +253,21 @@ namespace Eutherion.Win.AppTemplate
                             // For checking that EOF has been reached, evaluate ReadByte() == -1.
                             if (remainingBytes == 0 && existingLockFile.ReadByte() == -1)
                             {
+                                // Parse out the remote window handle and the magic bytes it is expecting.
+                                long longValue = BitConverter.ToInt64(lockFileBytes, 0);
+                                HandleRef remoteWindowHandle = new HandleRef(null, new IntPtr(longValue));
+
+                                byte[] remoteExpectedMagic = new byte[MagicLengthInBytes];
+                                Array.Copy(lockFileBytes, 8, remoteExpectedMagic, 0, MagicLengthInBytes);
+
+                                // Tell the singleInstanceMainForm that another instance is active.
+                                // Not a clean design to have callbacks going back and forth.
+                                // Hard to refactor since we're inside a loop.
+                                singleInstanceMainForm.NotifyExistingInstance(remoteWindowHandle, remoteExpectedMagic);
+
+                                // Reference remoteWindowHandle here so it won't be GC'ed until method returns.
+                                GC.KeepAlive(remoteWindowHandle);
+
                                 // Loop exit point 2: successful read of the lock file owned by an existing instance.
                                 return;
                             }
@@ -486,7 +502,7 @@ namespace Eutherion.Win.AppTemplate
         public void Dispose()
         {
             // Wait until the auto-save background task has finished.
-            AutoSave.Close();
+            AutoSave?.Close();
 
             // Only after AutoSave has completed its work can the lock file be closed.
             ReleaseLockFile(lockFile);
