@@ -145,23 +145,35 @@ namespace Eutherion.Win.AppTemplate
                 new SettingKey(LangSettingKey),
                 new PType.KeyedSet<FileLocalizer>(registeredLocalizers));
 
+            // Now attempt to get exclusive write access to the .lock file so it becomes a safe mutex.
             string lockFileName = Path.Combine(AppDataSubFolder, LockFileName);
-
-            // Create the folder on startup.
-            Directory.CreateDirectory(AppDataSubFolder);
-
-            // Assuming a buffer size of 1 means less allocated memory.
-            lockFile = new FileStream(
-                lockFileName,
-                FileMode.OpenOrCreate,
-                FileAccess.Write,
-                FileShare.Read,
-                1);
+            FileStreamPair autoSaveFiles = null;
 
             try
             {
-                FileStreamPair autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+                // Create the folder on startup.
+                Directory.CreateDirectory(AppDataSubFolder);
 
+                // If this call doesn't throw, exclusive access to the mutex file is obtained.
+                // Then this process is the first instance.
+                // Assuming a buffer size of 1 means less allocated memory.
+                lockFile = new FileStream(
+                    lockFileName,
+                    FileMode.OpenOrCreate,
+                    FileAccess.Write,
+                    FileShare.Read,
+                    1);
+
+                autoSaveFiles = OpenAutoSaveFileStreamPair(new AutoSaveFileNamePair(AutoSaveFileName1, AutoSaveFileName2));
+            }
+            catch
+            {
+                // Not the first instance.
+                // Proceed without auto-saving settings.
+            }
+
+            try
+            {
                 AutoSave = new SettingsAutoSave(settingsProvider.CreateAutoSaveSchema(this), autoSaveFiles);
 
                 // After creating the auto-save file, look for a local preferences file.
@@ -356,17 +368,20 @@ namespace Eutherion.Win.AppTemplate
 
         private static void ReleaseLockFile(FileStream lockFile)
         {
-            // Clear the lock file, release the lock on it, and attempt to delete it.
-            lockFile.SetLength(0);
-            lockFile.Dispose();
+            if (lockFile != null)
+            {
+                // Clear the lock file, release the lock on it, and attempt to delete it.
+                lockFile.SetLength(0);
+                lockFile.Dispose();
 
-            try
-            {
-                File.Delete(lockFile.Name);
-            }
-            catch
-            {
-                // Just ignore any exception thrown from File.Delete.
+                try
+                {
+                    File.Delete(lockFile.Name);
+                }
+                catch
+                {
+                    // Just ignore any exception thrown from File.Delete.
+                }
             }
         }
 
