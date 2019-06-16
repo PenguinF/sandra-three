@@ -34,6 +34,11 @@ namespace Sandra.UI
         [STAThread]
         static void Main(string[] args)
         {
+            Chess.Constants.ForceInitialize();
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             // Use built-in localizer if none is provided.
             var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
                 LocalizedStringKeys.DefaultEnglishTranslations,
@@ -46,11 +51,6 @@ namespace Sandra.UI
                                                    builtInEnglishLocalizer.Dictionary,
                                                    Properties.Resources.Sandra))
             {
-                Chess.Constants.ForceInitialize();
-
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-
                 var mdiContainerForm = new MdiContainerForm();
 
                 mdiContainerForm.Load += (_, __) =>
