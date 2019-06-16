@@ -22,6 +22,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security;
 
 namespace Eutherion.Win
 {
@@ -124,6 +125,7 @@ namespace Eutherion.Win
     /// <summary>
     /// Contains P/Invoke definitions for the Windows API.
     /// </summary>
+    [SuppressUnmanagedCodeSecurity]
     internal static class WinAPI
     {
         const string Gdi32 = "gdi32.dll";
