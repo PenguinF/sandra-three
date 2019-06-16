@@ -38,19 +38,46 @@ namespace Sandra.UI
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Control.CheckForIllegalCrossThreadCalls = true;
 
-            // Use built-in localizer if none is provided.
-            var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
-                LocalizedStringKeys.DefaultEnglishTranslations,
-                LocalizedConsoleKeys.DefaultEnglishTranslations,
-                SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
-                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
+            Application.Run(new SandraChessMainForm(args));
+        }
 
-            using (var session = Session.Configure(new SettingsProvider(),
-                                                   builtInEnglishLocalizer,
-                                                   builtInEnglishLocalizer.Dictionary,
-                                                   Properties.Resources.Sandra))
+        private class SandraChessMainForm : SingleInstanceMainForm
+        {
+            private readonly string[] commandLineArgs;
+            private Session session;
+
+            public SandraChessMainForm(string[] commandLineArgs)
             {
+                this.commandLineArgs = commandLineArgs;
+
+                // This hides the window at startup.
+                ShowInTaskbar = false;
+                WindowState = FormWindowState.Minimized;
+            }
+
+            protected override void OnHandleCreated(EventArgs e)
+            {
+                // Use built-in localizer if none is provided.
+                var builtInEnglishLocalizer = new BuiltInEnglishLocalizer(
+                    LocalizedStringKeys.DefaultEnglishTranslations,
+                    LocalizedConsoleKeys.DefaultEnglishTranslations,
+                    SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
+                    JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
+
+                session = Session.Configure(new SettingsProvider(),
+                                            builtInEnglishLocalizer,
+                                            builtInEnglishLocalizer.Dictionary,
+                                            Properties.Resources.Sandra);
+
+                base.OnHandleCreated(e);
+            }
+
+            protected override void OnLoad(EventArgs e)
+            {
+                base.OnLoad(e);
+
                 var mdiContainerForm = new MdiContainerForm();
 
                 mdiContainerForm.Load += (_, __) =>
@@ -62,7 +89,7 @@ namespace Sandra.UI
                 mdiContainerForm.Shown += (_, __) =>
                 {
                     // Interpret each command line argument as a file to open.
-                    args.ForEach(pgnFileName =>
+                    commandLineArgs.ForEach(pgnFileName =>
                     {
                         // Catch exception for each open action individually.
                         try
@@ -75,15 +102,26 @@ namespace Sandra.UI
                             // Maybe user has no access to the path, or the given file name is not a valid.
                             // TODO: analyze what error conditions can occur and handle them appropriately.
                             MessageBox.Show(
-                                $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
-                                pgnFileName,
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information);
+                            $"Attempt to open code file '{pgnFileName}' failed with message: '{exception.Message}'",
+                            pgnFileName,
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
                         }
                     });
                 };
 
-                Application.Run(mdiContainerForm);
+                mdiContainerForm.FormClosed += (_, __) => Close();
+
+                Visible = false;
+
+                mdiContainerForm.Show();
+            }
+
+            protected override void OnHandleDestroyed(EventArgs e)
+            {
+                base.OnHandleDestroyed(e);
+
+                session?.Dispose();
             }
         }
     }
