@@ -58,6 +58,8 @@
     "Help": "Help",
     "JsonFiles": "Json bestanden",
     "NoErrorsMessage": "(Geen meldingen)",
+    "OpenExecutableFolder": "Executable map openen",
+    "OpenLocalAppDataFolder": "Applicatie data map openen",
     "Paste": "Plakken",
     "Redo": "Opnieuw",
     "Save": "Opslaan",

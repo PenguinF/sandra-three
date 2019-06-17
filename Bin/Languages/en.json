@@ -58,6 +58,8 @@
     "Help": "Help",
     "JsonFiles": "Json files",
     "NoErrorsMessage": "(No errors)",
+    "OpenExecutableFolder": "Open executable folder",
+    "OpenLocalAppDataFolder": "Open local application data folder",
     "Paste": "Paste",
     "Redo": "Redo",
     "Save": "Save",

@@ -43,6 +43,8 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         public static readonly LocalizedStringKey JsonFiles = new LocalizedStringKey(nameof(JsonFiles));
         public static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
+        public static readonly LocalizedStringKey OpenExecutableFolder = new LocalizedStringKey(nameof(OpenExecutableFolder));
+        public static readonly LocalizedStringKey OpenLocalAppDataFolder = new LocalizedStringKey(nameof(OpenLocalAppDataFolder));
         public static readonly LocalizedStringKey Paste = new LocalizedStringKey(nameof(Paste));
         public static readonly LocalizedStringKey Redo = new LocalizedStringKey(nameof(Redo));
         public static readonly LocalizedStringKey Save = new LocalizedStringKey(nameof(Save));
@@ -78,6 +80,8 @@ namespace Eutherion.Win.AppTemplate
                 { Help, "Help" },
                 { JsonFiles, "Json files" },
                 { NoErrorsMessage, "(No errors)" },
+                { OpenExecutableFolder, "Open executable folder" },
+                { OpenLocalAppDataFolder, "Open local application data folder" },
                 { Paste, "Paste" },
                 { Redo, "Redo" },
                 { Save, "Save" },
