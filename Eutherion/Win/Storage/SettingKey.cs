@@ -42,7 +42,7 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public SettingKey(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public bool Equals(SettingKey other) => other != null
+        public bool Equals(SettingKey other) => !(other is null)
                                              && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as SettingKey);

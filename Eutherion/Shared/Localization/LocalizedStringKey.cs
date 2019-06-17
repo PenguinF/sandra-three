@@ -44,7 +44,7 @@ namespace Eutherion.Localization
         /// </exception>
         public LocalizedStringKey(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public bool Equals(LocalizedStringKey other) => other != null
+        public bool Equals(LocalizedStringKey other) => !(other is null)
                                                      && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as LocalizedStringKey);

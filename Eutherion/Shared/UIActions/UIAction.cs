@@ -41,7 +41,7 @@ namespace Eutherion.UIActions
         /// </exception>
         public UIAction(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public bool Equals(UIAction other) => other != null
+        public bool Equals(UIAction other) => !(other is null)
                                            && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as UIAction);
