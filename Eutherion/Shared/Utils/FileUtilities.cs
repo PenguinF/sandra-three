@@ -63,7 +63,7 @@ namespace Eutherion.Utils
         /// </exception>
         public static string NormalizeFilePath(string path)
         {
-            return Path.GetFullPath(path);
+            return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
 
         /// <summary>
