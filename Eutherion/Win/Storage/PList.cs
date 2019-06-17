@@ -31,14 +31,6 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public class PList : IReadOnlyList<PValue>, PValue
     {
-        // Prevent repeated allocations of empty arrays.
-        private static readonly PValue[] emptyArray = new PValue[0];
-
-        /// <summary>
-        /// Represents the empty <see cref="PList"/>, which contains no values.
-        /// </summary>
-        public static readonly PList Empty = new PList(null);
-
         private readonly PValue[] array;
 
         /// <summary>
@@ -47,12 +39,7 @@ namespace Eutherion.Win.Storage
         /// <param name="list">
         /// The list which contains the values to construct this <see cref="PList"/> with.
         /// </param>
-        public PList(IEnumerable<PValue> list)
-        {
-            array = list != null && list.Any()
-                ? list.ToArray()
-                : emptyArray;
-        }
+        public PList(IEnumerable<PValue> list) => array = list.ToArrayEx();
 
         /// <summary>
         /// Gets the <see cref="PValue"/> at the specified index.
