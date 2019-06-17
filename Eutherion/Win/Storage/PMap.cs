@@ -34,11 +34,6 @@ namespace Eutherion.Win.Storage
         // Prevent repeated allocations of empty dictionaries.
         private static readonly Dictionary<string, PValue> emptyMap = new Dictionary<string, PValue>();
 
-        /// <summary>
-        /// Represents the empty <see cref="PMap"/>, which contains no key-value pairs.
-        /// </summary>
-        public static readonly PMap Empty = new PMap(null);
-
         private readonly Dictionary<string, PValue> map;
 
         /// <summary>
