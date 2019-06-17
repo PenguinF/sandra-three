@@ -67,8 +67,7 @@ namespace Eutherion.Text.Json
 
         public JsonErrorString(IEnumerable<JsonErrorInfo> errors)
         {
-            if (errors == null) throw new ArgumentNullException(nameof(errors));
-            Errors = errors.ToArray();
+            Errors = errors.ToArrayEx();
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorString(this);
