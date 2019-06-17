@@ -196,12 +196,13 @@ namespace System.Linq
                     return array;
                 }
             }
-            else if (source.Any())
+            else
             {
-                return source.ToArray();
+                var array = source.ToArray();
+                if (array.Length > 0) return array;
             }
 
-            // Default case if null or empty.
+            // Default case if empty.
             return Array.Empty<TSource>();
         }
     }
