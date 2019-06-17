@@ -95,7 +95,7 @@ namespace Eutherion.Win
         /// </exception>
         public LiveTextFile(string path)
         {
-            AbsoluteFilePath = Path.GetFullPath(path);
+            AbsoluteFilePath = FileUtilities.NormalizeFilePath(path);
 
             try
             {
