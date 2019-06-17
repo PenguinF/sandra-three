@@ -187,7 +187,7 @@ namespace Eutherion.Win.AppTemplate
                     // Parse out the message.
                     string message = Encoding.UTF8.GetString(
                         encodedMessage,
-                        magicLength, 
+                        magicLength,
                         encodedMessage.Length - magicLength);
 
                     ReceivedMessageFromAnotherInstance(message);
