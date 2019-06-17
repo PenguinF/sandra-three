@@ -83,7 +83,7 @@ namespace Eutherion.Utils
             }
             else
             {
-                implementation = default(TImplementation);
+                implementation = default;
                 return false;
             }
         }

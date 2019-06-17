@@ -30,6 +30,6 @@ namespace Eutherion.Utils
         /// <summary>
         /// Returns a void value.
         /// </summary>
-        public static _void _ => default(_void);
+        public static _void _ => default;
     }
 }

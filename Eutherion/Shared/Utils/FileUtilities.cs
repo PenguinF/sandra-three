@@ -35,6 +35,38 @@ namespace Eutherion.Utils
         public const int DefaultFileStreamBufferSize = 4096;
 
         /// <summary>
+        /// Returns a normalized absolute path for the specified file path string.
+        /// Do not use this for directories.
+        /// </summary>
+        /// <param name="path">
+        /// The path to normalize.
+        /// </param>
+        /// <returns>
+        /// The normalized path.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public static string NormalizeFilePath(string path)
+        {
+            return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+
+        /// <summary>
         /// Creates a new file with a guaranteed unique name and opens it for reading and writing.
         /// The generated unique file name is in the format: {file name}_{hexadecimal counter}.{extension}
         /// Only this process can write to the returned <see cref="FileStream"/>, other processes can still read from it.

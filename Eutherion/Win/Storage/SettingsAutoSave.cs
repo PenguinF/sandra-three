@@ -71,7 +71,7 @@ namespace Eutherion.Win.Storage
                     return true;
                 }
 
-                textToSave = default(string);
+                textToSave = default;
                 return false;
             }
         }

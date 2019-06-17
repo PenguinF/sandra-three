@@ -34,11 +34,6 @@ namespace Eutherion.Win.Storage
         // Prevent repeated allocations of empty dictionaries.
         private static readonly Dictionary<string, PValue> emptyMap = new Dictionary<string, PValue>();
 
-        /// <summary>
-        /// Represents the empty <see cref="PMap"/>, which contains no key-value pairs.
-        /// </summary>
-        public static readonly PMap Empty = new PMap(null);
-
         private readonly Dictionary<string, PValue> map;
 
         /// <summary>
@@ -47,12 +42,17 @@ namespace Eutherion.Win.Storage
         /// <param name="map">
         /// The map which contains the key-value pairs to construct this <see cref="PMap"/> with.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="map"/> is null.
+        /// </exception>
         /// <exception cref="ArgumentException">
         /// <paramref name="map"/> contains one or more duplicate keys.
         /// </exception>
         public PMap(IDictionary<string, PValue> map)
         {
-            this.map = map != null && map.Count > 0
+            if (map == null) throw new ArgumentNullException(nameof(map));
+
+            this.map = map.Count > 0
                 ? new Dictionary<string, PValue>(map)
                 : emptyMap;
         }

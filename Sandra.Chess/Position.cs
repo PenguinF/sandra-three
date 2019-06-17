@@ -727,7 +727,7 @@ namespace Sandra.Chess
 
                         // Since en passant doesn't capture a pawn on the target square, separate captureVector from targetVector.
                         bool isCapture = false;
-                        Piece capturedPiece = default(Piece);
+                        Piece capturedPiece = default;
                         ulong captureVector;
                         if (movingPiece == Piece.Pawn && enPassantVector.Test(targetVector))
                         {

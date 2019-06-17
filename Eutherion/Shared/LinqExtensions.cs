@@ -52,7 +52,7 @@ namespace System.Linq
                 value = element;
                 return true;
             }
-            value = default(TSource);
+            value = default;
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace System.Linq
                     return true;
                 }
             }
-            value = default(TSource);
+            value = default;
             return false;
         }
 
@@ -142,6 +142,82 @@ namespace System.Linq
             {
                 action(element);
             }
+        }
+
+        /// <summary>
+        /// Creates an array from a <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// A sequence of elements.
+        /// </param>
+        /// <returns>
+        /// An array that contains the elements from the input sequence.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// This is similar to the regular <see cref="Enumerable.ToArray{TSource}(IEnumerable{TSource})"/>,
+        /// but contains more code targeted to input sequences of a specific type.
+        /// </remarks>
+        public static TSource[] ToArrayEx<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
+            TSource[] array;
+            int length;
+            switch (source)
+            {
+                // This covers the TSource[] too; expression (ICollection<TSource>)(new TSource[0]) is valid.
+                case ICollection<TSource> collection:
+                    length = collection.Count;
+                    if (length > 0)
+                    {
+                        array = new TSource[length];
+                        collection.CopyTo(array, 0);
+                        return array;
+                    }
+                    break;
+                case IReadOnlyCollection<TSource> readOnlyCollection:
+                    length = readOnlyCollection.Count;
+                    if (length > 0)
+                    {
+                        array = new TSource[length];
+                        int index = 0;
+
+                        try
+                        {
+                            foreach (var element in readOnlyCollection)
+                            {
+                                array[index] = element;
+
+                                // Don't check if index >= length, assume that readOnlyCollection
+                                // satisfies the contract that the number of enumerated elements is always equal to Count.
+                                // Do catch IndexOutOfRangeExceptions in case the readOnlyCollection returns more
+                                // elements than it should.
+                                index++;
+                            }
+                        }
+                        catch (IndexOutOfRangeException)
+                        {
+                            // Ignore this exception, the IReadOnlyCollection does not honor its contract.
+                        }
+
+                        return array;
+                    }
+                    break;
+                default:
+                    array = source.ToArray();
+                    if (array.Length > 0) return array;
+                    break;
+            }
+
+            // Default case if empty.
+            return Array.Empty<TSource>();
         }
     }
 }

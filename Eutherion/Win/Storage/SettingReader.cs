@@ -83,7 +83,7 @@ namespace Eutherion.Win.Storage
                 errors.Add(PTypeError.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
             }
 
-            map = default(PMap);
+            map = default;
             return false;
         }
 

@@ -95,7 +95,7 @@ namespace Eutherion.Win
         /// </exception>
         public LiveTextFile(string path)
         {
-            AbsoluteFilePath = Path.GetFullPath(path);
+            AbsoluteFilePath = FileUtilities.NormalizeFilePath(path);
 
             try
             {
@@ -244,7 +244,7 @@ namespace Eutherion.Win
             }
             catch (Exception exception)
             {
-                // In theory WaitOne() and Send() can throw, but it's extremely unlikely
+                // In theory WaitOne() and Post() can throw, but it's extremely unlikely
                 // in Windows 7 environments. Tracing the exception here is enough, but stop listening.
                 exception.Trace();
             }

@@ -285,6 +285,7 @@ namespace Eutherion.Win.AppTemplate
                 remainingRetryAttempts--;
 
                 // Loop exit point 3: proceed without auto-saving settings if even after 2 seconds the lock file couldn't be accessed.
+                // This can happen for example if the first instance is running as Administrator and this instance is not.
             }
 
             try

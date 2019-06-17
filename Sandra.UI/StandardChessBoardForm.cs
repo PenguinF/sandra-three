@@ -501,7 +501,7 @@ namespace Sandra.UI
         {
             if (currentSquareWithPromoteEffect != null)
             {
-                UpdateHoverQuadrant(SquareQuadrant.Indeterminate, default(Chess.Color));
+                UpdateHoverQuadrant(SquareQuadrant.Indeterminate, default);
                 currentSquareWithPromoteEffect = null;
             }
         }

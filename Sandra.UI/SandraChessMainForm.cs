@@ -27,7 +27,6 @@ using Eutherion.Win.AppTemplate;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -204,7 +203,7 @@ namespace Sandra.UI
         private void OpenOrActivatePgnFile(string pgnFileName, bool isReadOnly)
         {
             // Normalize the file name so it gets indexed correctly.
-            string normalizedPgnFileName = Path.GetFullPath(pgnFileName);
+            string normalizedPgnFileName = FileUtilities.NormalizeFilePath(pgnFileName);
 
             if (isReadOnly || !OpenPgnForms.TryGetValue(normalizedPgnFileName, out List<PgnForm> pgnForms))
             {

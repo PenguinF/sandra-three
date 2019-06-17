@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -55,7 +56,7 @@ namespace Eutherion.Win
                     return true;
                 }
 
-                textToSave = default(string);
+                textToSave = default;
                 return false;
             }
         }
@@ -322,7 +323,7 @@ namespace Eutherion.Win
             // Only update OpenTextFile and raise event if actually different.
             // Assume we're on a Windows case insensitive file system.
             string previousOpenTextFilePath = OpenTextFilePath;
-            if (OpenTextFile == null || !Path.GetFullPath(path).Equals(previousOpenTextFilePath, StringComparison.OrdinalIgnoreCase))
+            if (OpenTextFile == null || !FileUtilities.NormalizeFilePath(path).Equals(previousOpenTextFilePath, StringComparison.OrdinalIgnoreCase))
             {
                 // Open new text file before disposing the old one.
                 var oldOpenTextFile = OpenTextFile;

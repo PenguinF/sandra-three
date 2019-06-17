@@ -46,7 +46,7 @@ namespace Eutherion.Utils
                 // Examples:
                 // string.Format("Test with parameters {invalid parameter}", parameters)
                 // string.Format("Test with parameters {0}, {1} and {2}", new string[] { "0", "1" })
-                return $"{localizedString} {StringUtilities.ToDefaultParameterListDisplayString(parameters)}";
+                return $"{localizedString} {ToDefaultParameterListDisplayString(parameters)}";
             }
         }
 

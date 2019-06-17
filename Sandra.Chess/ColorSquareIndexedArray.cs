@@ -45,7 +45,7 @@ namespace Sandra.Chess
         /// </summary>
         public static ColorSquareIndexedArray<TValue> New()
         {
-            ColorSquareIndexedArray<TValue> wrapped = default(ColorSquareIndexedArray<TValue>);
+            ColorSquareIndexedArray<TValue> wrapped = default;
             wrapped.Init();
             return wrapped;
         }

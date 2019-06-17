@@ -158,8 +158,8 @@ namespace Sandra.PgnDeprecated
 
     public abstract class PgnTerminalSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(IPgnTerminalSymbol symbol) => default(TResult);
-        public virtual TResult Visit(IPgnTerminalSymbol symbol) => symbol == null ? default(TResult) : symbol.Accept(this);
+        public virtual TResult DefaultVisit(IPgnTerminalSymbol symbol) => default;
+        public virtual TResult Visit(IPgnTerminalSymbol symbol) => symbol == null ? default : symbol.Accept(this);
         public virtual TResult VisitBlackToMoveEllipsisSymbol(BlackToMoveEllipsisSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitFormattedMoveSymbol(FormattedMoveSymbol symbol) => DefaultVisit(symbol);
         public virtual TResult VisitMoveCounterSymbol(MoveCounterSymbol symbol) => DefaultVisit(symbol);
