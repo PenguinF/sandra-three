@@ -33,14 +33,16 @@ namespace Eutherion.UIActions
         private readonly string Key;
 
         /// <summary>
-        /// Constructs a new instance of <see cref="UIAction"/>, in which the provided string key is used for equality comparison and hashcode generation.
+        /// Constructs a new instance of <see cref="UIAction"/>,
+        /// in which the provided string key is used for equality comparison and hashcode generation.
         /// </summary>
-        public UIAction(string key)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-        }
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
+        public UIAction(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public bool Equals(UIAction other) => other != null && Key == other.Key;
+        public bool Equals(UIAction other) => other != null
+                                           && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as UIAction);
 

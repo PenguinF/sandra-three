@@ -26,7 +26,7 @@ using System.Text;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Represents a key for a setting value.
+    /// Represents an immutable key for a setting value.
     /// </summary>
     [DebuggerDisplay("{Key}")]
     public sealed class SettingKey : IEquatable<SettingKey>
@@ -34,17 +34,16 @@ namespace Eutherion.Win.Storage
         internal readonly string Key;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="SettingKey"/>.
+        /// Initializes a new instance of <see cref="SettingKey"/>,
+        /// in which the provided string key is used for equality comparison and hashcode generation.
         /// </summary>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
-        public SettingKey(string key)
-        {
-            Key = key ?? throw new ArgumentNullException(nameof(key));
-        }
+        public SettingKey(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
-        public bool Equals(SettingKey other) => other != null && Key == other.Key;
+        public bool Equals(SettingKey other) => other != null
+                                             && Key == other.Key;
 
         public override bool Equals(object obj) => Equals(obj as SettingKey);
 

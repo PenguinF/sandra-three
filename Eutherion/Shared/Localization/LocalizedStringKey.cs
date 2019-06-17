@@ -36,8 +36,12 @@ namespace Eutherion.Localization
         public readonly string Key;
 
         /// <summary>
-        /// Constructs a new instance of <see cref="LocalizedStringKey"/>.
+        /// Constructs a new instance of <see cref="LocalizedStringKey"/>,
+        /// in which the provided string key is used for equality comparison and hashcode generation.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
         public LocalizedStringKey(string key) => Key = key ?? throw new ArgumentNullException(nameof(key));
 
         public bool Equals(LocalizedStringKey other) => other != null
