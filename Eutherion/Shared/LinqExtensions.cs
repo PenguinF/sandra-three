@@ -168,38 +168,41 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
 
             // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
-            if (source is ICollection<TSource> collection)
+            TSource[] array;
+            int length;
+            switch (source)
             {
-                var length = collection.Count;
-                if (length > 0)
-                {
-                    TSource[] array = new TSource[length];
-                    collection.CopyTo(array, 0);
-                    return array;
-                }
-            }
-            else if (source is IReadOnlyCollection<TSource> readOnlyCollection)
-            {
-                var length = readOnlyCollection.Count;
-                if (length > 0)
-                {
-                    TSource[] array = new TSource[length];
-                    int index = 0;
-                    foreach (var element in readOnlyCollection)
+                // This covers the TSource[] too; expression (ICollection<TSource>)(new TSource[0]) is valid.
+                case ICollection<TSource> collection:
+                    length = collection.Count;
+                    if (length > 0)
                     {
-                        array[index] = element;
-
-                        // Don't check if index >= length, assume that readOnlyCollection
-                        // satisfies the contract that the number of enumerated elements is always equal to Count.
-                        index++;
+                        array = new TSource[length];
+                        collection.CopyTo(array, 0);
+                        return array;
                     }
-                    return array;
-                }
-            }
-            else
-            {
-                var array = source.ToArray();
-                if (array.Length > 0) return array;
+                    break;
+                case IReadOnlyCollection<TSource> readOnlyCollection:
+                    length = readOnlyCollection.Count;
+                    if (length > 0)
+                    {
+                        array = new TSource[length];
+                        int index = 0;
+                        foreach (var element in readOnlyCollection)
+                        {
+                            array[index] = element;
+
+                            // Don't check if index >= length, assume that readOnlyCollection
+                            // satisfies the contract that the number of enumerated elements is always equal to Count.
+                            index++;
+                        }
+                        return array;
+                    }
+                    break;
+                default:
+                    array = source.ToArray();
+                    if (array.Length > 0) return array;
+                    break;
             }
 
             // Default case if empty.
