@@ -69,7 +69,7 @@ namespace Eutherion.Win.Storage
             {
                 return true;
             }
-            value = default(PValue);
+            value = default;
             return false;
         }
 
@@ -99,7 +99,7 @@ namespace Eutherion.Win.Storage
             {
                 return true;
             }
-            value = default(TValue);
+            value = default;
             return false;
         }
 

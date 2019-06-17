@@ -68,7 +68,7 @@ namespace Eutherion.Text.Json
                 bool gotKey = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys, out JsonSyntaxNode parsedKeyNode);
 
                 bool validKey = false;
-                JsonStringLiteralSyntax propertyKeyNode = default(JsonStringLiteralSyntax);
+                JsonStringLiteralSyntax propertyKeyNode = default;
 
                 if (gotKey)
                 {
@@ -104,7 +104,7 @@ namespace Eutherion.Text.Json
                 }
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                JsonSyntaxNode parsedValueNode = default(JsonSyntaxNode);
+                JsonSyntaxNode parsedValueNode = default;
 
                 // If gotValue remains false, a missing value error will be reported.
                 bool gotValue = false;
@@ -276,7 +276,7 @@ namespace Eutherion.Text.Json
         private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
                                      out JsonSyntaxNode firstValueNode)
         {
-            firstValueNode = default(JsonSyntaxNode);
+            firstValueNode = default;
 
             ShiftToNextForegroundToken();
             if (CurrentToken == null || !CurrentToken.TerminalSymbol.IsValueStartSymbol) return false;

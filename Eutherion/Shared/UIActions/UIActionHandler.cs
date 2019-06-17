@@ -104,7 +104,7 @@ namespace Eutherion.UIActions
             }
 
             // Default is to look at parent controls for unsupported actions.
-            return default(UIActionState);
+            return default;
         }
 
         /// <summary>

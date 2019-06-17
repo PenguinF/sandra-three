@@ -125,7 +125,7 @@ namespace Eutherion.Win.Storage
             if (settingKey == null) throw new ArgumentNullException(nameof(settingKey));
 
             if (properties.TryGetValue(settingKey.Key, out property)) return true;
-            property = default(SettingProperty);
+            property = default;
             return false;
         }
 

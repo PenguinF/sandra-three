@@ -55,7 +55,7 @@ namespace Eutherion.Win
                     return true;
                 }
 
-                textToSave = default(string);
+                textToSave = default;
                 return false;
             }
         }

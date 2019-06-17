@@ -52,7 +52,7 @@ namespace System.Linq
                 value = element;
                 return true;
             }
-            value = default(TSource);
+            value = default;
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace System.Linq
                     return true;
                 }
             }
-            value = default(TSource);
+            value = default;
             return false;
         }
 

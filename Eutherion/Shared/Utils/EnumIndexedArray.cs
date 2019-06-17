@@ -62,7 +62,7 @@ namespace Eutherion.Utils
         /// </summary>
         public static EnumIndexedArray<TEnum, TValue> New()
         {
-            EnumIndexedArray<TEnum, TValue> wrapped = default(EnumIndexedArray<TEnum, TValue>);
+            EnumIndexedArray<TEnum, TValue> wrapped = default;
             wrapped.Init();
             return wrapped;
         }

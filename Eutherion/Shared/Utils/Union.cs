@@ -61,7 +61,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption1(out T1 value)
         {
-            value = default(T1);
+            value = default;
             return false;
         }
 
@@ -76,7 +76,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption2(out T2 value)
         {
-            value = default(T2);
+            value = default;
             return false;
         }
 
@@ -152,7 +152,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType2 : Union<T1, T2>
@@ -185,7 +185,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
     }
 
@@ -237,7 +237,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption1(out T1 value)
         {
-            value = default(T1);
+            value = default;
             return false;
         }
 
@@ -252,7 +252,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption2(out T2 value)
         {
-            value = default(T2);
+            value = default;
             return false;
         }
 
@@ -267,7 +267,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption3(out T3 value)
         {
-            value = default(T3);
+            value = default;
             return false;
         }
 
@@ -355,7 +355,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType2 : Union<T1, T2, T3>
@@ -390,7 +390,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType3 : Union<T1, T2, T3>
@@ -425,7 +425,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption3 != null ? whenOption3(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
     }
 
@@ -487,7 +487,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption1(out T1 value)
         {
-            value = default(T1);
+            value = default;
             return false;
         }
 
@@ -502,7 +502,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption2(out T2 value)
         {
-            value = default(T2);
+            value = default;
             return false;
         }
 
@@ -517,7 +517,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption3(out T3 value)
         {
-            value = default(T3);
+            value = default;
             return false;
         }
 
@@ -532,7 +532,7 @@ namespace Eutherion.Utils
         /// </returns>
         public virtual bool IsOption4(out T4 value)
         {
-            value = default(T4);
+            value = default;
             return false;
         }
 
@@ -630,7 +630,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption1 != null ? whenOption1(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType2 : Union<T1, T2, T3, T4>
@@ -667,7 +667,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption2 != null ? whenOption2(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType3 : Union<T1, T2, T3, T4>
@@ -704,7 +704,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption3 != null ? whenOption3(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
 
         private sealed class ValueOfType4 : Union<T1, T2, T3, T4>
@@ -741,7 +741,7 @@ namespace Eutherion.Utils
                 Func<TResult> otherwise = null)
                 => whenOption4 != null ? whenOption4(Value)
                 : otherwise != null ? otherwise()
-                : default(TResult);
+                : default;
         }
     }
 }
