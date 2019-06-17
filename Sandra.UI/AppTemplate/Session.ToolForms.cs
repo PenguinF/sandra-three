@@ -395,5 +395,45 @@ namespace Eutherion.Win.AppTemplate
 
             return UIActionVisibility.Enabled;
         };
+
+        public static readonly DefaultUIActionBinding OpenLocalAppDataFolder = new DefaultUIActionBinding(
+            new UIAction(SessionUIActionPrefix + nameof(OpenLocalAppDataFolder)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.OpenLocalAppDataFolder.ToTextProvider(),
+                },
+            });
+
+        public UIActionHandlerFunc TryOpenLocalAppDataFolder() => perform =>
+        {
+            // Only enable in developer mode.
+            if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
+
+            if (perform) using (Process.Start(AppDataSubFolder)) { }
+
+            return UIActionVisibility.Enabled;
+        };
+
+        public static readonly DefaultUIActionBinding OpenExecutableFolder = new DefaultUIActionBinding(
+            new UIAction(SessionUIActionPrefix + nameof(OpenExecutableFolder)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    MenuTextProvider = SharedLocalizedStringKeys.OpenExecutableFolder.ToTextProvider(),
+                },
+            });
+
+        public UIActionHandlerFunc TryOpenExecutableFolder() => perform =>
+        {
+            // Only enable in developer mode.
+            if (!GetSetting(DeveloperMode)) return UIActionVisibility.Hidden;
+
+            if (perform) using (Process.Start(ExecutableFolder)) { }
+
+            return UIActionVisibility.Enabled;
+        };
     }
 }

@@ -114,7 +114,7 @@ namespace Sandra.UI
 
         private void ShowOrHideEditCurrentLanguageItem()
         {
-            // Make an exception for the EditCurrentLanguage action: hide it when it's disabled.
+            // Make an exception for developer actions: hide them when they're disabled.
             // This code is fragile because it assumes several things about the location
             // and the localized string keys of the involved menu items.
             foreach (ToolStripItem item in MainMenuStrip.Items)
@@ -129,7 +129,9 @@ namespace Sandra.UI
                     {
                         if (dropDownItem is UIActionToolStripMenuItem uiActionItem
                             && uiActionItem.TextProvider is LocalizedTextProvider subLocalizedTextProvider
-                            && subLocalizedTextProvider.Key == SharedLocalizedStringKeys.EditCurrentLanguage)
+                            && (subLocalizedTextProvider.Key == SharedLocalizedStringKeys.EditCurrentLanguage
+                                || subLocalizedTextProvider.Key == SharedLocalizedStringKeys.OpenLocalAppDataFolder
+                                || subLocalizedTextProvider.Key == SharedLocalizedStringKeys.OpenExecutableFolder))
                         {
                             // Use ActionHandler rather than mainMenuActionHandler because it can return UIActionVisibility.Hidden.
                             var uiActionState = ActionHandler.TryPerformAction(uiActionItem.Action, false);
@@ -139,7 +141,6 @@ namespace Sandra.UI
 
                             // Hide/show ToolStripSeparator as well.
                             previousItem.Visible = visible;
-                            break;
                         }
 
                         previousItem = dropDownItem;
@@ -248,6 +249,8 @@ namespace Sandra.UI
             this.BindAction(Session.OpenAbout, Session.Current.TryOpenAbout(this));
             this.BindAction(Session.ShowCredits, Session.Current.TryShowCredits(this));
             this.BindAction(Session.EditCurrentLanguage, Session.Current.TryEditCurrentLanguage());
+            this.BindAction(Session.OpenLocalAppDataFolder, Session.Current.TryOpenLocalAppDataFolder());
+            this.BindAction(Session.OpenExecutableFolder, Session.Current.TryOpenExecutableFolder());
 
             UIMenuNode.Container fileMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.File.ToTextProvider());
             mainMenuRootNodes.Add(fileMenu);
@@ -336,7 +339,9 @@ namespace Sandra.UI
             BindFocusDependentUIActions(toolsMenu,
                                         Session.EditPreferencesFile,
                                         Session.ShowDefaultSettingsFile,
-                                        Session.EditCurrentLanguage);
+                                        Session.EditCurrentLanguage,
+                                        Session.OpenLocalAppDataFolder,
+                                        Session.OpenExecutableFolder);
 
             UIMenuNode.Container helpMenu = new UIMenuNode.Container(SharedLocalizedStringKeys.Help.ToTextProvider());
             mainMenuRootNodes.Add(helpMenu);
