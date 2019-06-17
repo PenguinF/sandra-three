@@ -143,5 +143,66 @@ namespace System.Linq
                 action(element);
             }
         }
+
+        /// <summary>
+        /// Creates an array from a <see cref="IEnumerable{T}"/>.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of the elements of <paramref name="source"/>.
+        /// </typeparam>
+        /// <param name="source">
+        /// A sequence of elements.
+        /// </param>
+        /// <returns>
+        /// An array that contains the elements from the input sequence.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// This is similar to the regular <see cref="Enumerable.ToArray{TSource}(IEnumerable{TSource})"/>,
+        /// but contains more code targeted to input sequences of a specific type.
+        /// </remarks>
+        public static TSource[] ToArrayEx<TSource>(this IEnumerable<TSource> source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+
+            // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
+            if (source is ICollection<TSource> collection)
+            {
+                var length = collection.Count;
+                if (length > 0)
+                {
+                    TSource[] array = new TSource[length];
+                    collection.CopyTo(array, 0);
+                    return array;
+                }
+            }
+            else if (source is IReadOnlyCollection<TSource> readOnlyCollection)
+            {
+                var length = readOnlyCollection.Count;
+                if (length > 0)
+                {
+                    TSource[] array = new TSource[length];
+                    int index = 0;
+                    foreach (var element in readOnlyCollection)
+                    {
+                        array[index] = element;
+
+                        // Don't check if index >= length, assume that readOnlyCollection
+                        // satisfies the contract that the number of enumerated elements is always equal to Count.
+                        index++;
+                    }
+                    return array;
+                }
+            }
+            else if (source.Any())
+            {
+                return source.ToArray();
+            }
+
+            // Default case if null or empty.
+            return Array.Empty<TSource>();
+        }
     }
 }
