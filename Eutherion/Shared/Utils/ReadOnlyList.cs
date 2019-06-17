@@ -42,40 +42,37 @@ namespace Eutherion.Utils
         private static T[] GetArray(IEnumerable<T> elements)
         {
             // Use ICollection.CopyTo() if possible, to ensure only one array is allocated.
-            if (elements != null)
+            if (elements is ICollection<T> collection)
             {
-                if (elements is ICollection<T> collection)
+                var length = collection.Count;
+                if (length > 0)
                 {
-                    var length = collection.Count;
-                    if (length > 0)
-                    {
-                        T[] array = new T[length];
-                        collection.CopyTo(array, 0);
-                        return array;
-                    }
+                    T[] array = new T[length];
+                    collection.CopyTo(array, 0);
+                    return array;
                 }
-                else if (elements is IReadOnlyCollection<T> readOnlyCollection)
+            }
+            else if (elements is IReadOnlyCollection<T> readOnlyCollection)
+            {
+                var length = readOnlyCollection.Count;
+                if (length > 0)
                 {
-                    var length = readOnlyCollection.Count;
-                    if (length > 0)
+                    T[] array = new T[length];
+                    int index = 0;
+                    foreach (var element in readOnlyCollection)
                     {
-                        T[] array = new T[length];
-                        int index = 0;
-                        foreach (var element in readOnlyCollection)
-                        {
-                            array[index] = element;
+                        array[index] = element;
 
-                            // Don't check if index >= length, assume that readOnlyCollection
-                            // satisfies the contract that the number of enumerated elements is always equal to Count.
-                            index++;
-                        }
-                        return array;
+                        // Don't check if index >= length, assume that readOnlyCollection
+                        // satisfies the contract that the number of enumerated elements is always equal to Count.
+                        index++;
                     }
+                    return array;
                 }
-                else if (elements.Any())
-                {
-                    return elements.ToArray();
-                }
+            }
+            else if (elements.Any())
+            {
+                return elements.ToArray();
             }
 
             // Default case if null or empty.
