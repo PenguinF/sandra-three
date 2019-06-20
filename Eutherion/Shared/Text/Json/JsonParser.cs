@@ -91,7 +91,8 @@ namespace Eutherion.Text.Json
                                 JsonErrorCode.PropertyKeyAlreadyExists,
                                 parsedKeyNode.Start,
                                 parsedKeyNode.Length,
-                                new[] { propertyKey }));
+                                // Take the substring, key may contain escape sequences.
+                                new[] { Json.Substring(parsedKeyNode.Start, parsedKeyNode.Length) }));
                         }
                     }
                     else

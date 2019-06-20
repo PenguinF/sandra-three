@@ -85,7 +85,7 @@
     "JsonErrorControlSymbolInObject": "'}' verwacht",
     "JsonErrorControlSymbolInArray": "']' verwacht",
     "JsonErrorInvalidPropertyKey": "Eigenschap identificatie is ongeldig",
-    "JsonErrorPropertyKeyAlreadyExists": "Eigenschap identificatie '{0}' bestaat al in object",
+    "JsonErrorPropertyKeyAlreadyExists": "Eigenschap identificatie {0} bestaat al in object",
     "JsonErrorMissingPropertyKey": "Eigenschap identificatie ontbreekt",
     "JsonErrorMissingValue": "Waarde ontbreekt",
     "JsonErrorUnrecognizedValue": "Waarde '{0}' niet herkend",

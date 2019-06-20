@@ -85,7 +85,7 @@
     "JsonErrorControlSymbolInObject": "'}' expected",
     "JsonErrorControlSymbolInArray": "']' expected",
     "JsonErrorInvalidPropertyKey": "Invalid property key",
-    "JsonErrorPropertyKeyAlreadyExists": "Key '{0}' already exists in object",
+    "JsonErrorPropertyKeyAlreadyExists": "Key {0} already exists in object",
     "JsonErrorMissingPropertyKey": "Missing property key",
     "JsonErrorMissingValue": "Missing value",
     "JsonErrorUnrecognizedValue": "Unrecognized value '{0}'",
