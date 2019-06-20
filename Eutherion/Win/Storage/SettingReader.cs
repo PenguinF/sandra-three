@@ -49,7 +49,7 @@ namespace Eutherion.Win.Storage
 
         public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)
         {
-            JsonParser parser = new JsonParser(Tokens, json.Length);
+            JsonParser parser = new JsonParser(Tokens, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
