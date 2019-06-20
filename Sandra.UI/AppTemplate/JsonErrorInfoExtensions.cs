@@ -64,7 +64,7 @@ namespace Eutherion.Win.AppTemplate
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInObject), "'}' expected" },
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInArray), "']' expected" },
             { GetLocalizedStringKey(JsonErrorCode.InvalidPropertyKey), "Invalid property key" },
-            { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "Key '{0}' already exists in object" },
+            { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "Key {0} already exists in object" },
             { GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "Missing property key" },
             { GetLocalizedStringKey(JsonErrorCode.MissingValue), "Missing value" },
             { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "Unrecognized value '{0}'" },

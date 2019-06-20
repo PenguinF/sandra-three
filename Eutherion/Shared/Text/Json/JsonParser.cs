@@ -33,16 +33,16 @@ namespace Eutherion.Text.Json
     public class JsonParser : JsonSymbolVisitor<TextElement<JsonSymbol>, JsonSyntaxNode>
     {
         private readonly IEnumerator<TextElement<JsonSymbol>> Tokens;
-        private readonly int SourceLength;
+        private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
 
         private TextElement<JsonSymbol> CurrentToken;
 
-        public JsonParser(IEnumerable<TextElement<JsonSymbol>> tokens, int sourceLength)
+        public JsonParser(IEnumerable<TextElement<JsonSymbol>> tokens, string json)
         {
             if (tokens == null) throw new ArgumentNullException(nameof(tokens));
             Tokens = tokens.GetEnumerator();
-            SourceLength = sourceLength;
+            Json = json;
         }
 
         private void ShiftToNextForegroundToken()
@@ -91,7 +91,8 @@ namespace Eutherion.Text.Json
                                 JsonErrorCode.PropertyKeyAlreadyExists,
                                 parsedKeyNode.Start,
                                 parsedKeyNode.Length,
-                                new[] { propertyKey }));
+                                // Take the substring, key may contain escape sequences.
+                                new[] { Json.Substring(parsedKeyNode.Start, parsedKeyNode.Length) }));
                         }
                     }
                     else
@@ -164,12 +165,12 @@ namespace Eutherion.Text.Json
                     int endPosition;
                     if (CurrentToken == null)
                     {
+                        endPosition = Json.Length;
+
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
-                            SourceLength,
+                            endPosition,
                             0));
-
-                        endPosition = SourceLength;
                     }
                     else if (!isCurlyClose)
                     {
@@ -222,12 +223,12 @@ namespace Eutherion.Text.Json
                     int endPosition;
                     if (CurrentToken == null)
                     {
+                        endPosition = Json.Length;
+
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
-                            SourceLength,
+                            endPosition,
                             0));
-
-                        endPosition = SourceLength;
                     }
                     else if (!(CurrentToken.TerminalSymbol is JsonSquareBracketClose))
                     {
