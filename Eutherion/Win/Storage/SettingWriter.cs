@@ -163,6 +163,41 @@ namespace Eutherion.Win.Storage
             }
         }
 
+        public override void VisitList(PList value)
+        {
+            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+            currentDepth++;
+
+            bool first = true;
+            foreach (var element in value)
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    outputBuilder.Append(JsonComma.CommaCharacter);
+                }
+
+                outputBuilder.AppendLine();
+                AppendIndent();
+                Visit(element);
+            }
+
+            currentDepth--;
+
+            if (!first)
+            {
+                // Do this after decreasing currentDepth, so the closing bracket
+                // is indented less than the values.
+                outputBuilder.AppendLine();
+                AppendIndent();
+            }
+
+            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
+        }
+
         public override void VisitMap(PMap value)
         {
             outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
