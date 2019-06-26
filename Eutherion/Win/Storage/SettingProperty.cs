@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text.Json;
+using Eutherion.Utils;
 using System;
 
 namespace Eutherion.Win.Storage
@@ -68,10 +69,7 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public abstract bool IsValidValue(PValue value);
 
-        internal abstract bool TryCreateValue(
-            JsonSyntaxNode valueNode,
-            out PValue convertedValue,
-            out ITypeErrorBuilder typeError);
+        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonSyntaxNode valueNode);
     }
 
     /// <summary>
@@ -126,13 +124,16 @@ namespace Eutherion.Win.Storage
         public sealed override bool IsValidValue(PValue value)
             => !PType.TryConvert(value).IsNothing;
 
-        internal sealed override bool TryCreateValue(
-            JsonSyntaxNode valueNode,
-            out PValue convertedValue,
-            out ITypeErrorBuilder typeError)
+        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonSyntaxNode valueNode)
         {
-            convertedValue = new ToPValueConverter().Visit(valueNode);
-            return !PType.TryGetValidValue(convertedValue).IsOption1(out typeError);
+            PValue convertedValue = new ToPValueConverter().Visit(valueNode);
+
+            if (PType.TryGetValidValue(convertedValue).IsOption1(out ITypeErrorBuilder typeError))
+            {
+                return Union<ITypeErrorBuilder, PValue>.Option1(typeError);
+            }
+
+            return Union<ITypeErrorBuilder, PValue>.Option2(convertedValue);
         }
     }
 }

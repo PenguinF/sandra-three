@@ -64,12 +64,15 @@ namespace Eutherion.Win.Storage
                         // TODO: should probably add a warning if a property key does not exist.
                         if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                         {
-                            if (property.TryCreateValue(keyedNode.Value, out PValue convertedValue, out ITypeErrorBuilder typeError))
+                            var valueOrError = property.TryCreateValue(keyedNode.Value);
+
+                            if (valueOrError.IsOption2(out PValue convertedValue))
                             {
                                 mapBuilder.Add(keyedNode.Key.Value, convertedValue);
                             }
                             else
                             {
+                                valueOrError.IsOption1(out ITypeErrorBuilder typeError);
                                 errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
                         }
