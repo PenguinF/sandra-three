@@ -189,15 +189,13 @@ namespace Eutherion.Win.Storage
 
             if (parser.TryParse(Schema, out PMap map, out List<JsonErrorInfo> errors))
             {
+                // Error tolerance:
+                // 1) Even if there are errors, still load the map.
+                // 2) Don't clear the existing settings, only overwrite them.
+                //    The map might not contain all expected properties.
                 foreach (var kv in map)
                 {
-                    if (Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
-                    {
-                        if (Schema.ContainsProperty(property) && property.IsValidValue(kv.Value))
-                        {
-                            KeyValueMapping[property.Name.Key] = kv.Value;
-                        }
-                    }
+                    KeyValueMapping[kv.Key] = kv.Value;
                 }
             }
 
