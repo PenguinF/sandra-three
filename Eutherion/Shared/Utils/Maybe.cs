@@ -21,4 +21,74 @@
 
 namespace Eutherion.Utils
 {
+    /// <summary>
+    /// Represents an optional value.
+    /// </summary>
+    /// <typeparam name="T">
+    /// The type of the optional value.
+    /// </typeparam>
+    public abstract class Maybe<T>
+    {
+        private sealed class NothingValue : Maybe<T>
+        {
+            public override bool IsNothing => true;
+
+            public override bool IsJust(out T value)
+            {
+                value = default;
+                return false;
+            }
+        }
+
+        private sealed class JustValue : Maybe<T>
+        {
+            public readonly T Value;
+
+            public JustValue(T value) => Value = value;
+
+            public override bool IsNothing => false;
+
+            public override bool IsJust(out T value)
+            {
+                value = Value;
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Represents the <see cref="Maybe{T}"/> without a value.
+        /// </summary>
+        public static readonly Maybe<T> Nothing = new NothingValue();
+
+        /// <summary>
+        /// Creates a <see cref="Maybe{T}"/> instance which contains a value.
+        /// </summary>
+        /// <param name="value">
+        /// The value to wrap.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Maybe{T}"/> which contains the value.
+        /// </returns>
+        public static Maybe<T> Just(T value) => new JustValue(value);
+
+        public static implicit operator Maybe<T>(T value) => new JustValue(value);
+
+        private Maybe() { }
+
+        /// <summary>
+        /// Returns if this <see cref="Maybe{T}"/> is empty, i.e. does not contain a value.
+        /// </summary>
+        public abstract bool IsNothing { get; }
+
+        /// <summary>
+        /// Returns if this <see cref="Maybe{T}"/> contains a value, and if it does, returns it.
+        /// </summary>
+        /// <param name="value">
+        /// The value contained in this <see cref="Maybe{T}"/>, or a default value if empty.
+        /// </param>
+        /// <returns>
+        /// Whether or not this <see cref="Maybe{T}"/> contains a value.
+        /// </returns>
+        public abstract bool IsJust(out T value);
+    }
 }
