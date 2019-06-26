@@ -125,13 +125,6 @@ namespace Eutherion.Win.Storage
             => !PType.TryConvert(value).IsNothing;
 
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonSyntaxNode valueNode)
-        {
-            if (PType.TryCreateValue(valueNode, out PValue convertedValue).IsOption1(out ITypeErrorBuilder typeError))
-            {
-                return Union<ITypeErrorBuilder, PValue>.Option1(typeError);
-            }
-
-            return Union<ITypeErrorBuilder, PValue>.Option2(convertedValue);
-        }
+            => PType.TryCreateValue(valueNode, out _);
     }
 }

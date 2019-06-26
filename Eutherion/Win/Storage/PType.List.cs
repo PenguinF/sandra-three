@@ -36,21 +36,21 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, (T1, T2)> TryCreateValue(
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 JsonSyntaxNode valueNode,
-                out PValue convertedValue)
+                out (T1, T2) convertedValue)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax
                     && jsonListSyntax.ElementNodes.Count == 2
-                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out PValue itemValue1).IsOption2(out T1 value1)
-                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out PValue itemValue2).IsOption2(out T2 value2))
+                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out T1 value1).IsOption2(out PValue itemValue1)
+                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out T2 value2).IsOption2(out PValue itemValue2))
                 {
-                    convertedValue = new PList(new[] { itemValue1, itemValue2 });
-                    return (value1, value2);
+                    convertedValue = (value1, value2);
+                    return new PList(new[] { itemValue1, itemValue2 });
                 }
 
                 convertedValue = default;
-                return InvalidValue(TupleItemTypeMismatchError);
+                return TupleItemTypeMismatchError;
             }
 
             public override Maybe<(T1, T2)> TryConvert(PValue value)
@@ -84,24 +84,24 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryCreateValue(
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 JsonSyntaxNode valueNode,
-                out PValue convertedValue)
+                out (T1, T2, T3, T4, T5) convertedValue)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax
                     && jsonListSyntax.ElementNodes.Count == 5
-                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out PValue itemValue1).IsOption2(out T1 value1)
-                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out PValue itemValue2).IsOption2(out T2 value2)
-                    && ItemTypes.Item3.TryCreateValue(jsonListSyntax.ElementNodes[2], out PValue itemValue3).IsOption2(out T3 value3)
-                    && ItemTypes.Item4.TryCreateValue(jsonListSyntax.ElementNodes[3], out PValue itemValue4).IsOption2(out T4 value4)
-                    && ItemTypes.Item5.TryCreateValue(jsonListSyntax.ElementNodes[4], out PValue itemValue5).IsOption2(out T5 value5))
+                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out T1 value1).IsOption2(out PValue itemValue1)
+                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out T2 value2).IsOption2(out PValue itemValue2)
+                    && ItemTypes.Item3.TryCreateValue(jsonListSyntax.ElementNodes[2], out T3 value3).IsOption2(out PValue itemValue3)
+                    && ItemTypes.Item4.TryCreateValue(jsonListSyntax.ElementNodes[3], out T4 value4).IsOption2(out PValue itemValue4)
+                    && ItemTypes.Item5.TryCreateValue(jsonListSyntax.ElementNodes[4], out T5 value5).IsOption2(out PValue itemValue5))
                 {
-                    convertedValue = new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
-                    return (value1, value2, value3, value4, value5);
+                    convertedValue = (value1, value2, value3, value4, value5);
+                    return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
                 }
 
                 convertedValue = default;
-                return InvalidValue(TupleItemTypeMismatchError);
+                return TupleItemTypeMismatchError;
             }
 
             public override Maybe<(T1, T2, T3, T4, T5)> TryConvert(PValue value)

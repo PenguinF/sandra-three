@@ -37,9 +37,9 @@ namespace Eutherion.Win.Storage
             public ValueMap(PType<T> itemType)
                 => ItemType = itemType;
 
-            internal override Union<ITypeErrorBuilder, Dictionary<string, T>> TryCreateValue(
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 JsonSyntaxNode valueNode,
-                out PValue convertedValue)
+                out Dictionary<string, T> convertedValue)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
@@ -50,19 +50,19 @@ namespace Eutherion.Win.Storage
                     {
                         // Error tolerance: ignore items of the wrong type.
                         // TODO: report errors.
-                        if (ItemType.TryCreateValue(keyedNode.Value, out PValue itemValue).IsOption2(out T value))
+                        if (ItemType.TryCreateValue(keyedNode.Value, out T value).IsOption2(out PValue itemValue))
                         {
                             mapBuilder.Add(keyedNode.Key.Value, itemValue);
                             dictionary.Add(keyedNode.Key.Value, value);
                         }
                     }
 
-                    convertedValue = new PMap(mapBuilder);
-                    return dictionary;
+                    convertedValue = dictionary;
+                    return new PMap(mapBuilder);
                 }
 
                 convertedValue = default;
-                return InvalidValue(MapTypeError);
+                return MapTypeError;
             }
 
             public override Maybe<Dictionary<string, T>> TryConvert(PValue value)
