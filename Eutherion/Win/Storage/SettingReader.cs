@@ -25,7 +25,6 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
@@ -88,28 +87,5 @@ namespace Eutherion.Win.Storage
             map = default;
             return false;
         }
-    }
-
-    public class ToPValueConverter : JsonSyntaxNodeVisitor<PValue>
-    {
-        public PMap ConvertToMap(JsonMapSyntax value)
-        {
-            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-
-            foreach (var keyedNode in value.MapNodeKeyValuePairs)
-            {
-                mapBuilder.Add(keyedNode.Key.Value, Visit(keyedNode.Value));
-            }
-
-            return new PMap(mapBuilder);
-        }
-
-        public override PValue VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
-        public override PValue VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
-        public override PValue VisitListSyntax(JsonListSyntax value) => new PList(value.ElementNodes.Select(Visit));
-        public override PValue VisitMapSyntax(JsonMapSyntax value) => ConvertToMap(value);
-        public override PValue VisitMissingValueSyntax(JsonMissingValueSyntax node) => PConstantValue.Undefined;
-        public override PValue VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
-        public override PValue VisitUndefinedValueSyntax(JsonUndefinedValueSyntax value) => PConstantValue.Undefined;
     }
 }

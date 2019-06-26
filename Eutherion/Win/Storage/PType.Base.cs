@@ -60,33 +60,62 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError);
+        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError, new ToBoolConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError);
+        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError, new ToIntConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError);
+        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError, new ToStringConverter());
+
+        private class ToBoolConverter : JsonSyntaxNodeVisitor<Maybe<PBoolean>>
+        {
+            public override Maybe<PBoolean> DefaultVisit(JsonSyntaxNode node) => Maybe<PBoolean>.Nothing;
+            public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
+        }
+
+        private class ToIntConverter : JsonSyntaxNodeVisitor<Maybe<PInteger>>
+        {
+            public override Maybe<PInteger> DefaultVisit(JsonSyntaxNode node) => Maybe<PInteger>.Nothing;
+            public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
+        }
+
+        private class ToStringConverter : JsonSyntaxNodeVisitor<Maybe<PString>>
+        {
+            public override Maybe<PString> DefaultVisit(JsonSyntaxNode node) => Maybe<PString>.Nothing;
+            public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
+        }
 
         private sealed class BaseType<TValue> : PType<TValue>
             where TValue : PValue
         {
-            public PTypeErrorBuilder TypeError { get; }
+            private readonly PTypeErrorBuilder typeError;
+            private readonly JsonSyntaxNodeVisitor<Maybe<TValue>> converter;
 
-            public BaseType(PTypeErrorBuilder typeError) => TypeError = typeError;
+            public BaseType(PTypeErrorBuilder typeError, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
+            {
+                this.typeError = typeError;
+                this.converter = converter;
+            }
 
             internal override Union<ITypeErrorBuilder, TValue> TryCreateValue(
                 JsonSyntaxNode valueNode,
                 out PValue convertedValue)
             {
-                convertedValue = new ToPValueConverter().Visit(valueNode);
-                return convertedValue is TValue targetValue
-                   ? targetValue
-                   : InvalidValue(TypeError);
+                var maybeConvertedValue = converter.Visit(valueNode);
+
+                if (maybeConvertedValue.IsJust(out TValue targetValue))
+                {
+                    convertedValue = targetValue;
+                    return targetValue;
+                }
+
+                convertedValue = default;
+                return InvalidValue(typeError);
             }
 
             public override Maybe<TValue> TryConvert(PValue value)
