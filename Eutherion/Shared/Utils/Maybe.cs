@@ -116,5 +116,52 @@ namespace Eutherion.Utils
         /// <paramref name="whenJust"/> is null.
         /// </exception>
         public abstract Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust);
+
+        /// <summary>
+        /// If this <see cref="Maybe{T}"/> contains a value, applies a function to it
+        /// to return a <see cref="Maybe{T}"/> of another target type.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// The type of the result.
+        /// </typeparam>
+        /// <param name="whenJust">
+        /// The function to apply if this <see cref="Maybe{T}"/> contains a value.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Maybe{T}"/> of the result type.
+        /// </returns>
+        /// <exception cref="NullReferenceException">
+        /// <paramref name="whenJust"/> is null.
+        /// </exception>
+        public Maybe<TResult> Select<TResult>(Func<T, TResult> whenJust)
+            => Bind(sourceValue => Maybe<TResult>.Just(whenJust(sourceValue)));
+
+        /// <summary>
+        /// If this <see cref="Maybe{T}"/> contains a value, applies two functions to it
+        /// to return a flattened <see cref="Maybe{T}"/> of another target type, i.e.
+        /// a <see cref="Maybe{T}"/> which does not wrap another <see cref="Maybe{T}"/>.
+        /// </summary>
+        /// <typeparam name="TIntermediate">
+        /// The type of the wrapped intermediate value returned by <paramref name="whenJust"/>.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        /// The type of the result.
+        /// </typeparam>
+        /// <param name="whenJust">
+        /// The function to apply if this <see cref="Maybe{T}"/> contains a value.
+        /// </param>
+        /// <param name="resultSelector">
+        /// The function to apply to flatten the result.
+        /// </param>
+        /// <returns>
+        /// The flattened <see cref="Maybe{T}"/> of the result type.
+        /// </returns>
+        /// <exception cref="NullReferenceException">
+        /// <paramref name="whenJust"/> and/or <paramref name="resultSelector"/> are null.
+        /// </exception>
+        public Maybe<TResult> SelectMany<TIntermediate, TResult>(
+            Func<T, Maybe<TIntermediate>> whenJust,
+            Func<T, TIntermediate, TResult> resultSelector)
+            => Bind(sourceValue => whenJust(sourceValue).Bind(intermediateValue => Maybe<TResult>.Just(resultSelector(sourceValue, intermediateValue))));
     }
 }
