@@ -21,6 +21,7 @@
 
 using Eutherion.Text.Json;
 using Eutherion.Utils;
+using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
 {
@@ -33,8 +34,10 @@ namespace Eutherion.Win.Storage
     public abstract class PType<T>
     {
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            string json,
             JsonSyntaxNode valueNode,
-            out T convertedValue);
+            out T convertedValue,
+            List<JsonErrorInfo> errors);
 
         /// <summary>
         /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.

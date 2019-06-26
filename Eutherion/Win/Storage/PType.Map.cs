@@ -38,8 +38,10 @@ namespace Eutherion.Win.Storage
                 => ItemType = itemType;
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
+                string json,
                 JsonSyntaxNode valueNode,
-                out Dictionary<string, T> convertedValue)
+                out Dictionary<string, T> convertedValue,
+                List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
@@ -50,7 +52,7 @@ namespace Eutherion.Win.Storage
                     {
                         // Error tolerance: ignore items of the wrong type.
                         // TODO: report errors.
-                        if (ItemType.TryCreateValue(keyedNode.Value, out T value).IsOption2(out PValue itemValue))
+                        if (ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors).IsOption2(out PValue itemValue))
                         {
                             mapBuilder.Add(keyedNode.Key.Value, itemValue);
                             dictionary.Add(keyedNode.Key.Value, value);

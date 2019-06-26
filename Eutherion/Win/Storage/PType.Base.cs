@@ -23,6 +23,7 @@ using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Numerics;
 
@@ -103,8 +104,10 @@ namespace Eutherion.Win.Storage
             }
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
+                string json,
                 JsonSyntaxNode valueNode,
-                out TValue convertedValue)
+                out TValue convertedValue,
+                List<JsonErrorInfo> errors)
                 => converter.Visit(valueNode).IsJust(out convertedValue)
                 ? convertedValue
                 : (Union<ITypeErrorBuilder, PValue>)typeError;
@@ -159,12 +162,14 @@ namespace Eutherion.Win.Storage
                 => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
             internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
+                string json,
                 JsonSyntaxNode valueNode,
-                out T convertedValue)
+                out T convertedValue,
+                List<JsonErrorInfo> errors)
             {
                 T value = default;
 
-                var result = BaseType.TryCreateValue(valueNode, out TBase convertedBaseValue).Match(
+                var result = BaseType.TryCreateValue(json, valueNode, out TBase convertedBaseValue, errors).Match(
                     whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),
                     whenOption2: baseValue => TryGetTargetValue(convertedBaseValue).Match(
                         whenOption1: typeError => Union<ITypeErrorBuilder, PValue>.Option1(typeError),

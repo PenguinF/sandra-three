@@ -22,6 +22,7 @@
 using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
 {
@@ -69,7 +70,10 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public abstract bool IsValidValue(PValue value);
 
-        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonSyntaxNode valueNode);
+        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            string json,
+            JsonSyntaxNode valueNode,
+            List<JsonErrorInfo> errors);
     }
 
     /// <summary>
@@ -124,7 +128,10 @@ namespace Eutherion.Win.Storage
         public sealed override bool IsValidValue(PValue value)
             => !PType.TryConvert(value).IsNothing;
 
-        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(JsonSyntaxNode valueNode)
-            => PType.TryCreateValue(valueNode, out _);
+        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            string json,
+            JsonSyntaxNode valueNode,
+            List<JsonErrorInfo> errors)
+            => PType.TryCreateValue(json, valueNode, out _, errors);
     }
 }
