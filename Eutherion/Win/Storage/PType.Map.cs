@@ -51,11 +51,16 @@ namespace Eutherion.Win.Storage
                     foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
                     {
                         // Error tolerance: ignore items of the wrong type.
-                        // TODO: report errors.
-                        if (ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors).IsOption2(out PValue itemValue))
+                        var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors);
+                        if (itemValueOrError.IsOption2(out PValue itemValue))
                         {
                             mapBuilder.Add(keyedNode.Key.Value, itemValue);
                             dictionary.Add(keyedNode.Key.Value, value);
+                        }
+                        else
+                        {
+                            itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
+                            errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                         }
                     }
 
