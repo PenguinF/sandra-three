@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the mutable mapping between keys and values.
         /// </summary>
-        private readonly Dictionary<SettingKey, PValue> KeyValueMapping;
+        private readonly Dictionary<string, PValue> KeyValueMapping;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SettingCopy"/>.
@@ -52,7 +52,7 @@ namespace Eutherion.Win.Storage
         public SettingCopy(SettingSchema schema)
         {
             Schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            KeyValueMapping = new Dictionary<SettingKey, PValue>();
+            KeyValueMapping = new Dictionary<string, PValue>();
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Eutherion.Win.Storage
 
             if (Schema.ContainsProperty(property) && property.IsValidValue(value))
             {
-                KeyValueMapping[property.Name] = value;
+                KeyValueMapping[property.Name.Key] = value;
             }
         }
 
@@ -113,7 +113,7 @@ namespace Eutherion.Win.Storage
 
             if (Schema.ContainsProperty(property))
             {
-                KeyValueMapping.Remove(property.Name);
+                KeyValueMapping.Remove(property.Name.Key);
             }
         }
 
@@ -140,7 +140,7 @@ namespace Eutherion.Win.Storage
             // No need to copy values if they can be assumed read-only or are structs.
             foreach (var kv in settingObject.Map)
             {
-                KeyValueMapping.Add(new SettingKey(kv.Key), kv.Value);
+                KeyValueMapping.Add(kv.Key, kv.Value);
             }
         }
 
@@ -178,12 +178,7 @@ namespace Eutherion.Win.Storage
             return ToPMap().EqualTo(other.Map);
         }
 
-        internal PMap ToPMap()
-        {
-            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-            foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
-            return new PMap(mapBuilder);
-        }
+        internal PMap ToPMap() => new PMap(KeyValueMapping);
 
         /// <summary>
         /// Loads settings from text.
