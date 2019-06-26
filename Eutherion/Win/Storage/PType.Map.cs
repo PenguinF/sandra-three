@@ -36,7 +36,7 @@ namespace Eutherion.Win.Storage
             public ValueMap(PType<T> itemType)
                 => ItemType = itemType;
 
-            public override Union<ITypeErrorBuilder, Dictionary<string, T>> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, Dictionary<string, T>> TryGetValidValue(PValue value)
             {
                 if (value is PMap map)
                 {

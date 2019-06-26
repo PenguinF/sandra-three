@@ -78,7 +78,7 @@ namespace Eutherion.Win.Storage
 
             public BaseType(PTypeErrorBuilder typeError) => TypeError = typeError;
 
-            public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
                 => value is TValue targetValue
                 ? targetValue
                 : InvalidValue(TypeError);
@@ -120,7 +120,7 @@ namespace Eutherion.Win.Storage
             protected Derived(PType<TBase> baseType)
                 => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
 
-            public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
+            internal override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
                 => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
 
             public override sealed Maybe<T> TryConvert(PValue value)

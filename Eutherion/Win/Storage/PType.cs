@@ -43,6 +43,8 @@ namespace Eutherion.Win.Storage
         protected Union<ITypeErrorBuilder, T> InvalidValue(ITypeErrorBuilder typeError)
             => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
+        internal abstract Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value);
+
         /// <summary>
         /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
         /// </summary>
@@ -53,8 +55,6 @@ namespace Eutherion.Win.Storage
         /// The converted value, if conversion succeeds, otherwise <see cref="Maybe{T}.Nothing"/>.
         /// </returns>
         public abstract Maybe<T> TryConvert(PValue value);
-
-        public abstract Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value);
 
         /// <summary>
         /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="PValue"/>.

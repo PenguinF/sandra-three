@@ -35,7 +35,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            public override Union<ITypeErrorBuilder, (T1, T2)> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, (T1, T2)> TryGetValidValue(PValue value)
             {
                 if (value is PList list
                     && list.Count == 5
@@ -79,7 +79,7 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            public override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryGetValidValue(PValue value)
             {
                 if (value is PList list
                     && list.Count == 5
