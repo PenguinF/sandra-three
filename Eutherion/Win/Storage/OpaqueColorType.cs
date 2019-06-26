@@ -46,7 +46,7 @@ namespace Eutherion.Win.Storage
                 string hexString = value.Substring(1);
                 if (int.TryParse(hexString, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out int rgb))
                 {
-                    return ValidValue(Color.FromArgb(255, Color.FromArgb(rgb)));
+                    return Color.FromArgb(255, Color.FromArgb(rgb));
                 }
             }
 

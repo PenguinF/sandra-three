@@ -45,9 +45,10 @@ namespace Sandra.UI
             private VersionRange() : base(new PType.RangedInteger(1, 1)) { }
 
             public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => ValidValue((int)integer.Value);
+                => (int)integer.Value;
 
-            public override PInteger GetBaseValue(int value) => new PInteger(value);
+            public override PInteger GetBaseValue(int value)
+                => new PInteger(value);
         }
 
         public static readonly SettingProperty<PersistableFormState> Window = new SettingProperty<PersistableFormState>(
@@ -93,9 +94,10 @@ namespace Sandra.UI
             private FastNavigationPlyCountRange() : base(new PType.RangedInteger(MinPlyCount, MaxPlyCount)) { }
 
             public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                => ValidValue((int)integer.Value);
+                => (int)integer.Value;
 
-            public override PInteger GetBaseValue(int value) => new PInteger(value);
+            public override PInteger GetBaseValue(int value)
+                => new PInteger(value);
         }
 
         private static readonly string DarkSquareColorDescription

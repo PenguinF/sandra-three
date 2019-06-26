@@ -19,8 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
 {
@@ -58,18 +60,20 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Returns if a raw <see cref="PValue"/> can be converted to the target .NET type <typeparamref name="T"/>.
+        /// Returns if a raw <see cref="PValue"/> can be converted to the target .NET type of this property.
         /// </summary>
         /// <param name="value">
         /// The value to convert from.
         /// </param>
-        /// <param name="typeError">
-        /// Type error, if conversion failed.
-        /// </param>
         /// <returns>
         /// Whether or not conversion will succeed.
         /// </returns>
-        public abstract bool IsValidValue(PValue value, out ITypeErrorBuilder typeError);
+        public abstract bool IsValidValue(PValue value);
+
+        internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            string json,
+            JsonSyntaxNode valueNode,
+            List<JsonErrorInfo> errors);
     }
 
     /// <summary>
@@ -121,19 +125,13 @@ namespace Eutherion.Win.Storage
             PType = pType ?? throw new ArgumentNullException(nameof(pType));
         }
 
-        /// <summary>
-        /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="value">
-        /// The value to convert from.
-        /// </param>
-        /// <returns>
-        /// The target value to convert to, if conversion succeeds, or a type error, if conversion fails.
-        /// </returns>
-        public Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
-            => PType.TryGetValidValue(value);
+        public sealed override bool IsValidValue(PValue value)
+            => !PType.TryConvert(value).IsNothing;
 
-        public override bool IsValidValue(PValue value, out ITypeErrorBuilder typeError)
-            => !TryGetValidValue(value).IsOption1(out typeError);
+        internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            string json,
+            JsonSyntaxNode valueNode,
+            List<JsonErrorInfo> errors)
+            => PType.TryCreateValue(json, valueNode, out _, errors);
     }
 }

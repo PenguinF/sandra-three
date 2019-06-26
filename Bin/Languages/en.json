@@ -108,7 +108,6 @@
     "OpaqueColorTypeError": "Expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}",
     "FileNameTypeError": "Expected valid file name for {0}, but found {1}",
     "SubFolderNameTypeError": "Expected valid subfolder name for {0}, but found {1}",
-    "TrimmedStringTypeError": "Expected string value which contains at least one non white-space character for {0}, but found {1}",
-    "TranslationDictionaryTypeError": "Expected string translations for {0}, but found {2} at key {1}"
+    "TrimmedStringTypeError": "Expected string value which contains at least one non white-space character for {0}, but found {1}"
   }
 }

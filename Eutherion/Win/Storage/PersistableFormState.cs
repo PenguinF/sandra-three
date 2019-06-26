@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.Utils;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -34,41 +32,27 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public class PersistableFormState
     {
-        public static readonly PTypeErrorBuilder PersistableFormStateTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(PersistableFormStateTypeError)));
-
         /// <summary>
         /// Gets the <see cref="PType"/> of a <see cref="PersistableFormState"/>.
         /// </summary>
         public static readonly PType<PersistableFormState> Type = new FormStatePType();
 
-        private sealed class FormStatePType : PType<PersistableFormState>
+        private sealed class FormStatePType : PType.Derived<(bool, int, int, int, int), PersistableFormState>
         {
-            public override Union<ITypeErrorBuilder, PersistableFormState> TryGetValidValue(PValue value)
+            public FormStatePType()
+                : base(new PType.TupleType<bool, int, int, int, int>(
+                                          (PType.CLR.Boolean, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32, PType.CLR.Int32)))
             {
-                if (value is PList windowBoundsList
-                    && windowBoundsList.Count == 5
-                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0]).IsOption2(out bool maximized)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1]).IsOption2(out int left)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2]).IsOption2(out int top)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3]).IsOption2(out int width)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4]).IsOption2(out int height))
-                {
-                    return ValidValue(new PersistableFormState(maximized, new Rectangle(left, top, width, height)));
-                }
-
-                return InvalidValue(PersistableFormStateTypeError);
             }
 
-            public override PValue GetPValue(PersistableFormState value) => new PList(
-                new List<PValue>
-                {
-                    PType.CLR.Boolean.GetPValue(value.Maximized),
-                    PType.CLR.Int32.GetPValue(value.Bounds.Left),
-                    PType.CLR.Int32.GetPValue(value.Bounds.Top),
-                    PType.CLR.Int32.GetPValue(value.Bounds.Width),
-                    PType.CLR.Int32.GetPValue(value.Bounds.Height),
-                });
+            public override Union<ITypeErrorBuilder, PersistableFormState> TryGetTargetValue((bool, int, int, int, int) value)
+            {
+                var (maximized, left, top, width, height) = value;
+                return new PersistableFormState(maximized, new Rectangle(left, top, width, height));
+            }
+
+            public override (bool, int, int, int, int) GetBaseValue(PersistableFormState value)
+                => (value.Maximized, value.Bounds.Left, value.Bounds.Top, value.Bounds.Width, value.Bounds.Height);
         }
 
         private Form form;

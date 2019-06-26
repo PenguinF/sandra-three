@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Text.Json;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using System;
@@ -163,99 +162,41 @@ namespace Eutherion.Win.AppTemplate
 
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
-            ? ValidValue(value.Trim())
+            ? value.Trim()
             : InvalidValue(TrimmedStringTypeError);
     }
 
-    public class TranslationDictionaryType : PType<Dictionary<LocalizedStringKey, string>>
+    public class TranslationDictionaryType : PType.Derived<Dictionary<string, string>, Dictionary<LocalizedStringKey, string>>
     {
         public static readonly TranslationDictionaryType Instance = new TranslationDictionaryType();
 
-        private TranslationDictionaryType() { }
-
-        public override PValue GetPValue(Dictionary<LocalizedStringKey, string> value)
+        private TranslationDictionaryType()
+            : base(new PType.ValueMap<string>(PType.CLR.String))
         {
-            Dictionary<string, PValue> dictionary = new Dictionary<string, PValue>();
-
-            if (value != null)
-            {
-                foreach (var kv in value)
-                {
-                    dictionary.Add(kv.Key.Key, new PString(kv.Value));
-                }
-            }
-
-            return new PMap(dictionary);
         }
 
-        public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetValidValue(PValue value)
+        public override Union<ITypeErrorBuilder, Dictionary<LocalizedStringKey, string>> TryGetTargetValue(Dictionary<string, string> value)
         {
-            if (!(value is PMap map))
-            {
-                return InvalidValue(PType.MapTypeError);
-            }
-
             var dictionary = new Dictionary<LocalizedStringKey, string>();
 
-            foreach (var kv in map)
+            foreach (var kv in value)
             {
-                if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
-                {
-                    return InvalidValue(new TranslationDictionaryTypeError(kv.Key, kv.Value));
-                }
-
-                dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
+                dictionary.Add(new LocalizedStringKey(kv.Key), kv.Value);
             }
 
-            return ValidValue(dictionary);
+            return dictionary;
         }
-    }
 
-    /// <summary>
-    /// Represents the result of a failed typecheck of <see cref="TranslationDictionaryType"/>.
-    /// </summary>
-    public class TranslationDictionaryTypeError : PValueVisitor<Localizer, string>, ITypeErrorBuilder
-    {
-        /// <summary>
-        /// Gets the translation key for this error message.
-        /// </summary>
-        public static readonly LocalizedStringKey LocalizedMessageKey = new LocalizedStringKey(nameof(TranslationDictionaryTypeError));
-
-        /// <summary>
-        /// Gets the key with the illegal value.
-        /// </summary>
-        public string Key { get; }
-
-        /// <summary>
-        /// Gets the illegal value.
-        /// </summary>
-        public PValue InvalidStringValue { get; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="KeyedSetTypeError"/>.
-        /// </summary>
-        internal TranslationDictionaryTypeError(string key, PValue invalidStringValue)
+        public override Dictionary<string, string> GetBaseValue(Dictionary<LocalizedStringKey, string> value)
         {
-            Key = key;
-            InvalidStringValue = invalidStringValue;
-        }
+            var dictionary = new Dictionary<string, string>();
 
-        /// <summary>
-        /// Gets the localized error message in the current language.
-        /// </summary>
-        public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
-            => localizer.Localize(LocalizedMessageKey, new[]
+            foreach (var kv in value)
             {
-                propertyKey,
-                PTypeErrorBuilder.QuoteStringValue(Key),
-                Visit(InvalidStringValue, localizer)
-            });
+                dictionary.Add(kv.Key.Key, kv.Value);
+            }
 
-
-        public override string DefaultVisit(PValue value, Localizer localizer) => localizer.Localize(PType.JsonUndefinedValue);
-        public override string VisitBoolean(PBoolean value, Localizer localizer) => PTypeErrorBuilder.QuoteValue(JsonValue.BoolSymbol(value.Value));
-        public override string VisitInteger(PInteger value, Localizer localizer) => PTypeErrorBuilder.QuoteValue(value.Value.ToString(CultureInfo.InvariantCulture));
-        public override string VisitList(PList value, Localizer localizer) => localizer.Localize(PType.JsonArray);
-        public override string VisitMap(PMap value, Localizer localizer) => localizer.Localize(PType.JsonObject);
+            return dictionary;
+        }
     }
 }

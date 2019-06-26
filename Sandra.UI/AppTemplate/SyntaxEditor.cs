@@ -480,33 +480,23 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Specialized PType that accepts pairs of legal file names that are used for auto-saving changes in text files.
     /// </summary>
-    public sealed class AutoSaveFilePairPType : PType<AutoSaveFileNamePair>
+    public sealed class AutoSaveFilePairPType : PType.Derived<(string, string), AutoSaveFileNamePair>
     {
-        public static readonly PTypeErrorBuilder AutoSaveFilePairTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(AutoSaveFilePairTypeError)));
-
         public static readonly AutoSaveFilePairPType Instance = new AutoSaveFilePairPType();
 
-        private AutoSaveFilePairPType() { }
-
-        public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetValidValue(PValue value)
+        private AutoSaveFilePairPType()
+            : base(new PType.TupleType<string, string>(
+                                      (FileNameType.InstanceAllowStartWithDots, FileNameType.InstanceAllowStartWithDots)))
         {
-            if (value is PList pair
-                && pair.Count == 2
-                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[0]).IsOption2(out string fileName1)
-                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[1]).IsOption2(out string fileName2))
-            {
-                return ValidValue(new AutoSaveFileNamePair(fileName1, fileName2));
-            }
-
-            return InvalidValue(AutoSaveFilePairTypeError);
         }
 
-        public override PValue GetPValue(AutoSaveFileNamePair value) => new PList(
-            new PValue[]
-            {
-                FileNameType.InstanceAllowStartWithDots.GetPValue(value.FileName1),
-                FileNameType.InstanceAllowStartWithDots.GetPValue(value.FileName2),
-            });
+        public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetTargetValue((string, string) value)
+        {
+            var (fileName1, fileName2) = value;
+            return new AutoSaveFileNamePair(fileName1, fileName2);
+        }
+
+        public override (string, string) GetBaseValue(AutoSaveFileNamePair value)
+            => (value.FileName1, value.FileName2);
     }
 }

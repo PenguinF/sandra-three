@@ -108,7 +108,6 @@
     "OpaqueColorTypeError": "Stringwaarde in het HTML kleur formaat (b.v. \"#808000\", of \"#DC143C\") voor eigenschap {0} verwacht, maar er staat {1}",
     "FileNameTypeError": "Geldige bestandsnaam voor eigenschap {0} verwacht, maar er staat {1}",
     "SubFolderNameTypeError": "Geldige mapnaam voor eigenschap {0} verwacht, maar er staat {1}",
-    "TrimmedStringTypeError": "Stringwaarde met minstens één niet-witruimte karakter voor eigenschap {0} verwacht, maar er staat {1}",
-    "TranslationDictionaryTypeError": "Vertalingen aangegeven door stringwaarden voor eigenschap {0} verwacht, maar er staat {2} bij vertaalsleutel {1}"
+    "TrimmedStringTypeError": "Stringwaarde met minstens één niet-witruimte karakter voor eigenschap {0} verwacht, maar er staat {1}"
   }
 }

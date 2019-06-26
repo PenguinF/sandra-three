@@ -44,9 +44,10 @@ namespace Eutherion.Win.Storage
                 public _BooleanCLRType() : base(PType.Boolean) { }
 
                 public override Union<ITypeErrorBuilder, bool> TryGetTargetValue(PBoolean boolean)
-                    => ValidValue(boolean.Value);
+                    => boolean.Value;
 
-                public override PBoolean GetBaseValue(bool value) => new PBoolean(value);
+                public override PBoolean GetBaseValue(bool value)
+                    => new PBoolean(value);
             }
 
             private sealed class _Int32CLRType : Derived<PInteger, int>
@@ -54,9 +55,10 @@ namespace Eutherion.Win.Storage
                 public _Int32CLRType() : base(new RangedInteger(int.MinValue, int.MaxValue)) { }
 
                 public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-                    => ValidValue((int)integer.Value);
+                    => (int)integer.Value;
 
-                public override PInteger GetBaseValue(int value) => new PInteger(value);
+                public override PInteger GetBaseValue(int value)
+                    => new PInteger(value);
             }
 
             private sealed class _UInt32CLRType : Derived<PInteger, uint>
@@ -64,9 +66,10 @@ namespace Eutherion.Win.Storage
                 public _UInt32CLRType() : base(new RangedInteger(uint.MinValue, uint.MaxValue)) { }
 
                 public override Union<ITypeErrorBuilder, uint> TryGetTargetValue(PInteger integer)
-                    => ValidValue((uint)integer.Value);
+                    => (uint)integer.Value;
 
-                public override PInteger GetBaseValue(uint value) => new PInteger(value);
+                public override PInteger GetBaseValue(uint value)
+                    => new PInteger(value);
             }
 
             private sealed class _StringCLRType : Derived<PString, string>
@@ -74,9 +77,10 @@ namespace Eutherion.Win.Storage
                 public _StringCLRType() : base(PType.String) { }
 
                 public override Union<ITypeErrorBuilder, string> TryGetTargetValue(PString stringValue)
-                    => ValidValue(stringValue.Value);
+                    => stringValue.Value;
 
-                public override PString GetBaseValue(string value) => new PString(value);
+                public override PString GetBaseValue(string value)
+                    => new PString(value);
             }
         }
 
@@ -114,7 +118,7 @@ namespace Eutherion.Win.Storage
 
             public override Union<ITypeErrorBuilder, TEnum> TryGetTargetValue(string stringValue)
                 => stringToEnum.TryGetValue(stringValue, out TEnum targetValue)
-                ? ValidValue(targetValue)
+                ? targetValue
                 : InvalidValue(this);
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
@@ -184,7 +188,7 @@ namespace Eutherion.Win.Storage
 
             public override Union<ITypeErrorBuilder, T> TryGetTargetValue(string stringValue)
                 => stringToTarget.TryGetValue(stringValue, out T targetValue)
-                ? ValidValue(targetValue)
+                ? targetValue
                 : InvalidValue(this);
 
             public override string GetBaseValue(T value)

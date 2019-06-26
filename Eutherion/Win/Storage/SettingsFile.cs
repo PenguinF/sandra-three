@@ -96,7 +96,7 @@ namespace Eutherion.Win.Storage
 
             fileTextOrException.Match(
                 whenOption1: exception => exception.Trace(),
-                whenOption2: fileText => SettingReader.ReadWorkingCopy(fileText, workingCopy));
+                whenOption2: fileText => workingCopy.TryLoadFromText(fileText));
 
             return workingCopy.Commit();
         }

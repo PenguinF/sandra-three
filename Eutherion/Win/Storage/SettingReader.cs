@@ -25,7 +25,6 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
@@ -57,23 +56,25 @@ namespace Eutherion.Win.Storage
                 if (rootNode is JsonMapSyntax mapNode)
                 {
                     Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-                    var converter = new ToPValueConverter();
 
                     // Analyze values with the provided schema while building the PMap.
                     foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
                     {
-                        var convertedValue = converter.Visit(keyedNode.Value);
-
                         // TODO: should probably add a warning if a property key does not exist.
                         if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                         {
-                            if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            var valueOrError = property.TryCreateValue(json, keyedNode.Value, errors);
+
+                            if (valueOrError.IsOption2(out PValue convertedValue))
                             {
+                                mapBuilder.Add(keyedNode.Key.Value, convertedValue);
+                            }
+                            else
+                            {
+                                valueOrError.IsOption1(out ITypeErrorBuilder typeError);
                                 errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
                         }
-
-                        mapBuilder.Add(keyedNode.Key.Value, convertedValue);
                     }
 
                     map = new PMap(mapBuilder);
@@ -86,49 +87,5 @@ namespace Eutherion.Win.Storage
             map = default;
             return false;
         }
-
-        /// <summary>
-        /// Loads settings from a file into a <see cref="SettingCopy"/>.
-        /// </summary>
-        internal static List<JsonErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
-        {
-            var parser = new SettingReader(json);
-
-            if (parser.TryParse(workingCopy.Schema, out PMap map, out List<JsonErrorInfo> errors))
-            {
-                foreach (var kv in map)
-                {
-                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
-                    {
-                        workingCopy.AddOrReplaceRaw(property, kv.Value);
-                    }
-                }
-            }
-
-            return errors;
-        }
-    }
-
-    public class ToPValueConverter : JsonSyntaxNodeVisitor<PValue>
-    {
-        public PMap ConvertToMap(JsonMapSyntax value)
-        {
-            Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-
-            foreach (var keyedNode in value.MapNodeKeyValuePairs)
-            {
-                mapBuilder.Add(keyedNode.Key.Value, Visit(keyedNode.Value));
-            }
-
-            return new PMap(mapBuilder);
-        }
-
-        public override PValue VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
-        public override PValue VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
-        public override PValue VisitListSyntax(JsonListSyntax value) => new PList(value.ElementNodes.Select(Visit));
-        public override PValue VisitMapSyntax(JsonMapSyntax value) => ConvertToMap(value);
-        public override PValue VisitMissingValueSyntax(JsonMissingValueSyntax node) => PConstantValue.Undefined;
-        public override PValue VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
-        public override PValue VisitUndefinedValueSyntax(JsonUndefinedValueSyntax value) => PConstantValue.Undefined;
     }
 }

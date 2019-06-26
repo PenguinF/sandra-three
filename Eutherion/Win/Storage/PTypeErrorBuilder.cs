@@ -39,6 +39,11 @@ namespace Eutherion.Win.Storage
         public static readonly LocalizedStringKey EnumerateWithOr = new LocalizedStringKey(nameof(EnumerateWithOr));
 
         /// <summary>
+        /// Gets the translation key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.
+        /// </summary>
+        public static readonly LocalizedStringKey TupleItemTypeMismatchError = new LocalizedStringKey(nameof(TupleItemTypeMismatchError));
+
+        /// <summary>
         /// Surrounds a string value with double quote characters.
         /// </summary>
         /// <param name="stringValue">
