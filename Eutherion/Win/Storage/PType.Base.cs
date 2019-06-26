@@ -84,9 +84,9 @@ namespace Eutherion.Win.Storage
                 : InvalidValue(TypeError);
 
             public override Maybe<TValue> TryConvert(PValue value)
-                => TryGetValidValue(value).Match(
-                    whenOption1: _ => Maybe<TValue>.Nothing,
-                    whenOption2: convertedValue => convertedValue);
+                => value is TValue targetValue
+                ? targetValue
+                : Maybe<TValue>.Nothing;
 
             public override PValue GetPValue(TValue value) => value;
         }
