@@ -57,7 +57,6 @@ namespace Eutherion.Win.Storage
                 if (rootNode is JsonMapSyntax mapNode)
                 {
                     Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-                    var converter = new ToPValueConverter();
 
                     // Analyze values with the provided schema while building the PMap.
                     foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
@@ -65,9 +64,7 @@ namespace Eutherion.Win.Storage
                         // TODO: should probably add a warning if a property key does not exist.
                         if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                         {
-                            var convertedValue = converter.Visit(keyedNode.Value);
-
-                            if (property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            if (property.TryCreateValue(keyedNode.Value, out PValue convertedValue, out ITypeErrorBuilder typeError))
                             {
                                 mapBuilder.Add(keyedNode.Key.Value, convertedValue);
                             }

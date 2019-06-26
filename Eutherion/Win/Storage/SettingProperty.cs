@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using System;
 
 namespace Eutherion.Win.Storage
@@ -67,7 +68,10 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public abstract bool IsValidValue(PValue value);
 
-        internal abstract bool IsValidValue(PValue value, out ITypeErrorBuilder typeError);
+        internal abstract bool TryCreateValue(
+            JsonSyntaxNode valueNode,
+            out PValue convertedValue,
+            out ITypeErrorBuilder typeError);
     }
 
     /// <summary>
@@ -122,7 +126,13 @@ namespace Eutherion.Win.Storage
         public sealed override bool IsValidValue(PValue value)
             => !PType.TryConvert(value).IsNothing;
 
-        internal sealed override bool IsValidValue(PValue value, out ITypeErrorBuilder typeError)
-            => !PType.TryGetValidValue(value).IsOption1(out typeError);
+        internal sealed override bool TryCreateValue(
+            JsonSyntaxNode valueNode,
+            out PValue convertedValue,
+            out ITypeErrorBuilder typeError)
+        {
+            convertedValue = new ToPValueConverter().Visit(valueNode);
+            return !PType.TryGetValidValue(convertedValue).IsOption1(out typeError);
+        }
     }
 }
