@@ -193,7 +193,10 @@ namespace Eutherion.Win.Storage
                 {
                     if (Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
                     {
-                        AddOrReplaceRaw(property, kv.Value);
+                        if (Schema.ContainsProperty(property) && property.IsValidValue(kv.Value))
+                        {
+                            KeyValueMapping[property.Name.Key] = kv.Value;
+                        }
                     }
                 }
             }
