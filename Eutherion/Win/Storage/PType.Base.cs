@@ -123,10 +123,11 @@ namespace Eutherion.Win.Storage
             public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
                 => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
 
-            public override Maybe<T> TryConvert(PValue value)
-                => TryGetValidValue(value).Match(
-                    whenOption1: _ => Maybe<T>.Nothing,
-                    whenOption2: convertedValue => convertedValue);
+            public override sealed Maybe<T> TryConvert(PValue value)
+                => BaseType.TryConvert(value).Bind(
+                    convertedBaseValue => TryGetTargetValue(convertedBaseValue).Match(
+                        whenOption1: _ => Maybe<T>.Nothing,
+                        whenOption2: convertedValue => convertedValue));
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 
