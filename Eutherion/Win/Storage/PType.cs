@@ -52,10 +52,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The converted value, if conversion succeeds, otherwise <see cref="Maybe{T}.Nothing"/>.
         /// </returns>
-        public Maybe<T> TryConvert(PValue value)
-            => TryGetValidValue(value).Match(
-                whenOption1: _ => Maybe<T>.Nothing,
-                whenOption2: convertedValue => convertedValue);
+        public abstract Maybe<T> TryConvert(PValue value);
 
         public abstract Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value);
 

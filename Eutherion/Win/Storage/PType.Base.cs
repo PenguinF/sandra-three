@@ -83,6 +83,11 @@ namespace Eutherion.Win.Storage
                 ? targetValue
                 : InvalidValue(TypeError);
 
+            public override Maybe<TValue> TryConvert(PValue value)
+                => TryGetValidValue(value).Match(
+                    whenOption1: _ => Maybe<TValue>.Nothing,
+                    whenOption2: convertedValue => convertedValue);
+
             public override PValue GetPValue(TValue value) => value;
         }
 
@@ -117,6 +122,11 @@ namespace Eutherion.Win.Storage
 
             public override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
                 => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
+
+            public override Maybe<T> TryConvert(PValue value)
+                => TryGetValidValue(value).Match(
+                    whenOption1: _ => Maybe<T>.Nothing,
+                    whenOption2: convertedValue => convertedValue);
 
             public override sealed PValue GetPValue(T value) => BaseType.GetPValue(GetBaseValue(value));
 

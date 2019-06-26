@@ -209,6 +209,11 @@ namespace Eutherion.Win.AppTemplate
 
             return dictionary;
         }
+
+        public override Maybe<Dictionary<LocalizedStringKey, string>> TryConvert(PValue value)
+            => TryGetValidValue(value).Match(
+                whenOption1: _ => Maybe<Dictionary<LocalizedStringKey, string>>.Nothing,
+                whenOption2: convertedValue => convertedValue);
     }
 
     /// <summary>

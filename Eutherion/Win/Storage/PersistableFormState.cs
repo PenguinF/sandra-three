@@ -60,6 +60,11 @@ namespace Eutherion.Win.Storage
                 return InvalidValue(PersistableFormStateTypeError);
             }
 
+            public override Maybe<PersistableFormState> TryConvert(PValue value)
+                => TryGetValidValue(value).Match(
+                    whenOption1: _ => Maybe<PersistableFormState>.Nothing,
+                    whenOption2: convertedValue => convertedValue);
+
             public override PValue GetPValue(PersistableFormState value) => new PList(
                 new List<PValue>
                 {

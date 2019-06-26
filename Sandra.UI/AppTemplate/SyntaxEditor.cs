@@ -502,6 +502,11 @@ namespace Eutherion.Win.AppTemplate
             return InvalidValue(AutoSaveFilePairTypeError);
         }
 
+        public override Maybe<AutoSaveFileNamePair> TryConvert(PValue value)
+            => TryGetValidValue(value).Match(
+                whenOption1: _ => Maybe<AutoSaveFileNamePair>.Nothing,
+                whenOption2: convertedValue => convertedValue);
+
         public override PValue GetPValue(AutoSaveFileNamePair value) => new PList(
             new PValue[]
             {
