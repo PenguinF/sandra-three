@@ -50,15 +50,20 @@ namespace Eutherion.Win.Storage
         /// The value to convert from.
         /// </param>
         /// <returns>
-        /// The target value to convert to, if conversion succeeds, or a type error, if conversion fails.
+        /// The converted value, if conversion succeeds, otherwise <see cref="Maybe{T}.Nothing"/>.
         /// </returns>
+        public Maybe<T> TryConvert(PValue value)
+            => TryGetValidValue(value).Match(
+                whenOption1: _ => Maybe<T>.Nothing,
+                whenOption2: convertedValue => convertedValue);
+
         public abstract Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value);
 
         /// <summary>
         /// Converts a value of the target .NET type <typeparamref name="T"/> to a <see cref="PValue"/>.
-        /// Assumed is that this is the reverse operation of <see cref="TryGetValidValue(PValue)"/>, i.e.:
+        /// Assumed is that this is the reverse operation of <see cref="TryConvert(PValue)"/>, i.e.:
         /// <code>
-        /// if (TryGetValidValue(value).IsOption2(out targetValue))
+        /// if (TryConvert(value).IsJust(out targetValue))
         /// {
         ///     PValue convertedValue = GetPValue(targetValue);
         ///     Debug.Assert(PValueEqualityComparer.Instance.AreEqual(value, convertedValue), "This should always succeed.");

@@ -95,7 +95,7 @@ namespace Eutherion.Win.Storage
         public bool TryGetValue<TValue>(SettingProperty<TValue> property, out TValue value)
         {
             if (TryGetRawValue(property, out PValue pValue)
-                && property.PType.TryGetValidValue(pValue).IsOption2(out value))
+                && property.PType.TryConvert(pValue).IsJust(out value))
             {
                 return true;
             }

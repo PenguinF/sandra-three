@@ -493,8 +493,8 @@ namespace Eutherion.Win.AppTemplate
         {
             if (value is PList pair
                 && pair.Count == 2
-                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[0]).IsOption2(out string fileName1)
-                && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[1]).IsOption2(out string fileName2))
+                && FileNameType.InstanceAllowStartWithDots.TryConvert(pair[0]).IsJust(out string fileName1)
+                && FileNameType.InstanceAllowStartWithDots.TryConvert(pair[1]).IsJust(out string fileName2))
             {
                 return new AutoSaveFileNamePair(fileName1, fileName2);
             }

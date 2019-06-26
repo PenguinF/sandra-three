@@ -48,11 +48,11 @@ namespace Eutherion.Win.Storage
             {
                 if (value is PList windowBoundsList
                     && windowBoundsList.Count == 5
-                    && PType.CLR.Boolean.TryGetValidValue(windowBoundsList[0]).IsOption2(out bool maximized)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[1]).IsOption2(out int left)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[2]).IsOption2(out int top)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3]).IsOption2(out int width)
-                    && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4]).IsOption2(out int height))
+                    && PType.CLR.Boolean.TryConvert(windowBoundsList[0]).IsJust(out bool maximized)
+                    && PType.CLR.Int32.TryConvert(windowBoundsList[1]).IsJust(out int left)
+                    && PType.CLR.Int32.TryConvert(windowBoundsList[2]).IsJust(out int top)
+                    && PType.CLR.Int32.TryConvert(windowBoundsList[3]).IsJust(out int width)
+                    && PType.CLR.Int32.TryConvert(windowBoundsList[4]).IsJust(out int height))
                 {
                     return new PersistableFormState(maximized, new Rectangle(left, top, width, height));
                 }

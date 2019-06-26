@@ -120,7 +120,7 @@ namespace Eutherion.Win.Storage
         }
 
         public sealed override bool IsValidValue(PValue value)
-            => !PType.TryGetValidValue(value).IsOption1(out _);
+            => !PType.TryConvert(value).IsNothing;
 
         internal sealed override bool IsValidValue(PValue value, out ITypeErrorBuilder typeError)
             => !PType.TryGetValidValue(value).IsOption1(out typeError);

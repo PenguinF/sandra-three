@@ -199,7 +199,7 @@ namespace Eutherion.Win.AppTemplate
 
             foreach (var kv in map)
             {
-                if (!PType.String.TryGetValidValue(kv.Value).IsOption2(out PString stringValue))
+                if (!PType.String.TryConvert(kv.Value).IsJust(out PString stringValue))
                 {
                     return InvalidValue(new TranslationDictionaryTypeError(kv.Key, kv.Value));
                 }
