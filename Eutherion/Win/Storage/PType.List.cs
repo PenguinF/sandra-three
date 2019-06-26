@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Eutherion.Utils;
 
 namespace Eutherion.Win.Storage
@@ -35,23 +36,27 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, (T1, T2)> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, (T1, T2)> TryCreateValue(
+                JsonSyntaxNode valueNode,
+                out PValue convertedValue)
             {
-                if (value is PList list
-                    && list.Count == 5
-                    && ItemTypes.Item1.TryGetValidValue(list[0]).IsOption2(out T1 value1)
-                    && ItemTypes.Item2.TryGetValidValue(list[1]).IsOption2(out T2 value2))
+                if (valueNode is JsonListSyntax jsonListSyntax
+                    && jsonListSyntax.ElementNodes.Count == 2
+                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out PValue itemValue1).IsOption2(out T1 value1)
+                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out PValue itemValue2).IsOption2(out T2 value2))
                 {
+                    convertedValue = new PList(new[] { itemValue1, itemValue2 });
                     return (value1, value2);
                 }
 
+                convertedValue = default;
                 return InvalidValue(TupleItemTypeMismatchError);
             }
 
             public override Maybe<(T1, T2)> TryConvert(PValue value)
             {
                 if (value is PList list
-                    && list.Count == 5
+                    && list.Count == 2
                     && ItemTypes.Item1.TryConvert(list[0]).IsJust(out T1 value1)
                     && ItemTypes.Item2.TryConvert(list[1]).IsJust(out T2 value2))
                 {
@@ -79,19 +84,23 @@ namespace Eutherion.Win.Storage
             public TupleType((PType<T1>, PType<T2>, PType<T3>, PType<T4>, PType<T5>) itemTypes)
                 => ItemTypes = itemTypes;
 
-            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, (T1, T2, T3, T4, T5)> TryCreateValue(
+                JsonSyntaxNode valueNode,
+                out PValue convertedValue)
             {
-                if (value is PList list
-                    && list.Count == 5
-                    && ItemTypes.Item1.TryGetValidValue(list[0]).IsOption2(out T1 value1)
-                    && ItemTypes.Item2.TryGetValidValue(list[1]).IsOption2(out T2 value2)
-                    && ItemTypes.Item3.TryGetValidValue(list[2]).IsOption2(out T3 value3)
-                    && ItemTypes.Item4.TryGetValidValue(list[3]).IsOption2(out T4 value4)
-                    && ItemTypes.Item5.TryGetValidValue(list[4]).IsOption2(out T5 value5))
+                if (valueNode is JsonListSyntax jsonListSyntax
+                    && jsonListSyntax.ElementNodes.Count == 5
+                    && ItemTypes.Item1.TryCreateValue(jsonListSyntax.ElementNodes[0], out PValue itemValue1).IsOption2(out T1 value1)
+                    && ItemTypes.Item2.TryCreateValue(jsonListSyntax.ElementNodes[1], out PValue itemValue2).IsOption2(out T2 value2)
+                    && ItemTypes.Item3.TryCreateValue(jsonListSyntax.ElementNodes[2], out PValue itemValue3).IsOption2(out T3 value3)
+                    && ItemTypes.Item4.TryCreateValue(jsonListSyntax.ElementNodes[3], out PValue itemValue4).IsOption2(out T4 value4)
+                    && ItemTypes.Item5.TryCreateValue(jsonListSyntax.ElementNodes[4], out PValue itemValue5).IsOption2(out T5 value5))
                 {
+                    convertedValue = new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
                     return (value1, value2, value3, value4, value5);
                 }
 
+                convertedValue = default;
                 return InvalidValue(TupleItemTypeMismatchError);
             }
 

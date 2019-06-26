@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Globalization;
@@ -78,10 +79,15 @@ namespace Eutherion.Win.Storage
 
             public BaseType(PTypeErrorBuilder typeError) => TypeError = typeError;
 
-            internal override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
-                => value is TValue targetValue
-                ? targetValue
-                : InvalidValue(TypeError);
+            internal override Union<ITypeErrorBuilder, TValue> TryCreateValue(
+                JsonSyntaxNode valueNode,
+                out PValue convertedValue)
+            {
+                convertedValue = new ToPValueConverter().Visit(valueNode);
+                return convertedValue is TValue targetValue
+                   ? targetValue
+                   : InvalidValue(TypeError);
+            }
 
             public override Maybe<TValue> TryConvert(PValue value)
                 => value is TValue targetValue
@@ -120,8 +126,10 @@ namespace Eutherion.Win.Storage
             protected Derived(PType<TBase> baseType)
                 => BaseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
 
-            internal override sealed Union<ITypeErrorBuilder, T> TryGetValidValue(PValue value)
-                => BaseType.TryGetValidValue(value).Match(InvalidValue, TryGetTargetValue);
+            internal override sealed Union<ITypeErrorBuilder, T> TryCreateValue(
+                JsonSyntaxNode valueNode,
+                out PValue convertedValue)
+                => BaseType.TryCreateValue(valueNode, out convertedValue).Match(InvalidValue, TryGetTargetValue);
 
             public override sealed Maybe<T> TryConvert(PValue value)
                 => BaseType.TryConvert(value).Bind(

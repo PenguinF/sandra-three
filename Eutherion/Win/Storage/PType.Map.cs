@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System.Collections.Generic;
 
@@ -36,25 +37,31 @@ namespace Eutherion.Win.Storage
             public ValueMap(PType<T> itemType)
                 => ItemType = itemType;
 
-            internal override Union<ITypeErrorBuilder, Dictionary<string, T>> TryGetValidValue(PValue value)
+            internal override Union<ITypeErrorBuilder, Dictionary<string, T>> TryCreateValue(
+                JsonSyntaxNode valueNode,
+                out PValue convertedValue)
             {
-                if (value is PMap map)
+                if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
+                    var mapBuilder = new Dictionary<string, PValue>();
                     var dictionary = new Dictionary<string, T>();
 
-                    foreach (var kv in map)
+                    foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
                     {
                         // Error tolerance: ignore items of the wrong type.
                         // TODO: report errors.
-                        if (ItemType.TryGetValidValue(kv.Value).IsOption2(out T itemValue))
+                        if (ItemType.TryCreateValue(keyedNode.Value, out PValue itemValue).IsOption2(out T value))
                         {
-                            dictionary.Add(kv.Key, itemValue);
+                            mapBuilder.Add(keyedNode.Key.Value, itemValue);
+                            dictionary.Add(keyedNode.Key.Value, value);
                         }
                     }
 
+                    convertedValue = new PMap(mapBuilder);
                     return dictionary;
                 }
 
+                convertedValue = default;
                 return InvalidValue(MapTypeError);
             }
 
