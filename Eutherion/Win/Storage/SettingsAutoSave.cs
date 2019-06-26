@@ -46,7 +46,7 @@ namespace Eutherion.Win.Storage
                 {
                     // Load into a copy of RemoteSettings, preserving defaults.
                     var workingCopy = RemoteSettings.CreateWorkingCopy();
-                    var errors = SettingReader.ReadWorkingCopy(loadedText, workingCopy);
+                    var errors = workingCopy.TryLoadFromText(loadedText);
 
                     if (errors.Count > 0)
                     {

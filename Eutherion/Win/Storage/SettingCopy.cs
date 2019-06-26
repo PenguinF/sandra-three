@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
 
@@ -182,6 +183,27 @@ namespace Eutherion.Win.Storage
             Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
             foreach (var kv in KeyValueMapping) mapBuilder.Add(kv.Key.Key, kv.Value);
             return new PMap(mapBuilder);
+        }
+
+        /// <summary>
+        /// Loads settings from text.
+        /// </summary>
+        internal List<JsonErrorInfo> TryLoadFromText(string json)
+        {
+            var parser = new SettingReader(json);
+
+            if (parser.TryParse(Schema, out PMap map, out List<JsonErrorInfo> errors))
+            {
+                foreach (var kv in map)
+                {
+                    if (Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
+                    {
+                        AddOrReplaceRaw(property, kv.Value);
+                    }
+                }
+            }
+
+            return errors;
         }
     }
 }

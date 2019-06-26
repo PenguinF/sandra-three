@@ -88,27 +88,6 @@ namespace Eutherion.Win.Storage
             map = default;
             return false;
         }
-
-        /// <summary>
-        /// Loads settings from a file into a <see cref="SettingCopy"/>.
-        /// </summary>
-        internal static List<JsonErrorInfo> ReadWorkingCopy(string json, SettingCopy workingCopy)
-        {
-            var parser = new SettingReader(json);
-
-            if (parser.TryParse(workingCopy.Schema, out PMap map, out List<JsonErrorInfo> errors))
-            {
-                foreach (var kv in map)
-                {
-                    if (workingCopy.Schema.TryGetProperty(new SettingKey(kv.Key), out SettingProperty property))
-                    {
-                        workingCopy.AddOrReplaceRaw(property, kv.Value);
-                    }
-                }
-            }
-
-            return errors;
-        }
     }
 
     public class ToPValueConverter : JsonSyntaxNodeVisitor<PValue>
