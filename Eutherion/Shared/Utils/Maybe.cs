@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Utils
 {
     /// <summary>
@@ -38,6 +40,9 @@ namespace Eutherion.Utils
                 value = default;
                 return false;
             }
+
+            public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
+                => Maybe<TResult>.Nothing;
         }
 
         private sealed class JustValue : Maybe<T>
@@ -53,6 +58,9 @@ namespace Eutherion.Utils
                 value = Value;
                 return true;
             }
+
+            public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
+                => whenJust(Value);
         }
 
         /// <summary>
@@ -90,5 +98,23 @@ namespace Eutherion.Utils
         /// Whether or not this <see cref="Maybe{T}"/> contains a value.
         /// </returns>
         public abstract bool IsJust(out T value);
+
+        /// <summary>
+        /// If this <see cref="Maybe{T}"/> contains a value, applies a function to it
+        /// to return a <see cref="Maybe{T}"/> of another target type.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// The type of the result.
+        /// </typeparam>
+        /// <param name="whenJust">
+        /// The function to apply if this <see cref="Maybe{T}"/> contains a value.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Maybe{T}"/> of the result type.
+        /// </returns>
+        /// <exception cref="NullReferenceException">
+        /// <paramref name="whenJust"/> is null.
+        /// </exception>
+        public abstract Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust);
     }
 }
