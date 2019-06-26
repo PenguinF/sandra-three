@@ -72,7 +72,7 @@ namespace Eutherion.Win.AppTemplate
         public override (IEnumerable<TextElement<JsonSymbol>>, List<JsonErrorInfo>) Parse(string code)
         {
             var parser = new SettingReader(code);
-            parser.TryParse(schema, out PMap dummy, out List<JsonErrorInfo> errors);
+            parser.TryParse(schema, out _, out List<JsonErrorInfo> errors);
 
             if (errors.Count > 0)
             {

@@ -62,18 +62,20 @@ namespace Eutherion.Win.Storage
                     // Analyze values with the provided schema while building the PMap.
                     foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
                     {
-                        var convertedValue = converter.Visit(keyedNode.Value);
-
                         // TODO: should probably add a warning if a property key does not exist.
                         if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                         {
-                            if (!property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            var convertedValue = converter.Visit(keyedNode.Value);
+
+                            if (property.IsValidValue(convertedValue, out ITypeErrorBuilder typeError))
+                            {
+                                mapBuilder.Add(keyedNode.Key.Value, convertedValue);
+                            }
+                            else
                             {
                                 errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
                         }
-
-                        mapBuilder.Add(keyedNode.Key.Value, convertedValue);
                     }
 
                     map = new PMap(mapBuilder);
