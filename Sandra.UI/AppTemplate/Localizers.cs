@@ -163,7 +163,7 @@ namespace Eutherion.Win.AppTemplate
 
         public override Union<ITypeErrorBuilder, string> TryGetTargetValue(string value)
             => !string.IsNullOrWhiteSpace(value)
-            ? ValidValue(value.Trim())
+            ? value.Trim()
             : InvalidValue(TrimmedStringTypeError);
     }
 
@@ -207,7 +207,7 @@ namespace Eutherion.Win.AppTemplate
                 dictionary.Add(new LocalizedStringKey(kv.Key), stringValue.Value);
             }
 
-            return ValidValue(dictionary);
+            return dictionary;
         }
     }
 

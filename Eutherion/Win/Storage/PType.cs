@@ -44,18 +44,6 @@ namespace Eutherion.Win.Storage
             => Union<ITypeErrorBuilder, T>.Option1(typeError);
 
         /// <summary>
-        /// Helper method to indicate a successful conversion in <see cref="TryGetValidValue(PValue)"/>.
-        /// </summary>
-        /// <param name="targetValue">
-        /// The successfully converted value.
-        /// </param>
-        /// <returns>
-        /// The target value to convert to, indicating a successful conversion.
-        /// </returns>
-        protected Union<ITypeErrorBuilder, T> ValidValue(T targetValue)
-            => Union<ITypeErrorBuilder, T>.Option2(targetValue);
-
-        /// <summary>
         /// Attempts to convert a raw <see cref="PValue"/> to the target .NET type <typeparamref name="T"/>.
         /// </summary>
         /// <param name="value">

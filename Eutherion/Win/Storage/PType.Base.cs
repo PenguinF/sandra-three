@@ -80,7 +80,7 @@ namespace Eutherion.Win.Storage
 
             public override Union<ITypeErrorBuilder, TValue> TryGetValidValue(PValue value)
                 => value is TValue targetValue
-                ? ValidValue(targetValue)
+                ? targetValue
                 : InvalidValue(TypeError);
 
             public override PValue GetPValue(TValue value) => value;
@@ -203,7 +203,7 @@ namespace Eutherion.Win.Storage
 
             public override sealed Union<ITypeErrorBuilder, T> TryGetTargetValue(T candidateValue)
                 => IsValid(candidateValue, out ITypeErrorBuilder typeError)
-                ? ValidValue(candidateValue)
+                ? candidateValue
                 : InvalidValue(typeError);
 
             public override sealed T GetBaseValue(T value)

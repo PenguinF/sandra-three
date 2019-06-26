@@ -54,7 +54,7 @@ namespace Eutherion.Win.Storage
                     && PType.CLR.Int32.TryGetValidValue(windowBoundsList[3]).IsOption2(out int width)
                     && PType.CLR.Int32.TryGetValidValue(windowBoundsList[4]).IsOption2(out int height))
                 {
-                    return ValidValue(new PersistableFormState(maximized, new Rectangle(left, top, width, height)));
+                    return new PersistableFormState(maximized, new Rectangle(left, top, width, height));
                 }
 
                 return InvalidValue(PersistableFormStateTypeError);

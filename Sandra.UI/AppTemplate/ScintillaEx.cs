@@ -285,8 +285,9 @@ namespace Eutherion.Win.AppTemplate
         private ScintillaZoomFactor() : base(new PType.RangedInteger(MinDiscreteValue, MaxDiscreteValue)) { }
 
         public override Union<ITypeErrorBuilder, int> TryGetTargetValue(PInteger integer)
-            => ValidValue((int)integer.Value);
+            => (int)integer.Value;
 
-        public override PInteger GetBaseValue(int value) => new PInteger(value);
+        public override PInteger GetBaseValue(int value)
+            => new PInteger(value);
     }
 }

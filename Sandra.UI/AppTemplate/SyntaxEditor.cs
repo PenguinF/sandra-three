@@ -496,7 +496,7 @@ namespace Eutherion.Win.AppTemplate
                 && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[0]).IsOption2(out string fileName1)
                 && FileNameType.InstanceAllowStartWithDots.TryGetValidValue(pair[1]).IsOption2(out string fileName2))
             {
-                return ValidValue(new AutoSaveFileNamePair(fileName1, fileName2));
+                return new AutoSaveFileNamePair(fileName1, fileName2);
             }
 
             return InvalidValue(AutoSaveFilePairTypeError);
