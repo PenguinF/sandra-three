@@ -22,6 +22,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Numerics;
 
 namespace Eutherion
 {
@@ -30,6 +32,30 @@ namespace Eutherion
     /// </summary>
     public static class UtilityExtensions
     {
+        /// <summary>
+        /// Returns a locale invariant representation of an integer.
+        /// </summary>
+        /// <param name="value">
+        /// The integer to convert.
+        /// </param>
+        /// <returns>
+        /// The locale invariant representation
+        /// </returns>
+        public static string ToStringInvariant(this int value)
+            => value.ToString(CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Returns a locale invariant representation of an integer.
+        /// </summary>
+        /// <param name="value">
+        /// The integer to convert.
+        /// </param>
+        /// <returns>
+        /// The locale invariant representation
+        /// </returns>
+        public static string ToStringInvariant(this BigInteger value)
+            => value.ToString(CultureInfo.InvariantCulture);
+
         /// <summary>
         /// Sets a single value at each index of the array.
         /// </summary>
