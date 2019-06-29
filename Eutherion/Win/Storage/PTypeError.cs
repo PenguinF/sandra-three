@@ -48,6 +48,64 @@ namespace Eutherion.Win.Storage
     }
 
     /// <summary>
+    /// Represents an error caused by an unknown property key within a schema.
+    /// </summary>
+    public class UnrecognizedPropertyKeyTypeError : PTypeError
+    {
+        /// <summary>
+        /// Gets the property key for which this error occurred.
+        /// </summary>
+        public string PropertyKey { get; }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public override string GetLocalizedMessage(Localizer localizer)
+            => localizer.Localize(
+                PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError,
+                new[] { PropertyKey });
+
+        private UnrecognizedPropertyKeyTypeError(string propertyKey, int start, int length)
+            : base(start, length)
+        {
+            PropertyKey = propertyKey;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="UnrecognizedPropertyKeyTypeError"/>.
+        /// </summary>
+        /// <param name="keyNode">
+        /// The property key for which the error is generated.
+        /// </param>
+        /// <param name="json">
+        /// The source json which contains the type error.
+        /// </param>
+        /// <returns>
+        /// A <see cref="UnrecognizedPropertyKeyTypeError"/> instance which generates a localized error message.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
+        {
+            if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
+            if (json == null) throw new ArgumentNullException(nameof(json));
+
+            return new UnrecognizedPropertyKeyTypeError(
+                // Do a Substring because the property key may contain escaped characters.
+                json.Substring(keyNode.Start, keyNode.Length),
+                keyNode.Start,
+                keyNode.Length);
+        }
+    }
+
+    /// <summary>
     /// Represents an error caused by a value being of a different type than expected.
     /// </summary>
     public class ValueTypeErrorAtPropertyKey : PTypeError

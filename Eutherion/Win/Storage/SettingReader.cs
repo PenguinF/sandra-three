@@ -60,7 +60,6 @@ namespace Eutherion.Win.Storage
                     // Analyze values with the provided schema while building the PMap.
                     foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
                     {
-                        // TODO: should probably add a warning if a property key does not exist.
                         if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                         {
                             var valueOrError = property.TryCreateValue(json, keyedNode.Value, errors);
@@ -74,6 +73,11 @@ namespace Eutherion.Win.Storage
                                 valueOrError.IsOption1(out ITypeErrorBuilder typeError);
                                 errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
+                        }
+                        else
+                        {
+                            // TODO: add error levels, this should probably be a warning.
+                            errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
                         }
                     }
 

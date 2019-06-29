@@ -29,14 +29,19 @@ namespace Eutherion.Win.Storage
     public class PTypeErrorBuilder : ITypeErrorBuilder
     {
         /// <summary>
-        /// Gets the translation key for when there are no legal values.
-        /// </summary>
-        public static readonly LocalizedStringKey NoLegalValues = new LocalizedStringKey(nameof(NoLegalValues));
-
-        /// <summary>
         /// Gets the translation key for concatenating a list of values.
         /// </summary>
         public static readonly LocalizedStringKey EnumerateWithOr = new LocalizedStringKey(nameof(EnumerateWithOr));
+
+        /// <summary>
+        /// Gets the translation key for property keys that are not recognized.
+        /// </summary>
+        public static readonly LocalizedStringKey UnrecognizedPropertyKeyTypeError = new LocalizedStringKey(nameof(UnrecognizedPropertyKeyTypeError));
+
+        /// <summary>
+        /// Gets the translation key for when there are no legal values.
+        /// </summary>
+        public static readonly LocalizedStringKey NoLegalValues = new LocalizedStringKey(nameof(NoLegalValues));
 
         /// <summary>
         /// Gets the translation key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.

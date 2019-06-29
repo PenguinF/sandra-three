@@ -78,13 +78,16 @@ namespace Eutherion.Win.AppTemplate
             { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             { PType.JsonUndefinedValue, "an undefined value" },
 
+            { PTypeErrorBuilder.EnumerateWithOr, "{0} or {1}" },
+
+            { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "Unrecognized key {0} in object" },
+
             { PType.BooleanTypeError.LocalizedMessageKey, "Expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
             { PType.IntegerTypeError.LocalizedMessageKey, "Expected integer value for {0}, but found {1}" },
             { PType.StringTypeError.LocalizedMessageKey, "Expected string value for {0}, but found {1}" },
             { PType.MapTypeError.LocalizedMessageKey, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
 
             { PTypeErrorBuilder.NoLegalValues, "Found value {1}, but there exist no legal values for {0}" },
-            { PTypeErrorBuilder.EnumerateWithOr, "{0} or {1}" },
             { PType.EnumerationTypeError, "Expected {2} for {0}, but found {1}" },
             { PType.KeyedSetTypeError, "Expected {2} for {0}, but found {1}" },
             { PType.RangedIntegerTypeError, "Expected integer value between {2} and {3} for {0}, but found {1}" },
