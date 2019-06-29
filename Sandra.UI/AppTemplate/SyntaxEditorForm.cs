@@ -233,6 +233,9 @@ namespace Eutherion.Win.AppTemplate
             {
                 UIMenu.UpdateMenu(MainMenuStrip.Items);
             }
+
+            // Individual error translations may have changed.
+            DisplayErrors();
         }
 
         private List<UIMenuNode> BindMainMenuItemActions(params DefaultUIActionBinding[] bindings)
