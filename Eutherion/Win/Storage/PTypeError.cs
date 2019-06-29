@@ -171,36 +171,11 @@ namespace Eutherion.Win.Storage
         public static ValueTypeErrorAtPropertyKey Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonSyntaxNode valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
-            if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
-
-            const int maxLength = 30;
-            const string ellipsis = "...";
-            const int ellipsisLength = 3;
-
-            string valueString;
-            if (valueNode is JsonMissingValueSyntax)
-            {
-                // Missing values.
-                valueString = null;
-            }
-            else if (valueNode.Length <= maxLength)
-            {
-                valueString = json.Substring(valueNode.Start, valueNode.Length);
-
-                if (!(valueNode is JsonStringLiteralSyntax))
-                {
-                    valueString = PTypeErrorBuilder.QuoteValue(valueString);
-                }
-            }
-            else
-            {
-                valueString = PTypeErrorBuilder.QuoteValue(json.Substring(valueNode.Start, maxLength - ellipsisLength) + ellipsis);
-            }
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
                 PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
-                valueString,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
                 valueNode.Start,
                 valueNode.Length);
         }

@@ -97,6 +97,60 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
+        /// Gets the display string for a json value.
+        /// </summary>
+        /// <param name="valueNode">
+        /// The value node.
+        /// </param>
+        /// <param name="json">
+        /// The source json on which the <paramref name="valueNode"/> is based.
+        /// </param>
+        /// <returns>
+        /// The display string.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static string GetValueDisplayString(JsonSyntaxNode valueNode, string json)
+        {
+            if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
+            if (json == null) throw new ArgumentNullException(nameof(json));
+
+            const int maxLength = 30;
+            const string ellipsis = "...";
+            const int ellipsisLength = 3;
+
+            switch (valueNode)
+            {
+                case JsonMissingValueSyntax _:
+                    // Missing values.
+                    return null;
+                case JsonStringLiteralSyntax _:
+                    // 2 quote characters.
+                    if (valueNode.Length <= maxLength)
+                    {
+                        // QuoteStringValue not necessary, already quoted.
+                        return json.Substring(valueNode.Start, valueNode.Length);
+                    }
+                    else
+                    {
+                        // Remove quotes, add ellipsis to inner string value, then quote again.
+                        // Somehow it looks like placing the ellipsis inside the string quotes makes more sense.
+                        return QuoteStringValue(json.Substring(valueNode.Start + 1, maxLength - ellipsisLength - 2) + ellipsis);
+                    }
+                default:
+                    if (valueNode.Length <= maxLength)
+                    {
+                        return QuoteValue(json.Substring(valueNode.Start, valueNode.Length));
+                    }
+                    else
+                    {
+                        return QuoteValue(json.Substring(valueNode.Start, maxLength - ellipsisLength) + ellipsis);
+                    }
+            }
+        }
+
+        /// <summary>
         /// Gets the translation key for this error message.
         /// </summary>
         // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
