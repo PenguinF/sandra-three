@@ -26,9 +26,31 @@ using System;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
+    /// Represents a semantic type error caused by a failed typecheck in any of the <see cref="PType{T}"/> subclasses.
+    /// </summary>
+    public abstract class PTypeError : JsonErrorInfo
+    {
+        public PTypeError(int start, int length)
+            : base(JsonErrorCode.Custom, start, length)
+        {
+        }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public abstract string GetLocalizedMessage(Localizer localizer);
+    }
+
+    /// <summary>
     /// Represents an error caused by a value being of a different type than expected.
     /// </summary>
-    public class PTypeError : JsonErrorInfo
+    public class ValueTypeErrorAtPropertyKey : PTypeError
     {
         /// <summary>
         /// Gets the context insensitive information for this error message.
@@ -54,13 +76,14 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// The localized error message.
         /// </returns>
-        public string GetLocalizedMessage(Localizer localizer) => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
-            localizer,
-            PropertyKey,
-            ValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+        public override string GetLocalizedMessage(Localizer localizer)
+            => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                localizer,
+                PropertyKey,
+                ValueString ?? localizer.Localize(PType.JsonUndefinedValue));
 
-        private PTypeError(ITypeErrorBuilder typeErrorBuilder, string propertyKey, string valueString, int start, int length)
-            : base(JsonErrorCode.Custom, start, length)
+        private ValueTypeErrorAtPropertyKey(ITypeErrorBuilder typeErrorBuilder, string propertyKey, string valueString, int start, int length)
+            : base(start, length)
         {
             TypeErrorBuilder = typeErrorBuilder;
             PropertyKey = propertyKey;
@@ -68,7 +91,7 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="PTypeError"/>.
+        /// Initializes a new instance of <see cref="ValueTypeErrorAtPropertyKey"/>.
         /// </summary>
         /// <param name="typeErrorBuilder">
         /// The context insensitive information for this error message.
@@ -83,12 +106,12 @@ namespace Eutherion.Win.Storage
         /// The source json which contains the type error.
         /// </param>
         /// <returns>
-        /// A <see cref="PTypeError"/> instance which generates a localized error message.
+        /// A <see cref="ValueTypeErrorAtPropertyKey"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> is null.
         /// </exception>
-        public static PTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonSyntaxNode valueNode, string json)
+        public static ValueTypeErrorAtPropertyKey Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonSyntaxNode valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
@@ -116,7 +139,7 @@ namespace Eutherion.Win.Storage
                 valueString = PTypeErrorBuilder.QuoteValue(json.Substring(valueNode.Start, maxLength - ellipsisLength) + ellipsis);
             }
 
-            return new PTypeError(
+            return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
                 // Do a Substring because the property key may contain escaped characters.
                 keyNode == null ? null : json.Substring(keyNode.Start, keyNode.Length),

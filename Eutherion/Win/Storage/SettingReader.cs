@@ -72,7 +72,7 @@ namespace Eutherion.Win.Storage
                             else
                             {
                                 valueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                                errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                                errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                             }
                         }
                     }
@@ -81,7 +81,7 @@ namespace Eutherion.Win.Storage
                     return true;
                 }
 
-                errors.Add(PTypeError.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
+                errors.Add(ValueTypeErrorAtPropertyKey.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
             }
 
             map = default;

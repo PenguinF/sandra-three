@@ -60,7 +60,7 @@ namespace Eutherion.Win.Storage
                         else
                         {
                             itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                            errors.Add(PTypeError.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                            errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
                         }
                     }
 
