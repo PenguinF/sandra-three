@@ -117,7 +117,7 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the string representation of the value for which this error occurred.
         /// </summary>
-        public string ValueString { get; }
+        public string ActualValueString { get; }
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -132,14 +132,19 @@ namespace Eutherion.Win.Storage
             => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
                 localizer,
                 PropertyKey,
-                ValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue));
 
-        private ValueTypeErrorAtPropertyKey(ITypeErrorBuilder typeErrorBuilder, string propertyKey, string valueString, int start, int length)
+        private ValueTypeErrorAtPropertyKey(
+            ITypeErrorBuilder typeErrorBuilder,
+            string propertyKey,
+            string actualValueString,
+            int start,
+            int length)
             : base(start, length)
         {
             TypeErrorBuilder = typeErrorBuilder;
             PropertyKey = propertyKey;
-            ValueString = valueString;
+            ActualValueString = actualValueString;
         }
 
         /// <summary>
