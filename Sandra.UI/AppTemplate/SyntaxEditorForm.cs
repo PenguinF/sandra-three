@@ -26,7 +26,6 @@ using Eutherion.Win.UIActions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -357,8 +356,8 @@ namespace Eutherion.Win.AppTemplate
                                          let errorStart = errorRange.Item1
                                          let errorLength = errorRange.Item2
                                          let errorMessage = SyntaxEditor.SyntaxDescriptor.GetErrorMessage(error)
-                                         let lineIndex = (SyntaxEditor.LineFromPosition(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
-                                         let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToString(CultureInfo.InvariantCulture)
+                                         let lineIndex = (SyntaxEditor.LineFromPosition(errorStart) + 1).ToStringInvariant()
+                                         let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
                                          select Session.Current.CurrentLocalizer.Localize(

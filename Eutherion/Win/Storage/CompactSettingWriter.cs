@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text.Json;
-using System.Globalization;
 using System.Text;
 
 namespace Eutherion.Win.Storage
@@ -87,7 +86,7 @@ namespace Eutherion.Win.Storage
             => outputBuilder.Append(JsonValue.BoolSymbol(value.Value));
 
         public override void VisitInteger(PInteger value)
-            => outputBuilder.Append(value.Value.ToString(CultureInfo.InvariantCulture));
+            => outputBuilder.Append(value.Value.ToStringInvariant());
 
         public override void VisitString(PString value)
             => AppendString(value.Value);

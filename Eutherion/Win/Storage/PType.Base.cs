@@ -333,8 +333,8 @@ namespace Eutherion.Win.Storage
                 {
                     propertyKey,
                     valueString,
-                    MinValue.ToString(CultureInfo.InvariantCulture),
-                    MaxValue.ToString(CultureInfo.InvariantCulture)
+                    MinValue.ToStringInvariant(),
+                    MaxValue.ToStringInvariant(),
                 });
 
             public override string ToString()

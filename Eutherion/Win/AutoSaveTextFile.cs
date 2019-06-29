@@ -23,7 +23,6 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -286,7 +285,7 @@ namespace Eutherion.Win
             // Write the length of the text plus a newline character before the rest, to aid recovery from crashes.
             // The length of its string representation will be smaller than CharBufferSize
             // until the day string lengths exceed 10¹⁰²⁴ - 2.
-            string firstLine = remainingLength.ToString(CultureInfo.InvariantCulture) + newLineChar;
+            string firstLine = remainingLength.ToStringInvariant() + newLineChar;
             firstLine.CopyTo(0, buffer, 0, firstLine.Length);
             int firstLineBytes = encoder.GetBytes(buffer, 0, firstLine.Length, encodedBuffer, 0, false);
             await targetFile.WriteAsync(encodedBuffer, 0, firstLineBytes);
