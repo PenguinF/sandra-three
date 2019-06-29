@@ -102,7 +102,7 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Represents an error caused by a value being of a different type than expected.
     /// </summary>
-    public class ValueTypeErrorAtPropertyKey : PTypeError
+    public class ValueTypeError : PTypeError
     {
         /// <summary>
         /// Gets the context insensitive information for this error message.
@@ -110,14 +110,71 @@ namespace Eutherion.Win.Storage
         public ITypeErrorBuilder TypeErrorBuilder { get; }
 
         /// <summary>
-        /// Gets the property key for which this error occurred, or null if there was none.
-        /// </summary>
-        public string PropertyKey { get; }
-
-        /// <summary>
         /// Gets the string representation of the value for which this error occurred.
         /// </summary>
         public string ActualValueString { get; }
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public override string GetLocalizedMessage(Localizer localizer)
+            => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                localizer,
+                null,
+                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+
+        internal ValueTypeError(ITypeErrorBuilder typeErrorBuilder, string actualValueString, int start, int length)
+            : base(start, length)
+        {
+            TypeErrorBuilder = typeErrorBuilder;
+            ActualValueString = actualValueString;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ValueTypeError"/>.
+        /// </summary>
+        /// <param name="typeErrorBuilder">
+        /// The context insensitive information for this error message.
+        /// </param>
+        /// <param name="valueNode">
+        /// The value node corresponding to the value that was typechecked.
+        /// </param>
+        /// <param name="json">
+        /// The source json which contains the type error.
+        /// </param>
+        /// <returns>
+        /// A <see cref="ValueTypeError"/> instance which generates a localized error message.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonSyntaxNode valueNode, string json)
+        {
+            if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
+
+            return new ValueTypeError(
+                typeErrorBuilder,
+                PTypeErrorBuilder.GetValueDisplayString(valueNode, json),
+                valueNode.Start,
+                valueNode.Length);
+        }
+    }
+
+    /// <summary>
+    /// Represents an error caused by a value at a property key being of a different type than expected.
+    /// </summary>
+    public class ValueTypeErrorAtPropertyKey : ValueTypeError
+    {
+        /// <summary>
+        /// Gets the property key for which this error occurred.
+        /// </summary>
+        public string PropertyKey { get; }
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -140,11 +197,9 @@ namespace Eutherion.Win.Storage
             string actualValueString,
             int start,
             int length)
-            : base(start, length)
+            : base(typeErrorBuilder, actualValueString, start, length)
         {
-            TypeErrorBuilder = typeErrorBuilder;
             PropertyKey = propertyKey;
-            ActualValueString = actualValueString;
         }
 
         /// <summary>

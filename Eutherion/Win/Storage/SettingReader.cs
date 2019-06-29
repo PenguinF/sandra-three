@@ -85,7 +85,7 @@ namespace Eutherion.Win.Storage
                     return true;
                 }
 
-                errors.Add(ValueTypeErrorAtPropertyKey.Create(RootValueShouldBeObjectTypeError, null, rootNode, json));
+                errors.Add(ValueTypeError.Create(RootValueShouldBeObjectTypeError, rootNode, json));
             }
 
             map = default;
