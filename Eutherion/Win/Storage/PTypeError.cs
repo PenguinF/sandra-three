@@ -93,16 +93,10 @@ namespace Eutherion.Win.Storage
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
         public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json)
-        {
-            if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
-            if (json == null) throw new ArgumentNullException(nameof(json));
-
-            return new UnrecognizedPropertyKeyTypeError(
-                // Do a Substring because the property key may contain escaped characters.
-                json.Substring(keyNode.Start, keyNode.Length),
+            => new UnrecognizedPropertyKeyTypeError(
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
                 keyNode.Start,
                 keyNode.Length);
-        }
     }
 
     /// <summary>
@@ -167,11 +161,12 @@ namespace Eutherion.Win.Storage
         /// A <see cref="ValueTypeErrorAtPropertyKey"/> instance which generates a localized error message.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="typeErrorBuilder"/> is null.
+        /// <paramref name="typeErrorBuilder"/> and/or <paramref name="keyNode"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
         public static ValueTypeErrorAtPropertyKey Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonSyntaxNode valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
+            if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
 
             const int maxLength = 30;
             const string ellipsis = "...";
@@ -199,8 +194,7 @@ namespace Eutherion.Win.Storage
 
             return new ValueTypeErrorAtPropertyKey(
                 typeErrorBuilder,
-                // Do a Substring because the property key may contain escaped characters.
-                keyNode == null ? null : json.Substring(keyNode.Start, keyNode.Length),
+                PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json),
                 valueString,
                 valueNode.Start,
                 valueNode.Length);

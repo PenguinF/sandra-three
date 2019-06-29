@@ -20,6 +20,8 @@
 #endregion
 
 using Eutherion.Localization;
+using Eutherion.Text.Json;
+using System;
 
 namespace Eutherion.Win.Storage
 {
@@ -69,6 +71,30 @@ namespace Eutherion.Win.Storage
         /// The value surrounded with single quote characters.
         /// </returns>
         public static string QuoteValue(string value) => $"'{value}'";
+
+        /// <summary>
+        /// Gets the display string for a property key.
+        /// </summary>
+        /// <param name="keyNode">
+        /// The key node that contains the property key for which the error is generated.
+        /// </param>
+        /// <param name="json">
+        /// The source json on which the <paramref name="keyNode"/> is based.
+        /// </param>
+        /// <returns>
+        /// The display string.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
+        /// </exception>
+        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json)
+        {
+            if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
+            if (json == null) throw new ArgumentNullException(nameof(json));
+
+            // Do a Substring rather than keyNode.Value because the property key may contain escaped characters.
+            return json.Substring(keyNode.Start, keyNode.Length);
+        }
 
         /// <summary>
         /// Gets the translation key for this error message.
