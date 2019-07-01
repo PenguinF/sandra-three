@@ -118,18 +118,17 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             {
                 if (stringToEnum.Count == 0)
                 {
-                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
-                    {
-                        propertyKey,
-                        valueString
-                    });
+                    return localizer.Localize(
+                        PTypeErrorBuilder.NoLegalValues,
+                        new[]
+                        {
+                            propertyKey,
+                            actualValueString,
+                        });
                 }
 
                 string localizedValueList;
@@ -155,7 +154,7 @@ namespace Eutherion.Win.Storage
                     new[]
                     {
                         localizedValueList,
-                        valueString,
+                        actualValueString,
                         propertyKey,
                     });
             }
@@ -195,18 +194,17 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             {
                 if (stringToTarget.Count == 0)
                 {
-                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
-                    {
-                        propertyKey,
-                        valueString
-                    });
+                    return localizer.Localize(
+                        PTypeErrorBuilder.NoLegalValues,
+                        new[]
+                        {
+                            propertyKey,
+                            actualValueString,
+                        });
                 }
 
                 string localizedKeysList;
@@ -233,7 +231,7 @@ namespace Eutherion.Win.Storage
                     new[]
                     {
                         localizedKeysList,
-                        valueString,
+                        actualValueString,
                         propertyKey,
                     });
             }

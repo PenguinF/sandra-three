@@ -124,10 +124,10 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public override string GetLocalizedMessage(Localizer localizer)
-            => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
+            => TypeErrorBuilder.GetLocalizedTypeErrorAtPropertyKeyMessage(
                 localizer,
-                null,
-                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue),
+                null);
 
         internal ValueTypeError(ITypeErrorBuilder typeErrorBuilder, string actualValueString, int start, int length)
             : base(start, length)
@@ -186,10 +186,10 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public override string GetLocalizedMessage(Localizer localizer)
-            => TypeErrorBuilder.GetLocalizedTypeErrorMessage(
+            => TypeErrorBuilder.GetLocalizedTypeErrorAtPropertyKeyMessage(
                 localizer,
-                PropertyKey,
-                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue));
+                ActualValueString ?? localizer.Localize(PType.JsonUndefinedValue),
+                PropertyKey);
 
         private ValueTypeErrorAtPropertyKey(
             ITypeErrorBuilder typeErrorBuilder,

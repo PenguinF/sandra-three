@@ -325,17 +325,16 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
-                => localizer.Localize(RangedIntegerTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    MinValue.ToStringInvariant(),
-                    MaxValue.ToStringInvariant(),
-                });
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => localizer.Localize(
+                    RangedIntegerTypeError,
+                    new[]
+                    {
+                        propertyKey,
+                        actualValueString,
+                        MinValue.ToStringInvariant(),
+                        MaxValue.ToStringInvariant(),
+                    });
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";
