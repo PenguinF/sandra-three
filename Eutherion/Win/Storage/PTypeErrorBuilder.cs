@@ -220,11 +220,12 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             => localizer.Localize(
-                ExpectedTypeDescriptionKey,
+                GenericJsonTypeErrorSomewhere,
                 new[]
                 {
-                    propertyKey,
+                    localizer.Localize(ExpectedTypeDescriptionKey),
                     actualValueString,
+                    propertyKey,
                 });
     }
 }

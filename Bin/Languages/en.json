@@ -99,15 +99,14 @@
     "UnrecognizedPropertyKeyTypeError": "unrecognized key {0} in object",
     "GenericJsonTypeError": "expected {0}, but found {1}",
     "GenericJsonTypeErrorSomewhere": "expected {0} for {2}, but found {1}",
-    "BooleanTypeError": "expected 'false' or 'true' value for {0}, but found {1}",
-    "IntegerTypeError": "expected integer value for {0}, but found {1}",
-    "StringTypeError": "expected string value for {0}, but found {1}",
-    "MapTypeError": "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}",
+    "BooleanTypeError": "'false' or 'true' value",
+    "IntegerTypeError": "integer value",
+    "StringTypeError": "string value",
     "NoLegalValues": "found value {1}, but there exist no legal values for {0}",
     "RangedIntegerTypeError": "expected integer value between {2} and {3} for {0}, but found {1}",
-    "OpaqueColorTypeError": "expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}",
-    "FileNameTypeError": "expected valid file name for {0}, but found {1}",
-    "SubFolderNameTypeError": "expected valid subfolder name for {0}, but found {1}",
-    "TrimmedStringTypeError": "expected string value which contains at least one non white-space character for {0}, but found {1}"
+    "OpaqueColorTypeError": "string in the HTML color format (e.g. \"#808000\", or \"#DC143C\")",
+    "FileNameTypeError": "valid file name",
+    "SubFolderNameTypeError": "valid subfolder name",
+    "TrimmedStringTypeError": "string value which contains at least one non white-space character"
   }
 }

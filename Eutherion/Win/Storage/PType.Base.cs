@@ -53,7 +53,7 @@ namespace Eutherion.Win.Storage
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(IntegerTypeError)));
 
         public static readonly PTypeErrorBuilder MapTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(MapTypeError)));
+            = new PTypeErrorBuilder(PType.JsonObject);
 
         public static readonly PTypeErrorBuilder StringTypeError
             = new PTypeErrorBuilder(new LocalizedStringKey(nameof(StringTypeError)));

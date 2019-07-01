@@ -99,15 +99,14 @@
     "UnrecognizedPropertyKeyTypeError": "eigenschap identificatie {0} in object niet herkend",
     "GenericJsonTypeError": "{0} verwacht, maar er staat {1}",
     "GenericJsonTypeErrorSomewhere": "{0} voor eigenschap {2} verwacht, maar er staat {1}",
-    "BooleanTypeError": "'false' of 'true' waarde voor eigenschap {0} verwacht, maar er staat {1}",
-    "IntegerTypeError": "geheel getal voor eigenschap {0} verwacht, maar er staat {1}",
-    "StringTypeError": "stringwaarde voor eigenschap {0} verwacht, maar er staat {1}",
-    "MapTypeError": "object ('{{ \"a\" = 1, \"b\" = 2, ... }}') voor eigenschap {0} verwacht, maar er staat {1}",
+    "BooleanTypeError": "'false' of 'true' waarde",
+    "IntegerTypeError": "geheel getal",
+    "StringTypeError": "stringwaarde",
     "NoLegalValues": "er staat waarde {1}, maar er bestaan geen geldige waarden voor eigenschap {0}",
     "RangedIntegerTypeError": "geheel getal tussen {2} en {3} voor eigenschap {0} verwacht, maar er staat {1}",
-    "OpaqueColorTypeError": "stringwaarde in het HTML kleur formaat (b.v. \"#808000\", of \"#DC143C\") voor eigenschap {0} verwacht, maar er staat {1}",
-    "FileNameTypeError": "geldige bestandsnaam voor eigenschap {0} verwacht, maar er staat {1}",
-    "SubFolderNameTypeError": "geldige mapnaam voor eigenschap {0} verwacht, maar er staat {1}",
-    "TrimmedStringTypeError": "stringwaarde met minstens één niet-witruimte karakter voor eigenschap {0} verwacht, maar er staat {1}"
+    "OpaqueColorTypeError": "stringwaarde in het HTML kleur formaat (b.v. \"#808000\", of \"#DC143C\")",
+    "FileNameTypeError": "geldige bestandsnaam",
+    "SubFolderNameTypeError": "geldige mapnaam",
+    "TrimmedStringTypeError": "stringwaarde met minstens één niet-witruimte karakter"
   }
 }
