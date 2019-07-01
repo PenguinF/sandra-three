@@ -41,6 +41,11 @@ namespace Eutherion.Win.Storage
         public static readonly LocalizedStringKey JsonInteger = new LocalizedStringKey(nameof(JsonInteger));
 
         /// <summary>
+        /// Gets the translation key for referring to a json integer within a specific range.
+        /// </summary>
+        public static readonly LocalizedStringKey RangedJsonInteger = new LocalizedStringKey(nameof(RangedJsonInteger));
+
+        /// <summary>
         /// Gets the translation key for referring to a json string.
         /// </summary>
         public static readonly LocalizedStringKey JsonString = new LocalizedStringKey(nameof(JsonString));
@@ -289,11 +294,6 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        /// <summary>
-        /// Gets the translation key for <see cref="RangedInteger"/> type check failure error messages.
-        /// </summary>
-        public static readonly LocalizedStringKey RangedIntegerTypeError = new LocalizedStringKey(nameof(RangedIntegerTypeError));
-
         public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
@@ -327,18 +327,32 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
+            private string LocalizedExpectedTypeDescription(Localizer localizer)
+                => localizer.Localize(
+                    RangedJsonInteger,
+                    new[]
+                    {
+                        MinValue.ToStringInvariant(),
+                        MaxValue.ToStringInvariant(),
+                    });
+
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
-                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
+                => localizer.Localize(
+                    PTypeErrorBuilder.GenericJsonTypeError,
+                    new[]
+                    {
+                        LocalizedExpectedTypeDescription(localizer),
+                        actualValueString,
+                    });
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
                 => localizer.Localize(
-                    RangedIntegerTypeError,
+                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
                     new[]
                     {
-                        propertyKey,
+                        LocalizedExpectedTypeDescription(localizer),
                         actualValueString,
-                        MinValue.ToStringInvariant(),
-                        MaxValue.ToStringInvariant(),
+                        propertyKey,
                     });
 
             public override string ToString()

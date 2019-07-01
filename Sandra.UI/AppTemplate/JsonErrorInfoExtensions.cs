@@ -102,6 +102,7 @@ namespace Eutherion.Win.AppTemplate
             { PType.JsonArray, "a value array ('[1, 2, ...]')" },
             { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             { PType.JsonUndefinedValue, "an undefined value" },
+            { PType.RangedJsonInteger, "integer value between {0} and {1}" },
 
             { PTypeErrorBuilder.EnumerateWithOr, "{0} or {1}" },
 
@@ -112,7 +113,6 @@ namespace Eutherion.Win.AppTemplate
 
             { PTypeErrorBuilder.NoLegalValuesError, "found value {0}, but there exist no legal values" },
             { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values for {1}" },
-            { PType.RangedIntegerTypeError, "expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
 
