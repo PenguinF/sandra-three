@@ -118,6 +118,9 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
+
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             {
                 if (stringToEnum.Count == 0)
@@ -193,6 +196,9 @@ namespace Eutherion.Win.Storage
 
                 throw new ArgumentException("Target value not found.");
             }
+
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             {

@@ -325,6 +325,9 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
+
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
                 => localizer.Localize(
                     RangedIntegerTypeError,

@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
 using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
@@ -34,7 +33,7 @@ namespace Eutherion.Win.Storage
     public class SettingReader
     {
         public static readonly PTypeErrorBuilder RootValueShouldBeObjectTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError)));
+            = new PTypeErrorBuilder(PType.JsonObject);
 
         private readonly string json;
 

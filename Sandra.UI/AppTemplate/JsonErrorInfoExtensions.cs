@@ -96,8 +96,6 @@ namespace Eutherion.Win.AppTemplate
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
 
-            { SettingReader.RootValueShouldBeObjectTypeError.LocalizedMessageKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
-
             { PType.JsonArray, "a value array ('[1, 2, ...]')" },
             { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             { PType.JsonUndefinedValue, "an undefined value" },
@@ -106,6 +104,7 @@ namespace Eutherion.Win.AppTemplate
 
             { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "unrecognized key {0} in object" },
 
+            { PTypeErrorBuilder.GenericJsonTypeError, "expected {0}, but found {1}" },
             { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} for {2}, but found {1}" },
 
             { PType.BooleanTypeError.LocalizedMessageKey, "expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },

@@ -42,6 +42,14 @@ namespace Eutherion.Win.Storage
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
+        /// Parameters: 0 = description of expected type, 1 = actual value
+        /// Example: "expected an integer value, but found 'false'"
+        ///          "expected _______{0}______, but found __{1}__"
+        /// </summary>
+        public static readonly LocalizedStringKey GenericJsonTypeError = new LocalizedStringKey(nameof(GenericJsonTypeError));
+
+        /// <summary>
+        /// Gets the translation key for a generic json value type error.
         /// Parameters: 0 = description of expected type, 1 = location, 2 = actual value
         /// Example: "expected an integer value at index 3, but found 'false'"
         ///          "expected _______{0}______ ____{1}___, but found __{2}__"
@@ -182,8 +190,29 @@ namespace Eutherion.Win.Storage
         /// <param name="actualValueString">
         /// A string representation of the value in the source code.
         /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+            => localizer.Localize(
+                GenericJsonTypeError,
+                new[]
+                {
+                    localizer.Localize(LocalizedMessageKey),
+                    actualValueString,
+                });
+
+        /// <summary>
+        /// Gets the localized, context sensitive message for this error.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="actualValueString">
+        /// A string representation of the value in the source code.
+        /// </param>
         /// <param name="propertyKey">
-        /// The property key for which the error occurred, or null if there was none.
+        /// The property key for which the error occurred.
         /// </param>
         /// <returns>
         /// The localized error message.
