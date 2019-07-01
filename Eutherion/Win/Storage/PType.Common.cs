@@ -157,13 +157,10 @@ namespace Eutherion.Win.Storage
                 }
 
                 return maybePropertyKey.Match(
-                    whenNothing: () => localizer.Localize(
-                        PTypeErrorBuilder.GenericJsonTypeError,
-                        new[]
-                        {
-                            localizedValueList,
-                            actualValueString,
-                        }),
+                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                        localizer,
+                        localizedValueList,
+                        actualValueString),
                     whenJust: propertyKey => localizer.Localize(
                         PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
                         new[]
@@ -255,13 +252,10 @@ namespace Eutherion.Win.Storage
                 }
 
                 return maybePropertyKey.Match(
-                    whenNothing: () => localizer.Localize(
-                        PTypeErrorBuilder.GenericJsonTypeError,
-                        new[]
-                        {
-                            localizedKeysList,
-                            actualValueString,
-                        }),
+                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                        localizer,
+                        localizedKeysList,
+                        actualValueString),
                     whenJust: propertyKey => localizer.Localize(
                         PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
                         new[]

@@ -45,6 +45,7 @@ namespace Eutherion.Win.Storage
         /// Parameters: 0 = description of expected type, 1 = actual value
         /// Example: "expected an integer value, but found 'false'"
         ///          "expected _______{0}______, but found __{1}__"
+        /// See also: <seealso cref="GetLocalizedTypeErrorMessage"/>.
         /// </summary>
         public static readonly LocalizedStringKey GenericJsonTypeError = new LocalizedStringKey(nameof(GenericJsonTypeError));
 
@@ -188,6 +189,33 @@ namespace Eutherion.Win.Storage
             => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
+        /// Gets the localized error message for a generic json value type error. 
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="localizedExpectedTypeDescription">
+        /// A localized description of the type of value that is expected.
+        /// </param>
+        /// <param name="actualValueString">
+        /// A string representation of the value in the source code.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public static string GetLocalizedTypeErrorMessage(
+            Localizer localizer,
+            string localizedExpectedTypeDescription,
+            string actualValueString)
+            => localizer.Localize(
+                GenericJsonTypeError,
+                new[]
+                {
+                    localizedExpectedTypeDescription,
+                    actualValueString,
+                });
+
+        /// <summary>
         /// Gets the localized, context sensitive message for this error.
         /// </summary>
         /// <param name="localizer">
@@ -200,13 +228,10 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
-            => localizer.Localize(
-                GenericJsonTypeError,
-                new[]
-                {
-                    localizer.Localize(ExpectedTypeDescriptionKey),
-                    actualValueString,
-                });
+            => GetLocalizedTypeErrorMessage(
+                localizer,
+                localizer.Localize(ExpectedTypeDescriptionKey),
+                actualValueString);
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.

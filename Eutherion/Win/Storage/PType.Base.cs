@@ -337,13 +337,10 @@ namespace Eutherion.Win.Storage
                     });
 
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
-                => localizer.Localize(
-                    PTypeErrorBuilder.GenericJsonTypeError,
-                    new[]
-                    {
-                        LocalizedExpectedTypeDescription(localizer),
-                        actualValueString,
-                    });
+                => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                    localizer,
+                    LocalizedExpectedTypeDescription(localizer),
+                    actualValueString);
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
                 => localizer.Localize(
