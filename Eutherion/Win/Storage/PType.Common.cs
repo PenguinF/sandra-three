@@ -84,11 +84,6 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        /// <summary>
-        /// Gets the translation key for a typecheck error message of <see cref="PType.Enumeration{TEnum}"/>.
-        /// </summary>
-        public static readonly LocalizedStringKey EnumerationTypeError = new LocalizedStringKey(nameof(EnumerationTypeError));
-
         public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
@@ -146,26 +141,25 @@ namespace Eutherion.Win.Storage
                 {
                     IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
-                    localizedValueList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
-                    {
-                        string.Join(", ", enumValues),
-                        lastEnumValue
-                    });
+                    localizedValueList = localizer.Localize(
+                        PTypeErrorBuilder.EnumerateWithOr,
+                        new[]
+                        {
+                            string.Join(", ", enumValues),
+                            lastEnumValue,
+                        });
                 }
 
-                return localizer.Localize(EnumerationTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    localizedValueList
-                });
+                return localizer.Localize(
+                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
+                    new[]
+                    {
+                        localizedValueList,
+                        valueString,
+                        propertyKey,
+                    });
             }
         }
-
-        /// <summary>
-        /// Gets the translation key for a typecheck error message of <see cref="PType.KeyedSet{T}"/>.
-        /// </summary>
-        public static readonly LocalizedStringKey KeyedSetTypeError = new LocalizedStringKey(nameof(KeyedSetTypeError));
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
         {
@@ -225,19 +219,23 @@ namespace Eutherion.Win.Storage
                     // TODO: escape characters in KeyedSet keys.
                     IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
-                    localizedKeysList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
-                    {
-                        string.Join(", ", keys),
-                        lastKey
-                    });
+                    localizedKeysList = localizer.Localize(
+                        PTypeErrorBuilder.EnumerateWithOr,
+                        new[]
+                        {
+                            string.Join(", ", keys),
+                            lastKey,
+                        });
                 }
 
-                return localizer.Localize(KeyedSetTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    localizedKeysList
-                });
+                return localizer.Localize(
+                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
+                    new[]
+                    {
+                        localizedKeysList,
+                        valueString,
+                        propertyKey,
+                    });
             }
         }
     }

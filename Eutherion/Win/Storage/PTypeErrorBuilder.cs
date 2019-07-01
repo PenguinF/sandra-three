@@ -41,6 +41,14 @@ namespace Eutherion.Win.Storage
         public static readonly LocalizedStringKey UnrecognizedPropertyKeyTypeError = new LocalizedStringKey(nameof(UnrecognizedPropertyKeyTypeError));
 
         /// <summary>
+        /// Gets the translation key for a generic json value type error.
+        /// Parameters: 0 = description of expected type, 1 = location, 2 = actual value
+        /// Example: "expected an integer value at index 3, but found 'false'"
+        ///          "expected _______{0}______ ____{1}___, but found __{2}__"
+        /// </summary>
+        public static readonly LocalizedStringKey GenericJsonTypeErrorSomewhere = new LocalizedStringKey(nameof(GenericJsonTypeErrorSomewhere));
+
+        /// <summary>
         /// Gets the translation key for when there are no legal values.
         /// </summary>
         public static readonly LocalizedStringKey NoLegalValues = new LocalizedStringKey(nameof(NoLegalValues));

@@ -106,14 +106,14 @@ namespace Eutherion.Win.AppTemplate
 
             { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "unrecognized key {0} in object" },
 
+            { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} for {2}, but found {1}" },
+
             { PType.BooleanTypeError.LocalizedMessageKey, "expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
             { PType.IntegerTypeError.LocalizedMessageKey, "expected integer value for {0}, but found {1}" },
             { PType.StringTypeError.LocalizedMessageKey, "expected string value for {0}, but found {1}" },
             { PType.MapTypeError.LocalizedMessageKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
 
             { PTypeErrorBuilder.NoLegalValues, "found value {1}, but there exist no legal values for {0}" },
-            { PType.EnumerationTypeError, "expected {2} for {0}, but found {1}" },
-            { PType.KeyedSetTypeError, "expected {2} for {0}, but found {1}" },
             { PType.RangedIntegerTypeError, "expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
