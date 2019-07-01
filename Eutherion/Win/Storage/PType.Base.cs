@@ -24,13 +24,27 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Numerics;
 
 namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
+        /// <summary>
+        /// Gets the translation key for referring to a json boolean.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonBoolean = new LocalizedStringKey(nameof(JsonBoolean));
+
+        /// <summary>
+        /// Gets the translation key for referring to a json integer.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonInteger = new LocalizedStringKey(nameof(JsonInteger));
+
+        /// <summary>
+        /// Gets the translation key for referring to a json string.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonString = new LocalizedStringKey(nameof(JsonString));
+
         /// <summary>
         /// Gets the translation key for referring to a general json array (list).
         /// </summary>
@@ -46,32 +60,20 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));
 
-        public static readonly PTypeErrorBuilder BooleanTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(BooleanTypeError)));
-
-        public static readonly PTypeErrorBuilder IntegerTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(IntegerTypeError)));
-
-        public static readonly PTypeErrorBuilder MapTypeError
-            = new PTypeErrorBuilder(PType.JsonObject);
-
-        public static readonly PTypeErrorBuilder StringTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(StringTypeError)));
-
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError, new ToBoolConverter());
+        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(JsonBoolean, new ToBoolConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError, new ToIntConverter());
+        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(JsonInteger, new ToIntConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError, new ToStringConverter());
+        public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
 
         private class ToBoolConverter : JsonSyntaxNodeVisitor<Maybe<PBoolean>>
         {
@@ -97,9 +99,9 @@ namespace Eutherion.Win.Storage
             private readonly PTypeErrorBuilder typeError;
             private readonly JsonSyntaxNodeVisitor<Maybe<TValue>> converter;
 
-            public BaseType(PTypeErrorBuilder typeError, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
+            public BaseType(LocalizedStringKey expectedTypeDescriptionKey, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
             {
-                this.typeError = typeError;
+                typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;
             }
 

@@ -96,6 +96,9 @@ namespace Eutherion.Win.AppTemplate
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
 
+            { PType.JsonBoolean, "'" + JsonValue.False + "' or '" + JsonValue.True + "' value" },
+            { PType.JsonInteger, "integer value" },
+            { PType.JsonString, "string value" },
             { PType.JsonArray, "a value array ('[1, 2, ...]')" },
             { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
             { PType.JsonUndefinedValue, "an undefined value" },
@@ -106,10 +109,6 @@ namespace Eutherion.Win.AppTemplate
 
             { PTypeErrorBuilder.GenericJsonTypeError, "expected {0}, but found {1}" },
             { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} for {2}, but found {1}" },
-
-            { PType.BooleanTypeError.ExpectedTypeDescriptionKey, "'" + JsonValue.False + "' or '" + JsonValue.True + "' value" },
-            { PType.IntegerTypeError.ExpectedTypeDescriptionKey, "integer value" },
-            { PType.StringTypeError.ExpectedTypeDescriptionKey, "string value" },
 
             { PTypeErrorBuilder.NoLegalValuesError, "found value {0}, but there exist no legal values" },
             { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values for {1}" },

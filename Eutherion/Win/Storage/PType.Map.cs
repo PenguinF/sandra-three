@@ -27,6 +27,8 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
+        public static readonly PTypeErrorBuilder MapTypeError = new PTypeErrorBuilder(JsonObject);
+
         /// <summary>
         /// A dictionary with an arbitrary number of string keys, and values are all of the same subtype.
         /// </summary>
