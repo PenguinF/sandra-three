@@ -30,24 +30,14 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Temporary class which parses a list of <see cref="JsonSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
-    public class SettingReader
+    public static class SettingReader
     {
-        public static readonly PTypeErrorBuilder RootValueShouldBeObjectTypeError
-            = new PTypeErrorBuilder(PType.JsonObject);
-
-        private readonly string json;
-
-        public ReadOnlyList<TextElement<JsonSymbol>> Tokens { get; }
-
-        public SettingReader(string json)
+        public static bool TryParse(string json, SettingSchema schema, out PMap map, out ReadOnlyList<TextElement<JsonSymbol>> tokens, out List<JsonErrorInfo> errors)
         {
-            this.json = json ?? throw new ArgumentNullException(nameof(json));
-            Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
-        }
+            if (json == null) throw new ArgumentNullException(nameof(json));
+            tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
 
-        public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)
-        {
-            JsonParser parser = new JsonParser(Tokens, json);
+            JsonParser parser = new JsonParser(tokens, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
@@ -84,7 +74,7 @@ namespace Eutherion.Win.Storage
                     return true;
                 }
 
-                errors.Add(ValueTypeError.Create(RootValueShouldBeObjectTypeError, rootNode, json));
+                errors.Add(ValueTypeError.Create(PType.MapTypeError, rootNode, json));
             }
 
             map = default;
