@@ -41,6 +41,16 @@ namespace Eutherion.Utils
                 return false;
             }
 
+            public override void Match(
+                Action whenNothing,
+                Action<T> whenJust)
+                => whenNothing?.Invoke();
+
+            public override TResult Match<TResult>(
+                Func<TResult> whenNothing,
+                Func<T, TResult> whenJust)
+                => whenNothing != null ? whenNothing() : default;
+
             public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
                 => Maybe<TResult>.Nothing;
         }
@@ -58,6 +68,16 @@ namespace Eutherion.Utils
                 value = Value;
                 return true;
             }
+
+            public override void Match(
+                Action whenNothing,
+                Action<T> whenJust)
+                => whenJust?.Invoke(Value);
+
+            public override TResult Match<TResult>(
+                Func<TResult> whenNothing,
+                Func<T, TResult> whenJust)
+                => whenJust != null ? whenJust(Value) : default;
 
             public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
                 => whenJust(Value);
@@ -98,6 +118,14 @@ namespace Eutherion.Utils
         /// Whether or not this <see cref="Maybe{T}"/> contains a value.
         /// </returns>
         public abstract bool IsJust(out T value);
+
+        public abstract void Match(
+            Action whenNothing,
+            Action<T> whenJust);
+
+        public abstract TResult Match<TResult>(
+            Func<TResult> whenNothing,
+            Func<T, TResult> whenJust);
 
         /// <summary>
         /// If this <see cref="Maybe{T}"/> contains a value, applies a function to it
