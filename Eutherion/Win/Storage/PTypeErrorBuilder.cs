@@ -54,8 +54,14 @@ namespace Eutherion.Win.Storage
         /// Parameters: 0 = description of expected type, 1 = location, 2 = actual value
         /// Example: "expected an integer value at index 3, but found 'false'"
         ///          "expected _______{0}______ ____{1}___, but found __{2}__"
+        /// See also: <seealso cref="GetLocalizedTypeErrorSomewhereMessage"/>.
         /// </summary>
         public static readonly LocalizedStringKey GenericJsonTypeErrorSomewhere = new LocalizedStringKey(nameof(GenericJsonTypeErrorSomewhere));
+
+        /// <summary>
+        /// Gets the translation key for displaying an error in the context of a property key.
+        /// </summary>
+        public static readonly LocalizedStringKey KeyErrorLocation = new LocalizedStringKey(nameof(KeyErrorLocation));
 
         /// <summary>
         /// Gets the translation key for when there are no legal values.
@@ -173,22 +179,6 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the translation key which describes the type of expected value.
-        /// </summary>
-        // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
-        // Instead, GetLocalizedTypeErrorMessage() handles the localization.
-        public LocalizedStringKey ExpectedTypeDescriptionKey { get; }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
-        /// </summary>
-        /// <param name="expectedTypeDescriptionKey">
-        /// The translation key which describes the type of expected value.
-        /// </param>
-        public PTypeErrorBuilder(LocalizedStringKey expectedTypeDescriptionKey)
-            => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
-
-        /// <summary>
         /// Gets the localized error message for a generic json value type error. 
         /// </summary>
         /// <param name="localizer">
@@ -214,6 +204,69 @@ namespace Eutherion.Win.Storage
                     localizedExpectedTypeDescription,
                     actualValueString,
                 });
+
+        /// <summary>
+        /// Gets the localized description of an error for a value located at a property key.
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="propertyKey">
+        /// The property key for which the error occurred.
+        /// </param>
+        /// <returns>
+        /// The localized description of the location of the error.
+        /// </returns>
+        public static string GetLocatedAtPropertyKeyMessage(Localizer localizer, string propertyKey)
+            => localizer.Localize(KeyErrorLocation, new[] { propertyKey });
+
+        /// <summary>
+        /// Gets the localized error message for a generic json value type error. 
+        /// </summary>
+        /// <param name="localizer">
+        /// The localizer to use.
+        /// </param>
+        /// <param name="localizedExpectedTypeDescription">
+        /// A localized description of the type of value that is expected.
+        /// </param>
+        /// <param name="actualValueString">
+        /// A string representation of the value in the source code.
+        /// </param>
+        /// <param name="somewhere">
+        /// The location where the error occurred.
+        /// </param>
+        /// <returns>
+        /// The localized error message.
+        /// </returns>
+        public static string GetLocalizedTypeErrorSomewhereMessage(
+            Localizer localizer,
+            string localizedExpectedTypeDescription,
+            string actualValueString,
+            string somewhere)
+            => localizer.Localize(
+                GenericJsonTypeErrorSomewhere,
+                new[]
+                {
+                    localizedExpectedTypeDescription,
+                    actualValueString,
+                    somewhere,
+                });
+
+        /// <summary>
+        /// Gets the translation key which describes the type of expected value.
+        /// </summary>
+        // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
+        // Instead, GetLocalizedTypeErrorMessage() handles the localization.
+        public LocalizedStringKey ExpectedTypeDescriptionKey { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
+        /// </summary>
+        /// <param name="expectedTypeDescriptionKey">
+        /// The translation key which describes the type of expected value.
+        /// </param>
+        public PTypeErrorBuilder(LocalizedStringKey expectedTypeDescriptionKey)
+            => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -249,13 +302,10 @@ namespace Eutherion.Win.Storage
         /// The localized error message.
         /// </returns>
         public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
-            => localizer.Localize(
-                GenericJsonTypeErrorSomewhere,
-                new[]
-                {
-                    localizer.Localize(ExpectedTypeDescriptionKey),
-                    actualValueString,
-                    propertyKey,
-                });
+            => GetLocalizedTypeErrorSomewhereMessage(
+                localizer,
+                localizer.Localize(ExpectedTypeDescriptionKey),
+                actualValueString,
+                GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
     }
 }

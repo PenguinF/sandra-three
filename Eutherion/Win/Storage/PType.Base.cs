@@ -343,14 +343,11 @@ namespace Eutherion.Win.Storage
                     actualValueString);
 
             public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
-                => localizer.Localize(
-                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
-                    new[]
-                    {
-                        LocalizedExpectedTypeDescription(localizer),
-                        actualValueString,
-                        propertyKey,
-                    });
+                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                    localizer,
+                    LocalizedExpectedTypeDescription(localizer),
+                    actualValueString,
+                    PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

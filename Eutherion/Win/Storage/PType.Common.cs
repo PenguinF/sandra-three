@@ -134,7 +134,7 @@ namespace Eutherion.Win.Storage
                             new[]
                             {
                                 actualValueString,
-                                propertyKey,
+                                PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey),
                             }));
                 }
 
@@ -161,14 +161,11 @@ namespace Eutherion.Win.Storage
                         localizer,
                         localizedValueList,
                         actualValueString),
-                    whenJust: propertyKey => localizer.Localize(
-                        PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
-                        new[]
-                        {
-                            localizedValueList,
-                            actualValueString,
-                            propertyKey,
-                        }));
+                    whenJust: propertyKey => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                        localizer,
+                        localizedValueList,
+                        actualValueString,
+                        PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey)));
             }
 
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
@@ -228,7 +225,7 @@ namespace Eutherion.Win.Storage
                             new[]
                             {
                                 actualValueString,
-                                propertyKey,
+                                PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey),
                             }));
                 }
 
@@ -256,14 +253,11 @@ namespace Eutherion.Win.Storage
                         localizer,
                         localizedKeysList,
                         actualValueString),
-                    whenJust: propertyKey => localizer.Localize(
-                        PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
-                        new[]
-                        {
-                            localizedKeysList,
-                            actualValueString,
-                            propertyKey,
-                        }));
+                    whenJust: propertyKey => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                        localizer,
+                        localizedKeysList,
+                        actualValueString,
+                        PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey)));
             }
 
             public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)

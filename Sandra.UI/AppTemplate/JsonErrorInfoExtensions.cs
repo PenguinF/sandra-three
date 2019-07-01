@@ -109,10 +109,12 @@ namespace Eutherion.Win.AppTemplate
             { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "unrecognized key {0} in object" },
 
             { PTypeErrorBuilder.GenericJsonTypeError, "expected {0}, but found {1}" },
-            { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} for {2}, but found {1}" },
+            { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} {2}, but found {1}" },
+
+            { PTypeErrorBuilder.KeyErrorLocation, "for {0}" },
 
             { PTypeErrorBuilder.NoLegalValuesError, "found value {0}, but there exist no legal values" },
-            { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values for {1}" },
+            { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
 
