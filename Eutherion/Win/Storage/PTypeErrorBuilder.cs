@@ -59,7 +59,12 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Gets the translation key for when there are no legal values.
         /// </summary>
-        public static readonly LocalizedStringKey NoLegalValues = new LocalizedStringKey(nameof(NoLegalValues));
+        public static readonly LocalizedStringKey NoLegalValuesError = new LocalizedStringKey(nameof(NoLegalValuesError));
+
+        /// <summary>
+        /// Gets the translation key for when there are no legal values.
+        /// </summary>
+        public static readonly LocalizedStringKey NoLegalValuesErrorSomewhere = new LocalizedStringKey(nameof(NoLegalValuesErrorSomewhere));
 
         /// <summary>
         /// Gets the translation key for <see cref="PType.TupleTypeBase{T}"/> type check failure error messages when one or more tuple elements have the wrong type.

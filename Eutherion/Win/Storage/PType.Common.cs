@@ -118,20 +118,24 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
-                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
-
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybePropertyKey)
             {
                 if (stringToEnum.Count == 0)
                 {
-                    return localizer.Localize(
-                        PTypeErrorBuilder.NoLegalValues,
-                        new[]
-                        {
-                            propertyKey,
-                            actualValueString,
-                        });
+                    return maybePropertyKey.Match(
+                        whenNothing: () => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesError,
+                            new[]
+                            {
+                                actualValueString,
+                            }),
+                        whenJust: propertyKey => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
+                            new[]
+                            {
+                                actualValueString,
+                                propertyKey,
+                            }));
                 }
 
                 string localizedValueList;
@@ -152,15 +156,29 @@ namespace Eutherion.Win.Storage
                         });
                 }
 
-                return localizer.Localize(
-                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
-                    new[]
-                    {
-                        localizedValueList,
-                        actualValueString,
-                        propertyKey,
-                    });
+                return maybePropertyKey.Match(
+                    whenNothing: () => localizer.Localize(
+                        PTypeErrorBuilder.GenericJsonTypeError,
+                        new[]
+                        {
+                            localizedValueList,
+                            actualValueString,
+                        }),
+                    whenJust: propertyKey => localizer.Localize(
+                        PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
+                        new[]
+                        {
+                            localizedValueList,
+                            actualValueString,
+                            propertyKey,
+                        }));
             }
+
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(localizer, actualValueString, propertyKey);
         }
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
@@ -197,20 +215,24 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
-                => GetLocalizedTypeErrorAtPropertyKeyMessage(localizer, actualValueString, null);
-
-            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybePropertyKey)
             {
                 if (stringToTarget.Count == 0)
                 {
-                    return localizer.Localize(
-                        PTypeErrorBuilder.NoLegalValues,
-                        new[]
-                        {
-                            propertyKey,
-                            actualValueString,
-                        });
+                    return maybePropertyKey.Match(
+                        whenNothing: () => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesError,
+                            new[]
+                            {
+                                actualValueString,
+                            }),
+                        whenJust: propertyKey => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
+                            new[]
+                            {
+                                actualValueString,
+                                propertyKey,
+                            }));
                 }
 
                 string localizedKeysList;
@@ -232,15 +254,29 @@ namespace Eutherion.Win.Storage
                         });
                 }
 
-                return localizer.Localize(
-                    PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
-                    new[]
-                    {
-                        localizedKeysList,
-                        actualValueString,
-                        propertyKey,
-                    });
+                return maybePropertyKey.Match(
+                    whenNothing: () => localizer.Localize(
+                        PTypeErrorBuilder.GenericJsonTypeError,
+                        new[]
+                        {
+                            localizedKeysList,
+                            actualValueString,
+                        }),
+                    whenJust: propertyKey => localizer.Localize(
+                        PTypeErrorBuilder.GenericJsonTypeErrorSomewhere,
+                        new[]
+                        {
+                            localizedKeysList,
+                            actualValueString,
+                            propertyKey,
+                        }));
             }
+
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(localizer, actualValueString, propertyKey);
         }
     }
 }

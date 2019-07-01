@@ -111,7 +111,8 @@ namespace Eutherion.Win.AppTemplate
             { PType.IntegerTypeError.ExpectedTypeDescriptionKey, "integer value" },
             { PType.StringTypeError.ExpectedTypeDescriptionKey, "string value" },
 
-            { PTypeErrorBuilder.NoLegalValues, "found value {1}, but there exist no legal values for {0}" },
+            { PTypeErrorBuilder.NoLegalValuesError, "found value {0}, but there exist no legal values" },
+            { PTypeErrorBuilder.NoLegalValuesErrorSomewhere, "found value {0}, but there exist no legal values for {1}" },
             { PType.RangedIntegerTypeError, "expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
