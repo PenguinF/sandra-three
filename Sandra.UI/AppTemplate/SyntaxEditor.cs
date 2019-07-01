@@ -71,8 +71,6 @@ namespace Eutherion.Win.AppTemplate
             => !ReadOnly
             && (Modified || containsChangesAtSavePoint);
 
-        private readonly TextIndex<TTerminal> TextIndex;
-
         public Style DefaultStyle => Styles[Style.Default];
         private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CallTipStyle => Styles[Style.CallTip];
@@ -95,8 +93,6 @@ namespace Eutherion.Win.AppTemplate
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
-
-            TextIndex = new TextIndex<TTerminal>();
 
             HScrollBar = false;
             VScrollBar = true;
@@ -215,12 +211,9 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            TextIndex.Clear();
-
             var (tokens, errors) = SyntaxDescriptor.Parse(code);
-            tokens.ForEach(TextIndex.AppendTerminalSymbol);
 
-            foreach (var textElement in TextIndex.Elements)
+            foreach (var textElement in tokens)
             {
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), textElement.Start, textElement.Length);
             }

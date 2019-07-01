@@ -22,7 +22,6 @@
 using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
-using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
@@ -39,7 +38,6 @@ namespace Eutherion.Win.Storage
             out ReadOnlyList<TextElement<JsonSymbol>> tokens,
             out List<JsonErrorInfo> errors)
         {
-            if (json == null) throw new ArgumentNullException(nameof(json));
             tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
 
             JsonParser parser = new JsonParser(tokens, json);
