@@ -311,7 +311,9 @@ namespace Eutherion.Win.AppTemplate
             base.OnDwellStart(e);
 
             int textPosition = e.Position;
-            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
+            string toolTipText = string.Join(
+                "\n\n",
+                ActiveErrorMessages(textPosition).Select(x => Session.Current.CurrentLocalizer.ToSentenceCase(x)));
 
             if (toolTipText.Length > 0)
             {

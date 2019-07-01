@@ -22,7 +22,9 @@
 using Eutherion.Localization;
 using Eutherion.Text.Json;
 using Eutherion.Win.Storage;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Eutherion.Win.AppTemplate
 {
@@ -30,6 +32,22 @@ namespace Eutherion.Win.AppTemplate
     {
         public static LocalizedStringKey GetLocalizedStringKey(JsonErrorCode jsonErrorCode)
             => new LocalizedStringKey($"JsonError{jsonErrorCode}");
+
+        /// <summary>
+        /// Capitalizes error messages after generating them.
+        /// This now uses the selected culture instead of the localizer however,
+        /// which is not the right dependency. Even if the right culture were used
+        /// for a given localizer, it would still be a dependency on something that
+        /// needs to be pre-installed for this feature to work correctly, which makes it
+        /// harder to test.
+        /// TODO: figure out how to incorporate this into localizers.
+        /// </summary>
+        public static string ToSentenceCase(this Localizer localizer, string errorMessage)
+        {
+            GC.KeepAlive(localizer); // Only to disable the warning that variable is unused.
+            if (errorMessage == null || errorMessage.Length == 0) return errorMessage;
+            return char.ToUpper(errorMessage[0], CultureInfo.CurrentUICulture) + errorMessage.Substring(1);
+        }
 
         /// <summary>
         /// Gets the formatted and localized error message of a <see cref="JsonErrorInfo"/>.
