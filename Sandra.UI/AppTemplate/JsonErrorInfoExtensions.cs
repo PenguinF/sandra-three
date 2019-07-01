@@ -71,26 +71,26 @@ namespace Eutherion.Win.AppTemplate
 
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishJsonErrorTranslations => new Dictionary<LocalizedStringKey, string>
         {
-            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "Unexpected symbol '{0}'" },
-            { GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "Unterminated multi-line comment" },
-            { GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "Unterminated string" },
-            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "Unrecognized escape sequence ('{0}')" },
-            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "Illegal control character '{0}' in string" },
-            { GetLocalizedStringKey(JsonErrorCode.ExpectedEof), "End of file expected" },
-            { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInObject), "Unexpected end of file, expected '}'" },
-            { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInArray), "Unexpected end of file, expected ']'" },
+            { GetLocalizedStringKey(JsonErrorCode.UnexpectedSymbol), "unexpected symbol '{0}'" },
+            { GetLocalizedStringKey(JsonErrorCode.UnterminatedMultiLineComment), "unterminated multi-line comment" },
+            { GetLocalizedStringKey(JsonErrorCode.UnterminatedString), "unterminated string" },
+            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
+            { GetLocalizedStringKey(JsonErrorCode.IllegalControlCharacterInString), "illegal control character '{0}' in string" },
+            { GetLocalizedStringKey(JsonErrorCode.ExpectedEof), "end of file expected" },
+            { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInObject), "unexpected end of file, expected '}'" },
+            { GetLocalizedStringKey(JsonErrorCode.UnexpectedEofInArray), "unexpected end of file, expected ']'" },
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInObject), "'}' expected" },
             { GetLocalizedStringKey(JsonErrorCode.ControlSymbolInArray), "']' expected" },
-            { GetLocalizedStringKey(JsonErrorCode.InvalidPropertyKey), "Invalid property key" },
-            { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "Key {0} already exists in object" },
-            { GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "Missing property key" },
-            { GetLocalizedStringKey(JsonErrorCode.MissingValue), "Missing value" },
-            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "Unrecognized value '{0}'" },
-            { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeySections), "Unexpected ':', expected ',' or '}'" },
+            { GetLocalizedStringKey(JsonErrorCode.InvalidPropertyKey), "invalid property key" },
+            { GetLocalizedStringKey(JsonErrorCode.PropertyKeyAlreadyExists), "key {0} already exists in object" },
+            { GetLocalizedStringKey(JsonErrorCode.MissingPropertyKey), "missing property key" },
+            { GetLocalizedStringKey(JsonErrorCode.MissingValue), "missing value" },
+            { GetLocalizedStringKey(JsonErrorCode.UnrecognizedValue), "unrecognized value '{0}'" },
+            { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeySections), "unexpected ':', expected ',' or '}'" },
             { GetLocalizedStringKey(JsonErrorCode.MultiplePropertyKeys), "':' expected" },
             { GetLocalizedStringKey(JsonErrorCode.MultipleValues), "',' expected" },
 
-            { SettingReader.RootValueShouldBeObjectTypeError.LocalizedMessageKey, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
+            { SettingReader.RootValueShouldBeObjectTypeError.LocalizedMessageKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
 
             { PType.JsonArray, "a value array ('[1, 2, ...]')" },
             { PType.JsonObject, "an object ('{{ \"a\" = 1, \"b\" = 2, ... }}')" },
@@ -98,24 +98,24 @@ namespace Eutherion.Win.AppTemplate
 
             { PTypeErrorBuilder.EnumerateWithOr, "{0} or {1}" },
 
-            { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "Unrecognized key {0} in object" },
+            { PTypeErrorBuilder.UnrecognizedPropertyKeyTypeError, "unrecognized key {0} in object" },
 
-            { PType.BooleanTypeError.LocalizedMessageKey, "Expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
-            { PType.IntegerTypeError.LocalizedMessageKey, "Expected integer value for {0}, but found {1}" },
-            { PType.StringTypeError.LocalizedMessageKey, "Expected string value for {0}, but found {1}" },
-            { PType.MapTypeError.LocalizedMessageKey, "Expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
+            { PType.BooleanTypeError.LocalizedMessageKey, "expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
+            { PType.IntegerTypeError.LocalizedMessageKey, "expected integer value for {0}, but found {1}" },
+            { PType.StringTypeError.LocalizedMessageKey, "expected string value for {0}, but found {1}" },
+            { PType.MapTypeError.LocalizedMessageKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
 
-            { PTypeErrorBuilder.NoLegalValues, "Found value {1}, but there exist no legal values for {0}" },
-            { PType.EnumerationTypeError, "Expected {2} for {0}, but found {1}" },
-            { PType.KeyedSetTypeError, "Expected {2} for {0}, but found {1}" },
-            { PType.RangedIntegerTypeError, "Expected integer value between {2} and {3} for {0}, but found {1}" },
+            { PTypeErrorBuilder.NoLegalValues, "found value {1}, but there exist no legal values for {0}" },
+            { PType.EnumerationTypeError, "expected {2} for {0}, but found {1}" },
+            { PType.KeyedSetTypeError, "expected {2} for {0}, but found {1}" },
+            { PType.RangedIntegerTypeError, "expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
 
-            { OpaqueColorType.OpaqueColorTypeError.LocalizedMessageKey, "Expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
-            { FileNameType.FileNameTypeError.LocalizedMessageKey, "Expected valid file name for {0}, but found {1}" },
-            { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "Expected valid subfolder name for {0}, but found {1}" },
-            { TrimmedStringType.TrimmedStringTypeError.LocalizedMessageKey, "Expected string value which contains at least one non white-space character for {0}, but found {1}" },
+            { OpaqueColorType.OpaqueColorTypeError.LocalizedMessageKey, "expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
+            { FileNameType.FileNameTypeError.LocalizedMessageKey, "expected valid file name for {0}, but found {1}" },
+            { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "expected valid subfolder name for {0}, but found {1}" },
+            { TrimmedStringType.TrimmedStringTypeError.LocalizedMessageKey, "expected string value which contains at least one non white-space character for {0}, but found {1}" },
         };
     }
 }
