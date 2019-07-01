@@ -32,7 +32,12 @@ namespace Eutherion.Win.Storage
     /// </summary>
     public static class SettingReader
     {
-        public static bool TryParse(string json, SettingSchema schema, out PMap map, out ReadOnlyList<TextElement<JsonSymbol>> tokens, out List<JsonErrorInfo> errors)
+        public static bool TryParse(
+            string json,
+            SettingSchema schema,
+            out SettingObject settingObject,
+            out ReadOnlyList<TextElement<JsonSymbol>> tokens,
+            out List<JsonErrorInfo> errors)
         {
             if (json == null) throw new ArgumentNullException(nameof(json));
             tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
@@ -42,42 +47,20 @@ namespace Eutherion.Win.Storage
 
             if (hasRootValue)
             {
-                if (rootNode is JsonMapSyntax mapNode)
+                if (schema.TryCreateValue(
+                    json,
+                    rootNode,
+                    out settingObject,
+                    errors).IsOption1(out ITypeErrorBuilder typeError))
                 {
-                    Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-
-                    // Analyze values with the provided schema while building the PMap.
-                    foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
-                    {
-                        if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
-                        {
-                            var valueOrError = property.TryCreateValue(json, keyedNode.Value, errors);
-
-                            if (valueOrError.IsOption2(out PValue convertedValue))
-                            {
-                                mapBuilder.Add(keyedNode.Key.Value, convertedValue);
-                            }
-                            else
-                            {
-                                valueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                                errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
-                            }
-                        }
-                        else
-                        {
-                            // TODO: add error levels, this should probably be a warning.
-                            errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
-                        }
-                    }
-
-                    map = new PMap(mapBuilder);
-                    return true;
+                    errors.Add(ValueTypeError.Create(typeError, rootNode, json));
+                    return false;
                 }
 
-                errors.Add(ValueTypeError.Create(PType.MapTypeError, rootNode, json));
+                return true;
             }
 
-            map = default;
+            settingObject = default;
             return false;
         }
     }
