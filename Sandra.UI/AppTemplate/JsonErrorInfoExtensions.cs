@@ -46,7 +46,13 @@ namespace Eutherion.Win.AppTemplate
         {
             GC.KeepAlive(localizer); // Only to disable the warning that variable is unused.
             if (errorMessage == null || errorMessage.Length == 0) return errorMessage;
-            return char.ToUpper(errorMessage[0], CultureInfo.CurrentUICulture) + errorMessage.Substring(1);
+            char firstCharacter = errorMessage[0];
+            char firstCharacterToUpper = char.ToUpper(firstCharacter, CultureInfo.CurrentUICulture);
+
+            // Only allocate a new string if there's an actual change.
+            return firstCharacter != firstCharacterToUpper
+                ? firstCharacterToUpper + errorMessage.Substring(1)
+                : errorMessage;
         }
 
         /// <summary>
