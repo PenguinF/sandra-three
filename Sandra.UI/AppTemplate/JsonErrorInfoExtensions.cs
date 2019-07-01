@@ -107,20 +107,20 @@ namespace Eutherion.Win.AppTemplate
             { PTypeErrorBuilder.GenericJsonTypeError, "expected {0}, but found {1}" },
             { PTypeErrorBuilder.GenericJsonTypeErrorSomewhere, "expected {0} for {2}, but found {1}" },
 
-            { PType.BooleanTypeError.LocalizedMessageKey, "expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
-            { PType.IntegerTypeError.LocalizedMessageKey, "expected integer value for {0}, but found {1}" },
-            { PType.StringTypeError.LocalizedMessageKey, "expected string value for {0}, but found {1}" },
-            { PType.MapTypeError.LocalizedMessageKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
+            { PType.BooleanTypeError.ExpectedTypeDescriptionKey, "expected '" + JsonValue.False + "' or '" + JsonValue.True + "' value for {0}, but found {1}" },
+            { PType.IntegerTypeError.ExpectedTypeDescriptionKey, "expected integer value for {0}, but found {1}" },
+            { PType.StringTypeError.ExpectedTypeDescriptionKey, "expected string value for {0}, but found {1}" },
+            { PType.MapTypeError.ExpectedTypeDescriptionKey, "expected object ('{{ \"a\" = 1, \"b\" = 2, ... }}') for {0}, but found {1}" },
 
             { PTypeErrorBuilder.NoLegalValues, "found value {1}, but there exist no legal values for {0}" },
             { PType.RangedIntegerTypeError, "expected integer value between {2} and {3} for {0}, but found {1}" },
 
             //{ PTypeErrorBuilder.TupleItemTypeMismatchError, "" }, // only used for auto-save
 
-            { OpaqueColorType.OpaqueColorTypeError.LocalizedMessageKey, "expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
-            { FileNameType.FileNameTypeError.LocalizedMessageKey, "expected valid file name for {0}, but found {1}" },
-            { SubFolderNameType.SubFolderNameTypeError.LocalizedMessageKey, "expected valid subfolder name for {0}, but found {1}" },
-            { TrimmedStringType.TrimmedStringTypeError.LocalizedMessageKey, "expected string value which contains at least one non white-space character for {0}, but found {1}" },
+            { OpaqueColorType.OpaqueColorTypeError.ExpectedTypeDescriptionKey, "expected string in the HTML color format (e.g. \"#808000\", or \"#DC143C\") for {0}, but found {1}" },
+            { FileNameType.FileNameTypeError.ExpectedTypeDescriptionKey, "expected valid file name for {0}, but found {1}" },
+            { SubFolderNameType.SubFolderNameTypeError.ExpectedTypeDescriptionKey, "expected valid subfolder name for {0}, but found {1}" },
+            { TrimmedStringType.TrimmedStringTypeError.ExpectedTypeDescriptionKey, "expected string value which contains at least one non white-space character for {0}, but found {1}" },
         };
     }
 }

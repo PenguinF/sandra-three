@@ -167,19 +167,20 @@ namespace Eutherion.Win.Storage
         }
 
         /// <summary>
-        /// Gets the translation key for this error message.
+        /// Gets the translation key which describes the type of expected value.
         /// </summary>
         // This is intentionally not a LocalizedString, because it has a dependency on the Localizer.CurrentChanged event.
         // Instead, GetLocalizedTypeErrorMessage() handles the localization.
-        public LocalizedStringKey LocalizedMessageKey { get; }
+        public LocalizedStringKey ExpectedTypeDescriptionKey { get; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="PTypeErrorBuilder"/>.
         /// </summary>
-        /// <param name="localizedMessageKey">
-        /// The translation key for this error message.
+        /// <param name="expectedTypeDescriptionKey">
+        /// The translation key which describes the type of expected value.
         /// </param>
-        public PTypeErrorBuilder(LocalizedStringKey localizedMessageKey) => LocalizedMessageKey = localizedMessageKey;
+        public PTypeErrorBuilder(LocalizedStringKey expectedTypeDescriptionKey)
+            => ExpectedTypeDescriptionKey = expectedTypeDescriptionKey;
 
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
@@ -198,7 +199,7 @@ namespace Eutherion.Win.Storage
                 GenericJsonTypeError,
                 new[]
                 {
-                    localizer.Localize(LocalizedMessageKey),
+                    localizer.Localize(ExpectedTypeDescriptionKey),
                     actualValueString,
                 });
 
@@ -219,7 +220,7 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
             => localizer.Localize(
-                LocalizedMessageKey,
+                ExpectedTypeDescriptionKey,
                 new[]
                 {
                     propertyKey,
