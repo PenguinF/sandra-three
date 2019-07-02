@@ -51,9 +51,9 @@ namespace Eutherion.Win.Storage
 
         /// <summary>
         /// Gets the translation key for a generic json value type error.
-        /// Parameters: 0 = description of expected type, 1 = location, 2 = actual value
+        /// Parameters: 0 = description of expected type, 1 = actual value, 2 = location
         /// Example: "expected an integer value at index 3, but found 'false'"
-        ///          "expected _______{0}______ ____{1}___, but found __{2}__"
+        ///          "expected _______{0}______ ____{2}___, but found __{1}__"
         /// See also: <seealso cref="GetLocalizedTypeErrorSomewhereMessage"/>.
         /// </summary>
         public static readonly LocalizedStringKey GenericJsonTypeErrorSomewhere = new LocalizedStringKey(nameof(GenericJsonTypeErrorSomewhere));
