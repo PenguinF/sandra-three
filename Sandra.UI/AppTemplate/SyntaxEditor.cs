@@ -213,9 +213,12 @@ namespace Eutherion.Win.AppTemplate
 
             var (tokens, errors) = SyntaxDescriptor.Parse(code);
 
+            int totalLength = 0;
             foreach (var textElement in tokens)
             {
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), textElement.Start, textElement.Length);
+                int length = textElement.Length;
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), totalLength, length);
+                totalLength += length;
             }
 
             IndicatorClearRange(0, TextLength);
