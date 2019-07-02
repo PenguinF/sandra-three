@@ -49,6 +49,9 @@ namespace Sandra.UI
         public override Style GetStyle(SyntaxEditor<PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;
 
+        public override int GetLength(TextElement<PgnSymbol> terminalSymbol)
+            => terminalSymbol.Length;
+
         public override (int, int) GetErrorRange(PgnErrorInfo error)
             => (error.Start, error.Length);
 

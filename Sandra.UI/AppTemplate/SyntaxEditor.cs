@@ -214,10 +214,10 @@ namespace Eutherion.Win.AppTemplate
             var (tokens, errors) = SyntaxDescriptor.Parse(code);
 
             int totalLength = 0;
-            foreach (var textElement in tokens)
+            foreach (var token in tokens)
             {
-                int length = textElement.Length;
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), totalLength, length);
+                int length = SyntaxDescriptor.GetLength(token);
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, token.TerminalSymbol), totalLength, length);
                 totalLength += length;
             }
 
@@ -428,6 +428,11 @@ namespace Eutherion.Win.AppTemplate
         /// Gets the style for a terminal symbol.
         /// </summary>
         public abstract Style GetStyle(SyntaxEditor<TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
+
+        /// <summary>
+        /// Gets the length of a terminal symbol.
+        /// </summary>
+        public abstract int GetLength(TextElement<TTerminal> terminalSymbol);
 
         /// <summary>
         /// Gets the start position and the length of the text span of an error.
