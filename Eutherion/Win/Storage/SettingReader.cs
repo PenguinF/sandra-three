@@ -49,7 +49,7 @@ namespace Eutherion.Win.Storage
                 totalLength += token.Length;
             }
 
-            JsonParser parser = new JsonParser(textElementBuilder, json);
+            JsonParser parser = new JsonParser(tokens, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
