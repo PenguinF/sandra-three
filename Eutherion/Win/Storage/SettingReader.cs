@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System.Collections.Generic;
@@ -39,15 +38,6 @@ namespace Eutherion.Win.Storage
             out List<JsonErrorInfo> errors)
         {
             tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
-
-            var textElementBuilder = new List<TextElement<JsonSymbol>>();
-            int totalLength = 0;
-
-            foreach (var token in tokens)
-            {
-                textElementBuilder.Add(new TextElement<JsonSymbol>(token, totalLength, token.Length));
-                totalLength += token.Length;
-            }
 
             JsonParser parser = new JsonParser(tokens, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
