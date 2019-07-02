@@ -19,15 +19,20 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Text.Json
 {
     public class JsonWhitespace : JsonSymbol
     {
-        public static readonly JsonWhitespace Value = new JsonWhitespace();
-
-        private JsonWhitespace() { }
-
         public override bool IsBackground => true;
+        public override int Length { get; }
+
+        public JsonWhitespace(int length)
+        {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespace(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespace(this);

@@ -37,6 +37,7 @@ namespace Eutherion.Text.Json
         public override IEnumerable<JsonErrorInfo> Errors { get; }
 
         public override bool IsValueStartSymbol => true;
+        public override int Length => 1;
 
         public JsonUnknownSymbol(string displayCharValue, int position)
         {

@@ -34,6 +34,10 @@ namespace Eutherion.Shared.Tests
         /// </summary>
         private class JsonTestSymbol : JsonSymbol
         {
+            public override int Length { get; }
+
+            public JsonTestSymbol(int length) => Length = length;
+
             public override void Accept(JsonSymbolVisitor visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.DefaultVisit(this);
             public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.DefaultVisit(this, arg);
@@ -45,13 +49,18 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>(() => new TextElement<JsonSymbol>(null, 0, 0));
         }
 
-        [Theory]
-        [InlineData(-1, 0, "start")]
-        [InlineData(-1, -1, "start")]
-        [InlineData(0, -1, "length")]
-        public void OutOfRangeArguments(int start, int length, string parameterName)
+        [Fact]
+        public void OutOfRangeArguments()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new TextElement<JsonSymbol>(new JsonTestSymbol(), start, length));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonComment(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(Array.Empty<JsonErrorInfo>(), -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonValue(string.Empty, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonWhitespace(-1));
+
+            Assert.Throws<ArgumentOutOfRangeException>("start", () => new TextElement<JsonSymbol>(new JsonString(string.Empty, 2), -1, 2));
         }
 
         [Theory]
@@ -61,7 +70,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, 2)]
         public void UnchangedParameters(int start, int length)
         {
-            var testSymbol = new JsonTestSymbol();
+            var testSymbol = new JsonTestSymbol(length);
             var textElement = new TextElement<JsonSymbol>(testSymbol, start, length);
             Assert.Equal(start, textElement.Start);
             Assert.Equal(length, textElement.Length);
@@ -71,31 +80,32 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullValueShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonString(null));
-            Assert.Throws<ArgumentNullException>(() => new JsonValue(null));
+            Assert.Throws<ArgumentNullException>(() => new JsonString(null, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonValue(null, 0));
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData("{}")]
+        [InlineData("", 10)]
+        [InlineData("{}", 3)]
         // No newline conversions.
-        [InlineData("\n")]
-        [InlineData("\r\n")]
-        public void UnchangedValueParameter(string value)
+        [InlineData("\n", 1)]
+        [InlineData("\r\n", 2)]
+        public void UnchangedValueParameter(string value, int length)
         {
-            var jsonString = new JsonString(value);
+            var jsonString = new JsonString(value, length);
             Assert.Equal(value, jsonString.Value);
+            Assert.Equal(length, jsonString.Length);
 
-            var jsonValue = new JsonValue(value);
-            Assert.Equal(value, jsonString.Value);
+            var jsonValue = new JsonValue(value, length);
+            Assert.Equal(value, jsonValue.Value);
+            Assert.Equal(length, jsonValue.Length);
         }
 
         [Fact]
         public void NullErrorsShouldThrow()
         {
-            // Explicit casts to ensure the right constructor overload is always called.
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((JsonErrorInfo[])null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString((IEnumerable<JsonErrorInfo>)null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(0, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(null, 0));
         }
 
         [Theory]
@@ -113,7 +123,7 @@ namespace Eutherion.Shared.Tests
             var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
 
             Assert.Collection(
-                new JsonErrorString(errorInfo1, errorInfo2, errorInfo3).Errors,
+                new JsonErrorString(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
@@ -121,7 +131,7 @@ namespace Eutherion.Shared.Tests
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
             var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new JsonErrorString(errorList);
+            var errorString = new JsonErrorString(errorList, 1);
             Assert.NotSame(errorString.Errors, errorList);
 
             // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
@@ -259,7 +269,7 @@ namespace Eutherion.Shared.Tests
 
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
-            yield return new object[] { JsonComment.Value, typeof(JsonComment) };
+            yield return new object[] { new JsonComment(2), typeof(JsonComment) };
             yield return new object[] { new JsonUnterminatedMultiLineComment(0, 2), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
             yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
@@ -268,10 +278,10 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol("*", 0), typeof(JsonUnknownSymbol) };
-            yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
-            yield return new object[] { new JsonString(string.Empty), typeof(JsonString) };
-            yield return new object[] { new JsonErrorString(new[] { JsonErrorString.Unterminated(0, 1) }), typeof(JsonErrorString) };
-            yield return new object[] { JsonWhitespace.Value, typeof(JsonWhitespace) };
+            yield return new object[] { new JsonValue("true", 4), typeof(JsonValue) };
+            yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
+            yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
+            yield return new object[] { new JsonWhitespace(2), typeof(JsonWhitespace) };
         }
 
         private sealed class TestVisitor1 : JsonSymbolVisitor

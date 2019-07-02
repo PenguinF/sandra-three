@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -61,9 +60,9 @@ namespace Eutherion.Win.AppTemplate
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override (IEnumerable<TextElement<JsonSymbol>>, List<JsonErrorInfo>) Parse(string code)
+        public override (IEnumerable<JsonSymbol>, List<JsonErrorInfo>) Parse(string code)
         {
-            SettingReader.TryParse(code, schema, out _, out ReadOnlyList<TextElement<JsonSymbol>> tokens, out List<JsonErrorInfo> errors);
+            SettingReader.TryParse(code, schema, out _, out ReadOnlyList<JsonSymbol> tokens, out List<JsonErrorInfo> errors);
 
             if (errors.Count > 0)
             {
@@ -83,7 +82,7 @@ namespace Eutherion.Win.AppTemplate
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
             => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
 
-        public override int GetLength(TextElement<JsonSymbol> terminalSymbol)
+        public override int GetLength(JsonSymbol terminalSymbol)
             => terminalSymbol.Length;
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)

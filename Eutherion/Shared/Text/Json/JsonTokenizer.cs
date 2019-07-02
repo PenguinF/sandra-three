@@ -41,7 +41,7 @@ namespace Eutherion.Text.Json
         // Current state.
         private int currentIndex;
         private int firstUnusedIndex;
-        private Func<IEnumerable<TextElement<JsonSymbol>>> currentTokenizer;
+        private Func<IEnumerable<JsonSymbol>> currentTokenizer;
 
         private JsonTokenizer(string json)
         {
@@ -50,7 +50,7 @@ namespace Eutherion.Text.Json
             currentTokenizer = Default;
         }
 
-        private IEnumerable<TextElement<JsonSymbol>> Default()
+        private IEnumerable<JsonSymbol> Default()
         {
             const int symbolClassValueChar = 0;
             const int symbolClassWhitespace = 1;
@@ -119,17 +119,11 @@ namespace Eutherion.Text.Json
                     {
                         if (inSymbolClass == symbolClassValueChar)
                         {
-                            yield return new TextElement<JsonSymbol>(
-                                new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                                firstUnusedIndex,
-                                currentIndex - firstUnusedIndex);
+                            yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
                         }
                         else
                         {
-                            yield return new TextElement<JsonSymbol>(
-                                JsonWhitespace.Value,
-                                firstUnusedIndex,
-                                currentIndex - firstUnusedIndex);
+                            yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
                         }
 
                         firstUnusedIndex = currentIndex;
@@ -140,22 +134,22 @@ namespace Eutherion.Text.Json
                         switch (c)
                         {
                             case JsonCurlyOpen.CurlyOpenCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonCurlyOpen.Value, currentIndex, 1);
+                                yield return JsonCurlyOpen.Value;
                                 break;
                             case JsonCurlyClose.CurlyCloseCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonCurlyClose.Value, currentIndex, 1);
+                                yield return JsonCurlyClose.Value;
                                 break;
                             case JsonSquareBracketOpen.SquareBracketOpenCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonSquareBracketOpen.Value, currentIndex, 1);
+                                yield return JsonSquareBracketOpen.Value;
                                 break;
                             case JsonSquareBracketClose.SquareBracketCloseCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonSquareBracketClose.Value, currentIndex, 1);
+                                yield return JsonSquareBracketClose.Value;
                                 break;
                             case JsonColon.ColonCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonColon.Value, currentIndex, 1);
+                                yield return JsonColon.Value;
                                 break;
                             case JsonComma.CommaCharacter:
-                                yield return new TextElement<JsonSymbol>(JsonComma.Value, currentIndex, 1);
+                                yield return JsonComma.Value;
                                 break;
                             case JsonString.QuoteCharacter:
                                 currentTokenizer = InString;
@@ -182,10 +176,7 @@ namespace Eutherion.Text.Json
                                 string displayCharValue = category == UnicodeCategory.OtherNotAssigned
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
-                                yield return new TextElement<JsonSymbol>(
-                                    new JsonUnknownSymbol(displayCharValue, currentIndex),
-                                    currentIndex,
-                                    1);
+                                yield return new JsonUnknownSymbol(displayCharValue, currentIndex);
                                 break;
                         }
 
@@ -206,24 +197,18 @@ namespace Eutherion.Text.Json
             {
                 if (inSymbolClass == symbolClassValueChar)
                 {
-                    yield return new TextElement<JsonSymbol>(
-                        new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex)),
-                        firstUnusedIndex,
-                        currentIndex - firstUnusedIndex);
+                    yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
                 }
                 else
                 {
-                    yield return new TextElement<JsonSymbol>(
-                        JsonWhitespace.Value,
-                        firstUnusedIndex,
-                        currentIndex - firstUnusedIndex);
+                    yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
                 }
             }
 
             currentTokenizer = null;
         }
 
-        private IEnumerable<TextElement<JsonSymbol>> InString()
+        private IEnumerable<JsonSymbol> InString()
         {
             // Eat " character, but leave firstUnusedIndex unchanged.
             currentIndex++;
@@ -237,18 +222,13 @@ namespace Eutherion.Text.Json
                         currentIndex++;
                         if (errors.Count > 0)
                         {
-                            yield return new TextElement<JsonSymbol>(
-                                new JsonErrorString(errors),
-                                firstUnusedIndex,
-                                currentIndex - firstUnusedIndex);
+                            yield return new JsonErrorString(errors, currentIndex - firstUnusedIndex);
+
                             errors.Clear();
                         }
                         else
                         {
-                            yield return new TextElement<JsonSymbol>(
-                                new JsonString(valueBuilder.ToString()),
-                                firstUnusedIndex,
-                                currentIndex - firstUnusedIndex);
+                            yield return new JsonString(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
                         }
                         valueBuilder.Clear();
                         firstUnusedIndex = currentIndex;
@@ -369,15 +349,13 @@ namespace Eutherion.Text.Json
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
             errors.Add(JsonErrorString.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
-            yield return new TextElement<JsonSymbol>(
-                new JsonErrorString(errors),
-                firstUnusedIndex,
-                length - firstUnusedIndex);
+
+            yield return new JsonErrorString(errors, length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
 
-        private IEnumerable<TextElement<JsonSymbol>> InSingleLineComment()
+        private IEnumerable<JsonSymbol> InSingleLineComment()
         {
             // Eat both / characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -398,10 +376,7 @@ namespace Eutherion.Text.Json
                             char secondChar = json[currentIndex];
                             if (secondChar == '\n')
                             {
-                                yield return new TextElement<JsonSymbol>(
-                                    JsonComment.Value,
-                                    firstUnusedIndex,
-                                    currentIndex - 1 - firstUnusedIndex);
+                                yield return new JsonComment(currentIndex - 1 - firstUnusedIndex);
 
                                 // Eat the second whitespace character.
                                 firstUnusedIndex = currentIndex - 1;
@@ -412,10 +387,7 @@ namespace Eutherion.Text.Json
                         }
                         break;
                     case '\n':
-                        yield return new TextElement<JsonSymbol>(
-                            JsonComment.Value,
-                            firstUnusedIndex,
-                            currentIndex - firstUnusedIndex);
+                        yield return new JsonComment(currentIndex - firstUnusedIndex);
 
                         // Eat the '\n'.
                         firstUnusedIndex = currentIndex;
@@ -427,15 +399,12 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new TextElement<JsonSymbol>(
-                JsonComment.Value,
-                firstUnusedIndex,
-                currentIndex - firstUnusedIndex);
+            yield return new JsonComment(currentIndex - firstUnusedIndex);
 
             currentTokenizer = null;
         }
 
-        private IEnumerable<TextElement<JsonSymbol>> InMultiLineComment()
+        private IEnumerable<JsonSymbol> InMultiLineComment()
         {
             // Eat /* characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -453,10 +422,7 @@ namespace Eutherion.Text.Json
                             // Increment so the closing '*/' is regarded as part of the comment.
                             currentIndex += 2;
 
-                            yield return new TextElement<JsonSymbol>(
-                                JsonComment.Value,
-                                firstUnusedIndex,
-                                currentIndex - firstUnusedIndex);
+                            yield return new JsonComment(currentIndex - firstUnusedIndex);
 
                             firstUnusedIndex = currentIndex;
                             currentTokenizer = Default;
@@ -468,10 +434,7 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new TextElement<JsonSymbol>(
-                new JsonUnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex),
-                firstUnusedIndex,
-                length - firstUnusedIndex);
+            yield return new JsonUnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
@@ -485,12 +448,10 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// An enumeration of <see cref="JsonSymbol"/> instances.
         /// </returns>
-        public static IEnumerable<TextElement<JsonSymbol>> TokenizeAll(string json)
-        {
-            return new JsonTokenizer(json)._TokenizeAll();
-        }
+        public static IEnumerable<JsonSymbol> TokenizeAll(string json)
+            => new JsonTokenizer(json)._TokenizeAll();
 
-        private IEnumerable<TextElement<JsonSymbol>> _TokenizeAll()
+        private IEnumerable<JsonSymbol> _TokenizeAll()
         {
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.

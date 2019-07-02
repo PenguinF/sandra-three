@@ -51,13 +51,12 @@ namespace Eutherion.Shared.Tests
         {
             string expectedCommentText = alternativeCommentText ?? json;
 
-            void firstTokenAssert(TextElement<JsonSymbol> symbol)
+            void firstTokenAssert(JsonSymbol symbol)
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonComment>(symbol.TerminalSymbol);
-                Assert.Equal(0, symbol.Start);
+                Assert.IsType<JsonComment>(symbol);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
-                Assert.Equal(expectedCommentText, json.Substring(symbol.Start, symbol.Length));
+                Assert.Equal(expectedCommentText, json.Substring(0, symbol.Length));
             }
 
             if (alternativeCommentText == null)
@@ -72,7 +71,7 @@ namespace Eutherion.Shared.Tests
                 Assert.Collection(
                     JsonTokenizer.TokenizeAll(json),
                     firstTokenAssert,
-                    symbol => Assert.IsType<JsonWhitespace>(symbol.TerminalSymbol));
+                    symbol => Assert.IsType<JsonWhitespace>(symbol));
             }
         }
 
@@ -94,7 +93,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            Assert.Collection(JsonTokenizer.TokenizeAll(ws), x => Assert.IsType<JsonWhitespace>(x.TerminalSymbol));
+            Assert.Collection(JsonTokenizer.TokenizeAll(ws), x => Assert.IsType<JsonWhitespace>(x));
         }
 
         [Theory]
@@ -119,8 +118,7 @@ namespace Eutherion.Shared.Tests
             Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
-                Assert.IsType(tokenType, symbol.TerminalSymbol);
-                Assert.Equal(0, symbol.Start);
+                Assert.IsType(tokenType, symbol);
                 Assert.Equal(json.Length, symbol.Length);
             });
         }
@@ -164,10 +162,9 @@ namespace Eutherion.Shared.Tests
             Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
-                var valueSymbol = Assert.IsType<JsonValue>(symbol.TerminalSymbol);
-                Assert.Equal(0, symbol.Start);
+                var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, json.Substring(symbol.Start, symbol.Length));
+                Assert.Equal(json, json.Substring(0, symbol.Length));
                 Assert.Equal(json, valueSymbol.Value);
             });
         }
@@ -196,8 +193,7 @@ namespace Eutherion.Shared.Tests
             Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
             {
                 Assert.NotNull(symbol);
-                var stringSymbol = Assert.IsType<JsonString>(symbol.TerminalSymbol);
-                Assert.Equal(0, symbol.Start);
+                var stringSymbol = Assert.IsType<JsonString>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
                 Assert.Equal(expectedValue, stringSymbol.Value);
             });
@@ -275,11 +271,10 @@ namespace Eutherion.Shared.Tests
                 // so assert that this is indeed what happens.
                 if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
                 {
-                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
+                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1.TerminalSymbol);
-                        Assert.Equal(expectedSymbol1Start, symbol1.Start);
+                        Assert.IsType(type1, symbol1);
                         Assert.Equal(expectedSymbol2Start + expectedSymbol2Length - expectedSymbol1Start, symbol1.Length);
                     });
                 }
@@ -291,17 +286,15 @@ namespace Eutherion.Shared.Tests
                         expectedSymbol2Length++;
                     }
 
-                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => x.TerminalSymbol != JsonWhitespace.Value), symbol1 =>
+                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1.TerminalSymbol);
-                        Assert.Equal(expectedSymbol1Start, symbol1.Start);
+                        Assert.IsType(type1, symbol1);
                         Assert.Equal(expectedSymbol1Length, symbol1.Length);
                     }, symbol2 =>
                     {
                         Assert.NotNull(symbol2);
-                        Assert.IsType(type2, symbol2.TerminalSymbol);
-                        Assert.Equal(expectedSymbol2Start, symbol2.Start);
+                        Assert.IsType(type2, symbol2);
                         Assert.Equal(expectedSymbol2Length, symbol2.Length);
                     });
                 }
@@ -407,7 +400,7 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.TerminalSymbol.Errors);
+            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.Errors);
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);

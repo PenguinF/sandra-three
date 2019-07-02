@@ -29,6 +29,7 @@ namespace Eutherion.Text.Json
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
         public virtual IEnumerable<JsonErrorInfo> Errors => Enumerable.Empty<JsonErrorInfo>();
+        public abstract int Length { get; }
 
         public abstract void Accept(JsonSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);

@@ -27,6 +27,8 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonColon Value = new JsonColon();
 
+        public override int Length => 1;
+
         private JsonColon() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColon(this);

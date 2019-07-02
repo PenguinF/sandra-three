@@ -27,6 +27,8 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonCurlyClose Value = new JsonCurlyClose();
 
+        public override int Length => 1;
+
         private JsonCurlyClose() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyClose(this);

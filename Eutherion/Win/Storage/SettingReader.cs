@@ -35,12 +35,21 @@ namespace Eutherion.Win.Storage
             string json,
             SettingSchema schema,
             out SettingObject settingObject,
-            out ReadOnlyList<TextElement<JsonSymbol>> tokens,
+            out ReadOnlyList<JsonSymbol> tokens,
             out List<JsonErrorInfo> errors)
         {
-            tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
+            tokens = new ReadOnlyList<JsonSymbol>(JsonTokenizer.TokenizeAll(json));
 
-            JsonParser parser = new JsonParser(tokens, json);
+            var textElementBuilder = new List<TextElement<JsonSymbol>>();
+            int totalLength = 0;
+
+            foreach (var token in tokens)
+            {
+                textElementBuilder.Add(new TextElement<JsonSymbol>(token, totalLength, token.Length));
+                totalLength += token.Length;
+            }
+
+            JsonParser parser = new JsonParser(textElementBuilder, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)

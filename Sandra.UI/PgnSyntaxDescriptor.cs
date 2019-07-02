@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Text;
 using Eutherion.Win.AppTemplate;
 using ScintillaNET;
 using System.Collections.Generic;
@@ -39,17 +38,17 @@ namespace Sandra.UI
 
         public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
-        public override (IEnumerable<TextElement<PgnSymbol>>, List<PgnErrorInfo>) Parse(string code)
+        public override (IEnumerable<PgnSymbol>, List<PgnErrorInfo>) Parse(string code)
         {
             int length = code.Length;
-            if (length == 0) return (Enumerable.Empty<TextElement<PgnSymbol>>(), new List<PgnErrorInfo>());
-            return (new TextElement<PgnSymbol>[] { new TextElement<PgnSymbol>(new PgnSymbol()) { Length = length } }, new List<PgnErrorInfo>());
+            if (length == 0) return (Enumerable.Empty<PgnSymbol>(), new List<PgnErrorInfo>());
+            return (new PgnSymbol[] { new PgnSymbol(length) }, new List<PgnErrorInfo>());
         }
 
         public override Style GetStyle(SyntaxEditor<PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;
 
-        public override int GetLength(TextElement<PgnSymbol> terminalSymbol)
+        public override int GetLength(PgnSymbol terminalSymbol)
             => terminalSymbol.Length;
 
         public override (int, int) GetErrorRange(PgnErrorInfo error)
@@ -61,6 +60,9 @@ namespace Sandra.UI
 
     public class PgnSymbol
     {
+        public int Length { get; }
+
+        public PgnSymbol(int length) => Length = length;
     }
 
     public class PgnErrorInfo

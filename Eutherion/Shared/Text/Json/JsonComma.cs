@@ -27,6 +27,8 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonComma Value = new JsonComma();
 
+        public override int Length => 1;
+
         private JsonComma() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComma(this);

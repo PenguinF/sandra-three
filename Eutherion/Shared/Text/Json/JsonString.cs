@@ -86,9 +86,12 @@ namespace Eutherion.Text.Json
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
+        public override int Length { get; }
 
-        public JsonString(string value)
+        public JsonString(string value, int length)
         {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 

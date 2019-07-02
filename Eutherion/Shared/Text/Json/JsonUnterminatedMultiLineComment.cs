@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -41,9 +42,12 @@ namespace Eutherion.Text.Json
 
         public override bool IsBackground => true;
         public override IEnumerable<JsonErrorInfo> Errors { get; }
+        public override int Length { get; }
 
         public JsonUnterminatedMultiLineComment(int start, int length)
         {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
             Error = CreateError(start, length);
             Errors = new[] { Error };
         }
