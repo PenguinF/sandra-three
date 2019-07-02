@@ -34,15 +34,30 @@ namespace Eutherion.Utils
     /// </typeparam>
     public class ReadOnlyList<T> : IReadOnlyList<T>
     {
-        private readonly T[] array;
+        /// <summary>
+        /// Gets the empty <see cref="ReadOnlyList{T}"/>.
+        /// </summary>
+        public static readonly ReadOnlyList<T> Empty = new ReadOnlyList<T>(Array.Empty<T>());
 
         /// <summary>
         /// Initializes a new instance of <see cref="ReadOnlyList{T}"/>.
         /// </summary>
-        /// <param name="elements">
+        /// <param name="source">
         /// The elements of the list.
         /// </param>
-        public ReadOnlyList(IEnumerable<T> elements) => array = elements.ToArrayEx();
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="source"/> is null.
+        /// </exception>
+        public static ReadOnlyList<T> Create(IEnumerable<T> source)
+        {
+            if (source is ReadOnlyList<T> readOnlyList) return readOnlyList;
+            var array = source.ToArrayEx();
+            return array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
+        }
+
+        private readonly T[] array;
+
+        private ReadOnlyList(T[] array) => this.array = array;
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.

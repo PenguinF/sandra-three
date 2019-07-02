@@ -38,7 +38,7 @@ namespace Eutherion.Win.Storage
             out ReadOnlyList<JsonSymbol> tokens,
             out List<JsonErrorInfo> errors)
         {
-            tokens = new ReadOnlyList<JsonSymbol>(JsonTokenizer.TokenizeAll(json));
+            tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
 
             var textElementBuilder = new List<TextElement<JsonSymbol>>();
             int totalLength = 0;
