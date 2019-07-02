@@ -44,26 +44,17 @@ namespace Eutherion.Win.AppTemplate
         private readonly SettingSchema schema;
 
         /// <summary>
-        /// Style selector for syntax highlighting.
-        /// </summary>
-        private readonly JsonStyleSelector styleSelector;
-
-        /// <summary>
         /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
         /// </summary>
         /// <param name="schema">
         /// The schema which defines what kind of keys and values are valid in the parsed json.
         /// </param>
-        /// <param name="styleSelector">
-        /// The style selector for syntax highlighting.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="styleSelector"/> and/or <paramref name="schema"/> are null.
+        /// <paramref name="schema"/> is null.
         /// </exception>
-        public JsonSyntaxDescriptor(SettingSchema schema, JsonStyleSelector styleSelector)
+        public JsonSyntaxDescriptor(SettingSchema schema)
         {
             this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
-            this.styleSelector = styleSelector ?? throw new ArgumentNullException(nameof(styleSelector));
         }
 
         public override string FileExtension => JsonFileExtension;
@@ -90,7 +81,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
-            => styleSelector.Visit(terminalSymbol, syntaxEditor);
+            => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)
             => (error.Start, error.Length);
@@ -116,7 +107,9 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        public void InitializeStyles(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public static readonly JsonStyleSelector Instance = new JsonStyleSelector();
+
+        public static void InitializeStyles(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
         {
             syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
             commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
@@ -126,6 +119,8 @@ namespace Eutherion.Win.AppTemplate
 
             syntaxEditor.Styles[stringStyleIndex].ForeColor = stringForeColor;
         }
+
+        private JsonStyleSelector() { }
 
         public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.DefaultStyle;
