@@ -119,10 +119,33 @@ namespace Eutherion.Utils
         /// </returns>
         public abstract bool IsJust(out T value);
 
+        /// <summary>
+        /// Invokes an action based on the type of the value.
+        /// </summary>
+        /// <param name="whenNothing">
+        /// The <see cref="Action"/> to invoke when the value is <see cref="Nothing"/>.
+        /// </param>
+        /// <param name="whenJust">
+        /// The <see cref="Action{T}"/> to invoke when the value is <see cref="Just(T)"/>.
+        /// </param>
         public abstract void Match(
             Action whenNothing,
             Action<T> whenJust);
 
+        /// <summary>
+        /// Invokes a function based on the type of the value and returns its result.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// </typeparam>
+        /// <param name="whenNothing">
+        /// The <see cref="Func{TResult}"/> to invoke when the value is <see cref="Nothing"/>.
+        /// </param>
+        /// <param name="whenJust">
+        /// The <see cref="Func{T, TResult}"/> to invoke when the value is <see cref="Just(T)"/>.
+        /// </param>
+        /// <returns>
+        /// The result of the invoked function.
+        /// </returns>
         public abstract TResult Match<TResult>(
             Func<TResult> whenNothing,
             Func<T, TResult> whenJust);
