@@ -144,9 +144,10 @@ namespace Eutherion.Win.Storage
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
-            const int maxLength = 30;
+            const int maxLength = 31;
             const string ellipsis = "...";
             const int ellipsisLength = 3;
+            const int halfLength = (maxLength - ellipsisLength) / 2;
 
             switch (valueNode)
             {
@@ -163,8 +164,10 @@ namespace Eutherion.Win.Storage
                     else
                     {
                         // Remove quotes, add ellipsis to inner string value, then quote again.
-                        // Somehow it looks like placing the ellipsis inside the string quotes makes more sense.
-                        return QuoteStringValue(json.Substring(valueNode.Start + 1, maxLength - ellipsisLength - 2) + ellipsis);
+                        return QuoteStringValue(
+                            json.Substring(valueNode.Start + 1, halfLength - 1)
+                            + ellipsis
+                            + json.Substring(valueNode.Start + valueNode.Length - halfLength + 1, halfLength - 1));
                     }
                 default:
                     if (valueNode.Length <= maxLength)
@@ -173,7 +176,10 @@ namespace Eutherion.Win.Storage
                     }
                     else
                     {
-                        return QuoteValue(json.Substring(valueNode.Start, maxLength - ellipsisLength) + ellipsis);
+                        return QuoteValue(
+                            json.Substring(valueNode.Start, halfLength)
+                            + ellipsis
+                            + json.Substring(valueNode.Start + valueNode.Length - halfLength, halfLength));
                     }
             }
         }
