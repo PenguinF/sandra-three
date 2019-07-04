@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Text.Json
 {
     public class JsonComment : JsonSymbol
@@ -30,11 +32,14 @@ namespace Eutherion.Text.Json
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
 
-        public static readonly JsonComment Value = new JsonComment();
-
-        private JsonComment() { }
-
         public override bool IsBackground => true;
+        public override int Length { get; }
+
+        public JsonComment(int length)
+        {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComment(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);

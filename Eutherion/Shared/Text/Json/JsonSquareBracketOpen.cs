@@ -27,9 +27,10 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
 
-        private JsonSquareBracketOpen() { }
-
         public override bool IsValueStartSymbol => true;
+        public override int Length => 1;
+
+        private JsonSquareBracketOpen() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);

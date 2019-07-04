@@ -84,11 +84,6 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        /// <summary>
-        /// Gets the translation key for a typecheck error message of <see cref="PType.Enumeration{TEnum}"/>.
-        /// </summary>
-        public static readonly LocalizedStringKey EnumerationTypeError = new LocalizedStringKey(nameof(EnumerationTypeError));
-
         public sealed class Enumeration<TEnum> : Derived<string, TEnum>, ITypeErrorBuilder where TEnum : struct
         {
             private readonly Dictionary<TEnum, string> enumToString = new Dictionary<TEnum, string>();
@@ -123,18 +118,24 @@ namespace Eutherion.Win.Storage
 
             public override string GetBaseValue(TEnum value) => enumToString[value];
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybePropertyKey)
             {
                 if (stringToEnum.Count == 0)
                 {
-                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
-                    {
-                        propertyKey,
-                        valueString
-                    });
+                    return maybePropertyKey.Match(
+                        whenNothing: () => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesError,
+                            new[]
+                            {
+                                actualValueString,
+                            }),
+                        whenJust: propertyKey => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
+                            new[]
+                            {
+                                actualValueString,
+                                PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey),
+                            }));
                 }
 
                 string localizedValueList;
@@ -146,26 +147,33 @@ namespace Eutherion.Win.Storage
                 {
                     IEnumerable<string> enumValues = stringToEnum.Keys.Take(stringToEnum.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastEnumValue = PTypeErrorBuilder.QuoteStringValue(stringToEnum.Keys.Last());
-                    localizedValueList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
-                    {
-                        string.Join(", ", enumValues),
-                        lastEnumValue
-                    });
+                    localizedValueList = localizer.Localize(
+                        PTypeErrorBuilder.EnumerateWithOr,
+                        new[]
+                        {
+                            string.Join(", ", enumValues),
+                            lastEnumValue,
+                        });
                 }
 
-                return localizer.Localize(EnumerationTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    localizedValueList
-                });
+                return maybePropertyKey.Match(
+                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                        localizer,
+                        localizedValueList,
+                        actualValueString),
+                    whenJust: propertyKey => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                        localizer,
+                        localizedValueList,
+                        actualValueString,
+                        PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey)));
             }
-        }
 
-        /// <summary>
-        /// Gets the translation key for a typecheck error message of <see cref="PType.KeyedSet{T}"/>.
-        /// </summary>
-        public static readonly LocalizedStringKey KeyedSetTypeError = new LocalizedStringKey(nameof(KeyedSetTypeError));
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(localizer, actualValueString, propertyKey);
+        }
 
         public sealed class KeyedSet<T> : Derived<string, T>, ITypeErrorBuilder where T : class
         {
@@ -201,18 +209,24 @@ namespace Eutherion.Win.Storage
                 throw new ArgumentException("Target value not found.");
             }
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
+            private string GenericTypeErrorMessage(Localizer localizer, string actualValueString, Maybe<string> maybePropertyKey)
             {
                 if (stringToTarget.Count == 0)
                 {
-                    return localizer.Localize(PTypeErrorBuilder.NoLegalValues, new[]
-                    {
-                        propertyKey,
-                        valueString
-                    });
+                    return maybePropertyKey.Match(
+                        whenNothing: () => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesError,
+                            new[]
+                            {
+                                actualValueString,
+                            }),
+                        whenJust: propertyKey => localizer.Localize(
+                            PTypeErrorBuilder.NoLegalValuesErrorSomewhere,
+                            new[]
+                            {
+                                actualValueString,
+                                PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey),
+                            }));
                 }
 
                 string localizedKeysList;
@@ -225,20 +239,32 @@ namespace Eutherion.Win.Storage
                     // TODO: escape characters in KeyedSet keys.
                     IEnumerable<string> keys = stringToTarget.Keys.Take(stringToTarget.Count - 1).Select(PTypeErrorBuilder.QuoteStringValue);
                     var lastKey = PTypeErrorBuilder.QuoteStringValue(stringToTarget.Keys.Last());
-                    localizedKeysList = localizer.Localize(PTypeErrorBuilder.EnumerateWithOr, new[]
-                    {
-                        string.Join(", ", keys),
-                        lastKey
-                    });
+                    localizedKeysList = localizer.Localize(
+                        PTypeErrorBuilder.EnumerateWithOr,
+                        new[]
+                        {
+                            string.Join(", ", keys),
+                            lastKey,
+                        });
                 }
 
-                return localizer.Localize(KeyedSetTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    localizedKeysList
-                });
+                return maybePropertyKey.Match(
+                    whenNothing: () => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                        localizer,
+                        localizedKeysList,
+                        actualValueString),
+                    whenJust: propertyKey => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                        localizer,
+                        localizedKeysList,
+                        actualValueString,
+                        PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey)));
             }
+
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => GenericTypeErrorMessage(localizer, actualValueString, Maybe<string>.Nothing);
+
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => GenericTypeErrorMessage(localizer, actualValueString, propertyKey);
         }
     }
 }

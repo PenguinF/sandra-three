@@ -363,9 +363,10 @@ namespace Eutherion.Win.AppTemplate
                                          let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
                                          // Instead of using errorLocationString.DisplayText.Value,
                                          // use the current localizer to format the localized string.
-                                         select Session.Current.CurrentLocalizer.Localize(
+                                         let fullErrorMessage = Session.Current.CurrentLocalizer.Localize(
                                              errorLocationString.Key,
-                                             new[] { errorMessage, lineIndex, position })).ToArray();
+                                             new[] { errorMessage, lineIndex, position })
+                                         select Session.Current.CurrentLocalizer.ToSentenceCase(fullErrorMessage)).ToArray();
 
                     int oldItemCount = errorsListBox.Items.Count;
                     var newErrorCount = errorMessages.Length;

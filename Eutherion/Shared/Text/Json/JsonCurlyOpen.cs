@@ -27,9 +27,10 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
 
-        private JsonCurlyOpen() { }
-
         public override bool IsValueStartSymbol => true;
+        public override int Length => 1;
+
+        private JsonCurlyOpen() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);

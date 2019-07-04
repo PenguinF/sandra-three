@@ -27,6 +27,8 @@ namespace Eutherion.Text.Json
 
         public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
 
+        public override int Length => 1;
+
         private JsonSquareBracketClose() { }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);

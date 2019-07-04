@@ -41,6 +41,16 @@ namespace Eutherion.Utils
                 return false;
             }
 
+            public override void Match(
+                Action whenNothing,
+                Action<T> whenJust)
+                => whenNothing?.Invoke();
+
+            public override TResult Match<TResult>(
+                Func<TResult> whenNothing,
+                Func<T, TResult> whenJust)
+                => whenNothing != null ? whenNothing() : default;
+
             public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
                 => Maybe<TResult>.Nothing;
         }
@@ -58,6 +68,16 @@ namespace Eutherion.Utils
                 value = Value;
                 return true;
             }
+
+            public override void Match(
+                Action whenNothing,
+                Action<T> whenJust)
+                => whenJust?.Invoke(Value);
+
+            public override TResult Match<TResult>(
+                Func<TResult> whenNothing,
+                Func<T, TResult> whenJust)
+                => whenJust != null ? whenJust(Value) : default;
 
             public override Maybe<TResult> Bind<TResult>(Func<T, Maybe<TResult>> whenJust)
                 => whenJust(Value);
@@ -98,6 +118,37 @@ namespace Eutherion.Utils
         /// Whether or not this <see cref="Maybe{T}"/> contains a value.
         /// </returns>
         public abstract bool IsJust(out T value);
+
+        /// <summary>
+        /// Invokes an action based on the type of the value.
+        /// </summary>
+        /// <param name="whenNothing">
+        /// The <see cref="Action"/> to invoke when the value is <see cref="Nothing"/>.
+        /// </param>
+        /// <param name="whenJust">
+        /// The <see cref="Action{T}"/> to invoke when the value is <see cref="Just(T)"/>.
+        /// </param>
+        public abstract void Match(
+            Action whenNothing,
+            Action<T> whenJust);
+
+        /// <summary>
+        /// Invokes a function based on the type of the value and returns its result.
+        /// </summary>
+        /// <typeparam name="TResult">
+        /// </typeparam>
+        /// <param name="whenNothing">
+        /// The <see cref="Func{TResult}"/> to invoke when the value is <see cref="Nothing"/>.
+        /// </param>
+        /// <param name="whenJust">
+        /// The <see cref="Func{T, TResult}"/> to invoke when the value is <see cref="Just(T)"/>.
+        /// </param>
+        /// <returns>
+        /// The result of the invoked function.
+        /// </returns>
+        public abstract TResult Match<TResult>(
+            Func<TResult> whenNothing,
+            Func<T, TResult> whenJust);
 
         /// <summary>
         /// If this <see cref="Maybe{T}"/> contains a value, applies a function to it

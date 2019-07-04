@@ -185,15 +185,13 @@ namespace Eutherion.Win.Storage
         /// </summary>
         internal List<JsonErrorInfo> TryLoadFromText(string json)
         {
-            var parser = new SettingReader(json);
-
-            if (parser.TryParse(Schema, out PMap map, out List<JsonErrorInfo> errors))
+            if (SettingReader.TryParse(json, Schema, out SettingObject settingObject, out _, out List<JsonErrorInfo> errors))
             {
                 // Error tolerance:
                 // 1) Even if there are errors, still load the map.
                 // 2) Don't clear the existing settings, only overwrite them.
                 //    The map might not contain all expected properties.
-                foreach (var kv in map)
+                foreach (var kv in settingObject.Map)
                 {
                     KeyValueMapping[kv.Key] = kv.Value;
                 }

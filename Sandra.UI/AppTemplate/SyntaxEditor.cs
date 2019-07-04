@@ -71,8 +71,6 @@ namespace Eutherion.Win.AppTemplate
             => !ReadOnly
             && (Modified || containsChangesAtSavePoint);
 
-        private readonly TextIndex<TTerminal> TextIndex;
-
         public Style DefaultStyle => Styles[Style.Default];
         private Style LineNumberStyle => Styles[Style.LineNumber];
         private Style CallTipStyle => Styles[Style.CallTip];
@@ -95,8 +93,6 @@ namespace Eutherion.Win.AppTemplate
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
             CodeFile = codeFile ?? throw new ArgumentNullException(nameof(codeFile));
-
-            TextIndex = new TextIndex<TTerminal>();
 
             HScrollBar = false;
             VScrollBar = true;
@@ -215,14 +211,14 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            TextIndex.Clear();
-
             var (tokens, errors) = SyntaxDescriptor.Parse(code);
-            tokens.ForEach(TextIndex.AppendTerminalSymbol);
 
-            foreach (var textElement in TextIndex.Elements)
+            int totalLength = 0;
+            foreach (var token in tokens)
             {
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, textElement.TerminalSymbol), textElement.Start, textElement.Length);
+                int length = SyntaxDescriptor.GetLength(token);
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
+                totalLength += length;
             }
 
             IndicatorClearRange(0, TextLength);
@@ -311,7 +307,9 @@ namespace Eutherion.Win.AppTemplate
             base.OnDwellStart(e);
 
             int textPosition = e.Position;
-            string toolTipText = string.Join("\n\n", ActiveErrorMessages(textPosition));
+            string toolTipText = string.Join(
+                "\n\n",
+                ActiveErrorMessages(textPosition).Select(x => Session.Current.CurrentLocalizer.ToSentenceCase(x)));
 
             if (toolTipText.Length > 0)
             {
@@ -424,12 +422,17 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.
         /// </summary>
-        public abstract (IEnumerable<TextElement<TTerminal>>, List<TError>) Parse(string code);
+        public abstract (IEnumerable<TTerminal>, List<TError>) Parse(string code);
 
         /// <summary>
         /// Gets the style for a terminal symbol.
         /// </summary>
         public abstract Style GetStyle(SyntaxEditor<TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
+
+        /// <summary>
+        /// Gets the length of a terminal symbol.
+        /// </summary>
+        public abstract int GetLength(TTerminal terminalSymbol);
 
         /// <summary>
         /// Gets the start position and the length of the text span of an error.

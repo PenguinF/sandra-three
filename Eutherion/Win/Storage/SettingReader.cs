@@ -19,11 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Localization;
-using Eutherion.Text;
 using Eutherion.Text.Json;
 using Eutherion.Utils;
-using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
@@ -31,64 +28,36 @@ namespace Eutherion.Win.Storage
     /// <summary>
     /// Temporary class which parses a list of <see cref="JsonSymbol"/>s directly into a <see cref="PValue"/> result.
     /// </summary>
-    public class SettingReader
+    public static class SettingReader
     {
-        public static readonly PTypeErrorBuilder RootValueShouldBeObjectTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(RootValueShouldBeObjectTypeError)));
-
-        private readonly string json;
-
-        public ReadOnlyList<TextElement<JsonSymbol>> Tokens { get; }
-
-        public SettingReader(string json)
+        public static bool TryParse(
+            string json,
+            SettingSchema schema,
+            out SettingObject settingObject,
+            out ReadOnlyList<JsonSymbol> tokens,
+            out List<JsonErrorInfo> errors)
         {
-            this.json = json ?? throw new ArgumentNullException(nameof(json));
-            Tokens = new ReadOnlyList<TextElement<JsonSymbol>>(JsonTokenizer.TokenizeAll(json));
-        }
+            tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
 
-        public bool TryParse(SettingSchema schema, out PMap map, out List<JsonErrorInfo> errors)
-        {
-            JsonParser parser = new JsonParser(Tokens, json);
+            JsonParser parser = new JsonParser(tokens, json);
             bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
 
             if (hasRootValue)
             {
-                if (rootNode is JsonMapSyntax mapNode)
+                if (schema.TryCreateValue(
+                    json,
+                    rootNode,
+                    out settingObject,
+                    errors).IsOption1(out ITypeErrorBuilder typeError))
                 {
-                    Dictionary<string, PValue> mapBuilder = new Dictionary<string, PValue>();
-
-                    // Analyze values with the provided schema while building the PMap.
-                    foreach (var keyedNode in mapNode.MapNodeKeyValuePairs)
-                    {
-                        if (schema.TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
-                        {
-                            var valueOrError = property.TryCreateValue(json, keyedNode.Value, errors);
-
-                            if (valueOrError.IsOption2(out PValue convertedValue))
-                            {
-                                mapBuilder.Add(keyedNode.Key.Value, convertedValue);
-                            }
-                            else
-                            {
-                                valueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                                errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
-                            }
-                        }
-                        else
-                        {
-                            // TODO: add error levels, this should probably be a warning.
-                            errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
-                        }
-                    }
-
-                    map = new PMap(mapBuilder);
-                    return true;
+                    errors.Add(ValueTypeError.Create(typeError, rootNode, json));
+                    return false;
                 }
 
-                errors.Add(ValueTypeError.Create(RootValueShouldBeObjectTypeError, rootNode, json));
+                return true;
             }
 
-            map = default;
+            settingObject = default;
             return false;
         }
     }

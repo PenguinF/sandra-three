@@ -28,9 +28,9 @@ namespace Eutherion.Text.Json
     {
         public string Value { get; }
 
-        public JsonStringLiteralSyntax(TextElement<JsonSymbol> stringToken, string value)
-            : base(stringToken.Start, stringToken.Length)
-            => Value = value;
+        public JsonStringLiteralSyntax(JsonString stringToken, int start)
+            : base(start, stringToken.Length)
+            => Value = stringToken.Value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

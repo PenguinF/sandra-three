@@ -30,8 +30,8 @@ namespace Eutherion.Text.Json
     {
         public BigInteger Value { get; }
 
-        public JsonIntegerLiteralSyntax(TextElement<JsonSymbol> integerToken, BigInteger value)
-            : base(integerToken.Start, integerToken.Length)
+        public JsonIntegerLiteralSyntax(JsonSymbol integerToken, BigInteger value, int start)
+            : base(start, integerToken.Length)
             => Value = value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);

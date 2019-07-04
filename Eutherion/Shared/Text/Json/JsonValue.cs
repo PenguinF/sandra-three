@@ -33,10 +33,13 @@ namespace Eutherion.Text.Json
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
+        public override int Length { get; }
 
-        public JsonValue(string value)
+        public JsonValue(string value, int length)
         {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Value = value ?? throw new ArgumentNullException(nameof(value));
+            Length = length;
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);

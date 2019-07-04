@@ -24,13 +24,32 @@ using Eutherion.Text.Json;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Numerics;
 
 namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
+        /// <summary>
+        /// Gets the translation key for referring to a json boolean.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonBoolean = new LocalizedStringKey(nameof(JsonBoolean));
+
+        /// <summary>
+        /// Gets the translation key for referring to a json integer.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonInteger = new LocalizedStringKey(nameof(JsonInteger));
+
+        /// <summary>
+        /// Gets the translation key for referring to a json integer within a specific range.
+        /// </summary>
+        public static readonly LocalizedStringKey RangedJsonInteger = new LocalizedStringKey(nameof(RangedJsonInteger));
+
+        /// <summary>
+        /// Gets the translation key for referring to a json string.
+        /// </summary>
+        public static readonly LocalizedStringKey JsonString = new LocalizedStringKey(nameof(JsonString));
+
         /// <summary>
         /// Gets the translation key for referring to a general json array (list).
         /// </summary>
@@ -46,32 +65,20 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly LocalizedStringKey JsonUndefinedValue = new LocalizedStringKey(nameof(JsonUndefinedValue));
 
-        public static readonly PTypeErrorBuilder BooleanTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(BooleanTypeError)));
-
-        public static readonly PTypeErrorBuilder IntegerTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(IntegerTypeError)));
-
-        public static readonly PTypeErrorBuilder MapTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(MapTypeError)));
-
-        public static readonly PTypeErrorBuilder StringTypeError
-            = new PTypeErrorBuilder(new LocalizedStringKey(nameof(StringTypeError)));
-
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PBoolean"/> values.
         /// </summary>
-        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(BooleanTypeError, new ToBoolConverter());
+        public static readonly PType<PBoolean> Boolean = new BaseType<PBoolean>(JsonBoolean, new ToBoolConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PInteger"/> values.
         /// </summary>
-        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(IntegerTypeError, new ToIntConverter());
+        public static readonly PType<PInteger> Integer = new BaseType<PInteger>(JsonInteger, new ToIntConverter());
 
         /// <summary>
         /// Gets the standard <see cref="PType"/> for <see cref="PString"/> values.
         /// </summary>
-        public static readonly PType<PString> String = new BaseType<PString>(StringTypeError, new ToStringConverter());
+        public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
 
         private class ToBoolConverter : JsonSyntaxNodeVisitor<Maybe<PBoolean>>
         {
@@ -97,9 +104,9 @@ namespace Eutherion.Win.Storage
             private readonly PTypeErrorBuilder typeError;
             private readonly JsonSyntaxNodeVisitor<Maybe<TValue>> converter;
 
-            public BaseType(PTypeErrorBuilder typeError, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
+            public BaseType(LocalizedStringKey expectedTypeDescriptionKey, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
             {
-                this.typeError = typeError;
+                typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;
             }
 
@@ -287,11 +294,6 @@ namespace Eutherion.Win.Storage
             }
         }
 
-        /// <summary>
-        /// Gets the translation key for <see cref="RangedInteger"/> type check failure error messages.
-        /// </summary>
-        public static readonly LocalizedStringKey RangedIntegerTypeError = new LocalizedStringKey(nameof(RangedIntegerTypeError));
-
         public sealed class RangedInteger : Filter<PInteger>, ITypeErrorBuilder
         {
             /// <summary>
@@ -325,17 +327,27 @@ namespace Eutherion.Win.Storage
                 ? ValidValue(out typeError)
                 : InvalidValue(this, out typeError);
 
-            /// <summary>
-            /// Gets the localized, context sensitive message for this error.
-            /// </summary>
-            public string GetLocalizedTypeErrorMessage(Localizer localizer, string propertyKey, string valueString)
-                => localizer.Localize(RangedIntegerTypeError, new[]
-                {
-                    propertyKey,
-                    valueString,
-                    MinValue.ToStringInvariant(),
-                    MaxValue.ToStringInvariant(),
-                });
+            private string LocalizedExpectedTypeDescription(Localizer localizer)
+                => localizer.Localize(
+                    RangedJsonInteger,
+                    new[]
+                    {
+                        MinValue.ToStringInvariant(),
+                        MaxValue.ToStringInvariant(),
+                    });
+
+            public string GetLocalizedTypeErrorMessage(Localizer localizer, string actualValueString)
+                => PTypeErrorBuilder.GetLocalizedTypeErrorMessage(
+                    localizer,
+                    LocalizedExpectedTypeDescription(localizer),
+                    actualValueString);
+
+            public string GetLocalizedTypeErrorAtPropertyKeyMessage(Localizer localizer, string actualValueString, string propertyKey)
+                => PTypeErrorBuilder.GetLocalizedTypeErrorSomewhereMessage(
+                    localizer,
+                    LocalizedExpectedTypeDescription(localizer),
+                    actualValueString,
+                    PTypeErrorBuilder.GetLocatedAtPropertyKeyMessage(localizer, propertyKey));
 
             public override string ToString()
                 => $"{nameof(RangedInteger)}[{MinValue}..{MaxValue}]";

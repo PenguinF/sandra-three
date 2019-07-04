@@ -36,10 +36,15 @@ namespace Eutherion.Win.Storage
 
         internal readonly PMap Map;
 
-        internal SettingObject(SettingCopy workingCopy)
+        internal SettingObject(SettingSchema schema, PMap map)
         {
-            Schema = workingCopy.Schema;
-            Map = workingCopy.ToPMap();
+            Schema = schema;
+            Map = map;
+        }
+
+        internal SettingObject(SettingCopy workingCopy)
+            : this(workingCopy.Schema, workingCopy.ToPMap())
+        {
         }
 
         /// <summary>

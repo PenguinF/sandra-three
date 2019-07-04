@@ -59,14 +59,19 @@ namespace Eutherion.Text.Json
 
         public override IEnumerable<JsonErrorInfo> Errors { get; }
         public override bool IsValueStartSymbol => true;
+        public override int Length { get; }
 
-        public JsonErrorString(params JsonErrorInfo[] errors)
+        public JsonErrorString(int length, params JsonErrorInfo[] errors)
         {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
 
-        public JsonErrorString(IEnumerable<JsonErrorInfo> errors)
+        public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
         {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
             Errors = errors.ToArrayEx();
         }
 

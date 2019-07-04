@@ -27,73 +27,100 @@ namespace Eutherion.Win.Storage
 {
     public static partial class PType
     {
-        /// <summary>
-        /// A dictionary with an arbitrary number of string keys, and values are all of the same subtype.
-        /// </summary>
-        public class ValueMap<T> : PType<Dictionary<string, T>>
+        public static readonly PTypeErrorBuilder MapTypeError = new PTypeErrorBuilder(JsonObject);
+
+        public abstract class MapBase<T> : PType<T>
         {
-            public PType<T> ItemType { get; }
+            internal MapBase() { }
 
-            public ValueMap(PType<T> itemType)
-                => ItemType = itemType;
-
-            internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
+            internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
                 JsonSyntaxNode valueNode,
-                out Dictionary<string, T> convertedValue,
+                out T convertedValue,
                 List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    var mapBuilder = new Dictionary<string, PValue>();
-                    var dictionary = new Dictionary<string, T>();
-
-                    foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
-                    {
-                        // Error tolerance: ignore items of the wrong type.
-                        var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors);
-                        if (itemValueOrError.IsOption2(out PValue itemValue))
-                        {
-                            mapBuilder.Add(keyedNode.Key.Value, itemValue);
-                            dictionary.Add(keyedNode.Key.Value, value);
-                        }
-                        else
-                        {
-                            itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                            errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
-                        }
-                    }
-
-                    convertedValue = dictionary;
-                    return new PMap(mapBuilder);
+                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, errors);
                 }
 
                 convertedValue = default;
                 return MapTypeError;
             }
 
-            public override Maybe<Dictionary<string, T>> TryConvert(PValue value)
+            internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
+                string json,
+                JsonMapSyntax jsonMapSyntax,
+                out T convertedValue,
+                List<JsonErrorInfo> errors);
+
+            public sealed override Maybe<T> TryConvert(PValue value)
+                => value is PMap map ? TryConvertFromMap(map) : Maybe<T>.Nothing;
+
+            public abstract Maybe<T> TryConvertFromMap(PMap map);
+
+            public sealed override PValue GetPValue(T value)
+                => GetBaseValue(value);
+
+            public abstract PMap GetBaseValue(T value);
+        }
+
+        /// <summary>
+        /// A dictionary with an arbitrary number of string keys, and values are all of the same subtype.
+        /// </summary>
+        public class ValueMap<T> : MapBase<Dictionary<string, T>>
+        {
+            public PType<T> ItemType { get; }
+
+            public ValueMap(PType<T> itemType)
+                => ItemType = itemType;
+
+            internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
+                string json,
+                JsonMapSyntax jsonMapSyntax,
+                out Dictionary<string, T> convertedValue,
+                List<JsonErrorInfo> errors)
             {
-                if (value is PMap map)
+                var dictionary = new Dictionary<string, T>();
+                var mapBuilder = new Dictionary<string, PValue>();
+
+                foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
                 {
-                    var dictionary = new Dictionary<string, T>();
-
-                    foreach (var kv in map)
+                    // Error tolerance: ignore items of the wrong type.
+                    var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors);
+                    if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
-                        // Error tolerance: ignore items of the wrong type.
-                        if (ItemType.TryConvert(kv.Value).IsJust(out T itemValue))
-                        {
-                            dictionary.Add(kv.Key, itemValue);
-                        }
+                        dictionary.Add(keyedNode.Key.Value, value);
+                        mapBuilder.Add(keyedNode.Key.Value, itemValue);
                     }
-
-                    return dictionary;
+                    else
+                    {
+                        itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                    }
                 }
 
-                return Maybe<Dictionary<string, T>>.Nothing;
+                convertedValue = dictionary;
+                return new PMap(mapBuilder);
             }
 
-            public override PValue GetPValue(Dictionary<string, T> value)
+            public override Maybe<Dictionary<string, T>> TryConvertFromMap(PMap map)
+            {
+                var dictionary = new Dictionary<string, T>();
+
+                foreach (var kv in map)
+                {
+                    // Error tolerance: ignore items of the wrong type.
+                    if (ItemType.TryConvert(kv.Value).IsJust(out T itemValue))
+                    {
+                        dictionary.Add(kv.Key, itemValue);
+                    }
+                }
+
+                return dictionary;
+            }
+
+            public override PMap GetBaseValue(Dictionary<string, T> value)
             {
                 var dictionary = new Dictionary<string, PValue>();
 

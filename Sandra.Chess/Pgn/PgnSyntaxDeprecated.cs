@@ -36,7 +36,7 @@ namespace Sandra.PgnDeprecated
         public PgnLine(IEnumerable<PgnPlyWithSidelines> plies)
         {
             if (plies == null) throw new ArgumentNullException(nameof(plies));
-            var plyList = new ReadOnlyList<PgnPlyWithSidelines>(plies);
+            var plyList = ReadOnlyList<PgnPlyWithSidelines>.Create(plies);
             for (int i = 0; i < plyList.Count; ++i)
             {
                 if (plyList[i].Parent != null) throw new ArgumentException($"{nameof(plyList)}[{i}] already has a parent {nameof(PgnLine)}.");
@@ -94,7 +94,7 @@ namespace Sandra.PgnDeprecated
             Ply = ply;
             if (sideLines != null)
             {
-                var sideLineList = new ReadOnlyList<PgnLine>(sideLines);
+                var sideLineList = ReadOnlyList<PgnLine>.Create(sideLines);
                 for (int i = 0; i < sideLineList.Count; ++i)
                 {
                     if (sideLineList[i].Parent != null) throw new ArgumentException($"{nameof(sideLines)}[{i}] already has a parent {nameof(PgnPlyWithSidelines)}.");

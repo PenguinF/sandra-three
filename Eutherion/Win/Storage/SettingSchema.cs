@@ -19,13 +19,15 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text.Json;
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Eutherion.Win.Storage
 {
-    public class SettingSchema
+    public class SettingSchema : PType.MapBase<SettingObject>
     {
         // Prevent repeated allocations of empty dictionaries.
         private static readonly Dictionary<string, SettingProperty> emptyProperties = new Dictionary<string, SettingProperty>();
@@ -153,5 +155,49 @@ namespace Eutherion.Win.Storage
         /// Enumerates all properties in this schema.
         /// </summary>
         public IEnumerable<SettingProperty> AllProperties => properties.Values;
+
+        internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
+            string json,
+            JsonMapSyntax jsonMapSyntax,
+            out SettingObject convertedValue,
+            List<JsonErrorInfo> errors)
+        {
+            var mapBuilder = new Dictionary<string, PValue>();
+
+            // Analyze values with this schema while building the PMap.
+            foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
+            {
+                if (TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
+                {
+                    var itemNode = keyedNode.Value;
+                    var valueOrError = property.TryCreateValue(json, itemNode, errors);
+
+                    if (valueOrError.IsOption2(out PValue convertedItemValue))
+                    {
+                        mapBuilder.Add(keyedNode.Key.Value, convertedItemValue);
+                    }
+                    else
+                    {
+                        valueOrError.IsOption1(out ITypeErrorBuilder typeError);
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, itemNode, json));
+                    }
+                }
+                else
+                {
+                    // TODO: add error levels, this should probably be a warning.
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
+                }
+            }
+
+            var map = new PMap(mapBuilder);
+            convertedValue = new SettingObject(this, map);
+            return map;
+        }
+
+        public override Maybe<SettingObject> TryConvertFromMap(PMap map)
+            => new SettingObject(this, map);
+
+        public override PMap GetBaseValue(SettingObject value)
+            => value.Map;
     }
 }

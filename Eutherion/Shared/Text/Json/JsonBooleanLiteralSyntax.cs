@@ -28,8 +28,8 @@ namespace Eutherion.Text.Json
     {
         public bool Value { get; }
 
-        public JsonBooleanLiteralSyntax(TextElement<JsonSymbol> booleanToken, bool value)
-            : base(booleanToken.Start, booleanToken.Length)
+        public JsonBooleanLiteralSyntax(JsonSymbol booleanToken, bool value, int start)
+            : base(start, booleanToken.Length)
             => Value = value;
 
         public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
