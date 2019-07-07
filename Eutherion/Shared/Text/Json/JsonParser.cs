@@ -64,6 +64,13 @@ namespace Eutherion.Text.Json
             }
         }
 
+        private JsonBackgroundSyntax CaptureBackground()
+        {
+            var background = JsonBackgroundSyntax.Create(BackgroundBuilder);
+            BackgroundBuilder.Clear();
+            return background;
+        }
+
         public override (JsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
         {
             int start = CurrentLength - curlyOpen.Length;
@@ -74,7 +81,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
+                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys).ContentNode;
                 bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
                 bool validKey = false;
@@ -131,7 +138,7 @@ namespace Eutherion.Text.Json
                     }
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
+                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ContentNode;
                     bool gotNewValue = !(parsedValueNode is JsonMissingValueSyntax);
                     gotValue |= gotNewValue;
 
@@ -212,7 +219,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
+                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ContentNode;
                 bool gotValue = !(parsedValueNode is JsonMissingValueSyntax);
 
                 if (gotValue) listBuilder.Add(parsedValueNode);
@@ -290,16 +297,31 @@ namespace Eutherion.Text.Json
         public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
             => (new JsonStringLiteralSyntax(symbol, CurrentLength - symbol.Length), false);
 
-        private JsonValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
+        private JsonValueWithBackgroundSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             ShiftToNextForegroundToken();
-            if (CurrentToken == null) return new JsonMissingValueSyntax(CurrentLength);
-            if (!CurrentToken.IsValueStartSymbol) return new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length);
 
-            JsonValueSyntax firstValueNode = null;
+            if (CurrentToken == null)
+            {
+                return new JsonValueWithBackgroundSyntax(
+                    CaptureBackground(),
+                    new JsonMissingValueSyntax(CurrentLength));
+            }
+
+            if (!CurrentToken.IsValueStartSymbol)
+            {
+                return new JsonValueWithBackgroundSyntax(
+                    CaptureBackground(),
+                    new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length));
+            }
+
+            JsonValueWithBackgroundSyntax firstValueNode = null;
 
             for (; ; )
             {
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+
                 // Make sure consecutive values are all parsed as if they were valid.
                 // Interpret the first, discard the rest.
                 JsonValueSyntax currentNode;
@@ -316,17 +338,27 @@ namespace Eutherion.Text.Json
 
                 if (firstValueNode == null)
                 {
-                    firstValueNode = currentNode;
+                    firstValueNode = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
                 }
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null) return firstValueNode;
+                if (CurrentToken == null)
+                {
+                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                    // This means that here there's no need to capture the background.
+                    return firstValueNode;
+                }
 
                 // Move to the next symbol if CurrentToken was processed.
                 if (!unprocessedToken) ShiftToNextForegroundToken();
 
                 // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return firstValueNode;
+                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+                {
+                    // Capture the background following the last value.
+                    var backgroundAfter = CaptureBackground();
+                    return firstValueNode;
+                }
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
@@ -338,7 +370,7 @@ namespace Eutherion.Text.Json
 
         public bool TryParse(out JsonValueSyntax rootNode, out List<JsonErrorInfo> errors)
         {
-            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
+            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof).ContentNode;
             bool hasRootValue = !(rootNode is JsonMissingValueSyntax);
 
             if (CurrentToken != null)
