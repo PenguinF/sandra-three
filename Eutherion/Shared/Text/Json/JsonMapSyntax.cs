@@ -32,6 +32,8 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
+        public ReadOnlyList<int> KeyValueNodePositions { get; }
+
         public bool MissingCurlyClose { get; }
 
         public override int Length { get; }
@@ -50,10 +52,12 @@ namespace Eutherion.Text.Json
             // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
             // The first iteration should be CurlyOpenLength rather than CommaLength.
             int cumulativeLength = 0;
+            int[] keyValueNodePositions = new int[KeyValueNodes.Count];
 
             for (int i = 0; i < KeyValueNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
+                keyValueNodePositions[i] = cumulativeLength;
                 cumulativeLength += KeyValueNodes[i].Length;
             }
 
@@ -62,6 +66,7 @@ namespace Eutherion.Text.Json
                 cumulativeLength += JsonCurlyClose.CurlyCloseLength;
             }
 
+            KeyValueNodePositions = ReadOnlyList<int>.DangerousCreateFromArray(keyValueNodePositions);
             Length = cumulativeLength;
         }
 
