@@ -39,7 +39,10 @@ namespace Eutherion.Text.Json
         public static JsonValue Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
-            return new JsonValue(value);
+
+            return value == False ? FalseJsonValue
+                : value == True ? TrueJsonValue
+                : new JsonValue(value);
         }
 
         public string Value { get; }

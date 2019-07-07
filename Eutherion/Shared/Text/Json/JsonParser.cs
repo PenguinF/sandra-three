@@ -262,10 +262,10 @@ namespace Eutherion.Text.Json
 
         public override (JsonSyntaxNode, bool) VisitValue(JsonValue symbol)
         {
-            string value = symbol.Value;
-            if (value == JsonValue.True) return (new JsonBooleanLiteralSyntax(symbol, true, CurrentLength - symbol.Length), false);
-            if (value == JsonValue.False) return (new JsonBooleanLiteralSyntax(symbol, false, CurrentLength - symbol.Length), false);
+            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(symbol, false, CurrentLength - JsonValue.FalseSymbolLength), false);
+            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(symbol, true, CurrentLength - JsonValue.TrueSymbolLength), false);
 
+            string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
                 return (new JsonIntegerLiteralSyntax(symbol, integerValue, CurrentLength - symbol.Length), false);
