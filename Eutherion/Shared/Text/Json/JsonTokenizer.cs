@@ -318,13 +318,13 @@ namespace Eutherion.Text.Json
                                         int escapeSequenceLength = currentIndex - escapeSequenceStart + 1;
                                         errors.Add(JsonErrorString.UnrecognizedUnicodeEscapeSequence(
                                             json.Substring(escapeSequenceStart, escapeSequenceLength),
-                                            escapeSequenceStart, escapeSequenceLength));
+                                            escapeSequenceStart - firstUnusedIndex, escapeSequenceLength));
                                     }
                                     break;
                                 default:
                                     errors.Add(JsonErrorString.UnrecognizedEscapeSequence(
                                         json.Substring(escapeSequenceStart, 2),
-                                        escapeSequenceStart));
+                                        escapeSequenceStart - firstUnusedIndex));
                                     break;
                             }
                         }
@@ -335,7 +335,7 @@ namespace Eutherion.Text.Json
                             // Generate user friendly representation of the illegal character in error message.
                             errors.Add(JsonErrorString.IllegalControlCharacter(
                                 JsonString.EscapedCharacterString(c),
-                                currentIndex));
+                                currentIndex - firstUnusedIndex));
                         }
                         else
                         {
@@ -348,7 +348,7 @@ namespace Eutherion.Text.Json
             }
 
             // Use length rather than currentIndex; currentIndex is bigger after a '\'.
-            errors.Add(JsonErrorString.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
+            errors.Add(JsonErrorString.Unterminated(0, length - firstUnusedIndex));
 
             yield return new JsonErrorString(errors, length - firstUnusedIndex);
 

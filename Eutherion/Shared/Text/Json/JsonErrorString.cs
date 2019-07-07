@@ -65,7 +65,13 @@ namespace Eutherion.Text.Json
 
         public override bool HasErrors => true;
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) { return Errors; }
+        // Copy all errors, offset by given start position.
+        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
+            => Errors.Select(error => new JsonErrorInfo(
+                error.ErrorCode,
+                startPosition + error.Start,
+                error.Length,
+                error.Parameters));
 
         public JsonErrorString(int length, params JsonErrorInfo[] errors)
         {
