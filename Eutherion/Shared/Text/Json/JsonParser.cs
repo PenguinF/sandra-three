@@ -82,7 +82,9 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys).ValueNode.ContentNode;
+                int keyStart = CurrentLength;
+                JsonMultiValueSyntax multiKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
+                JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
                 bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
                 bool validKey = false;
@@ -91,6 +93,8 @@ namespace Eutherion.Text.Json
                 if (gotKey)
                 {
                     // Analyze if this is an actual, unique property key.
+                    int parsedKeyNodeStart = keyStart + multiKeyNode.ValueNode.BackgroundBefore.Length;
+
                     if (parsedKeyNode is JsonStringLiteralSyntax stringLiteral)
                     {
                         propertyKeyNode = stringLiteral;
@@ -107,17 +111,17 @@ namespace Eutherion.Text.Json
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.PropertyKeyAlreadyExists,
-                                parsedKeyNode.Start,
+                                parsedKeyNodeStart,
                                 parsedKeyNode.Length,
                                 // Take the substring, key may contain escape sequences.
-                                new[] { Json.Substring(parsedKeyNode.Start, parsedKeyNode.Length) }));
+                                new[] { Json.Substring(parsedKeyNodeStart, parsedKeyNode.Length) }));
                         }
                     }
                     else
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
-                            parsedKeyNode.Start,
+                            parsedKeyNodeStart,
                             parsedKeyNode.Length));
                     }
                 }
