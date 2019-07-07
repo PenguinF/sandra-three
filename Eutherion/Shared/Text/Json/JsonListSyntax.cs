@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -28,11 +29,13 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public IReadOnlyList<JsonValueSyntax> ElementNodes { get; }
+        public ReadOnlyList<JsonValueSyntax> ElementNodes { get; }
 
-        public JsonListSyntax(IReadOnlyList<JsonValueSyntax> elementNodes, int start, int length)
+        public JsonListSyntax(IEnumerable<JsonValueSyntax> elementNodes, int start, int length)
             : base(start, length)
-            => ElementNodes = elementNodes;
+        {
+            ElementNodes = ReadOnlyList<JsonValueSyntax>.Create(elementNodes);
+        }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
