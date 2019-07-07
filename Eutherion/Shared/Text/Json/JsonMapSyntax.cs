@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -31,10 +32,15 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
-        public JsonMapSyntax(IReadOnlyList<JsonKeyValueSyntax> keyValueNodes, int start, int length)
+        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, int start, int length)
             : base(start, length)
         {
             KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
+
+            if (KeyValueNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(keyValueNodes)} cannot be empty", nameof(keyValueNodes));
+            }
         }
 
         public IEnumerable<(JsonStringLiteralSyntax, JsonValueSyntax)> ValidKeyValuePairs
