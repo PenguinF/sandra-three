@@ -26,11 +26,13 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonStringLiteralSyntax : JsonValueSyntax
     {
-        public string Value { get; }
+        public JsonString StringToken { get; }
 
-        public JsonStringLiteralSyntax(JsonString stringToken)
-            : base(stringToken.Length)
-            => Value = stringToken.Value;
+        public string Value => StringToken.Value;
+
+        public override int Length => StringToken.Length;
+
+        public JsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

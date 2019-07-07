@@ -28,11 +28,17 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax
     {
+        public JsonSymbol IntegerToken { get; }
+
         public BigInteger Value { get; }
 
+        public override int Length => IntegerToken.Length;
+
         public JsonIntegerLiteralSyntax(JsonSymbol integerToken, BigInteger value)
-            : base(integerToken.Length)
-            => Value = value;
+        {
+            IntegerToken = integerToken;
+            Value = value;
+        }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);

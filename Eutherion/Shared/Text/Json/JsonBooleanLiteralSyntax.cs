@@ -28,9 +28,9 @@ namespace Eutherion.Text.Json
     {
         public bool Value { get; }
 
-        public JsonBooleanLiteralSyntax(JsonSymbol booleanToken, bool value)
-            : base(booleanToken.Length)
-            => Value = value;
+        public override int Length => Value ? JsonValue.TrueSymbolLength : JsonValue.FalseSymbolLength;
+
+        public JsonBooleanLiteralSyntax(bool value) => Value = value;
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);

@@ -51,8 +51,9 @@ namespace Eutherion.Text.Json
             }
         }
 
+        public override int Length { get; }
+
         public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, int length)
-            : base(length)
         {
             ElementNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(elementNodes);
 
@@ -60,6 +61,8 @@ namespace Eutherion.Text.Json
             {
                 throw new ArgumentException($"{nameof(elementNodes)} cannot be empty", nameof(elementNodes));
             }
+
+            Length = length;
         }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);

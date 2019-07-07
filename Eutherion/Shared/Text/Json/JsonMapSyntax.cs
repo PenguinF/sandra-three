@@ -32,8 +32,9 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
+        public override int Length { get; }
+
         public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, int length)
-            : base(length)
         {
             KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
 
@@ -41,6 +42,8 @@ namespace Eutherion.Text.Json
             {
                 throw new ArgumentException($"{nameof(keyValueNodes)} cannot be empty", nameof(keyValueNodes));
             }
+
+            Length = length;
         }
 
         public IEnumerable<(JsonStringLiteralSyntax, JsonValueSyntax)> ValidKeyValuePairs

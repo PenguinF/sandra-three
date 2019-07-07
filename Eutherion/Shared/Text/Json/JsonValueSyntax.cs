@@ -34,12 +34,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
-
-        protected JsonValueSyntax(int length)
-        {
-            Length = length;
-        }
+        public abstract int Length { get; }
 
         public abstract void Accept(JsonValueSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
