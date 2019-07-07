@@ -74,7 +74,8 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                bool gotKey = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys, out JsonValueSyntax parsedKeyNode);
+                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
+                bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
                 bool validKey = false;
                 JsonStringLiteralSyntax propertyKeyNode = default;
@@ -130,7 +131,9 @@ namespace Eutherion.Text.Json
                     }
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    gotValue |= ParseMultiValue(JsonErrorCode.MultipleValues, out JsonValueSyntax parsedValueNode);
+                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
+                    bool gotNewValue = !(parsedValueNode is JsonMissingValueSyntax);
+                    gotValue |= gotNewValue;
 
                     // Only the first value can be valid, even if it's undefined.
                     if (validKey && !gotColon && gotValue)
@@ -209,7 +212,8 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                bool gotValue = ParseMultiValue(JsonErrorCode.MultipleValues, out JsonValueSyntax parsedValueNode);
+                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
+                bool gotValue = !(parsedValueNode is JsonMissingValueSyntax);
 
                 if (gotValue) listBuilder.Add(parsedValueNode);
 
@@ -286,13 +290,13 @@ namespace Eutherion.Text.Json
         public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
             => (new JsonStringLiteralSyntax(symbol, CurrentLength - symbol.Length), false);
 
-        private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
-                                     out JsonValueSyntax firstValueNode)
+        private JsonValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
-            firstValueNode = null;
-
             ShiftToNextForegroundToken();
-            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return false;
+            if (CurrentToken == null) return new JsonMissingValueSyntax(CurrentLength);
+            if (!CurrentToken.IsValueStartSymbol) return new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length);
+
+            JsonValueSyntax firstValueNode = null;
 
             for (; ; )
             {
@@ -316,13 +320,13 @@ namespace Eutherion.Text.Json
                 }
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null) return true;
+                if (CurrentToken == null) return firstValueNode;
 
                 // Move to the next symbol if CurrentToken was processed.
                 if (!unprocessedToken) ShiftToNextForegroundToken();
 
                 // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return true;
+                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return firstValueNode;
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
@@ -334,7 +338,8 @@ namespace Eutherion.Text.Json
 
         public bool TryParse(out JsonValueSyntax rootNode, out List<JsonErrorInfo> errors)
         {
-            bool hasRootValue = ParseMultiValue(JsonErrorCode.ExpectedEof, out rootNode);
+            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
+            bool hasRootValue = !(rootNode is JsonMissingValueSyntax);
 
             if (CurrentToken != null)
             {
