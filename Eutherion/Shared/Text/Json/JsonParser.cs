@@ -272,8 +272,8 @@ namespace Eutherion.Text.Json
 
         public override (JsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(false), false);
-            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(true), false);
+            if (symbol == JsonValue.FalseJsonValue) return (JsonBooleanLiteralSyntax.False.Instance, false);
+            if (symbol == JsonValue.TrueJsonValue) return (JsonBooleanLiteralSyntax.True.Instance, false);
 
             string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
