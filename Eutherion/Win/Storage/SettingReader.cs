@@ -48,7 +48,7 @@ namespace Eutherion.Win.Storage
                 return false;
             }
 
-            int rootNodeStart = rootNode.ValueNode.ContentNode.Start;
+            int rootNodeStart = rootNode.ValueNode.BackgroundBefore.Length;
 
             if (schema.TryCreateValue(
                 json,
