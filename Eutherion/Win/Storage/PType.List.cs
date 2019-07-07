@@ -34,6 +34,24 @@ namespace Eutherion.Win.Storage
 
         public abstract class ListBase<T> : PType<T>
         {
+            internal static bool TryCreateItemValue<ItemT>(
+                PType<ItemT> itemType,
+                string json,
+                JsonListSyntax jsonListSyntax,
+                int itemIndex,
+                int listSyntaxStartPosition,
+                List<JsonErrorInfo> errors,
+                out ItemT convertedTargetValue,
+                out PValue value)
+            {
+                return itemType.TryCreateValue(
+                    json,
+                    jsonListSyntax.ElementNodes[itemIndex],
+                    out convertedTargetValue,
+                    jsonListSyntax.ElementNodes[itemIndex].Start,
+                    errors).IsOption2(out value);
+            }
+
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
                 JsonValueSyntax valueNode,
@@ -85,8 +103,8 @@ namespace Eutherion.Win.Storage
                 List<JsonErrorInfo> errors)
             {
                 if (jsonListSyntax.ElementNodes.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, jsonListSyntax.ElementNodes[0].Start, errors).IsOption2(out PValue itemValue1)
-                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, jsonListSyntax.ElementNodes[1].Start, errors).IsOption2(out PValue itemValue2))
+                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2))
                 {
                     convertedValue = (value1, value2);
                     return new PList(new[] { itemValue1, itemValue2 });
@@ -136,11 +154,11 @@ namespace Eutherion.Win.Storage
                 List<JsonErrorInfo> errors)
             {
                 if (jsonListSyntax.ElementNodes.Count == ExpectedItemCount
-                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, jsonListSyntax.ElementNodes[0].Start, errors).IsOption2(out PValue itemValue1)
-                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, jsonListSyntax.ElementNodes[1].Start, errors).IsOption2(out PValue itemValue2)
-                    && ItemTypes.Item3.TryCreateValue(json, jsonListSyntax.ElementNodes[2], out T3 value3, jsonListSyntax.ElementNodes[2].Start, errors).IsOption2(out PValue itemValue3)
-                    && ItemTypes.Item4.TryCreateValue(json, jsonListSyntax.ElementNodes[3], out T4 value4, jsonListSyntax.ElementNodes[3].Start, errors).IsOption2(out PValue itemValue4)
-                    && ItemTypes.Item5.TryCreateValue(json, jsonListSyntax.ElementNodes[4], out T5 value5, jsonListSyntax.ElementNodes[4].Start, errors).IsOption2(out PValue itemValue5))
+                    && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
+                    && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
+                    && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)
+                    && TryCreateItemValue(ItemTypes.Item4, json, jsonListSyntax, 3, listSyntaxStartPosition, errors, out T4 value4, out PValue itemValue4)
+                    && TryCreateItemValue(ItemTypes.Item5, json, jsonListSyntax, 4, listSyntaxStartPosition, errors, out T5 value5, out PValue itemValue5))
                 {
                     convertedValue = (value1, value2, value3, value4, value5);
                     return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });
