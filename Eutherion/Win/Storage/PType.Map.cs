@@ -42,7 +42,7 @@ namespace Eutherion.Win.Storage
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, errors);
+                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, valueNodeStartPosition, errors);
                 }
 
                 convertedValue = default;
@@ -53,6 +53,7 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
@@ -80,6 +81,7 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
+                int mapSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 var dictionary = new Dictionary<string, T>();

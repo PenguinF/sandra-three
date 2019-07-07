@@ -160,6 +160,7 @@ namespace Eutherion.Win.Storage
             string json,
             JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
+            int mapSyntaxStartPosition,
             List<JsonErrorInfo> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
