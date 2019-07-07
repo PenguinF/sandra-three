@@ -32,20 +32,25 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo CreateError(string displayCharValue, int position)
             => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, position, 1, new[] { displayCharValue });
 
-        public JsonErrorInfo Error { get; }
-
-        public override IEnumerable<JsonErrorInfo> Errors { get; }
+        public string DisplayCharValue { get; }
 
         public override bool IsValueStartSymbol => true;
+
         public override int Length => 1;
 
-        public JsonUnknownSymbol(string displayCharValue, int position)
+        public override bool HasErrors => true;
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(int position)
+        {
+            yield return CreateError(DisplayCharValue, position);
+        }
+
+        public JsonUnknownSymbol(string displayCharValue)
         {
             if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
             if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
 
-            Error = CreateError(displayCharValue, position);
-            Errors = new[] { Error };
+            DisplayCharValue = displayCharValue;
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);

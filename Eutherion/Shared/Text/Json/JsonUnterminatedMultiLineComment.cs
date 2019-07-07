@@ -38,18 +38,21 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo CreateError(int start, int length)
             => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
 
-        public JsonErrorInfo Error { get; }
-
-        public override bool IsBackground => true;
-        public override IEnumerable<JsonErrorInfo> Errors { get; }
         public override int Length { get; }
 
-        public JsonUnterminatedMultiLineComment(int start, int length)
+        public override bool IsBackground => true;
+
+        public override bool HasErrors => true;
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(int start)
+        {
+            yield return CreateError(start, Length);
+        }
+
+        public JsonUnterminatedMultiLineComment(int length)
         {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Error = CreateError(start, length);
-            Errors = new[] { Error };
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);

@@ -28,7 +28,24 @@ namespace Eutherion.Text.Json
     {
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
-        public virtual IEnumerable<JsonErrorInfo> Errors => Enumerable.Empty<JsonErrorInfo>();
+
+        /// <summary>
+        /// Gets if there are any errors associated with this symbol.
+        /// </summary>
+        public virtual bool HasErrors => false;
+
+        /// <summary>
+        /// If <see cref="HasErrors"/> is true, generates a non-empty sequence of errors associated
+        /// with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the error.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => Enumerable.Empty<JsonErrorInfo>();
+
         public abstract int Length { get; }
 
         public abstract void Accept(JsonSymbolVisitor visitor);

@@ -22,7 +22,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -55,8 +54,8 @@ namespace Eutherion.Text.Json
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
                 if (CurrentToken != null)
                 {
+                    Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
                     CurrentLength += CurrentToken.Length;
-                    Errors.AddRange(CurrentToken.Errors);
                 }
             }
             while (CurrentToken != null && CurrentToken.IsBackground);
@@ -298,7 +297,7 @@ namespace Eutherion.Text.Json
                 // Interpret the first, discard the rest.
                 JsonSyntaxNode currentNode;
                 bool unprocessedToken;
-                if (CurrentToken.Errors.Any())
+                if (CurrentToken.HasErrors)
                 {
                     currentNode = new JsonUndefinedValueSyntax(CurrentToken, CurrentLength - CurrentToken.Length);
                     unprocessedToken = false;
