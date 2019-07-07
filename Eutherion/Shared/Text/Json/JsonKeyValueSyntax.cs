@@ -46,6 +46,11 @@ namespace Eutherion.Text.Json
         public ReadOnlyList<JsonMultiValueSyntax> ValueNodes { get; }
 
         /// <summary>
+        /// Gets the length of the text span corresponding with this syntax.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
         /// Initializes a new instance of a <see cref="JsonKeyValueSyntax"/>.
         /// </summary>
         /// <param name="keyNode">
@@ -73,6 +78,16 @@ namespace Eutherion.Text.Json
                 && validKeyNode != keyNode.ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
 
             ValueNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueNodes);
+
+            int cumulativeLength = keyNode.Length;
+
+            for (int i = 0; i < ValueNodes.Count; i++)
+            {
+                cumulativeLength += JsonColon.ColonLength;
+                cumulativeLength += ValueNodes[i].Length;
+            }
+
+            Length = cumulativeLength;
         }
     }
 }

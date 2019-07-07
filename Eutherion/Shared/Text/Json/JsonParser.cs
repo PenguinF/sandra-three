@@ -225,15 +225,7 @@ namespace Eutherion.Text.Json
                     for (int i = 0; i < mapBuilder.Count; i++)
                     {
                         length += JsonComma.CommaLength;
-
-                        var keyValueNode = mapBuilder[i];
-                        length += keyValueNode.KeyNode.Length;
-
-                        for (int j = 0; j < keyValueNode.ValueNodes.Count; j++)
-                        {
-                            length += JsonColon.ColonLength;
-                            length += keyValueNode.ValueNodes[j].Length;
-                        }
+                        length += mapBuilder[i].Length;
                     }
 
                     if (isCurlyClose)
