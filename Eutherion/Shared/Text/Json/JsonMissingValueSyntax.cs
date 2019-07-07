@@ -26,9 +26,11 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {
+        public static readonly JsonMissingValueSyntax Value = new JsonMissingValueSyntax();
+
         public override int Length => 0;
 
-        public JsonMissingValueSyntax() { }
+        private JsonMissingValueSyntax() { }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);

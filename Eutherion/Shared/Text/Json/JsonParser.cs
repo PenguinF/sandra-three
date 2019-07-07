@@ -300,9 +300,7 @@ namespace Eutherion.Text.Json
             if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
                 return new JsonMultiValueSyntax(
-                    new JsonValueWithBackgroundSyntax(
-                        CaptureBackground(),
-                        new JsonMissingValueSyntax()),
+                    new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value),
                     ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
                     JsonBackgroundSyntax.Empty);
             }
