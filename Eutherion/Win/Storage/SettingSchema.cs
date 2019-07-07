@@ -166,7 +166,7 @@ namespace Eutherion.Win.Storage
             var mapBuilder = new Dictionary<string, PValue>();
 
             // Analyze values with this schema while building the PMap.
-            foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
+            foreach (var keyedNode in jsonMapSyntax.KeyValueNodes)
             {
                 JsonStringLiteralSyntax keyNode = keyedNode.Key;
                 int keyNodeStart = keyNode.Start;

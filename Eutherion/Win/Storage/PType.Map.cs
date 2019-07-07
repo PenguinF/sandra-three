@@ -87,7 +87,7 @@ namespace Eutherion.Win.Storage
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
+                foreach (var keyedNode in jsonMapSyntax.KeyValueNodes)
                 {
                     JsonStringLiteralSyntax keyNode = keyedNode.Key;
                     int keyNodeStart = keyNode.Start;

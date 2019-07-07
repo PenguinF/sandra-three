@@ -28,45 +28,14 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonMapSyntax : JsonValueSyntax
     {
-        public IReadOnlyList<JsonMapNodeKeyValuePair> MapNodeKeyValuePairs { get; }
+        public IReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
-        public JsonMapSyntax(IReadOnlyList<JsonMapNodeKeyValuePair> mapNodeKeyValuePairs, int start, int length)
+        public JsonMapSyntax(IReadOnlyList<JsonKeyValueSyntax> keyValueNodes, int start, int length)
             : base(start, length)
-            => MapNodeKeyValuePairs = mapNodeKeyValuePairs;
+            => KeyValueNodes = keyValueNodes;
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
-    /// </summary>
-    public struct JsonMapNodeKeyValuePair
-    {
-        /// <summary>
-        /// Gets the syntax node containing the key of this <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        public JsonStringLiteralSyntax Key { get; }
-
-        /// <summary>
-        /// Gets the syntax node containing the value of this <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        public JsonValueSyntax Value { get; }
-
-        /// <summary>
-        /// Initializes a new instance of a <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        /// <param name="key">
-        /// The syntax node containing the key.
-        /// </param>
-        /// <param name="value">
-        /// The syntax node containing the value.
-        /// </param>
-        public JsonMapNodeKeyValuePair(JsonStringLiteralSyntax key, JsonValueSyntax value)
-        {
-            Key = key;
-            Value = value;
-        }
     }
 }

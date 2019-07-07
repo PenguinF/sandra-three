@@ -64,7 +64,7 @@ namespace Eutherion.Text.Json
         public override (JsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
         {
             int start = CurrentLength - curlyOpen.Length;
-            var mapBuilder = new List<JsonMapNodeKeyValuePair>();
+            var mapBuilder = new List<JsonKeyValueSyntax>();
 
             // Maintain a separate set of keys to aid error reporting on duplicate keys.
             HashSet<string> foundKeys = new HashSet<string>();
@@ -132,7 +132,7 @@ namespace Eutherion.Text.Json
                     // Only the first value can be valid, even if it's undefined.
                     if (validKey && !gotColon && gotValue)
                     {
-                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValueNode));
+                        mapBuilder.Add(new JsonKeyValueSyntax(propertyKeyNode, parsedValueNode));
                     }
 
                     gotColon = true;

@@ -52,6 +52,7 @@
     <Compile Include="Text\Json\JsonErrorInfo.cs" />
     <Compile Include="Text\Json\JsonErrorString.cs" />
     <Compile Include="Text\Json\JsonIntegerLiteralSyntax.cs" />
+    <Compile Include="Text\Json\JsonKeyValueSyntax.cs" />
     <Compile Include="Text\Json\JsonListSyntax.cs" />
     <Compile Include="Text\Json\JsonMapSyntax.cs" />
     <Compile Include="Text\Json\JsonMissingValueSyntax.cs" />
