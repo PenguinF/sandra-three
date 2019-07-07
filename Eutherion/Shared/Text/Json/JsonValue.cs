@@ -25,8 +25,14 @@ namespace Eutherion.Text.Json
 {
     public class JsonValue : JsonSymbol
     {
-        public static readonly string True = "true";
+        public const int FalseSymbolLength = 5;
+        public const int TrueSymbolLength = 4;
+
         public static readonly string False = "false";
+        public static readonly string True = "true";
+
+        public static readonly JsonValue FalseJsonValue = new JsonValue(False, FalseSymbolLength);
+        public static readonly JsonValue TrueJsonValue = new JsonValue(True, TrueSymbolLength);
 
         public static string BoolSymbol(bool boolValue) => boolValue ? True : False;
 
