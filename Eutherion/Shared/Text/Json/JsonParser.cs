@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -81,7 +82,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys).ContentNode;
+                JsonValueSyntax parsedKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys).ValueNode.ContentNode;
                 bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
                 bool validKey = false;
@@ -138,7 +139,7 @@ namespace Eutherion.Text.Json
                     }
 
                     // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ContentNode;
+                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ValueNode.ContentNode;
                     bool gotNewValue = !(parsedValueNode is JsonMissingValueSyntax);
                     gotValue |= gotNewValue;
 
@@ -219,7 +220,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
-                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ContentNode;
+                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ValueNode.ContentNode;
                 bool gotValue = !(parsedValueNode is JsonMissingValueSyntax);
 
                 if (gotValue) listBuilder.Add(parsedValueNode);
@@ -297,22 +298,28 @@ namespace Eutherion.Text.Json
         public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
             => (new JsonStringLiteralSyntax(symbol, CurrentLength - symbol.Length), false);
 
-        private JsonValueWithBackgroundSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
+        private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             ShiftToNextForegroundToken();
 
             if (CurrentToken == null)
             {
-                return new JsonValueWithBackgroundSyntax(
-                    CaptureBackground(),
-                    new JsonMissingValueSyntax(CurrentLength));
+                return new JsonMultiValueSyntax(
+                    new JsonValueWithBackgroundSyntax(
+                        CaptureBackground(),
+                        new JsonMissingValueSyntax(CurrentLength)),
+                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
+                    JsonBackgroundSyntax.Empty);
             }
 
             if (!CurrentToken.IsValueStartSymbol)
             {
-                return new JsonValueWithBackgroundSyntax(
-                    CaptureBackground(),
-                    new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length));
+                return new JsonMultiValueSyntax(
+                    new JsonValueWithBackgroundSyntax(
+                        CaptureBackground(),
+                        new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length)),
+                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
+                    JsonBackgroundSyntax.Empty);
             }
 
             JsonValueWithBackgroundSyntax firstValueNode = null;
@@ -352,7 +359,10 @@ namespace Eutherion.Text.Json
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    return firstValueNode;
+                    return new JsonMultiValueSyntax(
+                        firstValueNode,
+                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
+                        JsonBackgroundSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -363,7 +373,10 @@ namespace Eutherion.Text.Json
                 {
                     // Capture the background following the last value.
                     var backgroundAfter = CaptureBackground();
-                    return firstValueNode;
+                    return new JsonMultiValueSyntax(
+                        firstValueNode,
+                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
+                        backgroundAfter);
                 }
 
                 // Two or more consecutive values not allowed.
@@ -376,7 +389,7 @@ namespace Eutherion.Text.Json
 
         public bool TryParse(out JsonValueSyntax rootNode, out List<JsonErrorInfo> errors)
         {
-            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof).ContentNode;
+            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof).ValueNode.ContentNode;
             bool hasRootValue = !(rootNode is JsonMissingValueSyntax);
 
             if (CurrentToken != null)
