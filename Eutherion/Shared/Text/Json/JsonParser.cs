@@ -215,7 +215,6 @@ namespace Eutherion.Text.Json
 
         public override (JsonValueSyntax, bool) VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
         {
-            int start = CurrentLength - bracketOpen.Length;
             var listBuilder = new List<JsonMultiValueSyntax>();
 
             for (; ; )
@@ -240,6 +239,7 @@ namespace Eutherion.Text.Json
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
+                    bool missingSquareBracketClose = true;
                     bool unprocessedToken = false;
                     int endPosition;
                     if (CurrentToken == null)
@@ -248,16 +248,18 @@ namespace Eutherion.Text.Json
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
-                            endPosition,
+                            CurrentLength,
                             0));
                     }
                     else if (CurrentToken is JsonSquareBracketClose)
                     {
+                        missingSquareBracketClose = false;
                         endPosition = CurrentLength;
                     }
                     else
                     {
                         // ':', '}'
+                        // Do not include the control symbol in the list.
                         unprocessedToken = true;
                         endPosition = CurrentLength - CurrentToken.Length;
 
@@ -267,8 +269,22 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    int length = endPosition - start;
-                    return (new JsonListSyntax(listBuilder, start, length), unprocessedToken);
+                    // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
+                    // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
+                    int length = 0;
+
+                    for (int i = 0; i < listBuilder.Count; i++)
+                    {
+                        length += JsonComma.CommaLength;
+                        length += listBuilder[i].Length;
+                    }
+
+                    if (!missingSquareBracketClose)
+                    {
+                        length += JsonSquareBracketClose.SquareBracketCloseLength;
+                    }
+
+                    return (new JsonListSyntax(listBuilder, endPosition - length, length), unprocessedToken);
                 }
             }
         }
