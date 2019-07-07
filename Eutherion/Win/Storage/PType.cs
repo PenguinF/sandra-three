@@ -37,6 +37,7 @@ namespace Eutherion.Win.Storage
             string json,
             JsonValueSyntax valueNode,
             out T convertedValue,
+            int valueNodeStartPosition,
             List<JsonErrorInfo> errors);
 
         /// <summary>

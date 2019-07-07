@@ -48,6 +48,7 @@ namespace Eutherion.Win.Storage
                     json,
                     rootNode,
                     out settingObject,
+                    rootNode.Start,
                     errors).IsOption1(out ITypeErrorBuilder typeError))
                 {
                     errors.Add(ValueTypeError.Create(typeError, rootNode, json));

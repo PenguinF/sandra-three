@@ -41,12 +41,13 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out (T1, T2) convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax
                     && jsonListSyntax.ElementNodes.Count == 2
-                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, errors).IsOption2(out PValue itemValue1)
-                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, errors).IsOption2(out PValue itemValue2))
+                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, jsonListSyntax.ElementNodes[0].Start, errors).IsOption2(out PValue itemValue1)
+                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, jsonListSyntax.ElementNodes[1].Start, errors).IsOption2(out PValue itemValue2))
                 {
                     convertedValue = (value1, value2);
                     return new PList(new[] { itemValue1, itemValue2 });
@@ -91,15 +92,16 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out (T1, T2, T3, T4, T5) convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonListSyntax jsonListSyntax
                     && jsonListSyntax.ElementNodes.Count == 5
-                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, errors).IsOption2(out PValue itemValue1)
-                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, errors).IsOption2(out PValue itemValue2)
-                    && ItemTypes.Item3.TryCreateValue(json, jsonListSyntax.ElementNodes[2], out T3 value3, errors).IsOption2(out PValue itemValue3)
-                    && ItemTypes.Item4.TryCreateValue(json, jsonListSyntax.ElementNodes[3], out T4 value4, errors).IsOption2(out PValue itemValue4)
-                    && ItemTypes.Item5.TryCreateValue(json, jsonListSyntax.ElementNodes[4], out T5 value5, errors).IsOption2(out PValue itemValue5))
+                    && ItemTypes.Item1.TryCreateValue(json, jsonListSyntax.ElementNodes[0], out T1 value1, jsonListSyntax.ElementNodes[0].Start, errors).IsOption2(out PValue itemValue1)
+                    && ItemTypes.Item2.TryCreateValue(json, jsonListSyntax.ElementNodes[1], out T2 value2, jsonListSyntax.ElementNodes[1].Start, errors).IsOption2(out PValue itemValue2)
+                    && ItemTypes.Item3.TryCreateValue(json, jsonListSyntax.ElementNodes[2], out T3 value3, jsonListSyntax.ElementNodes[2].Start, errors).IsOption2(out PValue itemValue3)
+                    && ItemTypes.Item4.TryCreateValue(json, jsonListSyntax.ElementNodes[3], out T4 value4, jsonListSyntax.ElementNodes[3].Start, errors).IsOption2(out PValue itemValue4)
+                    && ItemTypes.Item5.TryCreateValue(json, jsonListSyntax.ElementNodes[4], out T5 value5, jsonListSyntax.ElementNodes[4].Start, errors).IsOption2(out PValue itemValue5))
                 {
                     convertedValue = (value1, value2, value3, value4, value5);
                     return new PList(new[] { itemValue1, itemValue2, itemValue3, itemValue4, itemValue5 });

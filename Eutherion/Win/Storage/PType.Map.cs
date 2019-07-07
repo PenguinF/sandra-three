@@ -37,6 +37,7 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonValueSyntax valueNode,
                 out T convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
@@ -87,7 +88,7 @@ namespace Eutherion.Win.Storage
                 foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
                 {
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors);
+                    var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, keyedNode.Value.Start, errors);
                     if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
                         dictionary.Add(keyedNode.Key.Value, value);

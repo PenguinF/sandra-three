@@ -70,9 +70,30 @@ namespace Eutherion.Win.Storage
         /// </returns>
         public abstract bool IsValidValue(PValue value);
 
+        /// <summary>
+        /// Type-checks a context free value syntax while parsing json.
+        /// Parameters other than <paramref name="valueNode"/> are given for type error construction.
+        /// </summary>
+        /// <param name="json">
+        /// The parsed json.
+        /// </param>
+        /// <param name="valueNode">
+        /// The value node to type-check.
+        /// </param>
+        /// <param name="valueNodeStartPosition">
+        /// The current start position of the value node, to create errors with an absolute position.
+        /// </param>
+        /// <param name="errors">
+        /// The list of inner errors to which new type errors can be added.
+        /// </param>
+        /// <returns>
+        /// A type error (not added to <paramref name="errors"/>) for this value if the type check failed,
+        /// or the converted <see cref="PValue"/> if the type check succeeded.
+        /// </returns>
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
             JsonValueSyntax valueNode,
+            int valueNodeStartPosition,
             List<JsonErrorInfo> errors);
     }
 
@@ -131,7 +152,8 @@ namespace Eutherion.Win.Storage
         internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
             JsonValueSyntax valueNode,
+            int valueNodeStartPosition,
             List<JsonErrorInfo> errors)
-            => PType.TryCreateValue(json, valueNode, out _, errors);
+            => PType.TryCreateValue(json, valueNode, out _, valueNodeStartPosition, errors);
     }
 }

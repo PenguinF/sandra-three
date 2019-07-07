@@ -170,7 +170,7 @@ namespace Eutherion.Win.Storage
                 if (TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
                 {
                     var itemNode = keyedNode.Value;
-                    var valueOrError = property.TryCreateValue(json, itemNode, errors);
+                    var valueOrError = property.TryCreateValue(json, itemNode, itemNode.Start, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
