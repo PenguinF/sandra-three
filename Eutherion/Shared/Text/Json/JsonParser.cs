@@ -316,14 +316,14 @@ namespace Eutherion.Text.Json
             }
 
             JsonValueWithBackgroundSyntax firstValueNode = null;
+            var ignoredNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
             for (; ; )
             {
+                // Always create a value node, then decide if it must be ignored.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
 
-                // Make sure consecutive values are all parsed as if they were valid.
-                // Interpret the first, discard the rest.
                 JsonValueSyntax currentNode;
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
@@ -336,9 +336,15 @@ namespace Eutherion.Text.Json
                     (currentNode, unprocessedToken) = Visit(CurrentToken);
                 }
 
+                var currentNodeWithBackgroundBefore = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
                 if (firstValueNode == null)
                 {
-                    firstValueNode = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
+                    firstValueNode = currentNodeWithBackgroundBefore;
+                }
+                else
+                {
+                    // Ignore this node.
+                    ignoredNodesBuilder.Add(currentNodeWithBackgroundBefore);
                 }
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
