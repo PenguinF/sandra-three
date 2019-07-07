@@ -31,21 +31,19 @@ namespace Eutherion.Text.Json
         public static readonly string False = "false";
         public static readonly string True = "true";
 
-        public static readonly JsonValue FalseJsonValue = new JsonValue(False, FalseSymbolLength);
-        public static readonly JsonValue TrueJsonValue = new JsonValue(True, TrueSymbolLength);
+        public static readonly JsonValue FalseJsonValue = new JsonValue(False);
+        public static readonly JsonValue TrueJsonValue = new JsonValue(True);
 
         public static string BoolSymbol(bool boolValue) => boolValue ? True : False;
 
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
-        public override int Length { get; }
+        public override int Length => Value.Length;
 
-        public JsonValue(string value, int length)
+        public JsonValue(string value)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Value = value ?? throw new ArgumentNullException(nameof(value));
-            Length = length;
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);

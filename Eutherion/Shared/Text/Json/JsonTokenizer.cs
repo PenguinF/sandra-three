@@ -119,7 +119,7 @@ namespace Eutherion.Text.Json
                     {
                         if (inSymbolClass == symbolClassValueChar)
                         {
-                            yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
+                            yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
                         }
                         else
                         {
@@ -197,7 +197,7 @@ namespace Eutherion.Text.Json
             {
                 if (inSymbolClass == symbolClassValueChar)
                 {
-                    yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
+                    yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
                 }
                 else
                 {

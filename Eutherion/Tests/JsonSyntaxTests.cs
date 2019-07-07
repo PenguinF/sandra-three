@@ -57,7 +57,6 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonValue(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonWhitespace(-1));
 
             Assert.Throws<ArgumentOutOfRangeException>("start", () => new TextElement<JsonSymbol>(new JsonString(string.Empty, 2), -1, 2));
@@ -81,7 +80,7 @@ namespace Eutherion.Shared.Tests
         public void NullValueShouldThrow()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonString(null, 0));
-            Assert.Throws<ArgumentNullException>(() => new JsonValue(null, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonValue(null));
         }
 
         [Theory]
@@ -96,9 +95,9 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length, jsonString.Length);
 
-            var jsonValue = new JsonValue(value, length);
+            var jsonValue = new JsonValue(value);
             Assert.Equal(value, jsonValue.Value);
-            Assert.Equal(length, jsonValue.Length);
+            Assert.Equal(value.Length, jsonValue.Length);
         }
 
         [Fact]
@@ -266,7 +265,7 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol("*"), typeof(JsonUnknownSymbol) };
-            yield return new object[] { new JsonValue("true", 4), typeof(JsonValue) };
+            yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
             yield return new object[] { new JsonWhitespace(2), typeof(JsonWhitespace) };
