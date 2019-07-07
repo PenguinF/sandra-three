@@ -27,11 +27,6 @@ namespace Eutherion.Text.Json
     public abstract class JsonValueSyntax
     {
         /// <summary>
-        /// Gets the start position of the text span corresponding with this node.
-        /// </summary>
-        public int Start { get; set; }
-
-        /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }

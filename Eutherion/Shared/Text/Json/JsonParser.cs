@@ -191,36 +191,26 @@ namespace Eutherion.Text.Json
                 {
                     // Assume missing closing bracket '}' on EOF or control symbol.
                     bool unprocessedToken = false;
-                    int endPosition;
                     if (CurrentToken == null)
                     {
-                        endPosition = CurrentLength;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
-                            endPosition,
+                            CurrentLength,
                             0));
                     }
-                    else if (isCurlyClose)
-                    {
-                        endPosition = CurrentLength;
-                    }
-                    else
+                    else if (!isCurlyClose)
                     {
                         // ']'
                         // Do not include the control symbol in the map.
                         unprocessedToken = true;
-                        endPosition = CurrentLength - CurrentToken.Length;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInObject,
-                            endPosition,
+                            CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    var jsonMapSyntax = new JsonMapSyntax(mapBuilder, !isCurlyClose);
-                    jsonMapSyntax.Start = endPosition - jsonMapSyntax.Length;
-                    return (jsonMapSyntax, unprocessedToken);
+                    return (new JsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), unprocessedToken);
                 }
             }
         }
@@ -253,11 +243,8 @@ namespace Eutherion.Text.Json
                     // Assume missing closing bracket ']' on EOF or control symbol.
                     bool missingSquareBracketClose = true;
                     bool unprocessedToken = false;
-                    int endPosition;
                     if (CurrentToken == null)
                     {
-                        endPosition = CurrentLength;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
                             CurrentLength,
@@ -266,37 +253,33 @@ namespace Eutherion.Text.Json
                     else if (CurrentToken is JsonSquareBracketClose)
                     {
                         missingSquareBracketClose = false;
-                        endPosition = CurrentLength;
                     }
                     else
                     {
                         // ':', '}'
                         // Do not include the control symbol in the list.
                         unprocessedToken = true;
-                        endPosition = CurrentLength - CurrentToken.Length;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInArray,
-                            endPosition,
+                            CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    var jsonListSyntax = new JsonListSyntax(listBuilder, missingSquareBracketClose);
-                    jsonListSyntax.Start = endPosition - jsonListSyntax.Length;
-                    return (jsonListSyntax, unprocessedToken);
+                    return (new JsonListSyntax(listBuilder, missingSquareBracketClose), unprocessedToken);
                 }
             }
         }
 
         public override (JsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(false) { Start = CurrentLength - JsonValue.FalseSymbolLength }, false);
-            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(true) { Start = CurrentLength - JsonValue.TrueSymbolLength }, false);
+            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(false), false);
+            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(true), false);
 
             string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
-                return (new JsonIntegerLiteralSyntax(symbol, integerValue) { Start = CurrentLength - symbol.Length }, false);
+                return (new JsonIntegerLiteralSyntax(symbol, integerValue), false);
             }
 
             Errors.Add(new JsonErrorInfo(
@@ -305,32 +288,22 @@ namespace Eutherion.Text.Json
                 symbol.Length,
                 new[] { value }));
 
-            return (new JsonUndefinedValueSyntax(symbol) { Start = CurrentLength - symbol.Length }, false);
+            return (new JsonUndefinedValueSyntax(symbol), false);
         }
 
         public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
-            => (new JsonStringLiteralSyntax(symbol) { Start = CurrentLength - symbol.Length }, false);
+            => (new JsonStringLiteralSyntax(symbol), false);
 
         private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             ShiftToNextForegroundToken();
 
-            if (CurrentToken == null)
+            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
                 return new JsonMultiValueSyntax(
                     new JsonValueWithBackgroundSyntax(
                         CaptureBackground(),
-                        new JsonMissingValueSyntax() { Start = CurrentLength }),
-                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
-                    JsonBackgroundSyntax.Empty);
-            }
-
-            if (!CurrentToken.IsValueStartSymbol)
-            {
-                return new JsonMultiValueSyntax(
-                    new JsonValueWithBackgroundSyntax(
-                        CaptureBackground(),
-                        new JsonMissingValueSyntax() { Start = CurrentLength - CurrentToken.Length }),
+                        new JsonMissingValueSyntax()),
                     ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
                     JsonBackgroundSyntax.Empty);
             }
@@ -348,7 +321,7 @@ namespace Eutherion.Text.Json
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
                 {
-                    currentNode = new JsonUndefinedValueSyntax(CurrentToken) { Start = CurrentLength - CurrentToken.Length };
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
                 }
                 else
