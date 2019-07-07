@@ -123,7 +123,7 @@ namespace Eutherion.Text.Json
                         }
                         else
                         {
-                            yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
+                            yield return JsonWhitespace.Create(currentIndex - firstUnusedIndex);
                         }
 
                         firstUnusedIndex = currentIndex;
@@ -201,7 +201,7 @@ namespace Eutherion.Text.Json
                 }
                 else
                 {
-                    yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
+                    yield return JsonWhitespace.Create(currentIndex - firstUnusedIndex);
                 }
             }
 

@@ -25,14 +25,35 @@ namespace Eutherion.Text.Json
 {
     public class JsonWhitespace : JsonSymbol
     {
+        /// <summary>
+        /// Maximum length before new <see cref="JsonWhitespace"/> instances are always newly allocated.
+        /// </summary>
+        public const int SharedWhitespaceInstanceLength = 255;
+
+        private static readonly JsonWhitespace[] SharedInstances;
+
+        static JsonWhitespace()
+        {
+            SharedInstances = new JsonWhitespace[SharedWhitespaceInstanceLength - 1];
+
+            for (int i = SharedWhitespaceInstanceLength - 2; i >= 0; i--)
+            {
+                // Do not allocate a zero length whitespace.
+                SharedInstances[i] = new JsonWhitespace(i + 1);
+            }
+        }
+
         public override bool IsBackground => true;
         public override int Length { get; }
 
-        public JsonWhitespace(int length)
+        public static JsonWhitespace Create(int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length < SharedWhitespaceInstanceLength) return SharedInstances[length - 1];
+            return new JsonWhitespace(length);
         }
+
+        private JsonWhitespace(int length) => Length = length;
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespace(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespace(this);

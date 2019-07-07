@@ -57,7 +57,8 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonWhitespace(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("start", () => new TextElement<JsonSymbol>(new JsonString(string.Empty, 2), -1, 2));
         }
@@ -268,7 +269,7 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonValue.TrueJsonValue, typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
-            yield return new object[] { new JsonWhitespace(2), typeof(JsonWhitespace) };
+            yield return new object[] { JsonWhitespace.Create(2), typeof(JsonWhitespace) };
         }
 
         private sealed class TestVisitor1 : JsonSymbolVisitor
