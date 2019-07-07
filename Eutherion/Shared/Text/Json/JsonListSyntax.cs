@@ -32,6 +32,8 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonMultiValueSyntax> ElementNodes { get; }
 
+        public ReadOnlyList<int> NodePositions { get; }
+
         public bool MissingSquareBracketClose { get; }
 
         /// <summary>
@@ -69,10 +71,12 @@ namespace Eutherion.Text.Json
             // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
             // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
             int cumulativeLength = 0;
+            int[] nodePositions = new int[ElementNodes.Count];
 
             for (int i = 0; i < ElementNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
+                nodePositions[i] = cumulativeLength;
                 cumulativeLength += ElementNodes[i].Length;
             }
 
@@ -81,6 +85,7 @@ namespace Eutherion.Text.Json
                 cumulativeLength += JsonSquareBracketClose.SquareBracketCloseLength;
             }
 
+            NodePositions = ReadOnlyList<int>.DangerousCreateFromArray(nodePositions);
             Length = cumulativeLength;
         }
 
