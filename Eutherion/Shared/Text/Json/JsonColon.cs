@@ -24,10 +24,11 @@ namespace Eutherion.Text.Json
     public class JsonColon : JsonSymbol
     {
         public const char ColonCharacter = ':';
+        public const int ColonLength = 1;
 
         public static readonly JsonColon Value = new JsonColon();
 
-        public override int Length => 1;
+        public override int Length => ColonLength;
 
         private JsonColon() { }
 

@@ -24,11 +24,12 @@ namespace Eutherion.Text.Json
     public class JsonCurlyOpen : JsonSymbol
     {
         public const char CurlyOpenCharacter = '{';
+        public const int CurlyOpenLength = 1;
 
         public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
 
         public override bool IsValueStartSymbol => true;
-        public override int Length => 1;
+        public override int Length => CurlyOpenLength;
 
         private JsonCurlyOpen() { }
 

@@ -24,11 +24,12 @@ namespace Eutherion.Text.Json
     public class JsonSquareBracketOpen : JsonSymbol
     {
         public const char SquareBracketOpenCharacter = '[';
+        public const int SquareBracketOpenLength = 1;
 
         public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
 
         public override bool IsValueStartSymbol => true;
-        public override int Length => 1;
+        public override int Length => SquareBracketOpenLength;
 
         private JsonSquareBracketOpen() { }
 
