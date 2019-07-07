@@ -32,6 +32,8 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonMultiValueSyntax> ElementNodes { get; }
 
+        public bool MissingSquareBracketClose { get; }
+
         /// <summary>
         /// Returns ElementNodes.Count, or one less if the last element is a JsonMissingValueSyntax.
         /// </summary>
@@ -61,6 +63,8 @@ namespace Eutherion.Text.Json
             {
                 throw new ArgumentException($"{nameof(elementNodes)} cannot be empty", nameof(elementNodes));
             }
+
+            MissingSquareBracketClose = missingSquareBracketClose;
 
             // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
             // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
