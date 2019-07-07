@@ -102,7 +102,7 @@ namespace Eutherion.Win.Storage
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (jsonListSyntax.ElementNodes.Count == ExpectedItemCount
+                if (jsonListSyntax.FilteredElementNodeCount == ExpectedItemCount
                     && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2))
                 {
@@ -153,7 +153,7 @@ namespace Eutherion.Win.Storage
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (jsonListSyntax.ElementNodes.Count == ExpectedItemCount
+                if (jsonListSyntax.FilteredElementNodeCount == ExpectedItemCount
                     && TryCreateItemValue(ItemTypes.Item1, json, jsonListSyntax, 0, listSyntaxStartPosition, errors, out T1 value1, out PValue itemValue1)
                     && TryCreateItemValue(ItemTypes.Item2, json, jsonListSyntax, 1, listSyntaxStartPosition, errors, out T2 value2, out PValue itemValue2)
                     && TryCreateItemValue(ItemTypes.Item3, json, jsonListSyntax, 2, listSyntaxStartPosition, errors, out T3 value3, out PValue itemValue3)

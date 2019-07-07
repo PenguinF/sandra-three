@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -31,10 +32,34 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonValueSyntax> ElementNodes { get; }
 
+        /// <summary>
+        /// Returns ElementNodes.Count, or one less if the last element is a JsonMissingValueSyntax.
+        /// </summary>
+        public int FilteredElementNodeCount
+        {
+            get
+            {
+                int count = ElementNodes.Count;
+
+                // Discard last item if it's a missing value, so that a trailing comma is ignored.
+                if (ElementNodes[count - 1] is JsonMissingValueSyntax)
+                {
+                    return count - 1;
+                }
+
+                return count;
+            }
+        }
+
         public JsonListSyntax(IEnumerable<JsonValueSyntax> elementNodes, int start, int length)
             : base(start, length)
         {
             ElementNodes = ReadOnlyList<JsonValueSyntax>.Create(elementNodes);
+
+            if (ElementNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(elementNodes)} cannot be empty", nameof(elementNodes));
+            }
         }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);

@@ -222,8 +222,7 @@ namespace Eutherion.Text.Json
             {
                 JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ValueNode.ContentNode;
                 bool gotValue = !(parsedValueNode is JsonMissingValueSyntax);
-
-                if (gotValue) listBuilder.Add(parsedValueNode);
+                listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                 if (CurrentToken is JsonComma)
@@ -235,8 +234,6 @@ namespace Eutherion.Text.Json
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
-
-                        listBuilder.Add(new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length));
                     }
                 }
                 else
