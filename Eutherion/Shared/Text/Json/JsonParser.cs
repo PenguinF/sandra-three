@@ -35,6 +35,7 @@ namespace Eutherion.Text.Json
         private readonly IEnumerator<JsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
+        private readonly List<JsonSymbol> BackgroundBuilder = new List<JsonSymbol>();
 
         private JsonSymbol CurrentToken;
         private int CurrentLength;
@@ -49,16 +50,16 @@ namespace Eutherion.Text.Json
         private void ShiftToNextForegroundToken()
         {
             // Skip comments until encountering something meaningful.
-            do
+            for (; ; )
             {
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
-                if (CurrentToken != null)
-                {
-                    Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
-                    CurrentLength += CurrentToken.Length;
-                }
+                if (CurrentToken == null) break;
+
+                Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
+                CurrentLength += CurrentToken.Length;
+                if (!CurrentToken.IsBackground) break;
+                BackgroundBuilder.Add(CurrentToken);
             }
-            while (CurrentToken != null && CurrentToken.IsBackground);
         }
 
         public override (JsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
