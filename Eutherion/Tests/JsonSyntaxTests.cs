@@ -56,7 +56,7 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(Array.Empty<JsonErrorInfo>(), -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(0, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonValue(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonWhitespace(-1));
 
@@ -180,9 +180,8 @@ namespace Eutherion.Shared.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var error = JsonUnterminatedMultiLineComment.CreateError(0, commentText.Length);
-            var symbol = new JsonUnterminatedMultiLineComment(0, commentText.Length);
-            AssertErrorEqual(error, symbol.Error);
+            var symbol = new JsonUnterminatedMultiLineComment(commentText.Length);
+            Assert.Equal(commentText.Length, symbol.Length);
         }
 
         [Theory]
@@ -270,7 +269,7 @@ namespace Eutherion.Shared.Tests
         public static IEnumerable<object[]> TerminalSymbolsOfEachType()
         {
             yield return new object[] { new JsonComment(2), typeof(JsonComment) };
-            yield return new object[] { new JsonUnterminatedMultiLineComment(0, 2), typeof(JsonUnterminatedMultiLineComment) };
+            yield return new object[] { new JsonUnterminatedMultiLineComment(2), typeof(JsonUnterminatedMultiLineComment) };
             yield return new object[] { JsonCurlyOpen.Value, typeof(JsonCurlyOpen) };
             yield return new object[] { JsonCurlyClose.Value, typeof(JsonCurlyClose) };
             yield return new object[] { JsonSquareBracketOpen.Value, typeof(JsonSquareBracketOpen) };

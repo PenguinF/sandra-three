@@ -434,7 +434,7 @@ namespace Eutherion.Text.Json
                 currentIndex++;
             }
 
-            yield return new JsonUnterminatedMultiLineComment(firstUnusedIndex, length - firstUnusedIndex);
+            yield return new JsonUnterminatedMultiLineComment(length - firstUnusedIndex);
 
             currentTokenizer = null;
         }
