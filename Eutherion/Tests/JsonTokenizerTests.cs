@@ -399,7 +399,15 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.GetErrors(0));
+            var generatedErrors = new List<JsonErrorInfo>();
+            int length = 0;
+
+            foreach (var token in JsonTokenizer.TokenizeAll(json))
+            {
+                if (token.HasErrors) generatedErrors.AddRange(token.GetErrors(length));
+                length += token.Length;
+            }
+
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);

@@ -54,8 +54,8 @@ namespace Eutherion.Text.Json
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
                 if (CurrentToken != null)
                 {
+                    Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
                     CurrentLength += CurrentToken.Length;
-                    Errors.AddRange(CurrentToken.GetErrors(0));
                 }
             }
             while (CurrentToken != null && CurrentToken.IsBackground);
