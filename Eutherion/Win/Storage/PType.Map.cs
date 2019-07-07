@@ -87,17 +87,22 @@ namespace Eutherion.Win.Storage
 
                 foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
                 {
+                    JsonStringLiteralSyntax keyNode = keyedNode.Key;
+                    int keyNodeStart = keyNode.Start;
+                    JsonValueSyntax valueNode = keyedNode.Value;
+                    int valueNodeStart = valueNode.Start;
+
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, keyedNode.Value.Start, errors);
+                    var itemValueOrError = ItemType.TryCreateValue(json, valueNode, out T value, valueNodeStart, errors);
                     if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
-                        dictionary.Add(keyedNode.Key.Value, value);
-                        mapBuilder.Add(keyedNode.Key.Value, itemValue);
+                        dictionary.Add(keyNode.Value, value);
+                        mapBuilder.Add(keyNode.Value, itemValue);
                     }
                     else
                     {
                         itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyNode, valueNode, json, keyNodeStart, valueNodeStart));
                     }
                 }
 

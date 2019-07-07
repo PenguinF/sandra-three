@@ -44,14 +44,16 @@ namespace Eutherion.Win.Storage
 
             if (hasRootValue)
             {
+                int rootNodeStart = rootNode.Start;
+
                 if (schema.TryCreateValue(
                     json,
                     rootNode,
                     out settingObject,
-                    rootNode.Start,
+                    rootNodeStart,
                     errors).IsOption1(out ITypeErrorBuilder typeError))
                 {
-                    errors.Add(ValueTypeError.Create(typeError, rootNode, json));
+                    errors.Add(ValueTypeError.Create(typeError, rootNode, json, rootNodeStart));
                     return false;
                 }
 

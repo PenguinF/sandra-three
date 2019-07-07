@@ -167,25 +167,30 @@ namespace Eutherion.Win.Storage
             // Analyze values with this schema while building the PMap.
             foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
             {
-                if (TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
+                JsonStringLiteralSyntax keyNode = keyedNode.Key;
+                int keyNodeStart = keyNode.Start;
+
+                if (TryGetProperty(new SettingKey(keyNode.Value), out SettingProperty property))
                 {
-                    var itemNode = keyedNode.Value;
-                    var valueOrError = property.TryCreateValue(json, itemNode, itemNode.Start, errors);
+                    JsonValueSyntax valueNode = keyedNode.Value;
+                    int valueNodeStart = valueNode.Start;
+
+                    var valueOrError = property.TryCreateValue(json, valueNode, valueNodeStart, errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
-                        mapBuilder.Add(keyedNode.Key.Value, convertedItemValue);
+                        mapBuilder.Add(keyNode.Value, convertedItemValue);
                     }
                     else
                     {
                         valueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, itemNode, json));
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyNode, valueNode, json, keyNodeStart, valueNodeStart));
                     }
                 }
                 else
                 {
                     // TODO: add error levels, this should probably be a warning.
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyNode, json, keyNodeStart));
                 }
             }
 
