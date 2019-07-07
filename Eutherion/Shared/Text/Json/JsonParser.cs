@@ -87,8 +87,7 @@ namespace Eutherion.Text.Json
                 JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
                 bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
-                bool validKey = false;
-                JsonStringLiteralSyntax propertyKeyNode = default;
+                Maybe<JsonStringLiteralSyntax> validKey = Maybe<JsonStringLiteralSyntax>.Nothing;
 
                 if (gotKey)
                 {
@@ -97,14 +96,12 @@ namespace Eutherion.Text.Json
 
                     if (parsedKeyNode is JsonStringLiteralSyntax stringLiteral)
                     {
-                        propertyKeyNode = stringLiteral;
                         string propertyKey = stringLiteral.Value;
 
                         // Expect unique keys.
-                        validKey = !foundKeys.Contains(propertyKey);
-
-                        if (validKey)
+                        if (!foundKeys.Contains(propertyKey))
                         {
+                            validKey = stringLiteral;
                             foundKeys.Add(propertyKey);
                         }
                         else
@@ -148,7 +145,7 @@ namespace Eutherion.Text.Json
                     gotValue |= gotNewValue;
 
                     // Only the first value can be valid, even if it's undefined.
-                    if (validKey && !gotColon && gotValue)
+                    if (validKey.IsJust(out JsonStringLiteralSyntax propertyKeyNode) && !gotColon && gotValue)
                     {
                         mapBuilder.Add(new JsonKeyValueSyntax(propertyKeyNode, parsedValueNode));
                     }
