@@ -38,6 +38,8 @@ namespace Eutherion.Text.Json
         private readonly List<JsonSymbol> BackgroundBuilder = new List<JsonSymbol>();
 
         private JsonSymbol CurrentToken;
+
+        // Used for parse error reporting.
         private int CurrentLength;
 
         public JsonParser(IEnumerable<JsonSymbol> tokens, string json)
