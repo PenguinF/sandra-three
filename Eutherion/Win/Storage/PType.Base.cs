@@ -80,19 +80,19 @@ namespace Eutherion.Win.Storage
         /// </summary>
         public static readonly PType<PString> String = new BaseType<PString>(JsonString, new ToStringConverter());
 
-        private class ToBoolConverter : JsonSyntaxNodeVisitor<Maybe<PBoolean>>
+        private class ToBoolConverter : JsonValueSyntaxVisitor<Maybe<PBoolean>>
         {
             public override Maybe<PBoolean> DefaultVisit(JsonSyntaxNode node) => Maybe<PBoolean>.Nothing;
             public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
         }
 
-        private class ToIntConverter : JsonSyntaxNodeVisitor<Maybe<PInteger>>
+        private class ToIntConverter : JsonValueSyntaxVisitor<Maybe<PInteger>>
         {
             public override Maybe<PInteger> DefaultVisit(JsonSyntaxNode node) => Maybe<PInteger>.Nothing;
             public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
         }
 
-        private class ToStringConverter : JsonSyntaxNodeVisitor<Maybe<PString>>
+        private class ToStringConverter : JsonValueSyntaxVisitor<Maybe<PString>>
         {
             public override Maybe<PString> DefaultVisit(JsonSyntaxNode node) => Maybe<PString>.Nothing;
             public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
@@ -102,9 +102,9 @@ namespace Eutherion.Win.Storage
             where TValue : PValue
         {
             private readonly PTypeErrorBuilder typeError;
-            private readonly JsonSyntaxNodeVisitor<Maybe<TValue>> converter;
+            private readonly JsonValueSyntaxVisitor<Maybe<TValue>> converter;
 
-            public BaseType(LocalizedStringKey expectedTypeDescriptionKey, JsonSyntaxNodeVisitor<Maybe<TValue>> converter)
+            public BaseType(LocalizedStringKey expectedTypeDescriptionKey, JsonValueSyntaxVisitor<Maybe<TValue>> converter)
             {
                 typeError = new PTypeErrorBuilder(expectedTypeDescriptionKey);
                 this.converter = converter;

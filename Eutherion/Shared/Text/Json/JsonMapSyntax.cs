@@ -34,9 +34,9 @@ namespace Eutherion.Text.Json
             : base(start, length)
             => MapNodeKeyValuePairs = mapNodeKeyValuePairs;
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 
     /// <summary>

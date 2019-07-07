@@ -34,8 +34,8 @@ namespace Eutherion.Text.Json
             : base(start, integerToken.Length)
             => Value = value;
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
     }
 }

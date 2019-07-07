@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSyntaxNodeVisitor.cs
+ * JsonValueSyntaxVisitor.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -25,7 +25,7 @@ namespace Eutherion.Text.Json
     /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor
+    public abstract class JsonValueSyntaxVisitor
     {
         public virtual void DefaultVisit(JsonSyntaxNode node) { }
         public virtual void Visit(JsonSyntaxNode node) { if (node != null) node.Accept(this); }
@@ -42,7 +42,7 @@ namespace Eutherion.Text.Json
     /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor<TResult>
+    public abstract class JsonValueSyntaxVisitor<TResult>
     {
         public virtual TResult DefaultVisit(JsonSyntaxNode node) => default;
         public virtual TResult Visit(JsonSyntaxNode node) => node == null ? default : node.Accept(this);
@@ -59,7 +59,7 @@ namespace Eutherion.Text.Json
     /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor<T, TResult>
+    public abstract class JsonValueSyntaxVisitor<T, TResult>
     {
         public virtual TResult DefaultVisit(JsonSyntaxNode node, T arg) => default;
         public virtual TResult Visit(JsonSyntaxNode node, T arg) => node == null ? default : node.Accept(this, arg);

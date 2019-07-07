@@ -42,8 +42,8 @@ namespace Eutherion.Text.Json
             Length = length;
         }
 
-        public abstract void Accept(JsonSyntaxNodeVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg);
+        public abstract void Accept(JsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }
