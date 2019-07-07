@@ -53,7 +53,7 @@ namespace Eutherion.Text.Json
 
         public override int Length { get; }
 
-        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, int length)
+        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, bool missingSquareBracketClose)
         {
             ElementNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(elementNodes);
 
@@ -62,7 +62,22 @@ namespace Eutherion.Text.Json
                 throw new ArgumentException($"{nameof(elementNodes)} cannot be empty", nameof(elementNodes));
             }
 
-            Length = length;
+            // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
+            // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
+            int cumulativeLength = 0;
+
+            for (int i = 0; i < ElementNodes.Count; i++)
+            {
+                cumulativeLength += JsonComma.CommaLength;
+                cumulativeLength += ElementNodes[i].Length;
+            }
+
+            if (!missingSquareBracketClose)
+            {
+                cumulativeLength += JsonSquareBracketClose.SquareBracketCloseLength;
+            }
+
+            Length = cumulativeLength;
         }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);

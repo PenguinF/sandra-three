@@ -218,22 +218,9 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
-                    // The first iteration should be CurlyOpenLength rather than CommaLength.
-                    int length = 0;
-
-                    for (int i = 0; i < mapBuilder.Count; i++)
-                    {
-                        length += JsonComma.CommaLength;
-                        length += mapBuilder[i].Length;
-                    }
-
-                    if (isCurlyClose)
-                    {
-                        length += JsonCurlyClose.CurlyCloseLength;
-                    }
-
-                    return (new JsonMapSyntax(mapBuilder, length) { Start = endPosition - length }, unprocessedToken);
+                    var jsonMapSyntax = new JsonMapSyntax(mapBuilder, !isCurlyClose);
+                    jsonMapSyntax.Start = endPosition - jsonMapSyntax.Length;
+                    return (jsonMapSyntax, unprocessedToken);
                 }
             }
         }
@@ -294,22 +281,9 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
-                    // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
-                    int length = 0;
-
-                    for (int i = 0; i < listBuilder.Count; i++)
-                    {
-                        length += JsonComma.CommaLength;
-                        length += listBuilder[i].Length;
-                    }
-
-                    if (!missingSquareBracketClose)
-                    {
-                        length += JsonSquareBracketClose.SquareBracketCloseLength;
-                    }
-
-                    return (new JsonListSyntax(listBuilder, length) { Start = endPosition - length }, unprocessedToken);
+                    var jsonListSyntax = new JsonListSyntax(listBuilder, missingSquareBracketClose);
+                    jsonListSyntax.Start = endPosition - jsonListSyntax.Length;
+                    return (jsonListSyntax, unprocessedToken);
                 }
             }
         }

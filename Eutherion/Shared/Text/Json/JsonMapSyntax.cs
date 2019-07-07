@@ -34,7 +34,7 @@ namespace Eutherion.Text.Json
 
         public override int Length { get; }
 
-        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, int length)
+        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
             KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
 
@@ -43,7 +43,22 @@ namespace Eutherion.Text.Json
                 throw new ArgumentException($"{nameof(keyValueNodes)} cannot be empty", nameof(keyValueNodes));
             }
 
-            Length = length;
+            // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
+            // The first iteration should be CurlyOpenLength rather than CommaLength.
+            int cumulativeLength = 0;
+
+            for (int i = 0; i < KeyValueNodes.Count; i++)
+            {
+                cumulativeLength += JsonComma.CommaLength;
+                cumulativeLength += KeyValueNodes[i].Length;
+            }
+
+            if (!missingCurlyClose)
+            {
+                cumulativeLength += JsonCurlyClose.CurlyCloseLength;
+            }
+
+            Length = cumulativeLength;
         }
 
         public IEnumerable<(JsonStringLiteralSyntax, JsonValueSyntax)> ValidKeyValuePairs
