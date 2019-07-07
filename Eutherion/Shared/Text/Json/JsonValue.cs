@@ -36,15 +36,18 @@ namespace Eutherion.Text.Json
 
         public static string BoolSymbol(bool boolValue) => boolValue ? True : False;
 
+        public static JsonValue Create(string value)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+            return new JsonValue(value);
+        }
+
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
         public override int Length => Value.Length;
 
-        public JsonValue(string value)
-        {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-        }
+        private JsonValue(string value) => Value = value;
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);

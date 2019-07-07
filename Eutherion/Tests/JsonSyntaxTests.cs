@@ -80,7 +80,7 @@ namespace Eutherion.Shared.Tests
         public void NullValueShouldThrow()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonString(null, 0));
-            Assert.Throws<ArgumentNullException>(() => new JsonValue(null));
+            Assert.Throws<ArgumentNullException>(() => JsonValue.Create(null));
         }
 
         [Theory]
@@ -95,7 +95,7 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length, jsonString.Length);
 
-            var jsonValue = new JsonValue(value);
+            var jsonValue = JsonValue.Create(value);
             Assert.Equal(value, jsonValue.Value);
             Assert.Equal(value.Length, jsonValue.Length);
         }
@@ -265,7 +265,7 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol("*"), typeof(JsonUnknownSymbol) };
-            yield return new object[] { new JsonValue("true"), typeof(JsonValue) };
+            yield return new object[] { JsonValue.TrueJsonValue, typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
             yield return new object[] { new JsonWhitespace(2), typeof(JsonWhitespace) };
