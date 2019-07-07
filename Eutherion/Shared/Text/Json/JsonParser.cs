@@ -426,10 +426,9 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public bool TryParse(out JsonValueSyntax rootNode, out List<JsonErrorInfo> errors)
+        public JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
         {
-            rootNode = ParseMultiValue(JsonErrorCode.ExpectedEof).ValueNode.ContentNode;
-            bool hasRootValue = !(rootNode is JsonMissingValueSyntax);
+            JsonMultiValueSyntax multiValueNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
 
             if (CurrentToken != null)
             {
@@ -440,7 +439,8 @@ namespace Eutherion.Text.Json
             }
 
             errors = Errors;
-            return hasRootValue;
+
+            return multiValueNode;
         }
     }
 }

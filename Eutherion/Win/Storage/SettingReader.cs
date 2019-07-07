@@ -40,28 +40,28 @@ namespace Eutherion.Win.Storage
             tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
 
             JsonParser parser = new JsonParser(tokens, json);
-            bool hasRootValue = parser.TryParse(out JsonValueSyntax rootNode, out errors);
+            var rootNode = parser.TryParse(out errors);
 
-            if (hasRootValue)
+            if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                int rootNodeStart = rootNode.Start;
-
-                if (schema.TryCreateValue(
-                    json,
-                    rootNode,
-                    out settingObject,
-                    rootNodeStart,
-                    errors).IsOption1(out ITypeErrorBuilder typeError))
-                {
-                    errors.Add(ValueTypeError.Create(typeError, rootNode, json, rootNodeStart));
-                    return false;
-                }
-
-                return true;
+                settingObject = default;
+                return false;
             }
 
-            settingObject = default;
-            return false;
+            int rootNodeStart = rootNode.ValueNode.ContentNode.Start;
+
+            if (schema.TryCreateValue(
+                json,
+                rootNode.ValueNode.ContentNode,
+                out settingObject,
+                rootNodeStart,
+                errors).IsOption1(out ITypeErrorBuilder typeError))
+            {
+                errors.Add(ValueTypeError.Create(typeError, rootNode.ValueNode.ContentNode, json, rootNodeStart));
+                return false;
+            }
+
+            return true;
         }
     }
 }
