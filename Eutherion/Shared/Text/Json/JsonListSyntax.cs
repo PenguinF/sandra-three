@@ -30,7 +30,7 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public ReadOnlyList<JsonValueSyntax> ElementNodes { get; }
+        public ReadOnlyList<JsonMultiValueSyntax> ElementNodes { get; }
 
         /// <summary>
         /// Returns ElementNodes.Count, or one less if the last element is a JsonMissingValueSyntax.
@@ -42,7 +42,7 @@ namespace Eutherion.Text.Json
                 int count = ElementNodes.Count;
 
                 // Discard last item if it's a missing value, so that a trailing comma is ignored.
-                if (ElementNodes[count - 1] is JsonMissingValueSyntax)
+                if (ElementNodes[count - 1].ValueNode.ContentNode is JsonMissingValueSyntax)
                 {
                     return count - 1;
                 }
@@ -51,10 +51,10 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public JsonListSyntax(IEnumerable<JsonValueSyntax> elementNodes, int start, int length)
+        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, int start, int length)
             : base(start, length)
         {
-            ElementNodes = ReadOnlyList<JsonValueSyntax>.Create(elementNodes);
+            ElementNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(elementNodes);
 
             if (ElementNodes.Count == 0)
             {

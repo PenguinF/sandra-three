@@ -216,12 +216,14 @@ namespace Eutherion.Text.Json
         public override (JsonValueSyntax, bool) VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
         {
             int start = CurrentLength - bracketOpen.Length;
-            List<JsonValueSyntax> listBuilder = new List<JsonValueSyntax>();
+            var listBuilder = new List<JsonMultiValueSyntax>();
 
             for (; ; )
             {
-                JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ValueNode.ContentNode;
-                bool gotValue = !(parsedValueNode is JsonMissingValueSyntax);
+                JsonMultiValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
+                bool gotValue = !(parsedValueNode.ValueNode.ContentNode is JsonMissingValueSyntax);
+
+                // Always add each value, because it may contain background symbols.
                 listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.

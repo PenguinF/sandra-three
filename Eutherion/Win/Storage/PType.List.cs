@@ -44,11 +44,14 @@ namespace Eutherion.Win.Storage
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
+                JsonValueSyntax itemNode = jsonListSyntax.ElementNodes[itemIndex].ValueNode.ContentNode;
+                int itemNodeStart = itemNode.Start;
+
                 return itemType.TryCreateValue(
                     json,
-                    jsonListSyntax.ElementNodes[itemIndex],
+                    itemNode,
                     out convertedTargetValue,
-                    jsonListSyntax.ElementNodes[itemIndex].Start,
+                    itemNodeStart,
                     errors).IsOption2(out value);
             }
 
