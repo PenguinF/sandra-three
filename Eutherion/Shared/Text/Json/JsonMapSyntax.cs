@@ -37,6 +37,28 @@ namespace Eutherion.Text.Json
             KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
         }
 
+        public IEnumerable<(JsonStringLiteralSyntax, JsonValueSyntax)> ValidKeyValuePairs
+        {
+            get
+            {
+                for (int i = 0; i < KeyValueNodes.Count; i++)
+                {
+                    var keyValueNode = KeyValueNodes[i];
+
+                    if (keyValueNode.ValidKey.IsJust(out JsonStringLiteralSyntax stringLiteral) && keyValueNode.ValueNodes.Count > 0)
+                    {
+                        JsonMultiValueSyntax multiValueNode = keyValueNode.ValueNodes[0];
+
+                        // Only the first value can be valid, even if it's undefined.
+                        if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
+                        {
+                            yield return (stringLiteral, multiValueNode.ValueNode.ContentNode);
+                        }
+                    }
+                }
+            }
+        }
+
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);

@@ -23,6 +23,7 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -76,6 +77,7 @@ namespace Eutherion.Text.Json
         {
             int start = CurrentLength - curlyOpen.Length;
             var mapBuilder = new List<JsonKeyValueSyntax>();
+            var keyValueSyntaxBuilder = new List<JsonMultiValueSyntax>();
 
             // Maintain a separate set of keys to aid error reporting on duplicate keys.
             HashSet<string> foundKeys = new HashSet<string>();
@@ -125,10 +127,10 @@ namespace Eutherion.Text.Json
                         break;
                 }
 
-                // If gotValue remains false, a missing value error will be reported.
-                bool gotValue = false;
+                // Reuse keyValueSyntaxBuilder.
+                keyValueSyntaxBuilder.Clear();
 
-                // Loop parsing values until encountering a non ':'.
+                // Keep parsing multi-values until encountering a non ':'.
                 bool gotColon = false;
                 while (CurrentToken is JsonColon)
                 {
@@ -140,20 +142,23 @@ namespace Eutherion.Text.Json
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
-
-                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    JsonValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues).ValueNode.ContentNode;
-                    bool gotNewValue = !(parsedValueNode is JsonMissingValueSyntax);
-                    gotValue |= gotNewValue;
-
-                    // Only the first value can be valid, even if it's undefined.
-                    if (validKey.IsJust(out JsonStringLiteralSyntax propertyKeyNode) && !gotColon && gotValue)
+                    else
                     {
-                        mapBuilder.Add(new JsonKeyValueSyntax(propertyKeyNode, parsedValueNode));
+                        gotColon = true;
                     }
 
-                    gotColon = true;
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    // Always add the GreenJsonMissingValueSyntax, because it may contain background symbols.
+                    keyValueSyntaxBuilder.Add(ParseMultiValue(JsonErrorCode.MultipleValues));
                 }
+
+                // One key-value section done.
+                var jsonKeyValueSyntax = new JsonKeyValueSyntax(
+                    multiKeyNode,
+                    validKey,
+                    keyValueSyntaxBuilder);
+
+                mapBuilder.Add(jsonKeyValueSyntax);
 
                 bool isComma = CurrentToken is JsonComma;
                 bool isCurlyClose = CurrentToken is JsonCurlyClose;
@@ -171,7 +176,10 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    if (!gotValue)
+                    // Report missing value error from being reported if all value sections are empty.
+                    // Example: { "key1":: 2, "key2": , }
+                    // The first section does not report a missing value, the second section does.
+                    if (jsonKeyValueSyntax.ValueNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
