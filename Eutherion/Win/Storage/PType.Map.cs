@@ -87,13 +87,16 @@ namespace Eutherion.Win.Storage
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var (keyNode, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
+                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
                 {
-                    int keyNodeStart = keyNode.Start;
-                    int valueNodeStart = valueNode.Start;
-
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(json, valueNode, out T value, valueNodeStart, errors);
+                    var itemValueOrError = ItemType.TryCreateValue(
+                        json,
+                        valueNode,
+                        out T value,
+                        mapSyntaxStartPosition + valueNodeStart,
+                        errors);
+
                     if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
                         dictionary.Add(keyNode.Value, value);
@@ -102,7 +105,13 @@ namespace Eutherion.Win.Storage
                     else
                     {
                         itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyNode, valueNode, json, keyNodeStart, valueNodeStart));
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
+                            typeError,
+                            keyNode,
+                            valueNode,
+                            json,
+                            mapSyntaxStartPosition + keyNodeStart,
+                            mapSyntaxStartPosition + valueNodeStart));
                     }
                 }
 

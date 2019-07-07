@@ -46,6 +46,11 @@ namespace Eutherion.Text.Json
         public ReadOnlyList<JsonMultiValueSyntax> ValueNodes { get; }
 
         /// <summary>
+        /// Gets the relative position of each value node.
+        /// </summary>
+        public ReadOnlyList<int> ValueNodePositions { get; }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
         /// </summary>
         public int Length { get; }
@@ -80,13 +85,16 @@ namespace Eutherion.Text.Json
             ValueNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueNodes);
 
             int cumulativeLength = keyNode.Length;
+            int[] valueNodePositions = new int[ValueNodes.Count];
 
             for (int i = 0; i < ValueNodes.Count; i++)
             {
                 cumulativeLength += JsonColon.ColonLength;
+                valueNodePositions[i] = cumulativeLength;
                 cumulativeLength += ValueNodes[i].Length;
             }
 
+            ValueNodePositions = ReadOnlyList<int>.DangerousCreateFromArray(valueNodePositions);
             Length = cumulativeLength;
         }
     }

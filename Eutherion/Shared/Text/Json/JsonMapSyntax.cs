@@ -70,7 +70,7 @@ namespace Eutherion.Text.Json
             Length = cumulativeLength;
         }
 
-        public IEnumerable<(JsonStringLiteralSyntax, JsonValueSyntax)> ValidKeyValuePairs
+        public IEnumerable<(int, JsonStringLiteralSyntax, int, JsonValueSyntax)> ValidKeyValuePairs
         {
             get
             {
@@ -85,7 +85,10 @@ namespace Eutherion.Text.Json
                         // Only the first value can be valid, even if it's undefined.
                         if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
                         {
-                            yield return (stringLiteral, multiValueNode.ValueNode.ContentNode);
+                            int keyNodeStart = KeyValueNodePositions[i] + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                            int valueNodeStart = KeyValueNodePositions[i] + keyValueNode.ValueNodePositions[0] + multiValueNode.ValueNode.BackgroundBefore.Length;
+
+                            yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                         }
                     }
                 }
