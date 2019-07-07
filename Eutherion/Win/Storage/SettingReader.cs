@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text.Json;
-using Eutherion.Utils;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
@@ -34,13 +33,10 @@ namespace Eutherion.Win.Storage
             string json,
             SettingSchema schema,
             out SettingObject settingObject,
-            out ReadOnlyList<JsonSymbol> tokens,
+            out JsonMultiValueSyntax rootNode,
             out List<JsonErrorInfo> errors)
         {
-            tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
-
-            JsonParser parser = new JsonParser(tokens, json);
-            var rootNode = parser.TryParse(out errors);
+            rootNode = new JsonParser(json).TryParse(out errors);
 
             if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
             {

@@ -28,6 +28,8 @@ namespace Eutherion.Text.Json
     {
         public bool Value { get; }
 
+        public JsonSymbol BooleanToken => Value ? JsonValue.TrueJsonValue : JsonValue.FalseJsonValue;
+
         public override int Length => Value ? JsonValue.TrueSymbolLength : JsonValue.FalseSymbolLength;
 
         public JsonBooleanLiteralSyntax(bool value) => Value = value;

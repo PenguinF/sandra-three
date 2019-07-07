@@ -64,6 +64,7 @@
     <Compile Include="Text\Json\JsonString.cs" />
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonSymbol.cs" />
+    <Compile Include="Text\Json\JsonSymbolEnumerator.cs" />
     <Compile Include="Text\Json\JsonSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonTokenizer.cs" />
     <Compile Include="Text\Json\JsonUndefinedValueSyntax.cs" />

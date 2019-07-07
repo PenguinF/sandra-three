@@ -44,11 +44,10 @@ namespace Eutherion.Text.Json
         // Used for parse error reporting.
         private int CurrentLength;
 
-        public JsonParser(IEnumerable<JsonSymbol> tokens, string json)
+        public JsonParser(string json)
         {
-            if (tokens == null) throw new ArgumentNullException(nameof(tokens));
-            Tokens = tokens.GetEnumerator();
-            Json = json;
+            Json = json ?? throw new ArgumentNullException(nameof(json));
+            Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
         }
 
         private void ShiftToNextForegroundToken()
