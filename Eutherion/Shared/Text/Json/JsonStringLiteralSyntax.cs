@@ -28,8 +28,8 @@ namespace Eutherion.Text.Json
     {
         public string Value { get; }
 
-        public JsonStringLiteralSyntax(JsonString stringToken, int start)
-            : base(start, stringToken.Length)
+        public JsonStringLiteralSyntax(JsonString stringToken)
+            : base(stringToken.Length)
             => Value = stringToken.Value;
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);

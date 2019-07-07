@@ -233,7 +233,7 @@ namespace Eutherion.Text.Json
                         length += JsonCurlyClose.CurlyCloseLength;
                     }
 
-                    return (new JsonMapSyntax(mapBuilder, endPosition - length, length), unprocessedToken);
+                    return (new JsonMapSyntax(mapBuilder, length) { Start = endPosition - length }, unprocessedToken);
                 }
             }
         }
@@ -309,20 +309,20 @@ namespace Eutherion.Text.Json
                         length += JsonSquareBracketClose.SquareBracketCloseLength;
                     }
 
-                    return (new JsonListSyntax(listBuilder, endPosition - length, length), unprocessedToken);
+                    return (new JsonListSyntax(listBuilder, length) { Start = endPosition - length }, unprocessedToken);
                 }
             }
         }
 
         public override (JsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(symbol, false, CurrentLength - JsonValue.FalseSymbolLength), false);
-            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(symbol, true, CurrentLength - JsonValue.TrueSymbolLength), false);
+            if (symbol == JsonValue.FalseJsonValue) return (new JsonBooleanLiteralSyntax(symbol, false) { Start = CurrentLength - JsonValue.FalseSymbolLength }, false);
+            if (symbol == JsonValue.TrueJsonValue) return (new JsonBooleanLiteralSyntax(symbol, true) { Start = CurrentLength - JsonValue.TrueSymbolLength }, false);
 
             string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
-                return (new JsonIntegerLiteralSyntax(symbol, integerValue, CurrentLength - symbol.Length), false);
+                return (new JsonIntegerLiteralSyntax(symbol, integerValue) { Start = CurrentLength - symbol.Length }, false);
             }
 
             Errors.Add(new JsonErrorInfo(
@@ -331,11 +331,11 @@ namespace Eutherion.Text.Json
                 symbol.Length,
                 new[] { value }));
 
-            return (new JsonUndefinedValueSyntax(symbol, CurrentLength - symbol.Length), false);
+            return (new JsonUndefinedValueSyntax(symbol) { Start = CurrentLength - symbol.Length }, false);
         }
 
         public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
-            => (new JsonStringLiteralSyntax(symbol, CurrentLength - symbol.Length), false);
+            => (new JsonStringLiteralSyntax(symbol) { Start = CurrentLength - symbol.Length }, false);
 
         private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
@@ -346,7 +346,7 @@ namespace Eutherion.Text.Json
                 return new JsonMultiValueSyntax(
                     new JsonValueWithBackgroundSyntax(
                         CaptureBackground(),
-                        new JsonMissingValueSyntax(CurrentLength)),
+                        new JsonMissingValueSyntax() { Start = CurrentLength }),
                     ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
                     JsonBackgroundSyntax.Empty);
             }
@@ -356,7 +356,7 @@ namespace Eutherion.Text.Json
                 return new JsonMultiValueSyntax(
                     new JsonValueWithBackgroundSyntax(
                         CaptureBackground(),
-                        new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length)),
+                        new JsonMissingValueSyntax() { Start = CurrentLength - CurrentToken.Length }),
                     ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
                     JsonBackgroundSyntax.Empty);
             }
@@ -374,7 +374,7 @@ namespace Eutherion.Text.Json
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
                 {
-                    currentNode = new JsonUndefinedValueSyntax(CurrentToken, CurrentLength - CurrentToken.Length);
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken) { Start = CurrentLength - CurrentToken.Length };
                     unprocessedToken = false;
                 }
                 else

@@ -29,16 +29,15 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of the text span corresponding with this node.
         /// </summary>
-        public int Start { get; }
+        public int Start { get; set; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length { get; }
 
-        protected JsonValueSyntax(int start, int length)
+        protected JsonValueSyntax(int length)
         {
-            Start = start;
             Length = length;
         }
 

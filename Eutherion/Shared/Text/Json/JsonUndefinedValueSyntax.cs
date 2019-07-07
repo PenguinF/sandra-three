@@ -26,8 +26,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
     {
-        public JsonUndefinedValueSyntax(JsonSymbol undefinedToken, int start)
-            : base(start, undefinedToken.Length)
+        public JsonUndefinedValueSyntax(JsonSymbol undefinedToken)
+            : base(undefinedToken.Length)
         {
         }
 

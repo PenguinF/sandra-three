@@ -51,8 +51,8 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, int start, int length)
-            : base(start, length)
+        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, int length)
+            : base(length)
         {
             ElementNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(elementNodes);
 

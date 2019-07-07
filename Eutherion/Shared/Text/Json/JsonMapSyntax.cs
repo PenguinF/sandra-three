@@ -32,8 +32,8 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
-        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, int start, int length)
-            : base(start, length)
+        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, int length)
+            : base(length)
         {
             KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
 

@@ -26,8 +26,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {
-        public JsonMissingValueSyntax(int start)
-            : base(start, 0)
+        public JsonMissingValueSyntax()
+            : base(0)
         {
         }
 
