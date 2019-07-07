@@ -57,6 +57,7 @@
     <Compile Include="Text\Json\JsonListSyntax.cs" />
     <Compile Include="Text\Json\JsonMapSyntax.cs" />
     <Compile Include="Text\Json\JsonMissingValueSyntax.cs" />
+    <Compile Include="Text\Json\JsonMultiValueSyntax.cs" />
     <Compile Include="Text\Json\JsonParser.cs" />
     <Compile Include="Text\Json\JsonSquareBracketClose.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpen.cs" />
