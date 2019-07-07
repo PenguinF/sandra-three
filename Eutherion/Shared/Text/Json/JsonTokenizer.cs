@@ -176,7 +176,7 @@ namespace Eutherion.Text.Json
                                 string displayCharValue = category == UnicodeCategory.OtherNotAssigned
                                     ? $"\\u{((int)c).ToString("x4")}"
                                     : Convert.ToString(c);
-                                yield return new JsonUnknownSymbol(displayCharValue, currentIndex);
+                                yield return new JsonUnknownSymbol(displayCharValue);
                                 break;
                         }
 

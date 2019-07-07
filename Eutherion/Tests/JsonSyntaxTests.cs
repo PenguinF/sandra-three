@@ -147,23 +147,13 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void UnexpectedSymbolShouldBeNotNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null));
         }
 
         [Fact]
         public void UnexpectedSymbolShouldBeNonEmpty()
         {
-            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty, 0));
-        }
-
-        private static void AssertErrorEqual(JsonErrorInfo expected, JsonErrorInfo actual)
-        {
-            Assert.Equal(expected.Start, actual.Start);
-            Assert.Equal(expected.Length, actual.Length);
-            Assert.Equal(expected.ErrorCode, actual.ErrorCode);
-
-            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
-            Assert.Equal<string>(expected.Parameters, actual.Parameters);
+            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty));
         }
 
         [Theory]
@@ -171,9 +161,8 @@ namespace Eutherion.Shared.Tests
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
-            var error = JsonUnknownSymbol.CreateError(displayCharValue, 0);
-            var symbol = new JsonUnknownSymbol(displayCharValue, 0);
-            AssertErrorEqual(error, symbol.Error);
+            var symbol = new JsonUnknownSymbol(displayCharValue);
+            Assert.Equal(displayCharValue, symbol.DisplayCharValue);
         }
 
         [Theory]
@@ -276,7 +265,7 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonSquareBracketClose.Value, typeof(JsonSquareBracketClose) };
             yield return new object[] { JsonColon.Value, typeof(JsonColon) };
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
-            yield return new object[] { new JsonUnknownSymbol("*", 0), typeof(JsonUnknownSymbol) };
+            yield return new object[] { new JsonUnknownSymbol("*"), typeof(JsonUnknownSymbol) };
             yield return new object[] { new JsonValue("true", 4), typeof(JsonValue) };
             yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
