@@ -34,10 +34,16 @@ namespace Eutherion.Text.Json
 
         public JsonErrorInfo Error { get; }
 
-        public override IEnumerable<JsonErrorInfo> Errors { get; }
-
         public override bool IsValueStartSymbol => true;
+
         public override int Length => 1;
+
+        public override bool HasErrors => true;
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(int position)
+        {
+            yield return Error;
+        }
 
         public JsonUnknownSymbol(string displayCharValue, int position)
         {
@@ -45,7 +51,6 @@ namespace Eutherion.Text.Json
             if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
 
             Error = CreateError(displayCharValue, position);
-            Errors = new[] { Error };
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);

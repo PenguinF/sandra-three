@@ -57,9 +57,15 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
             => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
 
-        public override IEnumerable<JsonErrorInfo> Errors { get; }
-        public override bool IsValueStartSymbol => true;
+        public IEnumerable<JsonErrorInfo> Errors { get; }
+
         public override int Length { get; }
+
+        public override bool IsValueStartSymbol => true;
+
+        public override bool HasErrors => true;
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) { return Errors; }
 
         public JsonErrorString(int length, params JsonErrorInfo[] errors)
         {

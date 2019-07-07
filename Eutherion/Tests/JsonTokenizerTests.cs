@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -400,7 +399,7 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(GetErrorStrings))]
         public void Errors(string json, JsonErrorInfo[] expectedErrors)
         {
-            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.Errors);
+            var generatedErrors = JsonTokenizer.TokenizeAll(json).SelectMany(x => x.GetErrors(0));
             Assert.Collection(generatedErrors, expectedErrors.Select(expectedError => new Action<JsonErrorInfo>(generatedError =>
             {
                 Assert.NotNull(generatedError);
