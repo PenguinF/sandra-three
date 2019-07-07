@@ -75,7 +75,6 @@ namespace Eutherion.Text.Json
 
         public override (JsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
         {
-            int start = CurrentLength - curlyOpen.Length;
             var mapBuilder = new List<JsonKeyValueSyntax>();
             var keyValueSyntaxBuilder = new List<JsonMultiValueSyntax>();
 
@@ -209,6 +208,7 @@ namespace Eutherion.Text.Json
                     else
                     {
                         // ']'
+                        // Do not include the control symbol in the map.
                         unprocessedToken = true;
                         endPosition = CurrentLength - CurrentToken.Length;
 
@@ -218,8 +218,30 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    int length = endPosition - start;
-                    return (new JsonMapSyntax(mapBuilder, start, length), unprocessedToken);
+                    // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
+                    // The first iteration should be CurlyOpenLength rather than CommaLength.
+                    int length = 0;
+
+                    for (int i = 0; i < mapBuilder.Count; i++)
+                    {
+                        length += JsonComma.CommaLength;
+
+                        var keyValueNode = mapBuilder[i];
+                        length += keyValueNode.KeyNode.Length;
+
+                        for (int j = 0; j < keyValueNode.ValueNodes.Count; j++)
+                        {
+                            length += JsonColon.ColonLength;
+                            length += keyValueNode.ValueNodes[j].Length;
+                        }
+                    }
+
+                    if (isCurlyClose)
+                    {
+                        length += JsonCurlyClose.CurlyCloseLength;
+                    }
+
+                    return (new JsonMapSyntax(mapBuilder, endPosition - length, length), unprocessedToken);
                 }
             }
         }
