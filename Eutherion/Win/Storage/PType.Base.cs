@@ -82,19 +82,19 @@ namespace Eutherion.Win.Storage
 
         private class ToBoolConverter : JsonValueSyntaxVisitor<Maybe<PBoolean>>
         {
-            public override Maybe<PBoolean> DefaultVisit(JsonSyntaxNode node) => Maybe<PBoolean>.Nothing;
+            public override Maybe<PBoolean> DefaultVisit(JsonValueSyntax node) => Maybe<PBoolean>.Nothing;
             public override Maybe<PBoolean> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax value) => value.Value ? PConstantValue.True : PConstantValue.False;
         }
 
         private class ToIntConverter : JsonValueSyntaxVisitor<Maybe<PInteger>>
         {
-            public override Maybe<PInteger> DefaultVisit(JsonSyntaxNode node) => Maybe<PInteger>.Nothing;
+            public override Maybe<PInteger> DefaultVisit(JsonValueSyntax node) => Maybe<PInteger>.Nothing;
             public override Maybe<PInteger> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax value) => new PInteger(value.Value);
         }
 
         private class ToStringConverter : JsonValueSyntaxVisitor<Maybe<PString>>
         {
-            public override Maybe<PString> DefaultVisit(JsonSyntaxNode node) => Maybe<PString>.Nothing;
+            public override Maybe<PString> DefaultVisit(JsonValueSyntax node) => Maybe<PString>.Nothing;
             public override Maybe<PString> VisitStringLiteralSyntax(JsonStringLiteralSyntax value) => new PString(value.Value);
         }
 
@@ -112,7 +112,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                JsonSyntaxNode valueNode,
+                JsonValueSyntax valueNode,
                 out TValue convertedValue,
                 List<JsonErrorInfo> errors)
                 => converter.Visit(valueNode).IsJust(out convertedValue)
@@ -170,7 +170,7 @@ namespace Eutherion.Win.Storage
 
             internal override sealed Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                JsonSyntaxNode valueNode,
+                JsonValueSyntax valueNode,
                 out T convertedValue,
                 List<JsonErrorInfo> errors)
             {

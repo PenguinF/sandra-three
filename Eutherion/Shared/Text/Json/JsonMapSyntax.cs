@@ -26,7 +26,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a map syntax node.
     /// </summary>
-    public sealed class JsonMapSyntax : JsonSyntaxNode
+    public sealed class JsonMapSyntax : JsonValueSyntax
     {
         public IReadOnlyList<JsonMapNodeKeyValuePair> MapNodeKeyValuePairs { get; }
 
@@ -52,7 +52,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the syntax node containing the value of this <see cref="JsonMapNodeKeyValuePair"/>.
         /// </summary>
-        public JsonSyntaxNode Value { get; }
+        public JsonValueSyntax Value { get; }
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonMapNodeKeyValuePair"/>.
@@ -63,7 +63,7 @@ namespace Eutherion.Text.Json
         /// <param name="value">
         /// The syntax node containing the value.
         /// </param>
-        public JsonMapNodeKeyValuePair(JsonStringLiteralSyntax key, JsonSyntaxNode value)
+        public JsonMapNodeKeyValuePair(JsonStringLiteralSyntax key, JsonValueSyntax value)
         {
             Key = key;
             Value = value;

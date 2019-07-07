@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public sealed class JsonBooleanLiteralSyntax : JsonSyntaxNode
+    public sealed class JsonBooleanLiteralSyntax : JsonValueSyntax
     {
         public bool Value { get; }
 

@@ -26,7 +26,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents an integer literal value syntax node.
     /// </summary>
-    public sealed class JsonIntegerLiteralSyntax : JsonSyntaxNode
+    public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax
     {
         public BigInteger Value { get; }
 

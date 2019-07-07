@@ -153,7 +153,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonSyntaxNode valueNode, string json)
+        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
@@ -222,7 +222,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="keyNode"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static ValueTypeErrorAtPropertyKey Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonSyntaxNode valueNode, string json)
+        public static ValueTypeErrorAtPropertyKey Create(ITypeErrorBuilder typeErrorBuilder, JsonStringLiteralSyntax keyNode, JsonValueSyntax valueNode, string json)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 

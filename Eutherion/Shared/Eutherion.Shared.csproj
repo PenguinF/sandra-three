@@ -62,12 +62,12 @@
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonSymbol.cs" />
     <Compile Include="Text\Json\JsonSymbolVisitor.cs" />
-    <Compile Include="Text\Json\JsonSyntaxNode.cs" />
     <Compile Include="Text\Json\JsonTokenizer.cs" />
     <Compile Include="Text\Json\JsonUndefinedValueSyntax.cs" />
     <Compile Include="Text\Json\JsonUnknownSymbol.cs" />
     <Compile Include="Text\Json\JsonUnterminatedMultiLineComment.cs" />
     <Compile Include="Text\Json\JsonValue.cs" />
+    <Compile Include="Text\Json\JsonValueSyntax.cs" />
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonWhitespace.cs" />
     <Compile Include="Text\TextElement.cs" />

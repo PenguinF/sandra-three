@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a missing value in a list. It has a length of 0.
     /// </summary>
-    public sealed class JsonMissingValueSyntax : JsonSyntaxNode
+    public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {
         public JsonMissingValueSyntax(int start)
             : base(start, 0)

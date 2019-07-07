@@ -26,11 +26,11 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a list syntax node.
     /// </summary>
-    public sealed class JsonListSyntax : JsonSyntaxNode
+    public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public IReadOnlyList<JsonSyntaxNode> ElementNodes { get; }
+        public IReadOnlyList<JsonValueSyntax> ElementNodes { get; }
 
-        public JsonListSyntax(IReadOnlyList<JsonSyntaxNode> elementNodes, int start, int length)
+        public JsonListSyntax(IReadOnlyList<JsonValueSyntax> elementNodes, int start, int length)
             : base(start, length)
             => ElementNodes = elementNodes;
 

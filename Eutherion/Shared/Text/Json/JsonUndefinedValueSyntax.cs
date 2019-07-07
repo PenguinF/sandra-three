@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a literal syntax node with an undefined or unsupported value.
     /// </summary>
-    public sealed class JsonUndefinedValueSyntax : JsonSyntaxNode
+    public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
     {
         public JsonUndefinedValueSyntax(JsonSymbol undefinedToken, int start)
             : base(start, undefinedToken.Length)

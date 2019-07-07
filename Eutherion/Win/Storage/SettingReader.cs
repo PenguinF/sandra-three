@@ -40,7 +40,7 @@ namespace Eutherion.Win.Storage
             tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
 
             JsonParser parser = new JsonParser(tokens, json);
-            bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
+            bool hasRootValue = parser.TryParse(out JsonValueSyntax rootNode, out errors);
 
             if (hasRootValue)
             {

@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node.
     /// </summary>
-    public sealed class JsonStringLiteralSyntax : JsonSyntaxNode
+    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
     {
         public string Value { get; }
 

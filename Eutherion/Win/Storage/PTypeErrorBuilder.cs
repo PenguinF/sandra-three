@@ -139,7 +139,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetValueDisplayString(JsonSyntaxNode valueNode, string json)
+        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
