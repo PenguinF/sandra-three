@@ -85,17 +85,19 @@ namespace Eutherion.Text.Json
                 int keyStart = CurrentLength;
                 JsonMultiValueSyntax multiKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
                 JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
-                bool gotKey = !(parsedKeyNode is JsonMissingValueSyntax);
 
+                // Analyze if this is an actual, unique property key.
+                int parsedKeyNodeStart = keyStart + multiKeyNode.ValueNode.BackgroundBefore.Length;
+                bool gotKey;
                 Maybe<JsonStringLiteralSyntax> validKey = Maybe<JsonStringLiteralSyntax>.Nothing;
 
-                if (gotKey)
+                switch (parsedKeyNode)
                 {
-                    // Analyze if this is an actual, unique property key.
-                    int parsedKeyNodeStart = keyStart + multiKeyNode.ValueNode.BackgroundBefore.Length;
-
-                    if (parsedKeyNode is JsonStringLiteralSyntax stringLiteral)
-                    {
+                    case JsonMissingValueSyntax _:
+                        gotKey = false;
+                        break;
+                    case JsonStringLiteralSyntax stringLiteral:
+                        gotKey = true;
                         string propertyKey = stringLiteral.Value;
 
                         // Expect unique keys.
@@ -113,14 +115,14 @@ namespace Eutherion.Text.Json
                                 // Take the substring, key may contain escape sequences.
                                 new[] { Json.Substring(parsedKeyNodeStart, parsedKeyNode.Length) }));
                         }
-                    }
-                    else
-                    {
+                        break;
+                    default:
+                        gotKey = true;
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
                             parsedKeyNodeStart,
                             parsedKeyNode.Length));
-                    }
+                        break;
                 }
 
                 // If gotValue remains false, a missing value error will be reported.
