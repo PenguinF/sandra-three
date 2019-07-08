@@ -86,7 +86,7 @@ namespace Eutherion.Text.Json
                         if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
                         {
                             int keyNodeStart = KeyValueNodePositions[i] + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                            int valueNodeStart = KeyValueNodePositions[i] + keyValueNode.ValueNodePositions[0] + multiValueNode.ValueNode.BackgroundBefore.Length;
+                            int valueNodeStart = KeyValueNodePositions[i] + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
 
                             yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                         }
