@@ -21,7 +21,6 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
-using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
@@ -62,7 +61,7 @@ namespace Eutherion.Win.AppTemplate
 
         public override (IEnumerable<JsonSymbol>, List<JsonErrorInfo>) Parse(string code)
         {
-            SettingReader.TryParse(code, schema, out _, out ReadOnlyList<JsonSymbol> tokens, out List<JsonErrorInfo> errors);
+            SettingReader.TryParse(code, schema, out _, out JsonMultiValueSyntax rootNode, out List<JsonErrorInfo> errors);
 
             if (errors.Count > 0)
             {
@@ -76,7 +75,7 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return (tokens, errors);
+            return (new JsonSymbolEnumerator(rootNode), errors);
         }
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)

@@ -160,32 +160,45 @@ namespace Eutherion.Win.Storage
             string json,
             JsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
+            int mapSyntaxStartPosition,
             List<JsonErrorInfo> errors)
         {
             var mapBuilder = new Dictionary<string, PValue>();
 
             // Analyze values with this schema while building the PMap.
-            foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
+            foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
             {
-                if (TryGetProperty(new SettingKey(keyedNode.Key.Value), out SettingProperty property))
+                if (TryGetProperty(new SettingKey(keyNode.Value), out SettingProperty property))
                 {
-                    var itemNode = keyedNode.Value;
-                    var valueOrError = property.TryCreateValue(json, itemNode, errors);
+                    var valueOrError = property.TryCreateValue(
+                        json,
+                        valueNode,
+                        mapSyntaxStartPosition + valueNodeStart,
+                        errors);
 
                     if (valueOrError.IsOption2(out PValue convertedItemValue))
                     {
-                        mapBuilder.Add(keyedNode.Key.Value, convertedItemValue);
+                        mapBuilder.Add(keyNode.Value, convertedItemValue);
                     }
                     else
                     {
                         valueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, itemNode, json));
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
+                            typeError,
+                            keyNode,
+                            valueNode,
+                            json,
+                            mapSyntaxStartPosition + keyNodeStart,
+                            mapSyntaxStartPosition + valueNodeStart));
                     }
                 }
                 else
                 {
                     // TODO: add error levels, this should probably be a warning.
-                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(keyedNode.Key, json));
+                    errors.Add(UnrecognizedPropertyKeyTypeError.Create(
+                        keyNode,
+                        json,
+                        mapSyntaxStartPosition + keyNodeStart));
                 }
             }
 

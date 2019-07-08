@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -26,47 +28,79 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a map syntax node.
     /// </summary>
-    public sealed class JsonMapSyntax : JsonSyntaxNode
+    public sealed class JsonMapSyntax : JsonValueSyntax
     {
-        public IReadOnlyList<JsonMapNodeKeyValuePair> MapNodeKeyValuePairs { get; }
+        public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
-        public JsonMapSyntax(IReadOnlyList<JsonMapNodeKeyValuePair> mapNodeKeyValuePairs, int start, int length)
-            : base(start, length)
-            => MapNodeKeyValuePairs = mapNodeKeyValuePairs;
+        private readonly int[] KeyValueNodePositions;
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
-    }
+        public bool MissingCurlyClose { get; }
 
-    /// <summary>
-    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
-    /// </summary>
-    public struct JsonMapNodeKeyValuePair
-    {
-        /// <summary>
-        /// Gets the syntax node containing the key of this <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        public JsonStringLiteralSyntax Key { get; }
+        public override int Length { get; }
 
-        /// <summary>
-        /// Gets the syntax node containing the value of this <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        public JsonSyntaxNode Value { get; }
-
-        /// <summary>
-        /// Initializes a new instance of a <see cref="JsonMapNodeKeyValuePair"/>.
-        /// </summary>
-        /// <param name="key">
-        /// The syntax node containing the key.
-        /// </param>
-        /// <param name="value">
-        /// The syntax node containing the value.
-        /// </param>
-        public JsonMapNodeKeyValuePair(JsonStringLiteralSyntax key, JsonSyntaxNode value)
+        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
-            Key = key;
-            Value = value;
+            KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
+
+            if (KeyValueNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(keyValueNodes)} cannot be empty", nameof(keyValueNodes));
+            }
+
+            MissingCurlyClose = missingCurlyClose;
+
+            // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
+            // The first iteration should be CurlyOpenLength rather than CommaLength.
+            int cumulativeLength = 0;
+            KeyValueNodePositions = new int[KeyValueNodes.Count];
+
+            for (int i = 0; i < KeyValueNodes.Count; i++)
+            {
+                cumulativeLength += JsonComma.CommaLength;
+                KeyValueNodePositions[i] = cumulativeLength;
+                cumulativeLength += KeyValueNodes[i].Length;
+            }
+
+            if (!missingCurlyClose)
+            {
+                cumulativeLength += JsonCurlyClose.CurlyCloseLength;
+            }
+
+            Length = cumulativeLength;
         }
+
+        public IEnumerable<(int, JsonStringLiteralSyntax, int, JsonValueSyntax)> ValidKeyValuePairs
+        {
+            get
+            {
+                for (int i = 0; i < KeyValueNodes.Count; i++)
+                {
+                    var keyValueNode = KeyValueNodes[i];
+
+                    if (keyValueNode.ValidKey.IsJust(out JsonStringLiteralSyntax stringLiteral) && keyValueNode.ValueNodes.Count > 0)
+                    {
+                        JsonMultiValueSyntax multiValueNode = keyValueNode.ValueNodes[0];
+
+                        // Only the first value can be valid, even if it's undefined.
+                        if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
+                        {
+                            int keyNodeStart = KeyValueNodePositions[i] + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                            int valueNodeStart = KeyValueNodePositions[i] + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
+
+                            yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the start position of an key-value node relative to the start position of this <see cref="JsonMapSyntax"/>.
+        /// </summary>
+        public int GetKeyValueNodeStart(int index) => KeyValueNodePositions[index];
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 }

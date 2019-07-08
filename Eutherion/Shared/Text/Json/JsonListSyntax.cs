@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -26,16 +28,73 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a list syntax node.
     /// </summary>
-    public sealed class JsonListSyntax : JsonSyntaxNode
+    public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public IReadOnlyList<JsonSyntaxNode> ElementNodes { get; }
+        public ReadOnlyList<JsonMultiValueSyntax> ElementNodes { get; }
 
-        public JsonListSyntax(IReadOnlyList<JsonSyntaxNode> elementNodes, int start, int length)
-            : base(start, length)
-            => ElementNodes = elementNodes;
+        private readonly int[] ElementNodePositions;
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+        public bool MissingSquareBracketClose { get; }
+
+        /// <summary>
+        /// Returns ElementNodes.Count, or one less if the last element is a JsonMissingValueSyntax.
+        /// </summary>
+        public int FilteredElementNodeCount
+        {
+            get
+            {
+                int count = ElementNodes.Count;
+
+                // Discard last item if it's a missing value, so that a trailing comma is ignored.
+                if (ElementNodes[count - 1].ValueNode.ContentNode is JsonMissingValueSyntax)
+                {
+                    return count - 1;
+                }
+
+                return count;
+            }
+        }
+
+        public override int Length { get; }
+
+        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> elementNodes, bool missingSquareBracketClose)
+        {
+            ElementNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(elementNodes);
+
+            if (ElementNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(elementNodes)} cannot be empty", nameof(elementNodes));
+            }
+
+            MissingSquareBracketClose = missingSquareBracketClose;
+
+            // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
+            // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
+            int cumulativeLength = 0;
+            ElementNodePositions = new int[ElementNodes.Count];
+
+            for (int i = 0; i < ElementNodes.Count; i++)
+            {
+                cumulativeLength += JsonComma.CommaLength;
+                ElementNodePositions[i] = cumulativeLength;
+                cumulativeLength += ElementNodes[i].Length;
+            }
+
+            if (!missingSquareBracketClose)
+            {
+                cumulativeLength += JsonSquareBracketClose.SquareBracketCloseLength;
+            }
+
+            Length = cumulativeLength;
+        }
+
+        /// <summary>
+        /// Gets the start position of an element node relative to the start position of this <see cref="JsonListSyntax"/>.
+        /// </summary>
+        public int GetElementNodeStart(int index) => ElementNodePositions[index];
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 }

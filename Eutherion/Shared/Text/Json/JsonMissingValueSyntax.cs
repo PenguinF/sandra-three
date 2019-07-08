@@ -24,15 +24,16 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a missing value in a list. It has a length of 0.
     /// </summary>
-    public sealed class JsonMissingValueSyntax : JsonSyntaxNode
+    public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {
-        public JsonMissingValueSyntax(int start)
-            : base(start, 0)
-        {
-        }
+        public static readonly JsonMissingValueSyntax Value = new JsonMissingValueSyntax();
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+        public override int Length => 0;
+
+        private JsonMissingValueSyntax() { }
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMissingValueSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 }

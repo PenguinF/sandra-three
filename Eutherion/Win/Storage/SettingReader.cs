@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text.Json;
-using Eutherion.Utils;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
@@ -34,31 +33,31 @@ namespace Eutherion.Win.Storage
             string json,
             SettingSchema schema,
             out SettingObject settingObject,
-            out ReadOnlyList<JsonSymbol> tokens,
+            out JsonMultiValueSyntax rootNode,
             out List<JsonErrorInfo> errors)
         {
-            tokens = ReadOnlyList<JsonSymbol>.Create(JsonTokenizer.TokenizeAll(json));
+            rootNode = new JsonParser(json).TryParse(out errors);
 
-            JsonParser parser = new JsonParser(tokens, json);
-            bool hasRootValue = parser.TryParse(out JsonSyntaxNode rootNode, out errors);
-
-            if (hasRootValue)
+            if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                if (schema.TryCreateValue(
-                    json,
-                    rootNode,
-                    out settingObject,
-                    errors).IsOption1(out ITypeErrorBuilder typeError))
-                {
-                    errors.Add(ValueTypeError.Create(typeError, rootNode, json));
-                    return false;
-                }
-
-                return true;
+                settingObject = default;
+                return false;
             }
 
-            settingObject = default;
-            return false;
+            int rootNodeStart = rootNode.ValueNode.BackgroundBefore.Length;
+
+            if (schema.TryCreateValue(
+                json,
+                rootNode.ValueNode.ContentNode,
+                out settingObject,
+                rootNodeStart,
+                errors).IsOption1(out ITypeErrorBuilder typeError))
+            {
+                errors.Add(ValueTypeError.Create(typeError, rootNode.ValueNode.ContentNode, json, rootNodeStart));
+                return false;
+            }
+
+            return true;
         }
     }
 }

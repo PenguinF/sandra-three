@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSyntaxNode.cs
+ * JsonValueSyntax.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -24,26 +24,15 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node in an abstract json syntax tree.
     /// </summary>
-    public abstract class JsonSyntaxNode
+    public abstract class JsonValueSyntax
     {
-        /// <summary>
-        /// Gets the start position of the text span corresponding with this node.
-        /// </summary>
-        public int Start { get; }
-
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public abstract int Length { get; }
 
-        protected JsonSyntaxNode(int start, int length)
-        {
-            Start = start;
-            Length = length;
-        }
-
-        public abstract void Accept(JsonSyntaxNodeVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg);
+        public abstract void Accept(JsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }

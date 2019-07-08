@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
             => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
 
-        public IEnumerable<JsonErrorInfo> Errors { get; }
+        public ReadOnlyList<JsonErrorInfo> Errors { get; }
 
         public override int Length { get; }
 
@@ -77,14 +78,14 @@ namespace Eutherion.Text.Json
         {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
         public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
         {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-            Errors = errors.ToArrayEx();
+            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorString(this);

@@ -24,10 +24,11 @@ namespace Eutherion.Text.Json
     public class JsonCurlyClose : JsonSymbol
     {
         public const char CurlyCloseCharacter = '}';
+        public const int CurlyCloseLength = 1;
 
         public static readonly JsonCurlyClose Value = new JsonCurlyClose();
 
-        public override int Length => 1;
+        public override int Length => CurlyCloseLength;
 
         private JsonCurlyClose() { }
 

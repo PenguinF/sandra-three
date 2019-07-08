@@ -25,22 +25,32 @@ namespace Eutherion.Text.Json
 {
     public class JsonValue : JsonSymbol
     {
-        public static readonly string True = "true";
-        public static readonly string False = "false";
+        public const int FalseSymbolLength = 5;
+        public const int TrueSymbolLength = 4;
 
-        public static string BoolSymbol(bool boolValue) => boolValue ? True : False;
+        public static readonly string False = "false";
+        public static readonly string True = "true";
+
+        public static readonly JsonValue FalseJsonValue = new JsonValue(False);
+        public static readonly JsonValue TrueJsonValue = new JsonValue(True);
+
+        public static JsonValue BoolJsonValue(bool boolValue) => boolValue ? TrueJsonValue : FalseJsonValue;
+
+        public static JsonValue Create(string value)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
+
+            return value == False ? FalseJsonValue
+                : value == True ? TrueJsonValue
+                : new JsonValue(value);
+        }
 
         public string Value { get; }
 
         public override bool IsValueStartSymbol => true;
-        public override int Length { get; }
+        public override int Length => Value.Length;
 
-        public JsonValue(string value, int length)
-        {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-            Length = length;
-        }
+        private JsonValue(string value) => Value = value;
 
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);

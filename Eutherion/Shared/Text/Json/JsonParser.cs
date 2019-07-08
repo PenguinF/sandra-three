@@ -19,9 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -30,90 +32,103 @@ namespace Eutherion.Text.Json
     /// Represents a single parse of a list of json tokens.
     /// </summary>
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
-    public class JsonParser : JsonSymbolVisitor<(JsonSyntaxNode, bool)>
+    public class JsonParser : JsonSymbolVisitor<(JsonValueSyntax, bool)>
     {
         private readonly IEnumerator<JsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
+        private readonly List<JsonSymbol> BackgroundBuilder = new List<JsonSymbol>();
 
         private JsonSymbol CurrentToken;
+
+        // Used for parse error reporting.
         private int CurrentLength;
 
-        public JsonParser(IEnumerable<JsonSymbol> tokens, string json)
+        public JsonParser(string json)
         {
-            if (tokens == null) throw new ArgumentNullException(nameof(tokens));
-            Tokens = tokens.GetEnumerator();
-            Json = json;
+            Json = json ?? throw new ArgumentNullException(nameof(json));
+            Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
         }
 
         private void ShiftToNextForegroundToken()
         {
             // Skip comments until encountering something meaningful.
-            do
+            for (; ; )
             {
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
-                if (CurrentToken != null)
-                {
-                    Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
-                    CurrentLength += CurrentToken.Length;
-                }
+                if (CurrentToken == null) break;
+
+                Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
+                CurrentLength += CurrentToken.Length;
+                if (!CurrentToken.IsBackground) break;
+                BackgroundBuilder.Add(CurrentToken);
             }
-            while (CurrentToken != null && CurrentToken.IsBackground);
         }
 
-        public override (JsonSyntaxNode, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+        private JsonBackgroundSyntax CaptureBackground()
         {
-            int start = CurrentLength - curlyOpen.Length;
-            var mapBuilder = new List<JsonMapNodeKeyValuePair>();
+            var background = JsonBackgroundSyntax.Create(BackgroundBuilder);
+            BackgroundBuilder.Clear();
+            return background;
+        }
+
+        public override (JsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+        {
+            var mapBuilder = new List<JsonKeyValueSyntax>();
+            var keyValueSyntaxBuilder = new List<JsonMultiValueSyntax>();
 
             // Maintain a separate set of keys to aid error reporting on duplicate keys.
             HashSet<string> foundKeys = new HashSet<string>();
 
             for (; ; )
             {
-                bool gotKey = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys, out JsonSyntaxNode parsedKeyNode);
+                int keyStart = CurrentLength;
+                JsonMultiValueSyntax multiKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
+                JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
 
-                bool validKey = false;
-                JsonStringLiteralSyntax propertyKeyNode = default;
+                // Analyze if this is an actual, unique property key.
+                int parsedKeyNodeStart = keyStart + multiKeyNode.ValueNode.BackgroundBefore.Length;
+                bool gotKey;
+                Maybe<JsonStringLiteralSyntax> validKey = Maybe<JsonStringLiteralSyntax>.Nothing;
 
-                if (gotKey)
+                switch (parsedKeyNode)
                 {
-                    // Analyze if this is an actual, unique property key.
-                    if (parsedKeyNode is JsonStringLiteralSyntax stringLiteral)
-                    {
-                        propertyKeyNode = stringLiteral;
+                    case JsonMissingValueSyntax _:
+                        gotKey = false;
+                        break;
+                    case JsonStringLiteralSyntax stringLiteral:
+                        gotKey = true;
                         string propertyKey = stringLiteral.Value;
 
                         // Expect unique keys.
-                        validKey = !foundKeys.Contains(propertyKey);
-
-                        if (validKey)
+                        if (!foundKeys.Contains(propertyKey))
                         {
+                            validKey = stringLiteral;
                             foundKeys.Add(propertyKey);
                         }
                         else
                         {
                             Errors.Add(new JsonErrorInfo(
                                 JsonErrorCode.PropertyKeyAlreadyExists,
-                                parsedKeyNode.Start,
+                                parsedKeyNodeStart,
                                 parsedKeyNode.Length,
                                 // Take the substring, key may contain escape sequences.
-                                new[] { Json.Substring(parsedKeyNode.Start, parsedKeyNode.Length) }));
+                                new[] { Json.Substring(parsedKeyNodeStart, parsedKeyNode.Length) }));
                         }
-                    }
-                    else
-                    {
+                        break;
+                    default:
+                        gotKey = true;
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.InvalidPropertyKey,
-                            parsedKeyNode.Start,
+                            parsedKeyNodeStart,
                             parsedKeyNode.Length));
-                    }
+                        break;
                 }
 
-                // If gotValue remains false, a missing value error will be reported.
-                bool gotValue = false;
+                // Reuse keyValueSyntaxBuilder.
+                keyValueSyntaxBuilder.Clear();
 
-                // Loop parsing values until encountering a non ':'.
+                // Keep parsing multi-values until encountering a non ':'.
                 bool gotColon = false;
                 while (CurrentToken is JsonColon)
                 {
@@ -125,18 +140,23 @@ namespace Eutherion.Text.Json
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
-
-                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                    gotValue |= ParseMultiValue(JsonErrorCode.MultipleValues, out JsonSyntaxNode parsedValueNode);
-
-                    // Only the first value can be valid, even if it's undefined.
-                    if (validKey && !gotColon && gotValue)
+                    else
                     {
-                        mapBuilder.Add(new JsonMapNodeKeyValuePair(propertyKeyNode, parsedValueNode));
+                        gotColon = true;
                     }
 
-                    gotColon = true;
+                    // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
+                    // Always add the GreenJsonMissingValueSyntax, because it may contain background symbols.
+                    keyValueSyntaxBuilder.Add(ParseMultiValue(JsonErrorCode.MultipleValues));
                 }
+
+                // One key-value section done.
+                var jsonKeyValueSyntax = new JsonKeyValueSyntax(
+                    multiKeyNode,
+                    validKey,
+                    keyValueSyntaxBuilder);
+
+                mapBuilder.Add(jsonKeyValueSyntax);
 
                 bool isComma = CurrentToken is JsonComma;
                 bool isCurlyClose = CurrentToken is JsonCurlyClose;
@@ -154,7 +174,10 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    if (!gotValue)
+                    // Report missing value error from being reported if all value sections are empty.
+                    // Example: { "key1":: 2, "key2": , }
+                    // The first section does not report a missing value, the second section does.
+                    if (jsonKeyValueSyntax.ValueNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
@@ -167,108 +190,95 @@ namespace Eutherion.Text.Json
                 {
                     // Assume missing closing bracket '}' on EOF or control symbol.
                     bool unprocessedToken = false;
-                    int endPosition;
                     if (CurrentToken == null)
                     {
-                        endPosition = CurrentLength;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
-                            endPosition,
+                            CurrentLength,
                             0));
                     }
-                    else if (isCurlyClose)
-                    {
-                        endPosition = CurrentLength;
-                    }
-                    else
+                    else if (!isCurlyClose)
                     {
                         // ']'
+                        // Do not include the control symbol in the map.
                         unprocessedToken = true;
-                        endPosition = CurrentLength - CurrentToken.Length;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInObject,
-                            endPosition,
+                            CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    int length = endPosition - start;
-                    return (new JsonMapSyntax(mapBuilder, start, length), unprocessedToken);
+                    return (new JsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), unprocessedToken);
                 }
             }
         }
 
-        public override (JsonSyntaxNode, bool) VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
+        public override (JsonValueSyntax, bool) VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
         {
-            int start = CurrentLength - bracketOpen.Length;
-            List<JsonSyntaxNode> listBuilder = new List<JsonSyntaxNode>();
+            var listBuilder = new List<JsonMultiValueSyntax>();
 
             for (; ; )
             {
-                bool gotValue = ParseMultiValue(JsonErrorCode.MultipleValues, out JsonSyntaxNode parsedValueNode);
+                JsonMultiValueSyntax parsedValueNode = ParseMultiValue(JsonErrorCode.MultipleValues);
 
-                if (gotValue) listBuilder.Add(parsedValueNode);
+                // Always add each value, because it may contain background symbols.
+                listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
                 if (CurrentToken is JsonComma)
                 {
-                    if (!gotValue)
+                    if (parsedValueNode.ValueNode.ContentNode is JsonMissingValueSyntax)
                     {
                         // Two commas or '[,'.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
-
-                        listBuilder.Add(new JsonMissingValueSyntax(CurrentLength - CurrentToken.Length));
                     }
                 }
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
+                    bool missingSquareBracketClose = true;
                     bool unprocessedToken = false;
-                    int endPosition;
                     if (CurrentToken == null)
                     {
-                        endPosition = CurrentLength;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
-                            endPosition,
+                            CurrentLength,
                             0));
                     }
                     else if (CurrentToken is JsonSquareBracketClose)
                     {
-                        endPosition = CurrentLength;
+                        missingSquareBracketClose = false;
                     }
                     else
                     {
                         // ':', '}'
+                        // Do not include the control symbol in the list.
                         unprocessedToken = true;
-                        endPosition = CurrentLength - CurrentToken.Length;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInArray,
-                            endPosition,
+                            CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    int length = endPosition - start;
-                    return (new JsonListSyntax(listBuilder, start, length), unprocessedToken);
+                    return (new JsonListSyntax(listBuilder, missingSquareBracketClose), unprocessedToken);
                 }
             }
         }
 
-        public override (JsonSyntaxNode, bool) VisitValue(JsonValue symbol)
+        public override (JsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            string value = symbol.Value;
-            if (value == JsonValue.True) return (new JsonBooleanLiteralSyntax(symbol, true, CurrentLength - symbol.Length), false);
-            if (value == JsonValue.False) return (new JsonBooleanLiteralSyntax(symbol, false, CurrentLength - symbol.Length), false);
+            if (symbol == JsonValue.FalseJsonValue) return (JsonBooleanLiteralSyntax.False.Instance, false);
+            if (symbol == JsonValue.TrueJsonValue) return (JsonBooleanLiteralSyntax.True.Instance, false);
 
+            string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
-                return (new JsonIntegerLiteralSyntax(symbol, integerValue, CurrentLength - symbol.Length), false);
+                return (new JsonIntegerLiteralSyntax(symbol, integerValue), false);
             }
 
             Errors.Add(new JsonErrorInfo(
@@ -277,29 +287,38 @@ namespace Eutherion.Text.Json
                 symbol.Length,
                 new[] { value }));
 
-            return (new JsonUndefinedValueSyntax(symbol, CurrentLength - symbol.Length), false);
+            return (new JsonUndefinedValueSyntax(symbol), false);
         }
 
-        public override (JsonSyntaxNode, bool) VisitString(JsonString symbol)
-            => (new JsonStringLiteralSyntax(symbol, CurrentLength - symbol.Length), false);
+        public override (JsonValueSyntax, bool) VisitString(JsonString symbol)
+            => (new JsonStringLiteralSyntax(symbol), false);
 
-        private bool ParseMultiValue(JsonErrorCode multipleValuesErrorCode,
-                                     out JsonSyntaxNode firstValueNode)
+        private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
-            firstValueNode = null;
-
             ShiftToNextForegroundToken();
-            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return false;
+
+            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+            {
+                return new JsonMultiValueSyntax(
+                    new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value),
+                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
+                    JsonBackgroundSyntax.Empty);
+            }
+
+            JsonValueWithBackgroundSyntax firstValueNode = null;
+            var ignoredNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
             for (; ; )
             {
-                // Make sure consecutive values are all parsed as if they were valid.
-                // Interpret the first, discard the rest.
-                JsonSyntaxNode currentNode;
+                // Always create a value node, then decide if it must be ignored.
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+
+                JsonValueSyntax currentNode;
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
                 {
-                    currentNode = new JsonUndefinedValueSyntax(CurrentToken, CurrentLength - CurrentToken.Length);
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
                 }
                 else
@@ -307,19 +326,41 @@ namespace Eutherion.Text.Json
                     (currentNode, unprocessedToken) = Visit(CurrentToken);
                 }
 
+                var currentNodeWithBackgroundBefore = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
                 if (firstValueNode == null)
                 {
-                    firstValueNode = currentNode;
+                    firstValueNode = currentNodeWithBackgroundBefore;
+                }
+                else
+                {
+                    // Ignore this node.
+                    ignoredNodesBuilder.Add(currentNodeWithBackgroundBefore);
                 }
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null) return true;
+                if (CurrentToken == null)
+                {
+                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                    // This means that here there's no need to capture the background.
+                    return new JsonMultiValueSyntax(
+                        firstValueNode,
+                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
+                        JsonBackgroundSyntax.Empty);
+                }
 
                 // Move to the next symbol if CurrentToken was processed.
                 if (!unprocessedToken) ShiftToNextForegroundToken();
 
                 // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol) return true;
+                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+                {
+                    // Capture the background following the last value.
+                    var backgroundAfter = CaptureBackground();
+                    return new JsonMultiValueSyntax(
+                        firstValueNode,
+                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
+                        backgroundAfter);
+                }
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
@@ -329,9 +370,9 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public bool TryParse(out JsonSyntaxNode rootNode, out List<JsonErrorInfo> errors)
+        public JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
         {
-            bool hasRootValue = ParseMultiValue(JsonErrorCode.ExpectedEof, out rootNode);
+            JsonMultiValueSyntax multiValueNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
 
             if (CurrentToken != null)
             {
@@ -342,7 +383,8 @@ namespace Eutherion.Text.Json
             }
 
             errors = Errors;
-            return hasRootValue;
+
+            return multiValueNode;
         }
     }
 }

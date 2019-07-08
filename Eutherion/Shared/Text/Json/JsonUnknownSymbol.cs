@@ -26,6 +26,8 @@ namespace Eutherion.Text.Json
 {
     public class JsonUnknownSymbol : JsonSymbol
     {
+        public const int UnknownSymbolLength = 1;
+
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
         /// </summary>
@@ -36,7 +38,7 @@ namespace Eutherion.Text.Json
 
         public override bool IsValueStartSymbol => true;
 
-        public override int Length => 1;
+        public override int Length => UnknownSymbolLength;
 
         public override bool HasErrors => true;
 

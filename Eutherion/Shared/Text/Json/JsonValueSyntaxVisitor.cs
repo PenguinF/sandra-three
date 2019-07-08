@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSyntaxNodeVisitor.cs
+ * JsonValueSyntaxVisitor.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -22,13 +22,13 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
+    /// Represents a visitor that visits a single <see cref="JsonValueSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor
+    public abstract class JsonValueSyntaxVisitor
     {
-        public virtual void DefaultVisit(JsonSyntaxNode node) { }
-        public virtual void Visit(JsonSyntaxNode node) { if (node != null) node.Accept(this); }
+        public virtual void DefaultVisit(JsonValueSyntax node) { }
+        public virtual void Visit(JsonValueSyntax node) { if (node != null) node.Accept(this); }
         public virtual void VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitListSyntax(JsonListSyntax node) => DefaultVisit(node);
@@ -39,13 +39,13 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
+    /// Represents a visitor that visits a single <see cref="JsonValueSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor<TResult>
+    public abstract class JsonValueSyntaxVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntaxNode node) => default;
-        public virtual TResult Visit(JsonSyntaxNode node) => node == null ? default : node.Accept(this);
+        public virtual TResult DefaultVisit(JsonValueSyntax node) => default;
+        public virtual TResult Visit(JsonValueSyntax node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitListSyntax(JsonListSyntax node) => DefaultVisit(node);
@@ -56,13 +56,13 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a single <see cref="JsonSyntaxNode"/>.
+    /// Represents a visitor that visits a single <see cref="JsonValueSyntax"/>.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
-    public abstract class JsonSyntaxNodeVisitor<T, TResult>
+    public abstract class JsonValueSyntaxVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntaxNode node, T arg) => default;
-        public virtual TResult Visit(JsonSyntaxNode node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult DefaultVisit(JsonValueSyntax node, T arg) => default;
+        public virtual TResult Visit(JsonValueSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitListSyntax(JsonListSyntax node, T arg) => DefaultVisit(node, arg);

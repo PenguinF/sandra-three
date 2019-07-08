@@ -109,19 +109,22 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="keyNode"/> is based.
         /// </param>
+        /// <param name="keyNodeStart">
+        /// The start position of the key node in the source json.
+        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json)
+        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
         {
             if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
 
             // Do a Substring rather than keyNode.Value because the property key may contain escaped characters.
-            return json.Substring(keyNode.Start, keyNode.Length);
+            return json.Substring(keyNodeStart, keyNode.Length);
         }
 
         /// <summary>
@@ -133,13 +136,16 @@ namespace Eutherion.Win.Storage
         /// <param name="json">
         /// The source json on which the <paramref name="valueNode"/> is based.
         /// </param>
+        /// <param name="valueNodeStart">
+        /// The start position of the value node in the source json.
+        /// </param>
         /// <returns>
         /// The display string.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetValueDisplayString(JsonSyntaxNode valueNode, string json)
+        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json, int valueNodeStart)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
@@ -159,27 +165,27 @@ namespace Eutherion.Win.Storage
                     if (valueNode.Length <= maxLength)
                     {
                         // QuoteStringValue not necessary, already quoted.
-                        return json.Substring(valueNode.Start, valueNode.Length);
+                        return json.Substring(valueNodeStart, valueNode.Length);
                     }
                     else
                     {
                         // Remove quotes, add ellipsis to inner string value, then quote again.
                         return QuoteStringValue(
-                            json.Substring(valueNode.Start + 1, halfLength - 1)
+                            json.Substring(valueNodeStart + 1, halfLength - 1)
                             + ellipsis
-                            + json.Substring(valueNode.Start + valueNode.Length - halfLength + 1, halfLength - 1));
+                            + json.Substring(valueNodeStart + valueNode.Length - halfLength + 1, halfLength - 1));
                     }
                 default:
                     if (valueNode.Length <= maxLength)
                     {
-                        return QuoteValue(json.Substring(valueNode.Start, valueNode.Length));
+                        return QuoteValue(json.Substring(valueNodeStart, valueNode.Length));
                     }
                     else
                     {
                         return QuoteValue(
-                            json.Substring(valueNode.Start, halfLength)
+                            json.Substring(valueNodeStart, halfLength)
                             + ellipsis
-                            + json.Substring(valueNode.Start + valueNode.Length - halfLength, halfLength));
+                            + json.Substring(valueNodeStart + valueNode.Length - halfLength, halfLength));
                     }
             }
         }

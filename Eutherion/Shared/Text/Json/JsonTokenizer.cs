@@ -119,11 +119,11 @@ namespace Eutherion.Text.Json
                     {
                         if (inSymbolClass == symbolClassValueChar)
                         {
-                            yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
+                            yield return JsonValue.Create(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
                         }
                         else
                         {
-                            yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
+                            yield return JsonWhitespace.Create(currentIndex - firstUnusedIndex);
                         }
 
                         firstUnusedIndex = currentIndex;
@@ -197,11 +197,11 @@ namespace Eutherion.Text.Json
             {
                 if (inSymbolClass == symbolClassValueChar)
                 {
-                    yield return new JsonValue(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex), currentIndex - firstUnusedIndex);
+                    yield return JsonValue.Create(json.Substring(firstUnusedIndex, currentIndex - firstUnusedIndex));
                 }
                 else
                 {
-                    yield return new JsonWhitespace(currentIndex - firstUnusedIndex);
+                    yield return JsonWhitespace.Create(currentIndex - firstUnusedIndex);
                 }
             }
 

@@ -35,13 +35,14 @@ namespace Eutherion.Win.Storage
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                JsonSyntaxNode valueNode,
+                JsonValueSyntax valueNode,
                 out T convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 if (valueNode is JsonMapSyntax jsonMapSyntax)
                 {
-                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, errors);
+                    return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, valueNodeStartPosition, errors);
                 }
 
                 convertedValue = default;
@@ -52,6 +53,7 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
+                int valueNodeStartPosition,
                 List<JsonErrorInfo> errors);
 
             public sealed override Maybe<T> TryConvert(PValue value)
@@ -79,24 +81,37 @@ namespace Eutherion.Win.Storage
                 string json,
                 JsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
+                int mapSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
             {
                 var dictionary = new Dictionary<string, T>();
                 var mapBuilder = new Dictionary<string, PValue>();
 
-                foreach (var keyedNode in jsonMapSyntax.MapNodeKeyValuePairs)
+                foreach (var (keyNodeStart, keyNode, valueNodeStart, valueNode) in jsonMapSyntax.ValidKeyValuePairs)
                 {
                     // Error tolerance: ignore items of the wrong type.
-                    var itemValueOrError = ItemType.TryCreateValue(json, keyedNode.Value, out T value, errors);
+                    var itemValueOrError = ItemType.TryCreateValue(
+                        json,
+                        valueNode,
+                        out T value,
+                        mapSyntaxStartPosition + valueNodeStart,
+                        errors);
+
                     if (itemValueOrError.IsOption2(out PValue itemValue))
                     {
-                        dictionary.Add(keyedNode.Key.Value, value);
-                        mapBuilder.Add(keyedNode.Key.Value, itemValue);
+                        dictionary.Add(keyNode.Value, value);
+                        mapBuilder.Add(keyNode.Value, itemValue);
                     }
                     else
                     {
                         itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
-                        errors.Add(ValueTypeErrorAtPropertyKey.Create(typeError, keyedNode.Key, keyedNode.Value, json));
+                        errors.Add(ValueTypeErrorAtPropertyKey.Create(
+                            typeError,
+                            keyNode,
+                            valueNode,
+                            json,
+                            mapSyntaxStartPosition + keyNodeStart,
+                            mapSyntaxStartPosition + valueNodeStart));
                     }
                 }
 

@@ -24,16 +24,18 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node.
     /// </summary>
-    public sealed class JsonStringLiteralSyntax : JsonSyntaxNode
+    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
     {
-        public string Value { get; }
+        public JsonString StringToken { get; }
 
-        public JsonStringLiteralSyntax(JsonString stringToken, int start)
-            : base(start, stringToken.Length)
-            => Value = stringToken.Value;
+        public string Value => StringToken.Value;
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+        public override int Length => StringToken.Length;
+
+        public JsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 }

@@ -24,10 +24,11 @@ namespace Eutherion.Text.Json
     public class JsonComma : JsonSymbol
     {
         public const char CommaCharacter = ',';
+        public const int CommaLength = 1;
 
         public static readonly JsonComma Value = new JsonComma();
 
-        public override int Length => 1;
+        public override int Length => CommaLength;
 
         private JsonComma() { }
 

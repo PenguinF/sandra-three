@@ -19,21 +19,60 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public sealed class JsonBooleanLiteralSyntax : JsonSyntaxNode
+    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
     {
-        public bool Value { get; }
+        public sealed class False : JsonBooleanLiteralSyntax
+        {
+            public static False Instance = new False();
 
-        public JsonBooleanLiteralSyntax(JsonSymbol booleanToken, bool value, int start)
-            : base(start, booleanToken.Length)
-            => Value = value;
+            private False() { }
 
-        public override void Accept(JsonSyntaxNodeVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonSyntaxNodeVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSyntaxNodeVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+            public override bool Value => false;
+
+            public override JsonSymbol BooleanToken => JsonValue.FalseJsonValue;
+
+            /// <summary>
+            /// Gets the length of the text span corresponding with this node.
+            /// </summary>
+            public override int Length => JsonValue.FalseSymbolLength;
+
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse();
+        }
+
+        public sealed class True : JsonBooleanLiteralSyntax
+        {
+            public static readonly True Instance = new True();
+
+            private True() { }
+
+            public override bool Value => true;
+
+            public override JsonSymbol BooleanToken => JsonValue.TrueJsonValue;
+
+            /// <summary>
+            /// Gets the length of the text span corresponding with this node.
+            /// </summary>
+            public override int Length => JsonValue.TrueSymbolLength;
+
+            public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenTrue();
+        }
+
+        public abstract bool Value { get; }
+        public abstract JsonSymbol BooleanToken { get; }
+
+        private JsonBooleanLiteralSyntax() { }
+
+        public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 }

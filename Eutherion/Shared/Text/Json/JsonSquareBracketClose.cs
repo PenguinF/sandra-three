@@ -24,10 +24,11 @@ namespace Eutherion.Text.Json
     public class JsonSquareBracketClose : JsonSymbol
     {
         public const char SquareBracketCloseCharacter = ']';
+        public const int SquareBracketCloseLength = 1;
 
         public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
 
-        public override int Length => 1;
+        public override int Length => SquareBracketCloseLength;
 
         private JsonSquareBracketClose() { }
 
