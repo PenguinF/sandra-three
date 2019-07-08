@@ -78,9 +78,7 @@ namespace Eutherion.Text.Json
         {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
-
-            if (errors == null) throw new ArgumentNullException(nameof(errors));
-            Errors = ReadOnlyList<JsonErrorInfo>.DangerousCreateFromArray(errors);
+            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
         public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
