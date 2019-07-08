@@ -47,7 +47,7 @@ namespace Eutherion.Win.Storage
                 JsonValueSyntax itemNode = jsonListSyntax.ElementNodes[itemIndex].ValueNode.ContentNode;
 
                 int itemNodeStart = listSyntaxStartPosition
-                                  + jsonListSyntax.NodePositions[itemIndex]
+                                  + jsonListSyntax.GetElementNodeStart(itemIndex)
                                   + jsonListSyntax.ElementNodes[itemIndex].ValueNode.BackgroundBefore.Length;
 
                 return itemType.TryCreateValue(
