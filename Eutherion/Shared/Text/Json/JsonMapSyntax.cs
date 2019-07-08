@@ -32,7 +32,7 @@ namespace Eutherion.Text.Json
     {
         public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
 
-        public ReadOnlyList<int> KeyValueNodePositions { get; }
+        private readonly int[] KeyValueNodePositions;
 
         public bool MissingCurlyClose { get; }
 
@@ -52,12 +52,12 @@ namespace Eutherion.Text.Json
             // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
             // The first iteration should be CurlyOpenLength rather than CommaLength.
             int cumulativeLength = 0;
-            int[] keyValueNodePositions = new int[KeyValueNodes.Count];
+            KeyValueNodePositions = new int[KeyValueNodes.Count];
 
             for (int i = 0; i < KeyValueNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
-                keyValueNodePositions[i] = cumulativeLength;
+                KeyValueNodePositions[i] = cumulativeLength;
                 cumulativeLength += KeyValueNodes[i].Length;
             }
 
@@ -66,7 +66,6 @@ namespace Eutherion.Text.Json
                 cumulativeLength += JsonCurlyClose.CurlyCloseLength;
             }
 
-            KeyValueNodePositions = ReadOnlyList<int>.DangerousCreateFromArray(keyValueNodePositions);
             Length = cumulativeLength;
         }
 
@@ -94,6 +93,11 @@ namespace Eutherion.Text.Json
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the start position of an key-value node relative to the start position of this <see cref="JsonMapSyntax"/>.
+        /// </summary>
+        public int GetKeyValueNodeStart(int index) => KeyValueNodePositions[index];
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
