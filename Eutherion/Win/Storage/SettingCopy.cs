@@ -185,19 +185,21 @@ namespace Eutherion.Win.Storage
         /// </summary>
         internal List<JsonErrorInfo> TryLoadFromText(string json)
         {
-            if (SettingReader.TryParse(json, Schema, out SettingObject settingObject, out _, out List<JsonErrorInfo> errors))
+            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(json, Schema);
+
+            if (settingSyntaxTree.SettingObject != null)
             {
                 // Error tolerance:
                 // 1) Even if there are errors, still load the map.
                 // 2) Don't clear the existing settings, only overwrite them.
                 //    The map might not contain all expected properties.
-                foreach (var kv in settingObject.Map)
+                foreach (var kv in settingSyntaxTree.SettingObject.Map)
                 {
                     KeyValueMapping[kv.Key] = kv.Value;
                 }
             }
 
-            return errors;
+            return settingSyntaxTree.Errors;
         }
     }
 }

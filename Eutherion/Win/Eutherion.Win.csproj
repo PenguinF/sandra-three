@@ -86,10 +86,10 @@
     <Compile Include="Storage\SettingKey.cs" />
     <Compile Include="Storage\SettingObject.cs" />
     <Compile Include="Storage\SettingProperty.cs" />
-    <Compile Include="Storage\SettingReader.cs" />
     <Compile Include="Storage\SettingsAutoSave.cs" />
     <Compile Include="Storage\SettingSchema.cs" />
     <Compile Include="Storage\SettingsFile.cs" />
+    <Compile Include="Storage\SettingSyntaxTree.cs" />
     <Compile Include="Storage\SettingWriter.cs" />
     <Compile Include="Storage\SubFolderNameType.cs" />
     <Compile Include="UIActions\UIActionBindings.cs" />

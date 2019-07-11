@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * SettingReader.cs
+ * SettingSyntaxTree.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -25,23 +25,17 @@ using System.Collections.Generic;
 namespace Eutherion.Win.Storage
 {
     /// <summary>
-    /// Temporary class which parses a list of <see cref="JsonSymbol"/>s directly into a <see cref="PValue"/> result.
+    /// Represents the result of parsing json and type-checking it against a <see cref="SettingSchema"/>.
     /// </summary>
-    public static class SettingReader
+    public class SettingSyntaxTree
     {
-        public static bool TryParse(
-            string json,
-            SettingSchema schema,
-            out SettingObject settingObject,
-            out JsonMultiValueSyntax rootNode,
-            out List<JsonErrorInfo> errors)
+        public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
-            rootNode = new JsonParser(json).TryParse(out errors);
+            JsonMultiValueSyntax rootNode = new JsonParser(json).TryParse(out List<JsonErrorInfo> errors);
 
             if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                settingObject = default;
-                return false;
+                return new SettingSyntaxTree(rootNode, errors, null);
             }
 
             int rootNodeStart = rootNode.ValueNode.BackgroundBefore.Length;
@@ -49,15 +43,26 @@ namespace Eutherion.Win.Storage
             if (schema.TryCreateValue(
                 json,
                 rootNode.ValueNode.ContentNode,
-                out settingObject,
+                out SettingObject settingObject,
                 rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
                 errors.Add(ValueTypeError.Create(typeError, rootNode.ValueNode.ContentNode, json, rootNodeStart));
-                return false;
+                return new SettingSyntaxTree(rootNode, errors, null);
             }
 
-            return true;
+            return new SettingSyntaxTree(rootNode, errors, settingObject);
+        }
+
+        public JsonMultiValueSyntax JsonRootNode { get; }
+        public List<JsonErrorInfo> Errors { get; }
+        public SettingObject SettingObject { get; }
+
+        public SettingSyntaxTree(JsonMultiValueSyntax jsonRootNode, List<JsonErrorInfo> errors, SettingObject settingObject)
+        {
+            JsonRootNode = jsonRootNode;
+            Errors = errors;
+            SettingObject = settingObject;
         }
     }
 }

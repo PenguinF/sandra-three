@@ -61,7 +61,8 @@ namespace Eutherion.Win.AppTemplate
 
         public override (IEnumerable<JsonSymbol>, List<JsonErrorInfo>) Parse(string code)
         {
-            SettingReader.TryParse(code, schema, out _, out JsonMultiValueSyntax rootNode, out List<JsonErrorInfo> errors);
+            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
+            var errors = settingSyntaxTree.Errors;
 
             if (errors.Count > 0)
             {
@@ -75,7 +76,7 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return (new JsonSymbolEnumerator(rootNode), errors);
+            return (new JsonSymbolEnumerator(settingSyntaxTree.JsonRootNode), errors);
         }
 
         public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
