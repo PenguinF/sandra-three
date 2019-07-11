@@ -48,14 +48,12 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the list of value section nodes separated by colon characters.
         /// </summary>
-        public ReadOnlyList<JsonMultiValueSyntax> ValueSectionNodes { get; }
-
-        private readonly int[] ValueNodePositions;
+        public ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
         /// </summary>
-        public int Length { get; }
+        public int Length => ValueSectionNodes.Length;
 
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonKeyValueSyntax"/>.
@@ -75,35 +73,21 @@ namespace Eutherion.Text.Json
         public JsonKeyValueSyntax(Maybe<JsonStringLiteralSyntax> validKey, IEnumerable<JsonMultiValueSyntax> valueSectionNodes)
         {
             ValidKey = validKey ?? throw new ArgumentNullException(nameof(validKey));
-            ValueSectionNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueSectionNodes);
+            ValueSectionNodes = ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
 
             if (ValueSectionNodes.Count == 0)
             {
                 throw new ArgumentException($"{nameof(valueSectionNodes)} cannot be empty", nameof(valueSectionNodes));
             }
 
-            JsonMultiValueSyntax keyNode = ValueSectionNodes[0];
-
             // If a valid key node is given, the node must always be equal to keyNode.ValueNode.Node.
             if (validKey.IsJust(out JsonStringLiteralSyntax validKeyNode)
-                && validKeyNode != keyNode.ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
-
-            int cumulativeLength = keyNode.Length;
-            ValueNodePositions = new int[ValueSectionNodes.Count - 1];
-
-            for (int i = 1; i < ValueSectionNodes.Count; i++)
-            {
-                cumulativeLength += JsonColon.ColonLength;
-                ValueNodePositions[i - 1] = cumulativeLength;
-                cumulativeLength += ValueSectionNodes[i].Length;
-            }
-
-            Length = cumulativeLength;
+                && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
         }
 
         /// <summary>
         /// Gets the start position of a value node relative to the start position of this <see cref="JsonKeyValueSyntax"/>.
         /// </summary>
-        public int GetValueNodeStart(int index) => ValueNodePositions[index];
+        public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
     }
 }
