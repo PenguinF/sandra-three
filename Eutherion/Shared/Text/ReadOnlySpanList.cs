@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,21 +33,78 @@ namespace Eutherion.Text
     /// <typeparam name="TSpan">
     /// The type of spanned elements in the read-only list.
     /// </typeparam>
-    public class ReadOnlySpanList<TSpan> : IReadOnlyList<TSpan>, ISpan where TSpan : ISpan
+    public abstract class ReadOnlySpanList<TSpan> : IReadOnlyList<TSpan>, ISpan where TSpan : ISpan
     {
-        /// <summary>
-        /// Gets the empty <see cref="ReadOnlySpanList{T}"/>.
-        /// </summary>
-        public static readonly ReadOnlySpanList<TSpan> Empty = new ReadOnlySpanList<TSpan>(Array.Empty<TSpan>());
+        private class ZeroElements : ReadOnlySpanList<TSpan>
+        {
+            public override int Length => 0;
+
+            public override TSpan this[int index] => throw new IndexOutOfRangeException();
+
+            public override int Count => 0;
+
+            public override IEnumerator<TSpan> GetEnumerator() => EmptyEnumerator<TSpan>.Instance;
+        }
+
+        private class OneElement : ReadOnlySpanList<TSpan>
+        {
+            private readonly TSpan element;
+
+            public OneElement(TSpan source)
+            {
+                if (source == null) throw new ArgumentException(nameof(source));
+                element = source;
+            }
+
+            public override int Length => element.Length;
+
+            public override TSpan this[int index] => index == 0 ? element : throw new IndexOutOfRangeException();
+
+            public override int Count => 1;
+
+            public override IEnumerator<TSpan> GetEnumerator() => new SingleElementEnumerator<TSpan>(element);
+        }
+
+        private class TwoOrMoreElements : ReadOnlySpanList<TSpan>
+        {
+            private readonly TSpan[] array;
+
+            public TwoOrMoreElements(TSpan[] source)
+            {
+                int length = 0;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    TSpan arrayElement = source[i];
+                    if (arrayElement == null) throw new ArgumentException(nameof(source));
+                    length += arrayElement.Length;
+                }
+
+                array = source;
+                Length = length;
+            }
+
+            public override int Length { get; }
+
+            public override TSpan this[int index] => array[index];
+
+            public override int Count => array.Length;
+
+            public override IEnumerator<TSpan> GetEnumerator() => ((ICollection<TSpan>)array).GetEnumerator();
+        }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ReadOnlySpanList{T}"/>.
+        /// Gets the empty <see cref="ReadOnlySpanList{TSpan}"/>.
+        /// </summary>
+        public static readonly ReadOnlySpanList<TSpan> Empty = new ZeroElements();
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ReadOnlySpanList{TSpan}"/>.
         /// </summary>
         /// <param name="source">
         /// The elements of the list.
         /// </param>
         /// <returns>
-        /// The initialized <see cref="ReadOnlySpanList{T}"/>.
+        /// The initialized <see cref="ReadOnlySpanList{TSpan}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
@@ -58,29 +116,17 @@ namespace Eutherion.Text
         {
             if (source is ReadOnlySpanList<TSpan> readOnlySpanList) return readOnlySpanList;
             var array = source.ToArrayEx();
-            return array.Length == 0 ? Empty : new ReadOnlySpanList<TSpan>(array);
+            if (array.Length == 0) return Empty;
+            if (array.Length == 1) return new OneElement(array[0]);
+            return new TwoOrMoreElements(array);
         }
 
-        private readonly TSpan[] array;
-
-        private ReadOnlySpanList(TSpan[] source)
-        {
-            int length = 0;
-            for (int i = 0; i < source.Length; i++)
-            {
-                TSpan arrayElement = source[i];
-                if (arrayElement == null) throw new ArgumentException(nameof(source));
-                length += arrayElement.Length;
-            }
-
-            array = source;
-            Length = length;
-        }
+        private ReadOnlySpanList() { }
 
         /// <summary>
         /// Gets the length of this <see cref="ReadOnlySpanList{TSpan}"/>.
         /// </summary>
-        public int Length { get; }
+        public abstract int Length { get; }
 
         /// <summary>
         /// Gets the spanned element at the specified index in the read-only list.
@@ -94,12 +140,12 @@ namespace Eutherion.Text
         /// <exception cref="IndexOutOfRangeException">
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
-        public TSpan this[int index] => array[index];
+        public abstract TSpan this[int index] { get; }
 
         /// <summary>
         /// Gets the number of spanned elements in the list.
         /// </summary>
-        public int Count => array.Length;
+        public abstract int Count { get; }
 
         /// <summary>
         /// Returns an enumerator that iterates through the list.
@@ -107,10 +153,7 @@ namespace Eutherion.Text
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
         /// </returns>
-        public IEnumerator<TSpan> GetEnumerator()
-        {
-            foreach (TSpan element in array) yield return element;
-        }
+        public abstract IEnumerator<TSpan> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
