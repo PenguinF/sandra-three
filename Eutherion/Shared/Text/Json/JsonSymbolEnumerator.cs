@@ -191,23 +191,23 @@ namespace Eutherion.Text.Json
 
             private JsonSymbol current;
             private bool comma;
-            private IEnumerator<JsonMultiValueSyntax> elementEnumerator;
+            private IEnumerator<JsonMultiValueSyntax> listItemEnumerator;
             private IEnumerator<JsonSymbol> elementValueEnumerator;
             private Func<bool> currentMoveNext;
 
             private bool SquareBracketOpenMoveNext()
             {
                 current = JsonSquareBracketOpen.Value;
-                elementEnumerator = jsonListSyntax.ElementNodes.GetEnumerator();
+                listItemEnumerator = jsonListSyntax.ListItemNodes.GetEnumerator();
                 currentMoveNext = ElementsMoveNext;
                 return true;
             }
 
             private bool ElementsMoveNext()
             {
-                if (elementEnumerator.MoveNext())
+                if (listItemEnumerator.MoveNext())
                 {
-                    elementValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(elementEnumerator.Current);
+                    elementValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(listItemEnumerator.Current);
                     currentMoveNext = ElementNodeValueMoveNext;
 
                     if (comma)
