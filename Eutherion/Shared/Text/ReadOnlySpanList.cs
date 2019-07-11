@@ -32,7 +32,7 @@ namespace Eutherion.Text
     /// <typeparam name="TSpan">
     /// The type of spanned elements in the read-only list.
     /// </typeparam>
-    public class ReadOnlySpanList<TSpan> : IReadOnlyList<TSpan> where TSpan : ISpan
+    public class ReadOnlySpanList<TSpan> : IReadOnlyList<TSpan>, ISpan where TSpan : ISpan
     {
         /// <summary>
         /// Gets the empty <see cref="ReadOnlySpanList{T}"/>.
@@ -51,16 +51,36 @@ namespace Eutherion.Text
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// One or more elements in <paramref name="source"/> are null.
+        /// </exception>
         public static ReadOnlySpanList<TSpan> Create(IEnumerable<TSpan> source)
         {
-            if (source is ReadOnlySpanList<TSpan> readOnlyList) return readOnlyList;
+            if (source is ReadOnlySpanList<TSpan> readOnlySpanList) return readOnlySpanList;
             var array = source.ToArrayEx();
             return array.Length == 0 ? Empty : new ReadOnlySpanList<TSpan>(array);
         }
 
         private readonly TSpan[] array;
 
-        private ReadOnlySpanList(TSpan[] array) => this.array = array;
+        private ReadOnlySpanList(TSpan[] source)
+        {
+            int length = 0;
+            for (int i = 0; i < source.Length; i++)
+            {
+                TSpan arrayElement = source[i];
+                if (arrayElement == null) throw new ArgumentException(nameof(source));
+                length += arrayElement.Length;
+            }
+
+            array = source;
+            Length = length;
+        }
+
+        /// <summary>
+        /// Gets the length of this <see cref="ReadOnlySpanList{TSpan}"/>.
+        /// </summary>
+        public int Length { get; }
 
         /// <summary>
         /// Gets the spanned element at the specified index in the read-only list.
