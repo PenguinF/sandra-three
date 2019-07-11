@@ -28,7 +28,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
     /// </summary>
-    public sealed class JsonKeyValueSyntax
+    public sealed class JsonKeyValueSyntax : ISpan
     {
         /// <summary>
         /// Gets the syntax node containing the key of this <see cref="JsonKeyValueSyntax"/>.

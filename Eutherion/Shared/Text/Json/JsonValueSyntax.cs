@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node in an abstract json syntax tree.
     /// </summary>
-    public abstract class JsonValueSyntax
+    public abstract class JsonValueSyntax : ISpan
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.

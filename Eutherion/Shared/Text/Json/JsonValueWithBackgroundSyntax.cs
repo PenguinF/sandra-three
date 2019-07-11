@@ -27,7 +27,7 @@ namespace Eutherion.Text.Json
     /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols
     /// which directly precede it in an abstract json syntax tree.
     /// </summary>
-    public sealed class JsonValueWithBackgroundSyntax
+    public sealed class JsonValueWithBackgroundSyntax : ISpan
     {
         /// <summary>
         /// Gets the background symbols which directly precede the content value node.

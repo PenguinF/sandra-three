@@ -29,7 +29,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Contains a value node together with all value nodes and background that follow it.
     /// </summary>
-    public sealed class JsonMultiValueSyntax
+    public sealed class JsonMultiValueSyntax : ISpan
     {
         // This syntax is generated everywhere a single value is expected.
         // It is a parse error if zero values, or two or more values are given, the exception being

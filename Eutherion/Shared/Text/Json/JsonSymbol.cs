@@ -24,7 +24,7 @@ using System.Linq;
 
 namespace Eutherion.Text.Json
 {
-    public abstract class JsonSymbol
+    public abstract class JsonSymbol : ISpan
     {
         public virtual bool IsBackground => false;
         public virtual bool IsValueStartSymbol => false;
