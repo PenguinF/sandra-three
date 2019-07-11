@@ -76,6 +76,7 @@
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonWhitespace.cs" />
+    <Compile Include="Text\ReadOnlySeparatedSpanList.cs" />
     <Compile Include="Text\ReadOnlySpanList.cs" />
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextIndex.cs" />
