@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -30,9 +29,7 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public ReadOnlyList<JsonMultiValueSyntax> ListItemNodes { get; }
-
-        private readonly int[] ListItemNodePositions;
+        public ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonComma> ListItemNodes { get; }
 
         public bool MissingSquareBracketClose { get; }
 
@@ -59,7 +56,7 @@ namespace Eutherion.Text.Json
 
         public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> listItemNodes, bool missingSquareBracketClose)
         {
-            ListItemNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(listItemNodes);
+            ListItemNodes = ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonComma>.Create(listItemNodes, JsonComma.Value);
 
             if (ListItemNodes.Count == 0)
             {
@@ -68,28 +65,15 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            ListItemNodePositions = new int[ListItemNodes.Count - 1];
-            int cumulativeLength = ListItemNodes[0].Length;
-
-            for (int i = 1; i < ListItemNodes.Count; i++)
-            {
-                cumulativeLength += JsonComma.CommaLength;
-                ListItemNodePositions[i - 1] = cumulativeLength;
-                cumulativeLength += ListItemNodes[i].Length;
-            }
-
-            if (!missingSquareBracketClose)
-            {
-                cumulativeLength += JsonSquareBracketClose.SquareBracketCloseLength;
-            }
-
-            Length = JsonSquareBracketOpen.SquareBracketOpenLength + cumulativeLength;
+            Length = JsonSquareBracketOpen.SquareBracketOpenLength
+                   + ListItemNodes.Length
+                   + (missingSquareBracketClose ? 0 : JsonSquareBracketClose.SquareBracketCloseLength);
         }
 
         /// <summary>
         /// Gets the start position of an element node relative to the start position of this <see cref="JsonListSyntax"/>.
         /// </summary>
-        public int GetElementNodeStart(int index) => JsonSquareBracketOpen.SquareBracketOpenLength + (index == 0 ? 0 : ListItemNodePositions[index - 1]);
+        public int GetElementNodeStart(int index) => JsonSquareBracketOpen.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);

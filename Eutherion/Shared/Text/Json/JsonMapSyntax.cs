@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -30,9 +29,7 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonMapSyntax : JsonValueSyntax
     {
-        public ReadOnlyList<JsonKeyValueSyntax> KeyValueNodes { get; }
-
-        private readonly int[] KeyValueNodePositions;
+        public ReadOnlySeparatedSpanList<JsonKeyValueSyntax, JsonComma> KeyValueNodes { get; }
 
         public bool MissingCurlyClose { get; }
 
@@ -40,7 +37,7 @@ namespace Eutherion.Text.Json
 
         public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
-            KeyValueNodes = ReadOnlyList<JsonKeyValueSyntax>.Create(keyValueNodes);
+            KeyValueNodes = ReadOnlySeparatedSpanList<JsonKeyValueSyntax, JsonComma>.Create(keyValueNodes, JsonComma.Value);
 
             if (KeyValueNodes.Count == 0)
             {
@@ -49,22 +46,9 @@ namespace Eutherion.Text.Json
 
             MissingCurlyClose = missingCurlyClose;
 
-            KeyValueNodePositions = new int[KeyValueNodes.Count - 1];
-            int cumulativeLength = KeyValueNodes[0].Length;
-
-            for (int i = 1; i < KeyValueNodes.Count; i++)
-            {
-                cumulativeLength += JsonComma.CommaLength;
-                KeyValueNodePositions[i - 1] = cumulativeLength;
-                cumulativeLength += KeyValueNodes[i].Length;
-            }
-
-            if (!missingCurlyClose)
-            {
-                cumulativeLength += JsonCurlyClose.CurlyCloseLength;
-            }
-
-            Length = JsonCurlyOpen.CurlyOpenLength + cumulativeLength;
+            Length = JsonCurlyOpen.CurlyOpenLength
+                   + KeyValueNodes.Length
+                   + (missingCurlyClose ? 0 : JsonCurlyClose.CurlyCloseLength);
         }
 
         public IEnumerable<(int, JsonStringLiteralSyntax, int, JsonValueSyntax)> ValidKeyValuePairs
@@ -95,7 +79,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of an key-value node relative to the start position of this <see cref="JsonMapSyntax"/>.
         /// </summary>
-        public int GetKeyValueNodeStart(int index) => JsonCurlyOpen.CurlyOpenLength + (index == 0 ? 0 : KeyValueNodePositions[index - 1]);
+        public int GetKeyValueNodeStart(int index) => JsonCurlyOpen.CurlyOpenLength + KeyValueNodes.GetElementOffset(index);
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
