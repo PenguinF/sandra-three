@@ -52,7 +52,7 @@ namespace Eutherion.Text.Json
 
         private void ShiftToNextForegroundToken()
         {
-            // Skip comments until encountering something meaningful.
+            // Skip background until encountering something meaningful.
             for (; ; )
             {
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
@@ -82,6 +82,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
+                // Save CurrentLength for error reporting before parsing the key.
                 int keyStart = CurrentLength;
                 JsonMultiValueSyntax multiKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
                 JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
@@ -318,6 +319,7 @@ namespace Eutherion.Text.Json
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
                 {
+                    // JsonErrorString, JsonUnknownSymbol
                     currentNode = new JsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
                 }
