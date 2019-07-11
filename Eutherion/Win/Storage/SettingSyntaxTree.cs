@@ -31,7 +31,7 @@ namespace Eutherion.Win.Storage
     {
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
-            JsonMultiValueSyntax rootNode = new JsonParser(json).TryParse(out List<JsonErrorInfo> errors);
+            JsonMultiValueSyntax rootNode = JsonParser.TryParse(json, out List<JsonErrorInfo> errors);
 
             if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
             {

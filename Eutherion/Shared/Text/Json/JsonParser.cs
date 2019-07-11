@@ -44,7 +44,7 @@ namespace Eutherion.Text.Json
         // Used for parse error reporting.
         private int CurrentLength;
 
-        public JsonParser(string json)
+        private JsonParser(string json)
         {
             Json = json ?? throw new ArgumentNullException(nameof(json));
             Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
@@ -372,7 +372,7 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
+        private JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
         {
             JsonMultiValueSyntax multiValueNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
 
@@ -388,5 +388,8 @@ namespace Eutherion.Text.Json
 
             return multiValueNode;
         }
+
+        public static JsonMultiValueSyntax TryParse(string json, out List<JsonErrorInfo> errors)
+            => new JsonParser(json).TryParse(out errors);
     }
 }
