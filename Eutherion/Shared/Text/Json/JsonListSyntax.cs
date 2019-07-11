@@ -68,15 +68,13 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            ListItemNodePositions = new int[ListItemNodes.Count];
-            int cumulativeLength = JsonSquareBracketOpen.SquareBracketOpenLength;
-            ListItemNodePositions[0] = cumulativeLength;
-            cumulativeLength += ListItemNodes[0].Length;
+            ListItemNodePositions = new int[ListItemNodes.Count - 1];
+            int cumulativeLength = ListItemNodes[0].Length;
 
             for (int i = 1; i < ListItemNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
-                ListItemNodePositions[i] = cumulativeLength;
+                ListItemNodePositions[i - 1] = cumulativeLength;
                 cumulativeLength += ListItemNodes[i].Length;
             }
 
@@ -85,13 +83,13 @@ namespace Eutherion.Text.Json
                 cumulativeLength += JsonSquareBracketClose.SquareBracketCloseLength;
             }
 
-            Length = cumulativeLength;
+            Length = JsonSquareBracketOpen.SquareBracketOpenLength + cumulativeLength;
         }
 
         /// <summary>
         /// Gets the start position of an element node relative to the start position of this <see cref="JsonListSyntax"/>.
         /// </summary>
-        public int GetElementNodeStart(int index) => ListItemNodePositions[index];
+        public int GetElementNodeStart(int index) => JsonSquareBracketOpen.SquareBracketOpenLength + (index == 0 ? 0 : ListItemNodePositions[index - 1]);
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);

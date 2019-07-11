@@ -49,15 +49,13 @@ namespace Eutherion.Text.Json
 
             MissingCurlyClose = missingCurlyClose;
 
-            KeyValueNodePositions = new int[KeyValueNodes.Count];
-            int cumulativeLength = JsonCurlyOpen.CurlyOpenLength;
-            KeyValueNodePositions[0] = cumulativeLength;
-            cumulativeLength += KeyValueNodes[0].Length;
+            KeyValueNodePositions = new int[KeyValueNodes.Count - 1];
+            int cumulativeLength = KeyValueNodes[0].Length;
 
             for (int i = 1; i < KeyValueNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
-                KeyValueNodePositions[i] = cumulativeLength;
+                KeyValueNodePositions[i - 1] = cumulativeLength;
                 cumulativeLength += KeyValueNodes[i].Length;
             }
 
@@ -66,7 +64,7 @@ namespace Eutherion.Text.Json
                 cumulativeLength += JsonCurlyClose.CurlyCloseLength;
             }
 
-            Length = cumulativeLength;
+            Length = JsonCurlyOpen.CurlyOpenLength + cumulativeLength;
         }
 
         public IEnumerable<(int, JsonStringLiteralSyntax, int, JsonValueSyntax)> ValidKeyValuePairs
@@ -84,8 +82,8 @@ namespace Eutherion.Text.Json
                         // Only the first value can be valid, even if it's undefined.
                         if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
                         {
-                            int keyNodeStart = KeyValueNodePositions[i] + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                            int valueNodeStart = KeyValueNodePositions[i] + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
+                            int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                            int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
 
                             yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                         }
@@ -97,7 +95,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of an key-value node relative to the start position of this <see cref="JsonMapSyntax"/>.
         /// </summary>
-        public int GetKeyValueNodeStart(int index) => KeyValueNodePositions[index];
+        public int GetKeyValueNodeStart(int index) => JsonCurlyOpen.CurlyOpenLength + (index == 0 ? 0 : KeyValueNodePositions[index - 1]);
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
