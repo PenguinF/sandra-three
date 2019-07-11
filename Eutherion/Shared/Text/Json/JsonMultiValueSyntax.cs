@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -87,7 +85,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the non-empty list of value nodes.
         /// </summary>
-        public ReadOnlyList<JsonValueWithBackgroundSyntax> ValueNodes { get; }
+        public ReadOnlySpanList<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
         /// <summary>
         /// Gets the background after the value nodes.
@@ -97,7 +95,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public int Length => ValueNodes.Length + BackgroundAfter.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonMultiValueSyntax"/>.
@@ -116,7 +114,7 @@ namespace Eutherion.Text.Json
         /// </exception>
         public JsonMultiValueSyntax(IEnumerable<JsonValueWithBackgroundSyntax> valueNodes, JsonBackgroundSyntax backgroundAfter)
         {
-            ValueNodes = ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(valueNodes);
+            ValueNodes = ReadOnlySpanList<JsonValueWithBackgroundSyntax>.Create(valueNodes);
 
             if (ValueNodes.Count == 0)
             {
@@ -124,7 +122,6 @@ namespace Eutherion.Text.Json
             }
 
             BackgroundAfter = backgroundAfter ?? throw new ArgumentNullException(nameof(backgroundAfter));
-            Length = ValueNodes.Sum(x => x.Length) + BackgroundAfter.Length;
         }
     }
 }
