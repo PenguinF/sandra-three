@@ -359,22 +359,11 @@ namespace Eutherion.Text.Json
 
             ShiftToNextForegroundToken();
 
-            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+            if (CurrentToken == null)
             {
                 valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
-                JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
-
-                if (CurrentToken != null)
-                {
-                    Errors.Add(new JsonErrorInfo(
-                        JsonErrorCode.ExpectedEof,
-                        CurrentLength - CurrentToken.Length,
-                        CurrentToken.Length));
-                }
-
                 errors = Errors;
-
-                return multiValueNode;
+                return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
             }
 
             for (; ; )
@@ -382,6 +371,27 @@ namespace Eutherion.Text.Json
                 // Always create a value node, then decide if it must be ignored.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
+
+                if (!CurrentToken.IsValueStartSymbol)
+                {
+                    if (valueNodesBuilder.Count == 0)
+                    {
+                        valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, JsonMissingValueSyntax.Value));
+
+                        Errors.Add(new JsonErrorInfo(
+                            JsonErrorCode.ExpectedEof,
+                            CurrentLength - CurrentToken.Length,
+                            CurrentToken.Length));
+
+                        errors = Errors;
+                        return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+                    }
+                    else
+                    {
+                        errors = Errors;
+                        return new JsonMultiValueSyntax(valueNodesBuilder, backgroundBefore);
+                    }
+                }
 
                 JsonValueSyntax currentNode;
                 bool unprocessedToken;
@@ -403,41 +413,18 @@ namespace Eutherion.Text.Json
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
-
-                    if (CurrentToken != null)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ExpectedEof,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
-                    }
-
                     errors = Errors;
-
-                    return multiValueNode;
+                    return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
                 if (!unprocessedToken) ShiftToNextForegroundToken();
 
-                // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+                if (CurrentToken == null)
                 {
                     // Capture the background following the last value.
-                    JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
-
-                    if (CurrentToken != null)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ExpectedEof,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
-                    }
-
                     errors = Errors;
-
-                    return multiValueNode;
+                    return new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
                 }
 
                 // Two or more consecutive values not allowed.
