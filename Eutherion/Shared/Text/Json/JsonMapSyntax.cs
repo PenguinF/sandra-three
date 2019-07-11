@@ -49,12 +49,12 @@ namespace Eutherion.Text.Json
 
             MissingCurlyClose = missingCurlyClose;
 
-            // This code assumes that JsonCurlyOpen.CurlyOpenLength == JsonComma.CommaLength.
-            // The first iteration should be CurlyOpenLength rather than CommaLength.
-            int cumulativeLength = 0;
             KeyValueNodePositions = new int[KeyValueNodes.Count];
+            int cumulativeLength = JsonCurlyOpen.CurlyOpenLength;
+            KeyValueNodePositions[0] = cumulativeLength;
+            cumulativeLength += KeyValueNodes[0].Length;
 
-            for (int i = 0; i < KeyValueNodes.Count; i++)
+            for (int i = 1; i < KeyValueNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
                 KeyValueNodePositions[i] = cumulativeLength;

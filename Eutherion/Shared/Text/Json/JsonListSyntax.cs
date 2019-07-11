@@ -68,12 +68,12 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            // This code assumes that JsonSquareBracketOpen.SquareBracketOpenLength == JsonComma.CommaLength.
-            // The first iteration should formally be SquareBracketOpenLength rather than CommaLength.
-            int cumulativeLength = 0;
             ListItemNodePositions = new int[ListItemNodes.Count];
+            int cumulativeLength = JsonSquareBracketOpen.SquareBracketOpenLength;
+            ListItemNodePositions[0] = cumulativeLength;
+            cumulativeLength += ListItemNodes[0].Length;
 
-            for (int i = 0; i < ListItemNodes.Count; i++)
+            for (int i = 1; i < ListItemNodes.Count; i++)
             {
                 cumulativeLength += JsonComma.CommaLength;
                 ListItemNodePositions[i] = cumulativeLength;
