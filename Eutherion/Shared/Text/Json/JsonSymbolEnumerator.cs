@@ -87,34 +87,22 @@ namespace Eutherion.Text.Json
             public JsonMultiValueSyntaxNodeEnumerator(JsonMultiValueSyntax jsonMultiValueSyntaxNode)
             {
                 this.jsonMultiValueSyntaxNode = jsonMultiValueSyntaxNode;
-                currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(jsonMultiValueSyntaxNode.ValueNode);
-                currentMoveNext = NodeWithBackgroundMoveNext;
+                valueNodesEnumerator = jsonMultiValueSyntaxNode.ValueNodes.GetEnumerator();
+                currentMoveNext = ValueNodesMoveNext;
             }
 
             private JsonSymbol current;
-            private IEnumerator<JsonValueWithBackgroundSyntax> ignoredNodesEnumerator;
+            private readonly IEnumerator<JsonValueWithBackgroundSyntax> valueNodesEnumerator;
             private IEnumerator<JsonSymbol> currentEnumerator;
             private Func<bool> currentMoveNext;
 
-            private bool NodeWithBackgroundMoveNext()
+            private bool ValueNodesMoveNext()
             {
-                if (currentEnumerator.MoveNext())
+                if (valueNodesEnumerator.MoveNext())
                 {
-                    current = currentEnumerator.Current;
-                    return true;
-                }
-
-                ignoredNodesEnumerator = jsonMultiValueSyntaxNode.IgnoredNodes.GetEnumerator();
-                return IgnoredNodesMoveNext();
-            }
-
-            private bool IgnoredNodesMoveNext()
-            {
-                if (ignoredNodesEnumerator.MoveNext())
-                {
-                    currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(ignoredNodesEnumerator.Current);
-                    currentMoveNext = IgnoredNodeWithBackgroundMoveNext;
-                    return IgnoredNodeWithBackgroundMoveNext();
+                    currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(valueNodesEnumerator.Current);
+                    currentMoveNext = ValueNodeWithBackgroundMoveNext;
+                    return ValueNodeWithBackgroundMoveNext();
                 }
 
                 currentEnumerator = jsonMultiValueSyntaxNode.BackgroundAfter.BackgroundSymbols.GetEnumerator();
@@ -122,7 +110,7 @@ namespace Eutherion.Text.Json
                 return BackgroundAfterMoveNext();
             }
 
-            private bool IgnoredNodeWithBackgroundMoveNext()
+            private bool ValueNodeWithBackgroundMoveNext()
             {
                 if (currentEnumerator.MoveNext())
                 {
@@ -130,7 +118,7 @@ namespace Eutherion.Text.Json
                     return true;
                 }
 
-                return IgnoredNodesMoveNext();
+                return ValueNodesMoveNext();
             }
 
             private bool BackgroundAfterMoveNext()

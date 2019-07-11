@@ -296,18 +296,15 @@ namespace Eutherion.Text.Json
 
         private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
+            var valueNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
+
             ShiftToNextForegroundToken();
 
             if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
-                return new JsonMultiValueSyntax(
-                    new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value),
-                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
-                    JsonBackgroundSyntax.Empty);
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
+                return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
             }
-
-            JsonValueWithBackgroundSyntax firstValueNode = null;
-            var ignoredNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
             for (; ; )
             {
@@ -328,26 +325,14 @@ namespace Eutherion.Text.Json
                     (currentNode, unprocessedToken) = Visit(CurrentToken);
                 }
 
-                var currentNodeWithBackgroundBefore = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
-                if (firstValueNode == null)
-                {
-                    firstValueNode = currentNodeWithBackgroundBefore;
-                }
-                else
-                {
-                    // Ignore this node.
-                    ignoredNodesBuilder.Add(currentNodeWithBackgroundBefore);
-                }
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    return new JsonMultiValueSyntax(
-                        firstValueNode,
-                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
-                        JsonBackgroundSyntax.Empty);
+                    return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -357,11 +342,7 @@ namespace Eutherion.Text.Json
                 if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
                 {
                     // Capture the background following the last value.
-                    var backgroundAfter = CaptureBackground();
-                    return new JsonMultiValueSyntax(
-                        firstValueNode,
-                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
-                        backgroundAfter);
+                    return new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
                 }
 
                 // Two or more consecutive values not allowed.
