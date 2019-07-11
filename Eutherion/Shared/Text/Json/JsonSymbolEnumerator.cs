@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,35 +33,6 @@ namespace Eutherion.Text.Json
         // trouble with JsonComma.Value and refuses to yield return it more than once inside
         // the loop over the elements of an object or array, causing syntax highlighting to skew.
         // So yeah, this is an implementation by hand.
-
-        private class EmptyJsonSymbolEnumerator : IEnumerator<JsonSymbol>
-        {
-            public static readonly EmptyJsonSymbolEnumerator Instance = new EmptyJsonSymbolEnumerator();
-
-            private EmptyJsonSymbolEnumerator() { }
-
-            void IEnumerator.Reset() { }
-            bool IEnumerator.MoveNext() => false;
-            JsonSymbol IEnumerator<JsonSymbol>.Current => default;
-            object IEnumerator.Current => default;
-            void IDisposable.Dispose() { }
-        }
-
-        private class SingleJsonSymbolEnumerator : IEnumerator<JsonSymbol>
-        {
-            private readonly JsonSymbol symbol;
-            private bool yielded;
-
-            public SingleJsonSymbolEnumerator(JsonSymbol symbol) => this.symbol = symbol;
-
-            // When called from a foreach construct, it goes:
-            // MoveNext() Current MoveNext() Dispose()
-            void IEnumerator.Reset() { }
-            bool IEnumerator.MoveNext() { if (yielded) return false; yielded = true; return true; }
-            JsonSymbol IEnumerator<JsonSymbol>.Current => symbol;
-            object IEnumerator.Current => symbol;
-            void IDisposable.Dispose() { }
-        }
 
         private class JsonSyntaxNodeWithBackgroundBeforeEnumerator : IEnumerator<JsonSymbol>
         {
@@ -360,10 +332,10 @@ namespace Eutherion.Text.Json
             private EnumeratorSelector() { }
 
             public override IEnumerator<JsonSymbol> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.BooleanToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.BooleanToken);
 
             public override IEnumerator<JsonSymbol> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.IntegerToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.IntegerToken);
 
             public override IEnumerator<JsonSymbol> VisitListSyntax(JsonListSyntax node)
                 => new JsonListSyntaxEnumerator(node);
@@ -372,13 +344,13 @@ namespace Eutherion.Text.Json
                 => new JsonMapSyntaxEnumerator(node);
 
             public override IEnumerator<JsonSymbol> VisitMissingValueSyntax(JsonMissingValueSyntax node)
-                => EmptyJsonSymbolEnumerator.Instance;
+                => EmptyEnumerator<JsonSymbol>.Instance;
 
             public override IEnumerator<JsonSymbol> VisitStringLiteralSyntax(JsonStringLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.StringToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.StringToken);
 
             public override IEnumerator<JsonSymbol> VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node)
-                => new SingleJsonSymbolEnumerator(node.UndefinedToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.UndefinedToken);
         }
 
         private readonly JsonMultiValueSyntax rootNode;
