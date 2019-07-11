@@ -213,10 +213,10 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            var (tokens, errors) = SyntaxDescriptor.Parse(code);
+            TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
 
             int totalLength = 0;
-            foreach (var token in tokens)
+            foreach (var token in SyntaxDescriptor.GetTerminals(syntaxTree))
             {
                 int length = SyntaxDescriptor.GetLength(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
@@ -225,39 +225,30 @@ namespace Eutherion.Win.AppTemplate
 
             IndicatorClearRange(0, TextLength);
 
-            if (errors == null || errors.Count == 0)
-            {
-                currentErrors = null;
-            }
-            else
-            {
-                currentErrors = errors;
+            currentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
 
-                foreach (var error in errors)
-                {
-                    var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+            foreach (var error in currentErrors)
+            {
+                var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
 
-                    IndicatorFillRange(errorStart, errorLength);
-                }
+                IndicatorFillRange(errorStart, errorLength);
             }
 
             CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private List<TError> currentErrors;
+        private ReadOnlyList<TError> currentErrors = ReadOnlyList<TError>.Empty;
 
-        public int CurrentErrorCount
-            => currentErrors == null ? 0 : currentErrors.Count;
+        public int CurrentErrorCount => currentErrors.Count;
 
-        public IEnumerable<TError> CurrentErrors
-            => currentErrors == null ? Enumerable.Empty<TError>() : currentErrors.Enumerate();
+        public IEnumerable<TError> CurrentErrors => currentErrors.Enumerate();
 
         public event EventHandler CurrentErrorsChanged;
 
         public void ActivateError(int errorIndex)
         {
             // Select the text that generated the error.
-            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
+            if (0 <= errorIndex && errorIndex < currentErrors.Count)
             {
                 // Determine how many lines are visible in the top half of the control.
                 int firstVisibleLine = FirstVisibleLine;
@@ -290,7 +281,7 @@ namespace Eutherion.Win.AppTemplate
 
         private IEnumerable<string> ActiveErrorMessages(int textPosition)
         {
-            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
+            if (textPosition >= 0 && textPosition < TextLength)
             {
                 foreach (var error in currentErrors)
                 {
@@ -427,7 +418,17 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.
         /// </summary>
-        public abstract (IEnumerable<TTerminal>, List<TError>) Parse(string code);
+        public abstract TSyntaxTree Parse(string code);
+
+        /// <summary>
+        /// Enumerates terminal symbols of a syntax tree.
+        /// </summary>
+        public abstract IEnumerable<TTerminal> GetTerminals(TSyntaxTree syntaxTree);
+
+        /// <summary>
+        /// Enumerates errors of a syntax tree.
+        /// </summary>
+        public abstract IEnumerable<TError> GetErrors(TSyntaxTree syntaxTree);
 
         /// <summary>
         /// Gets the style for a terminal symbol.

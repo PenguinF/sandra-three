@@ -59,14 +59,13 @@ namespace Eutherion.Win.AppTemplate
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override (IEnumerable<JsonSymbol>, List<JsonErrorInfo>) Parse(string code)
+        public override SettingSyntaxTree Parse(string code)
         {
             var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
-            var errors = settingSyntaxTree.Errors;
 
-            if (errors.Count > 0)
+            if (settingSyntaxTree.Errors.Count > 0)
             {
-                errors.Sort((x, y)
+                settingSyntaxTree.Errors.Sort((x, y)
                     => x.Start < y.Start ? -1
                     : x.Start > y.Start ? 1
                     : x.Length < y.Length ? -1
@@ -76,8 +75,14 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return (new JsonSymbolEnumerator(settingSyntaxTree.JsonRootNode), errors);
+            return settingSyntaxTree;
         }
+
+        public override IEnumerable<JsonSymbol> GetTerminals(SettingSyntaxTree syntaxTree)
+            => new JsonSymbolEnumerator(syntaxTree.JsonRootNode);
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
+            => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
             => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
