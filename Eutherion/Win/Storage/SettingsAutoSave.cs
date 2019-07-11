@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text.Json;
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -46,14 +44,9 @@ namespace Eutherion.Win.Storage
                 {
                     // Load into a copy of RemoteSettings, preserving defaults.
                     var workingCopy = RemoteSettings.CreateWorkingCopy();
-                    var errors = workingCopy.TryLoadFromText(loadedText);
 
-                    if (errors.Count > 0)
-                    {
-                        // Leave RemoteSettings unchanged.
-                        errors.ForEach(x => new SettingsAutoSaveParseException(x).Trace());
-                    }
-                    else
+                    // Leave RemoteSettings unchanged if the loaded text contained any errors.
+                    if (workingCopy.TryLoadFromText(loadedText))
                     {
                         RemoteSettings = workingCopy.Commit();
                     }
@@ -169,17 +162,5 @@ namespace Eutherion.Win.Storage
         {
             autoSaveFile?.Dispose();
         }
-    }
-
-    internal class SettingsAutoSaveParseException : Exception
-    {
-        public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
-        {
-            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
-            return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
-        }
-
-        public SettingsAutoSaveParseException(JsonErrorInfo jsonErrorInfo)
-            : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
     }
 }

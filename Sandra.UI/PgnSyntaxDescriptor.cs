@@ -30,7 +30,7 @@ namespace Sandra.UI
     /// <summary>
     /// Describes the interaction between PGN syntax and a syntax editor.
     /// </summary>
-    public class PgnSyntaxDescriptor : SyntaxDescriptor<PgnSymbol, PgnErrorInfo>
+    public class PgnSyntaxDescriptor : SyntaxDescriptor<PgnSyntaxTree, PgnSymbol, PgnErrorInfo>
     {
         public static readonly string PgnFileExtension = "pgn";
 
@@ -38,14 +38,20 @@ namespace Sandra.UI
 
         public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
-        public override (IEnumerable<PgnSymbol>, List<PgnErrorInfo>) Parse(string code)
+        public override PgnSyntaxTree Parse(string code)
         {
             int length = code.Length;
-            if (length == 0) return (Enumerable.Empty<PgnSymbol>(), new List<PgnErrorInfo>());
-            return (new PgnSymbol[] { new PgnSymbol(length) }, new List<PgnErrorInfo>());
+            if (length == 0) return new PgnSyntaxTree(Enumerable.Empty<PgnSymbol>());
+            return new PgnSyntaxTree(new PgnSymbol[] { new PgnSymbol(length) });
         }
 
-        public override Style GetStyle(SyntaxEditor<PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
+        public override IEnumerable<PgnSymbol> GetTerminals(PgnSyntaxTree syntaxTree)
+            => syntaxTree.Terminals;
+
+        public override IEnumerable<PgnErrorInfo> GetErrors(PgnSyntaxTree syntaxTree)
+            => syntaxTree.Errors;
+
+        public override Style GetStyle(SyntaxEditor<PgnSyntaxTree, PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;
 
         public override int GetLength(PgnSymbol terminalSymbol)
@@ -56,6 +62,14 @@ namespace Sandra.UI
 
         public override string GetErrorMessage(PgnErrorInfo error)
             => error.Message;
+    }
+
+    public class PgnSyntaxTree
+    {
+        public readonly IEnumerable<PgnSymbol> Terminals;
+        public readonly IEnumerable<PgnErrorInfo> Errors = Enumerable.Empty<PgnErrorInfo>();
+
+        public PgnSyntaxTree(IEnumerable<PgnSymbol> terminals) => Terminals = terminals;
     }
 
     public class PgnSymbol

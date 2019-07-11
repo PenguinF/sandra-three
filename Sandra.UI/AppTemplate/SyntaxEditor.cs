@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -37,20 +36,23 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting.
     /// </summary>
+    /// <typeparam name="TSyntaxTree">
+    /// The type of syntax tree.
+    /// </typeparam>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbol to display.
     /// </typeparam>
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public class SyntaxEditor<TTerminal, TError> : ScintillaEx
+    public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
 
         /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
-        public SyntaxDescriptor<TTerminal, TError> SyntaxDescriptor { get; }
+        public SyntaxDescriptor<TSyntaxTree, TTerminal, TError> SyntaxDescriptor { get; }
 
         /// <summary>
         /// Gets the edited text file.
@@ -64,7 +66,7 @@ namespace Eutherion.Win.AppTemplate
         private bool containsChangesAtSavePoint;
 
         /// <summary>
-        /// Returns if this <see cref="SyntaxEditor{TTerminal, TError}"/> contains any unsaved changes.
+        /// Returns if this <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/> contains any unsaved changes.
         /// If the text file could not be opened, true is returned.
         /// </summary>
         public bool ContainsChanges
@@ -76,19 +78,19 @@ namespace Eutherion.Win.AppTemplate
         private Style CallTipStyle => Styles[Style.CallTip];
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal, TError}"/>.
+        /// Initializes a new instance of a <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </summary>
         /// <param name="syntaxDescriptor">
         /// The syntax descriptor.
         /// </param>
         /// <param name="codeFile">
         /// The code file to show and/or edit.
-        /// It is disposed together with this <see cref="SyntaxEditor{TTerminal, TError}"/>.
+        /// It is disposed together with this <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
-        public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+        public SyntaxEditor(SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                             WorkingCopyTextFile codeFile)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
@@ -211,10 +213,10 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            var (tokens, errors) = SyntaxDescriptor.Parse(code);
+            TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
 
             int totalLength = 0;
-            foreach (var token in tokens)
+            foreach (var token in SyntaxDescriptor.GetTerminals(syntaxTree))
             {
                 int length = SyntaxDescriptor.GetLength(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
@@ -223,39 +225,26 @@ namespace Eutherion.Win.AppTemplate
 
             IndicatorClearRange(0, TextLength);
 
-            if (errors == null || errors.Count == 0)
-            {
-                currentErrors = null;
-            }
-            else
-            {
-                currentErrors = errors;
+            CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
 
-                foreach (var error in errors)
-                {
-                    var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+            foreach (var error in CurrentErrors)
+            {
+                var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
 
-                    IndicatorFillRange(errorStart, errorLength);
-                }
+                IndicatorFillRange(errorStart, errorLength);
             }
 
             CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private List<TError> currentErrors;
-
-        public int CurrentErrorCount
-            => currentErrors == null ? 0 : currentErrors.Count;
-
-        public IEnumerable<TError> CurrentErrors
-            => currentErrors == null ? Enumerable.Empty<TError>() : currentErrors.Enumerate();
+        public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
 
         public event EventHandler CurrentErrorsChanged;
 
         public void ActivateError(int errorIndex)
         {
             // Select the text that generated the error.
-            if (currentErrors != null && 0 <= errorIndex && errorIndex < currentErrors.Count)
+            if (0 <= errorIndex && errorIndex < CurrentErrors.Count)
             {
                 // Determine how many lines are visible in the top half of the control.
                 int firstVisibleLine = FirstVisibleLine;
@@ -264,7 +253,7 @@ namespace Eutherion.Win.AppTemplate
 
                 // Then calculate which line should become the first visible line
                 // so the error line ends up in the middle of the control.
-                var (hotErrorStart, hotErrorLength) = SyntaxDescriptor.GetErrorRange(currentErrors[errorIndex]);
+                var (hotErrorStart, hotErrorLength) = SyntaxDescriptor.GetErrorRange(CurrentErrors[errorIndex]);
                 int hotErrorLine = LineFromPosition(hotErrorStart);
 
                 // hotErrorLine in view?
@@ -288,9 +277,9 @@ namespace Eutherion.Win.AppTemplate
 
         private IEnumerable<string> ActiveErrorMessages(int textPosition)
         {
-            if (currentErrors != null && textPosition >= 0 && textPosition < TextLength)
+            if (textPosition >= 0 && textPosition < TextLength)
             {
-                foreach (var error in currentErrors)
+                foreach (var error in CurrentErrors)
                 {
                     var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
 
@@ -399,15 +388,18 @@ namespace Eutherion.Win.AppTemplate
     }
 
     /// <summary>
-    /// Describes the interaction between a syntax and how a <see cref="SyntaxDescriptor{TTerminal, TError}"/> displays it.
+    /// Describes the interaction between a syntax and how a <see cref="SyntaxDescriptor{TSyntaxTree, TTerminal, TError}"/> displays it.
     /// </summary>
+    /// <typeparam name="TSyntaxTree">
+    /// The type of syntax tree.
+    /// </typeparam>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbol to display.
     /// </typeparam>
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public abstract class SyntaxDescriptor<TTerminal, TError>
+    public abstract class SyntaxDescriptor<TSyntaxTree, TTerminal, TError>
     {
         /// <summary>
         /// Gets the default file extension for this syntax.
@@ -422,12 +414,22 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Parses the code, yielding lists of tokens and errors.
         /// </summary>
-        public abstract (IEnumerable<TTerminal>, List<TError>) Parse(string code);
+        public abstract TSyntaxTree Parse(string code);
+
+        /// <summary>
+        /// Enumerates terminal symbols of a syntax tree.
+        /// </summary>
+        public abstract IEnumerable<TTerminal> GetTerminals(TSyntaxTree syntaxTree);
+
+        /// <summary>
+        /// Enumerates errors of a syntax tree.
+        /// </summary>
+        public abstract IEnumerable<TError> GetErrors(TSyntaxTree syntaxTree);
 
         /// <summary>
         /// Gets the style for a terminal symbol.
         /// </summary>
-        public abstract Style GetStyle(SyntaxEditor<TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
+        public abstract Style GetStyle(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
 
         /// <summary>
         /// Gets the length of a terminal symbol.

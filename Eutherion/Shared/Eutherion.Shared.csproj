@@ -42,6 +42,7 @@
     <Compile Include="Localization\LocalizedStringKey.cs" />
     <Compile Include="Localization\Localizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Text\ISpan.cs" />
     <Compile Include="Text\Json\JsonBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonBooleanLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonColon.cs" />
@@ -75,6 +76,8 @@
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonWhitespace.cs" />
+    <Compile Include="Text\ReadOnlySeparatedSpanList.cs" />
+    <Compile Include="Text\ReadOnlySpanList.cs" />
     <Compile Include="Text\TextElement.cs" />
     <Compile Include="Text\TextIndex.cs" />
     <Compile Include="UIActions\DefaultUIActionBinding.cs" />
@@ -97,6 +100,7 @@
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\SafeLazy.cs" />
+    <Compile Include="Utils\SpecializedEnumerable.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
     <Compile Include="Utils\Union.cs" />
     <Compile Include="Utils\WeakEvent.cs" />

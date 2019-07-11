@@ -23,7 +23,7 @@ using System;
 
 namespace Eutherion.Text.Json
 {
-    public class JsonWhitespace : JsonSymbol
+    public sealed class JsonWhitespace : JsonSymbol
     {
         /// <summary>
         /// Maximum length before new <see cref="JsonWhitespace"/> instances are always newly allocated.

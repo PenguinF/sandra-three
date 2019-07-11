@@ -78,6 +78,19 @@ namespace Eutherion.Shared.Tests
         }
 
         [Fact]
+        public void JsonSymbolsWithLengthOne()
+        {
+            // As long as there's code around which depends on these symbols having length 1, this unit test is needed.
+            Assert.Equal(1, JsonColon.Value.Length);
+            Assert.Equal(1, JsonComma.Value.Length);
+            Assert.Equal(1, JsonCurlyClose.Value.Length);
+            Assert.Equal(1, JsonCurlyOpen.Value.Length);
+            Assert.Equal(1, JsonSquareBracketClose.Value.Length);
+            Assert.Equal(1, JsonSquareBracketOpen.Value.Length);
+            Assert.Equal(1, new JsonUnknownSymbol("\\0").Length);
+        }
+
+        [Fact]
         public void NullValueShouldThrow()
         {
             Assert.Throws<ArgumentNullException>(() => new JsonString(null, 0));

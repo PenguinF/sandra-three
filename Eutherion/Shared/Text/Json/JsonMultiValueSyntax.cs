@@ -19,17 +19,15 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Contains a value node together with all value nodes and background that follow it.
+    /// Contains one or more value nodes together with all background syntax that precedes and follows it.
     /// </summary>
-    public sealed class JsonMultiValueSyntax
+    public sealed class JsonMultiValueSyntax : ISpan
     {
         // This syntax is generated everywhere a single value is expected.
         // It is a parse error if zero values, or two or more values are given, the exception being
@@ -42,37 +40,37 @@ namespace Eutherion.Text.Json
         //
         // []            - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 0
         //                 ValueNode.ContentNode is JsonMissingValueSyntax
-        //                 IgnoredNodes.Count == 0
+        //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/]        - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1  (one JsonComment)
         //                 ValueNode.ContentNode is JsonMissingValueSyntax
-        //                 IgnoredNodes.Count == 0
+        //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/0]       - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
         //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
-        //                 IgnoredNodes.Count == 0
+        //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/0/**/]   - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
         //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
-        //                 IgnoredNodes.Count == 0
+        //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 1
         //
         // [0 ]          - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 0
         //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
-        //                 IgnoredNodes.Count == 0
+        //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 1             (one JsonWhitespace)
         //
         // [ 0 false ]   - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
         //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
-        //                 IgnoredNodes.Count == 1
-        //                 IgnoredNodes[0].BackgroundSymbols.Count == 1
-        //                 IgnoredNodes[0].ContentNode is JsonBooleanLiteralSyntax
+        //                 ValueNodes.Count == 2
+        //                 ValueNodes[1].BackgroundSymbols.Count == 1
+        //                 ValueNodes[1].ContentNode is JsonBooleanLiteralSyntax
         //                 BackgroundAfter.BackgroundSymbols.Count == 1
         //
-        // Only the first ValueNode can be JsonMissingValueSyntax, and if it is, IgnoredNodes.Count is always 0,
+        // Only the first ValueNode (ValueNodes[0]) can be JsonMissingValueSyntax, and if it is, ValueNodes.Count is always 1,
         // ValueNode.BackgroundBefore may still be non-empty, and BackgroundAfter is always empty.
         //
         // The main reason this structure exists like this is because there needs to be a place where
@@ -82,12 +80,12 @@ namespace Eutherion.Text.Json
         /// Gets the syntax node containing the first value.
         /// Is JsonMissingValueSyntax if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
         /// </summary>
-        public JsonValueWithBackgroundSyntax ValueNode { get; }
+        public JsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
 
         /// <summary>
-        /// Gets the list of ignored value nodes after the first.
+        /// Gets the non-empty list of value nodes.
         /// </summary>
-        public ReadOnlyList<JsonValueWithBackgroundSyntax> IgnoredNodes { get; }
+        public ReadOnlySpanList<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
         /// <summary>
         /// Gets the background after the value nodes.
@@ -97,32 +95,33 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public int Length => ValueNodes.Length + BackgroundAfter.Length;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonMultiValueSyntax"/>.
         /// </summary>
-        /// <param name="valueNode">
-        /// The syntax node containing the first value.
-        /// </param>
-        /// <param name="ignoredNodes">
-        /// The list of ignored value nodes after the first.
+        /// <param name="valueNodes">
+        /// The non-empty list of value nodes.
         /// </param>
         /// <param name="backgroundAfter">
         /// The background after the value nodes.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="valueNode"/> and/or <paramref name="ignoredNodes"/> and/or <paramref name="backgroundAfter"/> are null.
+        /// <paramref name="valueNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
-        public JsonMultiValueSyntax(
-            JsonValueWithBackgroundSyntax valueNode,
-            IEnumerable<JsonValueWithBackgroundSyntax> ignoredNodes,
-            JsonBackgroundSyntax backgroundAfter)
+        /// <exception cref="ArgumentException">
+        /// <paramref name="valueNodes"/> is an empty enumeration.
+        /// </exception>
+        public JsonMultiValueSyntax(IEnumerable<JsonValueWithBackgroundSyntax> valueNodes, JsonBackgroundSyntax backgroundAfter)
         {
-            ValueNode = valueNode ?? throw new ArgumentNullException(nameof(valueNode));
-            IgnoredNodes = ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodes);
+            ValueNodes = ReadOnlySpanList<JsonValueWithBackgroundSyntax>.Create(valueNodes);
+
+            if (ValueNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(valueNodes)} cannot be empty", nameof(valueNodes));
+            }
+
             BackgroundAfter = backgroundAfter ?? throw new ArgumentNullException(nameof(backgroundAfter));
-            Length = ValueNode.Length + IgnoredNodes.Sum(x => x.Length) + BackgroundAfter.Length;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Eutherion.Text
     /// The type of terminal symbols to index.
     /// See also: https://en.wikipedia.org/wiki/Terminal_and_nonterminal_symbols
     /// </typeparam>
-    public class TextElement<TTerminal>
+    public class TextElement<TTerminal> : ISpan
     {
         private int start;
         private int length;

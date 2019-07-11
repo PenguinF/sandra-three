@@ -44,7 +44,7 @@ namespace Eutherion.Text.Json
         // Used for parse error reporting.
         private int CurrentLength;
 
-        public JsonParser(string json)
+        private JsonParser(string json)
         {
             Json = json ?? throw new ArgumentNullException(nameof(json));
             Tokens = JsonTokenizer.TokenizeAll(json).GetEnumerator();
@@ -52,7 +52,7 @@ namespace Eutherion.Text.Json
 
         private void ShiftToNextForegroundToken()
         {
-            // Skip comments until encountering something meaningful.
+            // Skip background until encountering something meaningful.
             for (; ; )
             {
                 CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
@@ -82,6 +82,7 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
+                // Save CurrentLength for error reporting before parsing the key.
                 int keyStart = CurrentLength;
                 JsonMultiValueSyntax multiKeyNode = ParseMultiValue(JsonErrorCode.MultiplePropertyKeys);
                 JsonValueSyntax parsedKeyNode = multiKeyNode.ValueNode.ContentNode;
@@ -127,6 +128,7 @@ namespace Eutherion.Text.Json
 
                 // Reuse keyValueSyntaxBuilder.
                 keyValueSyntaxBuilder.Clear();
+                keyValueSyntaxBuilder.Add(multiKeyNode);
 
                 // Keep parsing multi-values until encountering a non ':'.
                 bool gotColon = false;
@@ -151,10 +153,7 @@ namespace Eutherion.Text.Json
                 }
 
                 // One key-value section done.
-                var jsonKeyValueSyntax = new JsonKeyValueSyntax(
-                    multiKeyNode,
-                    validKey,
-                    keyValueSyntaxBuilder);
+                var jsonKeyValueSyntax = new JsonKeyValueSyntax(validKey, keyValueSyntaxBuilder);
 
                 mapBuilder.Add(jsonKeyValueSyntax);
 
@@ -176,8 +175,8 @@ namespace Eutherion.Text.Json
 
                     // Report missing value error from being reported if all value sections are empty.
                     // Example: { "key1":: 2, "key2": , }
-                    // The first section does not report a missing value, the second section does.
-                    if (jsonKeyValueSyntax.ValueNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
+                    // Skip the fist value section, it contains the key node.
+                    if (jsonKeyValueSyntax.ValueSectionNodes.Skip(1).All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,
@@ -295,18 +294,15 @@ namespace Eutherion.Text.Json
 
         private JsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
+            var valueNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
+
             ShiftToNextForegroundToken();
 
             if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
-                return new JsonMultiValueSyntax(
-                    new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value),
-                    ReadOnlyList<JsonValueWithBackgroundSyntax>.Empty,
-                    JsonBackgroundSyntax.Empty);
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
+                return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
             }
-
-            JsonValueWithBackgroundSyntax firstValueNode = null;
-            var ignoredNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
             for (; ; )
             {
@@ -318,6 +314,7 @@ namespace Eutherion.Text.Json
                 bool unprocessedToken;
                 if (CurrentToken.HasErrors)
                 {
+                    // JsonErrorString, JsonUnknownSymbol
                     currentNode = new JsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
                 }
@@ -326,26 +323,14 @@ namespace Eutherion.Text.Json
                     (currentNode, unprocessedToken) = Visit(CurrentToken);
                 }
 
-                var currentNodeWithBackgroundBefore = new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode);
-                if (firstValueNode == null)
-                {
-                    firstValueNode = currentNodeWithBackgroundBefore;
-                }
-                else
-                {
-                    // Ignore this node.
-                    ignoredNodesBuilder.Add(currentNodeWithBackgroundBefore);
-                }
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    return new JsonMultiValueSyntax(
-                        firstValueNode,
-                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
-                        JsonBackgroundSyntax.Empty);
+                    return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -355,11 +340,7 @@ namespace Eutherion.Text.Json
                 if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
                 {
                     // Capture the background following the last value.
-                    var backgroundAfter = CaptureBackground();
-                    return new JsonMultiValueSyntax(
-                        firstValueNode,
-                        ReadOnlyList<JsonValueWithBackgroundSyntax>.Create(ignoredNodesBuilder),
-                        backgroundAfter);
+                    return new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
                 }
 
                 // Two or more consecutive values not allowed.
@@ -370,21 +351,87 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
+        // ParseMultiValue copy, except that it handles the !CurrentToken.IsValueStartSymbol case differently,
+        // as it cannot go to a higher level in the stack to process control symbols.
+        private JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
         {
-            JsonMultiValueSyntax multiValueNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
+            var valueNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
-            if (CurrentToken != null)
+            ShiftToNextForegroundToken();
+
+            if (CurrentToken == null)
             {
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
+                errors = Errors;
+                return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+            }
+
+            for (; ; )
+            {
+                // Always create a value node, then decide if it must be ignored.
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+
+                JsonValueSyntax currentNode;
+                bool unprocessedToken;
+                if (!CurrentToken.IsValueStartSymbol)
+                {
+                    // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
+                    if (valueNodesBuilder.Count == 0)
+                    {
+                        // Report an error if no value was encountered before the control symbol.
+                        // For all later control symbols, the last statement in this loop will
+                        // already have done it.
+                        Errors.Add(new JsonErrorInfo(
+                            JsonErrorCode.ExpectedEof,
+                            CurrentLength - CurrentToken.Length,
+                            CurrentToken.Length));
+                    }
+
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
+                    unprocessedToken = false;
+                }
+                else if (CurrentToken.HasErrors)
+                {
+                    // JsonErrorString, JsonUnknownSymbol
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
+                    unprocessedToken = false;
+                }
+                else
+                {
+                    (currentNode, unprocessedToken) = Visit(CurrentToken);
+                }
+
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+
+                // CurrentToken may be null, e.g. unterminated objects or arrays.
+                if (CurrentToken == null)
+                {
+                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                    // This means that here there's no need to capture the background.
+                    errors = Errors;
+                    return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+                }
+
+                // Move to the next symbol if CurrentToken was processed.
+                if (!unprocessedToken) ShiftToNextForegroundToken();
+
+                if (CurrentToken == null)
+                {
+                    // Capture the background following the last value.
+                    errors = Errors;
+                    return new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
+                }
+
+                // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
             }
-
-            errors = Errors;
-
-            return multiValueNode;
         }
+
+        public static JsonMultiValueSyntax TryParse(string json, out List<JsonErrorInfo> errors)
+            => new JsonParser(json).TryParse(out errors);
     }
 }

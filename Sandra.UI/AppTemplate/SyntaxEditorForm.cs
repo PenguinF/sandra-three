@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SyntaxEditorForm<TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -53,10 +53,10 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
+        public SyntaxEditor<TSyntaxTree, TTerminal, TError> SyntaxEditor { get; }
 
         public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
-                                SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+                                SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
@@ -65,7 +65,7 @@ namespace Eutherion.Win.AppTemplate
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile)
+            SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,
@@ -111,7 +111,7 @@ namespace Eutherion.Win.AppTemplate
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
-            if (SyntaxEditor.ReadOnly && SyntaxEditor.CurrentErrorCount == 0)
+            if (SyntaxEditor.ReadOnly && SyntaxEditor.CurrentErrors.Count == 0)
             {
                 // No errors while read-only: do not display an errors textbox.
                 Controls.Add(SyntaxEditor);
@@ -345,7 +345,7 @@ namespace Eutherion.Win.AppTemplate
 
             try
             {
-                if (SyntaxEditor.CurrentErrorCount == 0)
+                if (SyntaxEditor.CurrentErrors.Count == 0)
                 {
                     errorsListBox.Items.Clear();
                     errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
@@ -475,7 +475,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = SyntaxEditor.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrors.Count;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)
@@ -495,7 +495,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = SyntaxEditor.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrors.Count;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)

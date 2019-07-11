@@ -21,7 +21,7 @@
 
 namespace Eutherion.Text.Json
 {
-    public class JsonSquareBracketOpen : JsonSymbol
+    public sealed class JsonSquareBracketOpen : JsonSymbol
     {
         public const char SquareBracketOpenCharacter = '[';
         public const int SquareBracketOpenLength = 1;

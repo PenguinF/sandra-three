@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public class JsonUnterminatedMultiLineComment : JsonSymbol
+    public sealed class JsonUnterminatedMultiLineComment : JsonSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.

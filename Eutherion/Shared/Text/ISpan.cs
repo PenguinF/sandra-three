@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSquareBracketClose.cs
+ * ISpan.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,21 +19,16 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Text.Json
+namespace Eutherion.Text
 {
-    public sealed class JsonSquareBracketClose : JsonSymbol
+    /// <summary>
+    /// Represents something with a measure of length between a begin and an end point.
+    /// </summary>
+    public interface ISpan
     {
-        public const char SquareBracketCloseCharacter = ']';
-        public const int SquareBracketCloseLength = 1;
-
-        public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
-
-        public override int Length => SquareBracketCloseLength;
-
-        private JsonSquareBracketClose() { }
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketClose(this, arg);
+        /// <summary>
+        /// Gets the length.
+        /// </summary>
+        int Length { get; }
     }
 }

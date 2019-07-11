@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text.Json;
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -183,21 +184,43 @@ namespace Eutherion.Win.Storage
         /// <summary>
         /// Loads settings from text.
         /// </summary>
-        internal List<JsonErrorInfo> TryLoadFromText(string json)
+        internal bool TryLoadFromText(string json)
         {
-            if (SettingReader.TryParse(json, Schema, out SettingObject settingObject, out _, out List<JsonErrorInfo> errors))
+            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(json, Schema);
+
+            if (settingSyntaxTree.SettingObject != null)
             {
                 // Error tolerance:
                 // 1) Even if there are errors, still load the map.
                 // 2) Don't clear the existing settings, only overwrite them.
                 //    The map might not contain all expected properties.
-                foreach (var kv in settingObject.Map)
+                foreach (var kv in settingSyntaxTree.SettingObject.Map)
                 {
                     KeyValueMapping[kv.Key] = kv.Value;
                 }
             }
 
-            return errors;
+            // Log parse errors. Return true if no errors were found.
+            var errors = settingSyntaxTree.Errors;
+            if (errors.Count > 0)
+            {
+                errors.ForEach(x => new SettingsParseException(x).Trace());
+                return false;
+            }
+
+            return true;
         }
+    }
+
+    internal class SettingsParseException : Exception
+    {
+        public static string AutoSaveFileParseMessage(JsonErrorInfo jsonErrorInfo)
+        {
+            string paramDisplayString = StringUtilities.ToDefaultParameterListDisplayString(jsonErrorInfo.Parameters);
+            return $"{jsonErrorInfo.ErrorCode}{paramDisplayString} at position {jsonErrorInfo.Start}, length {jsonErrorInfo.Length}";
+        }
+
+        public SettingsParseException(JsonErrorInfo jsonErrorInfo)
+            : base(AutoSaveFileParseMessage(jsonErrorInfo)) { }
     }
 }

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,41 +28,6 @@ namespace Eutherion.Text.Json
 {
     public class JsonSymbolEnumerator : IEnumerable<JsonSymbol>
     {
-        // Originally I tried to use yield return expressions but it turns out that the compiler
-        // does not generate an entirely correct state machine from it in this case. It has
-        // trouble with JsonComma.Value and refuses to yield return it more than once inside
-        // the loop over the elements of an object or array, causing syntax highlighting to skew.
-        // So yeah, this is an implementation by hand.
-
-        private class EmptyJsonSymbolEnumerator : IEnumerator<JsonSymbol>
-        {
-            public static readonly EmptyJsonSymbolEnumerator Instance = new EmptyJsonSymbolEnumerator();
-
-            private EmptyJsonSymbolEnumerator() { }
-
-            void IEnumerator.Reset() { }
-            bool IEnumerator.MoveNext() => false;
-            JsonSymbol IEnumerator<JsonSymbol>.Current => default;
-            object IEnumerator.Current => default;
-            void IDisposable.Dispose() { }
-        }
-
-        private class SingleJsonSymbolEnumerator : IEnumerator<JsonSymbol>
-        {
-            private readonly JsonSymbol symbol;
-            private bool yielded;
-
-            public SingleJsonSymbolEnumerator(JsonSymbol symbol) => this.symbol = symbol;
-
-            // When called from a foreach construct, it goes:
-            // MoveNext() Current MoveNext() Dispose()
-            void IEnumerator.Reset() { }
-            bool IEnumerator.MoveNext() { if (yielded) return false; yielded = true; return true; }
-            JsonSymbol IEnumerator<JsonSymbol>.Current => symbol;
-            object IEnumerator.Current => symbol;
-            void IDisposable.Dispose() { }
-        }
-
         private class JsonSyntaxNodeWithBackgroundBeforeEnumerator : IEnumerator<JsonSymbol>
         {
             private readonly JsonValueWithBackgroundSyntax jsonSyntaxNodeWithBackgroundBefore;
@@ -115,34 +81,22 @@ namespace Eutherion.Text.Json
             public JsonMultiValueSyntaxNodeEnumerator(JsonMultiValueSyntax jsonMultiValueSyntaxNode)
             {
                 this.jsonMultiValueSyntaxNode = jsonMultiValueSyntaxNode;
-                currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(jsonMultiValueSyntaxNode.ValueNode);
-                currentMoveNext = NodeWithBackgroundMoveNext;
+                valueNodesEnumerator = jsonMultiValueSyntaxNode.ValueNodes.GetEnumerator();
+                currentMoveNext = ValueNodesMoveNext;
             }
 
             private JsonSymbol current;
-            private IEnumerator<JsonValueWithBackgroundSyntax> ignoredNodesEnumerator;
+            private readonly IEnumerator<JsonValueWithBackgroundSyntax> valueNodesEnumerator;
             private IEnumerator<JsonSymbol> currentEnumerator;
             private Func<bool> currentMoveNext;
 
-            private bool NodeWithBackgroundMoveNext()
+            private bool ValueNodesMoveNext()
             {
-                if (currentEnumerator.MoveNext())
+                if (valueNodesEnumerator.MoveNext())
                 {
-                    current = currentEnumerator.Current;
-                    return true;
-                }
-
-                ignoredNodesEnumerator = jsonMultiValueSyntaxNode.IgnoredNodes.GetEnumerator();
-                return IgnoredNodesMoveNext();
-            }
-
-            private bool IgnoredNodesMoveNext()
-            {
-                if (ignoredNodesEnumerator.MoveNext())
-                {
-                    currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(ignoredNodesEnumerator.Current);
-                    currentMoveNext = IgnoredNodeWithBackgroundMoveNext;
-                    return IgnoredNodeWithBackgroundMoveNext();
+                    currentEnumerator = new JsonSyntaxNodeWithBackgroundBeforeEnumerator(valueNodesEnumerator.Current);
+                    currentMoveNext = ValueNodeWithBackgroundMoveNext;
+                    return ValueNodeWithBackgroundMoveNext();
                 }
 
                 currentEnumerator = jsonMultiValueSyntaxNode.BackgroundAfter.BackgroundSymbols.GetEnumerator();
@@ -150,7 +104,7 @@ namespace Eutherion.Text.Json
                 return BackgroundAfterMoveNext();
             }
 
-            private bool IgnoredNodeWithBackgroundMoveNext()
+            private bool ValueNodeWithBackgroundMoveNext()
             {
                 if (currentEnumerator.MoveNext())
                 {
@@ -158,7 +112,7 @@ namespace Eutherion.Text.Json
                     return true;
                 }
 
-                return IgnoredNodesMoveNext();
+                return ValueNodesMoveNext();
             }
 
             private bool BackgroundAfterMoveNext()
@@ -190,37 +144,38 @@ namespace Eutherion.Text.Json
             }
 
             private JsonSymbol current;
-            private bool comma;
-            private IEnumerator<JsonMultiValueSyntax> elementEnumerator;
-            private IEnumerator<JsonSymbol> elementValueEnumerator;
+            private IEnumerator<Union<JsonMultiValueSyntax, JsonComma>> listItemEnumerator;
+            private IEnumerator<JsonSymbol> listItemValueEnumerator;
             private Func<bool> currentMoveNext;
 
             private bool SquareBracketOpenMoveNext()
             {
                 current = JsonSquareBracketOpen.Value;
-                elementEnumerator = jsonListSyntax.ElementNodes.GetEnumerator();
+                listItemEnumerator = jsonListSyntax.ListItemNodes.AllElements.GetEnumerator();
                 currentMoveNext = ElementsMoveNext;
                 return true;
             }
 
             private bool ElementsMoveNext()
             {
-                if (elementEnumerator.MoveNext())
+                if (listItemEnumerator.MoveNext())
                 {
-                    elementValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(elementEnumerator.Current);
-                    currentMoveNext = ElementNodeValueMoveNext;
+                    bool isComma = false;
 
-                    if (comma)
-                    {
-                        current = JsonComma.Value;
-                        return true;
-                    }
-                    else
-                    {
-                        comma = true;
-                    }
+                    listItemEnumerator.Current.Match(
+                        whenOption1: listItemNode =>
+                        {
+                            listItemValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(listItemNode);
+                            currentMoveNext = ListItemValueMoveNext;
+                        },
+                        whenOption2: comma =>
+                        {
+                            current = comma;
+                            isComma = true;
+                        });
 
-                    return ElementNodeValueMoveNext();
+                    // When encountering a separator, just re-enter this MoveNext method on the next iteration.
+                    return isComma || ListItemValueMoveNext();
                 }
 
                 if (!jsonListSyntax.MissingSquareBracketClose)
@@ -233,11 +188,11 @@ namespace Eutherion.Text.Json
                 return false;
             }
 
-            private bool ElementNodeValueMoveNext()
+            private bool ListItemValueMoveNext()
             {
-                if (elementValueEnumerator.MoveNext())
+                if (listItemValueEnumerator.MoveNext())
                 {
-                    current = elementValueEnumerator.Current;
+                    current = listItemValueEnumerator.Current;
                     return true;
                 }
 
@@ -264,17 +219,15 @@ namespace Eutherion.Text.Json
             }
 
             private JsonSymbol current;
-            private bool comma;
-            private JsonKeyValueSyntax keyValueNode;
-            private IEnumerator<JsonKeyValueSyntax> keyValueNodeEnumerator;
-            private IEnumerator<JsonMultiValueSyntax> valueNodeEnumerator;
+            private IEnumerator<Union<JsonKeyValueSyntax, JsonComma>> keyValueNodeEnumerator;
+            private IEnumerator<Union<JsonMultiValueSyntax, JsonColon>> valueSectionNodesEnumerator;
             private IEnumerator<JsonSymbol> multiValueEnumerator;
             private Func<bool> currentMoveNext;
 
             private bool CurlyOpenMoveNext()
             {
                 current = JsonCurlyOpen.Value;
-                keyValueNodeEnumerator = jsonMapSyntax.KeyValueNodes.GetEnumerator();
+                keyValueNodeEnumerator = jsonMapSyntax.KeyValueNodes.AllElements.GetEnumerator();
                 currentMoveNext = KeyValueMoveNext;
                 return true;
             }
@@ -283,18 +236,22 @@ namespace Eutherion.Text.Json
             {
                 if (keyValueNodeEnumerator.MoveNext())
                 {
-                    keyValueNode = keyValueNodeEnumerator.Current;
-                    multiValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(keyValueNode.KeyNode);
-                    currentMoveNext = KeyNodeMoveNext;
+                    bool isComma = false;
 
-                    if (comma)
-                    {
-                        current = JsonComma.Value;
-                        return true;
-                    }
+                    keyValueNodeEnumerator.Current.Match(
+                        whenOption1: keyValueNode =>
+                        {
+                            valueSectionNodesEnumerator = keyValueNode.ValueSectionNodes.AllElements.GetEnumerator();
+                            currentMoveNext = ValueNodesMoveNext;
+                        },
+                        whenOption2: comma =>
+                        {
+                            current = comma;
+                            isComma = true;
+                        });
 
-                    comma = true;
-                    return KeyNodeMoveNext();
+                    // When encountering a separator, just re-enter this MoveNext method on the next iteration.
+                    return isComma || ValueNodesMoveNext();
                 }
 
                 if (!jsonMapSyntax.MissingCurlyClose)
@@ -307,27 +264,26 @@ namespace Eutherion.Text.Json
                 return false;
             }
 
-            private bool KeyNodeMoveNext()
-            {
-                if (multiValueEnumerator.MoveNext())
-                {
-                    current = multiValueEnumerator.Current;
-                    return true;
-                }
-
-                valueNodeEnumerator = keyValueNode.ValueNodes.GetEnumerator();
-                currentMoveNext = ValueNodesMoveNext;
-                return ValueNodesMoveNext();
-            }
-
             private bool ValueNodesMoveNext()
             {
-                if (valueNodeEnumerator.MoveNext())
+                if (valueSectionNodesEnumerator.MoveNext())
                 {
-                    current = JsonColon.Value;
-                    multiValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(valueNodeEnumerator.Current);
-                    currentMoveNext = ValueNodeMoveNext;
-                    return true;
+                    bool isColon = false;
+
+                    valueSectionNodesEnumerator.Current.Match(
+                        whenOption1: valueSectionNode =>
+                        {
+                            multiValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(valueSectionNode);
+                            currentMoveNext = ValueNodeMoveNext;
+                        },
+                        whenOption2: colon =>
+                        {
+                            current = colon;
+                            isColon = true;
+                        });
+
+                    // When encountering a separator, just re-enter this MoveNext method on the next iteration.
+                    return isColon || ValueNodeMoveNext();
                 }
 
                 return KeyValueMoveNext();
@@ -360,10 +316,10 @@ namespace Eutherion.Text.Json
             private EnumeratorSelector() { }
 
             public override IEnumerator<JsonSymbol> VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.BooleanToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.BooleanToken);
 
             public override IEnumerator<JsonSymbol> VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.IntegerToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.IntegerToken);
 
             public override IEnumerator<JsonSymbol> VisitListSyntax(JsonListSyntax node)
                 => new JsonListSyntaxEnumerator(node);
@@ -372,13 +328,13 @@ namespace Eutherion.Text.Json
                 => new JsonMapSyntaxEnumerator(node);
 
             public override IEnumerator<JsonSymbol> VisitMissingValueSyntax(JsonMissingValueSyntax node)
-                => EmptyJsonSymbolEnumerator.Instance;
+                => EmptyEnumerator<JsonSymbol>.Instance;
 
             public override IEnumerator<JsonSymbol> VisitStringLiteralSyntax(JsonStringLiteralSyntax node)
-                => new SingleJsonSymbolEnumerator(node.StringToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.StringToken);
 
             public override IEnumerator<JsonSymbol> VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node)
-                => new SingleJsonSymbolEnumerator(node.UndefinedToken);
+                => new SingleElementEnumerator<JsonSymbol>(node.UndefinedToken);
         }
 
         private readonly JsonMultiValueSyntax rootNode;
