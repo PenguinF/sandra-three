@@ -128,6 +128,7 @@ namespace Eutherion.Text.Json
 
                 // Reuse keyValueSyntaxBuilder.
                 keyValueSyntaxBuilder.Clear();
+                keyValueSyntaxBuilder.Add(multiKeyNode);
 
                 // Keep parsing multi-values until encountering a non ':'.
                 bool gotColon = false;
@@ -152,10 +153,7 @@ namespace Eutherion.Text.Json
                 }
 
                 // One key-value section done.
-                var jsonKeyValueSyntax = new JsonKeyValueSyntax(
-                    multiKeyNode,
-                    validKey,
-                    keyValueSyntaxBuilder);
+                var jsonKeyValueSyntax = new JsonKeyValueSyntax(validKey, keyValueSyntaxBuilder);
 
                 mapBuilder.Add(jsonKeyValueSyntax);
 
@@ -177,8 +175,8 @@ namespace Eutherion.Text.Json
 
                     // Report missing value error from being reported if all value sections are empty.
                     // Example: { "key1":: 2, "key2": , }
-                    // The first section does not report a missing value, the second section does.
-                    if (jsonKeyValueSyntax.ValueSectionNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
+                    // Skip the fist value section, it contains the key node.
+                    if (jsonKeyValueSyntax.ValueSectionNodes.Skip(1).All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,

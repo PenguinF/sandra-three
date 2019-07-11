@@ -276,6 +276,7 @@ namespace Eutherion.Text.Json
                 }
 
                 valueSectionNodesEnumerator = keyValueNode.ValueSectionNodes.GetEnumerator();
+                valueSectionNodesEnumerator.MoveNext(); // Skip the key node.
                 currentMoveNext = ValueNodesMoveNext;
                 return ValueNodesMoveNext();
             }

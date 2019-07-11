@@ -33,7 +33,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the syntax node containing the key of this <see cref="JsonKeyValueSyntax"/>.
         /// </summary>
-        public JsonMultiValueSyntax KeyNode { get; }
+        public JsonMultiValueSyntax KeyNode => ValueSectionNodes[0];
 
         /// <summary>
         /// If <see cref="KeyNode"/> contains a valid key, returns it.
@@ -43,7 +43,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Returns the first value node containing the value of this <see cref="JsonKeyValueSyntax"/>, if it was provided.
         /// </summary>
-        public Maybe<JsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 0 ? ValueSectionNodes[0] : Maybe<JsonMultiValueSyntax>.Nothing;
+        public Maybe<JsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 1 ? ValueSectionNodes[1] : Maybe<JsonMultiValueSyntax>.Nothing;
 
         /// <summary>
         /// Gets the list of value section nodes separated by colon characters.
@@ -60,39 +60,41 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Initializes a new instance of a <see cref="JsonKeyValueSyntax"/>.
         /// </summary>
-        /// <param name="keyNode">
-        /// The syntax node containing the key.
-        /// </param>
         /// <param name="validKey">
         /// Nothing if no valid key was found, just the valid key otherwise.
         /// </param>
-        /// <param name="valueNodes">
-        /// The list of syntax nodes containing the value.
+        /// <param name="valueSectionNodes">
+        /// The list of syntax nodes containing the key and values.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="keyNode"/> and/or <paramref name="validKey"/> and/or <paramref name="valueNodes"/> are null.
+        /// <paramref name="validKey"/> and/or <paramref name="valueSectionNodes"/> are null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="validKey"/> is not the expected syntax node in <paramref name="keyNode"/>.
+        /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an enumeration containing one or less elements.
         /// </exception>
-        public JsonKeyValueSyntax(JsonMultiValueSyntax keyNode, Maybe<JsonStringLiteralSyntax> validKey, IEnumerable<JsonMultiValueSyntax> valueNodes)
+        public JsonKeyValueSyntax(Maybe<JsonStringLiteralSyntax> validKey, IEnumerable<JsonMultiValueSyntax> valueSectionNodes)
         {
-            KeyNode = keyNode ?? throw new ArgumentNullException(nameof(keyNode));
             ValidKey = validKey ?? throw new ArgumentNullException(nameof(validKey));
+            ValueSectionNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueSectionNodes);
+
+            if (ValueSectionNodes.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(valueSectionNodes)} cannot be empty", nameof(valueSectionNodes));
+            }
+
+            JsonMultiValueSyntax keyNode = ValueSectionNodes[0];
 
             // If a valid key node is given, the node must always be equal to keyNode.ValueNode.Node.
             if (validKey.IsJust(out JsonStringLiteralSyntax validKeyNode)
                 && validKeyNode != keyNode.ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
 
-            ValueSectionNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueNodes);
-
             int cumulativeLength = keyNode.Length;
-            ValueNodePositions = new int[ValueSectionNodes.Count];
+            ValueNodePositions = new int[ValueSectionNodes.Count - 1];
 
-            for (int i = 0; i < ValueSectionNodes.Count; i++)
+            for (int i = 1; i < ValueSectionNodes.Count; i++)
             {
                 cumulativeLength += JsonColon.ColonLength;
-                ValueNodePositions[i] = cumulativeLength;
+                ValueNodePositions[i - 1] = cumulativeLength;
                 cumulativeLength += ValueSectionNodes[i].Length;
             }
 
