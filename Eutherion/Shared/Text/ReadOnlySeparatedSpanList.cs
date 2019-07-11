@@ -48,6 +48,8 @@ namespace Eutherion.Text
 
             public override IEnumerator<TSpan> GetEnumerator() => EmptyEnumerator<TSpan>.Instance;
 
+            public override IEnumerable<Union<TSpan, TSeparator>> AllElements => default(EmptyEnumerable<Union<TSpan, TSeparator>>);
+
             public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
         }
 
@@ -68,6 +70,8 @@ namespace Eutherion.Text
             public override int Count => 1;
 
             public override IEnumerator<TSpan> GetEnumerator() => new SingleElementEnumerator<TSpan>(element);
+
+            public override IEnumerable<Union<TSpan, TSeparator>> AllElements => new SingleElementEnumerable<Union<TSpan, TSeparator>>(element);
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
         }
@@ -106,6 +110,20 @@ namespace Eutherion.Text
             public override int Count => array.Length;
 
             public override IEnumerator<TSpan> GetEnumerator() => ((ICollection<TSpan>)array).GetEnumerator();
+
+            public override IEnumerable<Union<TSpan, TSeparator>> AllElements
+            {
+                get
+                {
+                    yield return array[0];
+
+                    for (int i = 1; i < array.Length; i++)
+                    {
+                        yield return separator;
+                        yield return array[i];
+                    }
+                }
+            }
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : arrayElementOffsets[index - 1];
         }
@@ -192,5 +210,13 @@ namespace Eutherion.Text
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
         public abstract int GetElementOffset(int index);
+
+        /// <summary>
+        /// Enumerates all elements of the list, including separators.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="IEnumerable{T}"/> that enumerates all elements of the list, including separators.
+        /// </returns>
+        public abstract IEnumerable<Union<TSpan, TSeparator>> AllElements { get; }
     }
 }
