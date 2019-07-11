@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Eutherion.Win.AppTemplate
 {
-    public class SyntaxEditorForm<TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
+    public class SyntaxEditorForm<TSyntaxTree, TTerminal, TError> : MenuCaptionBarForm, IWeakEventTarget
     {
         private const string ChangedMarker = "• ";
 
@@ -53,10 +53,10 @@ namespace Eutherion.Win.AppTemplate
         private readonly LocalizedString noErrorsString;
         private readonly LocalizedString errorLocationString;
 
-        public SyntaxEditor<TTerminal, TError> SyntaxEditor { get; }
+        public SyntaxEditor<TSyntaxTree, TTerminal, TError> SyntaxEditor { get; }
 
         public SyntaxEditorForm(SyntaxEditorCodeAccessOption codeAccessOption,
-                                SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+                                SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
                                 SettingProperty<PersistableFormState> formStateSetting,
                                 SettingProperty<int> errorHeightSetting,
@@ -65,7 +65,7 @@ namespace Eutherion.Win.AppTemplate
             this.formStateSetting = formStateSetting;
             this.errorHeightSetting = errorHeightSetting;
 
-            SyntaxEditor = new SyntaxEditor<TTerminal, TError>(syntaxDescriptor, codeFile)
+            SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {
                 Dock = DockStyle.Fill,
                 ReadOnly = codeAccessOption == SyntaxEditorCodeAccessOption.ReadOnly,

@@ -32,7 +32,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Describes the interaction between json syntax and a syntax editor.
     /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<JsonSymbol, JsonErrorInfo>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
     {
         public static readonly string JsonFileExtension = "json";
 
@@ -79,7 +79,7 @@ namespace Eutherion.Win.AppTemplate
             return (new JsonSymbolEnumerator(settingSyntaxTree.JsonRootNode), errors);
         }
 
-        public override Style GetStyle(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
+        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
             => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override int GetLength(JsonSymbol terminalSymbol)
@@ -95,7 +95,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// A style selector for json syntax highlighting.
     /// </summary>
-    public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<JsonSymbol, JsonErrorInfo>, Style>
+    public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>, Style>
     {
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
@@ -111,7 +111,7 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly JsonStyleSelector Instance = new JsonStyleSelector();
 
-        public static void InitializeStyles(SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public static void InitializeStyles(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
         {
             syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
             commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
@@ -124,22 +124,22 @@ namespace Eutherion.Win.AppTemplate
 
         private JsonStyleSelector() { }
 
-        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitComment(JsonComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitComment(JsonComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitString(JsonString symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitString(JsonString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitValue(JsonValue symbol, SyntaxEditor<JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitValue(JsonValue symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[valueStyleIndex];
     }
 }

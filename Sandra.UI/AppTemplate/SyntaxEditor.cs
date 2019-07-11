@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Text;
 using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win.Storage;
@@ -37,20 +36,23 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Represents a <see cref="ScintillaEx"/> control with syntax highlighting.
     /// </summary>
+    /// <typeparam name="TSyntaxTree">
+    /// The type of syntax tree.
+    /// </typeparam>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbol to display.
     /// </typeparam>
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public class SyntaxEditor<TTerminal, TError> : ScintillaEx
+    public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
 
         /// <summary>
         /// Gets the syntax descriptor.
         /// </summary>
-        public SyntaxDescriptor<TTerminal, TError> SyntaxDescriptor { get; }
+        public SyntaxDescriptor<TSyntaxTree, TTerminal, TError> SyntaxDescriptor { get; }
 
         /// <summary>
         /// Gets the edited text file.
@@ -64,7 +66,7 @@ namespace Eutherion.Win.AppTemplate
         private bool containsChangesAtSavePoint;
 
         /// <summary>
-        /// Returns if this <see cref="SyntaxEditor{TTerminal, TError}"/> contains any unsaved changes.
+        /// Returns if this <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/> contains any unsaved changes.
         /// If the text file could not be opened, true is returned.
         /// </summary>
         public bool ContainsChanges
@@ -76,19 +78,19 @@ namespace Eutherion.Win.AppTemplate
         private Style CallTipStyle => Styles[Style.CallTip];
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="SyntaxEditor{TTerminal, TError}"/>.
+        /// Initializes a new instance of a <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </summary>
         /// <param name="syntaxDescriptor">
         /// The syntax descriptor.
         /// </param>
         /// <param name="codeFile">
         /// The code file to show and/or edit.
-        /// It is disposed together with this <see cref="SyntaxEditor{TTerminal, TError}"/>.
+        /// It is disposed together with this <see cref="SyntaxEditor{TSyntaxTree, TTerminal, TError}"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="syntaxDescriptor"/> and/or <paramref name="codeFile"/> are null.
         /// </exception>
-        public SyntaxEditor(SyntaxDescriptor<TTerminal, TError> syntaxDescriptor,
+        public SyntaxEditor(SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                             WorkingCopyTextFile codeFile)
         {
             SyntaxDescriptor = syntaxDescriptor ?? throw new ArgumentNullException(nameof(syntaxDescriptor));
@@ -399,15 +401,18 @@ namespace Eutherion.Win.AppTemplate
     }
 
     /// <summary>
-    /// Describes the interaction between a syntax and how a <see cref="SyntaxDescriptor{TTerminal, TError}"/> displays it.
+    /// Describes the interaction between a syntax and how a <see cref="SyntaxDescriptor{TSyntaxTree, TTerminal, TError}"/> displays it.
     /// </summary>
+    /// <typeparam name="TSyntaxTree">
+    /// The type of syntax tree.
+    /// </typeparam>
     /// <typeparam name="TTerminal">
     /// The type of terminal symbol to display.
     /// </typeparam>
     /// <typeparam name="TError">
     /// The type of error to display.
     /// </typeparam>
-    public abstract class SyntaxDescriptor<TTerminal, TError>
+    public abstract class SyntaxDescriptor<TSyntaxTree, TTerminal, TError>
     {
         /// <summary>
         /// Gets the default file extension for this syntax.
@@ -427,7 +432,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Gets the style for a terminal symbol.
         /// </summary>
-        public abstract Style GetStyle(SyntaxEditor<TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
+        public abstract Style GetStyle(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
 
         /// <summary>
         /// Gets the length of a terminal symbol.
