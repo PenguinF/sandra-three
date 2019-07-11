@@ -372,30 +372,26 @@ namespace Eutherion.Text.Json
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
 
+                JsonValueSyntax currentNode;
+                bool unprocessedToken;
                 if (!CurrentToken.IsValueStartSymbol)
                 {
+                    // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
                     if (valueNodesBuilder.Count == 0)
                     {
-                        valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, JsonMissingValueSyntax.Value));
-
+                        // Report an error if no value was encountered before the control symbol.
+                        // For all later control symbols, the last statement in this loop will
+                        // already have done it.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ExpectedEof,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
+                    }
 
-                        errors = Errors;
-                        return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
-                    }
-                    else
-                    {
-                        errors = Errors;
-                        return new JsonMultiValueSyntax(valueNodesBuilder, backgroundBefore);
-                    }
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
+                    unprocessedToken = false;
                 }
-
-                JsonValueSyntax currentNode;
-                bool unprocessedToken;
-                if (CurrentToken.HasErrors)
+                else if (CurrentToken.HasErrors)
                 {
                     // JsonErrorString, JsonUnknownSymbol
                     currentNode = new JsonUndefinedValueSyntax(CurrentToken);
