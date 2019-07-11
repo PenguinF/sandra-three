@@ -178,7 +178,7 @@ namespace Eutherion.Text.Json
                     // Report missing value error from being reported if all value sections are empty.
                     // Example: { "key1":: 2, "key2": , }
                     // The first section does not report a missing value, the second section does.
-                    if (jsonKeyValueSyntax.ValueNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
+                    if (jsonKeyValueSyntax.ValueSectionNodes.All(x => x.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.MissingValue,

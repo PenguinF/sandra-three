@@ -59,18 +59,15 @@ namespace Eutherion.Text.Json
                 {
                     var keyValueNode = KeyValueNodes[i];
 
-                    if (keyValueNode.ValidKey.IsJust(out JsonStringLiteralSyntax stringLiteral) && keyValueNode.ValueNodes.Count > 0)
+                    if (keyValueNode.ValidKey.IsJust(out JsonStringLiteralSyntax stringLiteral)
+                        && keyValueNode.FirstValueNode.IsJust(out JsonMultiValueSyntax multiValueNode)
+                        && !(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
                     {
-                        JsonMultiValueSyntax multiValueNode = keyValueNode.ValueNodes[0];
-
                         // Only the first value can be valid, even if it's undefined.
-                        if (!(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
-                        {
-                            int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                            int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
+                        int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
+                        int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
 
-                            yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
-                        }
+                        yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                     }
                 }
             }

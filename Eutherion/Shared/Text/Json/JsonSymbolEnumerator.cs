@@ -227,7 +227,7 @@ namespace Eutherion.Text.Json
             private bool comma;
             private JsonKeyValueSyntax keyValueNode;
             private IEnumerator<JsonKeyValueSyntax> keyValueNodeEnumerator;
-            private IEnumerator<JsonMultiValueSyntax> valueNodeEnumerator;
+            private IEnumerator<JsonMultiValueSyntax> valueSectionNodesEnumerator;
             private IEnumerator<JsonSymbol> multiValueEnumerator;
             private Func<bool> currentMoveNext;
 
@@ -275,17 +275,17 @@ namespace Eutherion.Text.Json
                     return true;
                 }
 
-                valueNodeEnumerator = keyValueNode.ValueNodes.GetEnumerator();
+                valueSectionNodesEnumerator = keyValueNode.ValueSectionNodes.GetEnumerator();
                 currentMoveNext = ValueNodesMoveNext;
                 return ValueNodesMoveNext();
             }
 
             private bool ValueNodesMoveNext()
             {
-                if (valueNodeEnumerator.MoveNext())
+                if (valueSectionNodesEnumerator.MoveNext())
                 {
                     current = JsonColon.Value;
-                    multiValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(valueNodeEnumerator.Current);
+                    multiValueEnumerator = new JsonMultiValueSyntaxNodeEnumerator(valueSectionNodesEnumerator.Current);
                     currentMoveNext = ValueNodeMoveNext;
                     return true;
                 }

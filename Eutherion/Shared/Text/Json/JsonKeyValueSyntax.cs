@@ -41,9 +41,14 @@ namespace Eutherion.Text.Json
         public Maybe<JsonStringLiteralSyntax> ValidKey { get; }
 
         /// <summary>
-        /// Gets the list of syntax nodes containing the value of this <see cref="JsonKeyValueSyntax"/>.
+        /// Returns the first value node containing the value of this <see cref="JsonKeyValueSyntax"/>, if it was provided.
         /// </summary>
-        public ReadOnlyList<JsonMultiValueSyntax> ValueNodes { get; }
+        public Maybe<JsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 0 ? ValueSectionNodes[0] : Maybe<JsonMultiValueSyntax>.Nothing;
+
+        /// <summary>
+        /// Gets the list of value section nodes separated by colon characters.
+        /// </summary>
+        public ReadOnlyList<JsonMultiValueSyntax> ValueSectionNodes { get; }
 
         private readonly int[] ValueNodePositions;
 
@@ -79,16 +84,16 @@ namespace Eutherion.Text.Json
             if (validKey.IsJust(out JsonStringLiteralSyntax validKeyNode)
                 && validKeyNode != keyNode.ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
 
-            ValueNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueNodes);
+            ValueSectionNodes = ReadOnlyList<JsonMultiValueSyntax>.Create(valueNodes);
 
             int cumulativeLength = keyNode.Length;
-            ValueNodePositions = new int[ValueNodes.Count];
+            ValueNodePositions = new int[ValueSectionNodes.Count];
 
-            for (int i = 0; i < ValueNodes.Count; i++)
+            for (int i = 0; i < ValueSectionNodes.Count; i++)
             {
                 cumulativeLength += JsonColon.ColonLength;
                 ValueNodePositions[i] = cumulativeLength;
-                cumulativeLength += ValueNodes[i].Length;
+                cumulativeLength += ValueSectionNodes[i].Length;
             }
 
             Length = cumulativeLength;
