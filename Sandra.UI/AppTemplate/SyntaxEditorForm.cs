@@ -111,7 +111,7 @@ namespace Eutherion.Win.AppTemplate
 
             // If there is no errorsTextBox, splitter will remain null,
             // and no splitter distance needs to be restored or auto-saved.
-            if (SyntaxEditor.ReadOnly && SyntaxEditor.CurrentErrorCount == 0)
+            if (SyntaxEditor.ReadOnly && SyntaxEditor.CurrentErrors.Count == 0)
             {
                 // No errors while read-only: do not display an errors textbox.
                 Controls.Add(SyntaxEditor);
@@ -345,7 +345,7 @@ namespace Eutherion.Win.AppTemplate
 
             try
             {
-                if (SyntaxEditor.CurrentErrorCount == 0)
+                if (SyntaxEditor.CurrentErrors.Count == 0)
                 {
                     errorsListBox.Items.Clear();
                     errorsListBox.Items.Add(noErrorsString.DisplayText.Value);
@@ -475,7 +475,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = SyntaxEditor.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrors.Count;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)
@@ -495,7 +495,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
-            int errorCount = SyntaxEditor.CurrentErrorCount;
+            int errorCount = SyntaxEditor.CurrentErrors.Count;
             if (errorCount == 0) return UIActionVisibility.Disabled;
 
             if (perform)

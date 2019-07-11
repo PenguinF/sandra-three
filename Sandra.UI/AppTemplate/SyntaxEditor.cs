@@ -225,9 +225,9 @@ namespace Eutherion.Win.AppTemplate
 
             IndicatorClearRange(0, TextLength);
 
-            currentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
+            CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
 
-            foreach (var error in currentErrors)
+            foreach (var error in CurrentErrors)
             {
                 var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
 
@@ -237,18 +237,14 @@ namespace Eutherion.Win.AppTemplate
             CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private ReadOnlyList<TError> currentErrors = ReadOnlyList<TError>.Empty;
-
-        public int CurrentErrorCount => currentErrors.Count;
-
-        public IEnumerable<TError> CurrentErrors => currentErrors.Enumerate();
+        public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
 
         public event EventHandler CurrentErrorsChanged;
 
         public void ActivateError(int errorIndex)
         {
             // Select the text that generated the error.
-            if (0 <= errorIndex && errorIndex < currentErrors.Count)
+            if (0 <= errorIndex && errorIndex < CurrentErrors.Count)
             {
                 // Determine how many lines are visible in the top half of the control.
                 int firstVisibleLine = FirstVisibleLine;
@@ -257,7 +253,7 @@ namespace Eutherion.Win.AppTemplate
 
                 // Then calculate which line should become the first visible line
                 // so the error line ends up in the middle of the control.
-                var (hotErrorStart, hotErrorLength) = SyntaxDescriptor.GetErrorRange(currentErrors[errorIndex]);
+                var (hotErrorStart, hotErrorLength) = SyntaxDescriptor.GetErrorRange(CurrentErrors[errorIndex]);
                 int hotErrorLine = LineFromPosition(hotErrorStart);
 
                 // hotErrorLine in view?
@@ -283,7 +279,7 @@ namespace Eutherion.Win.AppTemplate
         {
             if (textPosition >= 0 && textPosition < TextLength)
             {
-                foreach (var error in currentErrors)
+                foreach (var error in CurrentErrors)
                 {
                     var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
 
