@@ -23,7 +23,7 @@ using System;
 
 namespace Eutherion.Text.Json
 {
-    public class JsonValue : JsonSymbol
+    public sealed class JsonValue : JsonSymbol
     {
         public const int FalseSymbolLength = 5;
         public const int TrueSymbolLength = 4;

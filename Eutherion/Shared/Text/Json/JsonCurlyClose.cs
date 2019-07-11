@@ -21,7 +21,7 @@
 
 namespace Eutherion.Text.Json
 {
-    public class JsonCurlyClose : JsonSymbol
+    public sealed class JsonCurlyClose : JsonSymbol
     {
         public const char CurlyCloseCharacter = '}';
         public const int CurlyCloseLength = 1;

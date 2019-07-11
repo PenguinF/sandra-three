@@ -29,7 +29,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node with background symbols in an abstract json syntax tree.
     /// </summary>
-    public class JsonBackgroundSyntax
+    public sealed class JsonBackgroundSyntax
     {
         /// <summary>
         /// Gets the empty <see cref="JsonBackgroundSyntax"/>.

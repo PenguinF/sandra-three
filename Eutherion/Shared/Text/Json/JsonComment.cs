@@ -23,7 +23,7 @@ using System;
 
 namespace Eutherion.Text.Json
 {
-    public class JsonComment : JsonSymbol
+    public sealed class JsonComment : JsonSymbol
     {
         public const char CommentStartFirstCharacter = '/';
         public const char SingleLineCommentStartSecondCharacter = '/';

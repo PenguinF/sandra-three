@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public class JsonUnknownSymbol : JsonSymbol
+    public sealed class JsonUnknownSymbol : JsonSymbol
     {
         public const int UnknownSymbolLength = 1;
 
