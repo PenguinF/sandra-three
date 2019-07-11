@@ -44,6 +44,8 @@ namespace Eutherion.Text
             public override int Count => 0;
 
             public override IEnumerator<TSpan> GetEnumerator() => EmptyEnumerator<TSpan>.Instance;
+
+            public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
         }
 
         private class OneElement : ReadOnlySpanList<TSpan>
@@ -63,19 +65,26 @@ namespace Eutherion.Text
             public override int Count => 1;
 
             public override IEnumerator<TSpan> GetEnumerator() => new SingleElementEnumerator<TSpan>(element);
+
+            public override int GetElementOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
         }
 
         private class TwoOrMoreElements : ReadOnlySpanList<TSpan>
         {
             private readonly TSpan[] array;
+            private readonly int[] arrayElementOffsets;
 
             public TwoOrMoreElements(TSpan[] source)
             {
-                int length = 0;
-                for (int i = 0; i < source.Length; i++)
+                if (source[0] == null) throw new ArgumentException(nameof(source));
+                int length = source[0].Length;
+                arrayElementOffsets = new int[source.Length - 1];
+
+                for (int i = 1; i < source.Length; i++)
                 {
                     TSpan arrayElement = source[i];
                     if (arrayElement == null) throw new ArgumentException(nameof(source));
+                    arrayElementOffsets[i - 1] = length;
                     length += arrayElement.Length;
                 }
 
@@ -90,6 +99,8 @@ namespace Eutherion.Text
             public override int Count => array.Length;
 
             public override IEnumerator<TSpan> GetEnumerator() => ((ICollection<TSpan>)array).GetEnumerator();
+
+            public override int GetElementOffset(int index) => index == 0 ? 0 : arrayElementOffsets[index - 1];
         }
 
         /// <summary>
@@ -156,5 +167,20 @@ namespace Eutherion.Text
         public abstract IEnumerator<TSpan> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Gets the start position of the spanned element at the specified index
+        /// relative to the start position of the first element.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the spanned element.
+        /// </param>
+        /// <returns>
+        /// The start position of the spanned element relative to the start position of the first element.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
+        /// </exception>
+        public abstract int GetElementOffset(int index);
     }
 }
