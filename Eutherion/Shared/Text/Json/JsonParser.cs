@@ -351,21 +351,101 @@ namespace Eutherion.Text.Json
             }
         }
 
+        // ParseMultiValue copy, except that it handles the !CurrentToken.IsValueStartSymbol case differently,
+        // as it cannot go to a higher level in the stack to process control symbols.
         private JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
         {
-            JsonMultiValueSyntax multiValueNode = ParseMultiValue(JsonErrorCode.ExpectedEof);
+            var valueNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
-            if (CurrentToken != null)
+            ShiftToNextForegroundToken();
+
+            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
+                JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+
+                if (CurrentToken != null)
+                {
+                    Errors.Add(new JsonErrorInfo(
+                        JsonErrorCode.ExpectedEof,
+                        CurrentLength - CurrentToken.Length,
+                        CurrentToken.Length));
+                }
+
+                errors = Errors;
+
+                return multiValueNode;
+            }
+
+            for (; ; )
+            {
+                // Always create a value node, then decide if it must be ignored.
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+
+                JsonValueSyntax currentNode;
+                bool unprocessedToken;
+                if (CurrentToken.HasErrors)
+                {
+                    // JsonErrorString, JsonUnknownSymbol
+                    currentNode = new JsonUndefinedValueSyntax(CurrentToken);
+                    unprocessedToken = false;
+                }
+                else
+                {
+                    (currentNode, unprocessedToken) = Visit(CurrentToken);
+                }
+
+                valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+
+                // CurrentToken may be null, e.g. unterminated objects or arrays.
+                if (CurrentToken == null)
+                {
+                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                    // This means that here there's no need to capture the background.
+                    JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+
+                    if (CurrentToken != null)
+                    {
+                        Errors.Add(new JsonErrorInfo(
+                            JsonErrorCode.ExpectedEof,
+                            CurrentLength - CurrentToken.Length,
+                            CurrentToken.Length));
+                    }
+
+                    errors = Errors;
+
+                    return multiValueNode;
+                }
+
+                // Move to the next symbol if CurrentToken was processed.
+                if (!unprocessedToken) ShiftToNextForegroundToken();
+
+                // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
+                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+                {
+                    // Capture the background following the last value.
+                    JsonMultiValueSyntax multiValueNode = new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
+
+                    if (CurrentToken != null)
+                    {
+                        Errors.Add(new JsonErrorInfo(
+                            JsonErrorCode.ExpectedEof,
+                            CurrentLength - CurrentToken.Length,
+                            CurrentToken.Length));
+                    }
+
+                    errors = Errors;
+
+                    return multiValueNode;
+                }
+
+                // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,
                     CurrentToken.Length));
             }
-
-            errors = Errors;
-
-            return multiValueNode;
         }
 
         public static JsonMultiValueSyntax TryParse(string json, out List<JsonErrorInfo> errors)
