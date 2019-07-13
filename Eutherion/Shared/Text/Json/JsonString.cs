@@ -90,7 +90,7 @@ namespace Eutherion.Text.Json
 
         public JsonString(string value, int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }

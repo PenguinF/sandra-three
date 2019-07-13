@@ -76,14 +76,14 @@ namespace Eutherion.Text.Json
 
         public JsonErrorString(int length, params JsonErrorInfo[] errors)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
         public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
