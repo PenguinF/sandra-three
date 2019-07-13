@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -34,7 +32,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the empty <see cref="JsonBackgroundSyntax"/>.
         /// </summary>
-        public static readonly JsonBackgroundSyntax Empty = new JsonBackgroundSyntax(ReadOnlyList<JsonSymbol>.Empty, 0);
+        public static readonly JsonBackgroundSyntax Empty = new JsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol>.Empty);
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonBackgroundSyntax"/>.
@@ -50,25 +48,21 @@ namespace Eutherion.Text.Json
         /// </exception>
         public static JsonBackgroundSyntax Create(IEnumerable<JsonSymbol> source)
         {
-            var readOnlyBackground = ReadOnlyList<JsonSymbol>.Create(source);
+            var readOnlyBackground = ReadOnlySpanList<JsonSymbol>.Create(source);
             if (readOnlyBackground.Count == 0) return Empty;
-            return new JsonBackgroundSyntax(readOnlyBackground, readOnlyBackground.Sum(x => x.Length));
+            return new JsonBackgroundSyntax(readOnlyBackground);
         }
 
         /// <summary>
         /// Gets the read-only list with background symbols.
         /// </summary>
-        public ReadOnlyList<JsonSymbol> BackgroundSymbols { get; }
+        public ReadOnlySpanList<JsonSymbol> BackgroundSymbols { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
         /// </summary>
-        public int Length { get; }
+        public int Length => BackgroundSymbols.Length;
 
-        private JsonBackgroundSyntax(ReadOnlyList<JsonSymbol> backgroundSymbols, int length)
-        {
-            BackgroundSymbols = ReadOnlyList<JsonSymbol>.Create(backgroundSymbols);
-            Length = length;
-        }
+        private JsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
     }
 }
