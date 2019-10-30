@@ -431,7 +431,10 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public static JsonMultiValueSyntax TryParse(string json, out List<JsonErrorInfo> errors)
-            => new JsonParser(json).TryParse(out errors);
+        public static RootJsonSyntax Parse(string json)
+        {
+            var jsonMultiValueSyntax = new JsonParser(json).TryParse(out List<JsonErrorInfo> errors);
+            return new RootJsonSyntax(jsonMultiValueSyntax, errors);
+        }
     }
 }

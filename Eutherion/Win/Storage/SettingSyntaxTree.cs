@@ -31,27 +31,28 @@ namespace Eutherion.Win.Storage
     {
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
-            JsonMultiValueSyntax rootNode = JsonParser.TryParse(json, out List<JsonErrorInfo> errors);
+            RootJsonSyntax rootNode = JsonParser.Parse(json);
+            var errors = rootNode.Errors;
 
-            if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
+            if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode, errors, null);
+                return new SettingSyntaxTree(rootNode.Syntax, errors, null);
             }
 
-            int rootNodeStart = rootNode.ValueNode.BackgroundBefore.Length;
+            int rootNodeStart = rootNode.Syntax.ValueNode.BackgroundBefore.Length;
 
             if (schema.TryCreateValue(
                 json,
-                rootNode.ValueNode.ContentNode,
+                rootNode.Syntax.ValueNode.ContentNode,
                 out SettingObject settingObject,
                 rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.ValueNode.ContentNode, json, rootNodeStart));
-                return new SettingSyntaxTree(rootNode, errors, null);
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json, rootNodeStart));
+                return new SettingSyntaxTree(rootNode.Syntax, errors, null);
             }
 
-            return new SettingSyntaxTree(rootNode, errors, settingObject);
+            return new SettingSyntaxTree(rootNode.Syntax, errors, settingObject);
         }
 
         public JsonMultiValueSyntax JsonRootNode { get; }
