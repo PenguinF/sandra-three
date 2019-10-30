@@ -32,7 +32,7 @@ namespace Eutherion.Win.AppTemplate
     /// Describes the interaction between json syntax and a syntax editor.
     /// Currently only used for testing.
     /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<RootJsonSyntax, JsonSymbol, JsonErrorInfo>
     {
         public static readonly string JsonFileExtension = "json";
 
@@ -59,13 +59,13 @@ namespace Eutherion.Win.AppTemplate
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override SettingSyntaxTree Parse(string code)
+        public override RootJsonSyntax Parse(string code)
         {
-            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
+            var rootNode = JsonParser.Parse(code);
 
-            if (settingSyntaxTree.Errors.Count > 0)
+            if (rootNode.Errors.Count > 0)
             {
-                settingSyntaxTree.Errors.Sort((x, y)
+                rootNode.Errors.Sort((x, y)
                     => x.Start < y.Start ? -1
                     : x.Start > y.Start ? 1
                     : x.Length < y.Length ? -1
@@ -75,17 +75,17 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return settingSyntaxTree;
+            return rootNode;
         }
 
-        public override IEnumerable<JsonSymbol> GetTerminals(SettingSyntaxTree syntaxTree)
-            => new JsonSymbolEnumerator(syntaxTree.JsonSyntaxTree.Syntax);
+        public override IEnumerable<JsonSymbol> GetTerminals(RootJsonSyntax syntaxTree)
+            => new JsonSymbolEnumerator(syntaxTree.Syntax);
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
+        public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
-            => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(SyntaxEditor<RootJsonSyntax, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
+            => JsonStyleSelector<RootJsonSyntax, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override int GetLength(JsonSymbol terminalSymbol)
             => terminalSymbol.Length;
