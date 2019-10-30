@@ -24,7 +24,11 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a context sensitive node in an abstract json syntax tree.
     /// </summary>
-    public abstract class JsonSyntax
+    public abstract class JsonSyntax : ISpan
     {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public abstract int Length { get; }
     }
 }
