@@ -77,6 +77,7 @@
     </Compile>
     <Compile Include="AppTemplate\Session.cs" />
     <Compile Include="AppTemplate\Session.ToolForms.cs" />
+    <Compile Include="AppTemplate\SettingSyntaxDescriptor.cs" />
     <Compile Include="AppTemplate\SharedLocalizedStringKeys.cs" />
     <Compile Include="AppTemplate\SharedResources.Designer.cs">
       <AutoGen>True</AutoGen>

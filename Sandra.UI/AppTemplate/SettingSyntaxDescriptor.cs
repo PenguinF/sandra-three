@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSyntaxDescriptor.cs
+ * SettingSyntaxDescriptor.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -29,20 +29,17 @@ using System.Collections.Generic;
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
-    /// Describes the interaction between json syntax and a syntax editor.
-    /// Currently only used for testing.
+    /// Describes the interaction between json syntax used for setting objects and a syntax editor.
     /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
+    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
     {
-        public static readonly string JsonFileExtension = "json";
-
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
         /// </summary>
         private readonly SettingSchema schema;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
+        /// Initializes a new instance of a <see cref="SettingSyntaxDescriptor"/>.
         /// </summary>
         /// <param name="schema">
         /// The schema which defines what kind of keys and values are valid in the parsed json.
@@ -50,12 +47,12 @@ namespace Eutherion.Win.AppTemplate
         /// <exception cref="ArgumentNullException">
         /// <paramref name="schema"/> is null.
         /// </exception>
-        public JsonSyntaxDescriptor(SettingSchema schema)
+        public SettingSyntaxDescriptor(SettingSchema schema)
         {
             this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
         }
 
-        public override string FileExtension => JsonFileExtension;
+        public override string FileExtension => JsonSyntaxDescriptor.JsonFileExtension;
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 

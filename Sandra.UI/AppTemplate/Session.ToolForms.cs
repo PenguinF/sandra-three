@@ -101,7 +101,7 @@ namespace Eutherion.Win.AppTemplate
                                         SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
-            var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema);
+            var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
 
             WorkingCopyTextFile codeFile;
             WorkingCopyTextFileAutoSaver autoSaver;
