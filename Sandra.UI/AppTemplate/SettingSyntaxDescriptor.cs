@@ -82,7 +82,7 @@ namespace Eutherion.Win.AppTemplate
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
-            => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
+            => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override int GetLength(JsonSymbol terminalSymbol)
             => terminalSymbol.Length;

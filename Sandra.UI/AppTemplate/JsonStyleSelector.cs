@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text.Json;
-using Eutherion.Win.Storage;
 using ScintillaNET;
 using System.Drawing;
 
@@ -29,7 +28,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// A style selector for json syntax highlighting.
     /// </summary>
-    public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>, Style>
+    public class JsonStyleSelector<TSyntaxTree, TError> : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSymbol, TError>, Style>
     {
         private const int commentStyleIndex = 8;
         private const int valueStyleIndex = 9;
@@ -43,9 +42,9 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
 
-        public static readonly JsonStyleSelector Instance = new JsonStyleSelector();
+        public static readonly JsonStyleSelector<TSyntaxTree, TError> Instance = new JsonStyleSelector<TSyntaxTree, TError>();
 
-        public static void InitializeStyles(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public static void InitializeStyles(SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
         {
             syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
             commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
@@ -58,22 +57,22 @@ namespace Eutherion.Win.AppTemplate
 
         private JsonStyleSelector() { }
 
-        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitComment(JsonComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitComment(JsonComment symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitString(JsonString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitString(JsonString symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitValue(JsonValue symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
+        public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, JsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[valueStyleIndex];
     }
 }

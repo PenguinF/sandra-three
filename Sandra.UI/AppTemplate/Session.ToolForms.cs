@@ -143,7 +143,7 @@ namespace Eutherion.Win.AppTemplate
                 ClientSize = new Size(600, 600),
             };
 
-            JsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+            JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.InitializeStyles(settingsForm.SyntaxEditor);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
