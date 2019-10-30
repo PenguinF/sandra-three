@@ -21,9 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
-using Eutherion.Win.Storage;
 using ScintillaNET;
-using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.AppTemplate
@@ -36,24 +34,9 @@ namespace Eutherion.Win.AppTemplate
     {
         public static readonly string JsonFileExtension = "json";
 
-        /// <summary>
-        /// Schema which defines what kind of keys and values are valid in the parsed json.
-        /// </summary>
-        private readonly SettingSchema schema;
+        public static readonly JsonSyntaxDescriptor Instance = new JsonSyntaxDescriptor();
 
-        /// <summary>
-        /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
-        /// </summary>
-        /// <param name="schema">
-        /// The schema which defines what kind of keys and values are valid in the parsed json.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="schema"/> is null.
-        /// </exception>
-        public JsonSyntaxDescriptor(SettingSchema schema)
-        {
-            this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
-        }
+        private JsonSyntaxDescriptor() { }
 
         public override string FileExtension => JsonFileExtension;
 
