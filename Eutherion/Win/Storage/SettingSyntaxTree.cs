@@ -36,7 +36,7 @@ namespace Eutherion.Win.Storage
 
             if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode.Syntax, errors, null);
+                return new SettingSyntaxTree(rootNode, null);
             }
 
             int rootNodeStart = rootNode.Syntax.ValueNode.BackgroundBefore.Length;
@@ -49,20 +49,19 @@ namespace Eutherion.Win.Storage
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
                 errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json, rootNodeStart));
-                return new SettingSyntaxTree(rootNode.Syntax, errors, null);
+                return new SettingSyntaxTree(rootNode, null);
             }
 
-            return new SettingSyntaxTree(rootNode.Syntax, errors, settingObject);
+            return new SettingSyntaxTree(rootNode, settingObject);
         }
 
-        public JsonMultiValueSyntax JsonRootNode { get; }
-        public List<JsonErrorInfo> Errors { get; }
+        public RootJsonSyntax JsonSyntaxTree { get; }
+        public List<JsonErrorInfo> Errors => JsonSyntaxTree.Errors;
         public SettingObject SettingObject { get; }
 
-        public SettingSyntaxTree(JsonMultiValueSyntax jsonRootNode, List<JsonErrorInfo> errors, SettingObject settingObject)
+        public SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, SettingObject settingObject)
         {
-            JsonRootNode = jsonRootNode;
-            Errors = errors;
+            JsonSyntaxTree = jsonSyntaxTree;
             SettingObject = settingObject;
         }
     }
