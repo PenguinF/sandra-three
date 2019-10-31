@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -129,6 +130,21 @@ namespace Eutherion.Text.Json
     {
         public JsonMultiValueSyntax Green { get; }
 
+        private readonly RedJsonValueWithBackgroundSyntax[] valueNodes;
+        public int ValueNodeCount => valueNodes.Length;
+        public RedJsonValueWithBackgroundSyntax GetValueNode(int index)
+        {
+            if (valueNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref valueNodes[index], new RedJsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
+            }
+
+            return valueNodes[index];
+        }
+
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => null;
 
@@ -136,6 +152,8 @@ namespace Eutherion.Text.Json
         internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
         {
             Green = green;
+            int valueNodeCount = green.ValueNodes.Count;
+            valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
         }
     }
 }

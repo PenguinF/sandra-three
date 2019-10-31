@@ -63,4 +63,22 @@ namespace Eutherion.Text.Json
             Length = BackgroundBefore.Length + ContentNode.Length;
         }
     }
+
+    public sealed class RedJsonValueWithBackgroundSyntax : JsonSyntax
+    {
+        public RedJsonMultiValueSyntax Parent { get; }
+        public int ParentValueNodeIndex { get; }
+
+        public JsonValueWithBackgroundSyntax Green { get; }
+
+        public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal RedJsonValueWithBackgroundSyntax(RedJsonMultiValueSyntax parent, int parentValueNodeIndex, JsonValueWithBackgroundSyntax green)
+        {
+            Parent = parent;
+            ParentValueNodeIndex = parentValueNodeIndex;
+            Green = green;
+        }
+    }
 }
