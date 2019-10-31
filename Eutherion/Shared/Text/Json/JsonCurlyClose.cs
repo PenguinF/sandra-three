@@ -43,6 +43,7 @@ namespace Eutherion.Text.Json
 
         public JsonCurlyClose Green => JsonCurlyClose.Value;
 
+        public override int Start => Parent.Length - JsonCurlyClose.CurlyCloseLength;
         public override int Length => JsonCurlyClose.CurlyCloseLength;
         public override JsonSyntax ParentSyntax => Parent;
 

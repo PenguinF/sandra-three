@@ -44,6 +44,7 @@ namespace Eutherion.Text.Json
 
         public JsonSquareBracketOpen Green => JsonSquareBracketOpen.Value;
 
+        public override int Start => 0;
         public override int Length => JsonSquareBracketOpen.SquareBracketOpenLength;
         public override JsonSyntax ParentSyntax => Parent;
 

@@ -73,7 +73,12 @@ namespace Eutherion.Text.Json
 
         public JsonBackgroundSyntax Green { get; }
 
+        public override int Start => Parent.Match(
+            whenOption1: valueWithBackgroundSyntax => 0,
+            whenOption2: multiValueSyntax => multiValueSyntax.Length - Length);
+
         public override int Length => Green.Length;
+
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: x => x,
             whenOption2: x => x);

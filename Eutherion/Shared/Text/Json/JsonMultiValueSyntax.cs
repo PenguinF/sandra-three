@@ -152,7 +152,13 @@ namespace Eutherion.Text.Json
         private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundAfter;
         public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
+        public override int Start => Parent.Match(
+            whenOption1: _ => 0,
+            whenOption2: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
+            whenOption3: keyValueSyntax => keyValueSyntax.Green.ValueSectionNodes.GetElementOffset(ParentIndex));
+
         public override int Length => Green.Length;
+
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: null,
             whenOption2: x => x,

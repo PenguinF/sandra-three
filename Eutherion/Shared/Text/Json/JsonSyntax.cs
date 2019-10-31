@@ -30,6 +30,11 @@ namespace Eutherion.Text.Json
     public abstract class JsonSyntax : ISpan
     {
         /// <summary>
+        /// Returns the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public abstract int Start { get; }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }

@@ -44,6 +44,7 @@ namespace Eutherion.Text.Json
 
         public JsonCurlyOpen Green => JsonCurlyOpen.Value;
 
+        public override int Start => 0;
         public override int Length => JsonCurlyOpen.CurlyOpenLength;
         public override JsonSyntax ParentSyntax => Parent;
 

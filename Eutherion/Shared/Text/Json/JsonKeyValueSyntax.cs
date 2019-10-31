@@ -130,6 +130,7 @@ namespace Eutherion.Text.Json
             return colons[index];
         }
 
+        public override int Start => JsonCurlyOpen.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 

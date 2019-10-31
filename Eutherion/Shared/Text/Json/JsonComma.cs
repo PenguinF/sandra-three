@@ -46,7 +46,12 @@ namespace Eutherion.Text.Json
 
         public JsonComma Green => JsonComma.Value;
 
+        public override int Start => Parent.Match(
+            whenOption1: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
+            whenOption2: mapSyntax => JsonCurlyOpen.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
+
         public override int Length => JsonComma.CommaLength;
+
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: x => x,
             whenOption2: x => x);

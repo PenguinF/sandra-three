@@ -108,6 +108,7 @@ namespace Eutherion.Text.Json
         private readonly SafeLazyObject<RedJsonValueSyntax> contentNode;
         public RedJsonValueSyntax ContentNode => contentNode.Object;
 
+        public override int Start => Parent.Green.ValueNodes.GetElementOffset(ParentValueNodeIndex);
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 

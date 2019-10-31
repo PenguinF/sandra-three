@@ -40,6 +40,7 @@ namespace Eutherion.Text.Json
     {
         public RedJsonValueWithBackgroundSyntax Parent { get; }
 
+        public override int Start => Parent.BackgroundBefore.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
         internal RedJsonValueSyntax(RedJsonValueWithBackgroundSyntax parent) => Parent = parent;

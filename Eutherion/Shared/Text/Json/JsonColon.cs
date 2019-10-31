@@ -44,6 +44,7 @@ namespace Eutherion.Text.Json
 
         public JsonColon Green => JsonColon.Value;
 
+        public override int Start => Parent.Green.ValueSectionNodes.GetSeparatorOffset(ColonIndex);
         public override int Length => JsonColon.ColonLength;
         public override JsonSyntax ParentSyntax => Parent;
 
