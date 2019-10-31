@@ -84,6 +84,9 @@ namespace Eutherion.Text.Json
             public override RedJsonValueSyntax VisitListSyntax(JsonListSyntax green, RedJsonValueWithBackgroundSyntax parent)
                 => new RedJsonListSyntax(parent, green);
 
+            public override RedJsonValueSyntax VisitMapSyntax(JsonMapSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonMapSyntax(parent, green);
+
             public override RedJsonValueSyntax VisitMissingValueSyntax(JsonMissingValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
                 => new RedJsonMissingValueSyntax(parent, green);
 

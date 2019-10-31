@@ -83,6 +83,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitListSyntax(RedJsonListSyntax node) => DefaultVisit(node);
+        public virtual void VisitMapSyntax(RedJsonMapSyntax node) => DefaultVisit(node);
         public virtual void VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual void VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
@@ -99,6 +100,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitListSyntax(RedJsonListSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitMapSyntax(RedJsonMapSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
@@ -115,6 +117,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitListSyntax(RedJsonListSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitMapSyntax(RedJsonMapSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
