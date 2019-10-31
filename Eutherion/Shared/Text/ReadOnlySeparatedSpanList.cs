@@ -54,6 +54,8 @@ namespace Eutherion.Text
 
             public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
 
+            public override int GetSeparatorOffset(int index) => throw new IndexOutOfRangeException();
+
             public override int GetElementOrSeparatorOffset(int index) => throw new IndexOutOfRangeException();
         }
 
@@ -80,6 +82,8 @@ namespace Eutherion.Text
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements => new SingleElementEnumerable<Union<TSpan, TSeparator>>(element);
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
+
+            public override int GetSeparatorOffset(int index) => throw new IndexOutOfRangeException();
 
             public override int GetElementOrSeparatorOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
         }
@@ -136,6 +140,8 @@ namespace Eutherion.Text
             }
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : arrayElementOffsets[index - 1];
+
+            public override int GetSeparatorOffset(int index) => arrayElementOffsets[index] - separator.Length;
 
             public override int GetElementOrSeparatorOffset(int index)
             {
@@ -232,7 +238,7 @@ namespace Eutherion.Text
         /// <summary>
         /// Gets the start position of the spanned element at the specified index
         /// relative to the start position of the first element.
-        /// See also: <seealso cref="GetElementOrSeparatorOffset"/>.
+        /// See also: <seealso cref="GetSeparatorOffset"/>, <seealso cref="GetElementOrSeparatorOffset"/>.
         /// </summary>
         /// <param name="index">
         /// The zero-based index of the spanned element.
@@ -246,9 +252,26 @@ namespace Eutherion.Text
         public abstract int GetElementOffset(int index);
 
         /// <summary>
+        /// Gets the start position of the separator at the specified index
+        /// relative to the start position of the first element.
+        /// The number of separators is always one less than the number of elements.
+        /// See also: <seealso cref="GetElementOffset"/>, <seealso cref="GetElementOrSeparatorOffset"/>.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the separator.
+        /// </param>
+        /// <returns>
+        /// The start position of the separator relative to the start position of the first element.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/> - 1.
+        /// </exception>
+        public abstract int GetSeparatorOffset(int index);
+
+        /// <summary>
         /// Gets the start position of the spanned element or separator at the specified index
         /// relative to the start position of the first element.
-        /// See also: <seealso cref="GetElementOffset"/>.
+        /// See also: <seealso cref="GetElementOffset"/>, <seealso cref="GetSeparatorOffset"/>.
         /// </summary>
         /// <param name="index">
         /// The zero-based index of the spanned element or separator.
