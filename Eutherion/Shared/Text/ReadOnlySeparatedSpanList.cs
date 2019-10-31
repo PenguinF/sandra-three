@@ -48,6 +48,8 @@ namespace Eutherion.Text
 
             public override IEnumerator<TSpan> GetEnumerator() => EmptyEnumerator<TSpan>.Instance;
 
+            public override int AllElementCount => 0;
+
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements => default(EmptyEnumerable<Union<TSpan, TSeparator>>);
 
             public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
@@ -70,6 +72,8 @@ namespace Eutherion.Text
             public override int Count => 1;
 
             public override IEnumerator<TSpan> GetEnumerator() => new SingleElementEnumerator<TSpan>(element);
+
+            public override int AllElementCount => 1;
 
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements => new SingleElementEnumerable<Union<TSpan, TSeparator>>(element);
 
@@ -110,6 +114,8 @@ namespace Eutherion.Text
             public override int Count => array.Length;
 
             public override IEnumerator<TSpan> GetEnumerator() => ((ICollection<TSpan>)array).GetEnumerator();
+
+            public override int AllElementCount => array.Length * 2 - 1;
 
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements
             {
@@ -182,7 +188,8 @@ namespace Eutherion.Text
         public abstract TSpan this[int index] { get; }
 
         /// <summary>
-        /// Gets the number of spanned elements in the list.
+        /// Gets the number of spanned elements in the list, excluding the separators.
+        /// See also: <seealso cref="AllElementCount"/>.
         /// </summary>
         public abstract int Count { get; }
 
@@ -195,6 +202,12 @@ namespace Eutherion.Text
         public abstract IEnumerator<TSpan> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        /// <summary>
+        /// Gets the number of spanned elements in the list, including the separators.
+        /// See also: <seealso cref="Count"/>.
+        /// </summary>
+        public abstract int AllElementCount { get; }
 
         /// <summary>
         /// Enumerates all elements of the list, including separators.
