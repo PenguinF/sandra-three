@@ -129,6 +129,27 @@ namespace Eutherion.Text.Json
 
         public override int ChildCount => KeyValueNodesCount + CommaCount + (Green.MissingCurlyClose ? 1 : 2);
 
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index == 0) return CurlyOpen;
+
+            index--;
+            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+
+            if (index < keyValueAndCommaCount)
+            {
+                if ((index & 1) == 0) return GetKeyValueNode(index >> 1);
+                return GetComma(index >> 1);
+            }
+
+            if (index == keyValueAndCommaCount && CurlyClose.IsJust(out RedJsonCurlyClose jsonCurlyClose))
+            {
+                return jsonCurlyClose;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+
         internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
         {
             Green = green;

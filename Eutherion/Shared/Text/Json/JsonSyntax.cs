@@ -48,6 +48,11 @@ namespace Eutherion.Text.Json
         /// </summary>
         public bool IsTerminalSymbol => ChildCount == 0;
 
+        /// <summary>
+        /// Initializes the child at the given index and returns it.
+        /// </summary>
+        public virtual JsonSyntax GetChild(int index) => throw new IndexOutOfRangeException();
+
         public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
         public virtual TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
         public virtual TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => throw new JsonSyntaxIsNotTerminalException(this);

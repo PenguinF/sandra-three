@@ -135,6 +135,13 @@ namespace Eutherion.Text.Json
 
         public override int ChildCount => ValueSectionNodeCount + ColonCount;
 
+        public override JsonSyntax GetChild(int index)
+        {
+            // '>>' has the happy property that (-1) >> 1 evaluates to -1, which correctly throws an IndexOutOfRangeException.
+            if ((index & 1) == 0) return GetValueSectionNode(index >> 1);
+            return GetColon(index >> 1);
+        }
+
         internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
         {
             Parent = parent;

@@ -126,6 +126,27 @@ namespace Eutherion.Text.Json
 
         public override int ChildCount => ListItemNodeCount + CommaCount + (Green.MissingSquareBracketClose ? 1 : 2);
 
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index == 0) return SquareBracketOpen;
+
+            index--;
+            int itemAndCommaCount = ListItemNodeCount + CommaCount;
+
+            if (index < itemAndCommaCount)
+            {
+                if ((index & 1) == 0) return GetListItemNode(index >> 1);
+                return GetComma(index >> 1);
+            }
+
+            if (index == itemAndCommaCount && SquareBracketClose.IsJust(out RedJsonSquareBracketClose jsonSquareBracketClose))
+            {
+                return jsonSquareBracketClose;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+
         internal RedJsonListSyntax(RedJsonValueWithBackgroundSyntax parent, JsonListSyntax green) : base(parent)
         {
             Green = green;

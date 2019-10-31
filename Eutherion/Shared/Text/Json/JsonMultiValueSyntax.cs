@@ -160,6 +160,13 @@ namespace Eutherion.Text.Json
 
         public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
 
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index < ValueNodeCount) return GetValueNode(index);
+            if (index == ValueNodeCount) return BackgroundAfter;
+            throw new IndexOutOfRangeException();
+        }
+
         private RedJsonMultiValueSyntax(Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> parent, JsonMultiValueSyntax green)
         {
             Parent = parent;
