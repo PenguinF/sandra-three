@@ -114,6 +114,21 @@ namespace Eutherion.Text.Json
             return valueSectionNodes[index];
         }
 
+        private readonly RedJsonColon[] colons;
+        public int ColonCount => colons.Length;
+        public RedJsonColon GetColon(int index)
+        {
+            if (colons[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref colons[index], new RedJsonColon(this, index), null);
+            }
+
+            return colons[index];
+        }
+
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
@@ -125,6 +140,7 @@ namespace Eutherion.Text.Json
 
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             valueSectionNodes = valueSectionNodeCount > 0 ? new RedJsonMultiValueSyntax[valueSectionNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
+            colons = valueSectionNodeCount > 1 ? new RedJsonColon[valueSectionNodeCount - 1] : Array.Empty<RedJsonColon>();
         }
     }
 }

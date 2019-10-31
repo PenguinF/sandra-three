@@ -36,4 +36,21 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
         public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColon(this, arg);
     }
+
+    public sealed class RedJsonColon : JsonSyntax
+    {
+        public RedJsonKeyValueSyntax Parent { get; }
+        public int ColonIndex { get; }
+
+        public JsonColon Green => JsonColon.Value;
+
+        public override int Length => JsonColon.ColonLength;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal RedJsonColon(RedJsonKeyValueSyntax parent, int colonIndex)
+        {
+            Parent = parent;
+            ColonIndex = colonIndex;
+        }
+    }
 }
