@@ -127,6 +127,8 @@ namespace Eutherion.Text.Json
 
         public override int Length => Green.Length;
 
+        public override int ChildCount => KeyValueNodesCount + CommaCount + (Green.MissingCurlyClose ? 1 : 2);
+
         internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
         {
             Green = green;

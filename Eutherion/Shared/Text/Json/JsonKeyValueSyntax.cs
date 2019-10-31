@@ -22,6 +22,7 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Eutherion.Text.Json
@@ -132,14 +133,18 @@ namespace Eutherion.Text.Json
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
+        public override int ChildCount => ValueSectionNodeCount + ColonCount;
+
         internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
         {
             Parent = parent;
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
             Green = green;
 
+            // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
-            valueSectionNodes = valueSectionNodeCount > 0 ? new RedJsonMultiValueSyntax[valueSectionNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
+            Debug.Assert(valueSectionNodeCount > 0);
+            valueSectionNodes = new RedJsonMultiValueSyntax[valueSectionNodeCount];
             colons = valueSectionNodeCount > 1 ? new RedJsonColon[valueSectionNodeCount - 1] : Array.Empty<RedJsonColon>();
         }
     }

@@ -111,6 +111,8 @@ namespace Eutherion.Text.Json
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
+        public override int ChildCount => 2;  // BackgroundBefore and ContentNode.
+
         internal RedJsonValueWithBackgroundSyntax(RedJsonMultiValueSyntax parent, int parentValueNodeIndex, JsonValueWithBackgroundSyntax green)
         {
             Parent = parent;

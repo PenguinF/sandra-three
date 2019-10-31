@@ -62,5 +62,9 @@ namespace Eutherion.Text.Json
             Parent = parent;
             CommaIndex = commaIndex;
         }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComma(this, arg);
     }
 }

@@ -47,5 +47,9 @@ namespace Eutherion.Text.Json
         public override JsonSyntax ParentSyntax => Parent;
 
         internal RedJsonSquareBracketClose(RedJsonListSyntax parent) => Parent = parent;
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketClose(this, arg);
     }
 }

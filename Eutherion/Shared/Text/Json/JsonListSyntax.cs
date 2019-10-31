@@ -124,6 +124,8 @@ namespace Eutherion.Text.Json
 
         public override int Length => Green.Length;
 
+        public override int ChildCount => ListItemNodeCount + CommaCount + (Green.MissingSquareBracketClose ? 1 : 2);
+
         internal RedJsonListSyntax(RedJsonValueWithBackgroundSyntax parent, JsonListSyntax green) : base(parent)
         {
             Green = green;

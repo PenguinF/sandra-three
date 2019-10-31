@@ -89,5 +89,11 @@ namespace Eutherion.Text.Json
             Parent = backgroundAfterParent;
             Green = green;
         }
+
+        // Treat RedJsonBackgroundSyntax as a terminal symbol.
+        // Can always specify further for each individual background JsonSymbol if the need arises.
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBackgroundSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundSyntax(this, arg);
     }
 }

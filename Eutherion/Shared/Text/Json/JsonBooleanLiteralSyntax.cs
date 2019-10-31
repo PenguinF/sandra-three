@@ -105,5 +105,9 @@ namespace Eutherion.Text.Json
         public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 }

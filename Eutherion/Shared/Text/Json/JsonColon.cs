@@ -52,5 +52,9 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ColonIndex = colonIndex;
         }
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColon(this, arg);
     }
 }
