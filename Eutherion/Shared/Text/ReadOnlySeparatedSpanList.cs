@@ -139,8 +139,10 @@ namespace Eutherion.Text
 
             public override int GetElementOrSeparatorOffset(int index)
             {
-                if ((index & 1) == 0) return GetElementOffset(index >> 1);
-                return GetElementOffset((index + 1) >> 1) - separator.Length;
+                if (index == 0) return 0;
+                int offset = arrayElementOffsets[(index - 1) >> 1];
+                if ((index & 1) != 0) offset -= separator.Length;
+                return offset;
             }
         }
 
