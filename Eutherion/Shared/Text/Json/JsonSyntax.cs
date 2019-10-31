@@ -50,14 +50,22 @@ namespace Eutherion.Text.Json
         public bool IsTerminalSymbol => ChildCount == 0;
 
         /// <summary>
-        /// Initializes the child at the given index and returns it.
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
         public virtual JsonSyntax GetChild(int index) => throw new IndexOutOfRangeException();
 
         /// <summary>
-        /// Gets the start position of the child at the given index, without initializing it.
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
         public virtual int GetChildStartPosition(int index) => throw new IndexOutOfRangeException();
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>,
+        /// which is the end position of the child at <paramref name="index"/> - 1.
+        /// If <paramref name="index"/> is equal to <see cref="ChildCount"/>, the end position of the last child is returned.
+        /// In neither case will the child node be initialized.
+        /// </summary>
+        public int GetChildStartOrEndPosition(int index) => index == ChildCount ? Length : GetChildStartPosition(index);
 
         /// <summary>
         /// Enumerates all <see cref="JsonSyntax"/> descendants of this node that fall within the
@@ -86,7 +94,7 @@ namespace Eutherion.Text.Json
                 {
                     int childStartPosition = childEndPosition;
                     int nextChildIndex = childIndex + 1;
-                    childEndPosition = nextChildIndex == ChildCount ? Length : GetChildStartPosition(nextChildIndex);
+                    childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
 
                     // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
                     if (start <= childEndPosition && childStartPosition <= end)
