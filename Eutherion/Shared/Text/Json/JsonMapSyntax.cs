@@ -159,8 +159,7 @@ namespace Eutherion.Text.Json
 
             if (index < keyValueAndCommaCount)
             {
-                if ((index & 1) == 0) return Green.KeyValueNodes.GetElementOffset(index >> 1);
-                return Green.KeyValueNodes.GetElementOffset((index + 1) >> 1) - JsonComma.CommaLength;
+                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index);
             }
 
             if (index == keyValueAndCommaCount && !Green.MissingCurlyClose)

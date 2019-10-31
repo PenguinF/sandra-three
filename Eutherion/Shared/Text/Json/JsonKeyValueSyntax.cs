@@ -142,11 +142,7 @@ namespace Eutherion.Text.Json
             return GetColon(index >> 1);
         }
 
-        public override int GetChildStartPosition(int index)
-        {
-            if ((index & 1) == 0) return Green.ValueSectionNodes.GetElementOffset(index >> 1);
-            return Green.ValueSectionNodes.GetElementOffset((index + 1) >> 1) - JsonColon.ColonLength;
-        }
+        public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
 
         internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
         {

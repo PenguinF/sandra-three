@@ -156,8 +156,7 @@ namespace Eutherion.Text.Json
 
             if (index < itemAndCommaCount)
             {
-                if ((index & 1) == 0) return Green.ListItemNodes.GetElementOffset(index >> 1);
-                return Green.ListItemNodes.GetElementOffset((index + 1) >> 1) - JsonComma.CommaLength;
+                return Green.ListItemNodes.GetElementOrSeparatorOffset(index);
             }
 
             if (index == itemAndCommaCount && !Green.MissingSquareBracketClose)
