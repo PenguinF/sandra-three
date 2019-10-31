@@ -38,6 +38,12 @@ namespace Eutherion.Text.Json
 
     public abstract class RedJsonValueSyntax : JsonSyntax
     {
+        public RedJsonValueWithBackgroundSyntax Parent { get; }
+
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal RedJsonValueSyntax(RedJsonValueWithBackgroundSyntax parent) => Parent = parent;
+
         public abstract void Accept(RedJsonValueSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg);

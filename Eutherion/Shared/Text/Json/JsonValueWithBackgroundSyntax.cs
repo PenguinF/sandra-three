@@ -67,6 +67,13 @@ namespace Eutherion.Text.Json
 
     public sealed class RedJsonValueWithBackgroundSyntax : JsonSyntax
     {
+        private class JsonValueSyntaxCreator : JsonValueSyntaxVisitor<RedJsonValueWithBackgroundSyntax, RedJsonValueSyntax>
+        {
+            public static readonly JsonValueSyntaxCreator Instance = new JsonValueSyntaxCreator();
+
+            private JsonValueSyntaxCreator() { }
+        }
+
         public RedJsonMultiValueSyntax Parent { get; }
         public int ParentValueNodeIndex { get; }
 
@@ -74,6 +81,9 @@ namespace Eutherion.Text.Json
 
         private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundBefore;
         public RedJsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
+
+        private readonly SafeLazyObject<RedJsonValueSyntax> contentNode;
+        public RedJsonValueSyntax ContentNode => contentNode.Object;
 
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
@@ -84,6 +94,7 @@ namespace Eutherion.Text.Json
             ParentValueNodeIndex = parentValueNodeIndex;
             Green = green;
             backgroundBefore = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundBefore));
+            contentNode = new SafeLazyObject<RedJsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
     }
 }
