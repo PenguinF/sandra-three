@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
@@ -57,6 +58,50 @@ namespace Eutherion.Text.Json
         /// Gets the start position of the child at the given index, without initializing it.
         /// </summary>
         public virtual int GetChildStartPosition(int index) => throw new IndexOutOfRangeException();
+
+        /// <summary>
+        /// Enumerates all <see cref="JsonSyntax"/> descendants of this node that fall within the
+        /// given range and have no child nodes.
+        /// </summary>
+        public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
+        {
+            int end = start + length;
+
+            if (IsTerminalSymbol)
+            {
+                // Yield return if ranges start..end and 0..Length intersect.
+                if (start <= Length && 0 <= end)
+                {
+                    yield return this;
+                }
+            }
+            else
+            {
+                int childIndex = 0;
+                int childEndPosition = GetChildStartPosition(0);
+
+                // Naive implementation traversing the entire child nodes collection.
+                // TODO: find the first child node within the range using binary search.
+                while (childIndex < ChildCount)
+                {
+                    int childStartPosition = childEndPosition;
+                    int nextChildIndex = childIndex + 1;
+                    childEndPosition = nextChildIndex == ChildCount ? Length : GetChildStartPosition(nextChildIndex);
+
+                    // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
+                    if (start <= childEndPosition && childStartPosition <= end)
+                    {
+                        // Translate to relative child position by subtracting childStartPosition.
+                        foreach (var descendant in GetChild(childIndex).TerminalSymbolsInRange(start - childStartPosition, length))
+                        {
+                            yield return descendant;
+                        }
+                    }
+
+                    childIndex = nextChildIndex;
+                }
+            }
+        }
 
         public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
         public virtual TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
