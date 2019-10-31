@@ -150,6 +150,27 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+
+            index--;
+            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+
+            if (index < keyValueAndCommaCount)
+            {
+                if ((index & 1) == 0) return Green.KeyValueNodes.GetElementOffset(index >> 1);
+                return Green.KeyValueNodes.GetElementOffset((index + 1) >> 1) - JsonComma.CommaLength;
+            }
+
+            if (index == keyValueAndCommaCount && !Green.MissingCurlyClose)
+            {
+                return Length - JsonCurlyClose.CurlyCloseLength;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+
         internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
         {
             Green = green;

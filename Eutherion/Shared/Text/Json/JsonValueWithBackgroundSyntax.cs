@@ -120,6 +120,13 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.BackgroundBefore.Length;
+            throw new IndexOutOfRangeException();
+        }
+
         internal RedJsonValueWithBackgroundSyntax(RedJsonMultiValueSyntax parent, int parentValueNodeIndex, JsonValueWithBackgroundSyntax green)
         {
             Parent = parent;

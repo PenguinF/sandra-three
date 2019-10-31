@@ -53,6 +53,11 @@ namespace Eutherion.Text.Json
         /// </summary>
         public virtual JsonSyntax GetChild(int index) => throw new IndexOutOfRangeException();
 
+        /// <summary>
+        /// Gets the start position of the child at the given index, without initializing it.
+        /// </summary>
+        public virtual int GetChildStartPosition(int index) => throw new IndexOutOfRangeException();
+
         public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
         public virtual TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
         public virtual TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => throw new JsonSyntaxIsNotTerminalException(this);

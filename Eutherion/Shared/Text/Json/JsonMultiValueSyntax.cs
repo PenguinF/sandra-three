@@ -167,6 +167,13 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        public override int GetChildStartPosition(int index)
+        {
+            if (index < ValueNodeCount) return Green.ValueNodes.GetElementOffset(index);
+            if (index == ValueNodeCount) return Length - Green.BackgroundAfter.Length;
+            throw new IndexOutOfRangeException();
+        }
+
         private RedJsonMultiValueSyntax(Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> parent, JsonMultiValueSyntax green)
         {
             Parent = parent;
