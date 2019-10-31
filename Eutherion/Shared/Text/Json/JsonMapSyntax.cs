@@ -22,6 +22,7 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -91,6 +92,21 @@ namespace Eutherion.Text.Json
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public RedJsonCurlyOpen CurlyOpen { get; }
 
+        private readonly RedJsonKeyValueSyntax[] keyValueNodes;
+        public int KeyValueNodesCount => keyValueNodes.Length;
+        public RedJsonKeyValueSyntax GetKeyValueNode(int index)
+        {
+            if (keyValueNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref keyValueNodes[index], new RedJsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
+            }
+
+            return keyValueNodes[index];
+        }
+
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<RedJsonCurlyClose> CurlyClose { get; }
 
@@ -101,6 +117,9 @@ namespace Eutherion.Text.Json
             Green = green;
 
             CurlyOpen = new RedJsonCurlyOpen(this);
+
+            int keyValueNodeCount = green.KeyValueNodes.Count;
+            keyValueNodes = keyValueNodeCount > 0 ? new RedJsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<RedJsonKeyValueSyntax>();
 
             CurlyClose = green.MissingCurlyClose
                        ? Maybe<RedJsonCurlyClose>.Nothing

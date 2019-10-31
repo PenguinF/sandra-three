@@ -90,4 +90,22 @@ namespace Eutherion.Text.Json
         /// </summary>
         public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
     }
+
+    public sealed class RedJsonKeyValueSyntax : JsonSyntax
+    {
+        public RedJsonMapSyntax Parent { get; }
+        public int ParentKeyValueNodeIndex { get; }
+
+        public JsonKeyValueSyntax Green { get; }
+
+        public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
+        {
+            Parent = parent;
+            ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
+            Green = green;
+        }
+    }
 }
