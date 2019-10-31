@@ -197,6 +197,14 @@ namespace Eutherion.Text
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
+        /// Enumerates all elements of the list, including separators.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="IEnumerable{T}"/> that enumerates all elements of the list, including separators.
+        /// </returns>
+        public abstract IEnumerable<Union<TSpan, TSeparator>> AllElements { get; }
+
+        /// <summary>
         /// Gets the start position of the spanned element at the specified index
         /// relative to the start position of the first element.
         /// </summary>
@@ -210,13 +218,5 @@ namespace Eutherion.Text
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
         public abstract int GetElementOffset(int index);
-
-        /// <summary>
-        /// Enumerates all elements of the list, including separators.
-        /// </summary>
-        /// <returns>
-        /// A <see cref="IEnumerable{T}"/> that enumerates all elements of the list, including separators.
-        /// </returns>
-        public abstract IEnumerable<Union<TSpan, TSeparator>> AllElements { get; }
     }
 }
