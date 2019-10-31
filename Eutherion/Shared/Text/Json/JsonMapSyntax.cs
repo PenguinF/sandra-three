@@ -107,6 +107,21 @@ namespace Eutherion.Text.Json
             return keyValueNodes[index];
         }
 
+        private readonly RedJsonComma[] commas;
+        public int CommaCount => commas.Length;
+        public RedJsonComma GetComma(int index)
+        {
+            if (commas[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref commas[index], new RedJsonComma(this, index), null);
+            }
+
+            return commas[index];
+        }
+
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<RedJsonCurlyClose> CurlyClose { get; }
 
@@ -120,6 +135,7 @@ namespace Eutherion.Text.Json
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
             keyValueNodes = keyValueNodeCount > 0 ? new RedJsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<RedJsonKeyValueSyntax>();
+            commas = keyValueNodeCount > 1 ? new RedJsonComma[keyValueNodeCount - 1] : Array.Empty<RedJsonComma>();
 
             CurlyClose = green.MissingCurlyClose
                        ? Maybe<RedJsonCurlyClose>.Nothing
