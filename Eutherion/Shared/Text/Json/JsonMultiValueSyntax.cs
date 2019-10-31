@@ -164,6 +164,8 @@ namespace Eutherion.Text.Json
             whenOption2: x => x,
             whenOption3: x => x);
 
+        public override int AbsoluteStart => Parent.IsOption1(out _) ? 0 : base.AbsoluteStart;
+
         public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
 
         public override JsonSyntax GetChild(int index)

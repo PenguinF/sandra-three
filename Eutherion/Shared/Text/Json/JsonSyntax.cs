@@ -45,6 +45,11 @@ namespace Eutherion.Text.Json
         public abstract JsonSyntax ParentSyntax { get; }
 
         /// <summary>
+        /// Returns the absolute start position of this syntax node.
+        /// </summary>
+        public virtual int AbsoluteStart => ParentSyntax.AbsoluteStart + Start;
+
+        /// <summary>
         /// Returns the number of children of this syntax node.
         /// </summary>
         public virtual int ChildCount => 0;
