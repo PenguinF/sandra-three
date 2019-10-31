@@ -22,6 +22,7 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -88,6 +89,21 @@ namespace Eutherion.Text.Json
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public RedJsonSquareBracketOpen SquareBracketOpen { get; }
 
+        private readonly RedJsonMultiValueSyntax[] listItemNodes;
+        public int ListItemNodeCount => listItemNodes.Length;
+        public RedJsonMultiValueSyntax GetListItemNode(int index)
+        {
+            if (listItemNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref listItemNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ListItemNodes[index]), null);
+            }
+
+            return listItemNodes[index];
+        }
+
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<RedJsonSquareBracketClose> SquareBracketClose { get; }
 
@@ -98,6 +114,9 @@ namespace Eutherion.Text.Json
             Green = green;
 
             SquareBracketOpen = new RedJsonSquareBracketOpen(this);
+
+            int listItemNodeCount = green.ListItemNodes.Count;
+            listItemNodes = listItemNodeCount > 0 ? new RedJsonMultiValueSyntax[listItemNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
 
             SquareBracketClose = green.MissingSquareBracketClose
                                ? Maybe<RedJsonSquareBracketClose>.Nothing

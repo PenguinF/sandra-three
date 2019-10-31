@@ -129,6 +129,9 @@ namespace Eutherion.Text.Json
 
     public sealed class RedJsonMultiValueSyntax : JsonSyntax
     {
+        public RedJsonListSyntax Parent { get; }
+        public int ParentIndex { get; }
+
         public JsonMultiValueSyntax Green { get; }
 
         private readonly RedJsonValueWithBackgroundSyntax[] valueNodes;
@@ -150,7 +153,7 @@ namespace Eutherion.Text.Json
         public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
         public override int Length => Green.Length;
-        public override JsonSyntax ParentSyntax => null;
+        public override JsonSyntax ParentSyntax => Parent;
 
         // For root nodes.
         internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
@@ -159,6 +162,13 @@ namespace Eutherion.Text.Json
             int valueNodeCount = green.ValueNodes.Count;
             valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
             backgroundAfter = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundAfter));
+        }
+
+        internal RedJsonMultiValueSyntax(RedJsonListSyntax parent, int parentIndex, JsonMultiValueSyntax green)
+            : this(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
         }
     }
 }
