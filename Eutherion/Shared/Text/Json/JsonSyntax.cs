@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -45,5 +47,21 @@ namespace Eutherion.Text.Json
         /// Returns if this syntax is a terminal symbol, i.e. if it has no children.
         /// </summary>
         public bool IsTerminalSymbol => ChildCount == 0;
+
+        public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
+        public virtual TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
+        public virtual TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => throw new JsonSyntaxIsNotTerminalException(this);
+    }
+
+    /// <summary>
+    /// Occurs when a <see cref="JsonTerminalSymbolVisitor"/> is called on a <see cref="JsonSyntax"/> instance
+    /// which is not a terminal symbol, i.e. for which <see cref="JsonSyntax.IsTerminalSymbol"/> returns false.
+    /// </summary>
+    public class JsonSyntaxIsNotTerminalException : Exception
+    {
+        internal JsonSyntaxIsNotTerminalException(JsonSyntax syntax)
+            : base($"{syntax.GetType().FullName} is not a terminal symbol.")
+        {
+        }
     }
 }
