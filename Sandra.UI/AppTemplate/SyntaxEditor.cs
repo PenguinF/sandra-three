@@ -216,7 +216,7 @@ namespace Eutherion.Win.AppTemplate
             TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
 
             int totalLength = 0;
-            foreach (var token in SyntaxDescriptor.GetTerminals(syntaxTree))
+            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, 0, code.Length))
             {
                 int length = SyntaxDescriptor.GetLength(token);
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
@@ -419,7 +419,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Enumerates terminal symbols of a syntax tree.
         /// </summary>
-        public abstract IEnumerable<TTerminal> GetTerminals(TSyntaxTree syntaxTree);
+        public abstract IEnumerable<TTerminal> GetTerminalsInRange(TSyntaxTree syntaxTree, int start, int length);
 
         /// <summary>
         /// Enumerates errors of a syntax tree.

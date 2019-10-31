@@ -45,7 +45,7 @@ namespace Sandra.UI
             return new PgnSyntaxTree(new PgnSymbol[] { new PgnSymbol(length) });
         }
 
-        public override IEnumerable<PgnSymbol> GetTerminals(PgnSyntaxTree syntaxTree)
+        public override IEnumerable<PgnSymbol> GetTerminalsInRange(PgnSyntaxTree syntaxTree, int start, int length)
             => syntaxTree.Terminals;
 
         public override IEnumerable<PgnErrorInfo> GetErrors(PgnSyntaxTree syntaxTree)

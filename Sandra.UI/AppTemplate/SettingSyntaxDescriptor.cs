@@ -75,8 +75,8 @@ namespace Eutherion.Win.AppTemplate
             return settingSyntaxTree;
         }
 
-        public override IEnumerable<JsonSyntax> GetTerminals(SettingSyntaxTree syntaxTree)
-            => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(0, syntaxTree.JsonSyntaxTree.Syntax.Length);
+        public override IEnumerable<JsonSyntax> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
+            => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
             => syntaxTree.Errors;
