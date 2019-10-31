@@ -79,4 +79,20 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
+
+    public sealed class RedJsonListSyntax : RedJsonValueSyntax
+    {
+        public JsonListSyntax Green { get; }
+
+        public override int Length => Green.Length;
+
+        internal RedJsonListSyntax(RedJsonValueWithBackgroundSyntax parent, JsonListSyntax green) : base(parent)
+        {
+            Green = green;
+        }
+
+        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+    }
 }
