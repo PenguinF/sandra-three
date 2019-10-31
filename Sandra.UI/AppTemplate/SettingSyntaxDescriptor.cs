@@ -31,7 +31,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Describes the interaction between json syntax used for setting objects and a syntax editor.
     /// </summary>
-    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
+    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSyntax, JsonErrorInfo>
     {
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
@@ -75,16 +75,16 @@ namespace Eutherion.Win.AppTemplate
             return settingSyntaxTree;
         }
 
-        public override IEnumerable<JsonSymbol> GetTerminals(SettingSyntaxTree syntaxTree)
-            => new JsonSymbolEnumerator(syntaxTree.JsonSyntaxTree.Syntax.Green);
+        public override IEnumerable<JsonSyntax> GetTerminals(SettingSyntaxTree syntaxTree)
+            => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(0, syntaxTree.JsonSyntaxTree.Syntax.Length);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
+        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSyntax, JsonErrorInfo> syntaxEditor, JsonSyntax terminalSymbol)
             => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
-        public override int GetLength(JsonSymbol terminalSymbol)
+        public override int GetLength(JsonSyntax terminalSymbol)
             => terminalSymbol.Length;
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)

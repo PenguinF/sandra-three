@@ -132,7 +132,7 @@ namespace Eutherion.Win.AppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>(
+            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, JsonSyntax, JsonErrorInfo>(
                 codeAccessOption,
                 syntaxDescriptor,
                 codeFile,
