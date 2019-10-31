@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -87,11 +88,23 @@ namespace Eutherion.Text.Json
     {
         public JsonMapSyntax Green { get; }
 
+        // Always create the { and }, avoid overhead of SafeLazyObject.
+        public RedJsonCurlyOpen CurlyOpen { get; }
+
+        // Always create the { and }, avoid overhead of SafeLazyObject.
+        public Maybe<RedJsonCurlyClose> CurlyClose { get; }
+
         public override int Length => Green.Length;
 
         internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
         {
             Green = green;
+
+            CurlyOpen = new RedJsonCurlyOpen(this);
+
+            CurlyClose = green.MissingCurlyClose
+                       ? Maybe<RedJsonCurlyClose>.Nothing
+                       : new RedJsonCurlyClose(this);
         }
 
         public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);

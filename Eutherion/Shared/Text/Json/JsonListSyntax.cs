@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -84,11 +85,23 @@ namespace Eutherion.Text.Json
     {
         public JsonListSyntax Green { get; }
 
+        // Always create the [ and ], avoid overhead of SafeLazyObject.
+        public RedJsonSquareBracketOpen SquareBracketOpen { get; }
+
+        // Always create the [ and ], avoid overhead of SafeLazyObject.
+        public Maybe<RedJsonSquareBracketClose> SquareBracketClose { get; }
+
         public override int Length => Green.Length;
 
         internal RedJsonListSyntax(RedJsonValueWithBackgroundSyntax parent, JsonListSyntax green) : base(parent)
         {
             Green = green;
+
+            SquareBracketOpen = new RedJsonSquareBracketOpen(this);
+
+            SquareBracketClose = green.MissingSquareBracketClose
+                               ? Maybe<RedJsonSquareBracketClose>.Nothing
+                               : new RedJsonSquareBracketClose(this);
         }
 
         public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
