@@ -130,6 +130,7 @@ namespace Eutherion.Text.Json
         public JsonMultiValueSyntax Green { get; }
 
         public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => null;
 
         // For root nodes.
         internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)

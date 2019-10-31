@@ -30,5 +30,10 @@ namespace Eutherion.Text.Json
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// </summary>
+        public abstract JsonSyntax ParentSyntax { get; }
     }
 }
