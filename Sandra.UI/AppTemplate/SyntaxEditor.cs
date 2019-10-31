@@ -192,6 +192,23 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
+        TSyntaxTree syntaxTree;
+
+        protected override void OnStyleNeeded(StyleNeededEventArgs e)
+        {
+            // Get the start position of the span which is still unstyled.
+            int startPosition = GetEndStyled();
+            int endPosition = e.Position;
+
+            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
+            {
+                var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
+            }
+
+            base.OnStyleNeeded(e);
+        }
+
         protected override void OnTextChanged(EventArgs e)
         {
             CallTipCancel();
@@ -213,13 +230,7 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
-
-            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, 0, code.Length))
-            {
-                var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
-            }
+            syntaxTree = SyntaxDescriptor.Parse(code);
 
             IndicatorClearRange(0, TextLength);
 
