@@ -75,4 +75,35 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
+
+    public abstract class RedJsonBooleanLiteralSyntax : RedJsonValueSyntax
+    {
+        public sealed class False : RedJsonBooleanLiteralSyntax
+        {
+            public override JsonBooleanLiteralSyntax Green => JsonBooleanLiteralSyntax.False.Instance;
+            public override bool Value => false;
+
+            internal False(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
+        }
+
+        public sealed class True : RedJsonBooleanLiteralSyntax
+        {
+            public override JsonBooleanLiteralSyntax Green => JsonBooleanLiteralSyntax.True.Instance;
+            public override bool Value => true;
+
+            internal True(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
+        }
+
+        public abstract JsonBooleanLiteralSyntax Green { get; }
+
+        public override int Length => Green.Length;
+
+        public abstract bool Value { get; }
+
+        private RedJsonBooleanLiteralSyntax(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
+
+        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+    }
 }

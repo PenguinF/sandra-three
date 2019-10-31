@@ -72,6 +72,23 @@ namespace Eutherion.Text.Json
             public static readonly JsonValueSyntaxCreator Instance = new JsonValueSyntaxCreator();
 
             private JsonValueSyntaxCreator() { }
+
+            public override RedJsonValueSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => green.Match<RedJsonValueSyntax>(
+                    whenFalse: () => new RedJsonBooleanLiteralSyntax.False(parent),
+                    whenTrue: () => new RedJsonBooleanLiteralSyntax.True(parent));
+
+            public override RedJsonValueSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonIntegerLiteralSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitMissingValueSyntax(JsonMissingValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonMissingValueSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonStringLiteralSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonUndefinedValueSyntax(parent, green);
         }
 
         public RedJsonMultiValueSyntax Parent { get; }

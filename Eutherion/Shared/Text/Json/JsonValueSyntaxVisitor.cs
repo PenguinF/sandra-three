@@ -72,21 +72,48 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
     }
 
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="RedJsonValueSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
     public abstract class RedJsonValueSyntaxVisitor
     {
         public virtual void DefaultVisit(RedJsonValueSyntax node) { }
         public virtual void Visit(RedJsonValueSyntax node) { if (node != null) node.Accept(this); }
+        public virtual void VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual void VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
+        public virtual void VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
+        public virtual void VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
+        public virtual void VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
     }
 
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="RedJsonValueSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
     public abstract class RedJsonValueSyntaxVisitor<TResult>
     {
         public virtual TResult DefaultVisit(RedJsonValueSyntax node) => default;
         public virtual TResult Visit(RedJsonValueSyntax node) => node == null ? default : node.Accept(this);
+        public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
     }
 
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="RedJsonValueSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
     public abstract class RedJsonValueSyntaxVisitor<T, TResult>
     {
         public virtual TResult DefaultVisit(RedJsonValueSyntax node, T arg) => default;
         public virtual TResult Visit(RedJsonValueSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }
