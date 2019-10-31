@@ -31,16 +31,18 @@ namespace Eutherion.Win.AppTemplate
     public class JsonStyleSelector<TSyntaxTree, TError> : JsonTerminalSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
     {
         private const int commentStyleIndex = 8;
-        private const int valueStyleIndex = 9;
+        private const int booleanIntegerStyleIndex = 9;
         private const int stringStyleIndex = 10;
+        private const int undefinedValueStyleIndex = 11;
 
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
 
-        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
         private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
 
+        private static readonly Color boolIntegerForeColor = Color.FromArgb(255, 255, 60);
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
+        private static readonly Color undefinedValueForeColor = Color.FromArgb(192, 192, 40);
 
         public static readonly JsonStyleSelector<TSyntaxTree, TError> Instance = new JsonStyleSelector<TSyntaxTree, TError>();
 
@@ -49,10 +51,13 @@ namespace Eutherion.Win.AppTemplate
             syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
             commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
 
-            syntaxEditor.Styles[valueStyleIndex].ForeColor = valueForeColor;
-            valueFont.CopyTo(syntaxEditor.Styles[valueStyleIndex]);
+            syntaxEditor.Styles[booleanIntegerStyleIndex].ForeColor = boolIntegerForeColor;
+            valueFont.CopyTo(syntaxEditor.Styles[booleanIntegerStyleIndex]);
 
             syntaxEditor.Styles[stringStyleIndex].ForeColor = stringForeColor;
+
+            syntaxEditor.Styles[undefinedValueStyleIndex].ForeColor = undefinedValueForeColor;
+            valueFont.CopyTo(syntaxEditor.Styles[undefinedValueStyleIndex]);
         }
 
         private JsonStyleSelector() { }
@@ -64,10 +69,10 @@ namespace Eutherion.Win.AppTemplate
             => syntaxEditor.Styles[commentStyleIndex];
 
         public override Style VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
-            => syntaxEditor.Styles[valueStyleIndex];
+            => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
         public override Style VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
-            => syntaxEditor.Styles[valueStyleIndex];
+            => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
         public override Style VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
@@ -75,6 +80,6 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => node.Green.UndefinedToken is JsonErrorString
             ? syntaxEditor.Styles[stringStyleIndex]
-            : syntaxEditor.Styles[valueStyleIndex];
+            : syntaxEditor.Styles[undefinedValueStyleIndex];
     }
 }
