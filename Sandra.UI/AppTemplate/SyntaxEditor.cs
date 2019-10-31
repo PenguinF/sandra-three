@@ -215,12 +215,10 @@ namespace Eutherion.Win.AppTemplate
 
             TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
 
-            int totalLength = 0;
             foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, 0, code.Length))
             {
-                int length = SyntaxDescriptor.GetLength(token);
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
-                totalLength += length;
+                var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
             }
 
             IndicatorClearRange(0, TextLength);
@@ -432,9 +430,9 @@ namespace Eutherion.Win.AppTemplate
         public abstract Style GetStyle(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
 
         /// <summary>
-        /// Gets the length of a terminal symbol.
+        /// Gets the start and length of a terminal symbol.
         /// </summary>
-        public abstract int GetLength(TTerminal terminalSymbol);
+        public abstract (int, int) GetTokenSpan(TTerminal terminalSymbol);
 
         /// <summary>
         /// Gets the start position and the length of the text span of an error.
