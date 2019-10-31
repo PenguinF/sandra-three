@@ -65,4 +65,20 @@ namespace Eutherion.Text.Json
 
         private JsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
     }
+
+    public sealed class RedJsonBackgroundSyntax : JsonSyntax
+    {
+        public RedJsonMultiValueSyntax Parent { get; }
+
+        public JsonBackgroundSyntax Green { get; }
+
+        public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal RedJsonBackgroundSyntax(RedJsonMultiValueSyntax backgroundAfterParent, JsonBackgroundSyntax green)
+        {
+            Parent = backgroundAfterParent;
+            Green = green;
+        }
+    }
 }

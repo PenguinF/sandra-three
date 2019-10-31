@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -145,6 +146,9 @@ namespace Eutherion.Text.Json
             return valueNodes[index];
         }
 
+        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundAfter;
+        public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
+
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => null;
 
@@ -154,6 +158,7 @@ namespace Eutherion.Text.Json
             Green = green;
             int valueNodeCount = green.ValueNodes.Count;
             valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
+            backgroundAfter = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundAfter));
         }
     }
 }
