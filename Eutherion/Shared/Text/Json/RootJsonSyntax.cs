@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
@@ -33,8 +34,8 @@ namespace Eutherion.Text.Json
 
         public RootJsonSyntax(JsonMultiValueSyntax syntax, List<JsonErrorInfo> errors)
         {
-            Syntax = syntax;
-            Errors = errors;
+            Syntax = syntax ?? throw new ArgumentNullException(nameof(syntax));
+            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
 }
