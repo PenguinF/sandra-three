@@ -35,5 +35,15 @@ namespace Eutherion.Text.Json
         /// Gets the parent syntax node of this instance. Returns null for the root node.
         /// </summary>
         public abstract JsonSyntax ParentSyntax { get; }
+
+        /// <summary>
+        /// Returns the number of children of this syntax node.
+        /// </summary>
+        public virtual int ChildCount => 0;
+
+        /// <summary>
+        /// Returns if this syntax is a terminal symbol, i.e. if it has no children.
+        /// </summary>
+        public bool IsTerminalSymbol => ChildCount == 0;
     }
 }
