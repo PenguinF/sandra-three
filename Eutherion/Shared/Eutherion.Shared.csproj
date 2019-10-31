@@ -102,6 +102,7 @@
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\SafeLazy.cs" />
+    <Compile Include="Utils\SafeLazyObject.cs" />
     <Compile Include="Utils\SpecializedEnumerable.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
     <Compile Include="Utils\Union.cs" />
