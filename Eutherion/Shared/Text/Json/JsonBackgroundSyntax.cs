@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -68,12 +69,20 @@ namespace Eutherion.Text.Json
 
     public sealed class RedJsonBackgroundSyntax : JsonSyntax
     {
-        public RedJsonMultiValueSyntax Parent { get; }
+        public Union<RedJsonValueWithBackgroundSyntax, RedJsonMultiValueSyntax> Parent { get; }
 
         public JsonBackgroundSyntax Green { get; }
 
         public override int Length => Green.Length;
-        public override JsonSyntax ParentSyntax => Parent;
+        public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
+            whenOption1: x => x,
+            whenOption2: x => x);
+
+        internal RedJsonBackgroundSyntax(RedJsonValueWithBackgroundSyntax backgroundBeforeParent, JsonBackgroundSyntax green)
+        {
+            Parent = backgroundBeforeParent;
+            Green = green;
+        }
 
         internal RedJsonBackgroundSyntax(RedJsonMultiValueSyntax backgroundAfterParent, JsonBackgroundSyntax green)
         {

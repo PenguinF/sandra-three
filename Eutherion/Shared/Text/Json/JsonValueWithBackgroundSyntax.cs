@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 
 namespace Eutherion.Text.Json
@@ -71,6 +72,9 @@ namespace Eutherion.Text.Json
 
         public JsonValueWithBackgroundSyntax Green { get; }
 
+        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundBefore;
+        public RedJsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
+
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
@@ -79,6 +83,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
             Green = green;
+            backgroundBefore = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundBefore));
         }
     }
 }
