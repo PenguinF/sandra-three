@@ -129,7 +129,7 @@ namespace Eutherion.Text.Json
 
     public sealed class RedJsonMultiValueSyntax : JsonSyntax
     {
-        public RedJsonListSyntax Parent { get; }
+        public Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> Parent { get; }
         public int ParentIndex { get; }
 
         public JsonMultiValueSyntax Green { get; }
@@ -153,21 +153,37 @@ namespace Eutherion.Text.Json
         public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
         public override int Length => Green.Length;
-        public override JsonSyntax ParentSyntax => Parent;
+        public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
+            whenOption1: null,
+            whenOption2: x => x,
+            whenOption3: x => x);
 
-        // For root nodes.
-        internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
+        private RedJsonMultiValueSyntax(Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> parent, JsonMultiValueSyntax green)
         {
+            Parent = parent;
             Green = green;
+
             int valueNodeCount = green.ValueNodes.Count;
             valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
             backgroundAfter = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundAfter));
         }
 
-        internal RedJsonMultiValueSyntax(RedJsonListSyntax parent, int parentIndex, JsonMultiValueSyntax green)
-            : this(green)
+        // For root nodes.
+        internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
+            : this(_void._, green)
         {
-            Parent = parent;
+            // Do not assign ParentIndex, its value is meaningless in this case.
+        }
+
+        internal RedJsonMultiValueSyntax(RedJsonListSyntax parent, int parentIndex, JsonMultiValueSyntax green)
+            : this(parent, green)
+        {
+            ParentIndex = parentIndex;
+        }
+
+        internal RedJsonMultiValueSyntax(RedJsonKeyValueSyntax parent, int parentIndex, JsonMultiValueSyntax green)
+            : this(parent, green)
+        {
             ParentIndex = parentIndex;
         }
     }

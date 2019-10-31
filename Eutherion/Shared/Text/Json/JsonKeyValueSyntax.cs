@@ -22,6 +22,7 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -98,6 +99,21 @@ namespace Eutherion.Text.Json
 
         public JsonKeyValueSyntax Green { get; }
 
+        private readonly RedJsonMultiValueSyntax[] valueSectionNodes;
+        public int ValueSectionNodeCount => valueSectionNodes.Length;
+        public RedJsonMultiValueSyntax GetValueSectionNode(int index)
+        {
+            if (valueSectionNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref valueSectionNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
+            }
+
+            return valueSectionNodes[index];
+        }
+
         public override int Length => Green.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
@@ -106,6 +122,9 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
             Green = green;
+
+            int valueSectionNodeCount = green.ValueSectionNodes.Count;
+            valueSectionNodes = valueSectionNodeCount > 0 ? new RedJsonMultiValueSyntax[valueSectionNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
         }
     }
 }
