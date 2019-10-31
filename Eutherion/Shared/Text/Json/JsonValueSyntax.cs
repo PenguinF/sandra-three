@@ -35,4 +35,11 @@ namespace Eutherion.Text.Json
         public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
+
+    public abstract class RedJsonValueSyntax : JsonSyntax
+    {
+        public abstract void Accept(RedJsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+    }
 }

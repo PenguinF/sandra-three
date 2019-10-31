@@ -71,4 +71,22 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitStringLiteralSyntax(JsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
     }
+
+    public abstract class RedJsonValueSyntaxVisitor
+    {
+        public virtual void DefaultVisit(RedJsonValueSyntax node) { }
+        public virtual void Visit(RedJsonValueSyntax node) { if (node != null) node.Accept(this); }
+    }
+
+    public abstract class RedJsonValueSyntaxVisitor<TResult>
+    {
+        public virtual TResult DefaultVisit(RedJsonValueSyntax node) => default;
+        public virtual TResult Visit(RedJsonValueSyntax node) => node == null ? default : node.Accept(this);
+    }
+
+    public abstract class RedJsonValueSyntaxVisitor<T, TResult>
+    {
+        public virtual TResult DefaultVisit(RedJsonValueSyntax node, T arg) => default;
+        public virtual TResult Visit(RedJsonValueSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
+    }
 }
