@@ -62,7 +62,7 @@ namespace Eutherion.Win.AppTemplate
         }
 
         public override IEnumerable<JsonSymbol> GetTerminals(RootJsonSyntax syntaxTree)
-            => new JsonSymbolEnumerator(syntaxTree.Syntax);
+            => new JsonSymbolEnumerator(syntaxTree.Syntax.Green);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
             => syntaxTree.Errors;

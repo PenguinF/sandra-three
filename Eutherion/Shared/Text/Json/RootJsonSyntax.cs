@@ -29,12 +29,13 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class RootJsonSyntax
     {
-        public JsonMultiValueSyntax Syntax { get; }
+        public RedJsonMultiValueSyntax Syntax { get; }
         public List<JsonErrorInfo> Errors { get; }
 
         public RootJsonSyntax(JsonMultiValueSyntax syntax, List<JsonErrorInfo> errors)
         {
-            Syntax = syntax ?? throw new ArgumentNullException(nameof(syntax));
+            if (syntax == null) throw new ArgumentNullException(nameof(syntax));
+            Syntax = new RedJsonMultiValueSyntax(syntax);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }

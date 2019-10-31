@@ -124,4 +124,17 @@ namespace Eutherion.Text.Json
             BackgroundAfter = backgroundAfter ?? throw new ArgumentNullException(nameof(backgroundAfter));
         }
     }
+
+    public sealed class RedJsonMultiValueSyntax : JsonSyntax
+    {
+        public JsonMultiValueSyntax Green { get; }
+
+        public override int Length => Green.Length;
+
+        // For root nodes.
+        internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
+        {
+            Green = green;
+        }
+    }
 }

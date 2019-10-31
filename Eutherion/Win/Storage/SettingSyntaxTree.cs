@@ -34,21 +34,23 @@ namespace Eutherion.Win.Storage
             RootJsonSyntax rootNode = JsonParser.Parse(json);
             var errors = rootNode.Errors;
 
-            if (rootNode.Syntax.ValueNode.ContentNode is JsonMissingValueSyntax)
+            // It is important to use green nodes here, so the schema doesn't need to create the entire parse tree to type-check its values.
+            // Instead, schema.TryCreateValue accepts a rootNodeStart parameter to generate errors at the right locations.
+            if (rootNode.Syntax.Green.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
                 return new SettingSyntaxTree(rootNode, null);
             }
 
-            int rootNodeStart = rootNode.Syntax.ValueNode.BackgroundBefore.Length;
+            int rootNodeStart = rootNode.Syntax.Green.ValueNode.BackgroundBefore.Length;
 
             if (schema.TryCreateValue(
                 json,
-                rootNode.Syntax.ValueNode.ContentNode,
+                rootNode.Syntax.Green.ValueNode.ContentNode,
                 out SettingObject settingObject,
                 rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.ValueNode.ContentNode, json, rootNodeStart));
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.Green.ValueNode.ContentNode, json, rootNodeStart));
                 return new SettingSyntaxTree(rootNode, null);
             }
 
@@ -59,7 +61,7 @@ namespace Eutherion.Win.Storage
         public List<JsonErrorInfo> Errors => JsonSyntaxTree.Errors;
         public SettingObject SettingObject { get; }
 
-        public SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, SettingObject settingObject)
+        private SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, SettingObject settingObject)
         {
             JsonSyntaxTree = jsonSyntaxTree;
             SettingObject = settingObject;
