@@ -23,30 +23,52 @@ using Eutherion.Utils;
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json comma syntax node.
+    /// </summary>
     public sealed class JsonCommaSyntax : JsonSyntax
     {
-        public Union<RedJsonListSyntax, RedJsonMapSyntax> Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public Union<JsonListSyntax, JsonMapSyntax> Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this comma in the comma collection of its parent.
+        /// </summary>
         public int CommaIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonComma Green => JsonComma.Value;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Match(
             whenOption1: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
             whenOption2: mapSyntax => JsonCurlyOpen.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => JsonComma.CommaLength;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: x => x,
             whenOption2: x => x);
 
-        internal JsonCommaSyntax(RedJsonListSyntax parent, int commaIndex)
+        internal JsonCommaSyntax(JsonListSyntax parent, int commaIndex)
         {
             Parent = parent;
             CommaIndex = commaIndex;
         }
 
-        internal JsonCommaSyntax(RedJsonMapSyntax parent, int commaIndex)
+        internal JsonCommaSyntax(JsonMapSyntax parent, int commaIndex)
         {
             Parent = parent;
             CommaIndex = commaIndex;

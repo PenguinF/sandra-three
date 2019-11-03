@@ -30,7 +30,7 @@ namespace Eutherion.Text.Json
     public abstract class JsonSyntax : ISpan
     {
         /// <summary>
-        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// Gets the start position of this syntax node relative to its parent's start position, or 0 if this syntax node is the root node.
         /// </summary>
         public abstract int Start { get; }
 

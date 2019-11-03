@@ -95,7 +95,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static UnrecognizedPropertyKeyTypeError Create(JsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
+        public static UnrecognizedPropertyKeyTypeError Create(GreenJsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
             => new UnrecognizedPropertyKeyTypeError(
                 PTypeErrorBuilder.GetPropertyKeyDisplayString(keyNode, json, keyNodeStart),
                 keyNodeStart,
@@ -159,7 +159,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="typeErrorBuilder"/> and/or <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, JsonValueSyntax valueNode, string json, int valueNodeStart)
+        public static ValueTypeError Create(ITypeErrorBuilder typeErrorBuilder, GreenJsonValueSyntax valueNode, string json, int valueNodeStart)
         {
             if (typeErrorBuilder == null) throw new ArgumentNullException(nameof(typeErrorBuilder));
 
@@ -236,8 +236,8 @@ namespace Eutherion.Win.Storage
         /// </exception>
         public static ValueTypeErrorAtPropertyKey Create(
             ITypeErrorBuilder typeErrorBuilder,
-            JsonStringLiteralSyntax keyNode,
-            JsonValueSyntax valueNode,
+            GreenJsonStringLiteralSyntax keyNode,
+            GreenJsonValueSyntax valueNode,
             string json,
             int keyNodeStart,
             int valueNodeStart)

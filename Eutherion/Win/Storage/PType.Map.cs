@@ -35,12 +35,12 @@ namespace Eutherion.Win.Storage
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                JsonValueSyntax valueNode,
+                GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (valueNode is JsonMapSyntax jsonMapSyntax)
+                if (valueNode is GreenJsonMapSyntax jsonMapSyntax)
                 {
                     return TryCreateFromMap(json, jsonMapSyntax, out convertedValue, valueNodeStartPosition, errors);
                 }
@@ -51,7 +51,7 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                JsonMapSyntax jsonMapSyntax,
+                GreenJsonMapSyntax jsonMapSyntax,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 List<JsonErrorInfo> errors);
@@ -79,7 +79,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
                 string json,
-                JsonMapSyntax jsonMapSyntax,
+                GreenJsonMapSyntax jsonMapSyntax,
                 out Dictionary<string, T> convertedValue,
                 int mapSyntaxStartPosition,
                 List<JsonErrorInfo> errors)

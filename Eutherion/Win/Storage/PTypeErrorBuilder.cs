@@ -118,7 +118,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="keyNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetPropertyKeyDisplayString(JsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
+        public static string GetPropertyKeyDisplayString(GreenJsonStringLiteralSyntax keyNode, string json, int keyNodeStart)
         {
             if (keyNode == null) throw new ArgumentNullException(nameof(keyNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
@@ -145,7 +145,7 @@ namespace Eutherion.Win.Storage
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueNode"/> and/or <paramref name="json"/> are null.
         /// </exception>
-        public static string GetValueDisplayString(JsonValueSyntax valueNode, string json, int valueNodeStart)
+        public static string GetValueDisplayString(GreenJsonValueSyntax valueNode, string json, int valueNodeStart)
         {
             if (valueNode == null) throw new ArgumentNullException(nameof(valueNode));
             if (json == null) throw new ArgumentNullException(nameof(json));
@@ -157,10 +157,10 @@ namespace Eutherion.Win.Storage
 
             switch (valueNode)
             {
-                case JsonMissingValueSyntax _:
+                case GreenJsonMissingValueSyntax _:
                     // Missing values.
                     return null;
-                case JsonStringLiteralSyntax _:
+                case GreenJsonStringLiteralSyntax _:
                     // 2 quote characters.
                     if (valueNode.Length <= maxLength)
                     {

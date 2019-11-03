@@ -22,31 +22,44 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a node in an abstract json syntax tree.
+    /// Represents a node containing a single json value in an abstract json syntax tree.
     /// </summary>
-    public abstract class JsonValueSyntax : ISpan
+    public abstract class GreenJsonValueSyntax : ISpan
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
 
+        public abstract void Accept(GreenJsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+    }
+
+    /// <summary>
+    /// Represents a node containing a single json value in an abstract json syntax tree.
+    /// </summary>
+    public abstract class JsonValueSyntax : JsonSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public JsonValueWithBackgroundSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.BackgroundBefore.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal JsonValueSyntax(JsonValueWithBackgroundSyntax parent) => Parent = parent;
+
         public abstract void Accept(JsonValueSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
-    }
-
-    public abstract class RedJsonValueSyntax : JsonSyntax
-    {
-        public RedJsonValueWithBackgroundSyntax Parent { get; }
-
-        public override int Start => Parent.BackgroundBefore.Length;
-        public override JsonSyntax ParentSyntax => Parent;
-
-        internal RedJsonValueSyntax(RedJsonValueWithBackgroundSyntax parent) => Parent = parent;
-
-        public abstract void Accept(RedJsonValueSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }

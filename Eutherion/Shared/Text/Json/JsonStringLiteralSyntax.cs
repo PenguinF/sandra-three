@@ -24,7 +24,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node.
     /// </summary>
-    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
+    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax
     {
         public JsonString StringToken { get; }
 
@@ -32,24 +32,38 @@ namespace Eutherion.Text.Json
 
         public override int Length => StringToken.Length;
 
-        public JsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
+        public GreenJsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
+
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a string literal value syntax node.
+    /// </summary>
+    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonStringLiteralSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the value of this syntax node.
+        /// </summary>
+        public string Value => Green.Value;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal JsonStringLiteralSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonStringLiteralSyntax green) : base(parent) => Green = green;
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
-    }
-
-    public sealed class RedJsonStringLiteralSyntax : RedJsonValueSyntax
-    {
-        public JsonStringLiteralSyntax Green { get; }
-
-        public override int Length => Green.Length;
-
-        internal RedJsonStringLiteralSyntax(RedJsonValueWithBackgroundSyntax parent, JsonStringLiteralSyntax green) : base(parent) => Green = green;
-
-        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

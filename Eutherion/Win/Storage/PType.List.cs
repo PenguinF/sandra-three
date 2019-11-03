@@ -37,14 +37,14 @@ namespace Eutherion.Win.Storage
             internal static bool TryCreateItemValue<ItemT>(
                 PType<ItemT> itemType,
                 string json,
-                JsonListSyntax jsonListSyntax,
+                GreenJsonListSyntax jsonListSyntax,
                 int itemIndex,
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors,
                 out ItemT convertedTargetValue,
                 out PValue value)
             {
-                JsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode.ContentNode;
+                GreenJsonValueSyntax itemNode = jsonListSyntax.ListItemNodes[itemIndex].ValueNode.ContentNode;
 
                 int itemNodeStart = listSyntaxStartPosition
                                   + jsonListSyntax.GetElementNodeStart(itemIndex)
@@ -60,12 +60,12 @@ namespace Eutherion.Win.Storage
 
             internal sealed override Union<ITypeErrorBuilder, PValue> TryCreateValue(
                 string json,
-                JsonValueSyntax valueNode,
+                GreenJsonValueSyntax valueNode,
                 out T convertedValue,
                 int valueNodeStartPosition,
                 List<JsonErrorInfo> errors)
             {
-                if (valueNode is JsonListSyntax jsonListSyntax)
+                if (valueNode is GreenJsonListSyntax jsonListSyntax)
                 {
                     return TryCreateFromList(json, jsonListSyntax, out convertedValue, valueNodeStartPosition, errors);
                 }
@@ -76,7 +76,7 @@ namespace Eutherion.Win.Storage
 
             internal abstract Union<ITypeErrorBuilder, PValue> TryCreateFromList(
                 string json,
-                JsonListSyntax jsonListSyntax,
+                GreenJsonListSyntax jsonListSyntax,
                 out T convertedValue,
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors);
@@ -103,7 +103,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
                 string json,
-                JsonListSyntax jsonListSyntax,
+                GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2) convertedValue,
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
 
             internal override Union<ITypeErrorBuilder, PValue> TryCreateFromList(
                 string json,
-                JsonListSyntax jsonListSyntax,
+                GreenJsonListSyntax jsonListSyntax,
                 out (T1, T2, T3, T4, T5) convertedValue,
                 int listSyntaxStartPosition,
                 List<JsonErrorInfo> errors)

@@ -26,9 +26,9 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
+    public abstract class GreenJsonBooleanLiteralSyntax : GreenJsonValueSyntax
     {
-        public sealed class False : JsonBooleanLiteralSyntax
+        public sealed class False : GreenJsonBooleanLiteralSyntax
         {
             public static False Instance = new False();
 
@@ -36,7 +36,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => false;
 
-            public override JsonSymbol BooleanToken => JsonValue.FalseJsonValue;
+            public override JsonValue BooleanToken => JsonValue.FalseJsonValue;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -46,7 +46,7 @@ namespace Eutherion.Text.Json
             public override TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue) => whenFalse();
         }
 
-        public sealed class True : JsonBooleanLiteralSyntax
+        public sealed class True : GreenJsonBooleanLiteralSyntax
         {
             public static readonly True Instance = new True();
 
@@ -54,7 +54,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => true;
 
-            public override JsonSymbol BooleanToken => JsonValue.TrueJsonValue;
+            public override JsonValue BooleanToken => JsonValue.TrueJsonValue;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -65,46 +65,78 @@ namespace Eutherion.Text.Json
         }
 
         public abstract bool Value { get; }
-        public abstract JsonSymbol BooleanToken { get; }
+        public abstract JsonValue BooleanToken { get; }
 
-        private JsonBooleanLiteralSyntax() { }
+        private GreenJsonBooleanLiteralSyntax() { }
 
         public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
+
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a boolean literal value syntax node.
+    /// </summary>
+    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
+    {
+        /// <summary>
+        /// Represents a 'false' literal value syntax node.
+        /// </summary>
+        public sealed class False : JsonBooleanLiteralSyntax
+        {
+            /// <summary>
+            /// Gets the bottom-up only 'green' representation of this syntax node.
+            /// </summary>
+            public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.False.Instance;
+
+            /// <summary>
+            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// </summary>
+            public override bool Value => false;
+
+            internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+        }
+
+        /// <summary>
+        /// Represents a 'true' literal value syntax node.
+        /// </summary>
+        public sealed class True : JsonBooleanLiteralSyntax
+        {
+            /// <summary>
+            /// Gets the bottom-up only 'green' representation of this syntax node.
+            /// </summary>
+            public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.True.Instance;
+
+            /// <summary>
+            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// </summary>
+            public override bool Value => true;
+
+            internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
+        }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public abstract GreenJsonBooleanLiteralSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+        /// </summary>
+        public abstract bool Value { get; }
+
+        private JsonBooleanLiteralSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }
 
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
-    }
-
-    public abstract class RedJsonBooleanLiteralSyntax : RedJsonValueSyntax
-    {
-        public sealed class False : RedJsonBooleanLiteralSyntax
-        {
-            public override JsonBooleanLiteralSyntax Green => JsonBooleanLiteralSyntax.False.Instance;
-            public override bool Value => false;
-
-            internal False(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
-        }
-
-        public sealed class True : RedJsonBooleanLiteralSyntax
-        {
-            public override JsonBooleanLiteralSyntax Green => JsonBooleanLiteralSyntax.True.Instance;
-            public override bool Value => true;
-
-            internal True(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
-        }
-
-        public abstract JsonBooleanLiteralSyntax Green { get; }
-
-        public override int Length => Green.Length;
-
-        public abstract bool Value { get; }
-
-        private RedJsonBooleanLiteralSyntax(RedJsonValueWithBackgroundSyntax parent) : base(parent) { }
-
-        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);

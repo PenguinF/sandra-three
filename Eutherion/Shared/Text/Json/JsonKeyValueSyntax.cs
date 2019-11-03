@@ -23,34 +23,33 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
+    /// Represents a single key-value pair in a <see cref="GreenJsonMapSyntax"/>.
     /// </summary>
-    public sealed class JsonKeyValueSyntax : ISpan
+    public sealed class GreenJsonKeyValueSyntax : ISpan
     {
         /// <summary>
-        /// Gets the syntax node containing the key of this <see cref="JsonKeyValueSyntax"/>.
+        /// Gets the syntax node containing the key of this <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
-        public JsonMultiValueSyntax KeyNode => ValueSectionNodes[0];
+        public GreenJsonMultiValueSyntax KeyNode => ValueSectionNodes[0];
 
         /// <summary>
         /// If <see cref="KeyNode"/> contains a valid key, returns it.
         /// </summary>
-        public Maybe<JsonStringLiteralSyntax> ValidKey { get; }
+        public Maybe<GreenJsonStringLiteralSyntax> ValidKey { get; }
 
         /// <summary>
-        /// Returns the first value node containing the value of this <see cref="JsonKeyValueSyntax"/>, if it was provided.
+        /// Returns the first value node containing the value of this <see cref="GreenJsonKeyValueSyntax"/>, if it was provided.
         /// </summary>
-        public Maybe<JsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 1 ? ValueSectionNodes[1] : Maybe<JsonMultiValueSyntax>.Nothing;
+        public Maybe<GreenJsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 1 ? ValueSectionNodes[1] : Maybe<GreenJsonMultiValueSyntax>.Nothing;
 
         /// <summary>
         /// Gets the list of value section nodes separated by colon characters.
         /// </summary>
-        public ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
@@ -58,7 +57,7 @@ namespace Eutherion.Text.Json
         public int Length => ValueSectionNodes.Length;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="JsonKeyValueSyntax"/>.
+        /// Initializes a new instance of a <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
         /// <param name="validKey">
         /// Nothing if no valid key was found, just the valid key otherwise.
@@ -72,10 +71,10 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentException">
         /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an enumeration containing one or less elements.
         /// </exception>
-        public JsonKeyValueSyntax(Maybe<JsonStringLiteralSyntax> validKey, IEnumerable<JsonMultiValueSyntax> valueSectionNodes)
+        public GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax> validKey, IEnumerable<GreenJsonMultiValueSyntax> valueSectionNodes)
         {
             ValidKey = validKey ?? throw new ArgumentNullException(nameof(validKey));
-            ValueSectionNodes = ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
+            ValueSectionNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
 
             if (ValueSectionNodes.Count == 0)
             {
@@ -83,79 +82,104 @@ namespace Eutherion.Text.Json
             }
 
             // If a valid key node is given, the node must always be equal to keyNode.ValueNode.Node.
-            if (validKey.IsJust(out JsonStringLiteralSyntax validKeyNode)
-                && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
+            if (validKey.IsJust(out GreenJsonStringLiteralSyntax validKeyNode)
+                && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode)
+            {
+                throw new ArgumentException(nameof(validKey));
+            }
         }
 
         /// <summary>
-        /// Gets the start position of a value node relative to the start position of this <see cref="JsonKeyValueSyntax"/>.
+        /// Gets the start position of <see cref="FirstValueNode"/> relative to the start position of this <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
-        public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
+        /// <exception cref="IndexOutOfRangeException">
+        /// There is no first value node, i.e. this <see cref="GreenJsonKeyValueSyntax"/> has a key only.
+        /// </exception>
+        public int GetFirstValueNodeStart() => ValueSectionNodes.GetElementOffset(1);
     }
 
-    public sealed class RedJsonKeyValueSyntax : JsonSyntax
+    /// <summary>
+    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
+    /// </summary>
+    public sealed class JsonKeyValueSyntax : JsonSyntax
     {
-        public RedJsonMapSyntax Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public JsonMapSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this key-value pair in the key-value pair collection of its parent.
+        /// </summary>
         public int ParentKeyValueNodeIndex { get; }
 
-        public JsonKeyValueSyntax Green { get; }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonKeyValueSyntax Green { get; }
 
-        private readonly RedJsonMultiValueSyntax[] valueSectionNodes;
-        public int ValueSectionNodeCount => valueSectionNodes.Length;
-        public RedJsonMultiValueSyntax GetValueSectionNode(int index)
-        {
-            if (valueSectionNodes[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueSectionNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
-            }
+        /// <summary>
+        /// Gets the value section node collection separated by colon characters.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonMultiValueSyntax> ValueSectionNodes { get; }
 
-            return valueSectionNodes[index];
-        }
+        /// <summary>
+        /// Gets the child colon syntax node collection.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonColonSyntax> Colons { get; }
 
-        private readonly JsonColonSyntax[] colons;
-        public int ColonCount => colons.Length;
-        public JsonColonSyntax GetColon(int index)
-        {
-            if (colons[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref colons[index], new JsonColonSyntax(this, index), null);
-            }
-
-            return colons[index];
-        }
-
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => JsonCurlyOpen.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
-        public override int ChildCount => ValueSectionNodeCount + ColonCount;
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => ValueSectionNodes.Count + Colons.Count;
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
             // '>>' has the happy property that (-1) >> 1 evaluates to -1, which correctly throws an IndexOutOfRangeException.
-            if ((index & 1) == 0) return GetValueSectionNode(index >> 1);
-            return GetColon(index >> 1);
+            if ((index & 1) == 0) return ValueSectionNodes[index >> 1];
+            return Colons[index >> 1];
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
 
-        internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
+        internal JsonKeyValueSyntax(JsonMapSyntax parent, int parentKeyValueNodeIndex)
         {
             Parent = parent;
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
-            Green = green;
+            Green = parent.Green.KeyValueNodes[parentKeyValueNodeIndex];
 
             // Assert that ChildCount will always return 1 or higher.
-            int valueSectionNodeCount = green.ValueSectionNodes.Count;
+            int valueSectionNodeCount = Green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
-            valueSectionNodes = new RedJsonMultiValueSyntax[valueSectionNodeCount];
-            colons = valueSectionNodeCount > 1 ? new JsonColonSyntax[valueSectionNodeCount - 1] : Array.Empty<JsonColonSyntax>();
+
+            ValueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
+                valueSectionNodeCount,
+                index => new JsonMultiValueSyntax(this, index));
+
+            Colons = new SafeLazyObjectCollection<JsonColonSyntax>(
+                valueSectionNodeCount - 1,
+                index => new JsonColonSyntax(this, index));
         }
     }
 }

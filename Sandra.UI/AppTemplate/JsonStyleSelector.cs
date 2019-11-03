@@ -65,19 +65,19 @@ namespace Eutherion.Win.AppTemplate
         public override Style DefaultVisit(JsonSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitBackgroundSyntax(RedJsonBackgroundSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitBackgroundSyntax(JsonBackgroundSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
-        public override Style VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
-        public override Style VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => node.Green.UndefinedToken is JsonErrorString
             ? syntaxEditor.Styles[stringStyleIndex]
             : syntaxEditor.Styles[undefinedValueStyleIndex];

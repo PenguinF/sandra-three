@@ -22,57 +22,56 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Contains one or more value nodes together with all background syntax that precedes and follows it.
     /// </summary>
-    public sealed class JsonMultiValueSyntax : ISpan
+    public sealed class GreenJsonMultiValueSyntax : ISpan
     {
         // This syntax is generated everywhere a single value is expected.
         // It is a parse error if zero values, or two or more values are given, the exception being
         // an optional value between a comma following elements of an array/object and its closing
         // ']' or '}' character. (E.g. [0,1,2,] is not an error.)
         //
-        // Below are a couple of examples to show in what states a JsonMultiValueSyntax node can be.
-        // The given example json represents an array with one enclosing JsonMultiValueSyntax.
+        // Below are a couple of examples to show in what states a GreenJsonMultiValueSyntax node can be.
+        // The given example json represents an array with one enclosing GreenJsonMultiValueSyntax.
         // For clarity, the surrounding brackets are given, though they are not part of this syntax node.
         //
         // []            - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 0
-        //                 ValueNode.ContentNode is JsonMissingValueSyntax
+        //                 ValueNode.ContentNode is GreenJsonMissingValueSyntax
         //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/]        - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1  (one JsonComment)
-        //                 ValueNode.ContentNode is JsonMissingValueSyntax
+        //                 ValueNode.ContentNode is GreenJsonMissingValueSyntax
         //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/0]       - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
-        //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
+        //                 ValueNode.ContentNode is GreenJsonIntegerLiteralSyntax
         //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 0
         //
         // [/**/0/**/]   - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
-        //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
+        //                 ValueNode.ContentNode is GreenJsonIntegerLiteralSyntax
         //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 1
         //
         // [0 ]          - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 0
-        //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
+        //                 ValueNode.ContentNode is GreenJsonIntegerLiteralSyntax
         //                 ValueNodes.Count == 1
         //                 BackgroundAfter.BackgroundSymbols.Count == 1             (one JsonWhitespace)
         //
         // [ 0 false ]   - ValueNode.BackgroundBefore.BackgroundSymbols.Count == 1
-        //                 ValueNode.ContentNode is JsonIntegerLiteralSyntax
+        //                 ValueNode.ContentNode is GreenJsonIntegerLiteralSyntax
         //                 ValueNodes.Count == 2
         //                 ValueNodes[1].BackgroundSymbols.Count == 1
-        //                 ValueNodes[1].ContentNode is JsonBooleanLiteralSyntax
+        //                 ValueNodes[1].ContentNode is GreenJsonBooleanLiteralSyntax
         //                 BackgroundAfter.BackgroundSymbols.Count == 1
         //
-        // Only the first ValueNode (ValueNodes[0]) can be JsonMissingValueSyntax, and if it is, ValueNodes.Count is always 1,
+        // Only the first ValueNode (ValueNodes[0]) can be GreenJsonMissingValueSyntax, and if it is, ValueNodes.Count is always 1,
         // ValueNode.BackgroundBefore may still be non-empty, and BackgroundAfter is always empty.
         //
         // The main reason this structure exists like this is because there needs to be a place where
@@ -80,19 +79,19 @@ namespace Eutherion.Text.Json
 
         /// <summary>
         /// Gets the syntax node containing the first value.
-        /// Is JsonMissingValueSyntax if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
+        /// Is <see cref="GreenJsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
         /// </summary>
-        public JsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
+        public GreenJsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
 
         /// <summary>
         /// Gets the non-empty list of value nodes.
         /// </summary>
-        public ReadOnlySpanList<JsonValueWithBackgroundSyntax> ValueNodes { get; }
+        public ReadOnlySpanList<GreenJsonValueWithBackgroundSyntax> ValueNodes { get; }
 
         /// <summary>
         /// Gets the background after the value nodes.
         /// </summary>
-        public JsonBackgroundSyntax BackgroundAfter { get; }
+        public GreenJsonBackgroundSyntax BackgroundAfter { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -100,7 +99,7 @@ namespace Eutherion.Text.Json
         public int Length => ValueNodes.Length + BackgroundAfter.Length;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JsonMultiValueSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenJsonMultiValueSyntax"/>.
         /// </summary>
         /// <param name="valueNodes">
         /// The non-empty list of value nodes.
@@ -114,9 +113,9 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentException">
         /// <paramref name="valueNodes"/> is an empty enumeration.
         /// </exception>
-        public JsonMultiValueSyntax(IEnumerable<JsonValueWithBackgroundSyntax> valueNodes, JsonBackgroundSyntax backgroundAfter)
+        public GreenJsonMultiValueSyntax(IEnumerable<GreenJsonValueWithBackgroundSyntax> valueNodes, GreenJsonBackgroundSyntax backgroundAfter)
         {
-            ValueNodes = ReadOnlySpanList<JsonValueWithBackgroundSyntax>.Create(valueNodes);
+            ValueNodes = ReadOnlySpanList<GreenJsonValueWithBackgroundSyntax>.Create(valueNodes);
 
             if (ValueNodes.Count == 0)
             {
@@ -127,86 +126,122 @@ namespace Eutherion.Text.Json
         }
     }
 
-    public sealed class RedJsonMultiValueSyntax : JsonSyntax
+    /// <summary>
+    /// Represents a json syntax node which contains one or more value nodes together with all background syntax that precedes and follows it.
+    /// </summary>
+    public sealed class JsonMultiValueSyntax : JsonSyntax
     {
-        public Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public Union<_void, JsonListSyntax, JsonKeyValueSyntax> Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent's collection, or 0 if this syntax node is the root node.
+        /// </summary>
         public int ParentIndex { get; }
 
-        public JsonMultiValueSyntax Green { get; }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonMultiValueSyntax Green { get; }
 
-        private readonly RedJsonValueWithBackgroundSyntax[] valueNodes;
-        public int ValueNodeCount => valueNodes.Length;
-        public RedJsonValueWithBackgroundSyntax GetValueNode(int index)
-        {
-            if (valueNodes[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueNodes[index], new RedJsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
-            }
+        /// <summary>
+        /// Gets the collection of value nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
-            return valueNodes[index];
-        }
+        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
 
-        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundAfter;
-        public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
+        /// <summary>
+        /// Gets the background after the value nodes.
+        /// </summary>
+        public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
+        /// <summary>
+        /// Gets the syntax node containing the first value.
+        /// Is <see cref="JsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
+        /// </summary>
+        public JsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position, or 0 if this syntax node is the root node.
+        /// </summary>
         public override int Start => Parent.Match(
             whenOption1: _ => 0,
             whenOption2: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
             whenOption3: keyValueSyntax => keyValueSyntax.Green.ValueSectionNodes.GetElementOffset(ParentIndex));
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: null,
             whenOption2: x => x,
             whenOption3: x => x);
 
+        /// <summary>
+        /// Gets the absolute start position of this syntax node.
+        /// </summary>
         public override int AbsoluteStart => Parent.IsOption1(out _) ? 0 : base.AbsoluteStart;
 
-        public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => ValueNodes.Count + 1;  // Extra 1 for BackgroundAfter.
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
-            if (index < ValueNodeCount) return GetValueNode(index);
-            if (index == ValueNodeCount) return BackgroundAfter;
+            if (index < ValueNodes.Count) return ValueNodes[index];
+            if (index == ValueNodes.Count) return BackgroundAfter;
             throw new IndexOutOfRangeException();
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index)
         {
-            if (index < ValueNodeCount) return Green.ValueNodes.GetElementOffset(index);
-            if (index == ValueNodeCount) return Length - Green.BackgroundAfter.Length;
+            if (index < ValueNodes.Count) return Green.ValueNodes.GetElementOffset(index);
+            if (index == ValueNodes.Count) return Length - Green.BackgroundAfter.Length;
             throw new IndexOutOfRangeException();
         }
 
-        private RedJsonMultiValueSyntax(Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> parent, JsonMultiValueSyntax green)
+        private JsonMultiValueSyntax(Union<_void, JsonListSyntax, JsonKeyValueSyntax> parent, GreenJsonMultiValueSyntax green)
         {
             Parent = parent;
             Green = green;
 
-            int valueNodeCount = green.ValueNodes.Count;
-            valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
-            backgroundAfter = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundAfter));
+            ValueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(
+                green.ValueNodes.Count,
+                index => new JsonValueWithBackgroundSyntax(this, index));
+
+            backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
         }
 
         // For root nodes.
-        internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
+        internal JsonMultiValueSyntax(GreenJsonMultiValueSyntax green)
             : this(_void._, green)
         {
             // Do not assign ParentIndex, its value is meaningless in this case.
         }
 
-        internal RedJsonMultiValueSyntax(RedJsonListSyntax parent, int parentIndex, JsonMultiValueSyntax green)
-            : this(parent, green)
+        internal JsonMultiValueSyntax(JsonListSyntax parent, int parentIndex)
+            : this(parent, parent.Green.ListItemNodes[parentIndex])
         {
             ParentIndex = parentIndex;
         }
 
-        internal RedJsonMultiValueSyntax(RedJsonKeyValueSyntax parent, int parentIndex, JsonMultiValueSyntax green)
-            : this(parent, green)
+        internal JsonMultiValueSyntax(JsonKeyValueSyntax parent, int parentIndex)
+            : this(parent, parent.Green.ValueSectionNodes[parentIndex])
         {
             ParentIndex = parentIndex;
         }

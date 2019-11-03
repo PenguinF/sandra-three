@@ -21,18 +21,42 @@
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json colon syntax node.
+    /// </summary>
     public sealed class JsonColonSyntax : JsonSyntax
     {
-        public RedJsonKeyValueSyntax Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public JsonKeyValueSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this colon in the colon collection of its parent.
+        /// </summary>
         public int ColonIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonColon Green => JsonColon.Value;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.ValueSectionNodes.GetSeparatorOffset(ColonIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => JsonColon.ColonLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
-        internal JsonColonSyntax(RedJsonKeyValueSyntax parent, int colonIndex)
+        internal JsonColonSyntax(JsonKeyValueSyntax parent, int colonIndex)
         {
             Parent = parent;
             ColonIndex = colonIndex;

@@ -25,20 +25,20 @@ using System;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols
+    /// Represents a <see cref="GreenJsonValueSyntax"/> node together with the background symbols
     /// which directly precede it in an abstract json syntax tree.
     /// </summary>
-    public sealed class JsonValueWithBackgroundSyntax : ISpan
+    public sealed class GreenJsonValueWithBackgroundSyntax : ISpan
     {
         /// <summary>
         /// Gets the background symbols which directly precede the content value node.
         /// </summary>
-        public JsonBackgroundSyntax BackgroundBefore { get; }
+        public GreenJsonBackgroundSyntax BackgroundBefore { get; }
 
         /// <summary>
         /// Gets the content node containing the actual json value.
         /// </summary>
-        public JsonValueSyntax ContentNode { get; }
+        public GreenJsonValueSyntax ContentNode { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
@@ -46,7 +46,7 @@ namespace Eutherion.Text.Json
         public int Length { get; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="JsonValueWithBackgroundSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenJsonValueWithBackgroundSyntax"/>.
         /// </summary>
         /// <param name="backgroundBefore">
         /// The background symbols which directly precede the content value node.
@@ -57,7 +57,7 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="backgroundBefore"/> and/or <paramref name="contentNode"/> are null.
         /// </exception>
-        public JsonValueWithBackgroundSyntax(JsonBackgroundSyntax backgroundBefore, JsonValueSyntax contentNode)
+        public GreenJsonValueWithBackgroundSyntax(GreenJsonBackgroundSyntax backgroundBefore, GreenJsonValueSyntax contentNode)
         {
             BackgroundBefore = backgroundBefore ?? throw new ArgumentNullException(nameof(backgroundBefore));
             ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
@@ -65,55 +65,92 @@ namespace Eutherion.Text.Json
         }
     }
 
-    public sealed class RedJsonValueWithBackgroundSyntax : JsonSyntax
+    /// <summary>
+    /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols directly before it in an abstract json syntax tree.
+    /// </summary>
+    public sealed class JsonValueWithBackgroundSyntax : JsonSyntax
     {
-        private class JsonValueSyntaxCreator : JsonValueSyntaxVisitor<RedJsonValueWithBackgroundSyntax, RedJsonValueSyntax>
+        private class JsonValueSyntaxCreator : GreenJsonValueSyntaxVisitor<JsonValueWithBackgroundSyntax, JsonValueSyntax>
         {
             public static readonly JsonValueSyntaxCreator Instance = new JsonValueSyntaxCreator();
 
             private JsonValueSyntaxCreator() { }
 
-            public override RedJsonValueSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => green.Match<RedJsonValueSyntax>(
-                    whenFalse: () => new RedJsonBooleanLiteralSyntax.False(parent),
-                    whenTrue: () => new RedJsonBooleanLiteralSyntax.True(parent));
+            public override JsonValueSyntax VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
+                => green.Match<JsonValueSyntax>(
+                    whenFalse: () => new JsonBooleanLiteralSyntax.False(parent),
+                    whenTrue: () => new JsonBooleanLiteralSyntax.True(parent));
 
-            public override RedJsonValueSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonIntegerLiteralSyntax(parent, green);
+            public override JsonValueSyntax VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonIntegerLiteralSyntax(parent, green);
 
-            public override RedJsonValueSyntax VisitListSyntax(JsonListSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonListSyntax(parent, green);
+            public override JsonValueSyntax VisitListSyntax(GreenJsonListSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonListSyntax(parent, green);
 
-            public override RedJsonValueSyntax VisitMapSyntax(JsonMapSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonMapSyntax(parent, green);
+            public override JsonValueSyntax VisitMapSyntax(GreenJsonMapSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonMapSyntax(parent, green);
 
-            public override RedJsonValueSyntax VisitMissingValueSyntax(JsonMissingValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonMissingValueSyntax(parent, green);
+            public override JsonValueSyntax VisitMissingValueSyntax(GreenJsonMissingValueSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonMissingValueSyntax(parent, green);
 
-            public override RedJsonValueSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonStringLiteralSyntax(parent, green);
+            public override JsonValueSyntax VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonStringLiteralSyntax(parent, green);
 
-            public override RedJsonValueSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
-                => new RedJsonUndefinedValueSyntax(parent, green);
+            public override JsonValueSyntax VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonUndefinedValueSyntax(parent, green);
         }
 
-        public RedJsonMultiValueSyntax Parent { get; }
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public JsonMultiValueSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this background-value pair in the background-value pair collection of its parent.
+        /// </summary>
         public int ParentValueNodeIndex { get; }
 
-        public JsonValueWithBackgroundSyntax Green { get; }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonValueWithBackgroundSyntax Green { get; }
 
-        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundBefore;
-        public RedJsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
+        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundBefore;
+        private readonly SafeLazyObject<JsonValueSyntax> contentNode;
 
-        private readonly SafeLazyObject<RedJsonValueSyntax> contentNode;
-        public RedJsonValueSyntax ContentNode => contentNode.Object;
+        /// <summary>
+        /// Gets the background symbols which directly precede the content value node.
+        /// </summary>
+        public JsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
 
+        /// <summary>
+        /// Gets the content node containing the actual json value.
+        /// </summary>
+        public JsonValueSyntax ContentNode => contentNode.Object;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.ValueNodes.GetElementOffset(ParentValueNodeIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
         public override int ChildCount => 2;  // BackgroundBefore and ContentNode.
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
             if (index == 0) return BackgroundBefore;
@@ -121,6 +158,9 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index)
         {
             if (index == 0) return 0;
@@ -128,13 +168,13 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
-        internal RedJsonValueWithBackgroundSyntax(RedJsonMultiValueSyntax parent, int parentValueNodeIndex, JsonValueWithBackgroundSyntax green)
+        internal JsonValueWithBackgroundSyntax(JsonMultiValueSyntax parent, int parentValueNodeIndex)
         {
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
-            Green = green;
-            backgroundBefore = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundBefore));
-            contentNode = new SafeLazyObject<RedJsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
+            Green = parent.Green.ValueNodes[parentValueNodeIndex];
+            backgroundBefore = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
+            contentNode = new SafeLazyObject<JsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
     }
 }
