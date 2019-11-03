@@ -182,7 +182,7 @@ namespace Eutherion.Text.Json
             int keyValueNodeCount = green.KeyValueNodes.Count;
             KeyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(
                 keyValueNodeCount,
-                index => new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]));
+                index => new JsonKeyValueSyntax(this, index));
 
             Commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
                 keyValueNodeCount - 1,

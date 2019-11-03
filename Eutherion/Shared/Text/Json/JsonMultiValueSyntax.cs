@@ -222,9 +222,9 @@ namespace Eutherion.Text.Json
 
             ValueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(
                 green.ValueNodes.Count,
-                index => new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]));
+                index => new JsonValueWithBackgroundSyntax(this, index));
 
-            backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this, Green.BackgroundAfter));
+            backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
         }
 
         // For root nodes.
@@ -234,14 +234,14 @@ namespace Eutherion.Text.Json
             // Do not assign ParentIndex, its value is meaningless in this case.
         }
 
-        internal JsonMultiValueSyntax(JsonListSyntax parent, int parentIndex, GreenJsonMultiValueSyntax green)
-            : this(parent, green)
+        internal JsonMultiValueSyntax(JsonListSyntax parent, int parentIndex)
+            : this(parent, parent.Green.ListItemNodes[parentIndex])
         {
             ParentIndex = parentIndex;
         }
 
-        internal JsonMultiValueSyntax(JsonKeyValueSyntax parent, int parentIndex, GreenJsonMultiValueSyntax green)
-            : this(parent, green)
+        internal JsonMultiValueSyntax(JsonKeyValueSyntax parent, int parentIndex)
+            : this(parent, parent.Green.ValueSectionNodes[parentIndex])
         {
             ParentIndex = parentIndex;
         }

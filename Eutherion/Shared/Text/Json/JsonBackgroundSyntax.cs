@@ -106,16 +106,16 @@ namespace Eutherion.Text.Json
             whenOption1: x => x,
             whenOption2: x => x);
 
-        internal JsonBackgroundSyntax(JsonValueWithBackgroundSyntax backgroundBeforeParent, GreenJsonBackgroundSyntax green)
+        internal JsonBackgroundSyntax(JsonValueWithBackgroundSyntax backgroundBeforeParent)
         {
             Parent = backgroundBeforeParent;
-            Green = green;
+            Green = backgroundBeforeParent.Green.BackgroundBefore;
         }
 
-        internal JsonBackgroundSyntax(JsonMultiValueSyntax backgroundAfterParent, GreenJsonBackgroundSyntax green)
+        internal JsonBackgroundSyntax(JsonMultiValueSyntax backgroundAfterParent)
         {
             Parent = backgroundAfterParent;
-            Green = green;
+            Green = backgroundAfterParent.Green.BackgroundAfter;
         }
 
         // Treat JsonBackgroundSyntax as a terminal symbol.

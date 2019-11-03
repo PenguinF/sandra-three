@@ -163,19 +163,19 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
 
-        internal JsonKeyValueSyntax(JsonMapSyntax parent, int parentKeyValueNodeIndex, GreenJsonKeyValueSyntax green)
+        internal JsonKeyValueSyntax(JsonMapSyntax parent, int parentKeyValueNodeIndex)
         {
             Parent = parent;
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
-            Green = green;
+            Green = parent.Green.KeyValueNodes[parentKeyValueNodeIndex];
 
             // Assert that ChildCount will always return 1 or higher.
-            int valueSectionNodeCount = green.ValueSectionNodes.Count;
+            int valueSectionNodeCount = Green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
 
             ValueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 valueSectionNodeCount,
-                index => new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]));
+                index => new JsonMultiValueSyntax(this, index));
 
             Colons = new SafeLazyObjectCollection<JsonColonSyntax>(
                 valueSectionNodeCount - 1,

@@ -168,12 +168,12 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
-        internal JsonValueWithBackgroundSyntax(JsonMultiValueSyntax parent, int parentValueNodeIndex, GreenJsonValueWithBackgroundSyntax green)
+        internal JsonValueWithBackgroundSyntax(JsonMultiValueSyntax parent, int parentValueNodeIndex)
         {
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
-            Green = green;
-            backgroundBefore = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this, Green.BackgroundBefore));
+            Green = parent.Green.ValueNodes[parentValueNodeIndex];
+            backgroundBefore = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
             contentNode = new SafeLazyObject<JsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
     }

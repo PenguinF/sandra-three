@@ -184,7 +184,7 @@ namespace Eutherion.Text.Json
             int listItemNodeCount = green.ListItemNodes.Count;
             ListItemNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 listItemNodeCount,
-                index => new JsonMultiValueSyntax(this, index, Green.ListItemNodes[index]));
+                index => new JsonMultiValueSyntax(this, index));
 
             Commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
                 listItemNodeCount - 1,
