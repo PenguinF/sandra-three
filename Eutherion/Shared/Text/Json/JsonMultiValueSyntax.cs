@@ -22,7 +22,6 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -146,15 +145,7 @@ namespace Eutherion.Text.Json
         public int ValueNodeCount => valueNodes.Count;
         public JsonValueWithBackgroundSyntax GetValueNode(int index)
         {
-            if (valueNodes.Arr[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueNodes.Arr[index], new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
-            }
-
-            return valueNodes.Arr[index];
+            return valueNodes.Get(index, i => new JsonValueWithBackgroundSyntax(this, i, Green.ValueNodes[i]));
         }
 
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;

@@ -22,7 +22,6 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -105,30 +104,14 @@ namespace Eutherion.Text.Json
 
         public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
-            if (keyValueNodes.Arr[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref keyValueNodes.Arr[index], new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
-            }
-
-            return keyValueNodes.Arr[index];
+            return keyValueNodes.Get(index, i => new JsonKeyValueSyntax(this, i, Green.KeyValueNodes[i]));
         }
 
         public int CommaCount => commas.Count;
 
         public JsonCommaSyntax GetComma(int index)
         {
-            if (commas.Arr[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref commas.Arr[index], new JsonCommaSyntax(this, index), null);
-            }
-
-            return commas.Arr[index];
+            return commas.Get(index, i => new JsonCommaSyntax(this, i));
         }
 
         /// <summary>

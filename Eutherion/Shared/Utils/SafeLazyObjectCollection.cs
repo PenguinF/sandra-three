@@ -20,6 +20,7 @@
 #endregion
 
 using System;
+using System.Threading;
 
 namespace Eutherion.Utils
 {
@@ -29,9 +30,9 @@ namespace Eutherion.Utils
     /// <typeparam name="TObject">
     /// The type of objects to create.
     /// </typeparam>
-    public class SafeLazyObjectCollection<TObject>
+    public class SafeLazyObjectCollection<TObject> where TObject : class
     {
-        public TObject[] Arr { get; }
+        private readonly TObject[] Arr;
 
         /// <summary>
         /// Gets the number of objects in this collection.
@@ -47,6 +48,34 @@ namespace Eutherion.Utils
         public SafeLazyObjectCollection(int count)
         {
             Arr = count > 0 ? new TObject[count] : Array.Empty<TObject>();
+        }
+
+        /// <summary>
+        /// Gets the object at the specified index in the collection.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the object to get.
+        /// </param>
+        /// <param name="elementConstructor">
+        /// The constructor with which to initialize an object at a given index.
+        /// Note that if multiple threads race to construct an object, they will all call the constructor.
+        /// Only one of the created objects is stored in the collection, and henceforth returned.
+        /// </param>
+        /// <returns>
+        /// The initialized object at the specified index in the collection.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
+        /// </exception>
+        public TObject Get(int index, Func<int, TObject> elementConstructor)
+        {
+            if (Arr[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                Interlocked.CompareExchange(ref Arr[index], elementConstructor(index), null);
+            }
+
+            return Arr[index];
         }
     }
 }

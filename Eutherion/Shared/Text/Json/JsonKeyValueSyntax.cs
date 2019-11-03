@@ -23,7 +23,6 @@ using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -119,30 +118,14 @@ namespace Eutherion.Text.Json
 
         public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
-            if (valueSectionNodes.Arr[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueSectionNodes.Arr[index], new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
-            }
-
-            return valueSectionNodes.Arr[index];
+            return valueSectionNodes.Get(index, i => new JsonMultiValueSyntax(this, i, Green.ValueSectionNodes[i]));
         }
 
         public int ColonCount => colons.Count;
 
         public JsonColonSyntax GetColon(int index)
         {
-            if (colons.Arr[index] == null)
-            {
-                // Replace with an initialized value as an atomic operation.
-                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
-                // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref colons.Arr[index], new JsonColonSyntax(this, index), null);
-            }
-
-            return colons.Arr[index];
+            return colons.Get(index, i => new JsonColonSyntax(this, i));
         }
 
         /// <summary>
