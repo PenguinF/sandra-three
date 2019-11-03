@@ -93,21 +93,22 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullValueShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonString(null, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonString(null, 2));
             Assert.Throws<ArgumentNullException>(() => JsonValue.Create(null));
         }
 
         [Theory]
-        [InlineData("", 10)]
+        [InlineData("\"", 10)]
         [InlineData("{}", 3)]
         // No newline conversions.
         [InlineData("\n", 1)]
         [InlineData("\r\n", 2)]
         public void UnchangedValueParameter(string value, int length)
         {
-            var jsonString = new JsonString(value, length);
+            // Length includes quotes for json strings.
+            var jsonString = new JsonString(value, length + 2);
             Assert.Equal(value, jsonString.Value);
-            Assert.Equal(length, jsonString.Length);
+            Assert.Equal(length + 2, jsonString.Length);
 
             var jsonValue = JsonValue.Create(value);
             Assert.Equal(value, jsonValue.Value);
@@ -117,16 +118,16 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullErrorsShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(0, null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(null, 0));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(2, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(null, 2));
         }
 
         [Theory]
-        [InlineData(JsonErrorCode.Custom, "", 0, 0)]
-        [InlineData(JsonErrorCode.Unspecified, null, 0, 1)]
+        [InlineData(JsonErrorCode.Custom, "", 0, 2)]
+        [InlineData(JsonErrorCode.Unspecified, null, 0, 2)]
         // No newline conversions.
-        [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 0)]
-        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "\\u00", 0, 2)]
+        [InlineData(JsonErrorCode.UnterminatedString, "\n", 1, 2)]
+        [InlineData(JsonErrorCode.UnrecognizedEscapeSequence, "\\u00", 0, 3)]
         public void UnchangedParametersInErrorString(JsonErrorCode errorCode, string errorParameter, int start, int length)
         {
             string[] parameters = errorParameter == null ? null : new[] { errorParameter };
@@ -280,7 +281,7 @@ namespace Eutherion.Shared.Tests
             yield return new object[] { JsonComma.Value, typeof(JsonComma) };
             yield return new object[] { new JsonUnknownSymbol("*"), typeof(JsonUnknownSymbol) };
             yield return new object[] { JsonValue.TrueJsonValue, typeof(JsonValue) };
-            yield return new object[] { new JsonString(string.Empty, 0), typeof(JsonString) };
+            yield return new object[] { new JsonString(string.Empty, 2), typeof(JsonString) };
             yield return new object[] { new JsonErrorString(1, JsonErrorString.Unterminated(0, 1)), typeof(JsonErrorString) };
             yield return new object[] { JsonWhitespace.Create(2), typeof(JsonWhitespace) };
         }
