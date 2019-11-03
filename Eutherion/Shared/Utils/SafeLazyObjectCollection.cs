@@ -20,6 +20,8 @@
 #endregion
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Eutherion.Utils
@@ -30,7 +32,7 @@ namespace Eutherion.Utils
     /// <typeparam name="TObject">
     /// The type of objects to create.
     /// </typeparam>
-    public class SafeLazyObjectCollection<TObject> where TObject : class
+    public class SafeLazyObjectCollection<TObject> : IReadOnlyList<TObject> where TObject : class
     {
         private readonly TObject[] Arr;
         private readonly Func<int, TObject> ElementConstructor;
@@ -85,5 +87,15 @@ namespace Eutherion.Utils
                 return Arr[index];
             }
         }
+
+        /// <summary>
+        /// Returns an enumerator that iterates through the list.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
+        /// </returns>
+        public IEnumerator<TObject> GetEnumerator() => ((ICollection<TObject>)Arr).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
