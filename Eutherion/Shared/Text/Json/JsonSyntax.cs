@@ -88,7 +88,7 @@ namespace Eutherion.Text.Json
             if (IsTerminalSymbol)
             {
                 // Yield return if ranges start..end and 0..Length intersect.
-                if (start <= Length && 0 <= end)
+                if (start < Length && 0 < end)
                 {
                     yield return this;
                 }

@@ -197,8 +197,11 @@ namespace Eutherion.Win.AppTemplate
         protected override void OnStyleNeeded(StyleNeededEventArgs e)
         {
             // Get the start position of the span which is still unstyled.
-            int startPosition = GetEndStyled();
-            int endPosition = e.Position;
+            // Increase range on both ends by 1 to make the search for intersecting intervals inclusive,
+            // so e.g. terminal symbols that end exactly at the end-styled position and which may be affected
+            // by the latest change are returned as well.
+            int startPosition = GetEndStyled() - 1;
+            int endPosition = e.Position + 1;
 
             foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
             {
