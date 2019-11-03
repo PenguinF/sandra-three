@@ -34,6 +34,11 @@ namespace Eutherion.Utils
         public TObject[] Arr { get; }
 
         /// <summary>
+        /// Gets the number of objects in this collection.
+        /// </summary>
+        public int Count => Arr.Length;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="SafeLazyObjectCollection{TObject}"/>.
         /// </summary>
         /// <param name="count">

@@ -143,7 +143,7 @@ namespace Eutherion.Text.Json
         private readonly SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> valueNodes;
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
 
-        public int ValueNodeCount => valueNodes.Arr.Length;
+        public int ValueNodeCount => valueNodes.Count;
         public JsonValueWithBackgroundSyntax GetValueNode(int index)
         {
             if (valueNodes.Arr[index] == null)

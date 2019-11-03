@@ -98,7 +98,7 @@ namespace Eutherion.Text.Json
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 
-        public int ListItemNodeCount => listItemNodes.Arr.Length;
+        public int ListItemNodeCount => listItemNodes.Count;
 
         public JsonMultiValueSyntax GetListItemNode(int index)
         {
@@ -113,7 +113,7 @@ namespace Eutherion.Text.Json
             return listItemNodes.Arr[index];
         }
 
-        public int CommaCount => commas.Arr.Length;
+        public int CommaCount => commas.Count;
 
         public JsonCommaSyntax GetComma(int index)
         {

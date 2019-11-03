@@ -115,7 +115,7 @@ namespace Eutherion.Text.Json
         private readonly SafeLazyObjectCollection<JsonMultiValueSyntax> valueSectionNodes;
         private readonly SafeLazyObjectCollection<JsonColonSyntax> colons;
 
-        public int ValueSectionNodeCount => valueSectionNodes.Arr.Length;
+        public int ValueSectionNodeCount => valueSectionNodes.Count;
 
         public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
@@ -130,7 +130,7 @@ namespace Eutherion.Text.Json
             return valueSectionNodes.Arr[index];
         }
 
-        public int ColonCount => colons.Arr.Length;
+        public int ColonCount => colons.Count;
 
         public JsonColonSyntax GetColon(int index)
         {

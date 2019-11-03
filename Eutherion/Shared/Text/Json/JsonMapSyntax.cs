@@ -101,7 +101,7 @@ namespace Eutherion.Text.Json
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
 
-        public int KeyValueNodesCount => keyValueNodes.Arr.Length;
+        public int KeyValueNodesCount => keyValueNodes.Count;
 
         public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
@@ -116,7 +116,7 @@ namespace Eutherion.Text.Json
             return keyValueNodes.Arr[index];
         }
 
-        public int CommaCount => commas.Arr.Length;
+        public int CommaCount => commas.Count;
 
         public JsonCommaSyntax GetComma(int index)
         {
