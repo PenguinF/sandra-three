@@ -115,16 +115,16 @@ namespace Eutherion.Text.Json
             return valueSectionNodes[index];
         }
 
-        private readonly RedJsonColon[] colons;
+        private readonly JsonColonSyntax[] colons;
         public int ColonCount => colons.Length;
-        public RedJsonColon GetColon(int index)
+        public JsonColonSyntax GetColon(int index)
         {
             if (colons[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref colons[index], new RedJsonColon(this, index), null);
+                Interlocked.CompareExchange(ref colons[index], new JsonColonSyntax(this, index), null);
             }
 
             return colons[index];
@@ -155,7 +155,7 @@ namespace Eutherion.Text.Json
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
             valueSectionNodes = new RedJsonMultiValueSyntax[valueSectionNodeCount];
-            colons = valueSectionNodeCount > 1 ? new RedJsonColon[valueSectionNodeCount - 1] : Array.Empty<RedJsonColon>();
+            colons = valueSectionNodeCount > 1 ? new JsonColonSyntax[valueSectionNodeCount - 1] : Array.Empty<JsonColonSyntax>();
         }
     }
 }

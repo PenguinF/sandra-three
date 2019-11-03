@@ -36,21 +36,4 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
         public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyClose(this, arg);
     }
-
-    public sealed class RedJsonCurlyClose : JsonSyntax
-    {
-        public RedJsonMapSyntax Parent { get; }
-
-        public JsonCurlyClose Green => JsonCurlyClose.Value;
-
-        public override int Start => Parent.Length - JsonCurlyClose.CurlyCloseLength;
-        public override int Length => JsonCurlyClose.CurlyCloseLength;
-        public override JsonSyntax ParentSyntax => Parent;
-
-        internal RedJsonCurlyClose(RedJsonMapSyntax parent) => Parent = parent;
-
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyClose(this, arg);
-    }
 }

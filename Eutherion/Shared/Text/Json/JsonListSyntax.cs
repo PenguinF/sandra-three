@@ -87,7 +87,7 @@ namespace Eutherion.Text.Json
         public JsonListSyntax Green { get; }
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.
-        public RedJsonSquareBracketOpen SquareBracketOpen { get; }
+        public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
         private readonly RedJsonMultiValueSyntax[] listItemNodes;
         public int ListItemNodeCount => listItemNodes.Length;
@@ -104,23 +104,23 @@ namespace Eutherion.Text.Json
             return listItemNodes[index];
         }
 
-        private readonly RedJsonComma[] commas;
+        private readonly JsonCommaSyntax[] commas;
         public int CommaCount => commas.Length;
-        public RedJsonComma GetComma(int index)
+        public JsonCommaSyntax GetComma(int index)
         {
             if (commas[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref commas[index], new RedJsonComma(this, index), null);
+                Interlocked.CompareExchange(ref commas[index], new JsonCommaSyntax(this, index), null);
             }
 
             return commas[index];
         }
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.
-        public Maybe<RedJsonSquareBracketClose> SquareBracketClose { get; }
+        public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 
         public override int Length => Green.Length;
 
@@ -139,7 +139,7 @@ namespace Eutherion.Text.Json
                 return GetComma(index >> 1);
             }
 
-            if (index == itemAndCommaCount && SquareBracketClose.IsJust(out RedJsonSquareBracketClose jsonSquareBracketClose))
+            if (index == itemAndCommaCount && SquareBracketClose.IsJust(out JsonSquareBracketCloseSyntax jsonSquareBracketClose))
             {
                 return jsonSquareBracketClose;
             }
@@ -171,15 +171,15 @@ namespace Eutherion.Text.Json
         {
             Green = green;
 
-            SquareBracketOpen = new RedJsonSquareBracketOpen(this);
+            SquareBracketOpen = new JsonSquareBracketOpenSyntax(this);
 
             int listItemNodeCount = green.ListItemNodes.Count;
             listItemNodes = listItemNodeCount > 0 ? new RedJsonMultiValueSyntax[listItemNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
-            commas = listItemNodeCount > 1 ? new RedJsonComma[listItemNodeCount - 1] : Array.Empty<RedJsonComma>();
+            commas = listItemNodeCount > 1 ? new JsonCommaSyntax[listItemNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
 
             SquareBracketClose = green.MissingSquareBracketClose
-                               ? Maybe<RedJsonSquareBracketClose>.Nothing
-                               : new RedJsonSquareBracketClose(this);
+                               ? Maybe<JsonSquareBracketCloseSyntax>.Nothing
+                               : new JsonSquareBracketCloseSyntax(this);
         }
 
         public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);

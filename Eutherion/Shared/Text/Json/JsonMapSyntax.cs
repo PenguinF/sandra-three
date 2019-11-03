@@ -90,7 +90,7 @@ namespace Eutherion.Text.Json
         public JsonMapSyntax Green { get; }
 
         // Always create the { and }, avoid overhead of SafeLazyObject.
-        public RedJsonCurlyOpen CurlyOpen { get; }
+        public JsonCurlyOpenSyntax CurlyOpen { get; }
 
         private readonly RedJsonKeyValueSyntax[] keyValueNodes;
         public int KeyValueNodesCount => keyValueNodes.Length;
@@ -107,23 +107,23 @@ namespace Eutherion.Text.Json
             return keyValueNodes[index];
         }
 
-        private readonly RedJsonComma[] commas;
+        private readonly JsonCommaSyntax[] commas;
         public int CommaCount => commas.Length;
-        public RedJsonComma GetComma(int index)
+        public JsonCommaSyntax GetComma(int index)
         {
             if (commas[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref commas[index], new RedJsonComma(this, index), null);
+                Interlocked.CompareExchange(ref commas[index], new JsonCommaSyntax(this, index), null);
             }
 
             return commas[index];
         }
 
         // Always create the { and }, avoid overhead of SafeLazyObject.
-        public Maybe<RedJsonCurlyClose> CurlyClose { get; }
+        public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
 
         public override int Length => Green.Length;
 
@@ -142,7 +142,7 @@ namespace Eutherion.Text.Json
                 return GetComma(index >> 1);
             }
 
-            if (index == keyValueAndCommaCount && CurlyClose.IsJust(out RedJsonCurlyClose jsonCurlyClose))
+            if (index == keyValueAndCommaCount && CurlyClose.IsJust(out JsonCurlyCloseSyntax jsonCurlyClose))
             {
                 return jsonCurlyClose;
             }
@@ -174,15 +174,15 @@ namespace Eutherion.Text.Json
         {
             Green = green;
 
-            CurlyOpen = new RedJsonCurlyOpen(this);
+            CurlyOpen = new JsonCurlyOpenSyntax(this);
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
             keyValueNodes = keyValueNodeCount > 0 ? new RedJsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<RedJsonKeyValueSyntax>();
-            commas = keyValueNodeCount > 1 ? new RedJsonComma[keyValueNodeCount - 1] : Array.Empty<RedJsonComma>();
+            commas = keyValueNodeCount > 1 ? new JsonCommaSyntax[keyValueNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
 
             CurlyClose = green.MissingCurlyClose
-                       ? Maybe<RedJsonCurlyClose>.Nothing
-                       : new RedJsonCurlyClose(this);
+                       ? Maybe<JsonCurlyCloseSyntax>.Nothing
+                       : new JsonCurlyCloseSyntax(this);
         }
 
         public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);

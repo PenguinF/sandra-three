@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
-
 namespace Eutherion.Text.Json
 {
     public sealed class JsonComma : JsonSymbol
@@ -37,39 +35,5 @@ namespace Eutherion.Text.Json
         public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComma(this);
         public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
         public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComma(this, arg);
-    }
-
-    public sealed class RedJsonComma : JsonSyntax
-    {
-        public Union<RedJsonListSyntax, RedJsonMapSyntax> Parent { get; }
-        public int CommaIndex { get; }
-
-        public JsonComma Green => JsonComma.Value;
-
-        public override int Start => Parent.Match(
-            whenOption1: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
-            whenOption2: mapSyntax => JsonCurlyOpen.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
-
-        public override int Length => JsonComma.CommaLength;
-
-        public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
-            whenOption1: x => x,
-            whenOption2: x => x);
-
-        internal RedJsonComma(RedJsonListSyntax parent, int commaIndex)
-        {
-            Parent = parent;
-            CommaIndex = commaIndex;
-        }
-
-        internal RedJsonComma(RedJsonMapSyntax parent, int commaIndex)
-        {
-            Parent = parent;
-            CommaIndex = commaIndex;
-        }
-
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComma(this, arg);
     }
 }

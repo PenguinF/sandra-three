@@ -31,15 +31,15 @@ namespace Eutherion.Text.Json
         public virtual void Visit(JsonSyntax node) { if (node != null) node.Accept(this); }
         public virtual void VisitBackgroundSyntax(RedJsonBackgroundSyntax node) => DefaultVisit(node);
         public virtual void VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
-        public virtual void VisitColon(RedJsonColon node) => DefaultVisit(node);
-        public virtual void VisitComma(RedJsonComma node) => DefaultVisit(node);
-        public virtual void VisitCurlyClose(RedJsonCurlyClose node) => DefaultVisit(node);
-        public virtual void VisitCurlyOpen(RedJsonCurlyOpen node) => DefaultVisit(node);
+        public virtual void VisitColon(JsonColonSyntax node) => DefaultVisit(node);
+        public virtual void VisitComma(JsonCommaSyntax node) => DefaultVisit(node);
+        public virtual void VisitCurlyClose(JsonCurlyCloseSyntax node) => DefaultVisit(node);
+        public virtual void VisitCurlyOpen(JsonCurlyOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual void VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
-        public virtual void VisitSquareBracketClose(RedJsonSquareBracketClose node) => DefaultVisit(node);
-        public virtual void VisitSquareBracketOpen(RedJsonSquareBracketOpen node) => DefaultVisit(node);
+        public virtual void VisitSquareBracketClose(JsonSquareBracketCloseSyntax node) => DefaultVisit(node);
+        public virtual void VisitSquareBracketOpen(JsonSquareBracketOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
     }
 
@@ -53,15 +53,15 @@ namespace Eutherion.Text.Json
         public virtual TResult Visit(JsonSyntax node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBackgroundSyntax(RedJsonBackgroundSyntax node) => DefaultVisit(node);
         public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitColon(RedJsonColon node) => DefaultVisit(node);
-        public virtual TResult VisitComma(RedJsonComma node) => DefaultVisit(node);
-        public virtual TResult VisitCurlyClose(RedJsonCurlyClose node) => DefaultVisit(node);
-        public virtual TResult VisitCurlyOpen(RedJsonCurlyOpen node) => DefaultVisit(node);
+        public virtual TResult VisitColon(JsonColonSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitComma(JsonCommaSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitCurlyClose(JsonCurlyCloseSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitCurlyOpen(JsonCurlyOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitSquareBracketClose(RedJsonSquareBracketClose node) => DefaultVisit(node);
-        public virtual TResult VisitSquareBracketOpen(RedJsonSquareBracketOpen node) => DefaultVisit(node);
+        public virtual TResult VisitSquareBracketClose(JsonSquareBracketCloseSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node) => DefaultVisit(node);
     }
 
@@ -75,15 +75,15 @@ namespace Eutherion.Text.Json
         public virtual TResult Visit(JsonSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBackgroundSyntax(RedJsonBackgroundSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitBooleanLiteralSyntax(RedJsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitColon(RedJsonColon node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitComma(RedJsonComma node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitCurlyClose(RedJsonCurlyClose node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitCurlyOpen(RedJsonCurlyOpen node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitColon(JsonColonSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitComma(JsonCommaSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitCurlyClose(JsonCurlyCloseSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitCurlyOpen(JsonCurlyOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(RedJsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMissingValueSyntax(RedJsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitStringLiteralSyntax(RedJsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitSquareBracketClose(RedJsonSquareBracketClose node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitSquareBracketOpen(RedJsonSquareBracketOpen node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitSquareBracketClose(JsonSquareBracketCloseSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(RedJsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }

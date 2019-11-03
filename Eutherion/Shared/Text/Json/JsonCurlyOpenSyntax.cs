@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSquareBracketOpen.cs
+ * JsonCurlyOpenSyntax.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -21,20 +21,20 @@
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonSquareBracketOpen : JsonSymbol
+    public sealed class JsonCurlyOpenSyntax : JsonSyntax
     {
-        public const char SquareBracketOpenCharacter = '[';
-        public const int SquareBracketOpenLength = 1;
+        public RedJsonMapSyntax Parent { get; }
 
-        public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
+        public JsonCurlyOpen Green => JsonCurlyOpen.Value;
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length => SquareBracketOpenLength;
+        public override int Start => 0;
+        public override int Length => JsonCurlyOpen.CurlyOpenLength;
+        public override JsonSyntax ParentSyntax => Parent;
 
-        private JsonSquareBracketOpen() { }
+        internal JsonCurlyOpenSyntax(RedJsonMapSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpen(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpen(this, arg);
     }
 }
