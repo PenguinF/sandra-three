@@ -47,7 +47,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => Green.Length;
+        public override int Length => 0;
 
         internal JsonMissingValueSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonMissingValueSyntax green) : base(parent) => Green = green;
 
