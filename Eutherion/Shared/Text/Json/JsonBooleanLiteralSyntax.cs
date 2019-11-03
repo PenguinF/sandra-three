@@ -36,7 +36,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => false;
 
-            public override JsonSymbol BooleanToken => JsonValue.FalseJsonValue;
+            public override JsonValue BooleanToken => JsonValue.FalseJsonValue;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -54,7 +54,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => true;
 
-            public override JsonSymbol BooleanToken => JsonValue.TrueJsonValue;
+            public override JsonValue BooleanToken => JsonValue.TrueJsonValue;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -65,7 +65,7 @@ namespace Eutherion.Text.Json
         }
 
         public abstract bool Value { get; }
-        public abstract JsonSymbol BooleanToken { get; }
+        public abstract JsonValue BooleanToken { get; }
 
         private GreenJsonBooleanLiteralSyntax() { }
 
