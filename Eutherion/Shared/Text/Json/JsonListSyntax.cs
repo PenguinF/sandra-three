@@ -91,25 +91,18 @@ namespace Eutherion.Text.Json
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
-        private readonly SafeLazyObjectCollection<JsonMultiValueSyntax> listItemNodes;
-        private readonly SafeLazyObjectCollection<JsonCommaSyntax> commas;
+        /// <summary>
+        /// Gets the collection of list item nodes separated by comma characters.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonMultiValueSyntax> ListItemNodes { get; }
+
+        /// <summary>
+        /// Gets the child comma syntax node collection.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
-
-        public int ListItemNodeCount => listItemNodes.Count;
-
-        public JsonMultiValueSyntax GetListItemNode(int index)
-        {
-            return listItemNodes[index];
-        }
-
-        public int CommaCount => commas.Count;
-
-        public JsonCommaSyntax GetComma(int index)
-        {
-            return commas[index];
-        }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -119,7 +112,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => ListItemNodeCount + CommaCount + (Green.MissingSquareBracketClose ? 1 : 2);
+        public override int ChildCount => ListItemNodes.Count + Commas.Count + (Green.MissingSquareBracketClose ? 1 : 2);
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -129,12 +122,12 @@ namespace Eutherion.Text.Json
             if (index == 0) return SquareBracketOpen;
 
             index--;
-            int itemAndCommaCount = ListItemNodeCount + CommaCount;
+            int itemAndCommaCount = ListItemNodes.Count + Commas.Count;
 
             if (index < itemAndCommaCount)
             {
-                if ((index & 1) == 0) return GetListItemNode(index >> 1);
-                return GetComma(index >> 1);
+                if ((index & 1) == 0) return ListItemNodes[index >> 1];
+                return Commas[index >> 1];
             }
 
             if (index == itemAndCommaCount && SquareBracketClose.IsJust(out JsonSquareBracketCloseSyntax jsonSquareBracketClose))
@@ -153,7 +146,7 @@ namespace Eutherion.Text.Json
             if (index == 0) return 0;
 
             index--;
-            int itemAndCommaCount = ListItemNodeCount + CommaCount;
+            int itemAndCommaCount = ListItemNodes.Count + Commas.Count;
 
             if (index < itemAndCommaCount)
             {
@@ -175,11 +168,11 @@ namespace Eutherion.Text.Json
             SquareBracketOpen = new JsonSquareBracketOpenSyntax(this);
 
             int listItemNodeCount = green.ListItemNodes.Count;
-            listItemNodes = listItemNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
+            ListItemNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 listItemNodeCount,
                 index => new JsonMultiValueSyntax(this, index, Green.ListItemNodes[index]));
 
-            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
+            Commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
                 listItemNodeCount - 1,
                 index => new JsonCommaSyntax(this, index));
 

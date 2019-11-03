@@ -139,14 +139,12 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonMultiValueSyntax Green { get; }
 
-        private readonly SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> valueNodes;
-        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
+        /// <summary>
+        /// Gets the collection of value nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
-        public int ValueNodeCount => valueNodes.Count;
-        public JsonValueWithBackgroundSyntax GetValueNode(int index)
-        {
-            return valueNodes[index];
-        }
+        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
 
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
@@ -179,15 +177,15 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
+        public override int ChildCount => ValueNodes.Count + 1;  // Extra 1 for BackgroundAfter.
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
         public override JsonSyntax GetChild(int index)
         {
-            if (index < ValueNodeCount) return GetValueNode(index);
-            if (index == ValueNodeCount) return BackgroundAfter;
+            if (index < ValueNodes.Count) return ValueNodes[index];
+            if (index == ValueNodes.Count) return BackgroundAfter;
             throw new IndexOutOfRangeException();
         }
 
@@ -196,8 +194,8 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int GetChildStartPosition(int index)
         {
-            if (index < ValueNodeCount) return Green.ValueNodes.GetElementOffset(index);
-            if (index == ValueNodeCount) return Length - Green.BackgroundAfter.Length;
+            if (index < ValueNodes.Count) return Green.ValueNodes.GetElementOffset(index);
+            if (index == ValueNodes.Count) return Length - Green.BackgroundAfter.Length;
             throw new IndexOutOfRangeException();
         }
 
@@ -206,7 +204,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             Green = green;
 
-            valueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(
+            ValueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(
                 green.ValueNodes.Count,
                 index => new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]));
 

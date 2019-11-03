@@ -94,25 +94,18 @@ namespace Eutherion.Text.Json
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
-        private readonly SafeLazyObjectCollection<JsonKeyValueSyntax> keyValueNodes;
-        private readonly SafeLazyObjectCollection<JsonCommaSyntax> commas;
+        /// <summary>
+        /// Gets the collection of key-value syntax nodes separated by comma characters.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonKeyValueSyntax> KeyValueNodes { get; }
+
+        /// <summary>
+        /// Gets the child comma syntax node collection.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
-
-        public int KeyValueNodesCount => keyValueNodes.Count;
-
-        public JsonKeyValueSyntax GetKeyValueNode(int index)
-        {
-            return keyValueNodes[index];
-        }
-
-        public int CommaCount => commas.Count;
-
-        public JsonCommaSyntax GetComma(int index)
-        {
-            return commas[index];
-        }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -122,7 +115,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => KeyValueNodesCount + CommaCount + (Green.MissingCurlyClose ? 1 : 2);
+        public override int ChildCount => KeyValueNodes.Count + Commas.Count + (Green.MissingCurlyClose ? 1 : 2);
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -132,12 +125,12 @@ namespace Eutherion.Text.Json
             if (index == 0) return CurlyOpen;
 
             index--;
-            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+            int keyValueAndCommaCount = KeyValueNodes.Count + Commas.Count;
 
             if (index < keyValueAndCommaCount)
             {
-                if ((index & 1) == 0) return GetKeyValueNode(index >> 1);
-                return GetComma(index >> 1);
+                if ((index & 1) == 0) return KeyValueNodes[index >> 1];
+                return Commas[index >> 1];
             }
 
             if (index == keyValueAndCommaCount && CurlyClose.IsJust(out JsonCurlyCloseSyntax jsonCurlyClose))
@@ -156,7 +149,7 @@ namespace Eutherion.Text.Json
             if (index == 0) return 0;
 
             index--;
-            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+            int keyValueAndCommaCount = KeyValueNodes.Count + Commas.Count;
 
             if (index < keyValueAndCommaCount)
             {
@@ -178,11 +171,11 @@ namespace Eutherion.Text.Json
             CurlyOpen = new JsonCurlyOpenSyntax(this);
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
-            keyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(
+            KeyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(
                 keyValueNodeCount,
                 index => new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]));
 
-            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
+            Commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
                 keyValueNodeCount - 1,
                 index => new JsonCommaSyntax(this, index));
 

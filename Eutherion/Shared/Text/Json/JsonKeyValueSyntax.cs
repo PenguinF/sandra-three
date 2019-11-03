@@ -111,22 +111,15 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonKeyValueSyntax Green { get; }
 
-        private readonly SafeLazyObjectCollection<JsonMultiValueSyntax> valueSectionNodes;
-        private readonly SafeLazyObjectCollection<JsonColonSyntax> colons;
+        /// <summary>
+        /// Gets the value section node collection separated by colon characters.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonMultiValueSyntax> ValueSectionNodes { get; }
 
-        public int ValueSectionNodeCount => valueSectionNodes.Count;
-
-        public JsonMultiValueSyntax GetValueSectionNode(int index)
-        {
-            return valueSectionNodes[index];
-        }
-
-        public int ColonCount => colons.Count;
-
-        public JsonColonSyntax GetColon(int index)
-        {
-            return colons[index];
-        }
+        /// <summary>
+        /// Gets the child colon syntax node collection.
+        /// </summary>
+        public SafeLazyObjectCollection<JsonColonSyntax> Colons { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -146,7 +139,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => ValueSectionNodeCount + ColonCount;
+        public override int ChildCount => ValueSectionNodes.Count + Colons.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -154,8 +147,8 @@ namespace Eutherion.Text.Json
         public override JsonSyntax GetChild(int index)
         {
             // '>>' has the happy property that (-1) >> 1 evaluates to -1, which correctly throws an IndexOutOfRangeException.
-            if ((index & 1) == 0) return GetValueSectionNode(index >> 1);
-            return GetColon(index >> 1);
+            if ((index & 1) == 0) return ValueSectionNodes[index >> 1];
+            return Colons[index >> 1];
         }
 
         /// <summary>
@@ -173,11 +166,11 @@ namespace Eutherion.Text.Json
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
 
-            valueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
+            ValueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
                 valueSectionNodeCount,
                 index => new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]));
 
-            colons = new SafeLazyObjectCollection<JsonColonSyntax>(
+            Colons = new SafeLazyObjectCollection<JsonColonSyntax>(
                 valueSectionNodeCount - 1,
                 index => new JsonColonSyntax(this, index));
         }
