@@ -93,7 +93,13 @@ namespace Eutherion.Text.Json
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
         private readonly JsonKeyValueSyntax[] keyValueNodes;
+        private readonly JsonCommaSyntax[] commas;
+
+        // Always create the { and }, avoid overhead of SafeLazyObject.
+        public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
+
         public int KeyValueNodesCount => keyValueNodes.Length;
+
         public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
             if (keyValueNodes[index] == null)
@@ -107,8 +113,8 @@ namespace Eutherion.Text.Json
             return keyValueNodes[index];
         }
 
-        private readonly JsonCommaSyntax[] commas;
         public int CommaCount => commas.Length;
+
         public JsonCommaSyntax GetComma(int index)
         {
             if (commas[index] == null)
@@ -121,9 +127,6 @@ namespace Eutherion.Text.Json
 
             return commas[index];
         }
-
-        // Always create the { and }, avoid overhead of SafeLazyObject.
-        public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
 
         public override int Length => Green.Length;
 

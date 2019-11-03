@@ -135,6 +135,8 @@ namespace Eutherion.Text.Json
         public GreenJsonMultiValueSyntax Green { get; }
 
         private readonly JsonValueWithBackgroundSyntax[] valueNodes;
+        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
+
         public int ValueNodeCount => valueNodes.Length;
         public JsonValueWithBackgroundSyntax GetValueNode(int index)
         {
@@ -149,7 +151,6 @@ namespace Eutherion.Text.Json
             return valueNodes[index];
         }
 
-        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
         public override int Start => Parent.Match(

@@ -90,7 +90,13 @@ namespace Eutherion.Text.Json
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
         private readonly JsonMultiValueSyntax[] listItemNodes;
+        private readonly JsonCommaSyntax[] commas;
+
+        // Always create the [ and ], avoid overhead of SafeLazyObject.
+        public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
+
         public int ListItemNodeCount => listItemNodes.Length;
+
         public JsonMultiValueSyntax GetListItemNode(int index)
         {
             if (listItemNodes[index] == null)
@@ -104,8 +110,8 @@ namespace Eutherion.Text.Json
             return listItemNodes[index];
         }
 
-        private readonly JsonCommaSyntax[] commas;
         public int CommaCount => commas.Length;
+
         public JsonCommaSyntax GetComma(int index)
         {
             if (commas[index] == null)
@@ -118,9 +124,6 @@ namespace Eutherion.Text.Json
 
             return commas[index];
         }
-
-        // Always create the [ and ], avoid overhead of SafeLazyObject.
-        public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 
         public override int Length => Green.Length;
 

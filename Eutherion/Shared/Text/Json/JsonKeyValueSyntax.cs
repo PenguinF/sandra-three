@@ -101,7 +101,10 @@ namespace Eutherion.Text.Json
         public GreenJsonKeyValueSyntax Green { get; }
 
         private readonly JsonMultiValueSyntax[] valueSectionNodes;
+        private readonly JsonColonSyntax[] colons;
+
         public int ValueSectionNodeCount => valueSectionNodes.Length;
+
         public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
             if (valueSectionNodes[index] == null)
@@ -115,8 +118,8 @@ namespace Eutherion.Text.Json
             return valueSectionNodes[index];
         }
 
-        private readonly JsonColonSyntax[] colons;
         public int ColonCount => colons.Length;
+
         public JsonColonSyntax GetColon(int index)
         {
             if (colons[index] == null)

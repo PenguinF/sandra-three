@@ -103,9 +103,10 @@ namespace Eutherion.Text.Json
         public GreenJsonValueWithBackgroundSyntax Green { get; }
 
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundBefore;
+        private readonly SafeLazyObject<JsonValueSyntax> contentNode;
+
         public JsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
 
-        private readonly SafeLazyObject<JsonValueSyntax> contentNode;
         public JsonValueSyntax ContentNode => contentNode.Object;
 
         public override int Start => Parent.Green.ValueNodes.GetElementOffset(ParentValueNodeIndex);
