@@ -30,12 +30,12 @@ namespace Eutherion.Text.Json
     public abstract class JsonSyntax : ISpan
     {
         /// <summary>
-        /// Returns the start position of this syntax node relative to its parent's start position.
+        /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public abstract int Start { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public abstract int Length { get; }
 
@@ -45,17 +45,17 @@ namespace Eutherion.Text.Json
         public abstract JsonSyntax ParentSyntax { get; }
 
         /// <summary>
-        /// Returns the absolute start position of this syntax node.
+        /// Gets the absolute start position of this syntax node.
         /// </summary>
         public virtual int AbsoluteStart => ParentSyntax.AbsoluteStart + Start;
 
         /// <summary>
-        /// Returns the number of children of this syntax node.
+        /// Gets the number of children of this syntax node.
         /// </summary>
         public virtual int ChildCount => 0;
 
         /// <summary>
-        /// Returns if this syntax is a terminal symbol, i.e. if it has no children.
+        /// Gets if this syntax is a terminal symbol, i.e. if it has no children.
         /// </summary>
         public bool IsTerminalSymbol => ChildCount == 0;
 
