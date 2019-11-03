@@ -140,21 +140,21 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonMultiValueSyntax Green { get; }
 
-        private readonly JsonValueWithBackgroundSyntax[] valueNodes;
+        private readonly SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> valueNodes;
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
 
-        public int ValueNodeCount => valueNodes.Length;
+        public int ValueNodeCount => valueNodes.Arr.Length;
         public JsonValueWithBackgroundSyntax GetValueNode(int index)
         {
-            if (valueNodes[index] == null)
+            if (valueNodes.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueNodes[index], new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
+                Interlocked.CompareExchange(ref valueNodes.Arr[index], new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
             }
 
-            return valueNodes[index];
+            return valueNodes.Arr[index];
         }
 
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
@@ -215,8 +215,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             Green = green;
 
-            int valueNodeCount = green.ValueNodes.Count;
-            valueNodes = valueNodeCount > 0 ? new JsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<JsonValueWithBackgroundSyntax>();
+            valueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(green.ValueNodes.Count);
             backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this, Green.BackgroundAfter));
         }
 

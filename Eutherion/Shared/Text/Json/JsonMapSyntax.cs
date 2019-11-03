@@ -95,40 +95,40 @@ namespace Eutherion.Text.Json
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
-        private readonly JsonKeyValueSyntax[] keyValueNodes;
-        private readonly JsonCommaSyntax[] commas;
+        private readonly SafeLazyObjectCollection<JsonKeyValueSyntax> keyValueNodes;
+        private readonly SafeLazyObjectCollection<JsonCommaSyntax> commas;
 
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
 
-        public int KeyValueNodesCount => keyValueNodes.Length;
+        public int KeyValueNodesCount => keyValueNodes.Arr.Length;
 
         public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
-            if (keyValueNodes[index] == null)
+            if (keyValueNodes.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref keyValueNodes[index], new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
+                Interlocked.CompareExchange(ref keyValueNodes.Arr[index], new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
             }
 
-            return keyValueNodes[index];
+            return keyValueNodes.Arr[index];
         }
 
-        public int CommaCount => commas.Length;
+        public int CommaCount => commas.Arr.Length;
 
         public JsonCommaSyntax GetComma(int index)
         {
-            if (commas[index] == null)
+            if (commas.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref commas[index], new JsonCommaSyntax(this, index), null);
+                Interlocked.CompareExchange(ref commas.Arr[index], new JsonCommaSyntax(this, index), null);
             }
 
-            return commas[index];
+            return commas.Arr[index];
         }
 
         /// <summary>
@@ -195,8 +195,8 @@ namespace Eutherion.Text.Json
             CurlyOpen = new JsonCurlyOpenSyntax(this);
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
-            keyValueNodes = keyValueNodeCount > 0 ? new JsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<JsonKeyValueSyntax>();
-            commas = keyValueNodeCount > 1 ? new JsonCommaSyntax[keyValueNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
+            keyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(keyValueNodeCount);
+            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(keyValueNodeCount - 1);
 
             CurlyClose = green.MissingCurlyClose
                        ? Maybe<JsonCurlyCloseSyntax>.Nothing

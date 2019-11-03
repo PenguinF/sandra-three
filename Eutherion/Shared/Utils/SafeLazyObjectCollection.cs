@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System;
+
 namespace Eutherion.Utils
 {
     /// <summary>
@@ -29,5 +31,17 @@ namespace Eutherion.Utils
     /// </typeparam>
     public class SafeLazyObjectCollection<TObject>
     {
+        public TObject[] Arr { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SafeLazyObjectCollection{TObject}"/>.
+        /// </summary>
+        /// <param name="count">
+        /// The number of objects in the collection.
+        /// </param>
+        public SafeLazyObjectCollection(int count)
+        {
+            Arr = count > 0 ? new TObject[count] : Array.Empty<TObject>();
+        }
     }
 }

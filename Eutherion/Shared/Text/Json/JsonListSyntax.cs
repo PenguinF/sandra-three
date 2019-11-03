@@ -92,40 +92,40 @@ namespace Eutherion.Text.Json
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
-        private readonly JsonMultiValueSyntax[] listItemNodes;
-        private readonly JsonCommaSyntax[] commas;
+        private readonly SafeLazyObjectCollection<JsonMultiValueSyntax> listItemNodes;
+        private readonly SafeLazyObjectCollection<JsonCommaSyntax> commas;
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 
-        public int ListItemNodeCount => listItemNodes.Length;
+        public int ListItemNodeCount => listItemNodes.Arr.Length;
 
         public JsonMultiValueSyntax GetListItemNode(int index)
         {
-            if (listItemNodes[index] == null)
+            if (listItemNodes.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref listItemNodes[index], new JsonMultiValueSyntax(this, index, Green.ListItemNodes[index]), null);
+                Interlocked.CompareExchange(ref listItemNodes.Arr[index], new JsonMultiValueSyntax(this, index, Green.ListItemNodes[index]), null);
             }
 
-            return listItemNodes[index];
+            return listItemNodes.Arr[index];
         }
 
-        public int CommaCount => commas.Length;
+        public int CommaCount => commas.Arr.Length;
 
         public JsonCommaSyntax GetComma(int index)
         {
-            if (commas[index] == null)
+            if (commas.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref commas[index], new JsonCommaSyntax(this, index), null);
+                Interlocked.CompareExchange(ref commas.Arr[index], new JsonCommaSyntax(this, index), null);
             }
 
-            return commas[index];
+            return commas.Arr[index];
         }
 
         /// <summary>
@@ -192,8 +192,8 @@ namespace Eutherion.Text.Json
             SquareBracketOpen = new JsonSquareBracketOpenSyntax(this);
 
             int listItemNodeCount = green.ListItemNodes.Count;
-            listItemNodes = listItemNodeCount > 0 ? new JsonMultiValueSyntax[listItemNodeCount] : Array.Empty<JsonMultiValueSyntax>();
-            commas = listItemNodeCount > 1 ? new JsonCommaSyntax[listItemNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
+            listItemNodes = listItemNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(listItemNodeCount);
+            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(listItemNodeCount - 1);
 
             SquareBracketClose = green.MissingSquareBracketClose
                                ? Maybe<JsonSquareBracketCloseSyntax>.Nothing

@@ -112,37 +112,37 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonKeyValueSyntax Green { get; }
 
-        private readonly JsonMultiValueSyntax[] valueSectionNodes;
-        private readonly JsonColonSyntax[] colons;
+        private readonly SafeLazyObjectCollection<JsonMultiValueSyntax> valueSectionNodes;
+        private readonly SafeLazyObjectCollection<JsonColonSyntax> colons;
 
-        public int ValueSectionNodeCount => valueSectionNodes.Length;
+        public int ValueSectionNodeCount => valueSectionNodes.Arr.Length;
 
         public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
-            if (valueSectionNodes[index] == null)
+            if (valueSectionNodes.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueSectionNodes[index], new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
+                Interlocked.CompareExchange(ref valueSectionNodes.Arr[index], new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
             }
 
-            return valueSectionNodes[index];
+            return valueSectionNodes.Arr[index];
         }
 
-        public int ColonCount => colons.Length;
+        public int ColonCount => colons.Arr.Length;
 
         public JsonColonSyntax GetColon(int index)
         {
-            if (colons[index] == null)
+            if (colons.Arr[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref colons[index], new JsonColonSyntax(this, index), null);
+                Interlocked.CompareExchange(ref colons.Arr[index], new JsonColonSyntax(this, index), null);
             }
 
-            return colons[index];
+            return colons.Arr[index];
         }
 
         /// <summary>
@@ -189,8 +189,8 @@ namespace Eutherion.Text.Json
             // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
-            valueSectionNodes = new JsonMultiValueSyntax[valueSectionNodeCount];
-            colons = valueSectionNodeCount > 1 ? new JsonColonSyntax[valueSectionNodeCount - 1] : Array.Empty<JsonColonSyntax>();
+            valueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(valueSectionNodeCount);
+            colons = new SafeLazyObjectCollection<JsonColonSyntax>(valueSectionNodeCount - 1);
         }
     }
 }
