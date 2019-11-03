@@ -21,6 +21,9 @@
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json square bracket open syntax node.
+    /// </summary>
     public sealed class JsonSquareBracketOpenSyntax : JsonSyntax
     {
         /// <summary>

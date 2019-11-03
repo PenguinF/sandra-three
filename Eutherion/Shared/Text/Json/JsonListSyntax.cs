@@ -81,6 +81,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a json list value syntax node.
+    /// </summary>
     public sealed class JsonListSyntax : JsonValueSyntax
     {
         /// <summary>
@@ -88,6 +91,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonListSyntax Green { get; }
 
+        /// <summary>
+        /// Gets the <see cref="JsonSquareBracketOpenSyntax"/> node at the start of this list value syntax node.
+        /// </summary>
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
@@ -101,6 +107,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
+        /// <summary>
+        /// Gets the <see cref="JsonSquareBracketCloseSyntax"/> node at the end of this list value syntax node, if it exists.
+        /// </summary>
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 

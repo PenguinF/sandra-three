@@ -65,6 +65,9 @@ namespace Eutherion.Text.Json
         }
     }
 
+    /// <summary>
+    /// Represents a <see cref="JsonValueSyntax"/> node together with the background symbols directly before it in an abstract json syntax tree.
+    /// </summary>
     public sealed class JsonValueWithBackgroundSyntax : JsonSyntax
     {
         private class JsonValueSyntaxCreator : GreenJsonValueSyntaxVisitor<JsonValueWithBackgroundSyntax, JsonValueSyntax>
@@ -101,6 +104,10 @@ namespace Eutherion.Text.Json
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public JsonMultiValueSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this background-value pair in the background-value pair collection of its parent.
+        /// </summary>
         public int ParentValueNodeIndex { get; }
 
         /// <summary>
@@ -111,8 +118,14 @@ namespace Eutherion.Text.Json
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundBefore;
         private readonly SafeLazyObject<JsonValueSyntax> contentNode;
 
+        /// <summary>
+        /// Gets the background symbols which directly precede the content value node.
+        /// </summary>
         public JsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
 
+        /// <summary>
+        /// Gets the content node containing the actual json value.
+        /// </summary>
         public JsonValueSyntax ContentNode => contentNode.Object;
 
         /// <summary>

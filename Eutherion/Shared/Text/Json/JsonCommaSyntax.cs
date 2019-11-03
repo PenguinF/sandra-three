@@ -23,12 +23,19 @@ using Eutherion.Utils;
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json comma syntax node.
+    /// </summary>
     public sealed class JsonCommaSyntax : JsonSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public Union<JsonListSyntax, JsonMapSyntax> Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this comma in the comma collection of its parent.
+        /// </summary>
         public int CommaIndex { get; }
 
         /// <summary>

@@ -126,12 +126,19 @@ namespace Eutherion.Text.Json
         }
     }
 
+    /// <summary>
+    /// Represents a json syntax node which contains one or more value nodes together with all background syntax that precedes and follows it.
+    /// </summary>
     public sealed class JsonMultiValueSyntax : JsonSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public Union<_void, JsonListSyntax, JsonKeyValueSyntax> Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent's collection, or 0 if this syntax node is the root node.
+        /// </summary>
         public int ParentIndex { get; }
 
         /// <summary>
@@ -146,6 +153,9 @@ namespace Eutherion.Text.Json
 
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
 
+        /// <summary>
+        /// Gets the background after the value nodes.
+        /// </summary>
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
         /// <summary>

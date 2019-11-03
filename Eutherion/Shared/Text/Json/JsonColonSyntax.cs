@@ -21,12 +21,19 @@
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json colon syntax node.
+    /// </summary>
     public sealed class JsonColonSyntax : JsonSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public JsonKeyValueSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this colon in the colon collection of its parent.
+        /// </summary>
         public int ColonIndex { get; }
 
         /// <summary>

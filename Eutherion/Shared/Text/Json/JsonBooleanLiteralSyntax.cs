@@ -76,8 +76,14 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a boolean literal value syntax node.
+    /// </summary>
     public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
     {
+        /// <summary>
+        /// Represents a 'false' literal value syntax node.
+        /// </summary>
         public sealed class False : JsonBooleanLiteralSyntax
         {
             /// <summary>
@@ -85,11 +91,17 @@ namespace Eutherion.Text.Json
             /// </summary>
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.False.Instance;
 
+            /// <summary>
+            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// </summary>
             public override bool Value => false;
 
             internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
         }
 
+        /// <summary>
+        /// Represents a 'true' literal value syntax node.
+        /// </summary>
         public sealed class True : JsonBooleanLiteralSyntax
         {
             /// <summary>
@@ -97,6 +109,9 @@ namespace Eutherion.Text.Json
             /// </summary>
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.True.Instance;
 
+            /// <summary>
+            /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+            /// </summary>
             public override bool Value => true;
 
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
@@ -112,6 +127,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length => Green.Length;
 
+        /// <summary>
+        /// Gets the boolean value represented by this <see cref="JsonBooleanLiteralSyntax"/> node.
+        /// </summary>
         public abstract bool Value { get; }
 
         private JsonBooleanLiteralSyntax(JsonValueWithBackgroundSyntax parent) : base(parent) { }

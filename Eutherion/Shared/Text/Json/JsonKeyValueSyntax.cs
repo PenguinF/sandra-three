@@ -98,12 +98,19 @@ namespace Eutherion.Text.Json
         public int GetFirstValueNodeStart() => ValueSectionNodes.GetElementOffset(1);
     }
 
+    /// <summary>
+    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
+    /// </summary>
     public sealed class JsonKeyValueSyntax : JsonSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
         public JsonMapSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this key-value pair in the key-value pair collection of its parent.
+        /// </summary>
         public int ParentKeyValueNodeIndex { get; }
 
         /// <summary>

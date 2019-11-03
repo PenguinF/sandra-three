@@ -37,6 +37,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a json syntax node with an undefined or unsupported value.
+    /// </summary>
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
     {
         /// <summary>

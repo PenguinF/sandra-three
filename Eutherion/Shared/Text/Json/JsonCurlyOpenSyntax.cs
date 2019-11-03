@@ -21,6 +21,9 @@
 
 namespace Eutherion.Text.Json
 {
+    /// <summary>
+    /// Represents a json curly open syntax node.
+    /// </summary>
     public sealed class JsonCurlyOpenSyntax : JsonSyntax
     {
         /// <summary>

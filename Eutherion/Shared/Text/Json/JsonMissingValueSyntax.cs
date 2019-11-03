@@ -37,6 +37,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a json missing value syntax node. It has a length of 0.
+    /// </summary>
     public sealed class JsonMissingValueSyntax : JsonValueSyntax
     {
         /// <summary>

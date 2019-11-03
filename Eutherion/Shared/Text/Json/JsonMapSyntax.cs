@@ -84,6 +84,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a json map value syntax node.
+    /// </summary>
     public sealed class JsonMapSyntax : JsonValueSyntax
     {
         /// <summary>
@@ -91,6 +94,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonMapSyntax Green { get; }
 
+        /// <summary>
+        /// Gets the <see cref="JsonCurlyOpenSyntax"/> node at the start of this map value syntax node.
+        /// </summary>
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
@@ -104,6 +110,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public SafeLazyObjectCollection<JsonCommaSyntax> Commas { get; }
 
+        /// <summary>
+        /// Gets the <see cref="JsonCurlyCloseSyntax"/> node at the end of this map value syntax node, if it exists.
+        /// </summary>
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
 

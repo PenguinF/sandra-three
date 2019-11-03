@@ -45,6 +45,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents an integer literal value syntax node.
+    /// </summary>
     public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax
     {
         /// <summary>

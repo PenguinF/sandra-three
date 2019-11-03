@@ -67,6 +67,9 @@ namespace Eutherion.Text.Json
         private GreenJsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
     }
 
+    /// <summary>
+    /// Represents a node with background symbols in an abstract json syntax tree.
+    /// </summary>
     public sealed class JsonBackgroundSyntax : JsonSyntax
     {
         /// <summary>

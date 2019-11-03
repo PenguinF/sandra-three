@@ -39,6 +39,9 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a string literal value syntax node.
+    /// </summary>
     public sealed class JsonStringLiteralSyntax : JsonValueSyntax
     {
         /// <summary>
