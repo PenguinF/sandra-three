@@ -84,7 +84,10 @@ namespace Eutherion.Text.Json
 
             // If a valid key node is given, the node must always be equal to keyNode.ValueNode.Node.
             if (validKey.IsJust(out GreenJsonStringLiteralSyntax validKeyNode)
-                && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
+                && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode)
+            {
+                throw new ArgumentException(nameof(validKey));
+            }
         }
 
         /// <summary>
