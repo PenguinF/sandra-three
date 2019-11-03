@@ -28,29 +28,29 @@ using System.Threading;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a single key-value pair in a <see cref="JsonMapSyntax"/>.
+    /// Represents a single key-value pair in a <see cref="GreenJsonMapSyntax"/>.
     /// </summary>
-    public sealed class JsonKeyValueSyntax : ISpan
+    public sealed class GreenJsonKeyValueSyntax : ISpan
     {
         /// <summary>
-        /// Gets the syntax node containing the key of this <see cref="JsonKeyValueSyntax"/>.
+        /// Gets the syntax node containing the key of this <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
-        public JsonMultiValueSyntax KeyNode => ValueSectionNodes[0];
+        public GreenJsonMultiValueSyntax KeyNode => ValueSectionNodes[0];
 
         /// <summary>
         /// If <see cref="KeyNode"/> contains a valid key, returns it.
         /// </summary>
-        public Maybe<JsonStringLiteralSyntax> ValidKey { get; }
+        public Maybe<GreenJsonStringLiteralSyntax> ValidKey { get; }
 
         /// <summary>
-        /// Returns the first value node containing the value of this <see cref="JsonKeyValueSyntax"/>, if it was provided.
+        /// Returns the first value node containing the value of this <see cref="GreenJsonKeyValueSyntax"/>, if it was provided.
         /// </summary>
-        public Maybe<JsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 1 ? ValueSectionNodes[1] : Maybe<JsonMultiValueSyntax>.Nothing;
+        public Maybe<GreenJsonMultiValueSyntax> FirstValueNode => ValueSectionNodes.Count > 1 ? ValueSectionNodes[1] : Maybe<GreenJsonMultiValueSyntax>.Nothing;
 
         /// <summary>
         /// Gets the list of value section nodes separated by colon characters.
         /// </summary>
-        public ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
@@ -58,7 +58,7 @@ namespace Eutherion.Text.Json
         public int Length => ValueSectionNodes.Length;
 
         /// <summary>
-        /// Initializes a new instance of a <see cref="JsonKeyValueSyntax"/>.
+        /// Initializes a new instance of a <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
         /// <param name="validKey">
         /// Nothing if no valid key was found, just the valid key otherwise.
@@ -72,10 +72,10 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentException">
         /// <paramref name="validKey"/> is not the expected syntax node -or- <paramref name="valueSectionNodes"/> is an enumeration containing one or less elements.
         /// </exception>
-        public JsonKeyValueSyntax(Maybe<JsonStringLiteralSyntax> validKey, IEnumerable<JsonMultiValueSyntax> valueSectionNodes)
+        public GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax> validKey, IEnumerable<GreenJsonMultiValueSyntax> valueSectionNodes)
         {
             ValidKey = validKey ?? throw new ArgumentNullException(nameof(validKey));
-            ValueSectionNodes = ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
+            ValueSectionNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
 
             if (ValueSectionNodes.Count == 0)
             {
@@ -83,33 +83,33 @@ namespace Eutherion.Text.Json
             }
 
             // If a valid key node is given, the node must always be equal to keyNode.ValueNode.Node.
-            if (validKey.IsJust(out JsonStringLiteralSyntax validKeyNode)
+            if (validKey.IsJust(out GreenJsonStringLiteralSyntax validKeyNode)
                 && validKeyNode != ValueSectionNodes[0].ValueNode.ContentNode) throw new ArgumentException(nameof(validKey));
         }
 
         /// <summary>
-        /// Gets the start position of a value node relative to the start position of this <see cref="JsonKeyValueSyntax"/>.
+        /// Gets the start position of a value node relative to the start position of this <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
         public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
     }
 
-    public sealed class RedJsonKeyValueSyntax : JsonSyntax
+    public sealed class JsonKeyValueSyntax : JsonSyntax
     {
-        public RedJsonMapSyntax Parent { get; }
+        public JsonMapSyntax Parent { get; }
         public int ParentKeyValueNodeIndex { get; }
 
-        public JsonKeyValueSyntax Green { get; }
+        public GreenJsonKeyValueSyntax Green { get; }
 
-        private readonly RedJsonMultiValueSyntax[] valueSectionNodes;
+        private readonly JsonMultiValueSyntax[] valueSectionNodes;
         public int ValueSectionNodeCount => valueSectionNodes.Length;
-        public RedJsonMultiValueSyntax GetValueSectionNode(int index)
+        public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
             if (valueSectionNodes[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref valueSectionNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
+                Interlocked.CompareExchange(ref valueSectionNodes[index], new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
             }
 
             return valueSectionNodes[index];
@@ -145,7 +145,7 @@ namespace Eutherion.Text.Json
 
         public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
 
-        internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
+        internal JsonKeyValueSyntax(JsonMapSyntax parent, int parentKeyValueNodeIndex, GreenJsonKeyValueSyntax green)
         {
             Parent = parent;
             ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
@@ -154,7 +154,7 @@ namespace Eutherion.Text.Json
             // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
-            valueSectionNodes = new RedJsonMultiValueSyntax[valueSectionNodeCount];
+            valueSectionNodes = new JsonMultiValueSyntax[valueSectionNodeCount];
             colons = valueSectionNodeCount > 1 ? new JsonColonSyntax[valueSectionNodeCount - 1] : Array.Empty<JsonColonSyntax>();
         }
     }

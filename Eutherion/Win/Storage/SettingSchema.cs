@@ -158,7 +158,7 @@ namespace Eutherion.Win.Storage
 
         internal override Union<ITypeErrorBuilder, PValue> TryCreateFromMap(
             string json,
-            JsonMapSyntax jsonMapSyntax,
+            GreenJsonMapSyntax jsonMapSyntax,
             out SettingObject convertedValue,
             int mapSyntaxStartPosition,
             List<JsonErrorInfo> errors)

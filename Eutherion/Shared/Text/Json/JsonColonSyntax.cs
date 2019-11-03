@@ -23,7 +23,7 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonColonSyntax : JsonSyntax
     {
-        public RedJsonKeyValueSyntax Parent { get; }
+        public JsonKeyValueSyntax Parent { get; }
         public int ColonIndex { get; }
 
         public JsonColon Green => JsonColon.Value;
@@ -32,7 +32,7 @@ namespace Eutherion.Text.Json
         public override int Length => JsonColon.ColonLength;
         public override JsonSyntax ParentSyntax => Parent;
 
-        internal JsonColonSyntax(RedJsonKeyValueSyntax parent, int colonIndex)
+        internal JsonColonSyntax(JsonKeyValueSyntax parent, int colonIndex)
         {
             Parent = parent;
             ColonIndex = colonIndex;

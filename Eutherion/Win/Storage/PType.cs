@@ -35,7 +35,7 @@ namespace Eutherion.Win.Storage
     {
         internal abstract Union<ITypeErrorBuilder, PValue> TryCreateValue(
             string json,
-            JsonValueSyntax valueNode,
+            GreenJsonValueSyntax valueNode,
             out T convertedValue,
             int valueNodeStartPosition,
             List<JsonErrorInfo> errors);

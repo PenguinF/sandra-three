@@ -25,7 +25,7 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonCommaSyntax : JsonSyntax
     {
-        public Union<RedJsonListSyntax, RedJsonMapSyntax> Parent { get; }
+        public Union<JsonListSyntax, JsonMapSyntax> Parent { get; }
         public int CommaIndex { get; }
 
         public JsonComma Green => JsonComma.Value;
@@ -40,13 +40,13 @@ namespace Eutherion.Text.Json
             whenOption1: x => x,
             whenOption2: x => x);
 
-        internal JsonCommaSyntax(RedJsonListSyntax parent, int commaIndex)
+        internal JsonCommaSyntax(JsonListSyntax parent, int commaIndex)
         {
             Parent = parent;
             CommaIndex = commaIndex;
         }
 
-        internal JsonCommaSyntax(RedJsonMapSyntax parent, int commaIndex)
+        internal JsonCommaSyntax(JsonMapSyntax parent, int commaIndex)
         {
             Parent = parent;
             CommaIndex = commaIndex;

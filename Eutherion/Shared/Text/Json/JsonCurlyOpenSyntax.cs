@@ -23,7 +23,7 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonCurlyOpenSyntax : JsonSyntax
     {
-        public RedJsonMapSyntax Parent { get; }
+        public JsonMapSyntax Parent { get; }
 
         public JsonCurlyOpen Green => JsonCurlyOpen.Value;
 
@@ -31,7 +31,7 @@ namespace Eutherion.Text.Json
         public override int Length => JsonCurlyOpen.CurlyOpenLength;
         public override JsonSyntax ParentSyntax => Parent;
 
-        internal JsonCurlyOpenSyntax(RedJsonMapSyntax parent) => Parent = parent;
+        internal JsonCurlyOpenSyntax(JsonMapSyntax parent) => Parent = parent;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);

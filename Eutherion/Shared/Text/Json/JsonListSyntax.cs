@@ -29,14 +29,14 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a list syntax node.
     /// </summary>
-    public sealed class JsonListSyntax : JsonValueSyntax
+    public sealed class GreenJsonListSyntax : GreenJsonValueSyntax
     {
-        public ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonComma> ListItemNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonComma> ListItemNodes { get; }
 
         public bool MissingSquareBracketClose { get; }
 
         /// <summary>
-        /// Returns ListItemNodes.Count, or one less if the last element is a JsonMissingValueSyntax.
+        /// Returns ListItemNodes.Count, or one less if the last element is a GreenJsonMissingValueSyntax.
         /// </summary>
         public int FilteredListItemNodeCount
         {
@@ -45,7 +45,7 @@ namespace Eutherion.Text.Json
                 int count = ListItemNodes.Count;
 
                 // Discard last item if it's a missing value, so that a trailing comma is ignored.
-                if (ListItemNodes[count - 1].ValueNode.ContentNode is JsonMissingValueSyntax)
+                if (ListItemNodes[count - 1].ValueNode.ContentNode is GreenJsonMissingValueSyntax)
                 {
                     return count - 1;
                 }
@@ -56,9 +56,9 @@ namespace Eutherion.Text.Json
 
         public override int Length { get; }
 
-        public JsonListSyntax(IEnumerable<JsonMultiValueSyntax> listItemNodes, bool missingSquareBracketClose)
+        public GreenJsonListSyntax(IEnumerable<GreenJsonMultiValueSyntax> listItemNodes, bool missingSquareBracketClose)
         {
-            ListItemNodes = ReadOnlySeparatedSpanList<JsonMultiValueSyntax, JsonComma>.Create(listItemNodes, JsonComma.Value);
+            ListItemNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonComma>.Create(listItemNodes, JsonComma.Value);
 
             if (ListItemNodes.Count == 0)
             {
@@ -73,32 +73,32 @@ namespace Eutherion.Text.Json
         }
 
         /// <summary>
-        /// Gets the start position of an element node relative to the start position of this <see cref="JsonListSyntax"/>.
+        /// Gets the start position of an element node relative to the start position of this <see cref="GreenJsonListSyntax"/>.
         /// </summary>
         public int GetElementNodeStart(int index) => JsonSquareBracketOpen.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 
-    public sealed class RedJsonListSyntax : RedJsonValueSyntax
+    public sealed class JsonListSyntax : JsonValueSyntax
     {
-        public JsonListSyntax Green { get; }
+        public GreenJsonListSyntax Green { get; }
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.
         public JsonSquareBracketOpenSyntax SquareBracketOpen { get; }
 
-        private readonly RedJsonMultiValueSyntax[] listItemNodes;
+        private readonly JsonMultiValueSyntax[] listItemNodes;
         public int ListItemNodeCount => listItemNodes.Length;
-        public RedJsonMultiValueSyntax GetListItemNode(int index)
+        public JsonMultiValueSyntax GetListItemNode(int index)
         {
             if (listItemNodes[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref listItemNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ListItemNodes[index]), null);
+                Interlocked.CompareExchange(ref listItemNodes[index], new JsonMultiValueSyntax(this, index, Green.ListItemNodes[index]), null);
             }
 
             return listItemNodes[index];
@@ -167,14 +167,14 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
-        internal RedJsonListSyntax(RedJsonValueWithBackgroundSyntax parent, JsonListSyntax green) : base(parent)
+        internal JsonListSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonListSyntax green) : base(parent)
         {
             Green = green;
 
             SquareBracketOpen = new JsonSquareBracketOpenSyntax(this);
 
             int listItemNodeCount = green.ListItemNodes.Count;
-            listItemNodes = listItemNodeCount > 0 ? new RedJsonMultiValueSyntax[listItemNodeCount] : Array.Empty<RedJsonMultiValueSyntax>();
+            listItemNodes = listItemNodeCount > 0 ? new JsonMultiValueSyntax[listItemNodeCount] : Array.Empty<JsonMultiValueSyntax>();
             commas = listItemNodeCount > 1 ? new JsonCommaSyntax[listItemNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
 
             SquareBracketClose = green.MissingSquareBracketClose
@@ -182,8 +182,8 @@ namespace Eutherion.Text.Json
                                : new JsonSquareBracketCloseSyntax(this);
         }
 
-        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
-        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitListSyntax(this, arg);
     }
 }

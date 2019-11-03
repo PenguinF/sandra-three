@@ -29,17 +29,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a map syntax node.
     /// </summary>
-    public sealed class JsonMapSyntax : JsonValueSyntax
+    public sealed class GreenJsonMapSyntax : GreenJsonValueSyntax
     {
-        public ReadOnlySeparatedSpanList<JsonKeyValueSyntax, JsonComma> KeyValueNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, JsonComma> KeyValueNodes { get; }
 
         public bool MissingCurlyClose { get; }
 
         public override int Length { get; }
 
-        public JsonMapSyntax(IEnumerable<JsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
+        public GreenJsonMapSyntax(IEnumerable<GreenJsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
-            KeyValueNodes = ReadOnlySeparatedSpanList<JsonKeyValueSyntax, JsonComma>.Create(keyValueNodes, JsonComma.Value);
+            KeyValueNodes = ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, JsonComma>.Create(keyValueNodes, JsonComma.Value);
 
             if (KeyValueNodes.Count == 0)
             {
@@ -53,7 +53,7 @@ namespace Eutherion.Text.Json
                    + (missingCurlyClose ? 0 : JsonCurlyClose.CurlyCloseLength);
         }
 
-        public IEnumerable<(int, JsonStringLiteralSyntax, int, JsonValueSyntax)> ValidKeyValuePairs
+        public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs
         {
             get
             {
@@ -61,9 +61,9 @@ namespace Eutherion.Text.Json
                 {
                     var keyValueNode = KeyValueNodes[i];
 
-                    if (keyValueNode.ValidKey.IsJust(out JsonStringLiteralSyntax stringLiteral)
-                        && keyValueNode.FirstValueNode.IsJust(out JsonMultiValueSyntax multiValueNode)
-                        && !(multiValueNode.ValueNode.ContentNode is JsonMissingValueSyntax))
+                    if (keyValueNode.ValidKey.IsJust(out GreenJsonStringLiteralSyntax stringLiteral)
+                        && keyValueNode.FirstValueNode.IsJust(out GreenJsonMultiValueSyntax multiValueNode)
+                        && !(multiValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax))
                     {
                         // Only the first value can be valid, even if it's undefined.
                         int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
@@ -76,32 +76,32 @@ namespace Eutherion.Text.Json
         }
 
         /// <summary>
-        /// Gets the start position of an key-value node relative to the start position of this <see cref="JsonMapSyntax"/>.
+        /// Gets the start position of an key-value node relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
         /// </summary>
         public int GetKeyValueNodeStart(int index) => JsonCurlyOpen.CurlyOpenLength + KeyValueNodes.GetElementOffset(index);
 
-        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 
-    public sealed class RedJsonMapSyntax : RedJsonValueSyntax
+    public sealed class JsonMapSyntax : JsonValueSyntax
     {
-        public JsonMapSyntax Green { get; }
+        public GreenJsonMapSyntax Green { get; }
 
         // Always create the { and }, avoid overhead of SafeLazyObject.
         public JsonCurlyOpenSyntax CurlyOpen { get; }
 
-        private readonly RedJsonKeyValueSyntax[] keyValueNodes;
+        private readonly JsonKeyValueSyntax[] keyValueNodes;
         public int KeyValueNodesCount => keyValueNodes.Length;
-        public RedJsonKeyValueSyntax GetKeyValueNode(int index)
+        public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
             if (keyValueNodes[index] == null)
             {
                 // Replace with an initialized value as an atomic operation.
                 // Note that if multiple threads race to this statement, they'll all construct a new syntax,
                 // but then only one of these syntaxes will 'win' and be returned.
-                Interlocked.CompareExchange(ref keyValueNodes[index], new RedJsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
+                Interlocked.CompareExchange(ref keyValueNodes[index], new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
             }
 
             return keyValueNodes[index];
@@ -170,14 +170,14 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
-        internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
+        internal JsonMapSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonMapSyntax green) : base(parent)
         {
             Green = green;
 
             CurlyOpen = new JsonCurlyOpenSyntax(this);
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
-            keyValueNodes = keyValueNodeCount > 0 ? new RedJsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<RedJsonKeyValueSyntax>();
+            keyValueNodes = keyValueNodeCount > 0 ? new JsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<JsonKeyValueSyntax>();
             commas = keyValueNodeCount > 1 ? new JsonCommaSyntax[keyValueNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
 
             CurlyClose = green.MissingCurlyClose
@@ -185,8 +185,8 @@ namespace Eutherion.Text.Json
                        : new JsonCurlyCloseSyntax(this);
         }
 
-        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
-        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 }

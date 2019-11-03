@@ -24,29 +24,29 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node in an abstract json syntax tree.
     /// </summary>
-    public abstract class JsonValueSyntax : ISpan
+    public abstract class GreenJsonValueSyntax : ISpan
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
 
-        public abstract void Accept(JsonValueSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+        public abstract void Accept(GreenJsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 
-    public abstract class RedJsonValueSyntax : JsonSyntax
+    public abstract class JsonValueSyntax : JsonSyntax
     {
-        public RedJsonValueWithBackgroundSyntax Parent { get; }
+        public JsonValueWithBackgroundSyntax Parent { get; }
 
         public override int Start => Parent.BackgroundBefore.Length;
         public override JsonSyntax ParentSyntax => Parent;
 
-        internal RedJsonValueSyntax(RedJsonValueWithBackgroundSyntax parent) => Parent = parent;
+        internal JsonValueSyntax(JsonValueWithBackgroundSyntax parent) => Parent = parent;
 
-        public abstract void Accept(RedJsonValueSyntaxVisitor visitor);
-        public abstract TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg);
+        public abstract void Accept(JsonValueSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }

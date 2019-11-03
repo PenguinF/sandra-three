@@ -23,7 +23,7 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonSquareBracketCloseSyntax : JsonSyntax
     {
-        public RedJsonListSyntax Parent { get; }
+        public JsonListSyntax Parent { get; }
 
         public JsonSquareBracketClose Green => JsonSquareBracketClose.Value;
 
@@ -31,7 +31,7 @@ namespace Eutherion.Text.Json
         public override int Length => JsonSquareBracketClose.SquareBracketCloseLength;
         public override JsonSyntax ParentSyntax => Parent;
 
-        internal JsonSquareBracketCloseSyntax(RedJsonListSyntax parent) => Parent = parent;
+        internal JsonSquareBracketCloseSyntax(JsonListSyntax parent) => Parent = parent;
 
         public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
         public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);

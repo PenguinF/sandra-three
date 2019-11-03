@@ -36,7 +36,7 @@ namespace Eutherion.Win.Storage
 
             // It is important to use green nodes here, so the schema doesn't need to create the entire parse tree to type-check its values.
             // Instead, schema.TryCreateValue accepts a rootNodeStart parameter to generate errors at the right locations.
-            if (rootNode.Syntax.Green.ValueNode.ContentNode is JsonMissingValueSyntax)
+            if (rootNode.Syntax.Green.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
             {
                 return new SettingSyntaxTree(rootNode, null);
             }
