@@ -23,6 +23,9 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonColonSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public JsonKeyValueSyntax Parent { get; }
         public int ColonIndex { get; }
 

@@ -25,6 +25,9 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonCommaSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public Union<JsonListSyntax, JsonMapSyntax> Parent { get; }
         public int CommaIndex { get; }
 

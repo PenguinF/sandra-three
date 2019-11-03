@@ -69,6 +69,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonBackgroundSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public Union<JsonValueWithBackgroundSyntax, JsonMultiValueSyntax> Parent { get; }
 
         /// <summary>

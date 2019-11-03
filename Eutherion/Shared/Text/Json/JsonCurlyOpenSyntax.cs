@@ -23,6 +23,9 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonCurlyOpenSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public JsonMapSyntax Parent { get; }
 
         /// <summary>

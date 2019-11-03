@@ -129,6 +129,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonMultiValueSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public Union<_void, JsonListSyntax, JsonKeyValueSyntax> Parent { get; }
         public int ParentIndex { get; }
 

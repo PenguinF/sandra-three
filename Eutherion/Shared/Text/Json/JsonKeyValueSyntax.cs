@@ -101,6 +101,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonKeyValueSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public JsonMapSyntax Parent { get; }
         public int ParentKeyValueNodeIndex { get; }
 

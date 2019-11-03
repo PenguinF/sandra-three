@@ -38,6 +38,9 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonValueSyntax : JsonSyntax
     {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public JsonValueWithBackgroundSyntax Parent { get; }
 
         /// <summary>

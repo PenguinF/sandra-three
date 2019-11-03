@@ -97,6 +97,9 @@ namespace Eutherion.Text.Json
                 => new JsonUndefinedValueSyntax(parent, green);
         }
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public JsonMultiValueSyntax Parent { get; }
         public int ParentValueNodeIndex { get; }
 
