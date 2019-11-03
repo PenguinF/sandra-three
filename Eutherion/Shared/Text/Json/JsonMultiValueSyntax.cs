@@ -132,6 +132,9 @@ namespace Eutherion.Text.Json
         public Union<_void, JsonListSyntax, JsonKeyValueSyntax> Parent { get; }
         public int ParentIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonMultiValueSyntax Green { get; }
 
         private readonly JsonValueWithBackgroundSyntax[] valueNodes;

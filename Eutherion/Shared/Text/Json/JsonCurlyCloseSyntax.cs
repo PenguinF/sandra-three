@@ -25,6 +25,9 @@ namespace Eutherion.Text.Json
     {
         public JsonMapSyntax Parent { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonCurlyClose Green => JsonCurlyClose.Value;
 
         public override int Start => Parent.Length - JsonCurlyClose.CurlyCloseLength;

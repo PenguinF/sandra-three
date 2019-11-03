@@ -104,6 +104,9 @@ namespace Eutherion.Text.Json
         public JsonMapSyntax Parent { get; }
         public int ParentKeyValueNodeIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonKeyValueSyntax Green { get; }
 
         private readonly JsonMultiValueSyntax[] valueSectionNodes;

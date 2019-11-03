@@ -25,6 +25,9 @@ namespace Eutherion.Text.Json
     {
         public JsonListSyntax Parent { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonSquareBracketOpen Green => JsonSquareBracketOpen.Value;
 
         public override int Start => 0;

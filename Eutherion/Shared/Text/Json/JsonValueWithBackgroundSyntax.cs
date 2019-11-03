@@ -100,6 +100,9 @@ namespace Eutherion.Text.Json
         public JsonMultiValueSyntax Parent { get; }
         public int ParentValueNodeIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonValueWithBackgroundSyntax Green { get; }
 
         private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundBefore;

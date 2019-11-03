@@ -80,7 +80,11 @@ namespace Eutherion.Text.Json
     {
         public sealed class False : JsonBooleanLiteralSyntax
         {
+            /// <summary>
+            /// Gets the bottom-up only 'green' representation of this syntax node.
+            /// </summary>
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.False.Instance;
+
             public override bool Value => false;
 
             internal False(JsonValueWithBackgroundSyntax parent) : base(parent) { }
@@ -88,12 +92,19 @@ namespace Eutherion.Text.Json
 
         public sealed class True : JsonBooleanLiteralSyntax
         {
+            /// <summary>
+            /// Gets the bottom-up only 'green' representation of this syntax node.
+            /// </summary>
             public override GreenJsonBooleanLiteralSyntax Green => GreenJsonBooleanLiteralSyntax.True.Instance;
+
             public override bool Value => true;
 
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
         }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public abstract GreenJsonBooleanLiteralSyntax Green { get; }
 
         public override int Length => Green.Length;

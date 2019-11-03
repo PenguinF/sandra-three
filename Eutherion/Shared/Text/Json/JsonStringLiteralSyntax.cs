@@ -41,6 +41,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonStringLiteralSyntax : JsonValueSyntax
     {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonStringLiteralSyntax Green { get; }
 
         public override int Length => Green.Length;

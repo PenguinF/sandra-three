@@ -71,6 +71,9 @@ namespace Eutherion.Text.Json
     {
         public Union<JsonValueWithBackgroundSyntax, JsonMultiValueSyntax> Parent { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonBackgroundSyntax Green { get; }
 
         public override int Start => Parent.Match(

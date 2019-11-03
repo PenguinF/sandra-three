@@ -87,6 +87,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonMapSyntax : JsonValueSyntax
     {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonMapSyntax Green { get; }
 
         // Always create the { and }, avoid overhead of SafeLazyObject.

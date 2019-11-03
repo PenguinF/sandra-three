@@ -84,6 +84,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonListSyntax : JsonValueSyntax
     {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonListSyntax Green { get; }
 
         // Always create the [ and ], avoid overhead of SafeLazyObject.

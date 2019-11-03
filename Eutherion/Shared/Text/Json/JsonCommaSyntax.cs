@@ -28,6 +28,9 @@ namespace Eutherion.Text.Json
         public Union<JsonListSyntax, JsonMapSyntax> Parent { get; }
         public int CommaIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonComma Green => JsonComma.Value;
 
         public override int Start => Parent.Match(

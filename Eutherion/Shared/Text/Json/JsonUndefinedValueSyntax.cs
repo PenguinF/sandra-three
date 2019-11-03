@@ -39,6 +39,9 @@ namespace Eutherion.Text.Json
 
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
     {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public GreenJsonUndefinedValueSyntax Green { get; }
 
         public override int Length => Green.Length;

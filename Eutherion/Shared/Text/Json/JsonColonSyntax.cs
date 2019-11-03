@@ -26,6 +26,9 @@ namespace Eutherion.Text.Json
         public JsonKeyValueSyntax Parent { get; }
         public int ColonIndex { get; }
 
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
         public JsonColon Green => JsonColon.Value;
 
         public override int Start => Parent.Green.ValueSectionNodes.GetSeparatorOffset(ColonIndex);
