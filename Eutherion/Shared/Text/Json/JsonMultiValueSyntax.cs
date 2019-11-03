@@ -145,7 +145,7 @@ namespace Eutherion.Text.Json
         public int ValueNodeCount => valueNodes.Count;
         public JsonValueWithBackgroundSyntax GetValueNode(int index)
         {
-            return valueNodes.Get(index, i => new JsonValueWithBackgroundSyntax(this, i, Green.ValueNodes[i]));
+            return valueNodes[index];
         }
 
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
@@ -206,7 +206,10 @@ namespace Eutherion.Text.Json
             Parent = parent;
             Green = green;
 
-            valueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(green.ValueNodes.Count);
+            valueNodes = new SafeLazyObjectCollection<JsonValueWithBackgroundSyntax>(
+                green.ValueNodes.Count,
+                index => new JsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]));
+
             backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this, Green.BackgroundAfter));
         }
 

@@ -104,14 +104,14 @@ namespace Eutherion.Text.Json
 
         public JsonKeyValueSyntax GetKeyValueNode(int index)
         {
-            return keyValueNodes.Get(index, i => new JsonKeyValueSyntax(this, i, Green.KeyValueNodes[i]));
+            return keyValueNodes[index];
         }
 
         public int CommaCount => commas.Count;
 
         public JsonCommaSyntax GetComma(int index)
         {
-            return commas.Get(index, i => new JsonCommaSyntax(this, i));
+            return commas[index];
         }
 
         /// <summary>
@@ -178,8 +178,13 @@ namespace Eutherion.Text.Json
             CurlyOpen = new JsonCurlyOpenSyntax(this);
 
             int keyValueNodeCount = green.KeyValueNodes.Count;
-            keyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(keyValueNodeCount);
-            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(keyValueNodeCount - 1);
+            keyValueNodes = new SafeLazyObjectCollection<JsonKeyValueSyntax>(
+                keyValueNodeCount,
+                index => new JsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]));
+
+            commas = new SafeLazyObjectCollection<JsonCommaSyntax>(
+                keyValueNodeCount - 1,
+                index => new JsonCommaSyntax(this, index));
 
             CurlyClose = green.MissingCurlyClose
                        ? Maybe<JsonCurlyCloseSyntax>.Nothing

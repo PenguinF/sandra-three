@@ -33,6 +33,7 @@ namespace Eutherion.Utils
     public class SafeLazyObjectCollection<TObject> where TObject : class
     {
         private readonly TObject[] Arr;
+        private readonly Func<int, TObject> ElementConstructor;
 
         /// <summary>
         /// Gets the number of objects in this collection.
@@ -45,9 +46,18 @@ namespace Eutherion.Utils
         /// <param name="count">
         /// The number of objects in the collection.
         /// </param>
-        public SafeLazyObjectCollection(int count)
+        /// <param name="elementConstructor">
+        /// The constructor with which to initialize an object at a given index.
+        /// Note that if multiple threads race to construct an object, they will all call the constructor.
+        /// Only one of the created objects is stored in the collection, and henceforth returned.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="elementConstructor"/> is null.
+        /// </exception>
+        public SafeLazyObjectCollection(int count, Func<int, TObject> elementConstructor)
         {
             Arr = count > 0 ? new TObject[count] : Array.Empty<TObject>();
+            ElementConstructor = elementConstructor ?? throw new ArgumentNullException(nameof(elementConstructor));
         }
 
         /// <summary>
@@ -56,26 +66,24 @@ namespace Eutherion.Utils
         /// <param name="index">
         /// The zero-based index of the object to get.
         /// </param>
-        /// <param name="elementConstructor">
-        /// The constructor with which to initialize an object at a given index.
-        /// Note that if multiple threads race to construct an object, they will all call the constructor.
-        /// Only one of the created objects is stored in the collection, and henceforth returned.
-        /// </param>
         /// <returns>
         /// The initialized object at the specified index in the collection.
         /// </returns>
         /// <exception cref="IndexOutOfRangeException">
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
-        public TObject Get(int index, Func<int, TObject> elementConstructor)
+        public TObject this[int index]
         {
-            if (Arr[index] == null)
+            get
             {
-                // Replace with an initialized value as an atomic operation.
-                Interlocked.CompareExchange(ref Arr[index], elementConstructor(index), null);
-            }
+                if (Arr[index] == null)
+                {
+                    // Replace with an initialized value as an atomic operation.
+                    Interlocked.CompareExchange(ref Arr[index], ElementConstructor(index), null);
+                }
 
-            return Arr[index];
+                return Arr[index];
+            }
         }
     }
 }

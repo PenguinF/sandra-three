@@ -118,14 +118,14 @@ namespace Eutherion.Text.Json
 
         public JsonMultiValueSyntax GetValueSectionNode(int index)
         {
-            return valueSectionNodes.Get(index, i => new JsonMultiValueSyntax(this, i, Green.ValueSectionNodes[i]));
+            return valueSectionNodes[index];
         }
 
         public int ColonCount => colons.Count;
 
         public JsonColonSyntax GetColon(int index)
         {
-            return colons.Get(index, i => new JsonColonSyntax(this, i));
+            return colons[index];
         }
 
         /// <summary>
@@ -172,8 +172,14 @@ namespace Eutherion.Text.Json
             // Assert that ChildCount will always return 1 or higher.
             int valueSectionNodeCount = green.ValueSectionNodes.Count;
             Debug.Assert(valueSectionNodeCount > 0);
-            valueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(valueSectionNodeCount);
-            colons = new SafeLazyObjectCollection<JsonColonSyntax>(valueSectionNodeCount - 1);
+
+            valueSectionNodes = new SafeLazyObjectCollection<JsonMultiValueSyntax>(
+                valueSectionNodeCount,
+                index => new JsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]));
+
+            colons = new SafeLazyObjectCollection<JsonColonSyntax>(
+                valueSectionNodeCount - 1,
+                index => new JsonColonSyntax(this, index));
         }
     }
 }
