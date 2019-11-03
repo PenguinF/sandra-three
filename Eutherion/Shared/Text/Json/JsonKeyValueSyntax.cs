@@ -91,9 +91,12 @@ namespace Eutherion.Text.Json
         }
 
         /// <summary>
-        /// Gets the start position of a value node relative to the start position of this <see cref="GreenJsonKeyValueSyntax"/>.
+        /// Gets the start position of <see cref="FirstValueNode"/> relative to the start position of this <see cref="GreenJsonKeyValueSyntax"/>.
         /// </summary>
-        public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
+        /// <exception cref="IndexOutOfRangeException">
+        /// There is no first value node, i.e. this <see cref="GreenJsonKeyValueSyntax"/> has a key only.
+        /// </exception>
+        public int GetFirstValueNodeStart() => ValueSectionNodes.GetElementOffset(1);
     }
 
     public sealed class JsonKeyValueSyntax : JsonSyntax

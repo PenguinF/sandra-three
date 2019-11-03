@@ -67,7 +67,7 @@ namespace Eutherion.Text.Json
                     {
                         // Only the first value can be valid, even if it's undefined.
                         int keyNodeStart = GetKeyValueNodeStart(i) + keyValueNode.KeyNode.ValueNode.BackgroundBefore.Length;
-                        int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetValueNodeStart(0) + multiValueNode.ValueNode.BackgroundBefore.Length;
+                        int valueNodeStart = GetKeyValueNodeStart(i) + keyValueNode.GetFirstValueNodeStart() + multiValueNode.ValueNode.BackgroundBefore.Length;
 
                         yield return (keyNodeStart, stringLiteral, valueNodeStart, multiValueNode.ValueNode.ContentNode);
                     }
