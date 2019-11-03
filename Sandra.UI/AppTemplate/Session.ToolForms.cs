@@ -101,7 +101,7 @@ namespace Eutherion.Win.AppTemplate
                                         SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
-            var syntaxDescriptor = new JsonSyntaxDescriptor(settingsFile.Settings.Schema);
+            var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
 
             WorkingCopyTextFile codeFile;
             WorkingCopyTextFileAutoSaver autoSaver;
@@ -132,7 +132,7 @@ namespace Eutherion.Win.AppTemplate
                     containsChanges: false);
             }
 
-            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>(
+            var settingsForm = new SyntaxEditorForm<SettingSyntaxTree, JsonSyntax, JsonErrorInfo>(
                 codeAccessOption,
                 syntaxDescriptor,
                 codeFile,
@@ -143,7 +143,7 @@ namespace Eutherion.Win.AppTemplate
                 ClientSize = new Size(600, 600),
             };
 
-            JsonStyleSelector.InitializeStyles(settingsForm.SyntaxEditor);
+            JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.InitializeStyles(settingsForm.SyntaxEditor);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 

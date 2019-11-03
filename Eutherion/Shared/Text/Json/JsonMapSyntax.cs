@@ -19,8 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -81,5 +83,110 @@ namespace Eutherion.Text.Json
         public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
+    }
+
+    public sealed class RedJsonMapSyntax : RedJsonValueSyntax
+    {
+        public JsonMapSyntax Green { get; }
+
+        // Always create the { and }, avoid overhead of SafeLazyObject.
+        public JsonCurlyOpenSyntax CurlyOpen { get; }
+
+        private readonly RedJsonKeyValueSyntax[] keyValueNodes;
+        public int KeyValueNodesCount => keyValueNodes.Length;
+        public RedJsonKeyValueSyntax GetKeyValueNode(int index)
+        {
+            if (keyValueNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref keyValueNodes[index], new RedJsonKeyValueSyntax(this, index, Green.KeyValueNodes[index]), null);
+            }
+
+            return keyValueNodes[index];
+        }
+
+        private readonly JsonCommaSyntax[] commas;
+        public int CommaCount => commas.Length;
+        public JsonCommaSyntax GetComma(int index)
+        {
+            if (commas[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref commas[index], new JsonCommaSyntax(this, index), null);
+            }
+
+            return commas[index];
+        }
+
+        // Always create the { and }, avoid overhead of SafeLazyObject.
+        public Maybe<JsonCurlyCloseSyntax> CurlyClose { get; }
+
+        public override int Length => Green.Length;
+
+        public override int ChildCount => KeyValueNodesCount + CommaCount + (Green.MissingCurlyClose ? 1 : 2);
+
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index == 0) return CurlyOpen;
+
+            index--;
+            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+
+            if (index < keyValueAndCommaCount)
+            {
+                if ((index & 1) == 0) return GetKeyValueNode(index >> 1);
+                return GetComma(index >> 1);
+            }
+
+            if (index == keyValueAndCommaCount && CurlyClose.IsJust(out JsonCurlyCloseSyntax jsonCurlyClose))
+            {
+                return jsonCurlyClose;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+
+            index--;
+            int keyValueAndCommaCount = KeyValueNodesCount + CommaCount;
+
+            if (index < keyValueAndCommaCount)
+            {
+                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index);
+            }
+
+            if (index == keyValueAndCommaCount && !Green.MissingCurlyClose)
+            {
+                return Length - JsonCurlyClose.CurlyCloseLength;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
+
+        internal RedJsonMapSyntax(RedJsonValueWithBackgroundSyntax parent, JsonMapSyntax green) : base(parent)
+        {
+            Green = green;
+
+            CurlyOpen = new JsonCurlyOpenSyntax(this);
+
+            int keyValueNodeCount = green.KeyValueNodes.Count;
+            keyValueNodes = keyValueNodeCount > 0 ? new RedJsonKeyValueSyntax[keyValueNodeCount] : Array.Empty<RedJsonKeyValueSyntax>();
+            commas = keyValueNodeCount > 1 ? new JsonCommaSyntax[keyValueNodeCount - 1] : Array.Empty<JsonCommaSyntax>();
+
+            CurlyClose = green.MissingCurlyClose
+                       ? Maybe<JsonCurlyCloseSyntax>.Nothing
+                       : new JsonCurlyCloseSyntax(this);
+        }
+
+        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
+        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMapSyntax(this, arg);
     }
 }

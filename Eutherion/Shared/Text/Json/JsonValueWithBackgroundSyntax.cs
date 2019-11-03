@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 
 namespace Eutherion.Text.Json
@@ -61,6 +62,79 @@ namespace Eutherion.Text.Json
             BackgroundBefore = backgroundBefore ?? throw new ArgumentNullException(nameof(backgroundBefore));
             ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
             Length = BackgroundBefore.Length + ContentNode.Length;
+        }
+    }
+
+    public sealed class RedJsonValueWithBackgroundSyntax : JsonSyntax
+    {
+        private class JsonValueSyntaxCreator : JsonValueSyntaxVisitor<RedJsonValueWithBackgroundSyntax, RedJsonValueSyntax>
+        {
+            public static readonly JsonValueSyntaxCreator Instance = new JsonValueSyntaxCreator();
+
+            private JsonValueSyntaxCreator() { }
+
+            public override RedJsonValueSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => green.Match<RedJsonValueSyntax>(
+                    whenFalse: () => new RedJsonBooleanLiteralSyntax.False(parent),
+                    whenTrue: () => new RedJsonBooleanLiteralSyntax.True(parent));
+
+            public override RedJsonValueSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonIntegerLiteralSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitListSyntax(JsonListSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonListSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitMapSyntax(JsonMapSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonMapSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitMissingValueSyntax(JsonMissingValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonMissingValueSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonStringLiteralSyntax(parent, green);
+
+            public override RedJsonValueSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax green, RedJsonValueWithBackgroundSyntax parent)
+                => new RedJsonUndefinedValueSyntax(parent, green);
+        }
+
+        public RedJsonMultiValueSyntax Parent { get; }
+        public int ParentValueNodeIndex { get; }
+
+        public JsonValueWithBackgroundSyntax Green { get; }
+
+        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundBefore;
+        public RedJsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
+
+        private readonly SafeLazyObject<RedJsonValueSyntax> contentNode;
+        public RedJsonValueSyntax ContentNode => contentNode.Object;
+
+        public override int Start => Parent.Green.ValueNodes.GetElementOffset(ParentValueNodeIndex);
+        public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        public override int ChildCount => 2;  // BackgroundBefore and ContentNode.
+
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index == 0) return BackgroundBefore;
+            if (index == 1) return ContentNode;
+            throw new IndexOutOfRangeException();
+        }
+
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.BackgroundBefore.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal RedJsonValueWithBackgroundSyntax(RedJsonMultiValueSyntax parent, int parentValueNodeIndex, JsonValueWithBackgroundSyntax green)
+        {
+            Parent = parent;
+            ParentValueNodeIndex = parentValueNodeIndex;
+            Green = green;
+            backgroundBefore = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundBefore));
+            contentNode = new SafeLazyObject<RedJsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
     }
 }

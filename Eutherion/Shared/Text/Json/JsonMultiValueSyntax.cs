@@ -19,8 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -122,6 +124,91 @@ namespace Eutherion.Text.Json
             }
 
             BackgroundAfter = backgroundAfter ?? throw new ArgumentNullException(nameof(backgroundAfter));
+        }
+    }
+
+    public sealed class RedJsonMultiValueSyntax : JsonSyntax
+    {
+        public Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> Parent { get; }
+        public int ParentIndex { get; }
+
+        public JsonMultiValueSyntax Green { get; }
+
+        private readonly RedJsonValueWithBackgroundSyntax[] valueNodes;
+        public int ValueNodeCount => valueNodes.Length;
+        public RedJsonValueWithBackgroundSyntax GetValueNode(int index)
+        {
+            if (valueNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref valueNodes[index], new RedJsonValueWithBackgroundSyntax(this, index, Green.ValueNodes[index]), null);
+            }
+
+            return valueNodes[index];
+        }
+
+        private readonly SafeLazyObject<RedJsonBackgroundSyntax> backgroundAfter;
+        public RedJsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
+
+        public override int Start => Parent.Match(
+            whenOption1: _ => 0,
+            whenOption2: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
+            whenOption3: keyValueSyntax => keyValueSyntax.Green.ValueSectionNodes.GetElementOffset(ParentIndex));
+
+        public override int Length => Green.Length;
+
+        public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
+            whenOption1: null,
+            whenOption2: x => x,
+            whenOption3: x => x);
+
+        public override int AbsoluteStart => Parent.IsOption1(out _) ? 0 : base.AbsoluteStart;
+
+        public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
+
+        public override JsonSyntax GetChild(int index)
+        {
+            if (index < ValueNodeCount) return GetValueNode(index);
+            if (index == ValueNodeCount) return BackgroundAfter;
+            throw new IndexOutOfRangeException();
+        }
+
+        public override int GetChildStartPosition(int index)
+        {
+            if (index < ValueNodeCount) return Green.ValueNodes.GetElementOffset(index);
+            if (index == ValueNodeCount) return Length - Green.BackgroundAfter.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        private RedJsonMultiValueSyntax(Union<_void, RedJsonListSyntax, RedJsonKeyValueSyntax> parent, JsonMultiValueSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+
+            int valueNodeCount = green.ValueNodes.Count;
+            valueNodes = valueNodeCount > 0 ? new RedJsonValueWithBackgroundSyntax[valueNodeCount] : Array.Empty<RedJsonValueWithBackgroundSyntax>();
+            backgroundAfter = new SafeLazyObject<RedJsonBackgroundSyntax>(() => new RedJsonBackgroundSyntax(this, Green.BackgroundAfter));
+        }
+
+        // For root nodes.
+        internal RedJsonMultiValueSyntax(JsonMultiValueSyntax green)
+            : this(_void._, green)
+        {
+            // Do not assign ParentIndex, its value is meaningless in this case.
+        }
+
+        internal RedJsonMultiValueSyntax(RedJsonListSyntax parent, int parentIndex, JsonMultiValueSyntax green)
+            : this(parent, green)
+        {
+            ParentIndex = parentIndex;
+        }
+
+        internal RedJsonMultiValueSyntax(RedJsonKeyValueSyntax parent, int parentIndex, JsonMultiValueSyntax green)
+            : this(parent, green)
+        {
+            ParentIndex = parentIndex;
         }
     }
 }

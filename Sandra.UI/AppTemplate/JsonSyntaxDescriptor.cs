@@ -21,51 +21,34 @@
 
 using Eutherion.Localization;
 using Eutherion.Text.Json;
-using Eutherion.Win.Storage;
 using ScintillaNET;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// Describes the interaction between json syntax and a syntax editor.
+    /// Currently only used for testing.
     /// </summary>
-    public class JsonSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>
+    public class JsonSyntaxDescriptor : SyntaxDescriptor<RootJsonSyntax, JsonSyntax, JsonErrorInfo>
     {
         public static readonly string JsonFileExtension = "json";
 
-        /// <summary>
-        /// Schema which defines what kind of keys and values are valid in the parsed json.
-        /// </summary>
-        private readonly SettingSchema schema;
+        public static readonly JsonSyntaxDescriptor Instance = new JsonSyntaxDescriptor();
 
-        /// <summary>
-        /// Initializes a new instance of a <see cref="JsonSyntaxDescriptor"/>.
-        /// </summary>
-        /// <param name="schema">
-        /// The schema which defines what kind of keys and values are valid in the parsed json.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="schema"/> is null.
-        /// </exception>
-        public JsonSyntaxDescriptor(SettingSchema schema)
-        {
-            this.schema = schema ?? throw new ArgumentNullException(nameof(schema));
-        }
+        private JsonSyntaxDescriptor() { }
 
         public override string FileExtension => JsonFileExtension;
 
         public override LocalizedStringKey FileExtensionLocalizedKey => SharedLocalizedStringKeys.JsonFiles;
 
-        public override SettingSyntaxTree Parse(string code)
+        public override RootJsonSyntax Parse(string code)
         {
-            var settingSyntaxTree = SettingSyntaxTree.ParseSettings(code, schema);
+            var rootNode = JsonParser.Parse(code);
 
-            if (settingSyntaxTree.Errors.Count > 0)
+            if (rootNode.Errors.Count > 0)
             {
-                settingSyntaxTree.Errors.Sort((x, y)
+                rootNode.Errors.Sort((x, y)
                     => x.Start < y.Start ? -1
                     : x.Start > y.Start ? 1
                     : x.Length < y.Length ? -1
@@ -75,76 +58,25 @@ namespace Eutherion.Win.AppTemplate
                     : 0);
             }
 
-            return settingSyntaxTree;
+            return rootNode;
         }
 
-        public override IEnumerable<JsonSymbol> GetTerminals(SettingSyntaxTree syntaxTree)
-            => new JsonSymbolEnumerator(syntaxTree.JsonRootNode);
+        public override IEnumerable<JsonSyntax> GetTerminalsInRange(RootJsonSyntax syntaxTree, int start, int length)
+            => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
+        public override IEnumerable<JsonErrorInfo> GetErrors(RootJsonSyntax syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor, JsonSymbol terminalSymbol)
-            => JsonStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
+        public override Style GetStyle(SyntaxEditor<RootJsonSyntax, JsonSyntax, JsonErrorInfo> syntaxEditor, JsonSyntax terminalSymbol)
+            => JsonStyleSelector<RootJsonSyntax, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
-        public override int GetLength(JsonSymbol terminalSymbol)
-            => terminalSymbol.Length;
+        public override (int, int) GetTokenSpan(JsonSyntax terminalSymbol)
+            => (terminalSymbol.AbsoluteStart, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)
             => (error.Start, error.Length);
 
         public override string GetErrorMessage(JsonErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);
-    }
-
-    /// <summary>
-    /// A style selector for json syntax highlighting.
-    /// </summary>
-    public class JsonStyleSelector : JsonSymbolVisitor<SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo>, Style>
-    {
-        private const int commentStyleIndex = 8;
-        private const int valueStyleIndex = 9;
-        private const int stringStyleIndex = 10;
-
-        private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
-        private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
-
-        private static readonly Color valueForeColor = Color.FromArgb(255, 255, 60);
-        private static readonly Font valueFont = new Font("Consolas", 10, FontStyle.Bold);
-
-        private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
-
-        public static readonly JsonStyleSelector Instance = new JsonStyleSelector();
-
-        public static void InitializeStyles(SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-        {
-            syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
-            commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
-
-            syntaxEditor.Styles[valueStyleIndex].ForeColor = valueForeColor;
-            valueFont.CopyTo(syntaxEditor.Styles[valueStyleIndex]);
-
-            syntaxEditor.Styles[stringStyleIndex].ForeColor = stringForeColor;
-        }
-
-        private JsonStyleSelector() { }
-
-        public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.DefaultStyle;
-
-        public override Style VisitComment(JsonComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[commentStyleIndex];
-
-        public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[stringStyleIndex];
-
-        public override Style VisitString(JsonString symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[stringStyleIndex];
-
-        public override Style VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[commentStyleIndex];
-
-        public override Style VisitValue(JsonValue symbol, SyntaxEditor<SettingSyntaxTree, JsonSymbol, JsonErrorInfo> syntaxEditor)
-            => syntaxEditor.Styles[valueStyleIndex];
     }
 }

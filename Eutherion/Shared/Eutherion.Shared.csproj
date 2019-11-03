@@ -46,10 +46,14 @@
     <Compile Include="Text\Json\JsonBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonBooleanLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonColon.cs" />
+    <Compile Include="Text\Json\JsonColonSyntax.cs" />
     <Compile Include="Text\Json\JsonComma.cs" />
+    <Compile Include="Text\Json\JsonCommaSyntax.cs" />
     <Compile Include="Text\Json\JsonComment.cs" />
     <Compile Include="Text\Json\JsonCurlyClose.cs" />
+    <Compile Include="Text\Json\JsonCurlyCloseSyntax.cs" />
     <Compile Include="Text\Json\JsonCurlyOpen.cs" />
+    <Compile Include="Text\Json\JsonCurlyOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonErrorCode.cs" />
     <Compile Include="Text\Json\JsonErrorInfo.cs" />
     <Compile Include="Text\Json\JsonErrorString.cs" />
@@ -61,12 +65,15 @@
     <Compile Include="Text\Json\JsonMultiValueSyntax.cs" />
     <Compile Include="Text\Json\JsonParser.cs" />
     <Compile Include="Text\Json\JsonSquareBracketClose.cs" />
+    <Compile Include="Text\Json\JsonSquareBracketCloseSyntax.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpen.cs" />
+    <Compile Include="Text\Json\JsonSquareBracketOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonString.cs" />
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonSymbol.cs" />
-    <Compile Include="Text\Json\JsonSymbolEnumerator.cs" />
     <Compile Include="Text\Json\JsonSymbolVisitor.cs" />
+    <Compile Include="Text\Json\JsonSyntax.cs" />
+    <Compile Include="Text\Json\JsonTerminalSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonTokenizer.cs" />
     <Compile Include="Text\Json\JsonUndefinedValueSyntax.cs" />
     <Compile Include="Text\Json\JsonUnknownSymbol.cs" />
@@ -76,6 +83,7 @@
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonWhitespace.cs" />
+    <Compile Include="Text\Json\RootJsonSyntax.cs" />
     <Compile Include="Text\ReadOnlySeparatedSpanList.cs" />
     <Compile Include="Text\ReadOnlySpanList.cs" />
     <Compile Include="Text\TextElement.cs" />
@@ -100,6 +108,7 @@
     <Compile Include="Utils\ObservableValue.cs" />
     <Compile Include="Utils\ReadOnlyList.cs" />
     <Compile Include="Utils\SafeLazy.cs" />
+    <Compile Include="Utils\SafeLazyObject.cs" />
     <Compile Include="Utils\SpecializedEnumerable.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
     <Compile Include="Utils\Union.cs" />

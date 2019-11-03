@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -64,5 +65,40 @@ namespace Eutherion.Text.Json
         public int Length => BackgroundSymbols.Length;
 
         private JsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
+    }
+
+    public sealed class RedJsonBackgroundSyntax : JsonSyntax
+    {
+        public Union<RedJsonValueWithBackgroundSyntax, RedJsonMultiValueSyntax> Parent { get; }
+
+        public JsonBackgroundSyntax Green { get; }
+
+        public override int Start => Parent.Match(
+            whenOption1: valueWithBackgroundSyntax => 0,
+            whenOption2: multiValueSyntax => multiValueSyntax.Length - Length);
+
+        public override int Length => Green.Length;
+
+        public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
+            whenOption1: x => x,
+            whenOption2: x => x);
+
+        internal RedJsonBackgroundSyntax(RedJsonValueWithBackgroundSyntax backgroundBeforeParent, JsonBackgroundSyntax green)
+        {
+            Parent = backgroundBeforeParent;
+            Green = green;
+        }
+
+        internal RedJsonBackgroundSyntax(RedJsonMultiValueSyntax backgroundAfterParent, JsonBackgroundSyntax green)
+        {
+            Parent = backgroundAfterParent;
+            Green = green;
+        }
+
+        // Treat RedJsonBackgroundSyntax as a terminal symbol.
+        // Can always specify further for each individual background JsonSymbol if the need arises.
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBackgroundSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundSyntax(this, arg);
     }
 }

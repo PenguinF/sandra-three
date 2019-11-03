@@ -192,6 +192,26 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
+        TSyntaxTree syntaxTree;
+
+        protected override void OnStyleNeeded(StyleNeededEventArgs e)
+        {
+            // Get the start position of the span which is still unstyled.
+            // Increase range on both ends by 1 to make the search for intersecting intervals inclusive,
+            // so e.g. terminal symbols that end exactly at the end-styled position and which may be affected
+            // by the latest change are returned as well.
+            int startPosition = GetEndStyled() - 1;
+            int endPosition = e.Position + 1;
+
+            foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
+            {
+                var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
+                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
+            }
+
+            base.OnStyleNeeded(e);
+        }
+
         protected override void OnTextChanged(EventArgs e)
         {
             CallTipCancel();
@@ -213,15 +233,7 @@ namespace Eutherion.Win.AppTemplate
                 displayedMaxLineNumberLength = maxLineNumberLength;
             }
 
-            TSyntaxTree syntaxTree = SyntaxDescriptor.Parse(code);
-
-            int totalLength = 0;
-            foreach (var token in SyntaxDescriptor.GetTerminals(syntaxTree))
-            {
-                int length = SyntaxDescriptor.GetLength(token);
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), totalLength, length);
-                totalLength += length;
-            }
+            syntaxTree = SyntaxDescriptor.Parse(code);
 
             IndicatorClearRange(0, TextLength);
 
@@ -419,7 +431,7 @@ namespace Eutherion.Win.AppTemplate
         /// <summary>
         /// Enumerates terminal symbols of a syntax tree.
         /// </summary>
-        public abstract IEnumerable<TTerminal> GetTerminals(TSyntaxTree syntaxTree);
+        public abstract IEnumerable<TTerminal> GetTerminalsInRange(TSyntaxTree syntaxTree, int start, int length);
 
         /// <summary>
         /// Enumerates errors of a syntax tree.
@@ -432,9 +444,9 @@ namespace Eutherion.Win.AppTemplate
         public abstract Style GetStyle(SyntaxEditor<TSyntaxTree, TTerminal, TError> syntaxEditor, TTerminal terminalSymbol);
 
         /// <summary>
-        /// Gets the length of a terminal symbol.
+        /// Gets the start and length of a terminal symbol.
         /// </summary>
-        public abstract int GetLength(TTerminal terminalSymbol);
+        public abstract (int, int) GetTokenSpan(TTerminal terminalSymbol);
 
         /// <summary>
         /// Gets the start position and the length of the text span of an error.

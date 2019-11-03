@@ -22,6 +22,8 @@
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Eutherion.Text.Json
 {
@@ -89,5 +91,71 @@ namespace Eutherion.Text.Json
         /// Gets the start position of a value node relative to the start position of this <see cref="JsonKeyValueSyntax"/>.
         /// </summary>
         public int GetValueNodeStart(int index) => ValueSectionNodes.GetElementOffset(index + 1);
+    }
+
+    public sealed class RedJsonKeyValueSyntax : JsonSyntax
+    {
+        public RedJsonMapSyntax Parent { get; }
+        public int ParentKeyValueNodeIndex { get; }
+
+        public JsonKeyValueSyntax Green { get; }
+
+        private readonly RedJsonMultiValueSyntax[] valueSectionNodes;
+        public int ValueSectionNodeCount => valueSectionNodes.Length;
+        public RedJsonMultiValueSyntax GetValueSectionNode(int index)
+        {
+            if (valueSectionNodes[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref valueSectionNodes[index], new RedJsonMultiValueSyntax(this, index, Green.ValueSectionNodes[index]), null);
+            }
+
+            return valueSectionNodes[index];
+        }
+
+        private readonly JsonColonSyntax[] colons;
+        public int ColonCount => colons.Length;
+        public JsonColonSyntax GetColon(int index)
+        {
+            if (colons[index] == null)
+            {
+                // Replace with an initialized value as an atomic operation.
+                // Note that if multiple threads race to this statement, they'll all construct a new syntax,
+                // but then only one of these syntaxes will 'win' and be returned.
+                Interlocked.CompareExchange(ref colons[index], new JsonColonSyntax(this, index), null);
+            }
+
+            return colons[index];
+        }
+
+        public override int Start => JsonCurlyOpen.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+        public override int Length => Green.Length;
+        public override JsonSyntax ParentSyntax => Parent;
+
+        public override int ChildCount => ValueSectionNodeCount + ColonCount;
+
+        public override JsonSyntax GetChild(int index)
+        {
+            // '>>' has the happy property that (-1) >> 1 evaluates to -1, which correctly throws an IndexOutOfRangeException.
+            if ((index & 1) == 0) return GetValueSectionNode(index >> 1);
+            return GetColon(index >> 1);
+        }
+
+        public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
+
+        internal RedJsonKeyValueSyntax(RedJsonMapSyntax parent, int parentKeyValueNodeIndex, JsonKeyValueSyntax green)
+        {
+            Parent = parent;
+            ParentKeyValueNodeIndex = parentKeyValueNodeIndex;
+            Green = green;
+
+            // Assert that ChildCount will always return 1 or higher.
+            int valueSectionNodeCount = green.ValueSectionNodes.Count;
+            Debug.Assert(valueSectionNodeCount > 0);
+            valueSectionNodes = new RedJsonMultiValueSyntax[valueSectionNodeCount];
+            colons = valueSectionNodeCount > 1 ? new JsonColonSyntax[valueSectionNodeCount - 1] : Array.Empty<JsonColonSyntax>();
+        }
     }
 }

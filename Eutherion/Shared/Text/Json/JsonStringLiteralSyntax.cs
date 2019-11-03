@@ -38,4 +38,21 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
+
+    public sealed class RedJsonStringLiteralSyntax : RedJsonValueSyntax
+    {
+        public JsonStringLiteralSyntax Green { get; }
+
+        public override int Length => Green.Length;
+
+        internal RedJsonStringLiteralSyntax(RedJsonValueWithBackgroundSyntax parent, JsonStringLiteralSyntax green) : base(parent) => Green = green;
+
+        public override void Accept(RedJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(RedJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(RedJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+    }
 }

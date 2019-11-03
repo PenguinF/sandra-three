@@ -48,9 +48,15 @@ namespace Eutherion.Text
 
             public override IEnumerator<TSpan> GetEnumerator() => EmptyEnumerator<TSpan>.Instance;
 
+            public override int AllElementCount => 0;
+
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements => default(EmptyEnumerable<Union<TSpan, TSeparator>>);
 
             public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
+
+            public override int GetSeparatorOffset(int index) => throw new IndexOutOfRangeException();
+
+            public override int GetElementOrSeparatorOffset(int index) => throw new IndexOutOfRangeException();
         }
 
         private class OneElement : ReadOnlySeparatedSpanList<TSpan, TSeparator>
@@ -71,9 +77,15 @@ namespace Eutherion.Text
 
             public override IEnumerator<TSpan> GetEnumerator() => new SingleElementEnumerator<TSpan>(element);
 
+            public override int AllElementCount => 1;
+
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements => new SingleElementEnumerable<Union<TSpan, TSeparator>>(element);
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
+
+            public override int GetSeparatorOffset(int index) => throw new IndexOutOfRangeException();
+
+            public override int GetElementOrSeparatorOffset(int index) => index == 0 ? 0 : throw new IndexOutOfRangeException();
         }
 
         private class TwoOrMoreElements : ReadOnlySeparatedSpanList<TSpan, TSeparator>
@@ -111,6 +123,8 @@ namespace Eutherion.Text
 
             public override IEnumerator<TSpan> GetEnumerator() => ((ICollection<TSpan>)array).GetEnumerator();
 
+            public override int AllElementCount => array.Length * 2 - 1;
+
             public override IEnumerable<Union<TSpan, TSeparator>> AllElements
             {
                 get
@@ -126,6 +140,16 @@ namespace Eutherion.Text
             }
 
             public override int GetElementOffset(int index) => index == 0 ? 0 : arrayElementOffsets[index - 1];
+
+            public override int GetSeparatorOffset(int index) => arrayElementOffsets[index] - separator.Length;
+
+            public override int GetElementOrSeparatorOffset(int index)
+            {
+                if (index == 0) return 0;
+                int offset = arrayElementOffsets[(index - 1) >> 1];
+                if ((index & 1) != 0) offset -= separator.Length;
+                return offset;
+            }
         }
 
         /// <summary>
@@ -182,7 +206,8 @@ namespace Eutherion.Text
         public abstract TSpan this[int index] { get; }
 
         /// <summary>
-        /// Gets the number of spanned elements in the list.
+        /// Gets the number of spanned elements in the list, excluding the separators.
+        /// See also: <seealso cref="AllElementCount"/>.
         /// </summary>
         public abstract int Count { get; }
 
@@ -197,8 +222,23 @@ namespace Eutherion.Text
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
+        /// Gets the number of spanned elements in the list, including the separators.
+        /// See also: <seealso cref="Count"/>.
+        /// </summary>
+        public abstract int AllElementCount { get; }
+
+        /// <summary>
+        /// Enumerates all elements of the list, including separators.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="IEnumerable{T}"/> that enumerates all elements of the list, including separators.
+        /// </returns>
+        public abstract IEnumerable<Union<TSpan, TSeparator>> AllElements { get; }
+
+        /// <summary>
         /// Gets the start position of the spanned element at the specified index
         /// relative to the start position of the first element.
+        /// See also: <seealso cref="GetSeparatorOffset"/>, <seealso cref="GetElementOrSeparatorOffset"/>.
         /// </summary>
         /// <param name="index">
         /// The zero-based index of the spanned element.
@@ -212,11 +252,36 @@ namespace Eutherion.Text
         public abstract int GetElementOffset(int index);
 
         /// <summary>
-        /// Enumerates all elements of the list, including separators.
+        /// Gets the start position of the separator at the specified index
+        /// relative to the start position of the first element.
+        /// The number of separators is always one less than the number of elements.
+        /// See also: <seealso cref="GetElementOffset"/>, <seealso cref="GetElementOrSeparatorOffset"/>.
         /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the separator.
+        /// </param>
         /// <returns>
-        /// A <see cref="IEnumerable{T}"/> that enumerates all elements of the list, including separators.
+        /// The start position of the separator relative to the start position of the first element.
         /// </returns>
-        public abstract IEnumerable<Union<TSpan, TSeparator>> AllElements { get; }
+        /// <exception cref="IndexOutOfRangeException">
+        /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/> - 1.
+        /// </exception>
+        public abstract int GetSeparatorOffset(int index);
+
+        /// <summary>
+        /// Gets the start position of the spanned element or separator at the specified index
+        /// relative to the start position of the first element.
+        /// See also: <seealso cref="GetElementOffset"/>, <seealso cref="GetSeparatorOffset"/>.
+        /// </summary>
+        /// <param name="index">
+        /// The zero-based index of the spanned element or separator.
+        /// </param>
+        /// <returns>
+        /// The start position of the spanned element or separator relative to the start position of the first element.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="AllElementCount"/>.
+        /// </exception>
+        public abstract int GetElementOrSeparatorOffset(int index);
     }
 }

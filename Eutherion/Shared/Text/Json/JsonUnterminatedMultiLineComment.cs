@@ -51,7 +51,7 @@ namespace Eutherion.Text.Json
 
         public JsonUnterminatedMultiLineComment(int length)
         {
-            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 

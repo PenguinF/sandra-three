@@ -353,7 +353,7 @@ namespace Eutherion.Text.Json
 
         // ParseMultiValue copy, except that it handles the !CurrentToken.IsValueStartSymbol case differently,
         // as it cannot go to a higher level in the stack to process control symbols.
-        private JsonMultiValueSyntax TryParse(out List<JsonErrorInfo> errors)
+        private RootJsonSyntax Parse()
         {
             var valueNodesBuilder = new List<JsonValueWithBackgroundSyntax>();
 
@@ -362,8 +362,9 @@ namespace Eutherion.Text.Json
             if (CurrentToken == null)
             {
                 valueNodesBuilder.Add(new JsonValueWithBackgroundSyntax(CaptureBackground(), JsonMissingValueSyntax.Value));
-                errors = Errors;
-                return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+                return new RootJsonSyntax(
+                    new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty),
+                    Errors);
             }
 
             for (; ; )
@@ -409,8 +410,9 @@ namespace Eutherion.Text.Json
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    errors = Errors;
-                    return new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty);
+                    return new RootJsonSyntax(
+                        new JsonMultiValueSyntax(valueNodesBuilder, JsonBackgroundSyntax.Empty),
+                        Errors);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -419,8 +421,9 @@ namespace Eutherion.Text.Json
                 if (CurrentToken == null)
                 {
                     // Capture the background following the last value.
-                    errors = Errors;
-                    return new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
+                    return new RootJsonSyntax(
+                        new JsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
+                        Errors);
                 }
 
                 // Two or more consecutive values not allowed.
@@ -431,7 +434,6 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public static JsonMultiValueSyntax TryParse(string json, out List<JsonErrorInfo> errors)
-            => new JsonParser(json).TryParse(out errors);
+        public static RootJsonSyntax Parse(string json) => new JsonParser(json).Parse();
     }
 }

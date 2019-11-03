@@ -31,37 +31,39 @@ namespace Eutherion.Win.Storage
     {
         public static SettingSyntaxTree ParseSettings(string json, SettingSchema schema)
         {
-            JsonMultiValueSyntax rootNode = JsonParser.TryParse(json, out List<JsonErrorInfo> errors);
+            RootJsonSyntax rootNode = JsonParser.Parse(json);
+            var errors = rootNode.Errors;
 
-            if (rootNode.ValueNode.ContentNode is JsonMissingValueSyntax)
+            // It is important to use green nodes here, so the schema doesn't need to create the entire parse tree to type-check its values.
+            // Instead, schema.TryCreateValue accepts a rootNodeStart parameter to generate errors at the right locations.
+            if (rootNode.Syntax.Green.ValueNode.ContentNode is JsonMissingValueSyntax)
             {
-                return new SettingSyntaxTree(rootNode, errors, null);
+                return new SettingSyntaxTree(rootNode, null);
             }
 
-            int rootNodeStart = rootNode.ValueNode.BackgroundBefore.Length;
+            int rootNodeStart = rootNode.Syntax.Green.ValueNode.BackgroundBefore.Length;
 
             if (schema.TryCreateValue(
                 json,
-                rootNode.ValueNode.ContentNode,
+                rootNode.Syntax.Green.ValueNode.ContentNode,
                 out SettingObject settingObject,
                 rootNodeStart,
                 errors).IsOption1(out ITypeErrorBuilder typeError))
             {
-                errors.Add(ValueTypeError.Create(typeError, rootNode.ValueNode.ContentNode, json, rootNodeStart));
-                return new SettingSyntaxTree(rootNode, errors, null);
+                errors.Add(ValueTypeError.Create(typeError, rootNode.Syntax.Green.ValueNode.ContentNode, json, rootNodeStart));
+                return new SettingSyntaxTree(rootNode, null);
             }
 
-            return new SettingSyntaxTree(rootNode, errors, settingObject);
+            return new SettingSyntaxTree(rootNode, settingObject);
         }
 
-        public JsonMultiValueSyntax JsonRootNode { get; }
-        public List<JsonErrorInfo> Errors { get; }
+        public RootJsonSyntax JsonSyntaxTree { get; }
+        public List<JsonErrorInfo> Errors => JsonSyntaxTree.Errors;
         public SettingObject SettingObject { get; }
 
-        public SettingSyntaxTree(JsonMultiValueSyntax jsonRootNode, List<JsonErrorInfo> errors, SettingObject settingObject)
+        private SettingSyntaxTree(RootJsonSyntax jsonSyntaxTree, SettingObject settingObject)
         {
-            JsonRootNode = jsonRootNode;
-            Errors = errors;
+            JsonSyntaxTree = jsonSyntaxTree;
             SettingObject = settingObject;
         }
     }
