@@ -131,10 +131,19 @@ namespace Eutherion.Text.Json
             return commas[index];
         }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
 
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
         public override int ChildCount => KeyValueNodesCount + CommaCount + (Green.MissingCurlyClose ? 1 : 2);
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
             if (index == 0) return CurlyOpen;
@@ -156,6 +165,9 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index)
         {
             if (index == 0) return 0;

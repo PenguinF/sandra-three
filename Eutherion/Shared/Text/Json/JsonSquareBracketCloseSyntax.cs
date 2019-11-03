@@ -30,8 +30,19 @@ namespace Eutherion.Text.Json
         /// </summary>
         public JsonSquareBracketClose Green => JsonSquareBracketClose.Value;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Length - JsonSquareBracketClose.SquareBracketCloseLength;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => JsonSquareBracketClose.SquareBracketCloseLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
         internal JsonSquareBracketCloseSyntax(JsonListSyntax parent) => Parent = parent;

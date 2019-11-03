@@ -33,12 +33,21 @@ namespace Eutherion.Text.Json
         /// </summary>
         public JsonComma Green => JsonComma.Value;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Match(
             whenOption1: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
             whenOption2: mapSyntax => JsonCurlyOpen.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => JsonComma.CommaLength;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: x => x,
             whenOption2: x => x);

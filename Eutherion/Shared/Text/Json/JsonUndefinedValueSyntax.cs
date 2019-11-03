@@ -44,6 +44,9 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonUndefinedValueSyntax Green { get; }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
 
         internal JsonUndefinedValueSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonUndefinedValueSyntax green) : base(parent) => Green = green;

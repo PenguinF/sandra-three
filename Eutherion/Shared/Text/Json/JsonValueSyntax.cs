@@ -40,7 +40,14 @@ namespace Eutherion.Text.Json
     {
         public JsonValueWithBackgroundSyntax Parent { get; }
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.BackgroundBefore.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
         internal JsonValueSyntax(JsonValueWithBackgroundSyntax parent) => Parent = parent;

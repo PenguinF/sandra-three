@@ -142,12 +142,29 @@ namespace Eutherion.Text.Json
             return colons[index];
         }
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => JsonCurlyOpen.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
         public override int ChildCount => ValueSectionNodeCount + ColonCount;
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
             // '>>' has the happy property that (-1) >> 1 evaluates to -1, which correctly throws an IndexOutOfRangeException.
@@ -155,6 +172,9 @@ namespace Eutherion.Text.Json
             return GetColon(index >> 1);
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index) => Green.ValueSectionNodes.GetElementOrSeparatorOffset(index);
 
         internal JsonKeyValueSyntax(JsonMapSyntax parent, int parentKeyValueNodeIndex, GreenJsonKeyValueSyntax green)

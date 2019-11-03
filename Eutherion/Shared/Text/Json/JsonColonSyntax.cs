@@ -31,8 +31,19 @@ namespace Eutherion.Text.Json
         /// </summary>
         public JsonColon Green => JsonColon.Value;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
         public override int Start => Parent.Green.ValueSectionNodes.GetSeparatorOffset(ColonIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => JsonColon.ColonLength;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent;
 
         internal JsonColonSyntax(JsonKeyValueSyntax parent, int colonIndex)

@@ -156,22 +156,40 @@ namespace Eutherion.Text.Json
 
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position, or 0 if this syntax node is the root node.
+        /// </summary>
         public override int Start => Parent.Match(
             whenOption1: _ => 0,
             whenOption2: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetElementOffset(ParentIndex),
             whenOption3: keyValueSyntax => keyValueSyntax.Green.ValueSectionNodes.GetElementOffset(ParentIndex));
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
         public override int Length => Green.Length;
 
+        /// <summary>
+        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// </summary>
         public override JsonSyntax ParentSyntax => Parent.Match<JsonSyntax>(
             whenOption1: null,
             whenOption2: x => x,
             whenOption3: x => x);
 
+        /// <summary>
+        /// Gets the absolute start position of this syntax node.
+        /// </summary>
         public override int AbsoluteStart => Parent.IsOption1(out _) ? 0 : base.AbsoluteStart;
 
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
         public override int ChildCount => ValueNodeCount + 1;  // Extra 1 for BackgroundAfter.
 
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
         public override JsonSyntax GetChild(int index)
         {
             if (index < ValueNodeCount) return GetValueNode(index);
@@ -179,6 +197,9 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
         public override int GetChildStartPosition(int index)
         {
             if (index < ValueNodeCount) return Green.ValueNodes.GetElementOffset(index);
