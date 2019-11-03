@@ -159,6 +159,12 @@ namespace Eutherion.Text.Json
         public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
 
         /// <summary>
+        /// Gets the syntax node containing the first value.
+        /// Is <see cref="JsonMissingValueSyntax"/> if a value was expected but none given. (E.g. in "[0,,2]", middle element.)
+        /// </summary>
+        public JsonValueWithBackgroundSyntax ValueNode => ValueNodes[0];
+
+        /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position, or 0 if this syntax node is the root node.
         /// </summary>
         public override int Start => Parent.Match(

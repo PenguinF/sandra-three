@@ -56,6 +56,11 @@ namespace Eutherion.Text.Json
         public GreenJsonIntegerLiteralSyntax Green { get; }
 
         /// <summary>
+        /// Gets the value of this syntax node.
+        /// </summary>
+        public BigInteger Value => Green.Value;
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => Green.Length;

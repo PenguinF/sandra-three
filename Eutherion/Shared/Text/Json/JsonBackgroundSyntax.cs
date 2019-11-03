@@ -83,6 +83,11 @@ namespace Eutherion.Text.Json
         public GreenJsonBackgroundSyntax Green { get; }
 
         /// <summary>
+        /// Gets the read-only list with background symbols.
+        /// </summary>
+        public ReadOnlySpanList<JsonSymbol> BackgroundSymbols => Green.BackgroundSymbols;
+
+        /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Match(

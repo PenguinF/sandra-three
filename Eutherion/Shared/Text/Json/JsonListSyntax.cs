@@ -114,6 +114,11 @@ namespace Eutherion.Text.Json
         public Maybe<JsonSquareBracketCloseSyntax> SquareBracketClose { get; }
 
         /// <summary>
+        /// Returns ListItemNodes.Count, or one less if the last element is a <see cref="JsonMissingValueSyntax"/>.
+        /// </summary>
+        public int FilteredListItemNodeCount => Green.FilteredListItemNodeCount;
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public override int Length => Green.Length;
