@@ -83,40 +83,43 @@ namespace Eutherion.Text.Json
         /// </summary>
         public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
         {
-            int end = start + length;
-
-            if (IsTerminalSymbol)
+            if (0 < Length)
             {
-                // Yield return if ranges start..end and 0..Length intersect.
-                if (start < Length && 0 < end)
-                {
-                    yield return this;
-                }
-            }
-            else
-            {
-                int childIndex = 0;
-                int childEndPosition = GetChildStartPosition(0);
+                int end = start + length;
 
-                // Naive implementation traversing the entire child nodes collection.
-                // TODO: find the first child node within the range using binary search.
-                while (childIndex < ChildCount)
+                if (IsTerminalSymbol)
                 {
-                    int childStartPosition = childEndPosition;
-                    int nextChildIndex = childIndex + 1;
-                    childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
-
-                    // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
-                    if (start <= childEndPosition && childStartPosition <= end)
+                    // Yield return if ranges start..end and 0..Length intersect.
+                    if (start < Length && 0 < end)
                     {
-                        // Translate to relative child position by subtracting childStartPosition.
-                        foreach (var descendant in GetChild(childIndex).TerminalSymbolsInRange(start - childStartPosition, length))
-                        {
-                            yield return descendant;
-                        }
+                        yield return this;
                     }
+                }
+                else
+                {
+                    int childIndex = 0;
+                    int childEndPosition = GetChildStartPosition(0);
 
-                    childIndex = nextChildIndex;
+                    // Naive implementation traversing the entire child nodes collection.
+                    // TODO: find the first child node within the range using binary search.
+                    while (childIndex < ChildCount)
+                    {
+                        int childStartPosition = childEndPosition;
+                        int nextChildIndex = childIndex + 1;
+                        childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
+
+                        // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
+                        if (start <= childEndPosition && childStartPosition <= end)
+                        {
+                            // Translate to relative child position by subtracting childStartPosition.
+                            foreach (var descendant in GetChild(childIndex).TerminalSymbolsInRange(start - childStartPosition, length))
+                            {
+                                yield return descendant;
+                            }
+                        }
+
+                        childIndex = nextChildIndex;
+                    }
                 }
             }
         }
