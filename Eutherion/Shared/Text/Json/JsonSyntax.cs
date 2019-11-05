@@ -84,12 +84,12 @@ namespace Eutherion.Text.Json
 
             // Naive implementation traversing the entire child nodes collection.
             // TODO: find the first child node within the range using binary search.
-            while (childIndex < ChildCount)
+            while (childIndex < ChildCount && childEndPosition < start + length)
             {
                 int childStartPosition = childEndPosition;
                 childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
 
-                if (start < childEndPosition && childStartPosition < start + length && childStartPosition < childEndPosition)
+                if (start < childEndPosition && childStartPosition < childEndPosition)
                 {
                     JsonSyntax childNode = GetChild(childIndex);
 
