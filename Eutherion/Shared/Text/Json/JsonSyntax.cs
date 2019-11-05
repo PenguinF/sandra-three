@@ -98,7 +98,7 @@ namespace Eutherion.Text.Json
                     int childStart = start - childStartPosition;
 
                     // Yield return if ranges [start..start+length] and [0..Length] intersect.
-                    if (0 < childNode.Length && childStart < childNode.Length && 0 < childStart + length)
+                    if (0 < childEndPosition - childStartPosition && childStart < childEndPosition - childStartPosition && 0 < childStart + length)
                     {
                         if (childNode.IsTerminalSymbol)
                         {
