@@ -91,17 +91,12 @@ namespace Eutherion.Text.Json
         /// </returns>
         public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
         {
-            if (0 < length && 0 < Length)
+            // Yield return if ranges [start..start+length] and [0..Length] intersect.
+            if (0 < length && 0 < Length && start < Length && 0 < start + length)
             {
-                int end = start + length;
-
                 if (IsTerminalSymbol)
                 {
-                    // Yield return if ranges start..end and 0..Length intersect.
-                    if (start < Length && 0 < end)
-                    {
-                        yield return this;
-                    }
+                    yield return this;
                 }
                 else
                 {
@@ -117,7 +112,7 @@ namespace Eutherion.Text.Json
                         childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
 
                         // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
-                        if (start <= childEndPosition && childStartPosition <= end)
+                        if (start <= childEndPosition && childStartPosition <= start + length)
                         {
                             // Translate to relative child position by subtracting childStartPosition.
                             foreach (var descendant in GetChild(childIndex).TerminalSymbolsInRange(start - childStartPosition, length))
