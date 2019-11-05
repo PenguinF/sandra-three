@@ -83,7 +83,7 @@ namespace Eutherion.Text.Json
         /// </summary>
         public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
         {
-            if (0 < Length)
+            if (0 < length && 0 < Length)
             {
                 int end = start + length;
 
