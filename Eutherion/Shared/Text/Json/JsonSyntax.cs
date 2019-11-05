@@ -78,47 +78,102 @@ namespace Eutherion.Text.Json
         public int GetChildStartOrEndPosition(int index) => index == ChildCount ? Length : GetChildStartPosition(index);
 
         /// <summary>
-        /// Enumerates all <see cref="JsonSyntax"/> descendants of this node that fall within the
-        /// given range and have no child nodes.
+        /// Returns the index of the <see cref="JsonSyntax"/> after the given position.
+        /// <seealso cref="TextIndex{TTerminal}.GetElementAfter(int)"/>.
         /// </summary>
-        public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
+        private int GetChildIndexAfter(int position)
         {
-            int end = start + length;
+            int minIndex = 0;
+            int maxIndex = ChildCount - 1;
 
-            if (IsTerminalSymbol)
+            while (minIndex <= maxIndex)
             {
-                // Yield return if ranges start..end and 0..Length intersect.
-                if (start < Length && 0 < end)
+                int childIndex = (minIndex + maxIndex) / 2;
+                int childStartPosition = GetChildStartPosition(childIndex);
+                int childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
+
+                if (position < childStartPosition)
                 {
-                    yield return this;
+                    // Exclude higher part.
+                    maxIndex = childIndex - 1;
+                }
+                else if (childEndPosition <= position)
+                {
+                    // Exclude lower part.
+                    minIndex = childIndex + 1;
+                }
+                else
+                {
+                    return childIndex;
                 }
             }
-            else
+
+            throw new IndexOutOfRangeException(nameof(position));
+        }
+
+        private IEnumerable<JsonSyntax> ChildTerminalSymbolsInRange(int start, int length)
+        {
+            // Find the first child node that intersects with the given range.
+            // Can safely call GetChildIndexAfter because of invariant: start < this.Length
+            int childIndex = GetChildIndexAfter(0 <= start ? start : 0);
+            int childEndPosition = GetChildStartPosition(childIndex);
+
+            while (childIndex < ChildCount && childEndPosition < start + length)
             {
-                int childIndex = 0;
-                int childEndPosition = GetChildStartPosition(0);
+                int childStartPosition = childEndPosition;
+                childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
 
-                // Naive implementation traversing the entire child nodes collection.
-                // TODO: find the first child node within the range using binary search.
-                while (childIndex < ChildCount)
+                // Skip empty child nodes.
+                if (childStartPosition < childEndPosition)
                 {
-                    int childStartPosition = childEndPosition;
-                    int nextChildIndex = childIndex + 1;
-                    childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
+                    JsonSyntax childNode = GetChild(childIndex);
 
-                    // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
-                    if (start <= childEndPosition && childStartPosition <= end)
+                    if (childNode.IsTerminalSymbol)
+                    {
+                        yield return childNode;
+                    }
+                    else
                     {
                         // Translate to relative child position by subtracting childStartPosition.
-                        foreach (var descendant in GetChild(childIndex).TerminalSymbolsInRange(start - childStartPosition, length))
+                        foreach (var descendant in childNode.ChildTerminalSymbolsInRange(start - childStartPosition, length))
                         {
                             yield return descendant;
                         }
                     }
+                }
 
-                    childIndex = nextChildIndex;
+                childIndex++;
+            }
+        }
+
+        /// <summary>
+        /// Enumerates all <see cref="JsonSyntax"/> descendants of this node that fall within the
+        /// given range, have no child nodes, and have a length greater than 0.
+        /// </summary>
+        /// <param name="start">
+        /// Start position of the range to search, relative to this syntax node.
+        /// </param>
+        /// <param name="length"></param>
+        /// Length of the range to search, relative to this syntax node.
+        /// <returns>
+        /// All descendants of this node that intersect with the given range, have no child nodes, and have a length greater than 0. 
+        /// </returns>
+        public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
+        {
+            // Yield return if ranges [start..start+length] and [0..Length] intersect.
+            if (0 < length && 0 < Length && start < Length && 0 < start + length)
+            {
+                if (IsTerminalSymbol)
+                {
+                    return new[] { this };
+                }
+                else
+                {
+                    return ChildTerminalSymbolsInRange(start, length);
                 }
             }
+
+            return Array.Empty<JsonSyntax>();
         }
 
         public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
