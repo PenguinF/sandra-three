@@ -79,8 +79,16 @@ namespace Eutherion.Text.Json
 
         /// <summary>
         /// Enumerates all <see cref="JsonSyntax"/> descendants of this node that fall within the
-        /// given range and have no child nodes.
+        /// given range, have no child nodes, and have a length greater than 0.
         /// </summary>
+        /// <param name="start">
+        /// Start position of the range to search, relative to this syntax node.
+        /// </param>
+        /// <param name="length"></param>
+        /// Length of the range to search, relative to this syntax node.
+        /// <returns>
+        /// All descendants of this node that intersect with the given range, have no child nodes, and have a length greater than 0. 
+        /// </returns>
         public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
         {
             if (0 < length && 0 < Length)
