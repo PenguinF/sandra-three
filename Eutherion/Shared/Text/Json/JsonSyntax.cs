@@ -113,11 +113,11 @@ namespace Eutherion.Text.Json
 
         private IEnumerable<JsonSyntax> ChildTerminalSymbolsInRange(int start, int length)
         {
-            int childIndex = 0;
-            int childEndPosition = GetChildStartPosition(0);
+            // Find the first child node that intersects with the given range.
+            // Can safely call GetChildIndexAfter because of invariant: start < this.Length
+            int childIndex = GetChildIndexAfter(0 <= start ? start : 0);
+            int childEndPosition = GetChildStartPosition(childIndex);
 
-            // Naive implementation traversing the entire child nodes collection.
-            // TODO: find the first child node within the range using binary search.
             while (childIndex < ChildCount && childEndPosition < start + length)
             {
                 int childStartPosition = childEndPosition;
