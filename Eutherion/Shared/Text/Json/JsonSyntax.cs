@@ -95,7 +95,7 @@ namespace Eutherion.Text.Json
                     JsonSyntax childNode = GetChild(childIndex);
 
                     // Yield return if ranges [start..start+length] and [0..Length] intersect.
-                    if (0 < childEndPosition - childStartPosition && start - childStartPosition < childEndPosition - childStartPosition && 0 < start - childStartPosition + length)
+                    if (childStartPosition < childEndPosition && start < childEndPosition && childStartPosition < start + length)
                     {
                         if (childNode.IsTerminalSymbol)
                         {
