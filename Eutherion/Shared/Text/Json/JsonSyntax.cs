@@ -97,7 +97,26 @@ namespace Eutherion.Text.Json
                     // Translate to relative child position by subtracting childStartPosition.
                     int childStart = start - childStartPosition;
 
-                    foreach (var descendant in childNode.TerminalSymbolsInRange(childStart, length))
+                    // Yield return if ranges [start..start+length] and [0..Length] intersect.
+                    if (0 < length && 0 < childNode.Length && childStart < childNode.Length && 0 < childStart + length)
+                    {
+                        if (childNode.IsTerminalSymbol)
+                        {
+                            foreach (var descendant in new[] { childNode })
+                            {
+                                yield return descendant;
+                            }
+                        }
+                        else
+                        {
+                            foreach (var descendant in childNode.ChildTerminalSymbolsInRange(childStart, length))
+                            {
+                                yield return descendant;
+                            }
+                        }
+                    }
+
+                    foreach (var descendant in Array.Empty<JsonSyntax>())
                     {
                         yield return descendant;
                     }
