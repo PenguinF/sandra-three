@@ -87,8 +87,7 @@ namespace Eutherion.Text.Json
             while (childIndex < ChildCount)
             {
                 int childStartPosition = childEndPosition;
-                int nextChildIndex = childIndex + 1;
-                childEndPosition = GetChildStartOrEndPosition(nextChildIndex);
+                childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
 
                 // Yield return if intervals [start..end] and [childStartPosition..childEndPosition] intersect.
                 if (start <= childEndPosition && childStartPosition <= start + length)
@@ -100,7 +99,7 @@ namespace Eutherion.Text.Json
                     }
                 }
 
-                childIndex = nextChildIndex;
+                childIndex++;
             }
         }
 
