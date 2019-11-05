@@ -123,7 +123,8 @@ namespace Eutherion.Text.Json
                 int childStartPosition = childEndPosition;
                 childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
 
-                if (start < childEndPosition && childStartPosition < childEndPosition)
+                // Skip empty child nodes.
+                if (childStartPosition < childEndPosition)
                 {
                     JsonSyntax childNode = GetChild(childIndex);
 
