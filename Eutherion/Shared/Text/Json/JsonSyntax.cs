@@ -102,10 +102,7 @@ namespace Eutherion.Text.Json
                     {
                         if (childNode.IsTerminalSymbol)
                         {
-                            foreach (var descendant in new[] { childNode })
-                            {
-                                yield return descendant;
-                            }
+                            yield return childNode;
                         }
                         else
                         {
@@ -114,11 +111,6 @@ namespace Eutherion.Text.Json
                                 yield return descendant;
                             }
                         }
-                    }
-
-                    foreach (var descendant in Array.Empty<JsonSyntax>())
-                    {
-                        yield return descendant;
                     }
                 }
 
