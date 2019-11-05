@@ -77,6 +77,40 @@ namespace Eutherion.Text.Json
         /// </summary>
         public int GetChildStartOrEndPosition(int index) => index == ChildCount ? Length : GetChildStartPosition(index);
 
+        /// <summary>
+        /// Returns the index of the <see cref="JsonSyntax"/> after the given position.
+        /// <seealso cref="TextIndex{TTerminal}.GetElementAfter(int)"/>.
+        /// </summary>
+        private int GetChildIndexAfter(int position)
+        {
+            int minIndex = 0;
+            int maxIndex = ChildCount - 1;
+
+            while (minIndex <= maxIndex)
+            {
+                int childIndex = (minIndex + maxIndex) / 2;
+                int childStartPosition = GetChildStartPosition(childIndex);
+                int childEndPosition = GetChildStartOrEndPosition(childIndex + 1);
+
+                if (position < childStartPosition)
+                {
+                    // Exclude higher part.
+                    maxIndex = childIndex - 1;
+                }
+                else if (childEndPosition <= position)
+                {
+                    // Exclude lower part.
+                    minIndex = childIndex + 1;
+                }
+                else
+                {
+                    return childIndex;
+                }
+            }
+
+            throw new IndexOutOfRangeException(nameof(position));
+        }
+
         private IEnumerable<JsonSyntax> ChildTerminalSymbolsInRange(int start, int length)
         {
             int childIndex = 0;
