@@ -78,8 +78,22 @@ namespace Eutherion.Win.AppTemplate
             => syntaxEditor.Styles[stringStyleIndex];
 
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
-            => node.Green.UndefinedToken is JsonErrorString
-            ? syntaxEditor.Styles[stringStyleIndex]
-            : syntaxEditor.Styles[undefinedValueStyleIndex];
+            => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
+
+        public class JsonUndefinedValueStyleSelector : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
+        {
+            public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
+
+            private JsonUndefinedValueStyleSelector() { }
+
+            public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+                => syntaxEditor.DefaultStyle;
+
+            public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+                => syntaxEditor.Styles[stringStyleIndex];
+
+            public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+                => syntaxEditor.Styles[undefinedValueStyleIndex];
+        }
     }
 }
