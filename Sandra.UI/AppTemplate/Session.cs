@@ -523,7 +523,7 @@ namespace Eutherion.Win.AppTemplate
         {
             // No exception handler for both WriteToFiles.
             DefaultSettings.WriteToFile(
-                DefaultSettings.Settings,
+                DefaultSettings.TemplateSettings,
                 SettingWriterOptions.Default);
 
             using (SettingsFile englishFileFromBuiltIn = SettingsFile.Create(
