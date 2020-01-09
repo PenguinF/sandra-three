@@ -32,6 +32,9 @@ namespace Eutherion.Win.DragDrop
         /// <summary>
         /// Resizes an image, overlays it with an existing <see cref="Cursor"/>, and creates a new <see cref="Cursor"/> from the result.
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="image"/> and/or <paramref name="overlayCursor"/> are null.
+        /// </exception>
         public static CursorFromHandle CreateDragCursorFromImage(Image image, Size imageSize, Cursor overlayCursor, Point hotSpot)
         {
             if (image == null) throw new ArgumentNullException(nameof(image));

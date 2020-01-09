@@ -85,6 +85,9 @@ namespace Eutherion.UIActions
         /// A complete <see cref="UIActionState"/> if <paramref name="perform"/> is false,
         /// or a <see cref="UIActionState"/> indicating whether or not the action was performed successfully, if <paramref name="perform"/> is true.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="action"/> is null.
+        /// </exception>
         public UIActionState TryPerformAction(UIAction action, bool perform)
         {
             if (action == null) throw new ArgumentNullException(nameof(action));

@@ -100,6 +100,9 @@ namespace Eutherion.Utils
         /// Adds a handler to the event. This is equivalent to the statement:
         /// <code>myEvent += <paramref name="handler"/>;</code>
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="handler"/> is null.
+        /// </exception>
         public void AddListener(Action<TSender, TEventArgs> handler) => AddListenerInner(handler);
 
         private void AddListenerInner(Delegate handler)
@@ -121,6 +124,9 @@ namespace Eutherion.Utils
         /// Removes a handler from the event. This is equivalent to the statement:
         /// <code>myEvent -= <param name="handler">handler</param>;</code>
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="handler"/> is null.
+        /// </exception>
         public void RemoveListener(Action<TSender, TEventArgs> handler) => RemoveListenerInner(handler);
 
         private void RemoveListenerInner(Delegate handler)
