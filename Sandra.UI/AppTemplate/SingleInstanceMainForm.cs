@@ -100,13 +100,16 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnHandleCreated(EventArgs e)
         {
-            try
+            if (!HasSession)
             {
-                session = RequestSession();
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message, "Fatal initialization error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                try
+                {
+                    session = RequestSession();
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(exception.Message, "Fatal initialization error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
 
             base.OnHandleCreated(e);
