@@ -301,10 +301,11 @@ namespace Sandra.UI
 
                     try
                     {
-                        newDragCursor = DragUtilities.CreateDragCursorFromImage(newImage,
-                                                                            imageRectangle.Size,
-                                                                            Cursors.Default,
-                                                                            new Point(hotSpotX, hotSpotY));
+                        newDragCursor = DragUtilities.CreateDragCursorFromImage(
+                            newImage,
+                            imageRectangle.Size,
+                            Cursors.Default,
+                            new Point(hotSpotX, hotSpotY));
                     }
                     catch (Exception exc)
                     {
