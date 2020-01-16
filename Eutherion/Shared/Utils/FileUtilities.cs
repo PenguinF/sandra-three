@@ -161,5 +161,52 @@ namespace Eutherion.Utils
                 }
             }
         }
+
+        /// <summary>
+        /// Opens a text file, reads all lines of the file, and then closes the file.
+        /// This is an alternative to <see cref="File.ReadAllText(string)"/>,
+        /// which throws an exception when the file has a write lock on it.
+        /// </summary>
+        /// <param name="path">
+        /// The file to open for reading.
+        /// </param>
+        /// <returns>
+        /// A string containing all lines of the file.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="path"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is empty, contains only whitespace, or contains invalid characters
+        /// (see also <seealso cref="Path.GetInvalidPathChars"/>), or is in an invalid format,
+        /// or is a relative path and its absolute path could not be resolved.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        /// The file specified in <paramref name="path"/> does not exist.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// Part of the path which is expected to be a directory is actually a file,
+        /// -or- The path contains a network name which cannot be resolved,
+        /// -or- <paramref name="path"/> is longer than its maximum length (this is OS specific).
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// The caller does not have sufficient permissions to read the file,
+        /// -or- <paramref name="path"/> is a directory.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The caller does not have sufficient permissions to read the file.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path"/> is in an invalid format.
+        /// </exception>
+        public static string ReadAllText(string path)
+        {
+            // FileShare.ReadWrite is where this is different from File.ReadAllText.
+            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, DefaultFileStreamBufferSize, FileOptions.SequentialScan))
+            using (var streamReader = new StreamReader(fileStream))
+            {
+                return streamReader.ReadToEnd();
+            }
+        }
     }
 }

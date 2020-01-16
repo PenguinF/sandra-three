@@ -157,7 +157,7 @@ namespace Eutherion.Win
         {
             try
             {
-                loadedText = File.ReadAllText(AbsoluteFilePath);
+                loadedText = FileUtilities.ReadAllText(AbsoluteFilePath);
             }
             catch (Exception exception)
             {

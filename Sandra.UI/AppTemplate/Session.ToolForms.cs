@@ -227,7 +227,7 @@ namespace Eutherion.Win.AppTemplate
             string text;
             try
             {
-                text = File.ReadAllText(fileName);
+                text = FileUtilities.ReadAllText(fileName);
             }
             catch (Exception exception)
             {
