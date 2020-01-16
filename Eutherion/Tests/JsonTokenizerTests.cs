@@ -226,7 +226,7 @@ namespace Eutherion.Shared.Tests
 
         private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
         {
-            yield return ("//\n", typeof(JsonComment));
+            yield return ("//", typeof(JsonComment));
             yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
             yield return ("\"", typeof(JsonErrorString));
         }
@@ -253,64 +253,53 @@ namespace Eutherion.Shared.Tests
             }
         }
 
-        private static int ExpectedSymbolLength(string singleJsonSymbol)
-        {
-            // Exception for end-of-line comment "//\n".
-            int expectedLength = singleJsonSymbol.Length;
-            if (singleJsonSymbol[singleJsonSymbol.Length - 1] == '\n') expectedLength--;
-            return expectedLength;
-        }
-
         [Theory]
         [MemberData(nameof(TwoSymbolsOfEachType))]
         public void Transition(string json1, Type type1, string json2, Type type2)
         {
-            // Test all eight combinations of whitespace before/in between/after both strings.
-            for (int i = 0; i < 8; i++)
             {
-                string ws1 = (i & 1) != 0 ? " " : "";
-                string ws2 = (i & 2) != 0 ? " " : "";
-                string ws3 = (i & 4) != 0 ? " " : "";
-
-                int expectedSymbol1Start = (i & 1) != 0 ? 1 : 0;
-                int expectedSymbol2Start = expectedSymbol1Start + json1.Length + ((i & 2) != 0 ? 1 : 0);
-
-                int expectedSymbol1Length = ExpectedSymbolLength(json1);
-                int expectedSymbol2Length = ExpectedSymbolLength(json2);
-
-                var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
+                var json = $"{json1}{json2}";
 
                 // Two JsonValues are glued together if there's no whitespace in between,
                 // so assert that this is indeed what happens.
-                if ((i & 2) == 0 && IsGreedyTokenType(type1) && IsGreedyTokenType(type2))
+                if (type1 == type2 && IsGreedyTokenType(type1))
                 {
                     Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1);
-                        Assert.Equal(expectedSymbol2Start + expectedSymbol2Length - expectedSymbol1Start, symbol1.Length);
+                        Assert.Equal(json1.Length + json2.Length, symbol1.Length);
                     });
                 }
                 else
                 {
-                    if ((i & 4) != 0 && (json2 == "\"" || json2 == "/*"))
-                    {
-                        // If symbol2 is an unterminated string/comment, its length should include the whitespace after it.
-                        expectedSymbol2Length++;
-                    }
-
                     Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
                     {
                         Assert.NotNull(symbol1);
                         Assert.IsType(type1, symbol1);
-                        Assert.Equal(expectedSymbol1Length, symbol1.Length);
+                        Assert.Equal(json1.Length, symbol1.Length);
                     }, symbol2 =>
                     {
                         Assert.NotNull(symbol2);
                         Assert.IsType(type2, symbol2);
-                        Assert.Equal(expectedSymbol2Length, symbol2.Length);
+                        Assert.Equal(json2.Length, symbol2.Length);
                     });
                 }
+            }
+
+            {
+                var json = $"{json1} {json2}";
+                Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
+                {
+                    Assert.NotNull(symbol1);
+                    Assert.IsType(type1, symbol1);
+                    Assert.Equal(json1.Length, symbol1.Length);
+                }, symbol2 =>
+                {
+                    Assert.NotNull(symbol2);
+                    Assert.IsType(type2, symbol2);
+                    Assert.Equal(json2.Length, symbol2.Length);
+                });
             }
         }
 
@@ -318,9 +307,6 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(OneSymbolOfEachType))]
         public void SingleLineCommentTransition(string json, Type type)
         {
-            // Temp:
-            if (json == "//\n") json = "//";
-
             Assert.Collection(JsonTokenizer.TokenizeAll($"//\n{json}"), symbol1 =>
             {
                 Assert.NotNull(symbol1);
@@ -335,7 +321,7 @@ namespace Eutherion.Shared.Tests
             {
                 Assert.NotNull(symbol3);
                 Assert.IsType(type, symbol3);
-                Assert.Equal(ExpectedSymbolLength(json), symbol3.Length);
+                Assert.Equal(json.Length, symbol3.Length);
             });
         }
 
