@@ -204,7 +204,6 @@ namespace Eutherion.Shared.Tests
             yield return ("/**/", typeof(JsonComment));
             yield return ("/***/", typeof(JsonComment));
             yield return ("/*/*/", typeof(JsonComment));
-            yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
             yield return ("{", typeof(JsonCurlyOpen));
             yield return ("}", typeof(JsonCurlyClose));
             yield return ("[", typeof(JsonSquareBracketOpen));
@@ -216,24 +215,26 @@ namespace Eutherion.Shared.Tests
             yield return ("true", typeof(JsonValue));
             yield return ("\"\"", typeof(JsonString));
             yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
-            yield return ("\"", typeof(JsonErrorString));
             yield return ("\"\n\\ \n\"", typeof(JsonErrorString));
             yield return ("\"\\u0\"", typeof(JsonErrorString));
+        }
+
+        private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
+        {
+            yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
+            yield return ("\"", typeof(JsonErrorString));
         }
 
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
             var symbolTypes = JsonTestSymbols();
 
+            // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
             foreach (var (key1, type1) in symbolTypes)
             {
-                // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
-                if (key1 != "\"" && key1 != "/*")
+                foreach (var (key2, type2) in symbolTypes.Union(UnterminatedJsonTestSymbols()))
                 {
-                    foreach (var (key2, type2) in symbolTypes)
-                    {
-                        yield return new object[] { key1, type1, key2, type2 };
-                    }
+                    yield return new object[] { key1, type1, key2, type2 };
                 }
             }
         }
