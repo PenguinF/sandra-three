@@ -40,6 +40,26 @@ namespace Eutherion.Shared.Tests
             Assert.Collection(JsonTokenizer.TokenizeAll(json), tokenInspectors);
         }
 
+        private static Action<JsonSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
+        {
+            return symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType(expectedTokenType, symbol);
+                Assert.Equal(expectedLength, symbol.Length);
+            };
+        }
+
+        private static Action<JsonSymbol> ExpectToken<TExpected>(int expectedLength)
+        {
+            return symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<TExpected>(symbol);
+                Assert.Equal(expectedLength, symbol.Length);
+            };
+        }
+
         [Fact]
         public void NullJsonThrows()
         {
@@ -123,12 +143,7 @@ namespace Eutherion.Shared.Tests
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
-            AssertTokens(json, symbol =>
-            {
-                Assert.NotNull(symbol);
-                Assert.IsType(tokenType, symbol);
-                Assert.Equal(json.Length, symbol.Length);
-            });
+            AssertTokens(json, ExpectToken(tokenType, json.Length));
         }
 
         [Theory]
@@ -267,26 +282,14 @@ namespace Eutherion.Shared.Tests
             // so assert that this is indeed what happens.
             if (type1 == type2 && IsGreedyTokenType(type1))
             {
-                AssertTokens(json, symbol1 =>
-                {
-                    Assert.NotNull(symbol1);
-                    Assert.IsType(type1, symbol1);
-                    Assert.Equal(json1.Length + json2.Length, symbol1.Length);
-                });
+                AssertTokens(json, ExpectToken(type1, json1.Length + json2.Length));
             }
             else
             {
-                AssertTokens(json, symbol1 =>
-                {
-                    Assert.NotNull(symbol1);
-                    Assert.IsType(type1, symbol1);
-                    Assert.Equal(json1.Length, symbol1.Length);
-                }, symbol2 =>
-                {
-                    Assert.NotNull(symbol2);
-                    Assert.IsType(type2, symbol2);
-                    Assert.Equal(json2.Length, symbol2.Length);
-                });
+                AssertTokens(
+                    json,
+                    ExpectToken(type1, json1.Length),
+                    ExpectToken(type2, json2.Length));
             }
         }
 
@@ -297,36 +300,18 @@ namespace Eutherion.Shared.Tests
             if (type == typeof(JsonWhitespace))
             {
                 // Test this separately because the '\n' is included in the second symbol.
-                AssertTokens($"//\n{json}", symbol1 =>
-                {
-                    Assert.NotNull(symbol1);
-                    Assert.IsType<JsonComment>(symbol1);
-                    Assert.Equal(2, symbol1.Length);
-                }, symbol2 =>
-                {
-                    Assert.NotNull(symbol2);
-                    Assert.IsType<JsonWhitespace>(symbol2);
-                    Assert.Equal(1 + json.Length, symbol2.Length);
-                });
+                AssertTokens(
+                    $"//\n{json}",
+                    ExpectToken<JsonComment>(2),
+                    ExpectToken<JsonWhitespace>(1 + json.Length));
             }
             else
             {
-                AssertTokens($"//\n{json}", symbol1 =>
-                {
-                    Assert.NotNull(symbol1);
-                    Assert.IsType<JsonComment>(symbol1);
-                    Assert.Equal(2, symbol1.Length);
-                }, symbol2 =>
-                {
-                    Assert.NotNull(symbol2);
-                    Assert.IsType<JsonWhitespace>(symbol2);
-                    Assert.Equal(1, symbol2.Length);
-                }, symbol3 =>
-                {
-                    Assert.NotNull(symbol3);
-                    Assert.IsType(type, symbol3);
-                    Assert.Equal(json.Length, symbol3.Length);
-                });
+                AssertTokens(
+                    $"//\n{json}",
+                    ExpectToken<JsonComment>(2),
+                    ExpectToken<JsonWhitespace>(1),
+                    ExpectToken(type, json.Length));
             }
         }
 
