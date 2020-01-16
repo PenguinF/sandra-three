@@ -35,6 +35,11 @@ namespace Eutherion.Shared.Tests
                 || tokenType == typeof(JsonWhitespace);
         }
 
+        private static void AssertTokens(string json, params Action<JsonSymbol>[] tokenInspectors)
+        {
+            Assert.Collection(JsonTokenizer.TokenizeAll(json), tokenInspectors);
+        }
+
         [Fact]
         public void NullJsonThrows()
         {
@@ -66,15 +71,13 @@ namespace Eutherion.Shared.Tests
 
             if (alternativeCommentText == null)
             {
-                Assert.Collection(
-                    JsonTokenizer.TokenizeAll(json),
-                    firstTokenAssert);
+                AssertTokens(json, firstTokenAssert);
             }
             else
             {
                 // Expect some whitespace at the end.
-                Assert.Collection(
-                    JsonTokenizer.TokenizeAll(json),
+                AssertTokens(
+                    json,
                     firstTokenAssert,
                     symbol => Assert.IsType<JsonWhitespace>(symbol));
             }
@@ -83,7 +86,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void EmptyStringNoTokens()
         {
-            Assert.False(JsonTokenizer.TokenizeAll("").Any());
+            AssertTokens("");
         }
 
         [Theory]
@@ -98,7 +101,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            Assert.Collection(JsonTokenizer.TokenizeAll(ws), x => Assert.IsType<JsonWhitespace>(x));
+            AssertTokens(ws, x => Assert.IsType<JsonWhitespace>(x));
         }
 
         [Theory]
@@ -120,7 +123,7 @@ namespace Eutherion.Shared.Tests
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
+            AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
                 Assert.IsType(tokenType, symbol);
@@ -164,7 +167,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("ڳالھ")]
         public void ValueSymbol(string json)
         {
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
+            AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
                 var valueSymbol = Assert.IsType<JsonValue>(symbol);
@@ -195,7 +198,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\"\\u00200\"", " 0")] // last 0 is not part of the \u escape sequence
         public void StringValue(string json, string expectedValue)
         {
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
+            AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
                 var stringSymbol = Assert.IsType<JsonString>(symbol);
@@ -264,7 +267,7 @@ namespace Eutherion.Shared.Tests
             // so assert that this is indeed what happens.
             if (type1 == type2 && IsGreedyTokenType(type1))
             {
-                Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol1 =>
+                AssertTokens(json, symbol1 =>
                 {
                     Assert.NotNull(symbol1);
                     Assert.IsType(type1, symbol1);
@@ -273,7 +276,7 @@ namespace Eutherion.Shared.Tests
             }
             else
             {
-                Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol1 =>
+                AssertTokens(json, symbol1 =>
                 {
                     Assert.NotNull(symbol1);
                     Assert.IsType(type1, symbol1);
@@ -294,7 +297,7 @@ namespace Eutherion.Shared.Tests
             if (type == typeof(JsonWhitespace))
             {
                 // Test this separately because the '\n' is included in the second symbol.
-                Assert.Collection(JsonTokenizer.TokenizeAll($"//\n{json}"), symbol1 =>
+                AssertTokens($"//\n{json}", symbol1 =>
                 {
                     Assert.NotNull(symbol1);
                     Assert.IsType<JsonComment>(symbol1);
@@ -308,7 +311,7 @@ namespace Eutherion.Shared.Tests
             }
             else
             {
-                Assert.Collection(JsonTokenizer.TokenizeAll($"//\n{json}"), symbol1 =>
+                AssertTokens($"//\n{json}", symbol1 =>
                 {
                     Assert.NotNull(symbol1);
                     Assert.IsType<JsonComment>(symbol1);
