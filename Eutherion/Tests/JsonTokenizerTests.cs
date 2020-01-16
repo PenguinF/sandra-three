@@ -206,7 +206,6 @@ namespace Eutherion.Shared.Tests
 
         private static IEnumerable<(string, Type)> JsonTestSymbols()
         {
-            yield return ("//\n", typeof(JsonComment));
             yield return ("/**/", typeof(JsonComment));
             yield return ("/***/", typeof(JsonComment));
             yield return ("/*/*/", typeof(JsonComment));
@@ -227,8 +226,17 @@ namespace Eutherion.Shared.Tests
 
         private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
         {
+            yield return ("//\n", typeof(JsonComment));
             yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
             yield return ("\"", typeof(JsonErrorString));
+        }
+
+        public static IEnumerable<object[]> OneSymbolOfEachType()
+        {
+            foreach (var (key, type) in JsonTestSymbols().Union(UnterminatedJsonTestSymbols()))
+            {
+                yield return new object[] { key, type };
+            }
         }
 
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
@@ -304,6 +312,31 @@ namespace Eutherion.Shared.Tests
                     });
                 }
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(OneSymbolOfEachType))]
+        public void SingleLineCommentTransition(string json, Type type)
+        {
+            // Temp:
+            if (json == "//\n") json = "//";
+
+            Assert.Collection(JsonTokenizer.TokenizeAll($"//\n{json}"), symbol1 =>
+            {
+                Assert.NotNull(symbol1);
+                Assert.IsType<JsonComment>(symbol1);
+                Assert.Equal(2, symbol1.Length);
+            }, symbol2 =>
+            {
+                Assert.NotNull(symbol2);
+                Assert.IsType<JsonWhitespace>(symbol2);
+                Assert.Equal(1, symbol2.Length);
+            }, symbol3 =>
+            {
+                Assert.NotNull(symbol3);
+                Assert.IsType(type, symbol3);
+                Assert.Equal(ExpectedSymbolLength(json), symbol3.Length);
+            });
         }
 
         public static IEnumerable<object[]> GetErrorStrings()
