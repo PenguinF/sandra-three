@@ -29,7 +29,7 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonTokenizerTests
     {
-        private static bool IsGreedyTokenType(Type tokenType)
+        private static bool IsAgglutinativeTokenType(Type tokenType)
         {
             return tokenType == typeof(JsonValue)
                 || tokenType == typeof(JsonWhitespace);
@@ -276,21 +276,65 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(TwoSymbolsOfEachType))]
         public void Transition(string json1, Type type1, string json2, Type type2)
         {
-            var json = $"{json1}{json2}";
-
-            // Two JsonValues are glued together if there's no whitespace in between,
-            // so assert that this is indeed what happens.
-            if (type1 == type2 && IsGreedyTokenType(type1))
+            // Instead of having a gazillion separate tests over 3 tokens,
+            // first test the combination of 2 tokens, and then if that succeeds
+            // test every other token that could precede it in a loop.
+            if (type1 == type2 && IsAgglutinativeTokenType(type1))
             {
-                AssertTokens(json, ExpectToken(type1, json1.Length + json2.Length));
+                AssertTokens(
+                    json1 + json2,
+                    ExpectToken(type1, json1.Length + json2.Length));
             }
             else
             {
                 AssertTokens(
-                    json,
+                    json1 + json2,
                     ExpectToken(type1, json1.Length),
                     ExpectToken(type2, json2.Length));
             }
+
+            // Here Assert.Collection is used so if such a test fails,
+            // it gives the index of the third token that was tested.
+            Assert.Collection<(string, Type)>(
+                JsonTestSymbols(),
+                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
+                {
+                    // Put the third symbol in front, because the last symbol may eat it.
+                    string json0 = x0.Item1;
+                    Type type0 = x0.Item2;
+
+                    if (type0 == type1 && IsAgglutinativeTokenType(type1))
+                    {
+                        if (type0 == type2)
+                        {
+                            AssertTokens(
+                                json0 + json1 + json2,
+                                ExpectToken(type0, json0.Length + json1.Length + json2.Length));
+                        }
+                        else
+                        {
+                            AssertTokens(
+                                json0 + json1 + json2,
+                                ExpectToken(type0, json0.Length + json1.Length),
+                                ExpectToken(type2, json2.Length));
+                        }
+                    }
+                    else if (type1 == type2 && IsAgglutinativeTokenType(type1))
+                    {
+                        AssertTokens(
+                            json0 + json1 + json2,
+                            ExpectToken(type0, json0.Length),
+                            ExpectToken(type1, json1.Length + json2.Length));
+                    }
+                    else
+                    {
+                        AssertTokens(
+                            json0 + json1 + json2,
+                            ExpectToken(type0, json0.Length),
+                            ExpectToken(type1, json1.Length),
+                            ExpectToken(type2, json2.Length));
+                    }
+                }, JsonTestSymbols().Count()).ToArray());
         }
 
         [Theory]
