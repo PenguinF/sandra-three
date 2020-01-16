@@ -29,6 +29,12 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonTokenizerTests
     {
+        private static bool IsGreedyTokenType(Type tokenType)
+        {
+            return tokenType == typeof(JsonValue)
+                || tokenType == typeof(JsonWhitespace);
+        }
+
         [Fact]
         public void NullJsonThrows()
         {
@@ -268,7 +274,7 @@ namespace Eutherion.Shared.Tests
 
                 // Two JsonValues are glued together if there's no whitespace in between,
                 // so assert that this is indeed what happens.
-                if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
+                if ((i & 2) == 0 && IsGreedyTokenType(type1) && IsGreedyTokenType(type2))
                 {
                     Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
                     {
