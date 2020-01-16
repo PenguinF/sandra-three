@@ -198,41 +198,40 @@ namespace Eutherion.Shared.Tests
             });
         }
 
+        private static IEnumerable<(string, Type)> JsonTestSymbols()
+        {
+            yield return ("//\n", typeof(JsonComment));
+            yield return ("/**/", typeof(JsonComment));
+            yield return ("/***/", typeof(JsonComment));
+            yield return ("/*/*/", typeof(JsonComment));
+            yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
+            yield return ("{", typeof(JsonCurlyOpen));
+            yield return ("}", typeof(JsonCurlyClose));
+            yield return ("[", typeof(JsonSquareBracketOpen));
+            yield return ("]", typeof(JsonSquareBracketClose));
+            yield return (":", typeof(JsonColon));
+            yield return (",", typeof(JsonComma));
+            yield return ("*", typeof(JsonUnknownSymbol));
+            yield return ("_", typeof(JsonValue));
+            yield return ("true", typeof(JsonValue));
+            yield return ("\"\"", typeof(JsonString));
+            yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
+            yield return ("\"", typeof(JsonErrorString));
+            yield return ("\"\n\\ \n\"", typeof(JsonErrorString));
+            yield return ("\"\\u0\"", typeof(JsonErrorString));
+        }
+
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
-            var symbolTypes = new Dictionary<string, Type>
-            {
-                { "//\n", typeof(JsonComment) },
-                { "/**/", typeof(JsonComment) },
-                { "/***/", typeof(JsonComment) },
-                { "/*/*/", typeof(JsonComment) },
-                { "/*", typeof(JsonUnterminatedMultiLineComment) },
-                { "{", typeof(JsonCurlyOpen) },
-                { "}", typeof(JsonCurlyClose) },
-                { "[", typeof(JsonSquareBracketOpen) },
-                { "]", typeof(JsonSquareBracketClose) },
-                { ":", typeof(JsonColon) },
-                { ",", typeof(JsonComma) },
-                { "*", typeof(JsonUnknownSymbol) },
-                { "_", typeof(JsonValue) },
-                { "true", typeof(JsonValue) },
-                { "\"\"", typeof(JsonString) },
-                { "\" \"", typeof(JsonString) },  // Have to check if the space isn't interpreted as whitespace.
-                { "\"", typeof(JsonErrorString) },
-                { "\"\n\\ \n\"", typeof(JsonErrorString) },
-                { "\"\\u0\"", typeof(JsonErrorString) },
-            };
+            var symbolTypes = JsonTestSymbols();
 
-            var keys = symbolTypes.Keys;
-            foreach (var key1 in keys)
+            foreach (var (key1, type1) in symbolTypes)
             {
                 // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
                 if (key1 != "\"" && key1 != "/*")
                 {
-                    foreach (var key2 in keys)
+                    foreach (var (key2, type2) in symbolTypes)
                     {
-                        Type type1 = symbolTypes[key1];
-                        Type type2 = symbolTypes[key2];
                         yield return new object[] { key1, type1, key2, type2 };
                     }
                 }
