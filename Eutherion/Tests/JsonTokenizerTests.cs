@@ -121,7 +121,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            AssertTokens(ws, x => Assert.IsType<JsonWhitespace>(x));
+            AssertTokens(ws, ExpectToken<JsonWhitespace>(ws.Length));
         }
 
         [Theory]
@@ -187,7 +187,6 @@ namespace Eutherion.Shared.Tests
                 Assert.NotNull(symbol);
                 var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, json.Substring(0, symbol.Length));
                 Assert.Equal(json, valueSymbol.Value);
             });
         }
@@ -295,7 +294,7 @@ namespace Eutherion.Shared.Tests
 
             // Here Assert.Collection is used so if such a test fails,
             // it gives the index of the third token that was tested.
-            Assert.Collection<(string, Type)>(
+            Assert.Collection(
                 JsonTestSymbols(),
                 Enumerable.Repeat<Action<(string, Type)>>(x0 =>
                 {
