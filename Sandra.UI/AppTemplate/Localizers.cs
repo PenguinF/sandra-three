@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Localization;
-using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using System;
 using System.Collections.Generic;
