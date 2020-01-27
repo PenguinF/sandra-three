@@ -39,7 +39,7 @@ namespace Eutherion.Text.Json
         /// with this symbol at a given start position.
         /// </summary>
         /// <param name="startPosition">
-        /// The start position for which to generate the error.
+        /// The start position for which to generate the errors.
         /// </param>
         /// <returns>
         /// A sequence of errors associated with this symbol.
