@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using Eutherion.Text.Json;
 using System;
 using System.Collections.Generic;
@@ -44,12 +43,6 @@ namespace Eutherion.Shared.Tests
         }
 
         [Fact]
-        public void NullSymbolShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new TextElement<JsonSymbol>(null, 0, 0));
-        }
-
-        [Fact]
         public void OutOfRangeArguments()
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonComment(-1));
@@ -59,22 +52,6 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(0));
-
-            Assert.Throws<ArgumentOutOfRangeException>("start", () => new TextElement<JsonSymbol>(new JsonString(string.Empty, 2), -1, 2));
-        }
-
-        [Theory]
-        [InlineData(0, 0)]
-        [InlineData(0, 1)]
-        [InlineData(1, 0)]
-        [InlineData(0, 2)]
-        public void UnchangedParameters(int start, int length)
-        {
-            var testSymbol = new JsonTestSymbol(length);
-            var textElement = new TextElement<JsonSymbol>(testSymbol, start, length);
-            Assert.Equal(start, textElement.Start);
-            Assert.Equal(length, textElement.Length);
-            Assert.Same(testSymbol, textElement.TerminalSymbol);
         }
 
         [Fact]
