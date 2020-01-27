@@ -462,7 +462,7 @@ namespace Eutherion.Shared.Tests
 
             foreach (var token in JsonTokenizer.TokenizeAll(json))
             {
-                if (token.HasErrors) generatedErrors.AddRange(token.GetErrors(length));
+                generatedErrors.AddRange(token.GetErrors(length));
                 length += token.Length;
             }
 
