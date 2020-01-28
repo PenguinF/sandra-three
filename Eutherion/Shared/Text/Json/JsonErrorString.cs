@@ -58,7 +58,7 @@ namespace Eutherion.Text.Json
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
             => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
 
-        public ReadOnlyList<JsonErrorInfo> Errors { get; }
+        internal ReadOnlyList<JsonErrorInfo> Errors { get; }
 
         public override int Length { get; }
 
