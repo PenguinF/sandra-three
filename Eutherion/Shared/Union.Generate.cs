@@ -115,6 +115,8 @@ namespace Eutherion
 
             public {SubClassName(option)}({TypeParameter(option)} value) => Value = value;
 
+            public override bool {IsOptionMethodName(option)}() => true;
+
             public override bool {IsOptionMethodName(option)}(out {TypeParameter(option)} value)
             {{
                 value = Value;
@@ -159,6 +161,17 @@ namespace Eutherion
 ";
 
         private static Func<int, string> IsOptionMethod(int optionCount)
+            => option => $@"
+        /// <summary>
+        /// Checks if this <see cref=""{ClassName}{{{TypeParameters(optionCount)}}}""/> contains a value of the {Ordinal(option)} type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref=""{ClassName}{{{TypeParameters(optionCount)}}}""/> contains a value of the {Ordinal(option)} type; otherwise false.
+        /// </returns>
+        public virtual bool {IsOptionMethodName(option)}() => false;
+";
+
+        private static Func<int, string> IsOptionMethodWithParameter(int optionCount)
             => option => $@"
         /// <summary>
         /// Checks if this <see cref=""{ClassName}{{{TypeParameters(optionCount)}}}""/> contains a value of the {Ordinal(option)} type.
@@ -248,6 +261,7 @@ namespace Eutherion
                 ConcatList(optionCount, PublicConstructor(optionCount)),
                 ConcatList(optionCount, ImplicitCastOperator(optionCount)),
                 ConcatList(optionCount, IsOptionMethod(optionCount)),
+                ConcatList(optionCount, IsOptionMethodWithParameter(optionCount)),
                 ConcatList(optionCount, ToOptionMethod(optionCount)),
                 MatchMethodActionOverloadSummary(),
                 ConcatList(optionCount, MatchMethodActionOverloadSummaryParameters),

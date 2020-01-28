@@ -40,6 +40,8 @@ namespace Eutherion
 
             public ValueOfType1(T1 value) => Value = value;
 
+            public override bool IsOption1() => true;
+
             public override bool IsOption1(out T1 value)
             {
                 value = Value;
@@ -71,6 +73,8 @@ namespace Eutherion
             public readonly T2 Value;
 
             public ValueOfType2(T2 value) => Value = value;
+
+            public override bool IsOption2() => true;
 
             public override bool IsOption2(out T2 value)
             {
@@ -113,6 +117,22 @@ namespace Eutherion
         public static implicit operator Union<T1, T2>(T1 value) => new ValueOfType1(value);
 
         public static implicit operator Union<T1, T2>(T2 value) => new ValueOfType2(value);
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2() => false;
 
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2}"/> contains a value of the first type.
@@ -229,6 +249,8 @@ namespace Eutherion
 
             public ValueOfType1(T1 value) => Value = value;
 
+            public override bool IsOption1() => true;
+
             public override bool IsOption1(out T1 value)
             {
                 value = Value;
@@ -263,6 +285,8 @@ namespace Eutherion
 
             public ValueOfType2(T2 value) => Value = value;
 
+            public override bool IsOption2() => true;
+
             public override bool IsOption2(out T2 value)
             {
                 value = Value;
@@ -296,6 +320,8 @@ namespace Eutherion
             public readonly T3 Value;
 
             public ValueOfType3(T3 value) => Value = value;
+
+            public override bool IsOption3() => true;
 
             public override bool IsOption3(out T3 value)
             {
@@ -347,6 +373,30 @@ namespace Eutherion
         public static implicit operator Union<T1, T2, T3>(T2 value) => new ValueOfType2(value);
 
         public static implicit operator Union<T1, T2, T3>(T3 value) => new ValueOfType3(value);
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the third type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3}"/> contains a value of the third type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption3() => false;
 
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2, T3}"/> contains a value of the first type.
@@ -500,6 +550,8 @@ namespace Eutherion
 
             public ValueOfType1(T1 value) => Value = value;
 
+            public override bool IsOption1() => true;
+
             public override bool IsOption1(out T1 value)
             {
                 value = Value;
@@ -535,6 +587,8 @@ namespace Eutherion
             public readonly T2 Value;
 
             public ValueOfType2(T2 value) => Value = value;
+
+            public override bool IsOption2() => true;
 
             public override bool IsOption2(out T2 value)
             {
@@ -572,6 +626,8 @@ namespace Eutherion
 
             public ValueOfType3(T3 value) => Value = value;
 
+            public override bool IsOption3() => true;
+
             public override bool IsOption3(out T3 value)
             {
                 value = Value;
@@ -607,6 +663,8 @@ namespace Eutherion
             public readonly T4 Value;
 
             public ValueOfType4(T4 value) => Value = value;
+
+            public override bool IsOption4() => true;
 
             public override bool IsOption4(out T4 value)
             {
@@ -667,6 +725,38 @@ namespace Eutherion
         public static implicit operator Union<T1, T2, T3, T4>(T3 value) => new ValueOfType3(value);
 
         public static implicit operator Union<T1, T2, T3, T4>(T4 value) => new ValueOfType4(value);
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption1() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the second type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption2() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the third type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the third type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption3() => false;
+
+        /// <summary>
+        /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the fourth type.
+        /// </summary>
+        /// <returns>
+        /// True if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the fourth type; otherwise false.
+        /// </returns>
+        public virtual bool IsOption4() => false;
 
         /// <summary>
         /// Checks if this <see cref="Union{T1, T2, T3, T4}"/> contains a value of the first type.
