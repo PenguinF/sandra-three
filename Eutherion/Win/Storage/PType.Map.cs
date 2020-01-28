@@ -103,7 +103,7 @@ namespace Eutherion.Win.Storage
                     }
                     else
                     {
-                        itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
+                        ITypeErrorBuilder typeError = itemValueOrError.ToOption1();
                         errors.Add(ValueTypeErrorAtPropertyKey.Create(
                             typeError,
                             keyNode,
