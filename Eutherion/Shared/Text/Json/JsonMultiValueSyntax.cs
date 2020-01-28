@@ -188,7 +188,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the absolute start position of this syntax node.
         /// </summary>
-        public override int AbsoluteStart => Parent.IsOption1(out _) ? 0 : base.AbsoluteStart;
+        public override int AbsoluteStart => Parent.IsOption1() ? 0 : base.AbsoluteStart;
 
         /// <summary>
         /// Gets the number of children of this syntax node.

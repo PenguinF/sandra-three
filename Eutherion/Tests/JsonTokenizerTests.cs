@@ -29,6 +29,37 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonTokenizerTests
     {
+        private static bool IsAgglutinativeTokenType(Type tokenType)
+        {
+            return tokenType == typeof(JsonValue)
+                || tokenType == typeof(JsonWhitespace);
+        }
+
+        private static void AssertTokens(string json, params Action<JsonSymbol>[] tokenInspectors)
+        {
+            Assert.Collection(JsonTokenizer.TokenizeAll(json), tokenInspectors);
+        }
+
+        private static Action<JsonSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
+        {
+            return symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType(expectedTokenType, symbol);
+                Assert.Equal(expectedLength, symbol.Length);
+            };
+        }
+
+        private static Action<JsonSymbol> ExpectToken<TExpected>(int expectedLength)
+        {
+            return symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType<TExpected>(symbol);
+                Assert.Equal(expectedLength, symbol.Length);
+            };
+        }
+
         [Fact]
         public void NullJsonThrows()
         {
@@ -60,15 +91,13 @@ namespace Eutherion.Shared.Tests
 
             if (alternativeCommentText == null)
             {
-                Assert.Collection(
-                    JsonTokenizer.TokenizeAll(json),
-                    firstTokenAssert);
+                AssertTokens(json, firstTokenAssert);
             }
             else
             {
                 // Expect some whitespace at the end.
-                Assert.Collection(
-                    JsonTokenizer.TokenizeAll(json),
+                AssertTokens(
+                    json,
                     firstTokenAssert,
                     symbol => Assert.IsType<JsonWhitespace>(symbol));
             }
@@ -77,7 +106,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void EmptyStringNoTokens()
         {
-            Assert.False(JsonTokenizer.TokenizeAll("").Any());
+            AssertTokens("");
         }
 
         [Theory]
@@ -92,7 +121,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            Assert.Collection(JsonTokenizer.TokenizeAll(ws), x => Assert.IsType<JsonWhitespace>(x));
+            AssertTokens(ws, ExpectToken<JsonWhitespace>(ws.Length));
         }
 
         [Theory]
@@ -114,12 +143,7 @@ namespace Eutherion.Shared.Tests
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
-            {
-                Assert.NotNull(symbol);
-                Assert.IsType(tokenType, symbol);
-                Assert.Equal(json.Length, symbol.Length);
-            });
+            AssertTokens(json, ExpectToken(tokenType, json.Length));
         }
 
         [Theory]
@@ -158,12 +182,11 @@ namespace Eutherion.Shared.Tests
         [InlineData("ڳالھ")]
         public void ValueSymbol(string json)
         {
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
+            AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
                 var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, json.Substring(0, symbol.Length));
                 Assert.Equal(json, valueSymbol.Value);
             });
         }
@@ -189,7 +212,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\"\\u00200\"", " 0")] // last 0 is not part of the \u escape sequence
         public void StringValue(string json, string expectedValue)
         {
-            Assert.Collection(JsonTokenizer.TokenizeAll(json), symbol =>
+            AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
                 var stringSymbol = Assert.IsType<JsonString>(symbol);
@@ -198,105 +221,140 @@ namespace Eutherion.Shared.Tests
             });
         }
 
-        public static IEnumerable<object[]> TwoSymbolsOfEachType()
+        private static IEnumerable<(string, Type)> JsonTestSymbols()
         {
-            var symbolTypes = new Dictionary<string, Type>
-            {
-                { "//\n", typeof(JsonComment) },
-                { "/**/", typeof(JsonComment) },
-                { "/***/", typeof(JsonComment) },
-                { "/*/*/", typeof(JsonComment) },
-                { "/*", typeof(JsonUnterminatedMultiLineComment) },
-                { "{", typeof(JsonCurlyOpen) },
-                { "}", typeof(JsonCurlyClose) },
-                { "[", typeof(JsonSquareBracketOpen) },
-                { "]", typeof(JsonSquareBracketClose) },
-                { ":", typeof(JsonColon) },
-                { ",", typeof(JsonComma) },
-                { "*", typeof(JsonUnknownSymbol) },
-                { "_", typeof(JsonValue) },
-                { "true", typeof(JsonValue) },
-                { "\"\"", typeof(JsonString) },
-                { "\" \"", typeof(JsonString) },  // Have to check if the space isn't interpreted as whitespace.
-                { "\"", typeof(JsonErrorString) },
-                { "\"\n\\ \n\"", typeof(JsonErrorString) },
-                { "\"\\u0\"", typeof(JsonErrorString) },
-            };
+            yield return (" ", typeof(JsonWhitespace));
+            yield return ("/**/", typeof(JsonComment));
+            yield return ("/***/", typeof(JsonComment));
+            yield return ("/*/*/", typeof(JsonComment));
+            yield return ("{", typeof(JsonCurlyOpen));
+            yield return ("}", typeof(JsonCurlyClose));
+            yield return ("[", typeof(JsonSquareBracketOpen));
+            yield return ("]", typeof(JsonSquareBracketClose));
+            yield return (":", typeof(JsonColon));
+            yield return (",", typeof(JsonComma));
+            yield return ("*", typeof(JsonUnknownSymbol));
+            yield return ("_", typeof(JsonValue));
+            yield return ("true", typeof(JsonValue));
+            yield return ("\"\"", typeof(JsonString));
+            yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
+            yield return ("\"\n\\ \n\"", typeof(JsonErrorString));
+            yield return ("\"\\u0\"", typeof(JsonErrorString));
+        }
 
-            var keys = symbolTypes.Keys;
-            foreach (var key1 in keys)
+        private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
+        {
+            yield return ("//", typeof(JsonComment));
+            yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
+            yield return ("\"", typeof(JsonErrorString));
+        }
+
+        public static IEnumerable<object[]> OneSymbolOfEachType()
+        {
+            foreach (var (key, type) in JsonTestSymbols().Union(UnterminatedJsonTestSymbols()))
             {
-                // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
-                if (key1 != "\"" && key1 != "/*")
-                {
-                    foreach (var key2 in keys)
-                    {
-                        Type type1 = symbolTypes[key1];
-                        Type type2 = symbolTypes[key2];
-                        yield return new object[] { key1, type1, key2, type2 };
-                    }
-                }
+                yield return new object[] { key, type };
             }
         }
 
-        private static int ExpectedSymbolLength(string singleJsonSymbol)
+        public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
-            // Exception for end-of-line comment "//\n".
-            int expectedLength = singleJsonSymbol.Length;
-            if (singleJsonSymbol[singleJsonSymbol.Length - 1] == '\n') expectedLength--;
-            return expectedLength;
+            var symbolTypes = JsonTestSymbols();
+
+            // Unterminated strings/comments mess up the tokenization, skip those if they're the first key.
+            foreach (var (key1, type1) in symbolTypes)
+            {
+                foreach (var (key2, type2) in symbolTypes.Union(UnterminatedJsonTestSymbols()))
+                {
+                    yield return new object[] { key1, type1, key2, type2 };
+                }
+            }
         }
 
         [Theory]
         [MemberData(nameof(TwoSymbolsOfEachType))]
         public void Transition(string json1, Type type1, string json2, Type type2)
         {
-            // Test all eight combinations of whitespace before/in between/after both strings.
-            for (int i = 0; i < 8; i++)
+            // Instead of having a gazillion separate tests over 3 tokens,
+            // first test the combination of 2 tokens, and then if that succeeds
+            // test every other token that could precede it in a loop.
+            if (type1 == type2 && IsAgglutinativeTokenType(type1))
             {
-                string ws1 = (i & 1) != 0 ? " " : "";
-                string ws2 = (i & 2) != 0 ? " " : "";
-                string ws3 = (i & 4) != 0 ? " " : "";
+                AssertTokens(
+                    json1 + json2,
+                    ExpectToken(type1, json1.Length + json2.Length));
+            }
+            else
+            {
+                AssertTokens(
+                    json1 + json2,
+                    ExpectToken(type1, json1.Length),
+                    ExpectToken(type2, json2.Length));
+            }
 
-                int expectedSymbol1Start = (i & 1) != 0 ? 1 : 0;
-                int expectedSymbol2Start = expectedSymbol1Start + json1.Length + ((i & 2) != 0 ? 1 : 0);
-
-                int expectedSymbol1Length = ExpectedSymbolLength(json1);
-                int expectedSymbol2Length = ExpectedSymbolLength(json2);
-
-                var json = $"{ws1}{json1}{ws2}{json2}{ws3}";
-
-                // Two JsonValues are glued together if there's no whitespace in between,
-                // so assert that this is indeed what happens.
-                if ((i & 2) == 0 && type1 == typeof(JsonValue) && type2 == typeof(JsonValue))
+            // Here Assert.Collection is used so if such a test fails,
+            // it gives the index of the third token that was tested.
+            Assert.Collection(
+                JsonTestSymbols(),
+                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
                 {
-                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
+                    // Put the third symbol in front, because the last symbol may eat it.
+                    string json0 = x0.Item1;
+                    Type type0 = x0.Item2;
+
+                    if (type0 == type1 && IsAgglutinativeTokenType(type1))
                     {
-                        Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1);
-                        Assert.Equal(expectedSymbol2Start + expectedSymbol2Length - expectedSymbol1Start, symbol1.Length);
-                    });
-                }
-                else
-                {
-                    if ((i & 4) != 0 && (json2 == "\"" || json2 == "/*"))
-                    {
-                        // If symbol2 is an unterminated string/comment, its length should include the whitespace after it.
-                        expectedSymbol2Length++;
+                        if (type0 == type2)
+                        {
+                            AssertTokens(
+                                json0 + json1 + json2,
+                                ExpectToken(type0, json0.Length + json1.Length + json2.Length));
+                        }
+                        else
+                        {
+                            AssertTokens(
+                                json0 + json1 + json2,
+                                ExpectToken(type0, json0.Length + json1.Length),
+                                ExpectToken(type2, json2.Length));
+                        }
                     }
+                    else if (type1 == type2 && IsAgglutinativeTokenType(type1))
+                    {
+                        AssertTokens(
+                            json0 + json1 + json2,
+                            ExpectToken(type0, json0.Length),
+                            ExpectToken(type1, json1.Length + json2.Length));
+                    }
+                    else
+                    {
+                        AssertTokens(
+                            json0 + json1 + json2,
+                            ExpectToken(type0, json0.Length),
+                            ExpectToken(type1, json1.Length),
+                            ExpectToken(type2, json2.Length));
+                    }
+                }, JsonTestSymbols().Count()).ToArray());
+        }
 
-                    Assert.Collection(JsonTokenizer.TokenizeAll(json).Where(x => !(x is JsonWhitespace)), symbol1 =>
-                    {
-                        Assert.NotNull(symbol1);
-                        Assert.IsType(type1, symbol1);
-                        Assert.Equal(expectedSymbol1Length, symbol1.Length);
-                    }, symbol2 =>
-                    {
-                        Assert.NotNull(symbol2);
-                        Assert.IsType(type2, symbol2);
-                        Assert.Equal(expectedSymbol2Length, symbol2.Length);
-                    });
-                }
+        [Theory]
+        [MemberData(nameof(OneSymbolOfEachType))]
+        public void SingleLineCommentTransition(string json, Type type)
+        {
+            if (type == typeof(JsonWhitespace))
+            {
+                // Test this separately because the '\n' is included in the second symbol.
+                AssertTokens(
+                    $"//\n{json}",
+                    ExpectToken<JsonComment>(2),
+                    ExpectToken<JsonWhitespace>(1 + json.Length));
+            }
+            else
+            {
+                AssertTokens(
+                    $"//\n{json}",
+                    ExpectToken<JsonComment>(2),
+                    ExpectToken<JsonWhitespace>(1),
+                    ExpectToken(type, json.Length));
             }
         }
 
@@ -404,7 +462,7 @@ namespace Eutherion.Shared.Tests
 
             foreach (var token in JsonTokenizer.TokenizeAll(json))
             {
-                if (token.HasErrors) generatedErrors.AddRange(token.GetErrors(length));
+                generatedErrors.AddRange(token.GetErrors(length));
                 length += token.Length;
             }
 

@@ -21,7 +21,7 @@
 
 using System;
 
-namespace Eutherion.Utils
+namespace Eutherion
 {
     /// <summary>
     /// Represents an optional value.

@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text.Json;
-using Eutherion.Utils;
 using System.Collections.Generic;
 
 namespace Eutherion.Win.Storage
@@ -104,7 +103,7 @@ namespace Eutherion.Win.Storage
                     }
                     else
                     {
-                        itemValueOrError.IsOption1(out ITypeErrorBuilder typeError);
+                        ITypeErrorBuilder typeError = itemValueOrError.ToOption1();
                         errors.Add(ValueTypeErrorAtPropertyKey.Create(
                             typeError,
                             keyNode,

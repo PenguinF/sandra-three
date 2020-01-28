@@ -21,7 +21,7 @@
 
 using System;
 
-namespace Eutherion.Utils
+namespace Eutherion
 {
     /// <summary>
     /// Represents the thread-safe lazy evaluation of a parameterless function.

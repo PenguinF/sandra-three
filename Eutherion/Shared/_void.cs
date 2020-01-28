@@ -19,7 +19,7 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Utils
+namespace Eutherion
 {
     /// <summary>
     /// Represents the empty/void type, which means that its values contain no information.
