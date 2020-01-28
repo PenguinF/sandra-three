@@ -34,6 +34,66 @@ namespace Eutherion
     /// </typeparam>
     public abstract class Union<T1, T2>
     {
+        private sealed class ValueOfType1 : Union<T1, T2>
+        {
+            public readonly T1 Value;
+
+            public ValueOfType1(T1 value) => Value = value;
+
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action otherwise = null)
+            {
+                if (whenOption1 != null) whenOption1(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<TResult> otherwise = null)
+                => whenOption1 != null ? whenOption1(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType2 : Union<T1, T2>
+        {
+            public readonly T2 Value;
+
+            public ValueOfType2(T2 value) => Value = value;
+
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action otherwise = null)
+            {
+                if (whenOption2 != null) whenOption2(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<TResult> otherwise = null)
+                => whenOption2 != null ? whenOption2(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
         private Union() { }
 
         /// <summary>
@@ -121,66 +181,6 @@ namespace Eutherion
             Func<T1, TResult> whenOption1 = null,
             Func<T2, TResult> whenOption2 = null,
             Func<TResult> otherwise = null);
-
-        private sealed class ValueOfType1 : Union<T1, T2>
-        {
-            public readonly T1 Value;
-
-            public ValueOfType1(T1 value) => Value = value;
-
-            public override bool IsOption1(out T1 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action otherwise = null)
-            {
-                if (whenOption1 != null) whenOption1(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<TResult> otherwise = null)
-                => whenOption1 != null ? whenOption1(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType2 : Union<T1, T2>
-        {
-            public readonly T2 Value;
-
-            public ValueOfType2(T2 value) => Value = value;
-
-            public override bool IsOption2(out T2 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action otherwise = null)
-            {
-                if (whenOption2 != null) whenOption2(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<TResult> otherwise = null)
-                => whenOption2 != null ? whenOption2(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
     }
 
     /// <summary>
@@ -197,6 +197,102 @@ namespace Eutherion
     /// </typeparam>
     public abstract class Union<T1, T2, T3>
     {
+        private sealed class ValueOfType1 : Union<T1, T2, T3>
+        {
+            public readonly T1 Value;
+
+            public ValueOfType1(T1 value) => Value = value;
+
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action otherwise = null)
+            {
+                if (whenOption1 != null) whenOption1(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<TResult> otherwise = null)
+                => whenOption1 != null ? whenOption1(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType2 : Union<T1, T2, T3>
+        {
+            public readonly T2 Value;
+
+            public ValueOfType2(T2 value) => Value = value;
+
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action otherwise = null)
+            {
+                if (whenOption2 != null) whenOption2(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<TResult> otherwise = null)
+                => whenOption2 != null ? whenOption2(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType3 : Union<T1, T2, T3>
+        {
+            public readonly T3 Value;
+
+            public ValueOfType3(T3 value) => Value = value;
+
+            public override bool IsOption3(out T3 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action otherwise = null)
+            {
+                if (whenOption3 != null) whenOption3(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<TResult> otherwise = null)
+                => whenOption3 != null ? whenOption3(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
         private Union() { }
 
         /// <summary>
@@ -314,102 +410,6 @@ namespace Eutherion
             Func<T2, TResult> whenOption2 = null,
             Func<T3, TResult> whenOption3 = null,
             Func<TResult> otherwise = null);
-
-        private sealed class ValueOfType1 : Union<T1, T2, T3>
-        {
-            public readonly T1 Value;
-
-            public ValueOfType1(T1 value) => Value = value;
-
-            public override bool IsOption1(out T1 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action otherwise = null)
-            {
-                if (whenOption1 != null) whenOption1(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<TResult> otherwise = null)
-                => whenOption1 != null ? whenOption1(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType2 : Union<T1, T2, T3>
-        {
-            public readonly T2 Value;
-
-            public ValueOfType2(T2 value) => Value = value;
-
-            public override bool IsOption2(out T2 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action otherwise = null)
-            {
-                if (whenOption2 != null) whenOption2(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<TResult> otherwise = null)
-                => whenOption2 != null ? whenOption2(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType3 : Union<T1, T2, T3>
-        {
-            public readonly T3 Value;
-
-            public ValueOfType3(T3 value) => Value = value;
-
-            public override bool IsOption3(out T3 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action otherwise = null)
-            {
-                if (whenOption3 != null) whenOption3(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<TResult> otherwise = null)
-                => whenOption3 != null ? whenOption3(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
     }
 
     /// <summary>
@@ -429,6 +429,142 @@ namespace Eutherion
     /// </typeparam>
     public abstract class Union<T1, T2, T3, T4>
     {
+        private sealed class ValueOfType1 : Union<T1, T2, T3, T4>
+        {
+            public readonly T1 Value;
+
+            public ValueOfType1(T1 value) => Value = value;
+
+            public override bool IsOption1(out T1 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action<T4> whenOption4 = null,
+                Action otherwise = null)
+            {
+                if (whenOption1 != null) whenOption1(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<T4, TResult> whenOption4 = null,
+                Func<TResult> otherwise = null)
+                => whenOption1 != null ? whenOption1(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType2 : Union<T1, T2, T3, T4>
+        {
+            public readonly T2 Value;
+
+            public ValueOfType2(T2 value) => Value = value;
+
+            public override bool IsOption2(out T2 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action<T4> whenOption4 = null,
+                Action otherwise = null)
+            {
+                if (whenOption2 != null) whenOption2(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<T4, TResult> whenOption4 = null,
+                Func<TResult> otherwise = null)
+                => whenOption2 != null ? whenOption2(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType3 : Union<T1, T2, T3, T4>
+        {
+            public readonly T3 Value;
+
+            public ValueOfType3(T3 value) => Value = value;
+
+            public override bool IsOption3(out T3 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action<T4> whenOption4 = null,
+                Action otherwise = null)
+            {
+                if (whenOption3 != null) whenOption3(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<T4, TResult> whenOption4 = null,
+                Func<TResult> otherwise = null)
+                => whenOption3 != null ? whenOption3(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
+        private sealed class ValueOfType4 : Union<T1, T2, T3, T4>
+        {
+            public readonly T4 Value;
+
+            public ValueOfType4(T4 value) => Value = value;
+
+            public override bool IsOption4(out T4 value)
+            {
+                value = Value;
+                return true;
+            }
+
+            public override void Match(
+                Action<T1> whenOption1 = null,
+                Action<T2> whenOption2 = null,
+                Action<T3> whenOption3 = null,
+                Action<T4> whenOption4 = null,
+                Action otherwise = null)
+            {
+                if (whenOption4 != null) whenOption4(Value);
+                else otherwise?.Invoke();
+            }
+
+            public override TResult Match<TResult>(
+                Func<T1, TResult> whenOption1 = null,
+                Func<T2, TResult> whenOption2 = null,
+                Func<T3, TResult> whenOption3 = null,
+                Func<T4, TResult> whenOption4 = null,
+                Func<TResult> otherwise = null)
+                => whenOption4 != null ? whenOption4(Value)
+                : otherwise != null ? otherwise()
+                : default;
+        }
+
         private Union() { }
 
         /// <summary>
@@ -576,141 +712,5 @@ namespace Eutherion
             Func<T3, TResult> whenOption3 = null,
             Func<T4, TResult> whenOption4 = null,
             Func<TResult> otherwise = null);
-
-        private sealed class ValueOfType1 : Union<T1, T2, T3, T4>
-        {
-            public readonly T1 Value;
-
-            public ValueOfType1(T1 value) => Value = value;
-
-            public override bool IsOption1(out T1 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action<T4> whenOption4 = null,
-                Action otherwise = null)
-            {
-                if (whenOption1 != null) whenOption1(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<T4, TResult> whenOption4 = null,
-                Func<TResult> otherwise = null)
-                => whenOption1 != null ? whenOption1(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType2 : Union<T1, T2, T3, T4>
-        {
-            public readonly T2 Value;
-
-            public ValueOfType2(T2 value) => Value = value;
-
-            public override bool IsOption2(out T2 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action<T4> whenOption4 = null,
-                Action otherwise = null)
-            {
-                if (whenOption2 != null) whenOption2(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<T4, TResult> whenOption4 = null,
-                Func<TResult> otherwise = null)
-                => whenOption2 != null ? whenOption2(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType3 : Union<T1, T2, T3, T4>
-        {
-            public readonly T3 Value;
-
-            public ValueOfType3(T3 value) => Value = value;
-
-            public override bool IsOption3(out T3 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action<T4> whenOption4 = null,
-                Action otherwise = null)
-            {
-                if (whenOption3 != null) whenOption3(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<T4, TResult> whenOption4 = null,
-                Func<TResult> otherwise = null)
-                => whenOption3 != null ? whenOption3(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
-
-        private sealed class ValueOfType4 : Union<T1, T2, T3, T4>
-        {
-            public readonly T4 Value;
-
-            public ValueOfType4(T4 value) => Value = value;
-
-            public override bool IsOption4(out T4 value)
-            {
-                value = Value;
-                return true;
-            }
-
-            public override void Match(
-                Action<T1> whenOption1 = null,
-                Action<T2> whenOption2 = null,
-                Action<T3> whenOption3 = null,
-                Action<T4> whenOption4 = null,
-                Action otherwise = null)
-            {
-                if (whenOption4 != null) whenOption4(Value);
-                else otherwise?.Invoke();
-            }
-
-            public override TResult Match<TResult>(
-                Func<T1, TResult> whenOption1 = null,
-                Func<T2, TResult> whenOption2 = null,
-                Func<T3, TResult> whenOption3 = null,
-                Func<T4, TResult> whenOption4 = null,
-                Func<TResult> otherwise = null)
-                => whenOption4 != null ? whenOption4(Value)
-                : otherwise != null ? otherwise()
-                : default;
-        }
     }
 }

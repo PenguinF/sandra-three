@@ -81,6 +81,12 @@ namespace Eutherion
         private static string WhenOptionParamRef(int option)
             => $@"<paramref name=""{WhenOptionParamName(option)}""/>";
 
+        private static string MatchMethodActionOverloadParameter(int option)
+            => $"Action<{TypeParameter(option)}> {WhenOptionParamName(option)} = null,";
+
+        private static string MatchMethodFuncOverloadParameter(int option)
+            => $"Func<{TypeParameter(option)}, TResult> {WhenOptionParamName(option)} = null,";
+
         private static string ClassSummary(int optionCount)
             => $@"
     /// <summary>
@@ -177,9 +183,6 @@ namespace Eutherion
         /// The <see cref=""Action{{{TypeParameter(option)}}}""/> to invoke when the value is of the {Ordinal(option)} type.
         /// </param>";
 
-        private static string MatchMethodActionOverloadParameter(int option)
-            => $"Action<{TypeParameter(option)}> {WhenOptionParamName(option)} = null,";
-
         private static string MatchMethodActionOverload(int optionCount)
             => $@"
         /// <param name=""otherwise"">
@@ -206,9 +209,6 @@ namespace Eutherion
         /// The <see cref=""Func{{{TypeParameter(option)}, TResult}}""/> to invoke when the value is of the {Ordinal(option)} type.
         /// </param>";
 
-        private static string MatchMethodFuncOverloadParameter(int option)
-            => $"Func<{TypeParameter(option)}, TResult> {WhenOptionParamName(option)} = null,";
-
         private static string MatchMethodFuncOverload(int optionCount)
             => $@"
         /// <param name=""otherwise"">
@@ -225,6 +225,7 @@ namespace Eutherion
 
         private static string ClassBody(int optionCount)
             => string.Concat(
+                ConcatList(optionCount, SubClass(optionCount)),
                 PrivateConstructor(),
                 ConcatList(optionCount, PublicConstructor(optionCount)),
                 ConcatList(optionCount, ImplicitCastOperator(optionCount)),
@@ -234,8 +235,7 @@ namespace Eutherion
                 MatchMethodActionOverload(optionCount),
                 MatchMethodFuncOverloadSummary(),
                 ConcatList(optionCount, MatchMethodFuncOverloadSummaryParameters),
-                MatchMethodFuncOverload(optionCount),
-                ConcatList(optionCount, SubClass(optionCount)));
+                MatchMethodFuncOverload(optionCount));
 
         private static string ClassFooter()
             => $@"    }}
