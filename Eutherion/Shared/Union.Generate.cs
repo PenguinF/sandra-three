@@ -75,6 +75,9 @@ namespace Eutherion
         private static string IsOptionMethodName(int option)
             => $"IsOption{option}";
 
+        private static string ToOptionMethodName(int option)
+            => $"ToOption{option}";
+
         private static string WhenOptionParamName(int option)
             => $"whenOption{option}";
 
@@ -117,6 +120,8 @@ namespace Eutherion
                 value = Value;
                 return true;
             }}
+
+            public override {TypeParameter(option)} {ToOptionMethodName(option)}() => Value;
 
             public override void Match({ConcatList(optionCount, paramOption => $@"
                 {MatchMethodActionOverloadParameter(paramOption)}")}
@@ -171,6 +176,19 @@ namespace Eutherion
         }}
 ";
 
+        private static Func<int, string> ToOptionMethod(int optionCount)
+            => option => $@"
+        /// <summary>
+        /// Casts this <see cref=""{ClassName}{{{TypeParameters(optionCount)}}}""/> to a value of the {Ordinal(option)} type.
+        /// </summary>
+        /// <returns>
+        /// The value of the {Ordinal(option)} type.
+        /// </returns>
+        /// <exception cref=""InvalidCastException"">
+        /// Occurs when this <see cref=""{ClassName}{{{TypeParameters(optionCount)}}}""/> does not contain a value of the {Ordinal(option)} type.
+        /// </exception>
+        public virtual {TypeParameter(option)} {ToOptionMethodName(option)}() => throw new InvalidCastException();
+";
         private static string MatchMethodActionOverloadSummary()
             => $@"
         /// <summary>
@@ -230,6 +248,7 @@ namespace Eutherion
                 ConcatList(optionCount, PublicConstructor(optionCount)),
                 ConcatList(optionCount, ImplicitCastOperator(optionCount)),
                 ConcatList(optionCount, IsOptionMethod(optionCount)),
+                ConcatList(optionCount, ToOptionMethod(optionCount)),
                 MatchMethodActionOverloadSummary(),
                 ConcatList(optionCount, MatchMethodActionOverloadSummaryParameters),
                 MatchMethodActionOverload(optionCount),

@@ -46,6 +46,8 @@ namespace Eutherion
                 return true;
             }
 
+            public override T1 ToOption1() => Value;
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -75,6 +77,8 @@ namespace Eutherion
                 value = Value;
                 return true;
             }
+
+            public override T2 ToOption2() => Value;
 
             public override void Match(
                 Action<T1> whenOption1 = null,
@@ -139,6 +143,28 @@ namespace Eutherion
             value = default;
             return false;
         }
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2}"/> to a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// The value of the first type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2}"/> does not contain a value of the first type.
+        /// </exception>
+        public virtual T1 ToOption1() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2}"/> to a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// The value of the second type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2}"/> does not contain a value of the second type.
+        /// </exception>
+        public virtual T2 ToOption2() => throw new InvalidCastException();
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
@@ -209,6 +235,8 @@ namespace Eutherion
                 return true;
             }
 
+            public override T1 ToOption1() => Value;
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -241,6 +269,8 @@ namespace Eutherion
                 return true;
             }
 
+            public override T2 ToOption2() => Value;
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -272,6 +302,8 @@ namespace Eutherion
                 value = Value;
                 return true;
             }
+
+            public override T3 ToOption3() => Value;
 
             public override void Match(
                 Action<T1> whenOption1 = null,
@@ -362,6 +394,39 @@ namespace Eutherion
         }
 
         /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3}"/> to a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// The value of the first type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3}"/> does not contain a value of the first type.
+        /// </exception>
+        public virtual T1 ToOption1() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3}"/> to a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// The value of the second type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3}"/> does not contain a value of the second type.
+        /// </exception>
+        public virtual T2 ToOption2() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3}"/> to a value of the third type.
+        /// </summary>
+        /// <returns>
+        /// The value of the third type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3}"/> does not contain a value of the third type.
+        /// </exception>
+        public virtual T3 ToOption3() => throw new InvalidCastException();
+
+        /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
         /// </summary>
         /// <param name="whenOption1">
@@ -441,6 +506,8 @@ namespace Eutherion
                 return true;
             }
 
+            public override T1 ToOption1() => Value;
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -474,6 +541,8 @@ namespace Eutherion
                 value = Value;
                 return true;
             }
+
+            public override T2 ToOption2() => Value;
 
             public override void Match(
                 Action<T1> whenOption1 = null,
@@ -509,6 +578,8 @@ namespace Eutherion
                 return true;
             }
 
+            public override T3 ToOption3() => Value;
+
             public override void Match(
                 Action<T1> whenOption1 = null,
                 Action<T2> whenOption2 = null,
@@ -542,6 +613,8 @@ namespace Eutherion
                 value = Value;
                 return true;
             }
+
+            public override T4 ToOption4() => Value;
 
             public override void Match(
                 Action<T1> whenOption1 = null,
@@ -654,6 +727,50 @@ namespace Eutherion
             value = default;
             return false;
         }
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3, T4}"/> to a value of the first type.
+        /// </summary>
+        /// <returns>
+        /// The value of the first type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3, T4}"/> does not contain a value of the first type.
+        /// </exception>
+        public virtual T1 ToOption1() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3, T4}"/> to a value of the second type.
+        /// </summary>
+        /// <returns>
+        /// The value of the second type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3, T4}"/> does not contain a value of the second type.
+        /// </exception>
+        public virtual T2 ToOption2() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3, T4}"/> to a value of the third type.
+        /// </summary>
+        /// <returns>
+        /// The value of the third type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3, T4}"/> does not contain a value of the third type.
+        /// </exception>
+        public virtual T3 ToOption3() => throw new InvalidCastException();
+
+        /// <summary>
+        /// Casts this <see cref="Union{T1, T2, T3, T4}"/> to a value of the fourth type.
+        /// </summary>
+        /// <returns>
+        /// The value of the fourth type.
+        /// </returns>
+        /// <exception cref="InvalidCastException">
+        /// Occurs when this <see cref="Union{T1, T2, T3, T4}"/> does not contain a value of the fourth type.
+        /// </exception>
+        public virtual T4 ToOption4() => throw new InvalidCastException();
 
         /// <summary>
         /// Invokes an <see cref="Action{T}"/> based on the type of the value.
