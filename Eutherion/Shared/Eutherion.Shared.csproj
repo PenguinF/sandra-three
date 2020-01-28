@@ -101,6 +101,7 @@
     <Compile Include="UIActions\UIActionHandler.cs" />
     <Compile Include="UIActions\UIActionHandlerFunc.cs" />
     <Compile Include="Union.cs" />
+    <Compile Include="Union.Generate.cs" />
     <Compile Include="UtilityExtensions.cs" />
     <Compile Include="Utils\CircularBuffer.cs" />
     <Compile Include="Utils\EnumHelper.cs" />

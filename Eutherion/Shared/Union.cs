@@ -91,7 +91,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Action"/> to invoke if no action is specified for the type of the value.
-        /// If both <paramref name="whenOption1"/> and <paramref name="whenOption2"/> are given, this parameter is not used.
+        /// If <paramref name="whenOption1"/> and <paramref name="whenOption2"/> are given, this parameter is not used.
         /// </param>
         public abstract void Match(
             Action<T1> whenOption1 = null,
@@ -112,7 +112,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Func{TResult}"/> to invoke if no action is specified for the type of the value.
-        /// If both <paramref name="whenOption1"/> and <paramref name="whenOption2"/> are given, this parameter is not used.
+        /// If <paramref name="whenOption1"/> and <paramref name="whenOption2"/> are given, this parameter is not used.
         /// </param>
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
@@ -126,10 +126,7 @@ namespace Eutherion
         {
             public readonly T1 Value;
 
-            public ValueOfType1(T1 value)
-            {
-                Value = value;
-            }
+            public ValueOfType1(T1 value) => Value = value;
 
             public override bool IsOption1(out T1 value)
             {
@@ -159,10 +156,7 @@ namespace Eutherion
         {
             public readonly T2 Value;
 
-            public ValueOfType2(T2 value)
-            {
-                Value = value;
-            }
+            public ValueOfType2(T2 value) => Value = value;
 
             public override bool IsOption2(out T2 value)
             {
@@ -285,8 +279,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Action"/> to invoke if no action is specified for the type of the value.
-        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, and <paramref name="whenOption3"/> are given,
-        /// this parameter is not used.
+        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/> and <paramref name="whenOption3"/> are given, this parameter is not used.
         /// </param>
         public abstract void Match(
             Action<T1> whenOption1 = null,
@@ -311,8 +304,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Func{TResult}"/> to invoke if no action is specified for the type of the value.
-        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, and <paramref name="whenOption3"/> are given,
-        /// this parameter is not used.
+        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/> and <paramref name="whenOption3"/> are given, this parameter is not used.
         /// </param>
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
@@ -327,10 +319,7 @@ namespace Eutherion
         {
             public readonly T1 Value;
 
-            public ValueOfType1(T1 value)
-            {
-                Value = value;
-            }
+            public ValueOfType1(T1 value) => Value = value;
 
             public override bool IsOption1(out T1 value)
             {
@@ -362,10 +351,7 @@ namespace Eutherion
         {
             public readonly T2 Value;
 
-            public ValueOfType2(T2 value)
-            {
-                Value = value;
-            }
+            public ValueOfType2(T2 value) => Value = value;
 
             public override bool IsOption2(out T2 value)
             {
@@ -397,10 +383,7 @@ namespace Eutherion
         {
             public readonly T3 Value;
 
-            public ValueOfType3(T3 value)
-            {
-                Value = value;
-            }
+            public ValueOfType3(T3 value) => Value = value;
 
             public override bool IsOption3(out T3 value)
             {
@@ -553,8 +536,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Action"/> to invoke if no action is specified for the type of the value.
-        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, <paramref name="whenOption3"/>,
-        /// and <paramref name="whenOption4"/> are given, this parameter is not used.
+        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, <paramref name="whenOption3"/> and <paramref name="whenOption4"/> are given, this parameter is not used.
         /// </param>
         public abstract void Match(
             Action<T1> whenOption1 = null,
@@ -583,8 +565,7 @@ namespace Eutherion
         /// </param>
         /// <param name="otherwise">
         /// The <see cref="Func{TResult}"/> to invoke if no action is specified for the type of the value.
-        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, <paramref name="whenOption3"/>,
-        /// and <paramref name="whenOption4"/> are given, this parameter is not used.
+        /// If <paramref name="whenOption1"/>, <paramref name="whenOption2"/>, <paramref name="whenOption3"/> and <paramref name="whenOption4"/> are given, this parameter is not used.
         /// </param>
         /// <returns>
         /// The result of the invoked <see cref="Func{T, TResult}"/>.
@@ -600,10 +581,7 @@ namespace Eutherion
         {
             public readonly T1 Value;
 
-            public ValueOfType1(T1 value)
-            {
-                Value = value;
-            }
+            public ValueOfType1(T1 value) => Value = value;
 
             public override bool IsOption1(out T1 value)
             {
@@ -637,10 +615,7 @@ namespace Eutherion
         {
             public readonly T2 Value;
 
-            public ValueOfType2(T2 value)
-            {
-                Value = value;
-            }
+            public ValueOfType2(T2 value) => Value = value;
 
             public override bool IsOption2(out T2 value)
             {
@@ -674,10 +649,7 @@ namespace Eutherion
         {
             public readonly T3 Value;
 
-            public ValueOfType3(T3 value)
-            {
-                Value = value;
-            }
+            public ValueOfType3(T3 value) => Value = value;
 
             public override bool IsOption3(out T3 value)
             {
@@ -711,10 +683,7 @@ namespace Eutherion
         {
             public readonly T4 Value;
 
-            public ValueOfType4(T4 value)
-            {
-                Value = value;
-            }
+            public ValueOfType4(T4 value) => Value = value;
 
             public override bool IsOption4(out T4 value)
             {
