@@ -52,7 +52,7 @@ namespace Sandra.UI
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor, IPgnSymbol terminalSymbol)
-            => syntaxEditor.DefaultStyle;
+            => PgnStyleSelector<RootPgnSyntax, PgnErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IPgnSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
