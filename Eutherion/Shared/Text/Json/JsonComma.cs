@@ -21,7 +21,7 @@
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonComma : JsonSymbol
+    public sealed class JsonComma : JsonForegroundSymbol
     {
         public const char CommaCharacter = ',';
         public const int CommaLength = 1;

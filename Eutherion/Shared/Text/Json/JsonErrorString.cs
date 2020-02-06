@@ -26,7 +26,7 @@ using System.Linq;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonErrorString : JsonSymbol
+    public sealed class JsonErrorString : JsonForegroundSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.

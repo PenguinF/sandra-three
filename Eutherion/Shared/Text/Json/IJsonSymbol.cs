@@ -25,7 +25,7 @@ namespace Eutherion.Text.Json
 {
     public abstract class JsonSymbol : ISpan
     {
-        public virtual bool IsBackground => false;
+        public abstract bool IsBackground { get; }
         public virtual bool IsValueStartSymbol => false;
 
         /// <summary>
@@ -49,5 +49,10 @@ namespace Eutherion.Text.Json
         public abstract void Accept(JsonSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    public abstract class JsonForegroundSymbol : JsonSymbol
+    {
+        public sealed override bool IsBackground => false;
     }
 }
