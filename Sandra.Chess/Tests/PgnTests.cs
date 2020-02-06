@@ -41,5 +41,29 @@ namespace Sandra.Chess.Tests
         {
             Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
         }
+
+        [Fact]
+        public void OutOfRangeArguments()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
+        }
+
+        private const int SharedWhitespaceInstanceLengthMinusTwo = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
+        private const int SharedWhitespaceInstanceLengthMinusOne = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength - 1;
+        private const int SharedWhitespaceInstanceLengthPlusOne = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength + 1;
+        private const int SharedWhitespaceInstanceLengthPlusTwo = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength + 2;
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(SharedWhitespaceInstanceLengthMinusTwo)]
+        [InlineData(SharedWhitespaceInstanceLengthMinusOne)]
+        [InlineData(GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength)]
+        [InlineData(SharedWhitespaceInstanceLengthPlusOne)]
+        [InlineData(SharedWhitespaceInstanceLengthPlusTwo)]
+        public void WhitespaceHasCorrectLength(int length)
+        {
+            Assert.Equal(length, GreenPgnWhitespaceSyntax.Create(length).Length);
+        }
     }
 }
