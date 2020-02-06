@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonErrorString.cs
+ * JsonErrorStringSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -26,7 +26,47 @@ using System.Linq;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonErrorString : JsonForegroundSymbol
+    /// <summary>
+    /// Represents a string literal value syntax node which contains errors.
+    /// </summary>
+    public sealed class GreenJsonErrorStringSyntax : JsonForegroundSymbol
+    {
+        internal ReadOnlyList<JsonErrorInfo> Errors { get; }
+
+        public override int Length { get; }
+
+        public override bool IsValueStartSymbol => true;
+
+        public override bool HasErrors => true;
+
+        // Copy all errors, offset by given start position.
+        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
+            => Errors.Select(error => new JsonErrorInfo(
+                error.ErrorCode,
+                startPosition + error.Start,
+                error.Length,
+                error.Parameters));
+
+        public GreenJsonErrorStringSyntax(int length, params JsonErrorInfo[] errors)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
+        }
+
+        public GreenJsonErrorStringSyntax(IEnumerable<JsonErrorInfo> errors, int length)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
+        }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+    }
+
+    public static class JsonErrorStringSyntax
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
@@ -57,39 +97,5 @@ namespace Eutherion.Text.Json
         /// </summary>
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
             => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
-
-        internal ReadOnlyList<JsonErrorInfo> Errors { get; }
-
-        public override int Length { get; }
-
-        public override bool IsValueStartSymbol => true;
-
-        public override bool HasErrors => true;
-
-        // Copy all errors, offset by given start position.
-        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
-            => Errors.Select(error => new JsonErrorInfo(
-                error.ErrorCode,
-                startPosition + error.Start,
-                error.Length,
-                error.Parameters));
-
-        public JsonErrorString(int length, params JsonErrorInfo[] errors)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
-        }
-
-        public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-            Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
-        }
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorString(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorString(this, arg);
     }
 }

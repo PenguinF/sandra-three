@@ -24,8 +24,27 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>
+    public sealed class GreenJsonCommaSyntax : JsonForegroundSymbol
+    {
+        public static readonly GreenJsonCommaSyntax Value = new GreenJsonCommaSyntax();
+
+        public override int Length => JsonCommaSyntax.CommaLength;
+
+        private GreenJsonCommaSyntax() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a json comma syntax node.
+    /// </summary>
     public sealed class JsonCommaSyntax : JsonSyntax
     {
+        public const char CommaCharacter = ',';
+        public const int CommaLength = 1;
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -39,19 +58,19 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public JsonComma Green => JsonComma.Value;
+        public GreenJsonCommaSyntax Green => GreenJsonCommaSyntax.Value;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Match(
-            whenOption1: listSyntax => JsonSquareBracketOpen.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
-            whenOption2: mapSyntax => JsonCurlyOpen.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
+            whenOption1: listSyntax => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + listSyntax.Green.ListItemNodes.GetSeparatorOffset(CommaIndex),
+            whenOption2: mapSyntax => JsonCurlyOpenSyntax.CurlyOpenLength + mapSyntax.Green.KeyValueNodes.GetSeparatorOffset(CommaIndex));
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => JsonComma.CommaLength;
+        public override int Length => CommaLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -72,8 +91,8 @@ namespace Eutherion.Text.Json
             CommaIndex = commaIndex;
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitComma(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComma(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
     }
 }

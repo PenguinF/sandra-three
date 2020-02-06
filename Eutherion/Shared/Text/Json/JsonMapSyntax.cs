@@ -30,7 +30,7 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonMapSyntax : GreenJsonValueSyntax
     {
-        public ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, JsonComma> KeyValueNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, GreenJsonCommaSyntax> KeyValueNodes { get; }
 
         public bool MissingCurlyClose { get; }
 
@@ -38,7 +38,7 @@ namespace Eutherion.Text.Json
 
         public GreenJsonMapSyntax(IEnumerable<GreenJsonKeyValueSyntax> keyValueNodes, bool missingCurlyClose)
         {
-            KeyValueNodes = ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, JsonComma>.Create(keyValueNodes, JsonComma.Value);
+            KeyValueNodes = ReadOnlySeparatedSpanList<GreenJsonKeyValueSyntax, GreenJsonCommaSyntax>.Create(keyValueNodes, GreenJsonCommaSyntax.Value);
 
             if (KeyValueNodes.Count == 0)
             {
@@ -47,9 +47,9 @@ namespace Eutherion.Text.Json
 
             MissingCurlyClose = missingCurlyClose;
 
-            Length = JsonCurlyOpen.CurlyOpenLength
+            Length = JsonCurlyOpenSyntax.CurlyOpenLength
                    + KeyValueNodes.Length
-                   + (missingCurlyClose ? 0 : JsonCurlyClose.CurlyCloseLength);
+                   + (missingCurlyClose ? 0 : JsonCurlyCloseSyntax.CurlyCloseLength);
         }
 
         public IEnumerable<(int, GreenJsonStringLiteralSyntax, int, GreenJsonValueSyntax)> ValidKeyValuePairs
@@ -77,7 +77,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of an key-value node relative to the start position of this <see cref="GreenJsonMapSyntax"/>.
         /// </summary>
-        public int GetKeyValueNodeStart(int index) => JsonCurlyOpen.CurlyOpenLength + KeyValueNodes.GetElementOffset(index);
+        public int GetKeyValueNodeStart(int index) => JsonCurlyOpenSyntax.CurlyOpenLength + KeyValueNodes.GetElementOffset(index);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitMapSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMapSyntax(this);
@@ -162,12 +162,12 @@ namespace Eutherion.Text.Json
 
             if (index < keyValueAndCommaCount)
             {
-                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index) + JsonCurlyOpen.CurlyOpenLength;
+                return Green.KeyValueNodes.GetElementOrSeparatorOffset(index) + JsonCurlyOpenSyntax.CurlyOpenLength;
             }
 
             if (index == keyValueAndCommaCount && !Green.MissingCurlyClose)
             {
-                return Length - JsonCurlyClose.CurlyCloseLength;
+                return Length - JsonCurlyCloseSyntax.CurlyCloseLength;
             }
 
             throw new IndexOutOfRangeException();

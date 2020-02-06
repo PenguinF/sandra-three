@@ -82,7 +82,7 @@ namespace Eutherion.Text.Json
             return background;
         }
 
-        public override (GreenJsonValueSyntax, bool) VisitCurlyOpen(JsonCurlyOpen curlyOpen)
+        public override (GreenJsonValueSyntax, bool) VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax curlyOpen)
         {
             var mapBuilder = new List<GreenJsonKeyValueSyntax>();
             var keyValueSyntaxBuilder = new List<GreenJsonMultiValueSyntax>();
@@ -142,7 +142,7 @@ namespace Eutherion.Text.Json
 
                 // Keep parsing multi-values until encountering a non ':'.
                 bool gotColon = false;
-                while (CurrentToken is JsonColon)
+                while (CurrentToken is GreenJsonColonSyntax)
                 {
                     if (gotColon)
                     {
@@ -167,8 +167,8 @@ namespace Eutherion.Text.Json
 
                 mapBuilder.Add(jsonKeyValueSyntax);
 
-                bool isComma = CurrentToken is JsonComma;
-                bool isCurlyClose = CurrentToken is JsonCurlyClose;
+                bool isComma = CurrentToken is GreenJsonCommaSyntax;
+                bool isCurlyClose = CurrentToken is GreenJsonCurlyCloseSyntax;
 
                 // '}' directly following a ',' should not report errors.
                 // '..., : }' however misses both a key and a value.
@@ -223,7 +223,7 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public override (GreenJsonValueSyntax, bool) VisitSquareBracketOpen(JsonSquareBracketOpen bracketOpen)
+        public override (GreenJsonValueSyntax, bool) VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax bracketOpen)
         {
             var listBuilder = new List<GreenJsonMultiValueSyntax>();
 
@@ -235,7 +235,7 @@ namespace Eutherion.Text.Json
                 listBuilder.Add(parsedValueNode);
 
                 // ParseMultiValue() guarantees that the next symbol is never a ValueStartSymbol.
-                if (CurrentToken is JsonComma)
+                if (CurrentToken is GreenJsonCommaSyntax)
                 {
                     if (parsedValueNode.ValueNode.ContentNode is GreenJsonMissingValueSyntax)
                     {
@@ -258,7 +258,7 @@ namespace Eutherion.Text.Json
                             CurrentLength,
                             0));
                     }
-                    else if (CurrentToken is JsonSquareBracketClose)
+                    else if (CurrentToken is GreenJsonSquareBracketCloseSyntax)
                     {
                         missingSquareBracketClose = false;
                     }
@@ -299,7 +299,7 @@ namespace Eutherion.Text.Json
             return (new GreenJsonUndefinedValueSyntax(symbol), false);
         }
 
-        public override (GreenJsonValueSyntax, bool) VisitString(JsonString symbol)
+        public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(JsonString symbol)
             => (new GreenJsonStringLiteralSyntax(symbol), false);
 
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)

@@ -24,8 +24,27 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
+    public sealed class GreenJsonSquareBracketCloseSyntax : JsonForegroundSymbol
+    {
+        public static readonly GreenJsonSquareBracketCloseSyntax Value = new GreenJsonSquareBracketCloseSyntax();
+
+        public override int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+
+        private GreenJsonSquareBracketCloseSyntax() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a json square bracket close syntax node.
+    /// </summary>
     public sealed class JsonSquareBracketCloseSyntax : JsonSyntax
     {
+        public const char SquareBracketCloseCharacter = ']';
+        public const int SquareBracketCloseLength = 1;
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -34,17 +53,17 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public JsonSquareBracketClose Green => JsonSquareBracketClose.Value;
+        public GreenJsonSquareBracketCloseSyntax Green => GreenJsonSquareBracketCloseSyntax.Value;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Length - JsonSquareBracketClose.SquareBracketCloseLength;
+        public override int Start => Parent.Length - SquareBracketCloseLength;
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => JsonSquareBracketClose.SquareBracketCloseLength;
+        public override int Length => SquareBracketCloseLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -53,8 +72,8 @@ namespace Eutherion.Text.Json
 
         internal JsonSquareBracketCloseSyntax(JsonListSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketClose(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
     }
 }

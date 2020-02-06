@@ -136,7 +136,7 @@ namespace Eutherion.Win.Storage
                 // Decrease by an extra 1 because of the space between '//' and the text.
                 int availableCommentWidth = maxLineLength
                                           - currentDepth * Indentation
-                                          - JsonComment.SingleLineCommentStart.Length
+                                          - JsonCommentSyntax.SingleLineCommentStart.Length
                                           - 1;
 
                 bool first = true;
@@ -146,7 +146,7 @@ namespace Eutherion.Win.Storage
                     {
                         // Extra line with empty single line comment to separate paragraphs.
                         AppendIndent();
-                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                         outputBuilder.AppendLine();
                     }
                     else first = false;
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
                     foreach (string commentLine in GetCommentLines(paragraph, availableCommentWidth))
                     {
                         AppendIndent();
-                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                         outputBuilder.Append(SpaceChar);
                         outputBuilder.Append(commentLine);
                         outputBuilder.AppendLine();
@@ -165,7 +165,7 @@ namespace Eutherion.Win.Storage
 
         public override void VisitList(PList value)
         {
-            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+            outputBuilder.Append(JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -177,7 +177,7 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    outputBuilder.Append(JsonComma.CommaCharacter);
+                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
                 }
 
                 outputBuilder.AppendLine();
@@ -195,12 +195,12 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
+            outputBuilder.Append(JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
+            outputBuilder.Append(JsonCurlyOpenSyntax.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -210,7 +210,7 @@ namespace Eutherion.Win.Storage
 
                 if (!first)
                 {
-                    outputBuilder.Append(JsonComma.CommaCharacter);
+                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
                 }
                 else
                 {
@@ -231,11 +231,11 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
                 if ((options & SettingWriterOptions.CommentOutProperties) != 0)
                 {
-                    outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                    outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                 }
 
                 AppendString(name);
-                outputBuilder.Append(JsonColon.ColonCharacter);
+                outputBuilder.Append(JsonColonSyntax.ColonCharacter);
                 outputBuilder.Append(SpaceChar);
                 Visit(kv.Value);
             }
@@ -250,7 +250,7 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
+            outputBuilder.Append(JsonCurlyCloseSyntax.CurlyCloseCharacter);
         }
     }
 

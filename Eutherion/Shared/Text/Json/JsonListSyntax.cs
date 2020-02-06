@@ -30,7 +30,7 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonListSyntax : GreenJsonValueSyntax
     {
-        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonComma> ListItemNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonCommaSyntax> ListItemNodes { get; }
 
         public bool MissingSquareBracketClose { get; }
 
@@ -57,7 +57,7 @@ namespace Eutherion.Text.Json
 
         public GreenJsonListSyntax(IEnumerable<GreenJsonMultiValueSyntax> listItemNodes, bool missingSquareBracketClose)
         {
-            ListItemNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonComma>.Create(listItemNodes, JsonComma.Value);
+            ListItemNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonCommaSyntax>.Create(listItemNodes, GreenJsonCommaSyntax.Value);
 
             if (ListItemNodes.Count == 0)
             {
@@ -66,15 +66,15 @@ namespace Eutherion.Text.Json
 
             MissingSquareBracketClose = missingSquareBracketClose;
 
-            Length = JsonSquareBracketOpen.SquareBracketOpenLength
+            Length = JsonSquareBracketOpenSyntax.SquareBracketOpenLength
                    + ListItemNodes.Length
-                   + (missingSquareBracketClose ? 0 : JsonSquareBracketClose.SquareBracketCloseLength);
+                   + (missingSquareBracketClose ? 0 : JsonSquareBracketCloseSyntax.SquareBracketCloseLength);
         }
 
         /// <summary>
         /// Gets the start position of an element node relative to the start position of this <see cref="GreenJsonListSyntax"/>.
         /// </summary>
-        public int GetElementNodeStart(int index) => JsonSquareBracketOpen.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
+        public int GetElementNodeStart(int index) => JsonSquareBracketOpenSyntax.SquareBracketOpenLength + ListItemNodes.GetElementOffset(index);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitListSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitListSyntax(this);
@@ -164,12 +164,12 @@ namespace Eutherion.Text.Json
 
             if (index < itemAndCommaCount)
             {
-                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSquareBracketOpen.SquareBracketOpenLength;
+                return Green.ListItemNodes.GetElementOrSeparatorOffset(index) + JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
             }
 
             if (index == itemAndCommaCount && !Green.MissingSquareBracketClose)
             {
-                return Length - JsonSquareBracketClose.SquareBracketCloseLength;
+                return Length - JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
             }
 
             throw new IndexOutOfRangeException();

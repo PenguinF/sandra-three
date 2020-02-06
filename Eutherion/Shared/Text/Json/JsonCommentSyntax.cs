@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonUnterminatedMultiLineComment.cs
+ * JsonCommentSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -24,30 +24,31 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonUnterminatedMultiLineComment : GreenJsonBackgroundSyntax, IGreenJsonSymbol
+    /// <summary>
+    /// Represents a json syntax node which contains a comment.
+    /// </summary>
+    public sealed class GreenJsonCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
-        /// <summary>
-        /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated comment.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unterminated comment.
-        /// </param>
-        public static JsonErrorInfo CreateError(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
-
         public override int Length { get; }
 
-        public JsonUnterminatedMultiLineComment(int length)
+        public GreenJsonCommentSyntax(int length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(CreateError(startPosition, Length));
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class JsonCommentSyntax
+    {
+        public const char CommentStartFirstCharacter = '/';
+        public const char SingleLineCommentStartSecondCharacter = '/';
+        public const char MultiLineCommentStartSecondCharacter = '*';
+
+        public static readonly string SingleLineCommentStart
+            = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
     }
 }

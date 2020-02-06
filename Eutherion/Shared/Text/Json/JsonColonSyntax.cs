@@ -24,8 +24,27 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
+    public sealed class GreenJsonColonSyntax : JsonForegroundSymbol
+    {
+        public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
+
+        public override int Length => JsonColonSyntax.ColonLength;
+
+        private GreenJsonColonSyntax() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a json colon syntax node.
+    /// </summary>
     public sealed class JsonColonSyntax : JsonSyntax
     {
+        public const char ColonCharacter = ':';
+        public const int ColonLength = 1;
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -39,7 +58,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public JsonColon Green => JsonColon.Value;
+        public GreenJsonColonSyntax Green => GreenJsonColonSyntax.Value;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -49,7 +68,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => JsonColon.ColonLength;
+        public override int Length => ColonLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -62,8 +81,8 @@ namespace Eutherion.Text.Json
             ColonIndex = colonIndex;
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColon(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColon(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 }
