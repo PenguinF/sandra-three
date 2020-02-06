@@ -448,6 +448,9 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// An enumeration of <see cref="IGreenJsonSymbol"/> instances.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null/
+        /// </exception>
         public static IEnumerable<IGreenJsonSymbol> TokenizeAll(string json)
             => new JsonTokenizer(json)._TokenizeAll();
 
