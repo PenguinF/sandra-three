@@ -34,8 +34,7 @@ namespace Eutherion.Text.Json
         public virtual bool HasErrors => false;
 
         /// <summary>
-        /// If <see cref="HasErrors"/> is true, generates a non-empty sequence of errors associated
-        /// with this symbol at a given start position.
+        /// Generates a sequence of errors associated with this symbol at a given start position.
         /// </summary>
         /// <param name="startPosition">
         /// The start position for which to generate the errors.
