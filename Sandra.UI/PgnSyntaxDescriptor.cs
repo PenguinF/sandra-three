@@ -79,18 +79,4 @@ namespace Sandra.UI
 
         public PgnSymbol(int length) => Length = length;
     }
-
-    public class PgnErrorInfo
-    {
-        public int Start { get; }
-        public int Length { get; }
-        public string Message { get; }
-
-        public PgnErrorInfo(int start, int length, string message)
-        {
-            Start = start;
-            Length = length;
-            Message = message;
-        }
-    }
 }
