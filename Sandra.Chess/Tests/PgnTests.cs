@@ -21,6 +21,8 @@
 
 using Sandra.Chess.Pgn;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
@@ -28,6 +30,58 @@ namespace Sandra.Chess.Tests
 {
     public class PgnTests
     {
+        /// <summary>
+        /// Indicates if two symbols of the same type should combine into one.
+        /// </summary>
+        private static bool WillCombine(Type tokenType1, Type tokenType2, out Type resultTokenType)
+        {
+            if (tokenType1 == typeof(GreenPgnWhitespaceSyntax))
+            {
+                if (tokenType1 == tokenType2)
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(PgnSymbol))
+            {
+                if (tokenType1 == tokenType2)
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
+
+            resultTokenType = default;
+            return false;
+        }
+
+        [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Private backing field of public counterpart")]
+        private static IEnumerable<(string, Type)> _PgnTestSymbols
+        {
+            get
+            {
+                yield return (" ", typeof(GreenPgnWhitespaceSyntax));
+                yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
+                yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
+                yield return ("é", typeof(GreenPgnIllegalCharacterSyntax));
+                yield return ("a1".ToString(), typeof(PgnSymbol));
+            }
+        }
+
+        private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
+            => Assert.Collection(PgnTokenizer.TokenizeAll(pgn), elementInspectors);
+
+        private static Action<IGreenPgnSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
+        {
+            return symbol =>
+            {
+                Assert.NotNull(symbol);
+                Assert.IsType(expectedTokenType, symbol);
+                Assert.Equal(expectedLength, symbol.Length);
+            };
+        }
+
         [Theory]
         [InlineData(-1, 0, "start")]
         [InlineData(-1, -1, "start")]
@@ -114,6 +168,82 @@ namespace Sandra.Chess.Tests
         public void WhitespaceHasCorrectLength(int length)
         {
             Assert.Equal(length, GreenPgnWhitespaceSyntax.Create(length).Length);
+        }
+
+        public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
+            => from x1 in _PgnTestSymbols
+               from x2 in _PgnTestSymbols
+               select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
+
+        /// <summary>
+        /// Tests all combinations of three tokens.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(TwoPgnTestSymbolCombinations))]
+        public void Transition(string pgn1, Type type1, string pgn2, Type type2)
+        {
+            // Instead of having a gazillion separate tests over 3 tokens,
+            // first test the combination of 2 tokens, and then if that succeeds
+            // test every other token that could precede it in a loop.
+            {
+                if (WillCombine(type1, type2, out Type type12))
+                {
+                    AssertTokens(
+                        pgn1 + pgn2,
+                        ExpectToken(type12, pgn1.Length + pgn2.Length));
+                }
+                else
+                {
+                    AssertTokens(
+                        pgn1 + pgn2,
+                        ExpectToken(type1, pgn1.Length),
+                        ExpectToken(type2, pgn2.Length));
+                }
+            }
+
+            // Here Assert.Collection is used so if such a test fails,
+            // it gives the index of the third token that was tested.
+            Assert.Collection(
+                _PgnTestSymbols,
+                Enumerable.Repeat<Action<(string, Type)>>(x0 =>
+                {
+                    // Put the third symbol in front, because the last symbol may eat it.
+                    string pgn0 = x0.Item1;
+                    Type type0 = x0.Item2;
+
+                    // Exceptions for when 2 or 3 PGN tokens go together and make 1.
+                    if (WillCombine(type0, type1, out Type type01))
+                    {
+                        if (WillCombine(type01, type2, out Type type012))
+                        {
+                            AssertTokens(
+                                pgn0 + pgn1 + pgn2,
+                                ExpectToken(type012, pgn0.Length + pgn1.Length + pgn2.Length));
+                        }
+                        else
+                        {
+                            AssertTokens(
+                                pgn0 + pgn1 + pgn2,
+                                ExpectToken(type01, pgn0.Length + pgn1.Length),
+                                ExpectToken(type2, pgn2.Length));
+                        }
+                    }
+                    else if (WillCombine(type1, type2, out Type type12))
+                    {
+                        AssertTokens(
+                            pgn0 + pgn1 + pgn2,
+                            ExpectToken(type0, pgn0.Length),
+                            ExpectToken(type12, pgn1.Length + pgn2.Length));
+                    }
+                    else
+                    {
+                        AssertTokens(
+                            pgn0 + pgn1 + pgn2,
+                            ExpectToken(type0, pgn0.Length),
+                            ExpectToken(type1, pgn1.Length),
+                            ExpectToken(type2, pgn2.Length));
+                    }
+                }, _PgnTestSymbols.Count()).ToArray());
         }
     }
 }
