@@ -70,8 +70,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a terminal PGN symbol.
     /// These are all <see cref="PgnSyntax"/> nodes which have no child <see cref="PgnSyntax"/> nodes.
+    /// Use <see cref="PgnSymbolVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public interface IPgnSymbol : ISpan
     {
+        void Accept(PgnSymbolVisitor visitor);
+        TResult Accept<TResult>(PgnSymbolVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg);
     }
 }
