@@ -44,6 +44,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MoveFormatter.cs" />
+    <Compile Include="Pgn\IPgnSymbol.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

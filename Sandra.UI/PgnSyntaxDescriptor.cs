@@ -21,6 +21,7 @@
 
 using Eutherion.Localization;
 using Eutherion.Win.AppTemplate;
+using Sandra.Chess.Pgn;
 using ScintillaNET;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace Sandra.UI
     /// <summary>
     /// Describes the interaction between PGN syntax and a syntax editor.
     /// </summary>
-    public class PgnSyntaxDescriptor : SyntaxDescriptor<RootPgnSyntax, PgnSymbol, PgnErrorInfo>
+    public class PgnSyntaxDescriptor : SyntaxDescriptor<RootPgnSyntax, IGreenPgnSymbol, PgnErrorInfo>
     {
         public static readonly string PgnFileExtension = "pgn";
 
@@ -45,16 +46,16 @@ namespace Sandra.UI
             return new RootPgnSyntax(new PgnSymbol[] { new PgnSymbol(length) });
         }
 
-        public override IEnumerable<PgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
+        public override IEnumerable<IGreenPgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
             => syntaxTree.Terminals;
 
         public override IEnumerable<PgnErrorInfo> GetErrors(RootPgnSyntax syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<RootPgnSyntax, PgnSymbol, PgnErrorInfo> syntaxEditor, PgnSymbol terminalSymbol)
+        public override Style GetStyle(SyntaxEditor<RootPgnSyntax, IGreenPgnSymbol, PgnErrorInfo> syntaxEditor, IGreenPgnSymbol terminalSymbol)
             => syntaxEditor.DefaultStyle;
 
-        public override (int, int) GetTokenSpan(PgnSymbol terminalSymbol)
+        public override (int, int) GetTokenSpan(IGreenPgnSymbol terminalSymbol)
             => (0, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(PgnErrorInfo error)
@@ -72,7 +73,7 @@ namespace Sandra.UI
         public RootPgnSyntax(IEnumerable<PgnSymbol> terminals) => Terminals = terminals;
     }
 
-    public class PgnSymbol
+    public class PgnSymbol : IGreenPgnSymbol
     {
         public int Length { get; }
 
