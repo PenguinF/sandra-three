@@ -19,11 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
-namespace Eutherion.Utils
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Utility <see cref="IEnumerable{T}"/> that enumerates no elements of the given type.
