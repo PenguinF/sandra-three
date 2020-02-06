@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSymbol.cs
+ * IJsonSymbol.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
