@@ -66,4 +66,12 @@ namespace Sandra.Chess.Pgn
 
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
+
+    /// <summary>
+    /// Represents a terminal PGN symbol.
+    /// These are all <see cref="PgnSyntax"/> nodes which have no child <see cref="PgnSyntax"/> nodes.
+    /// </summary>
+    public interface IPgnSymbol : ISpan
+    {
+    }
 }
