@@ -83,6 +83,9 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents a PGN syntax node which contains whitespace.
+    /// </summary>
     public sealed class PgnWhitespaceSyntax : PgnBackgroundSyntax, IPgnSymbol
     {
         /// <summary>

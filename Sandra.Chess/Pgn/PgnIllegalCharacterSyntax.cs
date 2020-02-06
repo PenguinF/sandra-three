@@ -80,6 +80,9 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
     }
 
+    /// <summary>
+    /// Represents an character which is illegal in the PGN standard.
+    /// </summary>
     public sealed class PgnIllegalCharacterSyntax : PgnBackgroundSyntax, IPgnSymbol
     {
         public const int IllegalCharacterLength = 1;
