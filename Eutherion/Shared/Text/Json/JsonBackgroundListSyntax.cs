@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonBackgroundSyntax.cs
+ * JsonBackgroundListSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -27,30 +27,30 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node with background symbols in an abstract json syntax tree.
     /// </summary>
-    public sealed class GreenJsonBackgroundSyntax : ISpan
+    public sealed class GreenJsonBackgroundListSyntax : ISpan
     {
         /// <summary>
-        /// Gets the empty <see cref="GreenJsonBackgroundSyntax"/>.
+        /// Gets the empty <see cref="GreenJsonBackgroundListSyntax"/>.
         /// </summary>
-        public static readonly GreenJsonBackgroundSyntax Empty = new GreenJsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol>.Empty);
+        public static readonly GreenJsonBackgroundListSyntax Empty = new GreenJsonBackgroundListSyntax(ReadOnlySpanList<JsonSymbol>.Empty);
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenJsonBackgroundSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenJsonBackgroundListSyntax"/>.
         /// </summary>
         /// <param name="source">
         /// The source enumeration of <see cref="JsonSymbol"/>.
         /// </param>
         /// <returns>
-        /// The new <see cref="GreenJsonBackgroundSyntax"/>.
+        /// The new <see cref="GreenJsonBackgroundListSyntax"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
         /// </exception>
-        public static GreenJsonBackgroundSyntax Create(IEnumerable<JsonSymbol> source)
+        public static GreenJsonBackgroundListSyntax Create(IEnumerable<JsonSymbol> source)
         {
             var readOnlyBackground = ReadOnlySpanList<JsonSymbol>.Create(source);
             if (readOnlyBackground.Count == 0) return Empty;
-            return new GreenJsonBackgroundSyntax(readOnlyBackground);
+            return new GreenJsonBackgroundListSyntax(readOnlyBackground);
         }
 
         /// <summary>
@@ -63,13 +63,13 @@ namespace Eutherion.Text.Json
         /// </summary>
         public int Length => BackgroundSymbols.Length;
 
-        private GreenJsonBackgroundSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
+        private GreenJsonBackgroundListSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
     }
 
     /// <summary>
     /// Represents a node with background symbols in an abstract json syntax tree.
     /// </summary>
-    public sealed class JsonBackgroundSyntax : JsonSyntax
+    public sealed class JsonBackgroundListSyntax : JsonSyntax
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -79,7 +79,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public GreenJsonBackgroundSyntax Green { get; }
+        public GreenJsonBackgroundListSyntax Green { get; }
 
         /// <summary>
         /// Gets the read-only list with background symbols.
@@ -105,13 +105,13 @@ namespace Eutherion.Text.Json
             whenOption1: x => x,
             whenOption2: x => x);
 
-        internal JsonBackgroundSyntax(JsonValueWithBackgroundSyntax backgroundBeforeParent)
+        internal JsonBackgroundListSyntax(JsonValueWithBackgroundSyntax backgroundBeforeParent)
         {
             Parent = backgroundBeforeParent;
             Green = backgroundBeforeParent.Green.BackgroundBefore;
         }
 
-        internal JsonBackgroundSyntax(JsonMultiValueSyntax backgroundAfterParent)
+        internal JsonBackgroundListSyntax(JsonMultiValueSyntax backgroundAfterParent)
         {
             Parent = backgroundAfterParent;
             Green = backgroundAfterParent.Green.BackgroundAfter;
@@ -119,8 +119,8 @@ namespace Eutherion.Text.Json
 
         // Treat JsonBackgroundSyntax as a terminal symbol.
         // Can always specify further for each individual background JsonSymbol if the need arises.
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBackgroundSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundSyntax(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBackgroundListSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundListSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundListSyntax(this, arg);
     }
 }

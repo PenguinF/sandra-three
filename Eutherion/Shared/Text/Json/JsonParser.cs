@@ -64,9 +64,9 @@ namespace Eutherion.Text.Json
             }
         }
 
-        private GreenJsonBackgroundSyntax CaptureBackground()
+        private GreenJsonBackgroundListSyntax CaptureBackground()
         {
-            var background = GreenJsonBackgroundSyntax.Create(BackgroundBuilder);
+            var background = GreenJsonBackgroundListSyntax.Create(BackgroundBuilder);
             BackgroundBuilder.Clear();
             return background;
         }
@@ -300,7 +300,7 @@ namespace Eutherion.Text.Json
             if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundSyntax.Empty);
+                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
             }
 
             for (; ; )
@@ -329,7 +329,7 @@ namespace Eutherion.Text.Json
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundSyntax.Empty);
+                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -362,7 +362,7 @@ namespace Eutherion.Text.Json
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
                 return new RootJsonSyntax(
-                    new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundSyntax.Empty),
+                    new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
                     Errors);
             }
 
@@ -410,7 +410,7 @@ namespace Eutherion.Text.Json
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
                     return new RootJsonSyntax(
-                        new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundSyntax.Empty),
+                        new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
                         Errors);
                 }
 

@@ -91,7 +91,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the background after the value nodes.
         /// </summary>
-        public GreenJsonBackgroundSyntax BackgroundAfter { get; }
+        public GreenJsonBackgroundListSyntax BackgroundAfter { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -113,7 +113,7 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentException">
         /// <paramref name="valueNodes"/> is an empty enumeration.
         /// </exception>
-        public GreenJsonMultiValueSyntax(IEnumerable<GreenJsonValueWithBackgroundSyntax> valueNodes, GreenJsonBackgroundSyntax backgroundAfter)
+        public GreenJsonMultiValueSyntax(IEnumerable<GreenJsonValueWithBackgroundSyntax> valueNodes, GreenJsonBackgroundListSyntax backgroundAfter)
         {
             ValueNodes = ReadOnlySpanList<GreenJsonValueWithBackgroundSyntax>.Create(valueNodes);
 
@@ -151,12 +151,12 @@ namespace Eutherion.Text.Json
         /// </summary>
         public SafeLazyObjectCollection<JsonValueWithBackgroundSyntax> ValueNodes { get; }
 
-        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundAfter;
+        private readonly SafeLazyObject<JsonBackgroundListSyntax> backgroundAfter;
 
         /// <summary>
         /// Gets the background after the value nodes.
         /// </summary>
-        public JsonBackgroundSyntax BackgroundAfter => backgroundAfter.Object;
+        public JsonBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
 
         /// <summary>
         /// Gets the syntax node containing the first value.
@@ -224,7 +224,7 @@ namespace Eutherion.Text.Json
                 green.ValueNodes.Count,
                 index => new JsonValueWithBackgroundSyntax(this, index));
 
-            backgroundAfter = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
+            backgroundAfter = new SafeLazyObject<JsonBackgroundListSyntax>(() => new JsonBackgroundListSyntax(this));
         }
 
         // For root nodes.
