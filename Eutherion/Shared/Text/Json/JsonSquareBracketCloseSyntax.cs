@@ -21,6 +21,22 @@
 
 namespace Eutherion.Text.Json
 {
+    public sealed class JsonSquareBracketClose : JsonForegroundSymbol
+    {
+        public const char SquareBracketCloseCharacter = ']';
+        public const int SquareBracketCloseLength = 1;
+
+        public static readonly JsonSquareBracketClose Value = new JsonSquareBracketClose();
+
+        public override int Length => SquareBracketCloseLength;
+
+        private JsonSquareBracketClose() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketClose(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketClose(this, arg);
+    }
+
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>

@@ -21,6 +21,23 @@
 
 namespace Eutherion.Text.Json
 {
+    public sealed class JsonCurlyOpen : JsonForegroundSymbol
+    {
+        public const char CurlyOpenCharacter = '{';
+        public const int CurlyOpenLength = 1;
+
+        public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
+
+        public override bool IsValueStartSymbol => true;
+        public override int Length => CurlyOpenLength;
+
+        private JsonCurlyOpen() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpen(this, arg);
+    }
+
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>

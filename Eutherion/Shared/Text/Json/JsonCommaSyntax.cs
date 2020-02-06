@@ -21,6 +21,22 @@
 
 namespace Eutherion.Text.Json
 {
+    public sealed class JsonComma : JsonForegroundSymbol
+    {
+        public const char CommaCharacter = ',';
+        public const int CommaLength = 1;
+
+        public static readonly JsonComma Value = new JsonComma();
+
+        public override int Length => CommaLength;
+
+        private JsonComma() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComma(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComma(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComma(this, arg);
+    }
+
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>

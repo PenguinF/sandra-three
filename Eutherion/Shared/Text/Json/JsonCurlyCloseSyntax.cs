@@ -21,6 +21,22 @@
 
 namespace Eutherion.Text.Json
 {
+    public sealed class JsonCurlyClose : JsonForegroundSymbol
+    {
+        public const char CurlyCloseCharacter = '}';
+        public const int CurlyCloseLength = 1;
+
+        public static readonly JsonCurlyClose Value = new JsonCurlyClose();
+
+        public override int Length => CurlyCloseLength;
+
+        private JsonCurlyClose() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyClose(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyClose(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyClose(this, arg);
+    }
+
     /// <summary>
     /// Represents a json curly close syntax node.
     /// </summary>

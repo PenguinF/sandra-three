@@ -21,6 +21,22 @@
 
 namespace Eutherion.Text.Json
 {
+    public sealed class JsonColon : JsonForegroundSymbol
+    {
+        public const char ColonCharacter = ':';
+        public const int ColonLength = 1;
+
+        public static readonly JsonColon Value = new JsonColon();
+
+        public override int Length => ColonLength;
+
+        private JsonColon() { }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColon(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColon(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColon(this, arg);
+    }
+
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
