@@ -20,10 +20,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonWhitespace : JsonSymbol
+    public sealed class JsonWhitespace : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         /// <summary>
         /// Maximum length before new <see cref="JsonWhitespace"/> instances are always newly allocated.
@@ -43,7 +44,6 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public override bool IsBackground => true;
         public override int Length { get; }
 
         public static JsonWhitespace Create(int length)
@@ -55,8 +55,8 @@ namespace Eutherion.Text.Json
 
         private JsonWhitespace(int length) => Length = length;
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespace(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespace(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespace(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
     }
 }

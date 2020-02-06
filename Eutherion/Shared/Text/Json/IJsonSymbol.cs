@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonSymbol.cs
+ * IJsonSymbol.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -20,13 +20,40 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
-    public abstract class JsonSymbol : ISpan
+    /// <summary>
+    /// Represents a terminal json symbol.
+    /// Instances of this type are returned by <see cref="JsonTokenizer"/>.
+    /// </summary>
+    public interface IGreenJsonSymbol : ISpan
     {
-        public virtual bool IsBackground => false;
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
+
+        /// <summary>
+        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </summary>
+        /// <returns>
+        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </returns>
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
+    }
+
+    /// <summary>
+    /// Denotes any terminal json symbol that is not treated as background such as comments or whitespace.
+    /// </summary>
+    public abstract class JsonForegroundSymbol : IGreenJsonSymbol
+    {
         public virtual bool IsValueStartSymbol => false;
 
         /// <summary>
@@ -35,8 +62,7 @@ namespace Eutherion.Text.Json
         public virtual bool HasErrors => false;
 
         /// <summary>
-        /// If <see cref="HasErrors"/> is true, generates a non-empty sequence of errors associated
-        /// with this symbol at a given start position.
+        /// Generates a sequence of errors associated with this symbol at a given start position.
         /// </summary>
         /// <param name="startPosition">
         /// The start position for which to generate the errors.
@@ -44,12 +70,14 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// A sequence of errors associated with this symbol.
         /// </returns>
-        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => Enumerable.Empty<JsonErrorInfo>();
+        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public abstract int Length { get; }
 
         public abstract void Accept(JsonSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
+
+        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

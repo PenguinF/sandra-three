@@ -1,8 +1,8 @@
 ﻿#region License
 /*********************************************************************************
- * JsonBackgroundSyntax.cs
+ * PgnTests.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2019 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,16 +19,27 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Text.Json
+using Sandra.Chess.Pgn;
+using System;
+using Xunit;
+
+namespace Sandra.Chess.Tests
 {
-    /// <summary>
-    /// Represents a single background node in an abstract json syntax tree.
-    /// </summary>
-    public abstract class GreenJsonBackgroundSyntax : ISpan
+    public class PgnTests
     {
-        /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public abstract int Length { get; }
+        [Theory]
+        [InlineData(-1, 0, "start")]
+        [InlineData(-1, -1, "start")]
+        [InlineData(0, -1, "length")]
+        public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new PgnErrorInfo(0, start, length));
+        }
+
+        [Fact]
+        public void CreateRootPgnSyntaxWithNullTerminalsThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
+        }
     }
 }

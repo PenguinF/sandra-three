@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonUnterminatedMultiLineComment : JsonSymbol
+    public sealed class JsonUnterminatedMultiLineComment : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
@@ -40,23 +40,14 @@ namespace Eutherion.Text.Json
 
         public override int Length { get; }
 
-        public override bool IsBackground => true;
-
-        public override bool HasErrors => true;
-
-        public override IEnumerable<JsonErrorInfo> GetErrors(int start)
-        {
-            yield return CreateError(start, Length);
-        }
-
         public JsonUnterminatedMultiLineComment(int length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineComment(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedMultiLineComment(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(CreateError(startPosition, Length));
+
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
     }
 }

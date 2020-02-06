@@ -19,11 +19,7 @@
 **********************************************************************************/
 #endregion
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-
-namespace Eutherion.Utils
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Utility <see cref="IEnumerable{T}"/> that enumerates no elements of the given type.
@@ -31,8 +27,15 @@ namespace Eutherion.Utils
     /// <typeparam name="TResult">
     /// The type of the enumerated elements.
     /// </typeparam>
-    public struct EmptyEnumerable<TResult> : IEnumerable<TResult>
+    public class EmptyEnumerable<TResult> : IEnumerable<TResult>
     {
+        /// <summary>
+        /// Gets the only <see cref="EmptyEnumerable{TResult}"/> instance.
+        /// </summary>
+        public static readonly EmptyEnumerable<TResult> Instance = new EmptyEnumerable<TResult>();
+
+        private EmptyEnumerable() { }
+
         /// <summary>
         /// Returns an <see cref="EmptyEnumerator{TResult}"/> which enumerates no elements of the given type.
         /// </summary>

@@ -21,7 +21,7 @@
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonColon : JsonSymbol
+    public sealed class JsonColon : JsonForegroundSymbol
     {
         public const char ColonCharacter = ':';
         public const int ColonLength = 1;

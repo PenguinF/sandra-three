@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,7 +49,7 @@ namespace Eutherion.Text
 
             public override int AllElementCount => 0;
 
-            public override IEnumerable<Union<TSpan, TSeparator>> AllElements => default(EmptyEnumerable<Union<TSpan, TSeparator>>);
+            public override IEnumerable<Union<TSpan, TSeparator>> AllElements => EmptyEnumerable<Union<TSpan, TSeparator>>.Instance;
 
             public override int GetElementOffset(int index) => throw new IndexOutOfRangeException();
 

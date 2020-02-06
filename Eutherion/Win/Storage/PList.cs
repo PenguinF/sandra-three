@@ -66,12 +66,7 @@ namespace Eutherion.Win.Storage
         /// <returns>
         /// An enumerator that iterates through the <see cref="PList"/>.
         /// </returns>
-        public IEnumerator<PValue> GetEnumerator()
-        {
-            // Below syntax with 'var' is possible but somehow PValue[] doesn't expose a typed GetEnumerator() method.
-            // Hoping the compiler will flag this as optimizable.
-            foreach (var pValue in array) yield return pValue;
-        }
+        public IEnumerator<PValue> GetEnumerator() => ((ICollection<PValue>)array).GetEnumerator();
 
         /// <summary>
         /// Compares this <see cref="PList"/> with another and returns if they are equal.

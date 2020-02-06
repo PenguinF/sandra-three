@@ -32,7 +32,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the background symbols which directly precede the content value node.
         /// </summary>
-        public GreenJsonBackgroundSyntax BackgroundBefore { get; }
+        public GreenJsonBackgroundListSyntax BackgroundBefore { get; }
 
         /// <summary>
         /// Gets the content node containing the actual json value.
@@ -56,7 +56,7 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="backgroundBefore"/> and/or <paramref name="contentNode"/> are null.
         /// </exception>
-        public GreenJsonValueWithBackgroundSyntax(GreenJsonBackgroundSyntax backgroundBefore, GreenJsonValueSyntax contentNode)
+        public GreenJsonValueWithBackgroundSyntax(GreenJsonBackgroundListSyntax backgroundBefore, GreenJsonValueSyntax contentNode)
         {
             BackgroundBefore = backgroundBefore ?? throw new ArgumentNullException(nameof(backgroundBefore));
             ContentNode = contentNode ?? throw new ArgumentNullException(nameof(contentNode));
@@ -114,13 +114,13 @@ namespace Eutherion.Text.Json
         /// </summary>
         public GreenJsonValueWithBackgroundSyntax Green { get; }
 
-        private readonly SafeLazyObject<JsonBackgroundSyntax> backgroundBefore;
+        private readonly SafeLazyObject<JsonBackgroundListSyntax> backgroundBefore;
         private readonly SafeLazyObject<JsonValueSyntax> contentNode;
 
         /// <summary>
         /// Gets the background symbols which directly precede the content value node.
         /// </summary>
-        public JsonBackgroundSyntax BackgroundBefore => backgroundBefore.Object;
+        public JsonBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
 
         /// <summary>
         /// Gets the content node containing the actual json value.
@@ -172,7 +172,7 @@ namespace Eutherion.Text.Json
             Parent = parent;
             ParentValueNodeIndex = parentValueNodeIndex;
             Green = parent.Green.ValueNodes[parentValueNodeIndex];
-            backgroundBefore = new SafeLazyObject<JsonBackgroundSyntax>(() => new JsonBackgroundSyntax(this));
+            backgroundBefore = new SafeLazyObject<JsonBackgroundListSyntax>(() => new JsonBackgroundListSyntax(this));
             contentNode = new SafeLazyObject<JsonValueSyntax>(() => JsonValueSyntaxCreator.Instance.Visit(Green.ContentNode, this));
         }
     }

@@ -29,7 +29,7 @@ namespace Eutherion.Text.Json
     {
         public virtual void DefaultVisit(JsonSyntax node) { }
         public virtual void Visit(JsonSyntax node) { if (node != null) node.Accept(this); }
-        public virtual void VisitBackgroundSyntax(JsonBackgroundSyntax node) => DefaultVisit(node);
+        public virtual void VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual void VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitColon(JsonColonSyntax node) => DefaultVisit(node);
         public virtual void VisitComma(JsonCommaSyntax node) => DefaultVisit(node);
@@ -51,7 +51,7 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(JsonSyntax node) => default;
         public virtual TResult Visit(JsonSyntax node) => node == null ? default : node.Accept(this);
-        public virtual TResult VisitBackgroundSyntax(JsonBackgroundSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitColon(JsonColonSyntax node) => DefaultVisit(node);
         public virtual TResult VisitComma(JsonCommaSyntax node) => DefaultVisit(node);
@@ -73,7 +73,7 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(JsonSyntax node, T arg) => default;
         public virtual TResult Visit(JsonSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
-        public virtual TResult VisitBackgroundSyntax(JsonBackgroundSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitColon(JsonColonSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitComma(JsonCommaSyntax node, T arg) => DefaultVisit(node, arg);

@@ -24,6 +24,7 @@ using Eutherion.UIActions;
 using Eutherion.Utils;
 using Eutherion.Win;
 using Eutherion.Win.AppTemplate;
+using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -32,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = SyntaxEditorForm<PgnSyntaxTree, PgnSymbol, PgnErrorInfo>;
+    using PgnForm = SyntaxEditorForm<RootPgnSyntax, IGreenPgnSymbol, PgnErrorInfo>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {

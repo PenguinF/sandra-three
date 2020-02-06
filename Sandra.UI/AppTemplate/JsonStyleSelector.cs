@@ -65,7 +65,7 @@ namespace Eutherion.Win.AppTemplate
         public override Style DefaultVisit(JsonSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitBackgroundSyntax(JsonBackgroundSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitBackgroundListSyntax(JsonBackgroundListSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
         public override Style VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
@@ -86,7 +86,7 @@ namespace Eutherion.Win.AppTemplate
 
             private JsonUndefinedValueStyleSelector() { }
 
-            public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style DefaultVisit(JsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
                 => syntaxEditor.DefaultStyle;
 
             public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)

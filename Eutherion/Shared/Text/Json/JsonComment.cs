@@ -20,10 +20,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonComment : JsonSymbol
+    public sealed class JsonComment : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         public const char CommentStartFirstCharacter = '/';
         public const char SingleLineCommentStartSecondCharacter = '/';
@@ -32,7 +33,6 @@ namespace Eutherion.Text.Json
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
 
-        public override bool IsBackground => true;
         public override int Length { get; }
 
         public JsonComment(int length)
@@ -41,8 +41,8 @@ namespace Eutherion.Text.Json
             Length = length;
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitComment(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitComment(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitComment(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
     }
 }

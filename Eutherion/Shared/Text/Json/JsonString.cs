@@ -24,7 +24,7 @@ using System.Runtime.CompilerServices;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonString : JsonSymbol
+    public sealed class JsonString : JsonForegroundSymbol
     {
         public const char QuoteCharacter = '"';
         public const char EscapeCharacter = '\\';

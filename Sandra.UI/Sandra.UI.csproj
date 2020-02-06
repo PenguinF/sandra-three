@@ -118,6 +118,7 @@
       <DependentUpon>MovesTextBox.cs</DependentUpon>
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="PgnErrorInfoExtensions.cs" />
     <Compile Include="PgnSyntaxDescriptor.cs" />
     <Compile Include="PlayingBoard.cs">
       <SubType>Component</SubType>

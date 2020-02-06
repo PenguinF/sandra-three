@@ -1,8 +1,8 @@
 ﻿#region License
 /*********************************************************************************
- * JsonBackgroundSyntax.cs
+ * IPgnSymbol.cs
  *
- * Copyright (c) 2004-2020 Henk Nicolai
+ * Copyright (c) 2004-2019 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,16 +19,15 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Text.Json
+using Eutherion.Text;
+
+namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a single background node in an abstract json syntax tree.
+    /// Represents a terminal PGN symbol.
+    /// Instances of this type are returned by <see cref="PgnTokenizer"/>.
     /// </summary>
-    public abstract class GreenJsonBackgroundSyntax : ISpan
+    public interface IGreenPgnSymbol : ISpan
     {
-        /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public abstract int Length { get; }
     }
 }

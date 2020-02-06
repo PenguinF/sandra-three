@@ -35,12 +35,12 @@ namespace Eutherion.Shared.Tests
                 || tokenType == typeof(JsonWhitespace);
         }
 
-        private static void AssertTokens(string json, params Action<JsonSymbol>[] tokenInspectors)
+        private static void AssertTokens(string json, params Action<IGreenJsonSymbol>[] tokenInspectors)
         {
             Assert.Collection(JsonTokenizer.TokenizeAll(json), tokenInspectors);
         }
 
-        private static Action<JsonSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
+        private static Action<IGreenJsonSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
         {
             return symbol =>
             {
@@ -50,7 +50,7 @@ namespace Eutherion.Shared.Tests
             };
         }
 
-        private static Action<JsonSymbol> ExpectToken<TExpected>(int expectedLength)
+        private static Action<IGreenJsonSymbol> ExpectToken<TExpected>(int expectedLength)
         {
             return symbol =>
             {
@@ -81,7 +81,7 @@ namespace Eutherion.Shared.Tests
         {
             string expectedCommentText = alternativeCommentText ?? json;
 
-            void firstTokenAssert(JsonSymbol symbol)
+            void firstTokenAssert(IGreenJsonSymbol symbol)
             {
                 Assert.NotNull(symbol);
                 Assert.IsType<JsonComment>(symbol);

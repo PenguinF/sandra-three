@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonBackgroundSyntax.cs
+ * PgnErrorInfoExtensions.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,16 +19,20 @@
 **********************************************************************************/
 #endregion
 
-namespace Eutherion.Text.Json
+using Eutherion.Localization;
+using Sandra.Chess.Pgn;
+
+namespace Eutherion.Win.AppTemplate
 {
-    /// <summary>
-    /// Represents a single background node in an abstract json syntax tree.
-    /// </summary>
-    public abstract class GreenJsonBackgroundSyntax : ISpan
+    public static class PgnErrorInfoExtensions
     {
+        public static LocalizedStringKey GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
+            => new LocalizedStringKey($"PgnError{pgnErrorCode}");
+
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Gets the formatted and localized error message of a <see cref="PgnErrorInfo"/>.
         /// </summary>
-        public abstract int Length { get; }
+        public static string Message(this PgnErrorInfo pgnErrorInfo, Localizer localizer)
+            => localizer.Localize(GetLocalizedStringKey(pgnErrorInfo.ErrorCode));
     }
 }
