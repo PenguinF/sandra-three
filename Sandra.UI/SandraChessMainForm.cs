@@ -32,7 +32,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = SyntaxEditorForm<PgnSyntaxTree, PgnSymbol, PgnErrorInfo>;
+    using PgnForm = SyntaxEditorForm<RootPgnSyntax, PgnSymbol, PgnErrorInfo>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
