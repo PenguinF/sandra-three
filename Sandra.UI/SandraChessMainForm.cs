@@ -65,7 +65,8 @@ namespace Sandra.UI
                 LocalizedStringKeys.DefaultEnglishTranslations,
                 LocalizedConsoleKeys.DefaultEnglishTranslations,
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
-                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
+                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations,
+                PgnErrorInfoExtensions.DefaultEnglishPgnErrorTranslations);
 
             return Session.Configure(this,
                                      new SettingsProvider(),
