@@ -29,6 +29,10 @@ namespace Sandra.Chess.Pgn
     {
         public virtual void DefaultVisit(IPgnSymbol node) { }
         public virtual void Visit(IPgnSymbol node) { if (node != null) node.Accept(this); }
+        public virtual void VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual void VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
+
+        public virtual void VisitPgnSymbol(PgnSymbol node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -39,6 +43,10 @@ namespace Sandra.Chess.Pgn
     {
         public virtual TResult DefaultVisit(IPgnSymbol node) => default;
         public virtual TResult Visit(IPgnSymbol node) => node == null ? default : node.Accept(this);
+        public virtual TResult VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => DefaultVisit(node);
+
+        public virtual TResult VisitPgnSymbol(PgnSymbol node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -49,5 +57,9 @@ namespace Sandra.Chess.Pgn
     {
         public virtual TResult DefaultVisit(IPgnSymbol node, T arg) => default;
         public virtual TResult Visit(IPgnSymbol node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitWhitespaceSyntax(PgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
+
+        public virtual TResult VisitPgnSymbol(PgnSymbol node, T arg) => DefaultVisit(node, arg);
     }
 }

@@ -82,4 +82,25 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
         public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
+
+    public sealed class PgnWhitespaceSyntax : PgnBackgroundSyntax, IPgnSymbol
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnWhitespaceSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnWhitespaceSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnWhitespaceSyntax green)
+            : base(parent, parentIndex)
+            => Green = green;
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+    }
 }

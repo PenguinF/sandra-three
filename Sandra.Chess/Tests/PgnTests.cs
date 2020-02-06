@@ -43,7 +43,7 @@ namespace Sandra.Chess.Tests
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(PgnSymbol))
+            else if (tokenType1 == typeof(GreenPgnSymbol))
             {
                 if (tokenType1 == tokenType2)
                 {
@@ -65,7 +65,7 @@ namespace Sandra.Chess.Tests
                 yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("é", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("a1".ToString(), typeof(PgnSymbol));
+                yield return ("a1".ToString(), typeof(GreenPgnSymbol));
             }
         }
 

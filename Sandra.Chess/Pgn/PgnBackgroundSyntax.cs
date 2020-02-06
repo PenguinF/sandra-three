@@ -38,4 +38,36 @@ namespace Sandra.Chess.Pgn
         public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
+
+    /// <summary>
+    /// Represents a single background node in an abstract PGN syntax tree.
+    /// </summary>
+    public abstract class PgnBackgroundSyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnSyntaxNodes Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnBackgroundSyntax(PgnSyntaxNodes parent, int parentIndex)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
+    }
 }

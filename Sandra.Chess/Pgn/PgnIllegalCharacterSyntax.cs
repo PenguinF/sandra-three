@@ -80,7 +80,7 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
     }
 
-    public static class PgnIllegalCharacterSyntax
+    public sealed class PgnIllegalCharacterSyntax : PgnBackgroundSyntax, IPgnSymbol
     {
         public const int IllegalCharacterLength = 1;
 
@@ -98,5 +98,23 @@ namespace Sandra.Chess.Pgn
         /// </returns>
         public static PgnErrorInfo CreateError(string displayCharValue, int startPosition)
             => new PgnErrorInfo(PgnErrorCode.IllegalCharacter, startPosition, IllegalCharacterLength, new[] { displayCharValue });
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnIllegalCharacterSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => IllegalCharacterLength;
+
+        internal PgnIllegalCharacterSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnIllegalCharacterSyntax green)
+            : base(parent, parentIndex)
+            => Green = green;
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitllegalCharacterSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitllegalCharacterSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
     }
 }

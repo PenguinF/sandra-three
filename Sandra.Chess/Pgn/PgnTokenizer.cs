@@ -113,7 +113,7 @@ namespace Sandra.Chess.Pgn
                     {
                         if (firstUnusedIndex < currentIndex)
                         {
-                            yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+                            yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
                             firstUnusedIndex = currentIndex;
                         }
 
@@ -125,7 +125,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
-                        yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+                        yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
                         firstUnusedIndex = currentIndex;
                     }
 
@@ -138,7 +138,7 @@ namespace Sandra.Chess.Pgn
 
             if (firstUnusedIndex < currentIndex)
             {
-                yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+                yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
             }
         }
 

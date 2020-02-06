@@ -56,11 +56,11 @@ namespace Sandra.Chess.Pgn
     }
 
     // Temporary placeholder
-    public class PgnSymbol : IPgnForegroundSymbol
+    public class GreenPgnSymbol : IPgnForegroundSymbol
     {
         public int Length { get; }
 
-        public PgnSymbol(int length) => Length = length;
+        public GreenPgnSymbol(int length) => Length = length;
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
 
@@ -77,5 +77,27 @@ namespace Sandra.Chess.Pgn
         void Accept(PgnSymbolVisitor visitor);
         TResult Accept<TResult>(PgnSymbolVisitor<TResult> visitor);
         TResult Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    // Temporary placeholder
+    public class PgnSymbol : PgnSyntax, IPgnSymbol
+    {
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+        public GreenPgnSymbol Green { get; }
+        public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, GreenPgnSymbol green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitPgnSymbol(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitPgnSymbol(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitPgnSymbol(this, arg);
     }
 }
