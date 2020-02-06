@@ -47,8 +47,23 @@ namespace Eutherion.Text.Json
             }
         }
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonWhitespaceSyntax"/> with a specified length.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="GreenJsonWhitespaceSyntax"/>.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
         public static GreenJsonWhitespaceSyntax Create(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
