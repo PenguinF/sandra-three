@@ -23,6 +23,6 @@ namespace Eutherion.Text.Json
 {
     public abstract class GreenJsonBackgroundSyntax : JsonSymbol
     {
-        public sealed override bool IsBackground => true;
+        public sealed override Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

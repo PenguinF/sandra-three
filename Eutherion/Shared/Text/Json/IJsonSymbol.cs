@@ -25,7 +25,6 @@ namespace Eutherion.Text.Json
 {
     public abstract class JsonSymbol : ISpan
     {
-        public abstract bool IsBackground { get; }
         public virtual bool IsValueStartSymbol => false;
 
         /// <summary>
@@ -44,6 +43,14 @@ namespace Eutherion.Text.Json
         /// </returns>
         public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
+        /// <summary>
+        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </summary>
+        /// <returns>
+        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </returns>
+        public abstract Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
+
         public abstract int Length { get; }
 
         public abstract void Accept(JsonSymbolVisitor visitor);
@@ -53,6 +60,6 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonForegroundSymbol : JsonSymbol
     {
-        public sealed override bool IsBackground => false;
+        public sealed override Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

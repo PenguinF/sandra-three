@@ -54,13 +54,24 @@ namespace Eutherion.Text.Json
             // Skip background until encountering something meaningful.
             for (; ; )
             {
-                CurrentToken = Tokens.MoveNext() ? Tokens.Current : null;
-                if (CurrentToken == null) break;
+                JsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : null;
+                if (newToken == null)
+                {
+                    CurrentToken = null;
+                    break;
+                }
 
-                Errors.AddRange(CurrentToken.GetErrors(CurrentLength));
-                CurrentLength += CurrentToken.Length;
-                if (!CurrentToken.IsBackground) break;
-                BackgroundBuilder.Add(CurrentToken);
+                Errors.AddRange(newToken.GetErrors(CurrentLength));
+                CurrentLength += newToken.Length;
+
+                var discriminated = newToken.AsBackgroundOrForeground();
+                if (discriminated.IsOption2(out JsonForegroundSymbol foregroundSymbol))
+                {
+                    CurrentToken = foregroundSymbol;
+                    break;
+                }
+
+                BackgroundBuilder.Add(discriminated.ToOption1());
             }
         }
 
