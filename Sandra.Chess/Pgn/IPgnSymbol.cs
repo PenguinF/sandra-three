@@ -54,4 +54,16 @@ namespace Sandra.Chess.Pgn
     public interface IPgnForegroundSymbol : IGreenPgnSymbol
     {
     }
+
+    // Temporary placeholder
+    public class PgnSymbol : IPgnForegroundSymbol
+    {
+        public int Length { get; }
+
+        public PgnSymbol(int length) => Length = length;
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
 }
