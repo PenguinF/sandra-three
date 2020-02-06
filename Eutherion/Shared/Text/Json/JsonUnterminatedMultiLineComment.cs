@@ -42,8 +42,6 @@ namespace Eutherion.Text.Json
 
         public override bool IsBackground => true;
 
-        public override bool HasErrors => true;
-
         public override IEnumerable<JsonErrorInfo> GetErrors(int start)
             => new SingleElementEnumerable<JsonErrorInfo>(CreateError(start, Length));
 
