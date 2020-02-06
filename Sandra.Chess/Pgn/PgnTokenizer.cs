@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Sandra.Chess.Pgn
 {
@@ -32,6 +33,9 @@ namespace Sandra.Chess.Pgn
         private readonly string pgnText;
         private readonly int length;
 
+        // Current state.
+        private int currentIndex;
+
         private PgnTokenizer(string pgnText)
         {
             this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
@@ -40,6 +44,29 @@ namespace Sandra.Chess.Pgn
 
         private IEnumerable<IGreenPgnSymbol> _TokenizeAll()
         {
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // All legal PGN characters have a value below 0x7F.
+                if (c <= 0x7e)
+                {
+                }
+                else
+                {
+                    var category = char.GetUnicodeCategory(c);
+
+                    string displayCharValue = category == UnicodeCategory.OtherNotAssigned
+                                           || category == UnicodeCategory.Control
+                        ? $"\\u{((int)c).ToString("x4")}"
+                        : Convert.ToString(c);
+
+                    yield return new GreenPgnIllegalCharacterSyntax(displayCharValue);
+                }
+
+                currentIndex++;
+            }
+
             yield break;
         }
 
