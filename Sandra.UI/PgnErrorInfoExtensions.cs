@@ -1,8 +1,8 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorInfo.cs
+ * PgnErrorInfoExtensions.cs
  *
- * Copyright (c) 2004-2019 Henk Nicolai
+ * Copyright (c) 2004-2020 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,24 +19,20 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
+using Eutherion.Localization;
+using Sandra.Chess.Pgn;
 
-namespace Sandra.Chess.Pgn
+namespace Eutherion.Win.AppTemplate
 {
-    /// <summary>
-    /// Reports an error at a certain location in a source PGN.
-    /// </summary>
-    public class PgnErrorInfo : ISpan
+    public static class PgnErrorInfoExtensions
     {
-        public PgnErrorCode ErrorCode { get; }
-        public int Start { get; }
-        public int Length { get; }
+        public static LocalizedStringKey GetLocalizedStringKey(PgnErrorCode pgnErrorCode)
+            => new LocalizedStringKey($"PgnError{pgnErrorCode}");
 
-        public PgnErrorInfo(PgnErrorCode errorCode, int start, int length)
-        {
-            ErrorCode = errorCode;
-            Start = start;
-            Length = length;
-        }
+        /// <summary>
+        /// Gets the formatted and localized error message of a <see cref="PgnErrorInfo"/>.
+        /// </summary>
+        public static string Message(this PgnErrorInfo pgnErrorInfo, Localizer localizer)
+            => localizer.Localize(GetLocalizedStringKey(pgnErrorInfo.ErrorCode));
     }
 }

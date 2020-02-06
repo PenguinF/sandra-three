@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorInfo.cs
+ * PgnErrorCode.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,24 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Reports an error at a certain location in a source PGN.
+    /// Enumerates distinct PGN syntax and semantic error types.
     /// </summary>
-    public class PgnErrorInfo : ISpan
+    public enum PgnErrorCode
     {
-        public PgnErrorCode ErrorCode { get; }
-        public int Start { get; }
-        public int Length { get; }
-
-        public PgnErrorInfo(PgnErrorCode errorCode, int start, int length)
-        {
-            ErrorCode = errorCode;
-            Start = start;
-            Length = length;
-        }
     }
 }

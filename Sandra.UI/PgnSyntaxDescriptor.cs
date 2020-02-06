@@ -62,7 +62,7 @@ namespace Sandra.UI
             => (error.Start, error.Length);
 
         public override string GetErrorMessage(PgnErrorInfo error)
-            => error.Message;
+            => error.Message(Session.Current.CurrentLocalizer);
     }
 
     public class RootPgnSyntax

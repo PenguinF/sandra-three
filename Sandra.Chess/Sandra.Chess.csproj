@@ -45,6 +45,7 @@
     <Compile Include="Move.cs" />
     <Compile Include="MoveFormatter.cs" />
     <Compile Include="Pgn\IPgnSymbol.cs" />
+    <Compile Include="Pgn\PgnErrorCode.cs" />
     <Compile Include="Pgn\PgnErrorInfo.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
     <Compile Include="Position.cs" />
