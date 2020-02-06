@@ -36,9 +36,9 @@ namespace Eutherion.Text.Json
         private readonly IEnumerator<JsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
-        private readonly List<JsonSymbol> BackgroundBuilder = new List<JsonSymbol>();
+        private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
 
-        private JsonSymbol CurrentToken;
+        private JsonForegroundSymbol CurrentToken;
 
         // Used for parse error reporting.
         private int CurrentLength;

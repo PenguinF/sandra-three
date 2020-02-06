@@ -32,13 +32,13 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the empty <see cref="GreenJsonBackgroundListSyntax"/>.
         /// </summary>
-        public static readonly GreenJsonBackgroundListSyntax Empty = new GreenJsonBackgroundListSyntax(ReadOnlySpanList<JsonSymbol>.Empty);
+        public static readonly GreenJsonBackgroundListSyntax Empty = new GreenJsonBackgroundListSyntax(ReadOnlySpanList<GreenJsonBackgroundSyntax>.Empty);
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenJsonBackgroundListSyntax"/>.
         /// </summary>
         /// <param name="source">
-        /// The source enumeration of <see cref="JsonSymbol"/>.
+        /// The source enumeration of <see cref="GreenJsonBackgroundSyntax"/>.
         /// </param>
         /// <returns>
         /// The new <see cref="GreenJsonBackgroundListSyntax"/>.
@@ -46,9 +46,9 @@ namespace Eutherion.Text.Json
         /// <exception cref="ArgumentNullException">
         /// <paramref name="source"/> is null.
         /// </exception>
-        public static GreenJsonBackgroundListSyntax Create(IEnumerable<JsonSymbol> source)
+        public static GreenJsonBackgroundListSyntax Create(IEnumerable<GreenJsonBackgroundSyntax> source)
         {
-            var readOnlyBackground = ReadOnlySpanList<JsonSymbol>.Create(source);
+            var readOnlyBackground = ReadOnlySpanList<GreenJsonBackgroundSyntax>.Create(source);
             if (readOnlyBackground.Count == 0) return Empty;
             return new GreenJsonBackgroundListSyntax(readOnlyBackground);
         }
@@ -56,14 +56,14 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the read-only list with background symbols.
         /// </summary>
-        public ReadOnlySpanList<JsonSymbol> BackgroundSymbols { get; }
+        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundSymbols { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
         /// </summary>
         public int Length => BackgroundSymbols.Length;
 
-        private GreenJsonBackgroundListSyntax(ReadOnlySpanList<JsonSymbol> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
+        private GreenJsonBackgroundListSyntax(ReadOnlySpanList<GreenJsonBackgroundSyntax> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the read-only list with background symbols.
         /// </summary>
-        public ReadOnlySpanList<JsonSymbol> BackgroundSymbols => Green.BackgroundSymbols;
+        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundSymbols => Green.BackgroundSymbols;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
