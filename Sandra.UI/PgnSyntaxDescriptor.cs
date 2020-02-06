@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Localization;
 using Eutherion.Win.AppTemplate;
 using Sandra.Chess.Pgn;
@@ -64,10 +65,14 @@ namespace Sandra.UI
             => error.Message(Session.Current.CurrentLocalizer);
     }
 
-    public class PgnSymbol : IGreenPgnSymbol
+    public class PgnSymbol : IPgnForegroundSymbol
     {
         public int Length { get; }
 
         public PgnSymbol(int length) => Length = length;
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 }

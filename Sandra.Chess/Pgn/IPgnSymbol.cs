@@ -19,7 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
+using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
@@ -28,6 +30,28 @@ namespace Sandra.Chess.Pgn
     /// Instances of this type are returned by <see cref="PgnTokenizer"/>.
     /// </summary>
     public interface IGreenPgnSymbol : ISpan
+    {
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        IEnumerable<PgnErrorInfo> GetErrors(int startPosition);
+
+        /// <summary>
+        /// Converts this symbol into either a <see cref="GreenPgnBackgroundSyntax"/> or a <see cref="IPgnForegroundSymbol"/>.
+        /// </summary>
+        /// <returns>
+        /// Either a <see cref="GreenPgnBackgroundSyntax"/> or a <see cref="IPgnForegroundSymbol"/>.
+        /// </returns>
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> AsBackgroundOrForeground();
+    }
+
+    public interface IPgnForegroundSymbol : IGreenPgnSymbol
     {
     }
 }
