@@ -23,7 +23,7 @@ using System;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonComment : JsonSymbol
+    public sealed class JsonComment : GreenJsonBackgroundSyntax
     {
         public const char CommentStartFirstCharacter = '/';
         public const char SingleLineCommentStartSecondCharacter = '/';
@@ -32,7 +32,6 @@ namespace Eutherion.Text.Json
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
 
-        public override bool IsBackground => true;
         public override int Length { get; }
 
         public JsonComment(int length)

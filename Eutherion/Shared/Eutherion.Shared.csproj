@@ -49,6 +49,7 @@
     <Compile Include="Text\ISpan.cs" />
     <Compile Include="Text\Json\IJsonSymbol.cs" />
     <Compile Include="Text\Json\JsonBackgroundListSyntax.cs" />
+    <Compile Include="Text\Json\JsonBackgroundSyntax.cs" />
     <Compile Include="Text\Json\JsonBooleanLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonColon.cs" />
     <Compile Include="Text\Json\JsonColonSyntax.cs" />

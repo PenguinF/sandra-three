@@ -23,7 +23,7 @@ using System;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonWhitespace : JsonSymbol
+    public sealed class JsonWhitespace : GreenJsonBackgroundSyntax
     {
         /// <summary>
         /// Maximum length before new <see cref="JsonWhitespace"/> instances are always newly allocated.
@@ -43,7 +43,6 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public override bool IsBackground => true;
         public override int Length { get; }
 
         public static JsonWhitespace Create(int length)
