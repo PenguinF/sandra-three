@@ -274,7 +274,7 @@ namespace Sandra.UI
                 return GeneratePgnLine(copiedGame, new List<PgnPlyWithSidelines>()).GenerateTerminalSymbols();
             }
 
-            return Enumerable.Empty<IPgnTerminalSymbol>();
+            return EmptyEnumerable<IPgnTerminalSymbol>.Instance;
         }
 
         private TextElement<IPgnTerminalSymbol> currentActiveMoveStyleElement;

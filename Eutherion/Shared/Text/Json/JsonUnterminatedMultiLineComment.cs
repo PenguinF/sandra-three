@@ -45,9 +45,7 @@ namespace Eutherion.Text.Json
         public override bool HasErrors => true;
 
         public override IEnumerable<JsonErrorInfo> GetErrors(int start)
-        {
-            yield return CreateError(start, Length);
-        }
+            => new SingleElementEnumerable<JsonErrorInfo>(CreateError(start, Length));
 
         public JsonUnterminatedMultiLineComment(int length)
         {

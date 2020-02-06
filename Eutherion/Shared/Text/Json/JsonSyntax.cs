@@ -165,7 +165,7 @@ namespace Eutherion.Text.Json
             {
                 if (IsTerminalSymbol)
                 {
-                    return new[] { this };
+                    return new SingleElementEnumerable<JsonSyntax>(this);
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace Eutherion.Text.Json
                 }
             }
 
-            return Array.Empty<JsonSyntax>();
+            return EmptyEnumerable<JsonSyntax>.Instance;
         }
 
         public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);

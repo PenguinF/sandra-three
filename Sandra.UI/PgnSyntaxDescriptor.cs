@@ -24,7 +24,6 @@ using Eutherion.Win.AppTemplate;
 using Sandra.Chess.Pgn;
 using ScintillaNET;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.UI
 {
@@ -42,7 +41,7 @@ namespace Sandra.UI
         public override RootPgnSyntax Parse(string code)
         {
             int length = code.Length;
-            if (length == 0) return new RootPgnSyntax(Enumerable.Empty<PgnSymbol>());
+            if (length == 0) return new RootPgnSyntax(EmptyEnumerable<PgnSymbol>.Instance);
             return new RootPgnSyntax(new PgnSymbol[] { new PgnSymbol(length) });
         }
 

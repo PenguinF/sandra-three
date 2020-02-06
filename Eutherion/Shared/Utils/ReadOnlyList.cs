@@ -101,10 +101,7 @@ namespace Eutherion.Utils
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
         /// </returns>
-        public IEnumerator<T> GetEnumerator()
-        {
-            foreach (T element in array) yield return element;
-        }
+        public IEnumerator<T> GetEnumerator() => ((ICollection<T>)array).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

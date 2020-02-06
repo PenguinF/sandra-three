@@ -52,6 +52,7 @@ namespace System.Linq
                 value = element;
                 return true;
             }
+
             value = default;
             return false;
         }
@@ -90,6 +91,7 @@ namespace System.Linq
                     return true;
                 }
             }
+
             value = default;
             return false;
         }
@@ -210,6 +212,10 @@ namespace System.Linq
                         return array;
                     }
                     break;
+                case EmptyEnumerable<TSource> _:
+                    break;
+                case SingleElementEnumerable<TSource> singleElementEnumerable:
+                    return new[] { singleElementEnumerable.Element };
                 default:
                     array = source.ToArray();
                     if (array.Length > 0) return array;

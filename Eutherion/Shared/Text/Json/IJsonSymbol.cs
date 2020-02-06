@@ -20,7 +20,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Eutherion.Text.Json
 {
@@ -44,7 +43,7 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// A sequence of errors associated with this symbol.
         /// </returns>
-        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => Enumerable.Empty<JsonErrorInfo>();
+        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         public abstract int Length { get; }
 

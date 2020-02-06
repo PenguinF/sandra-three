@@ -43,9 +43,7 @@ namespace Eutherion.Text.Json
         public override bool HasErrors => true;
 
         public override IEnumerable<JsonErrorInfo> GetErrors(int position)
-        {
-            yield return CreateError(DisplayCharValue, position);
-        }
+            => new SingleElementEnumerable<JsonErrorInfo>(CreateError(DisplayCharValue, position));
 
         public JsonUnknownSymbol(string displayCharValue)
         {

@@ -20,7 +20,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -30,7 +29,7 @@ namespace Sandra.Chess.Pgn
     public class RootPgnSyntax
     {
         public readonly IEnumerable<IGreenPgnSymbol> Terminals;
-        public readonly IEnumerable<PgnErrorInfo> Errors = Enumerable.Empty<PgnErrorInfo>();
+        public readonly IEnumerable<PgnErrorInfo> Errors = EmptyEnumerable<PgnErrorInfo>.Instance;
 
         public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> terminals) => Terminals = terminals;
     }
