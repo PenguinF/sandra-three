@@ -35,6 +35,7 @@ namespace Sandra.Chess.Pgn
 
         // Current state.
         private int currentIndex;
+        private int firstUnusedIndex;
 
         private PgnTokenizer(string pgnText)
         {
@@ -51,6 +52,19 @@ namespace Sandra.Chess.Pgn
                 // All legal PGN characters have a value below 0x7F.
                 if (c <= 0x7e)
                 {
+                    switch (c)
+                    {
+                        case char _ when c <= ' ':
+                            // Treat all control characters as whitespace.
+                            break;
+                        default:
+                            if (firstUnusedIndex < currentIndex)
+                            {
+                                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                            }
+                            firstUnusedIndex = currentIndex;
+                            break;
+                    }
                 }
                 else
                 {
