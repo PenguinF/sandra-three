@@ -24,7 +24,27 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonUnterminatedMultiLineCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
+    /// <summary>
+    /// Represents a json syntax node which contains an unterminated multi-line comment.
+    /// </summary>
+    public sealed class GreenJsonUnterminatedMultiLineCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
+    {
+        public override int Length { get; }
+
+        public JsonErrorInfo GetError(int startPosition) => JsonUnterminatedMultiLineCommentSyntax.CreateError(startPosition, Length);
+
+        public GreenJsonUnterminatedMultiLineCommentSyntax(int length)
+        {
+            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
+
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
+
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class JsonUnterminatedMultiLineCommentSyntax
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
@@ -37,17 +57,5 @@ namespace Eutherion.Text.Json
         /// </param>
         public static JsonErrorInfo CreateError(int start, int length)
             => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
-
-        public override int Length { get; }
-
-        public JsonUnterminatedMultiLineCommentSyntax(int length)
-        {
-            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-        }
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(CreateError(startPosition, Length));
-
-        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
     }
 }

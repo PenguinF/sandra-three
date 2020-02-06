@@ -49,7 +49,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the list of value section nodes separated by colon characters.
         /// </summary>
-        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon> ValueSectionNodes { get; }
+        public ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonColonSyntax> ValueSectionNodes { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
@@ -74,7 +74,7 @@ namespace Eutherion.Text.Json
         public GreenJsonKeyValueSyntax(Maybe<GreenJsonStringLiteralSyntax> validKey, IEnumerable<GreenJsonMultiValueSyntax> valueSectionNodes)
         {
             ValidKey = validKey ?? throw new ArgumentNullException(nameof(validKey));
-            ValueSectionNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, JsonColon>.Create(valueSectionNodes, JsonColon.Value);
+            ValueSectionNodes = ReadOnlySeparatedSpanList<GreenJsonMultiValueSyntax, GreenJsonColonSyntax>.Create(valueSectionNodes, GreenJsonColonSyntax.Value);
 
             if (ValueSectionNodes.Count == 0)
             {
@@ -131,7 +131,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => JsonCurlyOpen.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
+        public override int Start => JsonCurlyOpenSyntax.CurlyOpenLength + Parent.Green.KeyValueNodes.GetElementOffset(ParentKeyValueNodeIndex);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.

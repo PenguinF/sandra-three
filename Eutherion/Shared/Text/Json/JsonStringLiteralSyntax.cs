@@ -26,6 +26,46 @@ namespace Eutherion.Text.Json
 {
     public sealed class JsonString : JsonForegroundSymbol
     {
+        public string Value { get; }
+
+        public override bool IsValueStartSymbol => true;
+        public override int Length { get; }
+
+        public JsonString(string value, int length)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+            Value = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a string literal value syntax node.
+    /// </summary>
+    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax
+    {
+        public JsonString StringToken { get; }
+
+        public string Value => StringToken.Value;
+
+        public override int Length => StringToken.Length;
+
+        public GreenJsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
+
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a string literal value syntax node.
+    /// </summary>
+    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
+    {
         public const char QuoteCharacter = '"';
         public const char EscapeCharacter = '\\';
 
@@ -55,7 +95,7 @@ namespace Eutherion.Text.Json
         // An index in memory is as fast as it gets for determining whether or not a character should be escaped.
         public static readonly bool[] CharacterMustBeEscapedIndex;
 
-        static JsonString()
+        static JsonStringLiteralSyntax()
         {
             // Will be initialized with all false values.
             CharacterMustBeEscapedIndex = new bool[ControlCharacterIndexLength];
@@ -83,46 +123,6 @@ namespace Eutherion.Text.Json
             return c >= '\u2028' && c <= '\u2029';
         }
 
-        public string Value { get; }
-
-        public override bool IsValueStartSymbol => true;
-        public override int Length { get; }
-
-        public JsonString(string value, int length)
-        {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitString(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitString(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitString(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a string literal value syntax node.
-    /// </summary>
-    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax
-    {
-        public JsonString StringToken { get; }
-
-        public string Value => StringToken.Value;
-
-        public override int Length => StringToken.Length;
-
-        public GreenJsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
-
-        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a string literal value syntax node.
-    /// </summary>
-    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
-    {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>

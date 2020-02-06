@@ -21,21 +21,21 @@
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonSquareBracketOpen : JsonForegroundSymbol
+    /// <summary>
+    /// Represents a json square bracket open syntax node.
+    /// </summary>
+    public sealed class GreenJsonSquareBracketOpenSyntax : JsonForegroundSymbol
     {
-        public const char SquareBracketOpenCharacter = '[';
-        public const int SquareBracketOpenLength = 1;
-
-        public static readonly JsonSquareBracketOpen Value = new JsonSquareBracketOpen();
+        public static readonly GreenJsonSquareBracketOpenSyntax Value = new GreenJsonSquareBracketOpenSyntax();
 
         public override bool IsValueStartSymbol => true;
-        public override int Length => SquareBracketOpenLength;
+        public override int Length => JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
 
-        private JsonSquareBracketOpen() { }
+        private GreenJsonSquareBracketOpenSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpen(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
     }
 
     /// <summary>
@@ -43,6 +43,9 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonSquareBracketOpenSyntax : JsonSyntax
     {
+        public const char SquareBracketOpenCharacter = '[';
+        public const int SquareBracketOpenLength = 1;
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -51,7 +54,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public JsonSquareBracketOpen Green => JsonSquareBracketOpen.Value;
+        public GreenJsonSquareBracketOpenSyntax Green => GreenJsonSquareBracketOpenSyntax.Value;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -61,7 +64,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => JsonSquareBracketOpen.SquareBracketOpenLength;
+        public override int Length => SquareBracketOpenLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -70,8 +73,8 @@ namespace Eutherion.Text.Json
 
         internal JsonSquareBracketOpenSyntax(JsonListSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpen(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpen(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
     }
 }

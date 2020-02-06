@@ -165,7 +165,7 @@ namespace Eutherion.Win.Storage
 
         public override void VisitList(PList value)
         {
-            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+            outputBuilder.Append(JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -177,7 +177,7 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    outputBuilder.Append(JsonComma.CommaCharacter);
+                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
                 }
 
                 outputBuilder.AppendLine();
@@ -195,12 +195,12 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
+            outputBuilder.Append(JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
+            outputBuilder.Append(JsonCurlyOpenSyntax.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
@@ -210,7 +210,7 @@ namespace Eutherion.Win.Storage
 
                 if (!first)
                 {
-                    outputBuilder.Append(JsonComma.CommaCharacter);
+                    outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
                 }
                 else
                 {
@@ -235,7 +235,7 @@ namespace Eutherion.Win.Storage
                 }
 
                 AppendString(name);
-                outputBuilder.Append(JsonColon.ColonCharacter);
+                outputBuilder.Append(JsonColonSyntax.ColonCharacter);
                 outputBuilder.Append(SpaceChar);
                 Visit(kv.Value);
             }
@@ -250,7 +250,7 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
             }
 
-            outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
+            outputBuilder.Append(JsonCurlyCloseSyntax.CurlyCloseCharacter);
         }
     }
 

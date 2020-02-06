@@ -24,18 +24,14 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
+    /// <summary>
+    /// Represents a json syntax node which contains a comment.
+    /// </summary>
+    public sealed class GreenJsonCommentSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
-        public const char CommentStartFirstCharacter = '/';
-        public const char SingleLineCommentStartSecondCharacter = '/';
-        public const char MultiLineCommentStartSecondCharacter = '*';
-
-        public static readonly string SingleLineCommentStart
-            = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
-
         public override int Length { get; }
 
-        public JsonCommentSyntax(int length)
+        public GreenJsonCommentSyntax(int length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
@@ -44,5 +40,15 @@ namespace Eutherion.Text.Json
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
         Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class JsonCommentSyntax
+    {
+        public const char CommentStartFirstCharacter = '/';
+        public const char SingleLineCommentStartSecondCharacter = '/';
+        public const char MultiLineCommentStartSecondCharacter = '*';
+
+        public static readonly string SingleLineCommentStart
+            = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
     }
 }

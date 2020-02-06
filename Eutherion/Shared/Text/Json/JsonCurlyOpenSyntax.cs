@@ -21,21 +21,21 @@
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonCurlyOpen : JsonForegroundSymbol
+    /// <summary>
+    /// Represents a json curly open syntax node.
+    /// </summary>
+    public sealed class GreenJsonCurlyOpenSyntax : JsonForegroundSymbol
     {
-        public const char CurlyOpenCharacter = '{';
-        public const int CurlyOpenLength = 1;
-
-        public static readonly JsonCurlyOpen Value = new JsonCurlyOpen();
+        public static readonly GreenJsonCurlyOpenSyntax Value = new GreenJsonCurlyOpenSyntax();
 
         public override bool IsValueStartSymbol => true;
-        public override int Length => CurlyOpenLength;
+        public override int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
 
-        private JsonCurlyOpen() { }
+        private GreenJsonCurlyOpenSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpen(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 
     /// <summary>
@@ -43,6 +43,9 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class JsonCurlyOpenSyntax : JsonSyntax
     {
+        public const char CurlyOpenCharacter = '{';
+        public const int CurlyOpenLength = 1;
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -51,7 +54,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
-        public JsonCurlyOpen Green => JsonCurlyOpen.Value;
+        public GreenJsonCurlyOpenSyntax Green => GreenJsonCurlyOpenSyntax.Value;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -61,7 +64,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public override int Length => JsonCurlyOpen.CurlyOpenLength;
+        public override int Length => CurlyOpenLength;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -70,8 +73,8 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyOpenSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpen(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpen(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpen(this, arg);
+        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 }

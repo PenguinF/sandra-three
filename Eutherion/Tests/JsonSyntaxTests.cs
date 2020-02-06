@@ -31,26 +31,26 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void OutOfRangeArguments()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonCommentSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorStringSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineCommentSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespaceSyntax.Create(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespaceSyntax.Create(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
         }
 
         [Fact]
         public void JsonSymbolsWithLengthOne()
         {
             // As long as there's code around which depends on these symbols having length 1, this unit test is needed.
-            Assert.Equal(1, JsonColon.Value.Length);
-            Assert.Equal(1, JsonComma.Value.Length);
-            Assert.Equal(1, JsonCurlyClose.Value.Length);
-            Assert.Equal(1, JsonCurlyOpen.Value.Length);
-            Assert.Equal(1, JsonSquareBracketClose.Value.Length);
-            Assert.Equal(1, JsonSquareBracketOpen.Value.Length);
-            Assert.Equal(1, new JsonUnknownSymbolSyntax("\\0").Length);
+            Assert.Equal(1, GreenJsonColonSyntax.Value.Length);
+            Assert.Equal(1, GreenJsonCommaSyntax.Value.Length);
+            Assert.Equal(1, GreenJsonCurlyCloseSyntax.Value.Length);
+            Assert.Equal(1, GreenJsonCurlyOpenSyntax.Value.Length);
+            Assert.Equal(1, GreenJsonSquareBracketCloseSyntax.Value.Length);
+            Assert.Equal(1, GreenJsonSquareBracketOpenSyntax.Value.Length);
+            Assert.Equal(1, new GreenJsonUnknownSymbolSyntax("\\0").Length);
         }
 
         [Fact]
@@ -81,8 +81,8 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullErrorsShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorStringSyntax(2, null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorStringSyntax(null, 2));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace Eutherion.Shared.Tests
             var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
 
             Assert.Collection(
-                new JsonErrorStringSyntax(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
+                new GreenJsonErrorStringSyntax(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
@@ -108,7 +108,7 @@ namespace Eutherion.Shared.Tests
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
             var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new JsonErrorStringSyntax(errorList, 1);
+            var errorString = new GreenJsonErrorStringSyntax(errorList, 1);
             Assert.NotSame(errorString.Errors, errorList);
 
             // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
@@ -124,13 +124,13 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void UnexpectedSymbolShouldBeNotNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbolSyntax(null));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonUnknownSymbolSyntax(null));
         }
 
         [Fact]
         public void UnexpectedSymbolShouldBeNonEmpty()
         {
-            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbolSyntax(string.Empty));
+            Assert.Throws<ArgumentException>(() => new GreenJsonUnknownSymbolSyntax(string.Empty));
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
-            var symbol = new JsonUnknownSymbolSyntax(displayCharValue);
+            var symbol = new GreenJsonUnknownSymbolSyntax(displayCharValue);
             Assert.Equal(displayCharValue, symbol.DisplayCharValue);
         }
 
@@ -146,7 +146,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var symbol = new JsonUnterminatedMultiLineCommentSyntax(commentText.Length);
+            var symbol = new GreenJsonUnterminatedMultiLineCommentSyntax(commentText.Length);
             Assert.Equal(commentText.Length, symbol.Length);
         }
 

@@ -32,7 +32,7 @@ namespace Eutherion.Shared.Tests
         private static bool IsAgglutinativeTokenType(Type tokenType)
         {
             return tokenType == typeof(JsonValue)
-                || tokenType == typeof(JsonWhitespaceSyntax);
+                || tokenType == typeof(GreenJsonWhitespaceSyntax);
         }
 
         private static void AssertTokens(string json, params Action<IGreenJsonSymbol>[] tokenInspectors)
@@ -84,7 +84,7 @@ namespace Eutherion.Shared.Tests
             void firstTokenAssert(IGreenJsonSymbol symbol)
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonCommentSyntax>(symbol);
+                Assert.IsType<GreenJsonCommentSyntax>(symbol);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
                 Assert.Equal(expectedCommentText, json.Substring(0, symbol.Length));
             }
@@ -99,7 +99,7 @@ namespace Eutherion.Shared.Tests
                 AssertTokens(
                     json,
                     firstTokenAssert,
-                    symbol => Assert.IsType<JsonWhitespaceSyntax>(symbol));
+                    symbol => Assert.IsType<GreenJsonWhitespaceSyntax>(symbol));
             }
         }
 
@@ -121,25 +121,25 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            AssertTokens(ws, ExpectToken<JsonWhitespaceSyntax>(ws.Length));
+            AssertTokens(ws, ExpectToken<GreenJsonWhitespaceSyntax>(ws.Length));
         }
 
         [Theory]
-        [InlineData(typeof(JsonCurlyOpen), '{')]
-        [InlineData(typeof(JsonCurlyClose), '}')]
-        [InlineData(typeof(JsonSquareBracketOpen), '[')]
-        [InlineData(typeof(JsonSquareBracketClose), ']')]
-        [InlineData(typeof(JsonColon), ':')]
-        [InlineData(typeof(JsonComma), ',')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '*')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '€')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '≥')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '¿')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '°')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '╣')]
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '∙')]
+        [InlineData(typeof(GreenJsonCurlyOpenSyntax), '{')]
+        [InlineData(typeof(GreenJsonCurlyCloseSyntax), '}')]
+        [InlineData(typeof(GreenJsonSquareBracketOpenSyntax), '[')]
+        [InlineData(typeof(GreenJsonSquareBracketCloseSyntax), ']')]
+        [InlineData(typeof(GreenJsonColonSyntax), ':')]
+        [InlineData(typeof(GreenJsonCommaSyntax), ',')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '*')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '€')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '≥')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '¿')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '°')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '╣')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '∙')]
 
-        [InlineData(typeof(JsonUnknownSymbolSyntax), '▓')]
+        [InlineData(typeof(GreenJsonUnknownSymbolSyntax), '▓')]
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
@@ -223,30 +223,30 @@ namespace Eutherion.Shared.Tests
 
         private static IEnumerable<(string, Type)> JsonTestSymbols()
         {
-            yield return (" ", typeof(JsonWhitespaceSyntax));
-            yield return ("/**/", typeof(JsonCommentSyntax));
-            yield return ("/***/", typeof(JsonCommentSyntax));
-            yield return ("/*/*/", typeof(JsonCommentSyntax));
-            yield return ("{", typeof(JsonCurlyOpen));
-            yield return ("}", typeof(JsonCurlyClose));
-            yield return ("[", typeof(JsonSquareBracketOpen));
-            yield return ("]", typeof(JsonSquareBracketClose));
-            yield return (":", typeof(JsonColon));
-            yield return (",", typeof(JsonComma));
-            yield return ("*", typeof(JsonUnknownSymbolSyntax));
+            yield return (" ", typeof(GreenJsonWhitespaceSyntax));
+            yield return ("/**/", typeof(GreenJsonCommentSyntax));
+            yield return ("/***/", typeof(GreenJsonCommentSyntax));
+            yield return ("/*/*/", typeof(GreenJsonCommentSyntax));
+            yield return ("{", typeof(GreenJsonCurlyOpenSyntax));
+            yield return ("}", typeof(GreenJsonCurlyCloseSyntax));
+            yield return ("[", typeof(GreenJsonSquareBracketOpenSyntax));
+            yield return ("]", typeof(GreenJsonSquareBracketCloseSyntax));
+            yield return (":", typeof(GreenJsonColonSyntax));
+            yield return (",", typeof(GreenJsonCommaSyntax));
+            yield return ("*", typeof(GreenJsonUnknownSymbolSyntax));
             yield return ("_", typeof(JsonValue));
             yield return ("true", typeof(JsonValue));
             yield return ("\"\"", typeof(JsonString));
             yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
-            yield return ("\"\n\\ \n\"", typeof(JsonErrorStringSyntax));
-            yield return ("\"\\u0\"", typeof(JsonErrorStringSyntax));
+            yield return ("\"\n\\ \n\"", typeof(GreenJsonErrorStringSyntax));
+            yield return ("\"\\u0\"", typeof(GreenJsonErrorStringSyntax));
         }
 
         private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
         {
-            yield return ("//", typeof(JsonCommentSyntax));
-            yield return ("/*", typeof(JsonUnterminatedMultiLineCommentSyntax));
-            yield return ("\"", typeof(JsonErrorStringSyntax));
+            yield return ("//", typeof(GreenJsonCommentSyntax));
+            yield return ("/*", typeof(GreenJsonUnterminatedMultiLineCommentSyntax));
+            yield return ("\"", typeof(GreenJsonErrorStringSyntax));
         }
 
         public static IEnumerable<object[]> OneSymbolOfEachType()
@@ -340,20 +340,20 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(OneSymbolOfEachType))]
         public void SingleLineCommentTransition(string json, Type type)
         {
-            if (type == typeof(JsonWhitespaceSyntax))
+            if (type == typeof(GreenJsonWhitespaceSyntax))
             {
                 // Test this separately because the '\n' is included in the second symbol.
                 AssertTokens(
                     $"//\n{json}",
-                    ExpectToken<JsonCommentSyntax>(2),
-                    ExpectToken<JsonWhitespaceSyntax>(1 + json.Length));
+                    ExpectToken<GreenJsonCommentSyntax>(2),
+                    ExpectToken<GreenJsonWhitespaceSyntax>(1 + json.Length));
             }
             else
             {
                 AssertTokens(
                     $"//\n{json}",
-                    ExpectToken<JsonCommentSyntax>(2),
-                    ExpectToken<JsonWhitespaceSyntax>(1),
+                    ExpectToken<GreenJsonCommentSyntax>(2),
+                    ExpectToken<GreenJsonWhitespaceSyntax>(1),
                     ExpectToken(type, json.Length));
             }
         }

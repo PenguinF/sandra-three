@@ -24,7 +24,37 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonUnknownSymbolSyntax : JsonForegroundSymbol
+    /// <summary>
+    /// Represents a json syntax node with an unknown symbol.
+    /// </summary>
+    public sealed class GreenJsonUnknownSymbolSyntax : JsonForegroundSymbol
+    {
+        public string DisplayCharValue { get; }
+
+        public override bool IsValueStartSymbol => true;
+
+        public override int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
+
+        public override bool HasErrors => true;
+
+        public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
+
+        public GreenJsonUnknownSymbolSyntax(string displayCharValue)
+        {
+            if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
+            if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
+
+            DisplayCharValue = displayCharValue;
+        }
+
+        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
+
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
+    }
+
+    public static class JsonUnknownSymbolSyntax
     {
         public const int UnknownSymbolLength = 1;
 
@@ -33,28 +63,5 @@ namespace Eutherion.Text.Json
         /// </summary>
         public static JsonErrorInfo CreateError(string displayCharValue, int position)
             => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, position, 1, new[] { displayCharValue });
-
-        public string DisplayCharValue { get; }
-
-        public override bool IsValueStartSymbol => true;
-
-        public override int Length => UnknownSymbolLength;
-
-        public override bool HasErrors => true;
-
-        public override IEnumerable<JsonErrorInfo> GetErrors(int position)
-            => new SingleElementEnumerable<JsonErrorInfo>(CreateError(DisplayCharValue, position));
-
-        public JsonUnknownSymbolSyntax(string displayCharValue)
-        {
-            if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
-            if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
-
-            DisplayCharValue = displayCharValue;
-        }
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 }

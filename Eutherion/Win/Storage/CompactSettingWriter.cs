@@ -41,7 +41,7 @@ namespace Eutherion.Win.Storage
 
         internal void AppendString(string value)
         {
-            outputBuilder.Append(JsonString.QuoteCharacter);
+            outputBuilder.Append(JsonStringLiteralSyntax.QuoteCharacter);
 
             if (value != null)
             {
@@ -52,7 +52,7 @@ namespace Eutherion.Win.Storage
                 for (int i = 0; i < value.Length; i++)
                 {
                     char c = value[i];
-                    if (JsonString.CharacterMustBeEscaped(c))
+                    if (JsonStringLiteralSyntax.CharacterMustBeEscaped(c))
                     {
                         // Non-empty substring between this character and the last?
                         if (firstNonEscapedCharPosition < i)
@@ -64,7 +64,7 @@ namespace Eutherion.Win.Storage
                         }
 
                         // Append the escape sequence.
-                        outputBuilder.Append(JsonString.EscapedCharacterString(c));
+                        outputBuilder.Append(JsonStringLiteralSyntax.EscapedCharacterString(c));
 
                         firstNonEscapedCharPosition = i + 1;
                     }
@@ -79,7 +79,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            outputBuilder.Append(JsonString.QuoteCharacter);
+            outputBuilder.Append(JsonStringLiteralSyntax.QuoteCharacter);
         }
 
         public override void VisitBoolean(PBoolean value)
@@ -93,40 +93,40 @@ namespace Eutherion.Win.Storage
 
         public override void VisitList(PList value)
         {
-            outputBuilder.Append(JsonSquareBracketOpen.SquareBracketOpenCharacter);
+            outputBuilder.Append(JsonSquareBracketOpenSyntax.SquareBracketOpenCharacter);
             currentDepth++;
 
             bool first = true;
             foreach (var element in value)
             {
                 if (first) first = false;
-                else outputBuilder.Append(JsonComma.CommaCharacter);
+                else outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
 
                 Visit(element);
             }
 
             currentDepth--;
-            outputBuilder.Append(JsonSquareBracketClose.SquareBracketCloseCharacter);
+            outputBuilder.Append(JsonSquareBracketCloseSyntax.SquareBracketCloseCharacter);
         }
 
         public override void VisitMap(PMap value)
         {
-            outputBuilder.Append(JsonCurlyOpen.CurlyOpenCharacter);
+            outputBuilder.Append(JsonCurlyOpenSyntax.CurlyOpenCharacter);
             currentDepth++;
 
             bool first = true;
             foreach (var kv in value)
             {
                 if (first) first = false;
-                else outputBuilder.Append(JsonComma.CommaCharacter);
+                else outputBuilder.Append(JsonCommaSyntax.CommaCharacter);
 
                 AppendString(kv.Key);
-                outputBuilder.Append(JsonColon.ColonCharacter);
+                outputBuilder.Append(JsonColonSyntax.ColonCharacter);
                 Visit(kv.Value);
             }
 
             currentDepth--;
-            outputBuilder.Append(JsonCurlyClose.CurlyCloseCharacter);
+            outputBuilder.Append(JsonCurlyCloseSyntax.CurlyCloseCharacter);
         }
     }
 }
