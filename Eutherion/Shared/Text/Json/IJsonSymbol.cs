@@ -23,7 +23,33 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public abstract class JsonSymbol : ISpan
+    /// <summary>
+    /// Represents a terminal json symbol.
+    /// Instances of this type are returned by <see cref="JsonTokenizer"/>.
+    /// </summary>
+    public interface IGreenJsonSymbol : ISpan
+    {
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
+
+        /// <summary>
+        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </summary>
+        /// <returns>
+        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// </returns>
+        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
+    }
+
+    public abstract class JsonForegroundSymbol : IGreenJsonSymbol
     {
         public virtual bool IsValueStartSymbol => false;
 
@@ -43,23 +69,12 @@ namespace Eutherion.Text.Json
         /// </returns>
         public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
-        /// <summary>
-        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
-        /// </summary>
-        /// <returns>
-        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
-        /// </returns>
-        public abstract Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
-
         public abstract int Length { get; }
 
         public abstract void Accept(JsonSymbolVisitor visitor);
         public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
-    }
 
-    public abstract class JsonForegroundSymbol : JsonSymbol
-    {
-        public sealed override Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
+        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

@@ -86,7 +86,7 @@ namespace Eutherion.Win.AppTemplate
 
             private JsonUndefinedValueStyleSelector() { }
 
-            public override Style DefaultVisit(JsonSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style DefaultVisit(JsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
                 => syntaxEditor.DefaultStyle;
 
             public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)

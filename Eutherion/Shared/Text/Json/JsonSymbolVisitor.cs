@@ -23,11 +23,10 @@ namespace Eutherion.Text.Json
 {
     public abstract class JsonSymbolVisitor
     {
-        public virtual void DefaultVisit(JsonSymbol symbol) { }
-        public virtual void Visit(JsonSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void DefaultVisit(JsonForegroundSymbol symbol) { }
+        public virtual void Visit(JsonForegroundSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual void VisitComma(JsonComma symbol) => DefaultVisit(symbol);
-        public virtual void VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitErrorString(JsonErrorString symbol) => DefaultVisit(symbol);
@@ -35,18 +34,15 @@ namespace Eutherion.Text.Json
         public virtual void VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual void VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual void VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
-        public virtual void VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
-        public virtual void VisitWhitespace(JsonWhitespace symbol) => DefaultVisit(symbol);
     }
 
     public abstract class JsonSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonSymbol symbol) => default;
-        public virtual TResult Visit(JsonSymbol symbol) => symbol == null ? default : symbol.Accept(this);
+        public virtual TResult DefaultVisit(JsonForegroundSymbol symbol) => default;
+        public virtual TResult Visit(JsonForegroundSymbol symbol) => symbol == null ? default : symbol.Accept(this);
         public virtual TResult VisitColon(JsonColon symbol) => DefaultVisit(symbol);
         public virtual TResult VisitComma(JsonComma symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitComment(JsonComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyClose(JsonCurlyClose symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitErrorString(JsonErrorString symbol) => DefaultVisit(symbol);
@@ -54,18 +50,15 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol) => DefaultVisit(symbol);
         public virtual TResult VisitString(JsonString symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol) => DefaultVisit(symbol);
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitWhitespace(JsonWhitespace symbol) => DefaultVisit(symbol);
     }
 
     public abstract class JsonSymbolVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonSymbol symbol, T arg) => default;
-        public virtual TResult Visit(JsonSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
+        public virtual TResult DefaultVisit(JsonForegroundSymbol symbol, T arg) => default;
+        public virtual TResult Visit(JsonForegroundSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
         public virtual TResult VisitColon(JsonColon symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitComma(JsonComma symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitComment(JsonComment symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCurlyClose(JsonCurlyClose symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCurlyOpen(JsonCurlyOpen symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitErrorString(JsonErrorString symbol, T arg) => DefaultVisit(symbol, arg);
@@ -73,8 +66,6 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitSquareBracketOpen(JsonSquareBracketOpen symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitString(JsonString symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitUnknownSymbol(JsonUnknownSymbol symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitUnterminatedMultiLineComment(JsonUnterminatedMultiLineComment symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitValue(JsonValue symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitWhitespace(JsonWhitespace symbol, T arg) => DefaultVisit(symbol, arg);
     }
 }

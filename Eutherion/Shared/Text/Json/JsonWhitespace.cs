@@ -53,9 +53,5 @@ namespace Eutherion.Text.Json
         }
 
         private JsonWhitespace(int length) => Length = length;
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespace(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespace(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespace(this, arg);
     }
 }

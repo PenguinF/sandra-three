@@ -48,9 +48,5 @@ namespace Eutherion.Text.Json
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
-
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineComment(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineComment(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedMultiLineComment(this, arg);
     }
 }

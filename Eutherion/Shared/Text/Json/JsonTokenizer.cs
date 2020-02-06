@@ -41,7 +41,7 @@ namespace Eutherion.Text.Json
         // Current state.
         private int currentIndex;
         private int firstUnusedIndex;
-        private Func<IEnumerable<JsonSymbol>> currentTokenizer;
+        private Func<IEnumerable<IGreenJsonSymbol>> currentTokenizer;
 
         private JsonTokenizer(string json)
         {
@@ -50,7 +50,7 @@ namespace Eutherion.Text.Json
             currentTokenizer = Default;
         }
 
-        private IEnumerable<JsonSymbol> Default()
+        private IEnumerable<IGreenJsonSymbol> Default()
         {
             const int symbolClassValueChar = 0;
             const int symbolClassWhitespace = 1;
@@ -208,7 +208,7 @@ namespace Eutherion.Text.Json
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonSymbol> InString()
+        private IEnumerable<IGreenJsonSymbol> InString()
         {
             // Eat " character, but leave firstUnusedIndex unchanged.
             currentIndex++;
@@ -355,7 +355,7 @@ namespace Eutherion.Text.Json
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonSymbol> InSingleLineComment()
+        private IEnumerable<IGreenJsonSymbol> InSingleLineComment()
         {
             // Eat both / characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -404,7 +404,7 @@ namespace Eutherion.Text.Json
             currentTokenizer = null;
         }
 
-        private IEnumerable<JsonSymbol> InMultiLineComment()
+        private IEnumerable<IGreenJsonSymbol> InMultiLineComment()
         {
             // Eat /* characters, but leave firstUnusedIndex unchanged.
             currentIndex += 2;
@@ -446,12 +446,12 @@ namespace Eutherion.Text.Json
         /// The Json to tokenize.
         /// </param>
         /// <returns>
-        /// An enumeration of <see cref="JsonSymbol"/> instances.
+        /// An enumeration of <see cref="IGreenJsonSymbol"/> instances.
         /// </returns>
-        public static IEnumerable<JsonSymbol> TokenizeAll(string json)
+        public static IEnumerable<IGreenJsonSymbol> TokenizeAll(string json)
             => new JsonTokenizer(json)._TokenizeAll();
 
-        private IEnumerable<JsonSymbol> _TokenizeAll()
+        private IEnumerable<IGreenJsonSymbol> _TokenizeAll()
         {
             // currentTokenizer represents the state the tokenizer is in,
             // e.g. whitespace, in a string, or whatnot.

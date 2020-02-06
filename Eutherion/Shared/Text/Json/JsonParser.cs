@@ -33,7 +33,7 @@ namespace Eutherion.Text.Json
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
     public class JsonParser : JsonSymbolVisitor<(GreenJsonValueSyntax, bool)>
     {
-        private readonly IEnumerator<JsonSymbol> Tokens;
+        private readonly IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
@@ -54,7 +54,7 @@ namespace Eutherion.Text.Json
             // Skip background until encountering something meaningful.
             for (; ; )
             {
-                JsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : null;
+                IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : null;
                 if (newToken == null)
                 {
                     CurrentToken = null;
