@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -29,10 +30,21 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class RootPgnSyntax
     {
-        public readonly IEnumerable<IGreenPgnSymbol> Terminals;
-        public readonly IEnumerable<PgnErrorInfo> Errors = EmptyEnumerable<PgnErrorInfo>.Instance;
+        public List<IGreenPgnSymbol> Terminals { get; }
+        public List<PgnErrorInfo> Errors { get; }
 
         public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> terminals)
-            => Terminals = terminals ?? throw new ArgumentNullException(nameof(terminals));
+        {
+            if (terminals == null) throw new ArgumentNullException(nameof(terminals));
+            Terminals = terminals.ToList();
+
+            int startPosition = 0;
+            Errors = new List<PgnErrorInfo>();
+            foreach (var terminal in Terminals)
+            {
+                Errors.AddRange(terminal.GetErrors(startPosition));
+                startPosition += terminal.Length;
+            }
+        }
     }
 }
