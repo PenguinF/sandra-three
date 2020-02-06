@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -26,11 +27,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Contains the syntax tree and list of parse errors which are the result of parsing PGN.
     /// </summary>
-    public class RootPgnSyntax
+    public sealed class RootPgnSyntax
     {
         public readonly IEnumerable<IGreenPgnSymbol> Terminals;
         public readonly IEnumerable<PgnErrorInfo> Errors = EmptyEnumerable<PgnErrorInfo>.Instance;
 
-        public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> terminals) => Terminals = terminals;
+        public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> terminals)
+            => Terminals = terminals ?? throw new ArgumentNullException(nameof(terminals));
     }
 }

@@ -35,5 +35,11 @@ namespace Sandra.Chess.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new PgnErrorInfo(0, start, length));
         }
+
+        [Fact]
+        public void CreateRootPgnSyntaxWithNullTerminalsThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
+        }
     }
 }
