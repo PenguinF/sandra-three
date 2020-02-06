@@ -24,8 +24,7 @@ using System;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a <see cref="GreenJsonValueSyntax"/> node together with the background symbols
-    /// which directly precede it in an abstract json syntax tree.
+    /// Represents a <see cref="IGreenJsonValueSyntax"/> node together with the background symbols directly before it in an abstract json syntax tree.
     /// </summary>
     public sealed class GreenJsonValueWithBackgroundSyntax : ISpan
     {

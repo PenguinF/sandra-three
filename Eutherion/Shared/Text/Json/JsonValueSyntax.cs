@@ -23,6 +23,7 @@ namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a node containing a single json value in an abstract json syntax tree.
+    /// Use <see cref="GreenJsonValueSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenJsonValueSyntax : ISpan
     {
@@ -38,6 +39,7 @@ namespace Eutherion.Text.Json
 
     /// <summary>
     /// Represents a node containing a single json value in an abstract json syntax tree.
+    /// Use <see cref="JsonValueSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class JsonValueSyntax : JsonSyntax
     {

@@ -22,7 +22,7 @@
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a literal syntax node with an undefined or unsupported value.
+    /// Represents a json syntax node with an undefined or unsupported value.
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax
     {
