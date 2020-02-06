@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -26,5 +29,33 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnTokenizer
     {
+        private readonly string pgnText;
+        private readonly int length;
+
+        private PgnTokenizer(string pgnText)
+        {
+            this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
+            length = pgnText.Length;
+        }
+
+        private IEnumerable<IGreenPgnSymbol> _TokenizeAll()
+        {
+            yield break;
+        }
+
+        /// <summary>
+        /// Tokenizes source text in the PGN format.
+        /// </summary>
+        /// <param name="pgnText">
+        /// The PGN to tokenize.
+        /// </param>
+        /// <returns>
+        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="pgnText"/> is null/
+        /// </exception>
+        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
+            => new PgnTokenizer(pgnText)._TokenizeAll();
     }
 }

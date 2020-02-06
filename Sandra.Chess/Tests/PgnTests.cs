@@ -21,6 +21,7 @@
 
 using Sandra.Chess.Pgn;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Sandra.Chess.Tests
@@ -40,6 +41,18 @@ namespace Sandra.Chess.Tests
         public void CreateRootPgnSyntaxWithNullTerminalsThrows()
         {
             Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
+        }
+
+        [Fact]
+        public void NullPgnThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => PgnTokenizer.TokenizeAll(null).Any());
+        }
+
+        [Fact]
+        public void EmptyPgnEmptyTokens()
+        {
+            Assert.False(PgnTokenizer.TokenizeAll(string.Empty).Any());
         }
 
         [Theory]
