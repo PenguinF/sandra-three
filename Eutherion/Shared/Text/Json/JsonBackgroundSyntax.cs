@@ -19,19 +19,16 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
-    public abstract class GreenJsonBackgroundSyntax : IGreenJsonSymbol
+    /// <summary>
+    /// Represents a single background node in an abstract json syntax tree.
+    /// </summary>
+    public abstract class GreenJsonBackgroundSyntax : ISpan
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
-
-        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }
