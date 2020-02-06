@@ -19,6 +19,21 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn;
+using System;
+using Xunit;
+
 namespace Sandra.Chess.Tests
 {
+    public class PgnTests
+    {
+        [Theory]
+        [InlineData(-1, 0, "start")]
+        [InlineData(-1, -1, "start")]
+        [InlineData(0, -1, "length")]
+        public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new PgnErrorInfo(0, start, length));
+        }
+    }
 }

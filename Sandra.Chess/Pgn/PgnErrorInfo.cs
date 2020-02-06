@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using System;
 
 namespace Sandra.Chess.Pgn
 {
@@ -55,8 +56,14 @@ namespace Sandra.Chess.Pgn
         /// <param name="length">
         /// The length of the text span where the error occurred.
         /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
         public PgnErrorInfo(PgnErrorCode errorCode, int start, int length)
         {
+            if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
             ErrorCode = errorCode;
             Start = start;
             Length = length;
