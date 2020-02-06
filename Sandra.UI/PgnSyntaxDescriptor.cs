@@ -55,7 +55,7 @@ namespace Sandra.UI
             => syntaxEditor.DefaultStyle;
 
         public override (int, int) GetTokenSpan(IPgnSymbol terminalSymbol)
-            => (0, terminalSymbol.Length);
+            => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(PgnErrorInfo error)
             => (error.Start, error.Length);

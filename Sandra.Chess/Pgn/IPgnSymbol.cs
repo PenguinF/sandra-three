@@ -79,6 +79,34 @@ namespace Sandra.Chess.Pgn
         TResult Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg);
     }
 
+    /// <summary>
+    /// Contains extension methods for the <see cref="IPgnSymbol"/> interface.
+    /// </summary>
+    public static class PgnSymbolExtensions
+    {
+        private sealed class ToPgnSyntaxConverter : PgnSymbolVisitor<PgnSyntax>
+        {
+            public static readonly ToPgnSyntaxConverter Instance = new ToPgnSyntaxConverter();
+
+            private ToPgnSyntaxConverter() { }
+
+            public override PgnSyntax VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
+            public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
+            public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
+        }
+
+        /// <summary>
+        /// Converts this <see cref="IPgnSymbol"/> to a <see cref="PgnSyntax"/> node.
+        /// </summary>
+        /// <param name="pgnSymbol">
+        /// The <see cref="IPgnSymbol"/> to convert.
+        /// </param>
+        /// <returns>
+        /// The converted <see cref="PgnSyntax"/> node.
+        /// </returns>
+        public static PgnSyntax ToSyntax(this IPgnSymbol pgnSymbol) => pgnSymbol.Accept(ToPgnSyntaxConverter.Instance);
+    }
+
     // Temporary placeholder
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
