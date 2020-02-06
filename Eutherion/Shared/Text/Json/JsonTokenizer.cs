@@ -64,7 +64,7 @@ namespace Eutherion.Text.Json
 
                 int symbolClass;
 
-                var category = CharUnicodeInfo.GetUnicodeCategory(c);
+                var category = char.GetUnicodeCategory(c);
                 switch (category)
                 {
                     case UnicodeCategory.UppercaseLetter:
