@@ -48,6 +48,7 @@
     <Compile Include="Pgn\PgnErrorCode.cs" />
     <Compile Include="Pgn\PgnErrorInfo.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
+    <Compile Include="Pgn\PgnTokenizer.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

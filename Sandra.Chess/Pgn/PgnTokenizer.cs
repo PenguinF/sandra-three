@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * IPgnSymbol.cs
+ * PgnTokenizer.cs
  *
  * Copyright (c) 2004-2019 Henk Nicolai
  *
@@ -19,15 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a terminal PGN symbol.
-    /// Instances of this type are returned by <see cref="PgnTokenizer"/>.
+    /// Partitions a source PGN file into separate tokens.
     /// </summary>
-    public interface IGreenPgnSymbol : ISpan
+    public sealed class PgnTokenizer
     {
     }
 }
