@@ -65,14 +65,6 @@ namespace Sandra.UI
             => error.Message(Session.Current.CurrentLocalizer);
     }
 
-    public class RootPgnSyntax
-    {
-        public readonly IEnumerable<PgnSymbol> Terminals;
-        public readonly IEnumerable<PgnErrorInfo> Errors = Enumerable.Empty<PgnErrorInfo>();
-
-        public RootPgnSyntax(IEnumerable<PgnSymbol> terminals) => Terminals = terminals;
-    }
-
     public class PgnSymbol : IGreenPgnSymbol
     {
         public int Length { get; }
