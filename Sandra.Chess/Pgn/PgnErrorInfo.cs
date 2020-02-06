@@ -28,10 +28,33 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public class PgnErrorInfo : ISpan
     {
+        /// <summary>
+        /// Gets the error code.
+        /// </summary>
         public PgnErrorCode ErrorCode { get; }
+
+        /// <summary>
+        /// Gets the start position of the text span where the error occurred.
+        /// </summary>
         public int Start { get; }
+
+        /// <summary>
+        /// Gets the length of the text span where the error occurred.
+        /// </summary>
         public int Length { get; }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="PgnErrorInfo"/>.
+        /// </summary>
+        /// <param name="errorCode">
+        /// The error code.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the text span where the error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the error occurred.
+        /// </param>
         public PgnErrorInfo(PgnErrorCode errorCode, int start, int length)
         {
             ErrorCode = errorCode;
