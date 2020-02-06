@@ -74,6 +74,10 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
 
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+
+        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitllegalCharacterSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitllegalCharacterSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
     }
 
     public static class PgnIllegalCharacterSyntax

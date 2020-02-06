@@ -25,6 +25,7 @@ namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a single background node in an abstract PGN syntax tree.
+    /// Use <see cref="GreenPgnBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenPgnBackgroundSyntax : ISpan
     {
@@ -32,5 +33,9 @@ namespace Sandra.Chess.Pgn
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
+
+        public abstract void Accept(GreenPgnBackgroundSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }
