@@ -33,18 +33,31 @@ namespace Sandra.Chess.Pgn
         private readonly string pgnText;
         private readonly int length;
 
-        // Current state.
-        private int currentIndex;
-        private int firstUnusedIndex;
-
         private PgnTokenizer(string pgnText)
         {
             this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
             length = pgnText.Length;
         }
 
+        private GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
+        {
+            var category = char.GetUnicodeCategory(c);
+
+            string displayCharValue = category == UnicodeCategory.OtherNotAssigned
+                                   || category == UnicodeCategory.Control
+                ? $"\\u{((int)c).ToString("x4")}"
+                : Convert.ToString(c);
+
+            return new GreenPgnIllegalCharacterSyntax(displayCharValue);
+        }
+
+        // This tokenizer uses labels with goto to switch between modes of tokenization.
         private IEnumerable<IGreenPgnSymbol> _TokenizeAll()
         {
+            int currentIndex = 0;
+            int firstUnusedIndex = 0;
+
+        inWhitespace:
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
@@ -52,36 +65,81 @@ namespace Sandra.Chess.Pgn
                 // All legal PGN characters have a value below 0x7F.
                 if (c <= 0x7e)
                 {
-                    switch (c)
+                    // Treat all control characters as whitespace.
+                    if (c > ' ')
                     {
-                        case char _ when c <= ' ':
-                            // Treat all control characters as whitespace.
-                            break;
-                        default:
-                            if (firstUnusedIndex < currentIndex)
-                            {
-                                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
-                            }
+                        if (firstUnusedIndex < currentIndex)
+                        {
+                            yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
                             firstUnusedIndex = currentIndex;
-                            break;
+                        }
+
+                        currentIndex++;
+                        goto inSymbol;
                     }
                 }
                 else
                 {
-                    var category = char.GetUnicodeCategory(c);
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                        firstUnusedIndex = currentIndex;
+                    }
 
-                    string displayCharValue = category == UnicodeCategory.OtherNotAssigned
-                                           || category == UnicodeCategory.Control
-                        ? $"\\u{((int)c).ToString("x4")}"
-                        : Convert.ToString(c);
-
-                    yield return new GreenPgnIllegalCharacterSyntax(displayCharValue);
+                    yield return CreateIllegalCharacterSyntax(c);
+                    firstUnusedIndex++;
                 }
 
                 currentIndex++;
             }
 
+            if (firstUnusedIndex < currentIndex)
+            {
+                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+            }
+
             yield break;
+
+        inSymbol:
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // All legal PGN characters have a value below 0x7F.
+                if (c <= 0x7e)
+                {
+                    // Treat all control characters as whitespace.
+                    if (c <= ' ')
+                    {
+                        if (firstUnusedIndex < currentIndex)
+                        {
+                            yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+                            firstUnusedIndex = currentIndex;
+                        }
+
+                        currentIndex++;
+                        goto inWhitespace;
+                    }
+                }
+                else
+                {
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+                        firstUnusedIndex = currentIndex;
+                    }
+
+                    yield return CreateIllegalCharacterSyntax(c);
+                    firstUnusedIndex++;
+                }
+
+                currentIndex++;
+            }
+
+            if (firstUnusedIndex < currentIndex)
+            {
+                yield return new PgnSymbol(currentIndex - firstUnusedIndex);
+            }
         }
 
         /// <summary>
