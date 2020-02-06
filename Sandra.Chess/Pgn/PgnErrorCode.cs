@@ -26,5 +26,9 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public enum PgnErrorCode
     {
+        /// <summary>
+        /// Occurs when a character is illegal.
+        /// </summary>
+        IllegalCharacter,
     }
 }

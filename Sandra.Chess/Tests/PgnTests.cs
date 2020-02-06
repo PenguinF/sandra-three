@@ -42,11 +42,32 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
         }
 
+        [Theory]
+        [InlineData("\\t", 0)]
+        [InlineData("\\v", 10)]
+        public void IllegalCharacterError(string displayCharValue, int position)
+        {
+            var error = PgnIllegalCharacterSyntax.CreateError(displayCharValue, position);
+            Assert.NotNull(error);
+            Assert.Equal(PgnErrorCode.IllegalCharacter, error.ErrorCode);
+            Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
+            Assert.Equal(position, error.Start);
+            Assert.Equal(1, error.Length);
+        }
+
         [Fact]
         public void OutOfRangeArguments()
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
+            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
+            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
+        }
+
+        [Fact]
+        public void PgnSymbolsWithConstantLength()
+        {
+            Assert.Equal(1, new GreenPgnIllegalCharacterSyntax("\\0").Length);
         }
 
         private const int SharedWhitespaceInstanceLengthMinusTwo = GreenPgnWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
