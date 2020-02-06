@@ -64,7 +64,7 @@ namespace Eutherion.Text.Json
 
                 int symbolClass;
 
-                var category = CharUnicodeInfo.GetUnicodeCategory(c);
+                var category = char.GetUnicodeCategory(c);
                 switch (category)
                 {
                     case UnicodeCategory.UppercaseLetter:
@@ -448,6 +448,9 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// An enumeration of <see cref="IGreenJsonSymbol"/> instances.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="json"/> is null/
+        /// </exception>
         public static IEnumerable<IGreenJsonSymbol> TokenizeAll(string json)
             => new JsonTokenizer(json)._TokenizeAll();
 

@@ -21,8 +21,9 @@
 
 using Eutherion.Localization;
 using Sandra.Chess.Pgn;
+using System.Collections.Generic;
 
-namespace Eutherion.Win.AppTemplate
+namespace Sandra.UI
 {
     public static class PgnErrorInfoExtensions
     {
@@ -33,6 +34,11 @@ namespace Eutherion.Win.AppTemplate
         /// Gets the formatted and localized error message of a <see cref="PgnErrorInfo"/>.
         /// </summary>
         public static string Message(this PgnErrorInfo pgnErrorInfo, Localizer localizer)
-            => localizer.Localize(GetLocalizedStringKey(pgnErrorInfo.ErrorCode));
+            => localizer.Localize(GetLocalizedStringKey(pgnErrorInfo.ErrorCode), pgnErrorInfo.Parameters);
+
+        public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<LocalizedStringKey, string>
+        {
+            { GetLocalizedStringKey(PgnErrorCode.IllegalCharacter), "illegal character '{0}'" },
+        };
     }
 }

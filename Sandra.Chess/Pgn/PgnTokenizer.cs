@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnTokenizer.cs
  *
- * Copyright (c) 2004-2019 Henk Nicolai
+ * Copyright (c) 2004-2020 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -26,5 +30,131 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnTokenizer
     {
+        private readonly string pgnText;
+        private readonly int length;
+
+        private PgnTokenizer(string pgnText)
+        {
+            this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
+            length = pgnText.Length;
+        }
+
+        private GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
+        {
+            var category = char.GetUnicodeCategory(c);
+
+            string displayCharValue = category == UnicodeCategory.OtherNotAssigned
+                                   || category == UnicodeCategory.Control
+                ? $"\\u{((int)c).ToString("x4")}"
+                : Convert.ToString(c);
+
+            return new GreenPgnIllegalCharacterSyntax(displayCharValue);
+        }
+
+        // This tokenizer uses labels with goto to switch between modes of tokenization.
+        private IEnumerable<IGreenPgnSymbol> _TokenizeAll()
+        {
+            int currentIndex = 0;
+            int firstUnusedIndex = 0;
+
+        inWhitespace:
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // All legal PGN characters have a value below 0x7F.
+                if (c <= 0x7e)
+                {
+                    // Treat all control characters as whitespace.
+                    if (c > ' ')
+                    {
+                        if (firstUnusedIndex < currentIndex)
+                        {
+                            yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                            firstUnusedIndex = currentIndex;
+                        }
+
+                        currentIndex++;
+                        goto inSymbol;
+                    }
+                }
+                else
+                {
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                        firstUnusedIndex = currentIndex;
+                    }
+
+                    yield return CreateIllegalCharacterSyntax(c);
+                    firstUnusedIndex++;
+                }
+
+                currentIndex++;
+            }
+
+            if (firstUnusedIndex < currentIndex)
+            {
+                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+            }
+
+            yield break;
+
+        inSymbol:
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // All legal PGN characters have a value below 0x7F.
+                if (c <= 0x7e)
+                {
+                    // Treat all control characters as whitespace.
+                    if (c <= ' ')
+                    {
+                        if (firstUnusedIndex < currentIndex)
+                        {
+                            yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                            firstUnusedIndex = currentIndex;
+                        }
+
+                        currentIndex++;
+                        goto inWhitespace;
+                    }
+                }
+                else
+                {
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                        firstUnusedIndex = currentIndex;
+                    }
+
+                    yield return CreateIllegalCharacterSyntax(c);
+                    firstUnusedIndex++;
+                }
+
+                currentIndex++;
+            }
+
+            if (firstUnusedIndex < currentIndex)
+            {
+                yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+            }
+        }
+
+        /// <summary>
+        /// Tokenizes source text in the PGN format.
+        /// </summary>
+        /// <param name="pgnText">
+        /// The PGN to tokenize.
+        /// </param>
+        /// <returns>
+        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="pgnText"/> is null/
+        /// </exception>
+        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
+            => new PgnTokenizer(pgnText)._TokenizeAll();
     }
 }

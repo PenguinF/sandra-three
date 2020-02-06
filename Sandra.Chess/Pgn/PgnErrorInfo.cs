@@ -2,7 +2,7 @@
 /*********************************************************************************
  * PgnErrorInfo.cs
  *
- * Copyright (c) 2004-2019 Henk Nicolai
+ * Copyright (c) 2004-2020 Henk Nicolai
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,6 +45,11 @@ namespace Sandra.Chess.Pgn
         public int Length { get; }
 
         /// <summary>
+        /// Gets the list of parameters.
+        /// </summary>
+        public string[] Parameters { get; }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="PgnErrorInfo"/>.
         /// </summary>
         /// <param name="errorCode">
@@ -60,6 +65,29 @@ namespace Sandra.Chess.Pgn
         /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
         /// </exception>
         public PgnErrorInfo(PgnErrorCode errorCode, int start, int length)
+            : this(errorCode, start, length, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="PgnErrorInfo"/>.
+        /// </summary>
+        /// <param name="errorCode">
+        /// The error code.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the text span where the error occurred.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span where the error occurred.
+        /// </param>
+        /// <param name="parameters">
+        /// Parameters of the error.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Either <paramref name="start"/> or <paramref name="length"/>, or both are negative.
+        /// </exception>
+        public PgnErrorInfo(PgnErrorCode errorCode, int start, int length, string[] parameters)
         {
             if (start < 0) throw new ArgumentOutOfRangeException(nameof(start));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -67,6 +95,7 @@ namespace Sandra.Chess.Pgn
             ErrorCode = errorCode;
             Start = start;
             Length = length;
+            Parameters = parameters;
         }
     }
 }

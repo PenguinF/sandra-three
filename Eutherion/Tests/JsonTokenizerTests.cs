@@ -29,10 +29,30 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonTokenizerTests
     {
-        private static bool IsAgglutinativeTokenType(Type tokenType)
+        /// <summary>
+        /// Indicates if two symbols of the same type should combine into one.
+        /// </summary>
+        private static bool WillCombine(Type tokenType1, Type tokenType2, out Type resultTokenType)
         {
-            return tokenType == typeof(JsonValue)
-                || tokenType == typeof(GreenJsonWhitespaceSyntax);
+            if (tokenType1 == typeof(GreenJsonWhitespaceSyntax))
+            {
+                if (tokenType1 == tokenType2)
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(JsonValue))
+            {
+                if (tokenType1 == tokenType2)
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
+
+            resultTokenType = default;
+            return false;
         }
 
         private static void AssertTokens(string json, params Action<IGreenJsonSymbol>[] tokenInspectors)
@@ -278,18 +298,20 @@ namespace Eutherion.Shared.Tests
             // Instead of having a gazillion separate tests over 3 tokens,
             // first test the combination of 2 tokens, and then if that succeeds
             // test every other token that could precede it in a loop.
-            if (type1 == type2 && IsAgglutinativeTokenType(type1))
             {
-                AssertTokens(
-                    json1 + json2,
-                    ExpectToken(type1, json1.Length + json2.Length));
-            }
-            else
-            {
-                AssertTokens(
-                    json1 + json2,
-                    ExpectToken(type1, json1.Length),
-                    ExpectToken(type2, json2.Length));
+                if (WillCombine(type1, type2, out Type type12))
+                {
+                    AssertTokens(
+                        json1 + json2,
+                        ExpectToken(type12, json1.Length + json2.Length));
+                }
+                else
+                {
+                    AssertTokens(
+                        json1 + json2,
+                        ExpectToken(type1, json1.Length),
+                        ExpectToken(type2, json2.Length));
+                }
             }
 
             // Here Assert.Collection is used so if such a test fails,
@@ -302,28 +324,28 @@ namespace Eutherion.Shared.Tests
                     string json0 = x0.Item1;
                     Type type0 = x0.Item2;
 
-                    if (type0 == type1 && IsAgglutinativeTokenType(type1))
+                    if (WillCombine(type0, type1, out Type type01))
                     {
-                        if (type0 == type2)
+                        if (WillCombine(type01, type2, out Type type012))
                         {
                             AssertTokens(
                                 json0 + json1 + json2,
-                                ExpectToken(type0, json0.Length + json1.Length + json2.Length));
+                                ExpectToken(type012, json0.Length + json1.Length + json2.Length));
                         }
                         else
                         {
                             AssertTokens(
                                 json0 + json1 + json2,
-                                ExpectToken(type0, json0.Length + json1.Length),
+                                ExpectToken(type01, json0.Length + json1.Length),
                                 ExpectToken(type2, json2.Length));
                         }
                     }
-                    else if (type1 == type2 && IsAgglutinativeTokenType(type1))
+                    else if (WillCombine(type1, type2, out Type type12))
                     {
                         AssertTokens(
                             json0 + json1 + json2,
                             ExpectToken(type0, json0.Length),
-                            ExpectToken(type1, json1.Length + json2.Length));
+                            ExpectToken(type12, json1.Length + json2.Length));
                     }
                     else
                     {

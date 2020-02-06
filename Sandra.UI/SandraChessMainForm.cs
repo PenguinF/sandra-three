@@ -33,7 +33,7 @@ using System.Windows.Forms;
 
 namespace Sandra.UI
 {
-    using PgnForm = SyntaxEditorForm<RootPgnSyntax, IGreenPgnSymbol, PgnErrorInfo>;
+    using PgnForm = SyntaxEditorForm<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>;
 
     internal class SandraChessMainForm : SingleInstanceMainForm
     {
@@ -65,7 +65,8 @@ namespace Sandra.UI
                 LocalizedStringKeys.DefaultEnglishTranslations,
                 LocalizedConsoleKeys.DefaultEnglishTranslations,
                 SharedLocalizedStringKeys.DefaultEnglishTranslations(Session.ExecutableFileNameWithoutExtension),
-                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations);
+                JsonErrorInfoExtensions.DefaultEnglishJsonErrorTranslations,
+                PgnErrorInfoExtensions.DefaultEnglishPgnErrorTranslations);
 
             return Session.Configure(this,
                                      new SettingsProvider(),
@@ -155,11 +156,10 @@ namespace Sandra.UI
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
-            var syntaxDescriptor = new PgnSyntaxDescriptor();
 
             var pgnForm = new PgnForm(
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                syntaxDescriptor,
+                PgnSyntaxDescriptor.Instance,
                 pgnFile,
                 SettingKeys.PgnWindow,
                 SettingKeys.PgnErrorHeight,
@@ -172,6 +172,8 @@ namespace Sandra.UI
                 ShowIcon = true,
                 StartPosition = FormStartPosition.CenterScreen,
             };
+
+            PgnStyleSelector<RootPgnSyntax, PgnErrorInfo>.InitializeStyles(pgnForm.SyntaxEditor);
 
             // Don't index read-only PgnForms.
             if (!isReadOnly)
@@ -252,10 +254,8 @@ namespace Sandra.UI
         {
             if (perform)
             {
-                var syntaxDescriptor = new PgnSyntaxDescriptor();
-
-                string extension = syntaxDescriptor.FileExtension;
-                var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
+                string extension = PgnSyntaxDescriptor.Instance.FileExtension;
+                var extensionLocalizedKey = PgnSyntaxDescriptor.Instance.FileExtensionLocalizedKey;
 
                 var openFileDialog = new OpenFileDialog
                 {

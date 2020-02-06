@@ -109,6 +109,7 @@
     "OpaqueColorTypeError": "stringwaarde in het HTML kleur formaat (b.v. \"#808000\", of \"#DC143C\")",
     "FileNameTypeError": "geldige bestandsnaam",
     "SubFolderNameTypeError": "geldige mapnaam",
-    "TrimmedStringTypeError": "stringwaarde met minstens één niet-witruimte karakter"
+    "TrimmedStringTypeError": "stringwaarde met minstens één niet-witruimte karakter",
+    "PgnErrorIllegalCharacter": "ongeldig karakter '{0}'"
   }
 }

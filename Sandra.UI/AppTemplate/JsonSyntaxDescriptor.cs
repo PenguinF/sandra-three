@@ -28,7 +28,6 @@ namespace Eutherion.Win.AppTemplate
 {
     /// <summary>
     /// Describes the interaction between json syntax and a syntax editor.
-    /// Currently only used for testing.
     /// </summary>
     public class JsonSyntaxDescriptor : SyntaxDescriptor<RootJsonSyntax, JsonSyntax, JsonErrorInfo>
     {
