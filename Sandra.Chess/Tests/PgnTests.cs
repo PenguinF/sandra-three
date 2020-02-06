@@ -43,6 +43,22 @@ namespace Sandra.Chess.Tests
         }
 
         [Theory]
+        [InlineData(PgnErrorCode.IllegalCharacter, 0, 0, null)]
+        [InlineData((PgnErrorCode)(-1), 0, 1, new string[0])]
+        [InlineData((PgnErrorCode)1, 1, 0, new[] { "\n", "" })]
+        [InlineData((PgnErrorCode)999, 0, 2, new[] { "Aa" })]
+        public void UnchangedParametersInError(PgnErrorCode errorCode, int start, int length, string[] parameters)
+        {
+            var errorInfo = new PgnErrorInfo(errorCode, start, length, parameters);
+            Assert.Equal(errorCode, errorInfo.ErrorCode);
+            Assert.Equal(start, errorInfo.Start);
+            Assert.Equal(length, errorInfo.Length);
+
+            // Select Assert.Equal() overload for collections so elements get compared rather than the array by reference.
+            Assert.Equal<string>(parameters, errorInfo.Parameters);
+        }
+
+        [Theory]
         [InlineData("\\t", 0)]
         [InlineData("\\v", 10)]
         public void IllegalCharacterError(string displayCharValue, int position)
