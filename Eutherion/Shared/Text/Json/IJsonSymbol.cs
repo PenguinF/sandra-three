@@ -49,6 +49,9 @@ namespace Eutherion.Text.Json
         Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
     }
 
+    /// <summary>
+    /// Denotes any terminal json symbol that is not treated as background such as comments or whitespace.
+    /// </summary>
     public abstract class JsonForegroundSymbol : IGreenJsonSymbol
     {
         public virtual bool IsValueStartSymbol => false;
