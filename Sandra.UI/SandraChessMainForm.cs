@@ -155,11 +155,10 @@ namespace Sandra.UI
         private void OpenPgnForm(string normalizedPgnFileName, bool isReadOnly)
         {
             var pgnFile = WorkingCopyTextFile.Open(normalizedPgnFileName, null);
-            var syntaxDescriptor = new PgnSyntaxDescriptor();
 
             var pgnForm = new PgnForm(
                 isReadOnly ? SyntaxEditorCodeAccessOption.ReadOnly : SyntaxEditorCodeAccessOption.Default,
-                syntaxDescriptor,
+                PgnSyntaxDescriptor.Instance,
                 pgnFile,
                 SettingKeys.PgnWindow,
                 SettingKeys.PgnErrorHeight,
@@ -252,10 +251,8 @@ namespace Sandra.UI
         {
             if (perform)
             {
-                var syntaxDescriptor = new PgnSyntaxDescriptor();
-
-                string extension = syntaxDescriptor.FileExtension;
-                var extensionLocalizedKey = syntaxDescriptor.FileExtensionLocalizedKey;
+                string extension = PgnSyntaxDescriptor.Instance.FileExtension;
+                var extensionLocalizedKey = PgnSyntaxDescriptor.Instance.FileExtensionLocalizedKey;
 
                 var openFileDialog = new OpenFileDialog
                 {

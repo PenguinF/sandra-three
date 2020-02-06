@@ -34,6 +34,10 @@ namespace Sandra.UI
     {
         public static readonly string PgnFileExtension = "pgn";
 
+        public static readonly PgnSyntaxDescriptor Instance = new PgnSyntaxDescriptor();
+
+        private PgnSyntaxDescriptor() { }
+
         public override string FileExtension => PgnFileExtension;
 
         public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
