@@ -29,16 +29,32 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonUnknownSymbolSyntax : JsonForegroundSymbol
     {
+        /// <summary>
+        /// Gets a friendly representation of the unknown symbol.
+        /// </summary>
         public string DisplayCharValue { get; }
 
         public override bool IsValueStartSymbol => true;
 
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
         public override int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
 
         public override bool HasErrors => true;
 
-        public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
-
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenJsonUnknownSymbolSyntax"/>.
+        /// </summary>
+        /// <param name="displayCharValue">
+        /// A friendly representation of the unknown symbol.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="displayCharValue"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="displayCharValue"/> is empty.
+        /// </exception>
         public GreenJsonUnknownSymbolSyntax(string displayCharValue)
         {
             if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
@@ -46,6 +62,17 @@ namespace Eutherion.Text.Json
 
             DisplayCharValue = displayCharValue;
         }
+
+        /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for this syntax node.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to create the error.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="JsonErrorInfo"/>.
+        /// </returns>
+        public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
 
@@ -61,7 +88,16 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unexpected symbol characters.
         /// </summary>
-        public static JsonErrorInfo CreateError(string displayCharValue, int position)
-            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, position, 1, new[] { displayCharValue });
+        /// <param name="displayCharValue">
+        /// A friendly representation of the unknown symbol.
+        /// </param>
+        /// <param name="startPosition">
+        /// The start position for which to create the error.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="JsonErrorInfo"/>.
+        /// </returns>
+        public static JsonErrorInfo CreateError(string displayCharValue, int startPosition)
+            => new JsonErrorInfo(JsonErrorCode.UnexpectedSymbol, startPosition, UnknownSymbolLength, new[] { displayCharValue });
     }
 }
