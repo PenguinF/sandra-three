@@ -89,7 +89,7 @@ namespace Eutherion.Win.AppTemplate
             public override Style DefaultVisit(JsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
                 => syntaxEditor.DefaultStyle;
 
-            public override Style VisitErrorString(JsonErrorString symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style VisitErrorStringSyntax(JsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
                 => syntaxEditor.Styles[stringStyleIndex];
 
             public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)

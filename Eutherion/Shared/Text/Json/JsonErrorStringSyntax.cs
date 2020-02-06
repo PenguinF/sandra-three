@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonErrorString.cs
+ * JsonErrorStringSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -26,7 +26,7 @@ using System.Linq;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonErrorString : JsonForegroundSymbol
+    public sealed class JsonErrorStringSyntax : JsonForegroundSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
@@ -74,22 +74,22 @@ namespace Eutherion.Text.Json
                 error.Length,
                 error.Parameters));
 
-        public JsonErrorString(int length, params JsonErrorInfo[] errors)
+        public JsonErrorStringSyntax(int length, params JsonErrorInfo[] errors)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
-        public JsonErrorString(IEnumerable<JsonErrorInfo> errors, int length)
+        public JsonErrorStringSyntax(IEnumerable<JsonErrorInfo> errors, int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorString(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorString(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorString(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
     }
 }

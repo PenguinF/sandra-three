@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonWhitespace.cs
+ * JsonWhitespaceSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -24,36 +24,36 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonWhitespace : GreenJsonBackgroundSyntax, IGreenJsonSymbol
+    public sealed class JsonWhitespaceSyntax : GreenJsonBackgroundSyntax, IGreenJsonSymbol
     {
         /// <summary>
-        /// Maximum length before new <see cref="JsonWhitespace"/> instances are always newly allocated.
+        /// Maximum length before new <see cref="JsonWhitespaceSyntax"/> instances are always newly allocated.
         /// </summary>
         public const int SharedWhitespaceInstanceLength = 255;
 
-        private static readonly JsonWhitespace[] SharedInstances;
+        private static readonly JsonWhitespaceSyntax[] SharedInstances;
 
-        static JsonWhitespace()
+        static JsonWhitespaceSyntax()
         {
-            SharedInstances = new JsonWhitespace[SharedWhitespaceInstanceLength - 1];
+            SharedInstances = new JsonWhitespaceSyntax[SharedWhitespaceInstanceLength - 1];
 
             for (int i = SharedWhitespaceInstanceLength - 2; i >= 0; i--)
             {
                 // Do not allocate a zero length whitespace.
-                SharedInstances[i] = new JsonWhitespace(i + 1);
+                SharedInstances[i] = new JsonWhitespaceSyntax(i + 1);
             }
         }
 
         public override int Length { get; }
 
-        public static JsonWhitespace Create(int length)
+        public static JsonWhitespaceSyntax Create(int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (length < SharedWhitespaceInstanceLength) return SharedInstances[length - 1];
-            return new JsonWhitespace(length);
+            return new JsonWhitespaceSyntax(length);
         }
 
-        private JsonWhitespace(int length) => Length = length;
+        private JsonWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 

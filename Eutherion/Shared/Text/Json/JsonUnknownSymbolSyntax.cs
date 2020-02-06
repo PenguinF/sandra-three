@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * JsonUnknownSymbol.cs
+ * JsonUnknownSymbolSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -24,7 +24,7 @@ using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonUnknownSymbol : JsonForegroundSymbol
+    public sealed class JsonUnknownSymbolSyntax : JsonForegroundSymbol
     {
         public const int UnknownSymbolLength = 1;
 
@@ -45,7 +45,7 @@ namespace Eutherion.Text.Json
         public override IEnumerable<JsonErrorInfo> GetErrors(int position)
             => new SingleElementEnumerable<JsonErrorInfo>(CreateError(DisplayCharValue, position));
 
-        public JsonUnknownSymbol(string displayCharValue)
+        public JsonUnknownSymbolSyntax(string displayCharValue)
         {
             if (displayCharValue == null) throw new ArgumentNullException(nameof(displayCharValue));
             if (displayCharValue.Length == 0) throw new ArgumentException($"{nameof(displayCharValue)} should be non-empty", nameof(displayCharValue));
@@ -53,8 +53,8 @@ namespace Eutherion.Text.Json
             DisplayCharValue = displayCharValue;
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbol(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbol(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbol(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 }

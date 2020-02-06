@@ -136,7 +136,7 @@ namespace Eutherion.Win.Storage
                 // Decrease by an extra 1 because of the space between '//' and the text.
                 int availableCommentWidth = maxLineLength
                                           - currentDepth * Indentation
-                                          - JsonComment.SingleLineCommentStart.Length
+                                          - JsonCommentSyntax.SingleLineCommentStart.Length
                                           - 1;
 
                 bool first = true;
@@ -146,7 +146,7 @@ namespace Eutherion.Win.Storage
                     {
                         // Extra line with empty single line comment to separate paragraphs.
                         AppendIndent();
-                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                         outputBuilder.AppendLine();
                     }
                     else first = false;
@@ -154,7 +154,7 @@ namespace Eutherion.Win.Storage
                     foreach (string commentLine in GetCommentLines(paragraph, availableCommentWidth))
                     {
                         AppendIndent();
-                        outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                        outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                         outputBuilder.Append(SpaceChar);
                         outputBuilder.Append(commentLine);
                         outputBuilder.AppendLine();
@@ -231,7 +231,7 @@ namespace Eutherion.Win.Storage
                 AppendIndent();
                 if ((options & SettingWriterOptions.CommentOutProperties) != 0)
                 {
-                    outputBuilder.Append(JsonComment.SingleLineCommentStart);
+                    outputBuilder.Append(JsonCommentSyntax.SingleLineCommentStart);
                 }
 
                 AppendString(name);

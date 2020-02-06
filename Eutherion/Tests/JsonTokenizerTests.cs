@@ -32,7 +32,7 @@ namespace Eutherion.Shared.Tests
         private static bool IsAgglutinativeTokenType(Type tokenType)
         {
             return tokenType == typeof(JsonValue)
-                || tokenType == typeof(JsonWhitespace);
+                || tokenType == typeof(JsonWhitespaceSyntax);
         }
 
         private static void AssertTokens(string json, params Action<IGreenJsonSymbol>[] tokenInspectors)
@@ -84,7 +84,7 @@ namespace Eutherion.Shared.Tests
             void firstTokenAssert(IGreenJsonSymbol symbol)
             {
                 Assert.NotNull(symbol);
-                Assert.IsType<JsonComment>(symbol);
+                Assert.IsType<JsonCommentSyntax>(symbol);
                 Assert.Equal(expectedCommentText.Length, symbol.Length);
                 Assert.Equal(expectedCommentText, json.Substring(0, symbol.Length));
             }
@@ -99,7 +99,7 @@ namespace Eutherion.Shared.Tests
                 AssertTokens(
                     json,
                     firstTokenAssert,
-                    symbol => Assert.IsType<JsonWhitespace>(symbol));
+                    symbol => Assert.IsType<JsonWhitespaceSyntax>(symbol));
             }
         }
 
@@ -121,7 +121,7 @@ namespace Eutherion.Shared.Tests
         public void WhiteSpace(string ws)
         {
             // Exactly one whitespace token.
-            AssertTokens(ws, ExpectToken<JsonWhitespace>(ws.Length));
+            AssertTokens(ws, ExpectToken<JsonWhitespaceSyntax>(ws.Length));
         }
 
         [Theory]
@@ -131,15 +131,15 @@ namespace Eutherion.Shared.Tests
         [InlineData(typeof(JsonSquareBracketClose), ']')]
         [InlineData(typeof(JsonColon), ':')]
         [InlineData(typeof(JsonComma), ',')]
-        [InlineData(typeof(JsonUnknownSymbol), '*')]
-        [InlineData(typeof(JsonUnknownSymbol), '€')]
-        [InlineData(typeof(JsonUnknownSymbol), '≥')]
-        [InlineData(typeof(JsonUnknownSymbol), '¿')]
-        [InlineData(typeof(JsonUnknownSymbol), '°')]
-        [InlineData(typeof(JsonUnknownSymbol), '╣')]
-        [InlineData(typeof(JsonUnknownSymbol), '∙')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '*')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '€')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '≥')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '¿')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '°')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '╣')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '∙')]
 
-        [InlineData(typeof(JsonUnknownSymbol), '▓')]
+        [InlineData(typeof(JsonUnknownSymbolSyntax), '▓')]
         public void SpecialCharacter(Type tokenType, char specialCharacter)
         {
             string json = Convert.ToString(specialCharacter);
@@ -223,30 +223,30 @@ namespace Eutherion.Shared.Tests
 
         private static IEnumerable<(string, Type)> JsonTestSymbols()
         {
-            yield return (" ", typeof(JsonWhitespace));
-            yield return ("/**/", typeof(JsonComment));
-            yield return ("/***/", typeof(JsonComment));
-            yield return ("/*/*/", typeof(JsonComment));
+            yield return (" ", typeof(JsonWhitespaceSyntax));
+            yield return ("/**/", typeof(JsonCommentSyntax));
+            yield return ("/***/", typeof(JsonCommentSyntax));
+            yield return ("/*/*/", typeof(JsonCommentSyntax));
             yield return ("{", typeof(JsonCurlyOpen));
             yield return ("}", typeof(JsonCurlyClose));
             yield return ("[", typeof(JsonSquareBracketOpen));
             yield return ("]", typeof(JsonSquareBracketClose));
             yield return (":", typeof(JsonColon));
             yield return (",", typeof(JsonComma));
-            yield return ("*", typeof(JsonUnknownSymbol));
+            yield return ("*", typeof(JsonUnknownSymbolSyntax));
             yield return ("_", typeof(JsonValue));
             yield return ("true", typeof(JsonValue));
             yield return ("\"\"", typeof(JsonString));
             yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
-            yield return ("\"\n\\ \n\"", typeof(JsonErrorString));
-            yield return ("\"\\u0\"", typeof(JsonErrorString));
+            yield return ("\"\n\\ \n\"", typeof(JsonErrorStringSyntax));
+            yield return ("\"\\u0\"", typeof(JsonErrorStringSyntax));
         }
 
         private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
         {
-            yield return ("//", typeof(JsonComment));
-            yield return ("/*", typeof(JsonUnterminatedMultiLineComment));
-            yield return ("\"", typeof(JsonErrorString));
+            yield return ("//", typeof(JsonCommentSyntax));
+            yield return ("/*", typeof(JsonUnterminatedMultiLineCommentSyntax));
+            yield return ("\"", typeof(JsonErrorStringSyntax));
         }
 
         public static IEnumerable<object[]> OneSymbolOfEachType()
@@ -340,117 +340,117 @@ namespace Eutherion.Shared.Tests
         [MemberData(nameof(OneSymbolOfEachType))]
         public void SingleLineCommentTransition(string json, Type type)
         {
-            if (type == typeof(JsonWhitespace))
+            if (type == typeof(JsonWhitespaceSyntax))
             {
                 // Test this separately because the '\n' is included in the second symbol.
                 AssertTokens(
                     $"//\n{json}",
-                    ExpectToken<JsonComment>(2),
-                    ExpectToken<JsonWhitespace>(1 + json.Length));
+                    ExpectToken<JsonCommentSyntax>(2),
+                    ExpectToken<JsonWhitespaceSyntax>(1 + json.Length));
             }
             else
             {
                 AssertTokens(
                     $"//\n{json}",
-                    ExpectToken<JsonComment>(2),
-                    ExpectToken<JsonWhitespace>(1),
+                    ExpectToken<JsonCommentSyntax>(2),
+                    ExpectToken<JsonWhitespaceSyntax>(1),
                     ExpectToken(type, json.Length));
             }
         }
 
         public static IEnumerable<object[]> GetErrorStrings()
         {
-            yield return new object[] { "*", new[] { JsonUnknownSymbol.CreateError("*", 0) } };
-            yield return new object[] { " *", new[] { JsonUnknownSymbol.CreateError("*", 1) } };
-            yield return new object[] { "  °  ", new[] { JsonUnknownSymbol.CreateError("°", 2) } };
+            yield return new object[] { "*", new[] { JsonUnknownSymbolSyntax.CreateError("*", 0) } };
+            yield return new object[] { " *", new[] { JsonUnknownSymbolSyntax.CreateError("*", 1) } };
+            yield return new object[] { "  °  ", new[] { JsonUnknownSymbolSyntax.CreateError("°", 2) } };
 
             // Unterminated comments.
-            yield return new object[] { "/*", new[] { JsonUnterminatedMultiLineComment.CreateError(0, 2) } };
-            yield return new object[] { "/*\n\n", new[] { JsonUnterminatedMultiLineComment.CreateError(0, 4) } };
-            yield return new object[] { "  /*\n\n*", new[] { JsonUnterminatedMultiLineComment.CreateError(2, 5) } };
-            yield return new object[] { "  /*\n\n* /", new[] { JsonUnterminatedMultiLineComment.CreateError(2, 7) } };
+            yield return new object[] { "/*", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(0, 2) } };
+            yield return new object[] { "/*\n\n", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(0, 4) } };
+            yield return new object[] { "  /*\n\n*", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(2, 5) } };
+            yield return new object[] { "  /*\n\n* /", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(2, 7) } };
 
             // Invalid strings.
-            yield return new object[] { "\"", new[] { JsonErrorString.Unterminated(0, 1) } };
-            yield return new object[] { "\"\\", new[] { JsonErrorString.Unterminated(0, 2) } };
+            yield return new object[] { "\"", new[] { JsonErrorStringSyntax.Unterminated(0, 1) } };
+            yield return new object[] { "\"\\", new[] { JsonErrorStringSyntax.Unterminated(0, 2) } };
 
             // Unterminated because the closing " is escaped.
-            yield return new object[] { "\"\\\"", new[] { JsonErrorString.Unterminated(0, 3) } };
-            yield return new object[] { "\"\\ \"", new[] { JsonErrorString.UnrecognizedEscapeSequence("\\ ", 1) } };
-            yield return new object[] { "\"\\e\"", new[] { JsonErrorString.UnrecognizedEscapeSequence("\\e", 1) } };
+            yield return new object[] { "\"\\\"", new[] { JsonErrorStringSyntax.Unterminated(0, 3) } };
+            yield return new object[] { "\"\\ \"", new[] { JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 1) } };
+            yield return new object[] { "\"\\e\"", new[] { JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\e", 1) } };
 
             // Unicode escape sequences.
-            yield return new object[] { "\"\\u\"", new[] { JsonErrorString.UnrecognizedEscapeSequence("\\u", 1) } };
-            yield return new object[] { "\"\\ux\"", new[] { JsonErrorString.UnrecognizedEscapeSequence("\\u", 1) } };
-            yield return new object[] { "\"\\uxxxx\"", new[] { JsonErrorString.UnrecognizedEscapeSequence("\\u", 1) } };
-            yield return new object[] { "\"\\u0\"", new[] { JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\u0", 1, 3) } };
-            yield return new object[] { "\"\\u00\"", new[] { JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\u00", 1, 4) } };
-            yield return new object[] { "\"\\u000\"", new[] { JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
-            yield return new object[] { "\"\\u000g\"", new[] { JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
+            yield return new object[] { "\"\\u\"", new[] { JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\ux\"", new[] { JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\uxxxx\"", new[] { JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\u", 1) } };
+            yield return new object[] { "\"\\u0\"", new[] { JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\u0", 1, 3) } };
+            yield return new object[] { "\"\\u00\"", new[] { JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\u00", 1, 4) } };
+            yield return new object[] { "\"\\u000\"", new[] { JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
+            yield return new object[] { "\"\\u000g\"", new[] { JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\u000", 1, 5) } };
 
             // Prevent int.TryParse hacks.
-            yield return new object[] { "\"\\u-1000\"", new[] { JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\u", 1, 2) } };
+            yield return new object[] { "\"\\u-1000\"", new[] { JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\u", 1, 2) } };
 
             // Disallow control characters.
-            yield return new object[] { "\"\n\"", new[] { JsonErrorString.IllegalControlCharacter("\\n", 1) } };
-            yield return new object[] { "\"\t\"", new[] { JsonErrorString.IllegalControlCharacter("\\t", 1) } };
-            yield return new object[] { "\"\0\"", new[] { JsonErrorString.IllegalControlCharacter("\\0", 1) } };
-            yield return new object[] { "\"\u0001\"", new[] { JsonErrorString.IllegalControlCharacter("\\u0001", 1) } };
-            yield return new object[] { "\"\u007f\"", new[] { JsonErrorString.IllegalControlCharacter("\\u007f", 1) } };
+            yield return new object[] { "\"\n\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\n", 1) } };
+            yield return new object[] { "\"\t\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\t", 1) } };
+            yield return new object[] { "\"\0\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\0", 1) } };
+            yield return new object[] { "\"\u0001\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\u0001", 1) } };
+            yield return new object[] { "\"\u007f\"", new[] { JsonErrorStringSyntax.IllegalControlCharacter("\\u007f", 1) } };
 
             // Multiple errors.
             yield return new object[] { " ∙\"∙\"\"", new JsonErrorInfo[] {
-                JsonUnknownSymbol.CreateError("∙", 1),
-                JsonErrorString.Unterminated(5, 1) } };
+                JsonUnknownSymbolSyntax.CreateError("∙", 1),
+                JsonErrorStringSyntax.Unterminated(5, 1) } };
             yield return new object[] { "\"\r\n\"", new[] {
-                JsonErrorString.IllegalControlCharacter("\\r", 1),
-                JsonErrorString.IllegalControlCharacter("\\n", 2) } };
+                JsonErrorStringSyntax.IllegalControlCharacter("\\r", 1),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 2) } };
             yield return new object[] { "\"\\ ", new[] {
-                JsonErrorString.UnrecognizedEscapeSequence("\\ ", 1),
-                JsonErrorString.Unterminated(0, 3) } };
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 1),
+                JsonErrorStringSyntax.Unterminated(0, 3) } };
             yield return new object[] { "\"\r\n∙\"∙", new[] {
-                JsonErrorString.IllegalControlCharacter("\\r", 1),
-                JsonErrorString.IllegalControlCharacter("\\n", 2),
-                JsonUnknownSymbol.CreateError("∙", 5) } };
+                JsonErrorStringSyntax.IllegalControlCharacter("\\r", 1),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 2),
+                JsonUnknownSymbolSyntax.CreateError("∙", 5) } };
             yield return new object[] { "\"\t\n", new[] {
-                JsonErrorString.IllegalControlCharacter("\\t", 1),
-                JsonErrorString.IllegalControlCharacter("\\n", 2),
-                JsonErrorString.Unterminated(0, 3) } };
+                JsonErrorStringSyntax.IllegalControlCharacter("\\t", 1),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 2),
+                JsonErrorStringSyntax.Unterminated(0, 3) } };
             yield return new object[] { "\" \\ \n\"", new[] {
-                JsonErrorString.UnrecognizedEscapeSequence("\\ ", 2),
-                JsonErrorString.IllegalControlCharacter("\\n", 4) } };
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 4) } };
             yield return new object[] { "\"\n\\ \n\"", new[] {
-                JsonErrorString.IllegalControlCharacter("\\n", 1),
-                JsonErrorString.UnrecognizedEscapeSequence("\\ ", 2),
-                JsonErrorString.IllegalControlCharacter("\\n", 4) } };
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 1),
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 4) } };
             yield return new object[] { "\"\\u", new[] {
-                JsonErrorString.UnrecognizedEscapeSequence("\\u", 1),
-                JsonErrorString.Unterminated(0, 3) } };
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\u", 1),
+                JsonErrorStringSyntax.Unterminated(0, 3) } };
             yield return new object[] { "\"\\uA", new[] {
-                JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\uA", 1, 3),
-                JsonErrorString.Unterminated(0, 4) } };
+                JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\uA", 1, 3),
+                JsonErrorStringSyntax.Unterminated(0, 4) } };
             yield return new object[] { "\"\\u\n", new[] {
-                JsonErrorString.UnrecognizedEscapeSequence("\\u", 1),
-                JsonErrorString.IllegalControlCharacter("\\n", 3),
-                JsonErrorString.Unterminated(0, 4) } };
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\u", 1),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 3),
+                JsonErrorStringSyntax.Unterminated(0, 4) } };
             yield return new object[] { "\"\\ufff\n", new[] {
-                JsonErrorString.UnrecognizedUnicodeEscapeSequence("\\ufff", 1, 5),
-                JsonErrorString.IllegalControlCharacter("\\n", 6),
-                JsonErrorString.Unterminated(0, 7) } };
+                JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence("\\ufff", 1, 5),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 6),
+                JsonErrorStringSyntax.Unterminated(0, 7) } };
             yield return new object[] { "\"\n\\ ∙\"∙", new[] {
-                JsonErrorString.IllegalControlCharacter("\\n", 1),
-                JsonErrorString.UnrecognizedEscapeSequence("\\ ", 2),
-                JsonUnknownSymbol.CreateError("∙", 6) } };
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 1),
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 2),
+                JsonUnknownSymbolSyntax.CreateError("∙", 6) } };
             yield return new object[] { "∙\"\n\\ ∙\"", new[] {
-                JsonUnknownSymbol.CreateError("∙", 0),
-                JsonErrorString.IllegalControlCharacter("\\n", 2),
-                JsonErrorString.UnrecognizedEscapeSequence("\\ ", 3) } };
+                JsonUnknownSymbolSyntax.CreateError("∙", 0),
+                JsonErrorStringSyntax.IllegalControlCharacter("\\n", 2),
+                JsonErrorStringSyntax.UnrecognizedEscapeSequence("\\ ", 3) } };
 
             // Know what's unterminated.
-            yield return new object[] { "\"/*", new[] { JsonErrorString.Unterminated(0, 3) } };
-            yield return new object[] { "/*\"", new[] { JsonUnterminatedMultiLineComment.CreateError(0, 3) } };
-            yield return new object[] { "///*\n\"", new[] { JsonErrorString.Unterminated(5, 1) } };
-            yield return new object[] { "///*\"\n/*", new[] { JsonUnterminatedMultiLineComment.CreateError(6, 2) } };
+            yield return new object[] { "\"/*", new[] { JsonErrorStringSyntax.Unterminated(0, 3) } };
+            yield return new object[] { "/*\"", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(0, 3) } };
+            yield return new object[] { "///*\n\"", new[] { JsonErrorStringSyntax.Unterminated(5, 1) } };
+            yield return new object[] { "///*\"\n/*", new[] { JsonUnterminatedMultiLineCommentSyntax.CreateError(6, 2) } };
         }
 
         [Theory]

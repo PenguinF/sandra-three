@@ -31,13 +31,13 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void OutOfRangeArguments()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonComment(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(Array.Empty<JsonErrorInfo>(), -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorString(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonErrorStringSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineComment(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespace.Create(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonUnterminatedMultiLineCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespaceSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => JsonWhitespaceSyntax.Create(0));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(1, JsonCurlyOpen.Value.Length);
             Assert.Equal(1, JsonSquareBracketClose.Value.Length);
             Assert.Equal(1, JsonSquareBracketOpen.Value.Length);
-            Assert.Equal(1, new JsonUnknownSymbol("\\0").Length);
+            Assert.Equal(1, new JsonUnknownSymbolSyntax("\\0").Length);
         }
 
         [Fact]
@@ -81,8 +81,8 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullErrorsShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(2, null));
-            Assert.Throws<ArgumentNullException>(() => new JsonErrorString(null, 2));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorStringSyntax(2, null));
+            Assert.Throws<ArgumentNullException>(() => new JsonErrorStringSyntax(null, 2));
         }
 
         [Theory]
@@ -100,7 +100,7 @@ namespace Eutherion.Shared.Tests
             var errorInfo3 = new JsonErrorInfo(errorCode, start + 2, length * 3, parameters);
 
             Assert.Collection(
-                new JsonErrorString(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
+                new JsonErrorStringSyntax(length * 6, errorInfo1, errorInfo2, errorInfo3).Errors,
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
@@ -108,7 +108,7 @@ namespace Eutherion.Shared.Tests
             // Assert that the elements of the list are copied, i.e. that if this collection is modified
             // after being used to create a JsonErrorInfo, it does not change that JsonErrorInfo.
             var errorList = new List<JsonErrorInfo> { errorInfo1, errorInfo2, errorInfo3 };
-            var errorString = new JsonErrorString(errorList, 1);
+            var errorString = new JsonErrorStringSyntax(errorList, 1);
             Assert.NotSame(errorString.Errors, errorList);
 
             // errorString.Errors should still return the same set of JsonErrorInfos after this statement.
@@ -124,13 +124,13 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void UnexpectedSymbolShouldBeNotNull()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbol(null));
+            Assert.Throws<ArgumentNullException>(() => new JsonUnknownSymbolSyntax(null));
         }
 
         [Fact]
         public void UnexpectedSymbolShouldBeNonEmpty()
         {
-            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbol(string.Empty));
+            Assert.Throws<ArgumentException>(() => new JsonUnknownSymbolSyntax(string.Empty));
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("€")]
         public void UnchangedParametersInUnexpectedSymbol(string displayCharValue)
         {
-            var symbol = new JsonUnknownSymbol(displayCharValue);
+            var symbol = new JsonUnknownSymbolSyntax(displayCharValue);
             Assert.Equal(displayCharValue, symbol.DisplayCharValue);
         }
 
@@ -146,7 +146,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("/*  *")]
         public void UnchangedParametersInUnterminatedMultiLineComment(string commentText)
         {
-            var symbol = new JsonUnterminatedMultiLineComment(commentText.Length);
+            var symbol = new JsonUnterminatedMultiLineCommentSyntax(commentText.Length);
             Assert.Equal(commentText.Length, symbol.Length);
         }
 
@@ -158,7 +158,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("▓", 200)]
         public void UnexpectedSymbolError(string displayCharValue, int position)
         {
-            var error = JsonUnknownSymbol.CreateError(displayCharValue, position);
+            var error = JsonUnknownSymbolSyntax.CreateError(displayCharValue, position);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnexpectedSymbol, error.ErrorCode);
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
@@ -172,7 +172,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedMultiLineCommentError(int start, int length)
         {
-            var error = JsonUnterminatedMultiLineComment.CreateError(start, length);
+            var error = JsonUnterminatedMultiLineCommentSyntax.CreateError(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedMultiLineComment, error.ErrorCode);
             Assert.Null(error.Parameters);
@@ -186,7 +186,7 @@ namespace Eutherion.Shared.Tests
         [InlineData(0, int.MaxValue)]
         public void UnterminatedStringError(int start, int length)
         {
-            var error = JsonErrorString.Unterminated(start, length);
+            var error = JsonErrorStringSyntax.Unterminated(start, length);
             Assert.NotNull(error);
             Assert.Equal(JsonErrorCode.UnterminatedString, error.ErrorCode);
             Assert.Null(error.Parameters);
@@ -200,7 +200,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\\0", 1)]
         public void IllegalControlCharacterInStringError(string displayCharValue, int position)
         {
-            var error = JsonErrorString.IllegalControlCharacter(displayCharValue, position);
+            var error = JsonErrorStringSyntax.IllegalControlCharacter(displayCharValue, position);
             Assert.Equal(JsonErrorCode.IllegalControlCharacterInString, error.ErrorCode);
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
@@ -212,7 +212,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\\0", 1)]
         public void UnrecognizedEscapeSequenceError(string displayCharValue, int position)
         {
-            var error = JsonErrorString.UnrecognizedEscapeSequence(displayCharValue, position);
+            var error = JsonErrorStringSyntax.UnrecognizedEscapeSequence(displayCharValue, position);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
@@ -225,7 +225,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("\\uffff", 1)]
         public void UnrecognizedUnicodeEscapeSequenceError(string displayCharValue, int position)
         {
-            var error = JsonErrorString.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
+            var error = JsonErrorStringSyntax.UnrecognizedUnicodeEscapeSequence(displayCharValue, position, displayCharValue.Length);
             Assert.Equal(JsonErrorCode.UnrecognizedEscapeSequence, error.ErrorCode);
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
