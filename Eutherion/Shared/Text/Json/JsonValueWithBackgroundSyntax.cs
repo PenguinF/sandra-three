@@ -99,6 +99,9 @@ namespace Eutherion.Text.Json
 
             public override JsonValueSyntax VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax green, JsonValueWithBackgroundSyntax parent)
                 => new JsonUndefinedValueSyntax(parent, green);
+
+            public override JsonValueSyntax VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonUnknownSymbolSyntax(parent, green);
         }
 
         /// <summary>

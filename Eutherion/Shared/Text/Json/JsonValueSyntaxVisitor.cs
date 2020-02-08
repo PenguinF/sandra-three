@@ -37,6 +37,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitMissingValueSyntax(GreenJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual void VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual void VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -55,6 +56,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitMissingValueSyntax(GreenJsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -73,6 +75,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitMissingValueSyntax(GreenJsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax node, T arg) => DefaultVisit(node, arg);
     }
 
     /// <summary>
@@ -91,6 +94,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitMissingValueSyntax(JsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual void VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual void VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -109,6 +113,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitMissingValueSyntax(JsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -127,5 +132,6 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitMissingValueSyntax(JsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitStringLiteralSyntax(JsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }

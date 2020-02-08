@@ -300,9 +300,7 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
-
-        public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
-            => (new GreenJsonUndefinedValueSyntax(symbol), false);
+        public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
 
         // Returns whether or not the current token still needs to be processed.
         private bool ParseValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, IJsonValueStarterSymbol valueStarterSymbol)

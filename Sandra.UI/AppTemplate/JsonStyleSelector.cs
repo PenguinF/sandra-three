@@ -86,6 +86,9 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[undefinedValueStyleIndex];
 
+        public override Style VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[undefinedValueStyleIndex];
+
         public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
     }
