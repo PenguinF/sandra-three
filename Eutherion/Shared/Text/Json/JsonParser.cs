@@ -408,16 +408,16 @@ namespace Eutherion.Text.Json
                 {
                     // Always create a value node, even if it contains an undefined value.
                     unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
-                }
 
-                // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null)
-                {
-                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                    // This means that here there's no need to capture the background.
-                    return new RootJsonSyntax(
-                        new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                        Errors);
+                    // CurrentToken may be null, e.g. unterminated objects or arrays.
+                    if (CurrentToken == null)
+                    {
+                        // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                        // This means that here there's no need to capture the background.
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            Errors);
+                    }
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
