@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
-    public sealed class JsonSquareBracketCloseSyntax : JsonSyntax
+    public sealed class JsonSquareBracketCloseSyntax : JsonSyntax, IJsonSymbol
     {
         public const char SquareBracketCloseCharacter = ']';
         public const int SquareBracketCloseLength = 1;

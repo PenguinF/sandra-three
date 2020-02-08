@@ -70,7 +70,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor
@@ -92,7 +92,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor<TResult>
@@ -114,7 +114,7 @@ namespace Eutherion.Text.Json
     }
 
     /// <summary>
-    /// Represents a visitor that visits a <see cref="JsonSyntax"/> which has no child <see cref="JsonSyntax"/> nodes.
+    /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
     /// </summary>
     public abstract class JsonSymbolVisitor<T, TResult>

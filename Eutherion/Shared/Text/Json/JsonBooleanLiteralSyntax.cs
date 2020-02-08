@@ -79,7 +79,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
+    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Represents a 'false' literal value syntax node.

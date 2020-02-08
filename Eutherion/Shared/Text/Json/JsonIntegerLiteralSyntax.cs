@@ -48,7 +48,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents an integer literal value syntax node.
     /// </summary>
-    public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax
+    public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.

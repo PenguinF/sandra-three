@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>
-    public sealed class JsonCommaSyntax : JsonSyntax
+    public sealed class JsonCommaSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CommaCharacter = ',';
         public const int CommaLength = 1;

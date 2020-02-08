@@ -64,7 +64,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node.
     /// </summary>
-    public sealed class JsonStringLiteralSyntax : JsonValueSyntax
+    public sealed class JsonStringLiteralSyntax : JsonValueSyntax, IJsonSymbol
     {
         public const char QuoteCharacter = '"';
         public const char EscapeCharacter = '\\';

@@ -48,4 +48,16 @@ namespace Eutherion.Text.Json
         /// </returns>
         Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
     }
+
+    /// <summary>
+    /// Represents a terminal json symbol.
+    /// These are all <see cref="JsonSyntax"/> nodes which have no child <see cref="JsonSyntax"/> nodes.
+    /// Use <see cref="JsonSymbolVisitor"/> overrides to distinguish between implementations of this type.
+    /// </summary>
+    public interface IJsonSymbol : ISpan
+    {
+        void Accept(JsonSymbolVisitor visitor);
+        TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
+    }
 }

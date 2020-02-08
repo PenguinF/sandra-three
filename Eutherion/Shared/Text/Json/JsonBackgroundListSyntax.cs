@@ -69,7 +69,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node with background symbols in an abstract json syntax tree.
     /// </summary>
-    public sealed class JsonBackgroundListSyntax : JsonSyntax
+    public sealed class JsonBackgroundListSyntax : JsonSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the parent syntax node of this instance.

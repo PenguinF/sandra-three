@@ -41,7 +41,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>
-    public sealed class JsonCurlyOpenSyntax : JsonSyntax
+    public sealed class JsonCurlyOpenSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CurlyOpenCharacter = '{';
         public const int CurlyOpenLength = 1;

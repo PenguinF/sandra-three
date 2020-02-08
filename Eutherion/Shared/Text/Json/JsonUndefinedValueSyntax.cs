@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an undefined or unsupported value.
     /// </summary>
-    public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
+    public sealed class JsonUndefinedValueSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.

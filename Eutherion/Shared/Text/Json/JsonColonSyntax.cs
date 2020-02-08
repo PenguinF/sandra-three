@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class JsonColonSyntax : JsonSyntax
+    public sealed class JsonColonSyntax : JsonSyntax, IJsonSymbol
     {
         public const char ColonCharacter = ':';
         public const int ColonLength = 1;

@@ -41,7 +41,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json square bracket open syntax node.
     /// </summary>
-    public sealed class JsonSquareBracketOpenSyntax : JsonSyntax
+    public sealed class JsonSquareBracketOpenSyntax : JsonSyntax, IJsonSymbol
     {
         public const char SquareBracketOpenCharacter = '[';
         public const int SquareBracketOpenLength = 1;

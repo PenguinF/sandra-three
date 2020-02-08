@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json curly close syntax node.
     /// </summary>
-    public sealed class JsonCurlyCloseSyntax : JsonSyntax
+    public sealed class JsonCurlyCloseSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CurlyCloseCharacter = '}';
         public const int CurlyCloseLength = 1;
