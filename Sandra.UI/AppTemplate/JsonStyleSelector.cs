@@ -35,6 +35,7 @@ namespace Eutherion.Win.AppTemplate
         private const int stringStyleIndex = 10;
         private const int errorStringStyleIndex = 11;
         private const int undefinedValueStyleIndex = 12;
+        private const int unknownSymbolStyleIndex = 13;
 
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -45,6 +46,7 @@ namespace Eutherion.Win.AppTemplate
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
         private static readonly Color errorStringForeColor = Color.FromArgb(224, 168, 126);
         private static readonly Color undefinedValueForeColor = Color.FromArgb(192, 192, 40);
+        private static readonly Color unknownSymbolForeColor = Color.FromArgb(204, 204, 204);
 
         public static readonly JsonStyleSelector<TSyntaxTree, TError> Instance = new JsonStyleSelector<TSyntaxTree, TError>();
 
@@ -61,6 +63,8 @@ namespace Eutherion.Win.AppTemplate
 
             syntaxEditor.Styles[undefinedValueStyleIndex].ForeColor = undefinedValueForeColor;
             valueFont.CopyTo(syntaxEditor.Styles[undefinedValueStyleIndex]);
+
+            syntaxEditor.Styles[unknownSymbolStyleIndex].ForeColor = unknownSymbolForeColor;
         }
 
         private JsonStyleSelector() { }
@@ -81,7 +85,7 @@ namespace Eutherion.Win.AppTemplate
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
         public override Style VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-            => syntaxEditor.Styles[undefinedValueStyleIndex];
+            => syntaxEditor.Styles[unknownSymbolStyleIndex];
 
         public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
@@ -90,7 +94,7 @@ namespace Eutherion.Win.AppTemplate
             => syntaxEditor.Styles[undefinedValueStyleIndex];
 
         public override Style VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-            => syntaxEditor.Styles[undefinedValueStyleIndex];
+            => syntaxEditor.Styles[unknownSymbolStyleIndex];
 
         public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
