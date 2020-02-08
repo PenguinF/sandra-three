@@ -19,22 +19,30 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class GreenJsonColonSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonColonSyntax : IJsonForegroundSymbol
     {
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
-        public override int Length => JsonColonSyntax.ColonLength;
+        public int Length => JsonColonSyntax.ColonLength;
 
         private GreenJsonColonSyntax() { }
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+
+        bool IJsonForegroundSymbol.IsValueStartSymbol => false;
+        bool IJsonForegroundSymbol.HasErrors => false;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 
     /// <summary>

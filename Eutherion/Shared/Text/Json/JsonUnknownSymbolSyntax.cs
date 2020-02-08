@@ -27,21 +27,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an unknown symbol.
     /// </summary>
-    public sealed class GreenJsonUnknownSymbolSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonUnknownSymbolSyntax : IJsonForegroundSymbol
     {
         /// <summary>
         /// Gets a friendly representation of the unknown symbol.
         /// </summary>
         public string DisplayCharValue { get; }
 
-        public override bool IsValueStartSymbol => true;
-
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
-
-        public override bool HasErrors => true;
+        public int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenJsonUnknownSymbolSyntax"/>.
@@ -74,11 +70,15 @@ namespace Eutherion.Text.Json
         /// </returns>
         public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
 
-        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
+        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        bool IJsonForegroundSymbol.HasErrors => true;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 
     public static class JsonUnknownSymbolSyntax

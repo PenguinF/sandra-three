@@ -19,22 +19,30 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
-    public sealed class GreenJsonSquareBracketCloseSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonSquareBracketCloseSyntax : IJsonForegroundSymbol
     {
         public static readonly GreenJsonSquareBracketCloseSyntax Value = new GreenJsonSquareBracketCloseSyntax();
 
-        public override int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+        public int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
 
         private GreenJsonSquareBracketCloseSyntax() { }
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+
+        bool IJsonForegroundSymbol.IsValueStartSymbol => false;
+        bool IJsonForegroundSymbol.HasErrors => false;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
     }
 
     /// <summary>

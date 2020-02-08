@@ -74,7 +74,6 @@ namespace Eutherion.Text.Json
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
     }
 }

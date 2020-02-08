@@ -19,23 +19,30 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>
-    public sealed class GreenJsonCurlyOpenSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonCurlyOpenSyntax : IJsonForegroundSymbol
     {
         public static readonly GreenJsonCurlyOpenSyntax Value = new GreenJsonCurlyOpenSyntax();
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
+        public int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
 
         private GreenJsonCurlyOpenSyntax() { }
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+
+        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        bool IJsonForegroundSymbol.HasErrors => false;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 
     /// <summary>

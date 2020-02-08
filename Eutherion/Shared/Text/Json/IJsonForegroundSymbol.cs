@@ -19,8 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -34,30 +32,5 @@ namespace Eutherion.Text.Json
         void Accept(JsonForegroundSymbolVisitor visitor);
         TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
         TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
-    }
-
-    public abstract class JsonForegroundSymbol : IJsonForegroundSymbol
-    {
-        public virtual bool IsValueStartSymbol => false;
-        public virtual bool HasErrors => false;
-
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
-        /// </param>
-        /// <returns>
-        /// A sequence of errors associated with this symbol.
-        /// </returns>
-        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public abstract int Length { get; }
-
-        public abstract void Accept(JsonForegroundSymbolVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
-
-        public Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

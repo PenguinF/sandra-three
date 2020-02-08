@@ -20,16 +20,16 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonString : JsonForegroundSymbol
+    public sealed class JsonString : IJsonForegroundSymbol
     {
         public string Value { get; }
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length { get; }
+        public int Length { get; }
 
         public JsonString(string value, int length)
         {
@@ -38,9 +38,15 @@ namespace Eutherion.Text.Json
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+
+        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        bool IJsonForegroundSymbol.HasErrors => false;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 
     /// <summary>

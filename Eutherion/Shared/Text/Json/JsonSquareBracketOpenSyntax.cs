@@ -19,23 +19,30 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json square bracket open syntax node.
     /// </summary>
-    public sealed class GreenJsonSquareBracketOpenSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonSquareBracketOpenSyntax : IJsonForegroundSymbol
     {
         public static readonly GreenJsonSquareBracketOpenSyntax Value = new GreenJsonSquareBracketOpenSyntax();
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length => JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
+        public int Length => JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
 
         private GreenJsonSquareBracketOpenSyntax() { }
 
-        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+
+        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        bool IJsonForegroundSymbol.HasErrors => false;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
     }
 
     /// <summary>
