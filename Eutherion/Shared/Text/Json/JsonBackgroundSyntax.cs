@@ -23,6 +23,7 @@ namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a single background node in an abstract json syntax tree.
+    /// Use <see cref="GreenJsonBackgroundSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public abstract class GreenJsonBackgroundSyntax : ISpan
     {
@@ -30,5 +31,9 @@ namespace Eutherion.Text.Json
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public abstract int Length { get; }
+
+        public abstract void Accept(GreenJsonBackgroundSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
 }
