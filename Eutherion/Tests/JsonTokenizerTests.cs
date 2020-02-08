@@ -42,11 +42,34 @@ namespace Eutherion.Shared.Tests
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(JsonValue))
+            else if (tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.False)
+                || tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.True)
+                || tokenType1 == typeof(GreenJsonUndefinedValueSyntax))
+            {
+                // This only works if two undefined values don't add up to 'true' or 'false'.
+                if (tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.False)
+                    || tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.True)
+                    || tokenType2 == typeof(GreenJsonIntegerLiteralSyntax)
+                    || tokenType2 == typeof(GreenJsonUndefinedValueSyntax))
+                {
+                    resultTokenType = typeof(GreenJsonUndefinedValueSyntax);
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(GreenJsonIntegerLiteralSyntax))
             {
                 if (tokenType1 == tokenType2)
                 {
+                    // This obviously only works if the literal is numbers only.
+                    // See JsonTestSymbols below.
                     resultTokenType = tokenType1;
+                    return true;
+                }
+                else if (tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.False)
+                    || tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.True)
+                    || tokenType2 == typeof(GreenJsonUndefinedValueSyntax))
+                {
+                    resultTokenType = typeof(GreenJsonUndefinedValueSyntax);
                     return true;
                 }
             }
@@ -175,6 +198,7 @@ namespace Eutherion.Shared.Tests
         [InlineData("10.8")]
         [InlineData("-9.00001")]
         [InlineData("+00001")]
+        [InlineData("-00001")]
         [InlineData("-1e+10")]
         [InlineData("1.9E-5")]
         [InlineData("0b01011001")]
@@ -205,9 +229,21 @@ namespace Eutherion.Shared.Tests
             AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
-                var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, valueSymbol.Value);
+
+                if (symbol is GreenJsonBooleanLiteralSyntax booleanLiteral)
+                {
+                    Assert.Equal(json, booleanLiteral.LiteralJsonValue);
+                }
+                else if (symbol is GreenJsonIntegerLiteralSyntax integerLiteral)
+                {
+                    Assert.Equal(int.Parse(json), integerLiteral.Value);
+                }
+                else
+                {
+                    var valueSymbol = Assert.IsType<GreenJsonUndefinedValueSyntax>(symbol);
+                    Assert.Equal(json, valueSymbol.UndefinedValue);
+                }
             });
         }
 
@@ -235,7 +271,7 @@ namespace Eutherion.Shared.Tests
             AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
-                var stringSymbol = Assert.IsType<JsonString>(symbol);
+                var stringSymbol = Assert.IsType<GreenJsonStringLiteralSyntax>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
                 Assert.Equal(expectedValue, stringSymbol.Value);
             });
@@ -254,10 +290,12 @@ namespace Eutherion.Shared.Tests
             yield return (":", typeof(GreenJsonColonSyntax));
             yield return (",", typeof(GreenJsonCommaSyntax));
             yield return ("*", typeof(GreenJsonUnknownSymbolSyntax));
-            yield return ("_", typeof(JsonValue));
-            yield return ("true", typeof(JsonValue));
-            yield return ("\"\"", typeof(JsonString));
-            yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
+            yield return ("false", typeof(GreenJsonBooleanLiteralSyntax.False));
+            yield return ("true", typeof(GreenJsonBooleanLiteralSyntax.True));
+            yield return ("0", typeof(GreenJsonIntegerLiteralSyntax));
+            yield return ("_", typeof(GreenJsonUndefinedValueSyntax));
+            yield return ("\"\"", typeof(GreenJsonStringLiteralSyntax));
+            yield return ("\" \"", typeof(GreenJsonStringLiteralSyntax));  // Have to check if the space isn't interpreted as whitespace.
             yield return ("\"\n\\ \n\"", typeof(GreenJsonErrorStringSyntax));
             yield return ("\"\\u0\"", typeof(GreenJsonErrorStringSyntax));
         }

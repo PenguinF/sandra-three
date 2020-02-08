@@ -21,9 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Numerics;
 
 namespace Eutherion.Text.Json
 {
@@ -31,7 +29,7 @@ namespace Eutherion.Text.Json
     /// Represents a single parse of a list of json tokens.
     /// </summary>
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
-    public class JsonParser : JsonForegroundSymbolVisitor<(GreenJsonValueSyntax, bool)>
+    public class JsonParser : JsonValueStarterSymbolVisitor<(GreenJsonValueSyntax, bool)>
     {
         private readonly IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
@@ -279,34 +277,23 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public override (GreenJsonValueSyntax, bool) VisitValue(JsonValue symbol)
+        // Explicit Visit overrides for classes which are both IJsonValueStarterSymbol and GreenJsonValueSyntax.
+        public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
+
+        // Returns whether or not the current token still needs to be processed.
+        private bool ParseValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, IJsonValueStarterSymbol valueStarterSymbol)
         {
-            if (symbol == JsonValue.FalseJsonValue) return (GreenJsonBooleanLiteralSyntax.False.Instance, false);
-            if (symbol == JsonValue.TrueJsonValue) return (GreenJsonBooleanLiteralSyntax.True.Instance, false);
-
-            string value = symbol.Value;
-            if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
-            {
-                return (new GreenJsonIntegerLiteralSyntax(symbol, integerValue), false);
-            }
-
-            Errors.Add(new JsonErrorInfo(
-                JsonErrorCode.UnrecognizedValue,
-                CurrentLength - symbol.Length,
-                symbol.Length,
-                new[] { value }));
-
-            return (new GreenJsonUndefinedValueSyntax(symbol), false);
+            // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+            var backgroundBefore = CaptureBackground();
+            (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
+            valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+            return unprocessedToken;
         }
-
-        public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol)
-            => (new GreenJsonUndefinedValueSyntax(symbol), false);
-
-        public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(JsonString symbol)
-            => (new GreenJsonStringLiteralSyntax(symbol), false);
-
-        public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
-            => (new GreenJsonUndefinedValueSyntax(symbol), false);
 
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
@@ -324,11 +311,8 @@ namespace Eutherion.Text.Json
             // Invariant: discriminated != null && !discriminated.IsOption1().
             for (; ; )
             {
-                // Always create a value node, then decide if it must be ignored.
-                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-                var backgroundBefore = CaptureBackground();
-                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+                // Always create a value node, even if it contains an undefined value.
+                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
@@ -377,13 +361,8 @@ namespace Eutherion.Text.Json
             {
                 var discriminated = CurrentToken.AsValueDelimiterOrStarter();
 
-                // Always create a value node, then decide if it must be ignored.
-                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-                var backgroundBefore = CaptureBackground();
-
-                GreenJsonValueSyntax currentNode;
                 bool unprocessedToken;
-                if (!discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
+                if (discriminated.IsOption1(out IJsonValueDelimiterSymbol valueDelimiterSymbol))
                 {
                     // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
                     if (valueNodesBuilder.Count == 0)
@@ -393,28 +372,27 @@ namespace Eutherion.Text.Json
                         // already have done it.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ExpectedEof,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
+                            CurrentLength - valueDelimiterSymbol.Length,
+                            valueDelimiterSymbol.Length));
                     }
 
-                    currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
+                    BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
                     unprocessedToken = false;
                 }
                 else
                 {
-                    (currentNode, unprocessedToken) = Visit(valueStarterSymbol);
-                }
+                    // Always create a value node, even if it contains an undefined value.
+                    unprocessedToken = ParseValueNode(valueNodesBuilder, discriminated.ToOption2());
 
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
-
-                // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null)
-                {
-                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                    // This means that here there's no need to capture the background.
-                    return new RootJsonSyntax(
-                        new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                        Errors);
+                    // CurrentToken may be null, e.g. unterminated objects or arrays.
+                    if (CurrentToken == null)
+                    {
+                        // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
+                        // This means that here there's no need to capture the background.
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            Errors);
+                    }
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -422,10 +400,21 @@ namespace Eutherion.Text.Json
 
                 if (CurrentToken == null)
                 {
-                    // Capture the background following the last value.
-                    return new RootJsonSyntax(
-                        new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
-                        Errors);
+                    // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
+                    if (valueNodesBuilder.Count == 0)
+                    {
+                        valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            Errors);
+                    }
+                    else
+                    {
+                        // Capture the background following the last value.
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
+                            Errors);
+                    }
                 }
 
                 // Two or more consecutive values not allowed.

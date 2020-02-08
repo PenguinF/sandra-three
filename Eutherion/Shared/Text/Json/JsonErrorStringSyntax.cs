@@ -29,14 +29,14 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenJsonErrorStringSyntax : IJsonValueStarterSymbol
+    public sealed class GreenJsonErrorStringSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
     {
         internal ReadOnlyList<JsonErrorInfo> Errors { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Generates a sequence of errors associated with this symbol at a given start position.
@@ -71,12 +71,19 @@ namespace Eutherion.Text.Json
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
         Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
 
-        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
-        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
-        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+
+        public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
     }
 
-    public static class JsonErrorStringSyntax
+    /// <summary>
+    /// Represents a string literal value syntax node which contains errors.
+    /// </summary>
+    public sealed class JsonErrorStringSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated strings.
@@ -107,5 +114,25 @@ namespace Eutherion.Text.Json
         /// </summary>
         public static JsonErrorInfo IllegalControlCharacter(string displayCharValue, int start)
             => new JsonErrorInfo(JsonErrorCode.IllegalControlCharacterInString, start, 1, new[] { displayCharValue });
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonErrorStringSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal JsonErrorStringSyntax(JsonValueWithBackgroundSyntax parent, GreenJsonErrorStringSyntax green) : base(parent) => Green = green;
+
+        public override void Accept(JsonValueSyntaxVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
     }
 }

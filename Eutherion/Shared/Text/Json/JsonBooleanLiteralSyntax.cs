@@ -20,13 +20,14 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public abstract class GreenJsonBooleanLiteralSyntax : GreenJsonValueSyntax
+    public abstract class GreenJsonBooleanLiteralSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
     {
         public sealed class False : GreenJsonBooleanLiteralSyntax
         {
@@ -36,7 +37,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => false;
 
-            public override JsonValue BooleanToken => JsonValue.FalseJsonValue;
+            public override string LiteralJsonValue => JsonValue.False;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -54,7 +55,7 @@ namespace Eutherion.Text.Json
 
             public override bool Value => true;
 
-            public override JsonValue BooleanToken => JsonValue.TrueJsonValue;
+            public override string LiteralJsonValue => JsonValue.True;
 
             /// <summary>
             /// Gets the length of the text span corresponding with this node.
@@ -65,11 +66,20 @@ namespace Eutherion.Text.Json
         }
 
         public abstract bool Value { get; }
-        public abstract JsonValue BooleanToken { get; }
+
+        public abstract string LiteralJsonValue { get; }
 
         private GreenJsonBooleanLiteralSyntax() { }
 
         public abstract TResult Match<TResult>(Func<TResult> whenFalse, Func<TResult> whenTrue);
+
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
@@ -116,6 +126,11 @@ namespace Eutherion.Text.Json
 
             internal True(JsonValueWithBackgroundSyntax parent) : base(parent) { }
         }
+
+        public static GreenJsonBooleanLiteralSyntax BoolJsonLiteral(bool boolValue)
+            => boolValue
+            ? GreenJsonBooleanLiteralSyntax.True.Instance
+            : (GreenJsonBooleanLiteralSyntax)GreenJsonBooleanLiteralSyntax.False.Instance;
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.

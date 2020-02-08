@@ -33,10 +33,6 @@ namespace Eutherion.Text.Json
         /// Either a <see cref="IJsonValueDelimiterSymbol"/> or a <see cref="IJsonValueStarterSymbol"/>.
         /// </returns>
         Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> AsValueDelimiterOrStarter();
-
-        void Accept(JsonForegroundSymbolVisitor visitor);
-        TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
-        TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
     }
 
     /// <summary>
@@ -48,8 +44,12 @@ namespace Eutherion.Text.Json
 
     /// <summary>
     /// Denotes any terminal json symbol that starts a value declaration, including maps and lists.
+    /// Use <see cref="JsonValueStarterSymbolVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
     public interface IJsonValueStarterSymbol : IJsonForegroundSymbol
     {
+        void Accept(JsonValueStarterSymbolVisitor visitor);
+        TResult Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg);
     }
 }

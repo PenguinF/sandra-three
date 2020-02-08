@@ -79,6 +79,9 @@ namespace Eutherion.Text.Json
                     whenFalse: () => new JsonBooleanLiteralSyntax.False(parent),
                     whenTrue: () => new JsonBooleanLiteralSyntax.True(parent));
 
+            public override JsonValueSyntax VisitErrorStringSyntax(GreenJsonErrorStringSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonErrorStringSyntax(parent, green);
+
             public override JsonValueSyntax VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax green, JsonValueWithBackgroundSyntax parent)
                 => new JsonIntegerLiteralSyntax(parent, green);
 
@@ -96,6 +99,9 @@ namespace Eutherion.Text.Json
 
             public override JsonValueSyntax VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax green, JsonValueWithBackgroundSyntax parent)
                 => new JsonUndefinedValueSyntax(parent, green);
+
+            public override JsonValueSyntax VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax green, JsonValueWithBackgroundSyntax parent)
+                => new JsonUnknownSymbolSyntax(parent, green);
         }
 
         /// <summary>

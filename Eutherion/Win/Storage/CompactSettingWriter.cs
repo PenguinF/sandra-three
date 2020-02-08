@@ -83,7 +83,7 @@ namespace Eutherion.Win.Storage
         }
 
         public override void VisitBoolean(PBoolean value)
-            => outputBuilder.Append(JsonValue.BoolJsonValue(value.Value).Value);
+            => outputBuilder.Append(JsonBooleanLiteralSyntax.BoolJsonLiteral(value.Value).LiteralJsonValue);
 
         public override void VisitInteger(PInteger value)
             => outputBuilder.Append(value.Value.ToStringInvariant());

@@ -20,11 +20,15 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonValue : IJsonValueStarterSymbol
+    /// <summary>
+    /// Helper class to generate json literal value terminal symbols from source json.
+    /// </summary>
+    public static class JsonValue
     {
         public const int FalseSymbolLength = 5;
         public const int TrueSymbolLength = 4;
@@ -32,33 +36,20 @@ namespace Eutherion.Text.Json
         public static readonly string False = "false";
         public static readonly string True = "true";
 
-        public static readonly JsonValue FalseJsonValue = new JsonValue(False);
-        public static readonly JsonValue TrueJsonValue = new JsonValue(True);
-
-        public static JsonValue BoolJsonValue(bool boolValue) => boolValue ? TrueJsonValue : FalseJsonValue;
-
-        public static JsonValue Create(string value)
+        public static IJsonValueStarterSymbol Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length <= 0) throw new ArgumentException(nameof(value));
 
-            return value == False ? FalseJsonValue
-                : value == True ? TrueJsonValue
-                : new JsonValue(value);
+            if (value == False) return GreenJsonBooleanLiteralSyntax.False.Instance;
+            if (value == True) return GreenJsonBooleanLiteralSyntax.True.Instance;
+
+            if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
+            {
+                return new GreenJsonIntegerLiteralSyntax(integerValue, value.Length);
+            }
+
+            return new GreenJsonUndefinedValueSyntax(value);
         }
-
-        public string Value { get; }
-
-        public int Length => Value.Length;
-
-        private JsonValue(string value) => Value = value;
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitValue(this);
-        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
-        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
     }
 }

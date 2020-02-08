@@ -29,15 +29,29 @@ namespace Eutherion.Shared.Tests
     public class JsonSyntaxTests
     {
         [Fact]
-        public void OutOfRangeArguments()
+        public void ArgumentChecks()
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
+
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
+
+            Assert.Throws<ArgumentNullException>("value", () => new GreenJsonStringLiteralSyntax(null, 2));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
+
+            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(null));
+            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(string.Empty));
+
+            Assert.Throws<ArgumentNullException>("undefinedValue", () => new GreenJsonUndefinedValueSyntax(null));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
+
+            Assert.Throws<ArgumentNullException>("value", () => JsonValue.Create(null));
         }
 
         [Fact]
@@ -53,13 +67,6 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(1, new GreenJsonUnknownSymbolSyntax("\\0").Length);
         }
 
-        [Fact]
-        public void NullValueShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new JsonString(null, 2));
-            Assert.Throws<ArgumentNullException>(() => JsonValue.Create(null));
-        }
-
         [Theory]
         [InlineData("\"", 10)]
         [InlineData("{}", 3)]
@@ -69,20 +76,14 @@ namespace Eutherion.Shared.Tests
         public void UnchangedValueParameter(string value, int length)
         {
             // Length includes quotes for json strings.
-            var jsonString = new JsonString(value, length + 2);
+            var jsonString = new GreenJsonStringLiteralSyntax(value, length + 2);
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
 
-            var jsonValue = JsonValue.Create(value);
-            Assert.Equal(value, jsonValue.Value);
+            var jsonSymbol = JsonValue.Create(value);
+            var jsonValue = Assert.IsType<GreenJsonUndefinedValueSyntax>(jsonSymbol);
+            Assert.Equal(value, jsonValue.UndefinedValue);
             Assert.Equal(value.Length, jsonValue.Length);
-        }
-
-        [Fact]
-        public void NullErrorsShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
         }
 
         [Theory]
@@ -119,18 +120,6 @@ namespace Eutherion.Shared.Tests
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
-        }
-
-        [Fact]
-        public void UnexpectedSymbolShouldBeNotNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonUnknownSymbolSyntax(null));
-        }
-
-        [Fact]
-        public void UnexpectedSymbolShouldBeNonEmpty()
-        {
-            Assert.Throws<ArgumentException>(() => new GreenJsonUnknownSymbolSyntax(string.Empty));
         }
 
         [Theory]

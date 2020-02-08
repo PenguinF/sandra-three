@@ -81,6 +81,9 @@ namespace Eutherion.Text.Json
             public override JsonBackgroundSyntax VisitCommentSyntax(GreenJsonCommentSyntax green, (JsonBackgroundListSyntax, int) parent)
                 => new JsonCommentSyntax(parent.Item1, parent.Item2, green);
 
+            public override JsonBackgroundSyntax VisitRootLevelValueDelimiterSyntax(GreenJsonRootLevelValueDelimiterSyntax green, (JsonBackgroundListSyntax, int) parent)
+                => new JsonRootLevelValueDelimiterSyntax(parent.Item1, parent.Item2, green);
+
             public override JsonBackgroundSyntax VisitUnterminatedMultiLineCommentSyntax(GreenJsonUnterminatedMultiLineCommentSyntax green, (JsonBackgroundListSyntax, int) parent)
                 => new JsonUnterminatedMultiLineCommentSyntax(parent.Item1, parent.Item2, green);
 

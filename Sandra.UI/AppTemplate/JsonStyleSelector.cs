@@ -33,7 +33,9 @@ namespace Eutherion.Win.AppTemplate
         private const int commentStyleIndex = 8;
         private const int booleanIntegerStyleIndex = 9;
         private const int stringStyleIndex = 10;
-        private const int undefinedValueStyleIndex = 11;
+        private const int errorStringStyleIndex = 11;
+        private const int undefinedValueStyleIndex = 12;
+        private const int unknownSymbolStyleIndex = 13;
 
         private static readonly Color commentForeColor = Color.FromArgb(128, 220, 220);
         private static readonly Font commentFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -42,7 +44,9 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color boolIntegerForeColor = Color.FromArgb(255, 255, 60);
         private static readonly Color stringForeColor = Color.FromArgb(255, 192, 144);
+        private static readonly Color errorStringForeColor = Color.FromArgb(224, 168, 126);
         private static readonly Color undefinedValueForeColor = Color.FromArgb(192, 192, 40);
+        private static readonly Color unknownSymbolForeColor = Color.FromArgb(204, 204, 204);
 
         public static readonly JsonStyleSelector<TSyntaxTree, TError> Instance = new JsonStyleSelector<TSyntaxTree, TError>();
 
@@ -55,9 +59,12 @@ namespace Eutherion.Win.AppTemplate
             valueFont.CopyTo(syntaxEditor.Styles[booleanIntegerStyleIndex]);
 
             syntaxEditor.Styles[stringStyleIndex].ForeColor = stringForeColor;
+            syntaxEditor.Styles[errorStringStyleIndex].ForeColor = errorStringForeColor;
 
             syntaxEditor.Styles[undefinedValueStyleIndex].ForeColor = undefinedValueForeColor;
             valueFont.CopyTo(syntaxEditor.Styles[undefinedValueStyleIndex]);
+
+            syntaxEditor.Styles[unknownSymbolStyleIndex].ForeColor = unknownSymbolForeColor;
         }
 
         private JsonStyleSelector() { }
@@ -71,32 +78,25 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitCommentSyntax(JsonCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
+        public override Style VisitErrorStringSyntax(JsonErrorStringSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[errorStringStyleIndex];
+
         public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
+
+        public override Style VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[unknownSymbolStyleIndex];
 
         public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-            => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
+            => syntaxEditor.Styles[undefinedValueStyleIndex];
+
+        public override Style VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[unknownSymbolStyleIndex];
 
         public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
-
-        public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
-        {
-            public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
-
-            private JsonUndefinedValueStyleSelector() { }
-
-            public override Style DefaultVisit(IJsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.DefaultStyle;
-
-            public override Style VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.Styles[stringStyleIndex];
-
-            public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.Styles[undefinedValueStyleIndex];
-        }
     }
 }

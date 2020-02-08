@@ -30,6 +30,7 @@ namespace Eutherion.Text.Json
         public virtual void DefaultVisit(GreenJsonBackgroundSyntax node) { }
         public virtual void Visit(GreenJsonBackgroundSyntax node) { if (node != null) node.Accept(this); }
         public virtual void VisitCommentSyntax(GreenJsonCommentSyntax node) => DefaultVisit(node);
+        public virtual void VisitRootLevelValueDelimiterSyntax(GreenJsonRootLevelValueDelimiterSyntax node) => DefaultVisit(node);
         public virtual void VisitUnterminatedMultiLineCommentSyntax(GreenJsonUnterminatedMultiLineCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitWhitespaceSyntax(GreenJsonWhitespaceSyntax node) => DefaultVisit(node);
     }
@@ -43,6 +44,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(GreenJsonBackgroundSyntax node) => default;
         public virtual TResult Visit(GreenJsonBackgroundSyntax node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitCommentSyntax(GreenJsonCommentSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitRootLevelValueDelimiterSyntax(GreenJsonRootLevelValueDelimiterSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUnterminatedMultiLineCommentSyntax(GreenJsonUnterminatedMultiLineCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitWhitespaceSyntax(GreenJsonWhitespaceSyntax node) => DefaultVisit(node);
     }
@@ -56,6 +58,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(GreenJsonBackgroundSyntax node, T arg) => default;
         public virtual TResult Visit(GreenJsonBackgroundSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitCommentSyntax(GreenJsonCommentSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitRootLevelValueDelimiterSyntax(GreenJsonRootLevelValueDelimiterSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUnterminatedMultiLineCommentSyntax(GreenJsonUnterminatedMultiLineCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitWhitespaceSyntax(GreenJsonWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
     }

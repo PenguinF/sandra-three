@@ -68,6 +68,7 @@
     <Compile Include="Text\Json\JsonMissingValueSyntax.cs" />
     <Compile Include="Text\Json\JsonMultiValueSyntax.cs" />
     <Compile Include="Text\Json\JsonParser.cs" />
+    <Compile Include="Text\Json\JsonRootLevelValueDelimiterSyntax.cs" />
     <Compile Include="Text\Json\JsonSquareBracketCloseSyntax.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Text\Json\JsonUnknownSymbolSyntax.cs" />
     <Compile Include="Text\Json\JsonUnterminatedMultiLineCommentSyntax.cs" />
     <Compile Include="Text\Json\JsonValue.cs" />
+    <Compile Include="Text\Json\JsonValueStarterSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonValueSyntax.cs" />
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />

@@ -78,12 +78,15 @@ namespace Eutherion.Text.Json
             public override JsonSyntax VisitCommentSyntax(JsonCommentSyntax node) => node;
             public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node;
             public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
+            public override JsonSyntax VisitErrorStringSyntax(JsonErrorStringSyntax node) => node;
             public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
             public override JsonSyntax VisitMissingValueSyntax(JsonMissingValueSyntax node) => node;
+            public override JsonSyntax VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => node;
             public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node;
             public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
             public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;
             public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node;
+            public override JsonSyntax VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => node;
             public override JsonSyntax VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node;
             public override JsonSyntax VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node;
         }
