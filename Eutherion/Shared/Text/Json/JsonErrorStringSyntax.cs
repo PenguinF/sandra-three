@@ -39,7 +39,15 @@ namespace Eutherion.Text.Json
 
         public override bool HasErrors => true;
 
-        // Copy all errors, offset by given start position.
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
         public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
             => Errors.Select(error => new JsonErrorInfo(
                 error.ErrorCode,
