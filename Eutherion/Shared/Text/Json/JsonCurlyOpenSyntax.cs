@@ -73,8 +73,8 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyOpenSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 }

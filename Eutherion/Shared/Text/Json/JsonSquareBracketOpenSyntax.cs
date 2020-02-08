@@ -73,8 +73,8 @@ namespace Eutherion.Text.Json
 
         internal JsonSquareBracketOpenSyntax(JsonListSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
     }
 }

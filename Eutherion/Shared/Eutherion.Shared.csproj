@@ -71,7 +71,6 @@
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
     <Compile Include="Text\Json\JsonSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonSyntax.cs" />
-    <Compile Include="Text\Json\JsonTerminalSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonTokenizer.cs" />
     <Compile Include="Text\Json\JsonUndefinedValueSyntax.cs" />
     <Compile Include="Text\Json\JsonUnknownSymbolSyntax.cs" />

@@ -119,8 +119,8 @@ namespace Eutherion.Text.Json
 
         // Treat JsonBackgroundSyntax as a terminal symbol.
         // Can always specify further for each individual background JsonSymbol if the need arises.
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBackgroundListSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundListSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundListSyntax(this, arg);
+        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitBackgroundListSyntax(this);
+        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundListSyntax(this);
+        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundListSyntax(this, arg);
     }
 }

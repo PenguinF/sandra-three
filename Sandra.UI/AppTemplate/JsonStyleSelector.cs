@@ -28,7 +28,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// A style selector for json syntax highlighting.
     /// </summary>
-    public class JsonStyleSelector<TSyntaxTree, TError> : JsonTerminalSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
+    public class JsonStyleSelector<TSyntaxTree, TError> : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
     {
         private const int commentStyleIndex = 8;
         private const int booleanIntegerStyleIndex = 9;
