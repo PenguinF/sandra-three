@@ -60,4 +60,41 @@ namespace Eutherion.Text.Json
         TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
         TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
     }
+
+    /// <summary>
+    /// Contains extension methods for the <see cref="IJsonSymbol"/> interface.
+    /// </summary>
+    public static class JsonSymbolExtensions
+    {
+        private sealed class ToJsonSyntaxConverter : JsonSymbolVisitor<JsonSyntax>
+        {
+            public static readonly ToJsonSyntaxConverter Instance = new ToJsonSyntaxConverter();
+
+            private ToJsonSyntaxConverter() { }
+
+            public override JsonSyntax VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => node;
+            public override JsonSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => node;
+            public override JsonSyntax VisitColonSyntax(JsonColonSyntax node) => node;
+            public override JsonSyntax VisitCommaSyntax(JsonCommaSyntax node) => node;
+            public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node;
+            public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
+            public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
+            public override JsonSyntax VisitMissingValueSyntax(JsonMissingValueSyntax node) => node;
+            public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node;
+            public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
+            public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;
+            public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node;
+        }
+
+        /// <summary>
+        /// Converts this <see cref="IJsonSymbol"/> to a <see cref="JsonSyntax"/> node.
+        /// </summary>
+        /// <param name="jsonSymbol">
+        /// The <see cref="IJsonSymbol"/> to convert.
+        /// </param>
+        /// <returns>
+        /// The converted <see cref="JsonSyntax"/> node.
+        /// </returns>
+        public static JsonSyntax ToSyntax(this IJsonSymbol jsonSymbol) => jsonSymbol.Accept(ToJsonSyntaxConverter.Instance);
+    }
 }

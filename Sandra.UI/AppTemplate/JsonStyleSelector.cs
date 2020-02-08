@@ -28,7 +28,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// A style selector for json syntax highlighting.
     /// </summary>
-    public class JsonStyleSelector<TSyntaxTree, TError> : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
+    public class JsonStyleSelector<TSyntaxTree, TError> : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
     {
         private const int commentStyleIndex = 8;
         private const int booleanIntegerStyleIndex = 9;
@@ -46,7 +46,7 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly JsonStyleSelector<TSyntaxTree, TError> Instance = new JsonStyleSelector<TSyntaxTree, TError>();
 
-        public static void InitializeStyles(SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public static void InitializeStyles(SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
         {
             syntaxEditor.Styles[commentStyleIndex].ForeColor = commentForeColor;
             commentFont.CopyTo(syntaxEditor.Styles[commentStyleIndex]);
@@ -62,37 +62,37 @@ namespace Eutherion.Win.AppTemplate
 
         private JsonStyleSelector() { }
 
-        public override Style DefaultVisit(JsonSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style DefaultVisit(JsonSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitBackgroundListSyntax(JsonBackgroundListSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitBackgroundListSyntax(JsonBackgroundListSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public override Style VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
-        public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
-        public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
-        public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+        public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
 
-        public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
+        public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
         {
             public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
 
             private JsonUndefinedValueStyleSelector() { }
 
-            public override Style DefaultVisit(JsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style DefaultVisit(JsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
                 => syntaxEditor.DefaultStyle;
 
-            public override Style VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
                 => syntaxEditor.Styles[stringStyleIndex];
 
-            public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
+            public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
                 => syntaxEditor.Styles[undefinedValueStyleIndex];
         }
     }

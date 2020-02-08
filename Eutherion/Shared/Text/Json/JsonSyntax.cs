@@ -128,7 +128,7 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException(nameof(position));
         }
 
-        private IEnumerable<JsonSyntax> ChildTerminalSymbolsInRange(int start, int length)
+        private IEnumerable<IJsonSymbol> ChildTerminalSymbolsInRange(int start, int length)
         {
             // Find the first child node that intersects with the given range.
             // Can safely call GetChildIndexAfter because of invariant: start < this.Length
@@ -147,7 +147,7 @@ namespace Eutherion.Text.Json
 
                     if (childNode.IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                     {
-                        yield return childNode;
+                        yield return jsonTerminalSymbol;
                     }
                     else
                     {
@@ -175,14 +175,14 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// All descendants of this node that intersect with the given range, have no child nodes, and have a length greater than 0. 
         /// </returns>
-        public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
+        public IEnumerable<IJsonSymbol> TerminalSymbolsInRange(int start, int length)
         {
             // Yield return if ranges [start..start+length] and [0..Length] intersect.
             if (0 < length && 0 < Length && start < Length && 0 < start + length)
             {
                 if (IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                 {
-                    return new SingleElementEnumerable<JsonSyntax>(this);
+                    return new SingleElementEnumerable<IJsonSymbol>(jsonTerminalSymbol);
                 }
                 else
                 {
@@ -190,7 +190,7 @@ namespace Eutherion.Text.Json
                 }
             }
 
-            return EmptyEnumerable<JsonSyntax>.Instance;
+            return EmptyEnumerable<IJsonSymbol>.Instance;
         }
 
         public virtual void Accept(JsonSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
