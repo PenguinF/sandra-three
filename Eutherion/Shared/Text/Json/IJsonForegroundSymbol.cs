@@ -26,10 +26,30 @@ namespace Eutherion.Text.Json
     /// </summary>
     public interface IJsonForegroundSymbol : IGreenJsonSymbol
     {
-        bool IsValueStartSymbol { get; }
+        /// <summary>
+        /// Converts this symbol into either a <see cref="IJsonValueDelimiterSymbol"/> or a <see cref="IJsonValueStarterSymbol"/>.
+        /// </summary>
+        /// <returns>
+        /// Either a <see cref="IJsonValueDelimiterSymbol"/> or a <see cref="IJsonValueStarterSymbol"/>.
+        /// </returns>
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> AsValueDelimiterOrStarter();
 
         void Accept(JsonForegroundSymbolVisitor visitor);
         TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
         TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    /// <summary>
+    /// Denotes any terminal json symbol that delimits a value, including maps and lists.
+    /// </summary>
+    public interface IJsonValueDelimiterSymbol : IJsonForegroundSymbol
+    {
+    }
+
+    /// <summary>
+    /// Denotes any terminal json symbol that starts a value declaration, including maps and lists.
+    /// </summary>
+    public interface IJsonValueStarterSymbol : IJsonForegroundSymbol
+    {
     }
 }

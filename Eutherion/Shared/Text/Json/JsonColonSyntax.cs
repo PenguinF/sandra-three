@@ -26,7 +26,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class GreenJsonColonSyntax : IJsonForegroundSymbol
+    public sealed class GreenJsonColonSyntax : IJsonValueDelimiterSymbol
     {
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
@@ -36,8 +36,7 @@ namespace Eutherion.Text.Json
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-
-        bool IJsonForegroundSymbol.IsValueStartSymbol => false;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
 
         void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
         TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);

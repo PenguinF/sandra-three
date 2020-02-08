@@ -29,7 +29,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenJsonErrorStringSyntax : IJsonForegroundSymbol
+    public sealed class GreenJsonErrorStringSyntax : IJsonValueStarterSymbol
     {
         internal ReadOnlyList<JsonErrorInfo> Errors { get; }
 
@@ -69,8 +69,7 @@ namespace Eutherion.Text.Json
         }
 
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-
-        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
 
         void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
         TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);

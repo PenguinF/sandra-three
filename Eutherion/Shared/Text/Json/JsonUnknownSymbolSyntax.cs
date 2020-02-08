@@ -27,7 +27,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an unknown symbol.
     /// </summary>
-    public sealed class GreenJsonUnknownSymbolSyntax : IJsonForegroundSymbol
+    public sealed class GreenJsonUnknownSymbolSyntax : IJsonValueStarterSymbol
     {
         /// <summary>
         /// Gets a friendly representation of the unknown symbol.
@@ -72,8 +72,7 @@ namespace Eutherion.Text.Json
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-
-        bool IJsonForegroundSymbol.IsValueStartSymbol => true;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
 
         void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
         TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);

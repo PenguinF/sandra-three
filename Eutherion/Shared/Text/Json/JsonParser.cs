@@ -314,18 +314,20 @@ namespace Eutherion.Text.Json
 
             ShiftToNextForegroundToken();
 
-            if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+            var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
+            if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
                 return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
             }
 
+            // Invariant: discriminated != null && !discriminated.IsOption1().
             for (; ; )
             {
                 // Always create a value node, then decide if it must be ignored.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
-                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(CurrentToken);
+                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
@@ -339,8 +341,9 @@ namespace Eutherion.Text.Json
                 // Move to the next symbol if CurrentToken was processed.
                 if (!unprocessedToken) ShiftToNextForegroundToken();
 
-                // If IsValueStartSymbol == false in the first iteration, it means that exactly one value was parsed, as desired.
-                if (CurrentToken == null || !CurrentToken.IsValueStartSymbol)
+                // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
+                discriminated = CurrentToken?.AsValueDelimiterOrStarter();
+                if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol))
                 {
                     // Capture the background following the last value.
                     return new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
@@ -354,8 +357,8 @@ namespace Eutherion.Text.Json
             }
         }
 
-        // ParseMultiValue copy, except that it handles the !CurrentToken.IsValueStartSymbol case differently,
-        // as it cannot go to a higher level in the stack to process control symbols.
+        // ParseMultiValue copy, except that it handles the discriminated.IsOption1() case differently,
+        // as it cannot go to a higher level in the stack to process value delimiter symbols.
         private RootJsonSyntax Parse()
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
@@ -372,13 +375,15 @@ namespace Eutherion.Text.Json
 
             for (; ; )
             {
+                var discriminated = CurrentToken.AsValueDelimiterOrStarter();
+
                 // Always create a value node, then decide if it must be ignored.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
 
                 GreenJsonValueSyntax currentNode;
                 bool unprocessedToken;
-                if (!CurrentToken.IsValueStartSymbol)
+                if (!discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
                 {
                     // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
                     if (valueNodesBuilder.Count == 0)
@@ -397,7 +402,7 @@ namespace Eutherion.Text.Json
                 }
                 else
                 {
-                    (currentNode, unprocessedToken) = Visit(CurrentToken);
+                    (currentNode, unprocessedToken) = Visit(valueStarterSymbol);
                 }
 
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
