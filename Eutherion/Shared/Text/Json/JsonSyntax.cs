@@ -192,21 +192,5 @@ namespace Eutherion.Text.Json
 
             return EmptyEnumerable<IJsonSymbol>.Instance;
         }
-
-        public virtual void Accept(JsonSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
-        public virtual TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
-        public virtual TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => throw new JsonSyntaxIsNotTerminalException(this);
-    }
-
-    /// <summary>
-    /// Occurs when a <see cref="JsonSymbolVisitor"/> is called on a <see cref="JsonSyntax"/> instance
-    /// which is not a terminal symbol, i.e. for which <see cref="JsonSyntax.IsTerminalSymbol"/> returns false.
-    /// </summary>
-    public class JsonSyntaxIsNotTerminalException : Exception
-    {
-        internal JsonSyntaxIsNotTerminalException(JsonSyntax syntax)
-            : base($"{syntax.GetType().FullName} is not a terminal symbol.")
-        {
-        }
     }
 }
