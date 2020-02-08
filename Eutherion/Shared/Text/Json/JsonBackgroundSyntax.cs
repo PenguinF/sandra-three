@@ -36,4 +36,36 @@ namespace Eutherion.Text.Json
         public abstract TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg);
     }
+
+    /// <summary>
+    /// Represents a single background node in an abstract json syntax tree.
+    /// </summary>
+    public abstract class JsonBackgroundSyntax : JsonSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public JsonBackgroundListSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in the background nodes collection of its parent.
+        /// </summary>
+        public int BackgroundNodeIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.BackgroundNodes.GetElementOffset(BackgroundNodeIndex);
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override JsonSyntax ParentSyntax => Parent;
+
+        internal JsonBackgroundSyntax(JsonBackgroundListSyntax parent, int backgroundNodeIndex)
+        {
+            Parent = parent;
+            BackgroundNodeIndex = backgroundNodeIndex;
+        }
+    }
 }

@@ -45,7 +45,10 @@ namespace Eutherion.Text.Json
         public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }
 
-    public static class JsonCommentSyntax
+    /// <summary>
+    /// Represents a json syntax node which contains a comment.
+    /// </summary>
+    public sealed class JsonCommentSyntax : JsonBackgroundSyntax, IJsonSymbol
     {
         public const char CommentStartFirstCharacter = '/';
         public const char SingleLineCommentStartSecondCharacter = '/';
@@ -53,5 +56,23 @@ namespace Eutherion.Text.Json
 
         public static readonly string SingleLineCommentStart
             = new string(new[] { CommentStartFirstCharacter, SingleLineCommentStartSecondCharacter });
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonCommentSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal JsonCommentSyntax(JsonBackgroundListSyntax parent, int backgroundNodeIndex, GreenJsonCommentSyntax green)
+            : base(parent, backgroundNodeIndex)
+            => Green = green;
+
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCommentSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }
 }

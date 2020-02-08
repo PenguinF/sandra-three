@@ -65,11 +65,11 @@ namespace Eutherion.Win.AppTemplate
         public override Style DefaultVisit(IJsonSymbol node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitBackgroundListSyntax(JsonBackgroundListSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-            => syntaxEditor.Styles[commentStyleIndex];
-
         public override Style VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
+
+        public override Style VisitCommentSyntax(JsonCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[commentStyleIndex];
 
         public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
@@ -79,6 +79,9 @@ namespace Eutherion.Win.AppTemplate
 
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
+
+        public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[commentStyleIndex];
 
         public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
         {

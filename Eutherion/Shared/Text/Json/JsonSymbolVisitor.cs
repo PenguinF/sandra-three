@@ -77,10 +77,10 @@ namespace Eutherion.Text.Json
     {
         public virtual void DefaultVisit(IJsonSymbol node) { }
         public virtual void Visit(IJsonSymbol node) { if (node != null) node.Accept(this); }
-        public virtual void VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual void VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitColonSyntax(JsonColonSyntax node) => DefaultVisit(node);
         public virtual void VisitCommaSyntax(JsonCommaSyntax node) => DefaultVisit(node);
+        public virtual void VisitCommentSyntax(JsonCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
@@ -89,6 +89,8 @@ namespace Eutherion.Text.Json
         public virtual void VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual void VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => DefaultVisit(node);
+        public virtual void VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -99,10 +101,10 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(IJsonSymbol node) => default;
         public virtual TResult Visit(IJsonSymbol node) => node == null ? default : node.Accept(this);
-        public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitColonSyntax(JsonColonSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCommaSyntax(JsonCommaSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitCommentSyntax(JsonCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
@@ -111,6 +113,8 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => DefaultVisit(node);
     }
 
     /// <summary>
@@ -121,10 +125,10 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(IJsonSymbol node, T arg) => default;
         public virtual TResult Visit(IJsonSymbol node, T arg) => node == null ? default : node.Accept(this, arg);
-        public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitColonSyntax(JsonColonSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCommaSyntax(JsonCommaSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitCommentSyntax(JsonCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
@@ -133,5 +137,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitStringLiteralSyntax(JsonStringLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitWhitespaceSyntax(JsonWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }

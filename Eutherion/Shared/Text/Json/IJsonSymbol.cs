@@ -72,10 +72,10 @@ namespace Eutherion.Text.Json
 
             private ToJsonSyntaxConverter() { }
 
-            public override JsonSyntax VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => node;
             public override JsonSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => node;
             public override JsonSyntax VisitColonSyntax(JsonColonSyntax node) => node;
             public override JsonSyntax VisitCommaSyntax(JsonCommaSyntax node) => node;
+            public override JsonSyntax VisitCommentSyntax(JsonCommentSyntax node) => node;
             public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node;
             public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
             public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
@@ -84,6 +84,8 @@ namespace Eutherion.Text.Json
             public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
             public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;
             public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node;
+            public override JsonSyntax VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node;
+            public override JsonSyntax VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node;
         }
 
         /// <summary>

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 
@@ -69,8 +70,24 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a node with background symbols in an abstract json syntax tree.
     /// </summary>
-    public sealed class JsonBackgroundListSyntax : JsonSyntax, IJsonSymbol
+    public sealed class JsonBackgroundListSyntax : JsonSyntax
     {
+        private class JsonValueWithBackgroundSyntaxCreator : GreenJsonBackgroundSyntaxVisitor<(JsonBackgroundListSyntax, int), JsonBackgroundSyntax>
+        {
+            public static readonly JsonValueWithBackgroundSyntaxCreator Instance = new JsonValueWithBackgroundSyntaxCreator();
+
+            private JsonValueWithBackgroundSyntaxCreator() { }
+
+            public override JsonBackgroundSyntax VisitCommentSyntax(GreenJsonCommentSyntax green, (JsonBackgroundListSyntax, int) parent)
+                => new JsonCommentSyntax(parent.Item1, parent.Item2, green);
+
+            public override JsonBackgroundSyntax VisitUnterminatedMultiLineCommentSyntax(GreenJsonUnterminatedMultiLineCommentSyntax green, (JsonBackgroundListSyntax, int) parent)
+                => new JsonUnterminatedMultiLineCommentSyntax(parent.Item1, parent.Item2, green);
+
+            public override JsonBackgroundSyntax VisitWhitespaceSyntax(GreenJsonWhitespaceSyntax green, (JsonBackgroundListSyntax, int) parent)
+                => new JsonWhitespaceSyntax(parent.Item1, parent.Item2, green);
+        }
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -84,7 +101,7 @@ namespace Eutherion.Text.Json
         /// <summary>
         /// Gets the collection of background nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundNodes => Green.BackgroundNodes;
+        public SafeLazyObjectCollection<JsonBackgroundSyntax> BackgroundNodes { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -105,10 +122,29 @@ namespace Eutherion.Text.Json
             whenOption1: x => x,
             whenOption2: x => x);
 
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => BackgroundNodes.Count;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override JsonSyntax GetChild(int index) => BackgroundNodes[index];
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public override int GetChildStartPosition(int index) => Green.BackgroundNodes.GetElementOffset(index);
+
         private JsonBackgroundListSyntax(Union<JsonValueWithBackgroundSyntax, JsonMultiValueSyntax> parent, GreenJsonBackgroundListSyntax green)
         {
             Parent = parent;
             Green = green;
+
+            BackgroundNodes = new SafeLazyObjectCollection<JsonBackgroundSyntax>(
+                green.BackgroundNodes.Count,
+                index => JsonValueWithBackgroundSyntaxCreator.Instance.Visit(green.BackgroundNodes[index], (this, index)));
         }
 
         internal JsonBackgroundListSyntax(JsonValueWithBackgroundSyntax backgroundBeforeParent)
@@ -120,11 +156,5 @@ namespace Eutherion.Text.Json
             : this(backgroundAfterParent, backgroundAfterParent.Green.BackgroundAfter)
         {
         }
-
-        // Treat JsonBackgroundSyntax as a terminal symbol.
-        // Can always specify further for each individual background JsonSymbol if the need arises.
-        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitBackgroundListSyntax(this);
-        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitBackgroundListSyntax(this);
-        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBackgroundListSyntax(this, arg);
     }
 }
