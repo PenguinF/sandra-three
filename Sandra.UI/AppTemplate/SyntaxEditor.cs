@@ -206,7 +206,10 @@ namespace Eutherion.Win.AppTemplate
             foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
             {
                 var (start, length) = SyntaxDescriptor.GetTokenSpan(token);
-                ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
+                if (length > 0)
+                {
+                    ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
+                }
             }
 
             base.OnStyleNeeded(e);
