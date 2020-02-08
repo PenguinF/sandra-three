@@ -377,11 +377,6 @@ namespace Eutherion.Text.Json
             {
                 var discriminated = CurrentToken.AsValueDelimiterOrStarter();
 
-                // Always create a value node, then decide if it must be ignored.
-                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-                var backgroundBefore = CaptureBackground();
-
-                GreenJsonValueSyntax currentNode;
                 bool unprocessedToken;
                 if (!discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
                 {
@@ -397,15 +392,20 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
+                    var backgroundBefore = CaptureBackground();
+                    GreenJsonValueSyntax currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
+                    valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
                 }
                 else
                 {
+                    // Always create a value node, then decide if it must be ignored.
+                    // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                    var backgroundBefore = CaptureBackground();
+                    GreenJsonValueSyntax currentNode;
                     (currentNode, unprocessedToken) = Visit(valueStarterSymbol);
+                    valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
                 }
-
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
