@@ -385,7 +385,7 @@ namespace Eutherion.Text.Json
                 var discriminated = CurrentToken.AsValueDelimiterOrStarter();
 
                 bool unprocessedToken;
-                if (!discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
+                if (discriminated.IsOption1(out IJsonValueDelimiterSymbol valueDelimiterSymbol))
                 {
                     // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
                     if (valueNodesBuilder.Count == 0)
@@ -395,19 +395,17 @@ namespace Eutherion.Text.Json
                         // already have done it.
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ExpectedEof,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
+                            CurrentLength - valueDelimiterSymbol.Length,
+                            valueDelimiterSymbol.Length));
                     }
 
-                    var backgroundBefore = CaptureBackground();
-                    GreenJsonValueSyntax currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
+                    BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
                     unprocessedToken = false;
-                    valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
                 }
                 else
                 {
                     // Always create a value node, even if it contains an undefined value.
-                    unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
+                    unprocessedToken = ParseValueNode(valueNodesBuilder, discriminated.ToOption2());
 
                     // CurrentToken may be null, e.g. unterminated objects or arrays.
                     if (CurrentToken == null)
