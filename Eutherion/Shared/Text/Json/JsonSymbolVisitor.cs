@@ -75,8 +75,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class JsonSymbolVisitor
     {
-        public virtual void DefaultVisit(JsonSyntax node) { }
-        public virtual void Visit(JsonSyntax node) { if (node != null) node.Accept(this); }
+        public virtual void DefaultVisit(IJsonSymbol node) { }
+        public virtual void Visit(IJsonSymbol node) { if (node != null) node.Accept(this); }
         public virtual void VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual void VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitColonSyntax(JsonColonSyntax node) => DefaultVisit(node);
@@ -97,8 +97,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class JsonSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntax node) => default;
-        public virtual TResult Visit(JsonSyntax node) => node == null ? default : node.Accept(this);
+        public virtual TResult DefaultVisit(IJsonSymbol node) => default;
+        public virtual TResult Visit(IJsonSymbol node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node) => DefaultVisit(node);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitColonSyntax(JsonColonSyntax node) => DefaultVisit(node);
@@ -119,8 +119,8 @@ namespace Eutherion.Text.Json
     /// </summary>
     public abstract class JsonSymbolVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonSyntax node, T arg) => default;
-        public virtual TResult Visit(JsonSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult DefaultVisit(IJsonSymbol node, T arg) => default;
+        public virtual TResult Visit(IJsonSymbol node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBackgroundListSyntax(JsonBackgroundListSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitColonSyntax(JsonColonSyntax node, T arg) => DefaultVisit(node, arg);

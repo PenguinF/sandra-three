@@ -62,7 +62,7 @@ namespace Eutherion.Win.AppTemplate
 
         private JsonStyleSelector() { }
 
-        public override Style DefaultVisit(JsonSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+        public override Style DefaultVisit(IJsonSymbol node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
         public override Style VisitBackgroundListSyntax(JsonBackgroundListSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
