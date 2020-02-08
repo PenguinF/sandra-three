@@ -425,10 +425,21 @@ namespace Eutherion.Text.Json
 
                 if (CurrentToken == null)
                 {
-                    // Capture the background following the last value.
-                    return new RootJsonSyntax(
-                        new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
-                        Errors);
+                    // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
+                    if (valueNodesBuilder.Count == 0)
+                    {
+                        valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            Errors);
+                    }
+                    else
+                    {
+                        // Capture the background following the last value.
+                        return new RootJsonSyntax(
+                            new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
+                            Errors);
+                    }
                 }
 
                 // Two or more consecutive values not allowed.
