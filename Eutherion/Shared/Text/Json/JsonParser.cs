@@ -299,8 +299,14 @@ namespace Eutherion.Text.Json
             return (new GreenJsonUndefinedValueSyntax(symbol), false);
         }
 
+        public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol)
+            => (new GreenJsonUndefinedValueSyntax(symbol), false);
+
         public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(JsonString symbol)
             => (new GreenJsonStringLiteralSyntax(symbol), false);
+
+        public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
+            => (new GreenJsonUndefinedValueSyntax(symbol), false);
 
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
@@ -319,20 +325,7 @@ namespace Eutherion.Text.Json
                 // Always create a value node, then decide if it must be ignored.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
-
-                GreenJsonValueSyntax currentNode;
-                bool unprocessedToken;
-                if (CurrentToken.HasErrors)
-                {
-                    // JsonErrorString, JsonUnknownSymbol
-                    currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
-                    unprocessedToken = false;
-                }
-                else
-                {
-                    (currentNode, unprocessedToken) = Visit(CurrentToken);
-                }
-
+                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(CurrentToken);
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
@@ -399,12 +392,6 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
-                    unprocessedToken = false;
-                }
-                else if (CurrentToken.HasErrors)
-                {
-                    // JsonErrorString, JsonUnknownSymbol
                     currentNode = new GreenJsonUndefinedValueSyntax(CurrentToken);
                     unprocessedToken = false;
                 }

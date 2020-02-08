@@ -27,7 +27,6 @@ namespace Eutherion.Text.Json
     public interface IJsonForegroundSymbol : IGreenJsonSymbol
     {
         bool IsValueStartSymbol { get; }
-        bool HasErrors { get; }
 
         void Accept(JsonForegroundSymbolVisitor visitor);
         TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);

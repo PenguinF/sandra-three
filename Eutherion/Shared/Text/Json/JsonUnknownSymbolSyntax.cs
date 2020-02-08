@@ -74,7 +74,6 @@ namespace Eutherion.Text.Json
         Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
         bool IJsonForegroundSymbol.IsValueStartSymbol => true;
-        bool IJsonForegroundSymbol.HasErrors => true;
 
         void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
         TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
