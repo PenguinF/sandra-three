@@ -78,7 +78,8 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
 
-            var jsonValue = JsonValue.Create(value);
+            var jsonSymbol = JsonValue.Create(value);
+            var jsonValue = Assert.IsType<JsonValue>(jsonSymbol);
             Assert.Equal(value, jsonValue.Value);
             Assert.Equal(value.Length, jsonValue.Length);
         }
