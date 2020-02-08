@@ -44,15 +44,15 @@ namespace Eutherion.Shared.Tests
             }
             else if (tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.False)
                 || tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.True)
-                || tokenType1 == typeof(JsonValue))
+                || tokenType1 == typeof(GreenJsonUndefinedValueSyntax))
             {
                 // This only works if two undefined values don't add up to 'true' or 'false'.
                 if (tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.False)
                     || tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.True)
                     || tokenType2 == typeof(GreenJsonIntegerLiteralSyntax)
-                    || tokenType2 == typeof(JsonValue))
+                    || tokenType2 == typeof(GreenJsonUndefinedValueSyntax))
                 {
-                    resultTokenType = typeof(JsonValue);
+                    resultTokenType = typeof(GreenJsonUndefinedValueSyntax);
                     return true;
                 }
             }
@@ -67,9 +67,9 @@ namespace Eutherion.Shared.Tests
                 }
                 else if (tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.False)
                     || tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.True)
-                    || tokenType2 == typeof(JsonValue))
+                    || tokenType2 == typeof(GreenJsonUndefinedValueSyntax))
                 {
-                    resultTokenType = typeof(JsonValue);
+                    resultTokenType = typeof(GreenJsonUndefinedValueSyntax);
                     return true;
                 }
             }
@@ -241,8 +241,8 @@ namespace Eutherion.Shared.Tests
                 }
                 else
                 {
-                    var valueSymbol = Assert.IsType<JsonValue>(symbol);
-                    Assert.Equal(json, valueSymbol.Value);
+                    var valueSymbol = Assert.IsType<GreenJsonUndefinedValueSyntax>(symbol);
+                    Assert.Equal(json, valueSymbol.UndefinedValue);
                 }
             });
         }
@@ -293,7 +293,7 @@ namespace Eutherion.Shared.Tests
             yield return ("false", typeof(GreenJsonBooleanLiteralSyntax.False));
             yield return ("true", typeof(GreenJsonBooleanLiteralSyntax.True));
             yield return ("0", typeof(GreenJsonIntegerLiteralSyntax));
-            yield return ("_", typeof(JsonValue));
+            yield return ("_", typeof(GreenJsonUndefinedValueSyntax));
             yield return ("\"\"", typeof(GreenJsonStringLiteralSyntax));
             yield return ("\" \"", typeof(GreenJsonStringLiteralSyntax));  // Have to check if the space isn't interpreted as whitespace.
             yield return ("\"\n\\ \n\"", typeof(GreenJsonErrorStringSyntax));

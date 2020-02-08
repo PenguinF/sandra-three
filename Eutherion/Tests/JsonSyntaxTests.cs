@@ -44,6 +44,8 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(null));
             Assert.Throws<ArgumentException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(string.Empty));
 
+            Assert.Throws<ArgumentNullException>("undefinedValue", () => new GreenJsonUndefinedValueSyntax(null));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
@@ -79,8 +81,8 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(length + 2, jsonString.Length);
 
             var jsonSymbol = JsonValue.Create(value);
-            var jsonValue = Assert.IsType<JsonValue>(jsonSymbol);
-            Assert.Equal(value, jsonValue.Value);
+            var jsonValue = Assert.IsType<GreenJsonUndefinedValueSyntax>(jsonSymbol);
+            Assert.Equal(value, jsonValue.UndefinedValue);
             Assert.Equal(value.Length, jsonValue.Length);
         }
 

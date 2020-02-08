@@ -20,13 +20,15 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonValue : IJsonValueStarterSymbol
+    /// <summary>
+    /// Helper class to generate json literal value terminal symbols from source json.
+    /// </summary>
+    public static class JsonValue
     {
         public const int FalseSymbolLength = 5;
         public const int TrueSymbolLength = 4;
@@ -47,21 +49,7 @@ namespace Eutherion.Text.Json
                 return new GreenJsonIntegerLiteralSyntax(integerValue, value.Length);
             }
 
-            return new JsonValue(value);
+            return new GreenJsonUndefinedValueSyntax(value);
         }
-
-        public string Value { get; }
-
-        public int Length => Value.Length;
-
-        private JsonValue(string value) => Value = value;
-
-        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitValue(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
     }
 }

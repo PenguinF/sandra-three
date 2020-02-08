@@ -277,17 +277,12 @@ namespace Eutherion.Text.Json
             }
         }
 
-        public override (GreenJsonValueSyntax, bool) VisitValue(JsonValue symbol)
-        {
-            Errors.Add(JsonUndefinedValueSyntax.CreateError(symbol.Value, CurrentLength - symbol.Length, symbol.Length));
-            return (new GreenJsonUndefinedValueSyntax(symbol), false);
-        }
-
         // Explicit Visit overrides for classes which are both IJsonValueStarterSymbol and GreenJsonValueSyntax.
         public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
 
         // Returns whether or not the current token still needs to be processed.
