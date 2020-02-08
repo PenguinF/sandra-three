@@ -55,9 +55,26 @@ namespace Eutherion.Text.Json
         public virtual int ChildCount => 0;
 
         /// <summary>
-        /// Gets if this syntax is a terminal symbol, i.e. if it has no children.
+        /// Gets if this syntax is a terminal symbol, i.e. if it has no child nodes.
         /// </summary>
-        public bool IsTerminalSymbol => ChildCount == 0;
+        /// <param name="jsonTerminalSymbol">
+        /// The terminal symbol if this syntax is a terminal symbol, otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// Whether or not this syntax is a terminal symbol, i.e. if it has no child nodes.
+        /// </returns>
+        public bool IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol)
+        {
+            if (ChildCount == 0)
+            {
+                // Contract is that all subclasses with ChildCount == 0 must implement IJsonSymbol.
+                jsonTerminalSymbol = (IJsonSymbol)this;
+                return true;
+            }
+
+            jsonTerminalSymbol = default;
+            return false;
+        }
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -128,7 +145,7 @@ namespace Eutherion.Text.Json
                 {
                     JsonSyntax childNode = GetChild(childIndex);
 
-                    if (childNode.IsTerminalSymbol)
+                    if (childNode.IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                     {
                         yield return childNode;
                     }
@@ -163,7 +180,7 @@ namespace Eutherion.Text.Json
             // Yield return if ranges [start..start+length] and [0..Length] intersect.
             if (0 < length && 0 < Length && start < Length && 0 < start + length)
             {
-                if (IsTerminalSymbol)
+                if (IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                 {
                     return new SingleElementEnumerable<JsonSyntax>(this);
                 }
