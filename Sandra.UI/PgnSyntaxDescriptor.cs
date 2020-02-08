@@ -43,7 +43,23 @@ namespace Sandra.UI
         public override LocalizedStringKey FileExtensionLocalizedKey => LocalizedStringKeys.PgnFiles;
 
         public override RootPgnSyntax Parse(string code)
-            => new RootPgnSyntax(PgnTokenizer.TokenizeAll(code));
+        {
+            var rootNode = new RootPgnSyntax(PgnTokenizer.TokenizeAll(code));
+
+            if (rootNode.Errors.Count > 0)
+            {
+                rootNode.Errors.Sort((x, y)
+                    => x.Start < y.Start ? -1
+                    : x.Start > y.Start ? 1
+                    : x.Length < y.Length ? -1
+                    : x.Length > y.Length ? 1
+                    : x.ErrorCode < y.ErrorCode ? -1
+                    : x.ErrorCode > y.ErrorCode ? 1
+                    : 0);
+            }
+
+            return rootNode;
+        }
 
         public override IEnumerable<IPgnSymbol> GetTerminalsInRange(RootPgnSyntax syntaxTree, int start, int length)
             => syntaxTree.Syntax.TerminalSymbolsInRange(start, length);
