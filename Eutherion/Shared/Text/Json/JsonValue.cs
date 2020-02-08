@@ -20,10 +20,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonValue : JsonForegroundSymbol
+    public sealed class JsonValue : IJsonValueStarterSymbol
     {
         public const int FalseSymbolLength = 5;
         public const int TrueSymbolLength = 4;
@@ -48,13 +49,16 @@ namespace Eutherion.Text.Json
 
         public string Value { get; }
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length => Value.Length;
+        public int Length => Value.Length;
 
         private JsonValue(string value) => Value = value;
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitValue(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
     }
 }

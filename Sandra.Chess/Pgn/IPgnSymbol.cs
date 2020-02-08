@@ -90,7 +90,7 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
-            public override PgnSyntax VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
+            public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
         }

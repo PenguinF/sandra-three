@@ -55,9 +55,26 @@ namespace Eutherion.Text.Json
         public virtual int ChildCount => 0;
 
         /// <summary>
-        /// Gets if this syntax is a terminal symbol, i.e. if it has no children.
+        /// Gets if this syntax is a terminal symbol, i.e. if it has no child nodes.
         /// </summary>
-        public bool IsTerminalSymbol => ChildCount == 0;
+        /// <param name="jsonTerminalSymbol">
+        /// The terminal symbol if this syntax is a terminal symbol, otherwise a default value.
+        /// </param>
+        /// <returns>
+        /// Whether or not this syntax is a terminal symbol, i.e. if it has no child nodes.
+        /// </returns>
+        public bool IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol)
+        {
+            if (ChildCount == 0)
+            {
+                // Contract is that all subclasses with ChildCount == 0 must implement IJsonSymbol.
+                jsonTerminalSymbol = (IJsonSymbol)this;
+                return true;
+            }
+
+            jsonTerminalSymbol = default;
+            return false;
+        }
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
@@ -111,7 +128,7 @@ namespace Eutherion.Text.Json
             throw new IndexOutOfRangeException(nameof(position));
         }
 
-        private IEnumerable<JsonSyntax> ChildTerminalSymbolsInRange(int start, int length)
+        private IEnumerable<IJsonSymbol> ChildTerminalSymbolsInRange(int start, int length)
         {
             // Find the first child node that intersects with the given range.
             // Can safely call GetChildIndexAfter because of invariant: start < this.Length
@@ -128,9 +145,9 @@ namespace Eutherion.Text.Json
                 {
                     JsonSyntax childNode = GetChild(childIndex);
 
-                    if (childNode.IsTerminalSymbol)
+                    if (childNode.IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                     {
-                        yield return childNode;
+                        yield return jsonTerminalSymbol;
                     }
                     else
                     {
@@ -158,14 +175,14 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// All descendants of this node that intersect with the given range, have no child nodes, and have a length greater than 0. 
         /// </returns>
-        public IEnumerable<JsonSyntax> TerminalSymbolsInRange(int start, int length)
+        public IEnumerable<IJsonSymbol> TerminalSymbolsInRange(int start, int length)
         {
             // Yield return if ranges [start..start+length] and [0..Length] intersect.
             if (0 < length && 0 < Length && start < Length && 0 < start + length)
             {
-                if (IsTerminalSymbol)
+                if (IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol))
                 {
-                    return new SingleElementEnumerable<JsonSyntax>(this);
+                    return new SingleElementEnumerable<IJsonSymbol>(jsonTerminalSymbol);
                 }
                 else
                 {
@@ -173,23 +190,7 @@ namespace Eutherion.Text.Json
                 }
             }
 
-            return EmptyEnumerable<JsonSyntax>.Instance;
-        }
-
-        public virtual void Accept(JsonTerminalSymbolVisitor visitor) => throw new JsonSyntaxIsNotTerminalException(this);
-        public virtual TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => throw new JsonSyntaxIsNotTerminalException(this);
-        public virtual TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => throw new JsonSyntaxIsNotTerminalException(this);
-    }
-
-    /// <summary>
-    /// Occurs when a <see cref="JsonTerminalSymbolVisitor"/> is called on a <see cref="JsonSyntax"/> instance
-    /// which is not a terminal symbol, i.e. for which <see cref="JsonSyntax.IsTerminalSymbol"/> returns false.
-    /// </summary>
-    public class JsonSyntaxIsNotTerminalException : Exception
-    {
-        internal JsonSyntaxIsNotTerminalException(JsonSyntax syntax)
-            : base($"{syntax.GetType().FullName} is not a terminal symbol.")
-        {
+            return EmptyEnumerable<IJsonSymbol>.Instance;
         }
     }
 }

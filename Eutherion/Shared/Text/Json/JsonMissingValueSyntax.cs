@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a missing value in a list syntax node. It has a length of 0.
     /// </summary>
-    public sealed class JsonMissingValueSyntax : JsonValueSyntax
+    public sealed class JsonMissingValueSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -58,8 +58,8 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitMissingValueSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitMissingValueSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitMissingValueSyntax(this, arg);
     }
 }

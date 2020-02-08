@@ -29,18 +29,25 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenJsonErrorStringSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonErrorStringSyntax : IJsonValueStarterSymbol
     {
         internal ReadOnlyList<JsonErrorInfo> Errors { get; }
 
-        public override int Length { get; }
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public int Length { get; }
 
-        public override bool IsValueStartSymbol => true;
-
-        public override bool HasErrors => true;
-
-        // Copy all errors, offset by given start position.
-        public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
+        /// <summary>
+        /// Generates a sequence of errors associated with this symbol at a given start position.
+        /// </summary>
+        /// <param name="startPosition">
+        /// The start position for which to generate the errors.
+        /// </param>
+        /// <returns>
+        /// A sequence of errors associated with this symbol.
+        /// </returns>
+        public IEnumerable<JsonErrorInfo> GetErrors(int startPosition)
             => Errors.Select(error => new JsonErrorInfo(
                 error.ErrorCode,
                 startPosition + error.Start,
@@ -61,9 +68,12 @@ namespace Eutherion.Text.Json
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
     }
 
     public static class JsonErrorStringSyntax

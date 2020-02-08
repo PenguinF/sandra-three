@@ -19,28 +19,34 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class GreenJsonColonSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonColonSyntax : IJsonValueDelimiterSymbol
     {
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
-        public override int Length => JsonColonSyntax.ColonLength;
+        public int Length => JsonColonSyntax.ColonLength;
 
         private GreenJsonColonSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class JsonColonSyntax : JsonSyntax
+    public sealed class JsonColonSyntax : JsonSyntax, IJsonSymbol
     {
         public const char ColonCharacter = ':';
         public const int ColonLength = 1;
@@ -81,8 +87,8 @@ namespace Eutherion.Text.Json
             ColonIndex = colonIndex;
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 }

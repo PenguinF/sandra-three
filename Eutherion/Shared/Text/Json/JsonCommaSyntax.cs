@@ -19,28 +19,34 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>
-    public sealed class GreenJsonCommaSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonCommaSyntax : IJsonValueDelimiterSymbol
     {
         public static readonly GreenJsonCommaSyntax Value = new GreenJsonCommaSyntax();
 
-        public override int Length => JsonCommaSyntax.CommaLength;
+        public int Length => JsonCommaSyntax.CommaLength;
 
         private GreenJsonCommaSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>
-    public sealed class JsonCommaSyntax : JsonSyntax
+    public sealed class JsonCommaSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CommaCharacter = ',';
         public const int CommaLength = 1;
@@ -91,8 +97,8 @@ namespace Eutherion.Text.Json
             CommaIndex = commaIndex;
         }
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
     }
 }

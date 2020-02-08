@@ -79,7 +79,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a boolean literal value syntax node.
     /// </summary>
-    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax
+    public abstract class JsonBooleanLiteralSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Represents a 'false' literal value syntax node.
@@ -138,8 +138,8 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitBooleanLiteralSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBooleanLiteralSyntax(this, arg);
     }
 }

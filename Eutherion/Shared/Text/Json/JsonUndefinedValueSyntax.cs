@@ -26,11 +26,11 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax
     {
-        public JsonForegroundSymbol UndefinedToken { get; }
+        public IJsonForegroundSymbol UndefinedToken { get; }
 
         public override int Length => UndefinedToken.Length;
 
-        public GreenJsonUndefinedValueSyntax(JsonForegroundSymbol undefinedToken) => UndefinedToken = undefinedToken;
+        public GreenJsonUndefinedValueSyntax(IJsonForegroundSymbol undefinedToken) => UndefinedToken = undefinedToken;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
@@ -40,7 +40,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an undefined or unsupported value.
     /// </summary>
-    public sealed class JsonUndefinedValueSyntax : JsonValueSyntax
+    public sealed class JsonUndefinedValueSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -58,8 +58,8 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
     }
 }

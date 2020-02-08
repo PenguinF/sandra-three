@@ -48,7 +48,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents an integer literal value syntax node.
     /// </summary>
-    public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax
+    public sealed class JsonIntegerLiteralSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -71,8 +71,8 @@ namespace Eutherion.Text.Json
         public override TResult Accept<TResult>(JsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
         public override TResult Accept<T, TResult>(JsonValueSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
     }
 }

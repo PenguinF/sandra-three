@@ -41,43 +41,62 @@ namespace Eutherion.Text.Json
         IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
 
         /// <summary>
-        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="IJsonForegroundSymbol"/>.
         /// </summary>
         /// <returns>
-        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
+        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="IJsonForegroundSymbol"/>.
         /// </returns>
-        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> AsBackgroundOrForeground();
     }
 
     /// <summary>
-    /// Denotes any terminal json symbol that is not treated as background such as comments or whitespace.
+    /// Represents a terminal json symbol.
+    /// These are all <see cref="JsonSyntax"/> nodes which have no child <see cref="JsonSyntax"/> nodes.
+    /// Use <see cref="JsonSymbolVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
-    public abstract class JsonForegroundSymbol : IGreenJsonSymbol
+    public interface IJsonSymbol : ISpan
     {
-        public virtual bool IsValueStartSymbol => false;
+        void Accept(JsonSymbolVisitor visitor);
+        TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    /// <summary>
+    /// Contains extension methods for the <see cref="IJsonSymbol"/> interface.
+    /// </summary>
+    public static class JsonSymbolExtensions
+    {
+        private sealed class ToJsonSyntaxConverter : JsonSymbolVisitor<JsonSyntax>
+        {
+            public static readonly ToJsonSyntaxConverter Instance = new ToJsonSyntaxConverter();
+
+            private ToJsonSyntaxConverter() { }
+
+            public override JsonSyntax VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => node;
+            public override JsonSyntax VisitColonSyntax(JsonColonSyntax node) => node;
+            public override JsonSyntax VisitCommaSyntax(JsonCommaSyntax node) => node;
+            public override JsonSyntax VisitCommentSyntax(JsonCommentSyntax node) => node;
+            public override JsonSyntax VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => node;
+            public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
+            public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
+            public override JsonSyntax VisitMissingValueSyntax(JsonMissingValueSyntax node) => node;
+            public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node;
+            public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
+            public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;
+            public override JsonSyntax VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node) => node;
+            public override JsonSyntax VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node;
+            public override JsonSyntax VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node;
+        }
 
         /// <summary>
-        /// Gets if there are any errors associated with this symbol.
+        /// Converts this <see cref="IJsonSymbol"/> to a <see cref="JsonSyntax"/> node.
         /// </summary>
-        public virtual bool HasErrors => false;
-
-        /// <summary>
-        /// Generates a sequence of errors associated with this symbol at a given start position.
-        /// </summary>
-        /// <param name="startPosition">
-        /// The start position for which to generate the errors.
+        /// <param name="jsonSymbol">
+        /// The <see cref="IJsonSymbol"/> to convert.
         /// </param>
         /// <returns>
-        /// A sequence of errors associated with this symbol.
+        /// The converted <see cref="JsonSyntax"/> node.
         /// </returns>
-        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-
-        public abstract int Length { get; }
-
-        public abstract void Accept(JsonSymbolVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
-
-        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
+        public static JsonSyntax ToSyntax(this IJsonSymbol jsonSymbol) => jsonSymbol.Accept(ToJsonSyntaxConverter.Instance);
     }
 }

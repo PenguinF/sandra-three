@@ -50,7 +50,7 @@ namespace Sandra.UI
         public override Style DefaultVisit(IPgnSymbol symbol, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitllegalCharacterSyntax(PgnIllegalCharacterSyntax symbol, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax symbol, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
     }
 }

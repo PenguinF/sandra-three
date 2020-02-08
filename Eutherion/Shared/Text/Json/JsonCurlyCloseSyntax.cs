@@ -19,28 +19,34 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json curly close syntax node.
     /// </summary>
-    public sealed class GreenJsonCurlyCloseSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonCurlyCloseSyntax : IJsonValueDelimiterSymbol
     {
         public static readonly GreenJsonCurlyCloseSyntax Value = new GreenJsonCurlyCloseSyntax();
 
-        public override int Length => JsonCurlyCloseSyntax.CurlyCloseLength;
+        public int Length => JsonCurlyCloseSyntax.CurlyCloseLength;
 
         private GreenJsonCurlyCloseSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyCloseSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyCloseSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyCloseSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCurlyCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCurlyCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyCloseSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a json curly close syntax node.
     /// </summary>
-    public sealed class JsonCurlyCloseSyntax : JsonSyntax
+    public sealed class JsonCurlyCloseSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CurlyCloseCharacter = '}';
         public const int CurlyCloseLength = 1;
@@ -72,8 +78,8 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyCloseSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyCloseSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyCloseSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyCloseSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyCloseSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyCloseSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyCloseSyntax(this, arg);
     }
 }

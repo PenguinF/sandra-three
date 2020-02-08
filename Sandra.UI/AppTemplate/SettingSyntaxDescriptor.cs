@@ -31,7 +31,7 @@ namespace Eutherion.Win.AppTemplate
     /// <summary>
     /// Describes the interaction between json syntax used for setting objects and a syntax editor.
     /// </summary>
-    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, JsonSyntax, JsonErrorInfo>
+    public class SettingSyntaxDescriptor : SyntaxDescriptor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo>
     {
         /// <summary>
         /// Schema which defines what kind of keys and values are valid in the parsed json.
@@ -75,17 +75,17 @@ namespace Eutherion.Win.AppTemplate
             return settingSyntaxTree;
         }
 
-        public override IEnumerable<JsonSyntax> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
+        public override IEnumerable<IJsonSymbol> GetTerminalsInRange(SettingSyntaxTree syntaxTree, int start, int length)
             => syntaxTree.JsonSyntaxTree.Syntax.TerminalSymbolsInRange(start, length);
 
         public override IEnumerable<JsonErrorInfo> GetErrors(SettingSyntaxTree syntaxTree)
             => syntaxTree.Errors;
 
-        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, JsonSyntax, JsonErrorInfo> syntaxEditor, JsonSyntax terminalSymbol)
+        public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
             => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
 
-        public override (int, int) GetTokenSpan(JsonSyntax terminalSymbol)
-            => (terminalSymbol.AbsoluteStart, terminalSymbol.Length);
+        public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
+            => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)
             => (error.Start, error.Length);

@@ -74,7 +74,34 @@ namespace Eutherion.Text.Json
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
-        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a json syntax node which contains whitespace.
+    /// </summary>
+    public sealed class JsonWhitespaceSyntax : JsonBackgroundSyntax, IJsonSymbol
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonWhitespaceSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal JsonWhitespaceSyntax(JsonBackgroundListSyntax parent, int backgroundNodeIndex, GreenJsonWhitespaceSyntax green)
+            : base(parent, backgroundNodeIndex)
+            => Green = green;
+
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitWhitespaceSyntax(this, arg);
     }
 }

@@ -40,11 +40,17 @@ namespace Eutherion.Text.Json
         }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
-        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
+        public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
+        public override TResult Accept<T, TResult>(GreenJsonBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedMultiLineCommentSyntax(this, arg);
     }
 
-    public static class JsonUnterminatedMultiLineCommentSyntax
+    /// <summary>
+    /// Represents a json syntax node which contains an unterminated multi-line comment.
+    /// </summary>
+    public sealed class JsonUnterminatedMultiLineCommentSyntax : JsonBackgroundSyntax, IJsonSymbol
     {
         /// <summary>
         /// Creates a <see cref="JsonErrorInfo"/> for unterminated multiline comments.
@@ -57,5 +63,23 @@ namespace Eutherion.Text.Json
         /// </param>
         public static JsonErrorInfo CreateError(int start, int length)
             => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenJsonUnterminatedMultiLineCommentSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal JsonUnterminatedMultiLineCommentSyntax(JsonBackgroundListSyntax parent, int backgroundNodeIndex, GreenJsonUnterminatedMultiLineCommentSyntax green)
+            : base(parent, backgroundNodeIndex)
+            => Green = green;
+
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedMultiLineCommentSyntax(this, arg);
     }
 }

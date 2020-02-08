@@ -75,7 +75,6 @@ namespace Sandra.Chess.Pgn
         private GreenPgnWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);

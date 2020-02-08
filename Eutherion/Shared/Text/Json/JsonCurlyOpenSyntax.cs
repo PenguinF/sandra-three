@@ -19,29 +19,34 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>
-    public sealed class GreenJsonCurlyOpenSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonCurlyOpenSyntax : IJsonValueStarterSymbol
     {
         public static readonly GreenJsonCurlyOpenSyntax Value = new GreenJsonCurlyOpenSyntax();
 
-        public override bool IsValueStartSymbol => true;
-        public override int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
+        public int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
 
         private GreenJsonCurlyOpenSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>
-    public sealed class JsonCurlyOpenSyntax : JsonSyntax
+    public sealed class JsonCurlyOpenSyntax : JsonSyntax, IJsonSymbol
     {
         public const char CurlyOpenCharacter = '{';
         public const int CurlyOpenLength = 1;
@@ -73,8 +78,8 @@ namespace Eutherion.Text.Json
 
         internal JsonCurlyOpenSyntax(JsonMapSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 }

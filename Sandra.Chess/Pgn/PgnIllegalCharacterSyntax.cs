@@ -72,12 +72,11 @@ namespace Sandra.Chess.Pgn
         public PgnErrorInfo GetError(int startPosition) => PgnIllegalCharacterSyntax.CreateError(DisplayCharValue, startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
 
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitllegalCharacterSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitllegalCharacterSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
+        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
     }
 
     /// <summary>
@@ -116,8 +115,8 @@ namespace Sandra.Chess.Pgn
             : base(parent, parentIndex)
             => Green = green;
 
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitllegalCharacterSyntax(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitllegalCharacterSyntax(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitllegalCharacterSyntax(this, arg);
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIllegalCharacterSyntax(this, arg);
     }
 }

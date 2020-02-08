@@ -70,7 +70,7 @@ namespace Sandra.Chess.Pgn
 
             private PgnBackgroundSyntaxCreator() { }
 
-            public override PgnSyntax VisitllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
+            public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
 
             public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)

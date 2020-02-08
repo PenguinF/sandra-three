@@ -19,28 +19,34 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
-    public sealed class GreenJsonSquareBracketCloseSyntax : JsonForegroundSymbol
+    public sealed class GreenJsonSquareBracketCloseSyntax : IJsonValueDelimiterSymbol
     {
         public static readonly GreenJsonSquareBracketCloseSyntax Value = new GreenJsonSquareBracketCloseSyntax();
 
-        public override int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
+        public int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
 
         private GreenJsonSquareBracketCloseSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonForegroundSymbol.Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonForegroundSymbol.Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
-    public sealed class JsonSquareBracketCloseSyntax : JsonSyntax
+    public sealed class JsonSquareBracketCloseSyntax : JsonSyntax, IJsonSymbol
     {
         public const char SquareBracketCloseCharacter = ']';
         public const int SquareBracketCloseLength = 1;
@@ -72,8 +78,8 @@ namespace Eutherion.Text.Json
 
         internal JsonSquareBracketCloseSyntax(JsonListSyntax parent) => Parent = parent;
 
-        public override void Accept(JsonTerminalSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<TResult>(JsonTerminalSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
-        public override TResult Accept<T, TResult>(JsonTerminalSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
+        void IJsonSymbol.Accept(JsonSymbolVisitor visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonSymbol.Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketCloseSyntax(this);
+        TResult IJsonSymbol.Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketCloseSyntax(this, arg);
     }
 }
