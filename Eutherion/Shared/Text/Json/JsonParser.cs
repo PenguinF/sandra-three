@@ -308,6 +308,16 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
             => (new GreenJsonUndefinedValueSyntax(symbol), false);
 
+        // Returns whether or not the current token still needs to be processed.
+        private bool ParseValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, IJsonValueStarterSymbol valueStarterSymbol)
+        {
+            // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+            var backgroundBefore = CaptureBackground();
+            (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
+            valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+            return unprocessedToken;
+        }
+
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
@@ -324,11 +334,8 @@ namespace Eutherion.Text.Json
             // Invariant: discriminated != null && !discriminated.IsOption1().
             for (; ; )
             {
-                // Always create a value node, then decide if it must be ignored.
-                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-                var backgroundBefore = CaptureBackground();
-                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+                // Always create a value node, even if it contains an undefined value.
+                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
@@ -399,12 +406,8 @@ namespace Eutherion.Text.Json
                 }
                 else
                 {
-                    // Always create a value node, then decide if it must be ignored.
-                    // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-                    var backgroundBefore = CaptureBackground();
-                    GreenJsonValueSyntax currentNode;
-                    (currentNode, unprocessedToken) = Visit(valueStarterSymbol);
-                    valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
+                    // Always create a value node, even if it contains an undefined value.
+                    unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
                 }
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
