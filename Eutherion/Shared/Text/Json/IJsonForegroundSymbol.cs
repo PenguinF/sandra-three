@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * IJsonSymbol.cs
+ * IJsonForegroundSymbol.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -24,11 +24,17 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Represents a terminal json symbol.
-    /// Instances of this type are returned by <see cref="JsonTokenizer"/>.
+    /// Denotes any terminal json symbol that is not treated as background such as comments or whitespace.
     /// </summary>
-    public interface IGreenJsonSymbol : ISpan
+    public abstract class JsonForegroundSymbol : IGreenJsonSymbol
     {
+        public virtual bool IsValueStartSymbol => false;
+
+        /// <summary>
+        /// Gets if there are any errors associated with this symbol.
+        /// </summary>
+        public virtual bool HasErrors => false;
+
         /// <summary>
         /// Generates a sequence of errors associated with this symbol at a given start position.
         /// </summary>
@@ -38,14 +44,14 @@ namespace Eutherion.Text.Json
         /// <returns>
         /// A sequence of errors associated with this symbol.
         /// </returns>
-        IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
+        public virtual IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
 
-        /// <summary>
-        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
-        /// </summary>
-        /// <returns>
-        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="JsonForegroundSymbol"/>.
-        /// </returns>
-        Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground();
+        public abstract int Length { get; }
+
+        public abstract void Accept(JsonForegroundSymbolVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
+
+        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

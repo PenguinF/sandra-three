@@ -47,6 +47,7 @@
     <Compile Include="SafeLazy.cs" />
     <Compile Include="SafeLazyObject.cs" />
     <Compile Include="Text\ISpan.cs" />
+    <Compile Include="Text\Json\IJsonForegroundSymbol.cs" />
     <Compile Include="Text\Json\IJsonSymbol.cs" />
     <Compile Include="Text\Json\JsonBackgroundListSyntax.cs" />
     <Compile Include="Text\Json\JsonBackgroundSyntax.cs" />
