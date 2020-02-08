@@ -80,6 +80,7 @@ namespace Eutherion.Text.Json
             public override JsonSyntax VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node;
             public override JsonSyntax VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node;
             public override JsonSyntax VisitMissingValueSyntax(JsonMissingValueSyntax node) => node;
+            public override JsonSyntax VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => node;
             public override JsonSyntax VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node;
             public override JsonSyntax VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node;
             public override JsonSyntax VisitStringLiteralSyntax(JsonStringLiteralSyntax node) => node;

@@ -74,6 +74,9 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
+        public override Style VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[undefinedValueStyleIndex];
+
         public override Style VisitStringLiteralSyntax(JsonStringLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[stringStyleIndex];
 
