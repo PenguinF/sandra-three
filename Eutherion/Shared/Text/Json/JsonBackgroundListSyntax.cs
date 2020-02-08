@@ -54,16 +54,16 @@ namespace Eutherion.Text.Json
         }
 
         /// <summary>
-        /// Gets the read-only list with background symbols.
+        /// Gets the read-only list with background nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundSymbols { get; }
+        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundNodes { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax.
         /// </summary>
-        public int Length => BackgroundSymbols.Length;
+        public int Length => BackgroundNodes.Length;
 
-        private GreenJsonBackgroundListSyntax(ReadOnlySpanList<GreenJsonBackgroundSyntax> backgroundSymbols) => BackgroundSymbols = backgroundSymbols;
+        private GreenJsonBackgroundListSyntax(ReadOnlySpanList<GreenJsonBackgroundSyntax> backgroundNodes) => BackgroundNodes = backgroundNodes;
     }
 
     /// <summary>
@@ -82,9 +82,9 @@ namespace Eutherion.Text.Json
         public GreenJsonBackgroundListSyntax Green { get; }
 
         /// <summary>
-        /// Gets the read-only list with background symbols.
+        /// Gets the collection of background nodes.
         /// </summary>
-        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundSymbols => Green.BackgroundSymbols;
+        public ReadOnlySpanList<GreenJsonBackgroundSyntax> BackgroundNodes => Green.BackgroundNodes;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
