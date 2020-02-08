@@ -79,6 +79,7 @@
     <Compile Include="Text\Json\JsonUnknownSymbolSyntax.cs" />
     <Compile Include="Text\Json\JsonUnterminatedMultiLineCommentSyntax.cs" />
     <Compile Include="Text\Json\JsonValue.cs" />
+    <Compile Include="Text\Json\JsonValueStarterSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonValueSyntax.cs" />
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />

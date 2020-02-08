@@ -21,54 +21,6 @@
 
 namespace Eutherion.Text.Json
 {
-    public abstract class JsonForegroundSymbolVisitor
-    {
-        public virtual void DefaultVisit(IJsonForegroundSymbol symbol) { }
-        public virtual void Visit(IJsonForegroundSymbol symbol) { if (symbol != null) symbol.Accept(this); }
-        public virtual void VisitColonSyntax(GreenJsonColonSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitCommaSyntax(GreenJsonCommaSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitSquareBracketCloseSyntax(GreenJsonSquareBracketCloseSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitStringLiteralSyntax(JsonString symbol) => DefaultVisit(symbol);
-        public virtual void VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => DefaultVisit(symbol);
-        public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
-    }
-
-    public abstract class JsonForegroundSymbolVisitor<TResult>
-    {
-        public virtual TResult DefaultVisit(IJsonForegroundSymbol symbol) => default;
-        public virtual TResult Visit(IJsonForegroundSymbol symbol) => symbol == null ? default : symbol.Accept(this);
-        public virtual TResult VisitColonSyntax(GreenJsonColonSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitCommaSyntax(GreenJsonCommaSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitSquareBracketCloseSyntax(GreenJsonSquareBracketCloseSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitStringLiteralSyntax(JsonString symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => DefaultVisit(symbol);
-        public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
-    }
-
-    public abstract class JsonForegroundSymbolVisitor<T, TResult>
-    {
-        public virtual TResult DefaultVisit(IJsonForegroundSymbol symbol, T arg) => default;
-        public virtual TResult Visit(IJsonForegroundSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
-        public virtual TResult VisitColonSyntax(GreenJsonColonSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitCommaSyntax(GreenJsonCommaSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitSquareBracketCloseSyntax(GreenJsonSquareBracketCloseSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitStringLiteralSyntax(JsonString symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol, T arg) => DefaultVisit(symbol, arg);
-        public virtual TResult VisitValue(JsonValue symbol, T arg) => DefaultVisit(symbol, arg);
-    }
-
     /// <summary>
     /// Represents a visitor that visits a <see cref="JsonSyntax"/> (<see cref="IJsonSymbol"/>) which has no child <see cref="JsonSyntax"/> nodes.
     /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
