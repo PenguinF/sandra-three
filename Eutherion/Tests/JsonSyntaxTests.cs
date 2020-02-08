@@ -29,15 +29,27 @@ namespace Eutherion.Shared.Tests
     public class JsonSyntaxTests
     {
         [Fact]
-        public void OutOfRangeArguments()
+        public void ArgumentChecks()
         {
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
+
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(-1));
+
+            Assert.Throws<ArgumentNullException>("value", () => new GreenJsonStringLiteralSyntax(null, 2));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
+
+            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(null));
+            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenJsonUnknownSymbolSyntax(string.Empty));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
+
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
+
+            Assert.Throws<ArgumentNullException>("value", () => JsonValue.Create(null));
         }
 
         [Fact]
@@ -51,13 +63,6 @@ namespace Eutherion.Shared.Tests
             Assert.Equal(1, GreenJsonSquareBracketCloseSyntax.Value.Length);
             Assert.Equal(1, GreenJsonSquareBracketOpenSyntax.Value.Length);
             Assert.Equal(1, new GreenJsonUnknownSymbolSyntax("\\0").Length);
-        }
-
-        [Fact]
-        public void NullValueShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonStringLiteralSyntax(null, 2));
-            Assert.Throws<ArgumentNullException>(() => JsonValue.Create(null));
         }
 
         [Theory]
@@ -76,13 +81,6 @@ namespace Eutherion.Shared.Tests
             var jsonValue = JsonValue.Create(value);
             Assert.Equal(value, jsonValue.Value);
             Assert.Equal(value.Length, jsonValue.Length);
-        }
-
-        [Fact]
-        public void NullErrorsShouldThrow()
-        {
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(2, null));
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonErrorStringSyntax(null, 2));
         }
 
         [Theory]
@@ -119,18 +117,6 @@ namespace Eutherion.Shared.Tests
                 error1 => Assert.Same(errorInfo1, error1),
                 error2 => Assert.Same(errorInfo2, error2),
                 error3 => Assert.Same(errorInfo3, error3));
-        }
-
-        [Fact]
-        public void UnexpectedSymbolShouldBeNotNull()
-        {
-            Assert.Throws<ArgumentNullException>(() => new GreenJsonUnknownSymbolSyntax(null));
-        }
-
-        [Fact]
-        public void UnexpectedSymbolShouldBeNonEmpty()
-        {
-            Assert.Throws<ArgumentException>(() => new GreenJsonUnknownSymbolSyntax(string.Empty));
         }
 
         [Theory]
