@@ -42,11 +42,16 @@ namespace Eutherion.Shared.Tests
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(JsonValue))
+            else if (tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.False)
+                || tokenType1 == typeof(GreenJsonBooleanLiteralSyntax.True)
+                || tokenType1 == typeof(JsonValue))
             {
-                if (tokenType1 == tokenType2)
+                // This only works if two undefined values don't add up to 'true' or 'false'.
+                if (tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.False)
+                    || tokenType2 == typeof(GreenJsonBooleanLiteralSyntax.True)
+                    || tokenType2 == typeof(JsonValue))
                 {
-                    resultTokenType = tokenType1;
+                    resultTokenType = typeof(JsonValue);
                     return true;
                 }
             }
@@ -205,9 +210,17 @@ namespace Eutherion.Shared.Tests
             AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
-                var valueSymbol = Assert.IsType<JsonValue>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
-                Assert.Equal(json, valueSymbol.Value);
+
+                if (symbol is GreenJsonBooleanLiteralSyntax booleanLiteral)
+                {
+                    Assert.Equal(json, booleanLiteral.LiteralJsonValue);
+                }
+                else
+                {
+                    var valueSymbol = Assert.IsType<JsonValue>(symbol);
+                    Assert.Equal(json, valueSymbol.Value);
+                }
             });
         }
 
@@ -254,8 +267,9 @@ namespace Eutherion.Shared.Tests
             yield return (":", typeof(GreenJsonColonSyntax));
             yield return (",", typeof(GreenJsonCommaSyntax));
             yield return ("*", typeof(GreenJsonUnknownSymbolSyntax));
+            yield return ("false", typeof(GreenJsonBooleanLiteralSyntax.False));
+            yield return ("true", typeof(GreenJsonBooleanLiteralSyntax.True));
             yield return ("_", typeof(JsonValue));
-            yield return ("true", typeof(JsonValue));
             yield return ("\"\"", typeof(GreenJsonStringLiteralSyntax));
             yield return ("\" \"", typeof(GreenJsonStringLiteralSyntax));  // Have to check if the space isn't interpreted as whitespace.
             yield return ("\"\n\\ \n\"", typeof(GreenJsonErrorStringSyntax));

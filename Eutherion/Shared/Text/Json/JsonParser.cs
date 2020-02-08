@@ -281,9 +281,6 @@ namespace Eutherion.Text.Json
 
         public override (GreenJsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            if (symbol == JsonValue.FalseJsonValue) return (GreenJsonBooleanLiteralSyntax.False.Instance, false);
-            if (symbol == JsonValue.TrueJsonValue) return (GreenJsonBooleanLiteralSyntax.True.Instance, false);
-
             string value = symbol.Value;
             if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
             {
@@ -298,6 +295,8 @@ namespace Eutherion.Text.Json
 
             return (new GreenJsonUndefinedValueSyntax(symbol), false);
         }
+
+        public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
 
         public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol)
             => (new GreenJsonUndefinedValueSyntax(symbol), false);

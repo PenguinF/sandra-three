@@ -29,6 +29,7 @@ namespace Eutherion.Text.Json
     {
         public virtual void DefaultVisit(IJsonValueStarterSymbol symbol) { }
         public virtual void Visit(IJsonValueStarterSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
@@ -45,6 +46,7 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(IJsonValueStarterSymbol symbol) => default;
         public virtual TResult Visit(IJsonValueStarterSymbol symbol) => symbol == null ? default : symbol.Accept(this);
+        public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
@@ -61,6 +63,7 @@ namespace Eutherion.Text.Json
     {
         public virtual TResult DefaultVisit(IJsonValueStarterSymbol symbol, T arg) => default;
         public virtual TResult Visit(IJsonValueStarterSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
+        public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);

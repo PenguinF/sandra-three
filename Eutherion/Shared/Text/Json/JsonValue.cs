@@ -32,17 +32,14 @@ namespace Eutherion.Text.Json
         public static readonly string False = "false";
         public static readonly string True = "true";
 
-        public static readonly JsonValue FalseJsonValue = new JsonValue(False);
-        public static readonly JsonValue TrueJsonValue = new JsonValue(True);
-
         public static IJsonValueStarterSymbol Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length <= 0) throw new ArgumentException(nameof(value));
 
-            return value == False ? FalseJsonValue
-                : value == True ? TrueJsonValue
-                : new JsonValue(value);
+            if (value == False) return GreenJsonBooleanLiteralSyntax.False.Instance;
+            if (value == True) return GreenJsonBooleanLiteralSyntax.True.Instance;
+            return new JsonValue(value);
         }
 
         public string Value { get; }
