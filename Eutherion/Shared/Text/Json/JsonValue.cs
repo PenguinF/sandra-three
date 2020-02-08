@@ -35,8 +35,6 @@ namespace Eutherion.Text.Json
         public static readonly JsonValue FalseJsonValue = new JsonValue(False);
         public static readonly JsonValue TrueJsonValue = new JsonValue(True);
 
-        public static JsonValue BoolJsonValue(bool boolValue) => boolValue ? TrueJsonValue : FalseJsonValue;
-
         public static JsonValue Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
