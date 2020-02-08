@@ -31,7 +31,7 @@ namespace Eutherion.Text.Json
     /// Represents a single parse of a list of json tokens.
     /// </summary>
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
-    public class JsonParser : JsonForegroundSymbolVisitor<(GreenJsonValueSyntax, bool)>
+    public class JsonParser : JsonValueStarterSymbolVisitor<(GreenJsonValueSyntax, bool)>
     {
         private readonly IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;

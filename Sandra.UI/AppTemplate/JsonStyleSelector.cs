@@ -86,13 +86,13 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
-        public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
+        public class JsonUndefinedValueStyleSelector : JsonValueStarterSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
         {
             public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
 
             private JsonUndefinedValueStyleSelector() { }
 
-            public override Style DefaultVisit(IJsonForegroundSymbol symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            public override Style DefaultVisit(IJsonValueStarterSymbol symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
                 => syntaxEditor.DefaultStyle;
 
             public override Style VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
