@@ -71,6 +71,9 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitCommentSyntax(JsonCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
 
+        public override Style VisitErrorStringSyntax(JsonErrorStringSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[stringStyleIndex];
+
         public override Style VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[booleanIntegerStyleIndex];
 
@@ -81,25 +84,9 @@ namespace Eutherion.Win.AppTemplate
             => syntaxEditor.Styles[stringStyleIndex];
 
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-            => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
+            => syntaxEditor.Styles[undefinedValueStyleIndex];
 
         public override Style VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[commentStyleIndex];
-
-        public class JsonUndefinedValueStyleSelector : JsonValueStarterSymbolVisitor<SyntaxEditor<TSyntaxTree, IJsonSymbol, TError>, Style>
-        {
-            public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
-
-            private JsonUndefinedValueStyleSelector() { }
-
-            public override Style DefaultVisit(IJsonValueStarterSymbol symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.DefaultStyle;
-
-            public override Style VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.Styles[stringStyleIndex];
-
-            public override Style VisitValue(JsonValue symbol, SyntaxEditor<TSyntaxTree, IJsonSymbol, TError> syntaxEditor)
-                => syntaxEditor.Styles[undefinedValueStyleIndex];
-        }
     }
 }

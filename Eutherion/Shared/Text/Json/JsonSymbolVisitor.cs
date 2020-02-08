@@ -35,6 +35,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitCommentSyntax(JsonCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => DefaultVisit(node);
+        public virtual void VisitErrorStringSyntax(JsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitMissingValueSyntax(JsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual void VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => DefaultVisit(node);
@@ -60,6 +61,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitCommentSyntax(JsonCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitErrorStringSyntax(JsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMissingValueSyntax(JsonMissingValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => DefaultVisit(node);
@@ -85,6 +87,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitCommentSyntax(JsonCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCurlyCloseSyntax(JsonCurlyCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitErrorStringSyntax(JsonErrorStringSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMissingValueSyntax(JsonMissingValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node, T arg) => DefaultVisit(node, arg);

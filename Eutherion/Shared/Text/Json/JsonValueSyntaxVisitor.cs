@@ -30,6 +30,7 @@ namespace Eutherion.Text.Json
         public virtual void DefaultVisit(GreenJsonValueSyntax node) { }
         public virtual void Visit(GreenJsonValueSyntax node) { if (node != null) node.Accept(this); }
         public virtual void VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual void VisitErrorStringSyntax(GreenJsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitListSyntax(GreenJsonListSyntax node) => DefaultVisit(node);
         public virtual void VisitMapSyntax(GreenJsonMapSyntax node) => DefaultVisit(node);
@@ -47,6 +48,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(GreenJsonValueSyntax node) => default;
         public virtual TResult Visit(GreenJsonValueSyntax node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitListSyntax(GreenJsonListSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMapSyntax(GreenJsonMapSyntax node) => DefaultVisit(node);
@@ -64,6 +66,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(GreenJsonValueSyntax node, T arg) => default;
         public virtual TResult Visit(GreenJsonValueSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitListSyntax(GreenJsonListSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMapSyntax(GreenJsonMapSyntax node, T arg) => DefaultVisit(node, arg);
@@ -81,6 +84,7 @@ namespace Eutherion.Text.Json
         public virtual void DefaultVisit(JsonValueSyntax node) { }
         public virtual void Visit(JsonValueSyntax node) { if (node != null) node.Accept(this); }
         public virtual void VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual void VisitErrorStringSyntax(JsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual void VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual void VisitListSyntax(JsonListSyntax node) => DefaultVisit(node);
         public virtual void VisitMapSyntax(JsonMapSyntax node) => DefaultVisit(node);
@@ -98,6 +102,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(JsonValueSyntax node) => default;
         public virtual TResult Visit(JsonValueSyntax node) => node == null ? default : node.Accept(this);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitErrorStringSyntax(JsonErrorStringSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => DefaultVisit(node);
         public virtual TResult VisitListSyntax(JsonListSyntax node) => DefaultVisit(node);
         public virtual TResult VisitMapSyntax(JsonMapSyntax node) => DefaultVisit(node);
@@ -115,6 +120,7 @@ namespace Eutherion.Text.Json
         public virtual TResult DefaultVisit(JsonValueSyntax node, T arg) => default;
         public virtual TResult Visit(JsonValueSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
         public virtual TResult VisitBooleanLiteralSyntax(JsonBooleanLiteralSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitErrorStringSyntax(JsonErrorStringSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitListSyntax(JsonListSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitMapSyntax(JsonMapSyntax node, T arg) => DefaultVisit(node, arg);

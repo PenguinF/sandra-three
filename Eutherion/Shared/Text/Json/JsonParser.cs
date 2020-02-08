@@ -296,11 +296,9 @@ namespace Eutherion.Text.Json
             return (new GreenJsonUndefinedValueSyntax(symbol), false);
         }
 
+        // Explicit Visit overrides for classes which are both IJsonValueStarterSymbol and GreenJsonValueSyntax.
         public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
-
-        public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol)
-            => (new GreenJsonUndefinedValueSyntax(symbol), false);
-
+        public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
 
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
