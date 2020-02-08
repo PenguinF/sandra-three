@@ -228,7 +228,7 @@ namespace Eutherion.Text.Json
                         }
                         else
                         {
-                            yield return new JsonString(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                            yield return new GreenJsonStringLiteralSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
                         }
                         valueBuilder.Clear();
                         firstUnusedIndex = currentIndex;

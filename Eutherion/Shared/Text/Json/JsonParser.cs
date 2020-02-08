@@ -302,8 +302,7 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol)
             => (new GreenJsonUndefinedValueSyntax(symbol), false);
 
-        public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(JsonString symbol)
-            => (new GreenJsonStringLiteralSyntax(symbol), false);
+        public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
 
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol)
             => (new GreenJsonUndefinedValueSyntax(symbol), false);

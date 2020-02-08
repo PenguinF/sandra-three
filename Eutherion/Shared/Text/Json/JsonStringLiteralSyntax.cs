@@ -25,13 +25,22 @@ using System.Runtime.CompilerServices;
 
 namespace Eutherion.Text.Json
 {
-    public sealed class JsonString : IJsonValueStarterSymbol
+    /// <summary>
+    /// Represents a string literal value syntax node.
+    /// </summary>
+    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
     {
+        /// <summary>
+        /// Gets the value of this syntax node.
+        /// </summary>
         public string Value { get; }
 
-        public int Length { get; }
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length { get; }
 
-        public JsonString(string value, int length)
+        public GreenJsonStringLiteralSyntax(string value, int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
@@ -45,20 +54,6 @@ namespace Eutherion.Text.Json
         void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
         TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a string literal value syntax node.
-    /// </summary>
-    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax
-    {
-        public JsonString StringToken { get; }
-
-        public string Value => StringToken.Value;
-
-        public override int Length => StringToken.Length;
-
-        public GreenJsonStringLiteralSyntax(JsonString stringToken) => StringToken = stringToken;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

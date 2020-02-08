@@ -34,7 +34,7 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonCommentSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(Array.Empty<JsonErrorInfo>(), -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonErrorStringSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new JsonString(string.Empty, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonStringLiteralSyntax(string.Empty, -1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenJsonUnterminatedMultiLineCommentSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenJsonWhitespaceSyntax.Create(0));
@@ -56,7 +56,7 @@ namespace Eutherion.Shared.Tests
         [Fact]
         public void NullValueShouldThrow()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonString(null, 2));
+            Assert.Throws<ArgumentNullException>(() => new GreenJsonStringLiteralSyntax(null, 2));
             Assert.Throws<ArgumentNullException>(() => JsonValue.Create(null));
         }
 
@@ -69,7 +69,7 @@ namespace Eutherion.Shared.Tests
         public void UnchangedValueParameter(string value, int length)
         {
             // Length includes quotes for json strings.
-            var jsonString = new JsonString(value, length + 2);
+            var jsonString = new GreenJsonStringLiteralSyntax(value, length + 2);
             Assert.Equal(value, jsonString.Value);
             Assert.Equal(length + 2, jsonString.Length);
 

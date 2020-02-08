@@ -235,7 +235,7 @@ namespace Eutherion.Shared.Tests
             AssertTokens(json, symbol =>
             {
                 Assert.NotNull(symbol);
-                var stringSymbol = Assert.IsType<JsonString>(symbol);
+                var stringSymbol = Assert.IsType<GreenJsonStringLiteralSyntax>(symbol);
                 Assert.Equal(json.Length, symbol.Length);
                 Assert.Equal(expectedValue, stringSymbol.Value);
             });
@@ -256,8 +256,8 @@ namespace Eutherion.Shared.Tests
             yield return ("*", typeof(GreenJsonUnknownSymbolSyntax));
             yield return ("_", typeof(JsonValue));
             yield return ("true", typeof(JsonValue));
-            yield return ("\"\"", typeof(JsonString));
-            yield return ("\" \"", typeof(JsonString));  // Have to check if the space isn't interpreted as whitespace.
+            yield return ("\"\"", typeof(GreenJsonStringLiteralSyntax));
+            yield return ("\" \"", typeof(GreenJsonStringLiteralSyntax));  // Have to check if the space isn't interpreted as whitespace.
             yield return ("\"\n\\ \n\"", typeof(GreenJsonErrorStringSyntax));
             yield return ("\"\\u0\"", typeof(GreenJsonErrorStringSyntax));
         }
