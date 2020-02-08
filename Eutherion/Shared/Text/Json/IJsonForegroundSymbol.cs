@@ -24,15 +24,21 @@ using System.Collections.Generic;
 namespace Eutherion.Text.Json
 {
     /// <summary>
-    /// Denotes any terminal json symbol that is not treated as background such as comments or whitespace.
+    /// Denotes any terminal json symbol that is not treated as background, such as comments or whitespace.
     /// </summary>
-    public abstract class JsonForegroundSymbol : IGreenJsonSymbol
+    public interface IJsonForegroundSymbol : IGreenJsonSymbol
+    {
+        bool IsValueStartSymbol { get; }
+        bool HasErrors { get; }
+
+        void Accept(JsonForegroundSymbolVisitor visitor);
+        TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
+        TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
+    }
+
+    public abstract class JsonForegroundSymbol : IJsonForegroundSymbol
     {
         public virtual bool IsValueStartSymbol => false;
-
-        /// <summary>
-        /// Gets if there are any errors associated with this symbol.
-        /// </summary>
         public virtual bool HasErrors => false;
 
         /// <summary>
@@ -52,6 +58,6 @@ namespace Eutherion.Text.Json
         public abstract TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
 
-        public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
+        public Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }
 }

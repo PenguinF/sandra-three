@@ -38,7 +38,7 @@ namespace Eutherion.Text.Json
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
         private readonly List<GreenJsonBackgroundSyntax> BackgroundBuilder = new List<GreenJsonBackgroundSyntax>();
 
-        private JsonForegroundSymbol CurrentToken;
+        private IJsonForegroundSymbol CurrentToken;
 
         // Used for parse error reporting.
         private int CurrentLength;
@@ -65,7 +65,7 @@ namespace Eutherion.Text.Json
                 CurrentLength += newToken.Length;
 
                 var discriminated = newToken.AsBackgroundOrForeground();
-                if (discriminated.IsOption2(out JsonForegroundSymbol foregroundSymbol))
+                if (discriminated.IsOption2(out IJsonForegroundSymbol foregroundSymbol))
                 {
                     CurrentToken = foregroundSymbol;
                     break;

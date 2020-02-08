@@ -23,8 +23,8 @@ namespace Eutherion.Text.Json
 {
     public abstract class JsonForegroundSymbolVisitor
     {
-        public virtual void DefaultVisit(JsonForegroundSymbol symbol) { }
-        public virtual void Visit(JsonForegroundSymbol symbol) { if (symbol != null) symbol.Accept(this); }
+        public virtual void DefaultVisit(IJsonForegroundSymbol symbol) { }
+        public virtual void Visit(IJsonForegroundSymbol symbol) { if (symbol != null) symbol.Accept(this); }
         public virtual void VisitColonSyntax(GreenJsonColonSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitCommaSyntax(GreenJsonCommaSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol) => DefaultVisit(symbol);
@@ -39,8 +39,8 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonForegroundSymbolVisitor<TResult>
     {
-        public virtual TResult DefaultVisit(JsonForegroundSymbol symbol) => default;
-        public virtual TResult Visit(JsonForegroundSymbol symbol) => symbol == null ? default : symbol.Accept(this);
+        public virtual TResult DefaultVisit(IJsonForegroundSymbol symbol) => default;
+        public virtual TResult Visit(IJsonForegroundSymbol symbol) => symbol == null ? default : symbol.Accept(this);
         public virtual TResult VisitColonSyntax(GreenJsonColonSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCommaSyntax(GreenJsonCommaSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol) => DefaultVisit(symbol);
@@ -55,8 +55,8 @@ namespace Eutherion.Text.Json
 
     public abstract class JsonForegroundSymbolVisitor<T, TResult>
     {
-        public virtual TResult DefaultVisit(JsonForegroundSymbol symbol, T arg) => default;
-        public virtual TResult Visit(JsonForegroundSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
+        public virtual TResult DefaultVisit(IJsonForegroundSymbol symbol, T arg) => default;
+        public virtual TResult Visit(IJsonForegroundSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);
         public virtual TResult VisitColonSyntax(GreenJsonColonSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCommaSyntax(GreenJsonCommaSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCurlyCloseSyntax(GreenJsonCurlyCloseSyntax symbol, T arg) => DefaultVisit(symbol, arg);

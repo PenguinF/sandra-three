@@ -26,11 +26,11 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax
     {
-        public JsonForegroundSymbol UndefinedToken { get; }
+        public IJsonForegroundSymbol UndefinedToken { get; }
 
         public override int Length => UndefinedToken.Length;
 
-        public GreenJsonUndefinedValueSyntax(JsonForegroundSymbol undefinedToken) => UndefinedToken = undefinedToken;
+        public GreenJsonUndefinedValueSyntax(IJsonForegroundSymbol undefinedToken) => UndefinedToken = undefinedToken;
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
