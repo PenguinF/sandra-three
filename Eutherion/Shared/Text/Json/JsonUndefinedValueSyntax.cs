@@ -43,6 +43,12 @@ namespace Eutherion.Text.Json
     public sealed class JsonUndefinedValueSyntax : JsonValueSyntax, IJsonSymbol
     {
         /// <summary>
+        /// Creates a <see cref="JsonErrorInfo"/> for an undefined value.
+        /// </summary>
+        public static JsonErrorInfo CreateError(string undefinedValue, int position, int length)
+            => new JsonErrorInfo(JsonErrorCode.UnrecognizedValue, position, length, new[] { undefinedValue });
+
+        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenJsonUndefinedValueSyntax Green { get; }

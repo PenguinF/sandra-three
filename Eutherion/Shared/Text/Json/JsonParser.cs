@@ -279,14 +279,7 @@ namespace Eutherion.Text.Json
 
         public override (GreenJsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
-            string value = symbol.Value;
-
-            Errors.Add(new JsonErrorInfo(
-                JsonErrorCode.UnrecognizedValue,
-                CurrentLength - symbol.Length,
-                symbol.Length,
-                new[] { value }));
-
+            Errors.Add(JsonUndefinedValueSyntax.CreateError(symbol.Value, CurrentLength - symbol.Length, symbol.Length));
             return (new GreenJsonUndefinedValueSyntax(symbol), false);
         }
 
