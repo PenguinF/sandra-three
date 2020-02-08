@@ -32,9 +32,9 @@ namespace Eutherion.Text.Json
 
         private GreenJsonColonSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitColonSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitColonSyntax(this, arg);
     }
 
     /// <summary>

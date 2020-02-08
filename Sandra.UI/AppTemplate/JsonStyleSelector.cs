@@ -80,7 +80,7 @@ namespace Eutherion.Win.AppTemplate
         public override Style VisitUndefinedValueSyntax(JsonUndefinedValueSyntax node, SyntaxEditor<TSyntaxTree, JsonSyntax, TError> syntaxEditor)
             => JsonUndefinedValueStyleSelector.Instance.Visit(node.Green.UndefinedToken, syntaxEditor);
 
-        public class JsonUndefinedValueStyleSelector : JsonSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
+        public class JsonUndefinedValueStyleSelector : JsonForegroundSymbolVisitor<SyntaxEditor<TSyntaxTree, JsonSyntax, TError>, Style>
         {
             public static readonly JsonUndefinedValueStyleSelector Instance = new JsonUndefinedValueStyleSelector();
 

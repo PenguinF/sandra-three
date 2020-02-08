@@ -53,8 +53,8 @@ namespace Eutherion.Text.Json
 
         private JsonValue(string value) => Value = value;
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitValue(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitValue(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitValue(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitValue(this, arg);
     }
 }

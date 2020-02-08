@@ -74,9 +74,9 @@ namespace Eutherion.Text.Json
 
         public abstract int Length { get; }
 
-        public abstract void Accept(JsonSymbolVisitor visitor);
-        public abstract TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor);
-        public abstract TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg);
+        public abstract void Accept(JsonForegroundSymbolVisitor visitor);
+        public abstract TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg);
 
         public Union<GreenJsonBackgroundSyntax, JsonForegroundSymbol> AsBackgroundOrForeground() => this;
     }

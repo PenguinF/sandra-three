@@ -76,9 +76,9 @@ namespace Eutherion.Text.Json
 
         public override IEnumerable<JsonErrorInfo> GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
     }
 
     public static class JsonUnknownSymbolSyntax

@@ -61,9 +61,9 @@ namespace Eutherion.Text.Json
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
     }
 
     public static class JsonErrorStringSyntax

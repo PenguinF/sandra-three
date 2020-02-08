@@ -32,9 +32,9 @@ namespace Eutherion.Text.Json
 
         private GreenJsonCommaSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCommaSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommaSyntax(this, arg);
     }
 
     /// <summary>

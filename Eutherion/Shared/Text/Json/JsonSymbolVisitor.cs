@@ -21,7 +21,7 @@
 
 namespace Eutherion.Text.Json
 {
-    public abstract class JsonSymbolVisitor
+    public abstract class JsonForegroundSymbolVisitor
     {
         public virtual void DefaultVisit(JsonForegroundSymbol symbol) { }
         public virtual void Visit(JsonForegroundSymbol symbol) { if (symbol != null) symbol.Accept(this); }
@@ -37,7 +37,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
-    public abstract class JsonSymbolVisitor<TResult>
+    public abstract class JsonForegroundSymbolVisitor<TResult>
     {
         public virtual TResult DefaultVisit(JsonForegroundSymbol symbol) => default;
         public virtual TResult Visit(JsonForegroundSymbol symbol) => symbol == null ? default : symbol.Accept(this);
@@ -53,7 +53,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitValue(JsonValue symbol) => DefaultVisit(symbol);
     }
 
-    public abstract class JsonSymbolVisitor<T, TResult>
+    public abstract class JsonForegroundSymbolVisitor<T, TResult>
     {
         public virtual TResult DefaultVisit(JsonForegroundSymbol symbol, T arg) => default;
         public virtual TResult Visit(JsonForegroundSymbol symbol, T arg) => symbol == null ? default : symbol.Accept(this, arg);

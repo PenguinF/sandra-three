@@ -38,9 +38,9 @@ namespace Eutherion.Text.Json
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
     }
 
     /// <summary>

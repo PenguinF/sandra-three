@@ -33,9 +33,9 @@ namespace Eutherion.Text.Json
 
         private GreenJsonCurlyOpenSyntax() { }
 
-        public override void Accept(JsonSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<TResult>(JsonSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        public override TResult Accept<T, TResult>(JsonSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
+        public override void Accept(JsonForegroundSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<TResult>(JsonForegroundSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
+        public override TResult Accept<T, TResult>(JsonForegroundSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 
     /// <summary>
