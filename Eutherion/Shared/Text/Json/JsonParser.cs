@@ -21,9 +21,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Numerics;
 
 namespace Eutherion.Text.Json
 {
@@ -282,10 +280,6 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitValue(JsonValue symbol)
         {
             string value = symbol.Value;
-            if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
-            {
-                return (new GreenJsonIntegerLiteralSyntax(symbol, integerValue), false);
-            }
 
             Errors.Add(new JsonErrorInfo(
                 JsonErrorCode.UnrecognizedValue,
@@ -299,6 +293,7 @@ namespace Eutherion.Text.Json
         // Explicit Visit overrides for classes which are both IJsonValueStarterSymbol and GreenJsonValueSyntax.
         public override (GreenJsonValueSyntax, bool) VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => (symbol, false);
+        public override (GreenJsonValueSyntax, bool) VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
 

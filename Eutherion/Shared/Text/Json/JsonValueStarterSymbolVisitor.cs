@@ -32,6 +32,7 @@ namespace Eutherion.Text.Json
         public virtual void VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
+        public virtual void VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual void VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => DefaultVisit(symbol);
@@ -49,6 +50,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol) => DefaultVisit(symbol);
+        public virtual TResult VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol) => DefaultVisit(symbol);
         public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => DefaultVisit(symbol);
@@ -66,6 +68,7 @@ namespace Eutherion.Text.Json
         public virtual TResult VisitBooleanLiteralSyntax(GreenJsonBooleanLiteralSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitCurlyOpenSyntax(GreenJsonCurlyOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitErrorStringSyntax(GreenJsonErrorStringSyntax symbol, T arg) => DefaultVisit(symbol, arg);
+        public virtual TResult VisitIntegerLiteralSyntax(GreenJsonIntegerLiteralSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitSquareBracketOpenSyntax(GreenJsonSquareBracketOpenSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitStringLiteralSyntax(GreenJsonStringLiteralSyntax symbol, T arg) => DefaultVisit(symbol, arg);
         public virtual TResult VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol, T arg) => DefaultVisit(symbol, arg);

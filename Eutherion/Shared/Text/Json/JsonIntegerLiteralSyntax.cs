@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Eutherion.Text.Json
@@ -26,19 +27,25 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents an integer literal value syntax node.
     /// </summary>
-    public sealed class GreenJsonIntegerLiteralSyntax : GreenJsonValueSyntax
+    public sealed class GreenJsonIntegerLiteralSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
     {
-        public JsonValue IntegerToken { get; }
-
         public BigInteger Value { get; }
 
-        public override int Length => IntegerToken.Length;
+        public override int Length { get; }
 
-        public GreenJsonIntegerLiteralSyntax(JsonValue integerToken, BigInteger value)
+        public GreenJsonIntegerLiteralSyntax(BigInteger value, int length)
         {
-            IntegerToken = integerToken;
             Value = value;
+            Length = length;
         }
+
+        IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+
+        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
+        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);

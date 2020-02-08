@@ -21,6 +21,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Numerics;
 
 namespace Eutherion.Text.Json
 {
@@ -39,6 +41,12 @@ namespace Eutherion.Text.Json
 
             if (value == False) return GreenJsonBooleanLiteralSyntax.False.Instance;
             if (value == True) return GreenJsonBooleanLiteralSyntax.True.Instance;
+
+            if (BigInteger.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out BigInteger integerValue))
+            {
+                return new GreenJsonIntegerLiteralSyntax(integerValue, value.Length);
+            }
+
             return new JsonValue(value);
         }
 
