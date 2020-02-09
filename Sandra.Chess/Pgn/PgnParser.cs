@@ -156,5 +156,29 @@ namespace Sandra.Chess.Pgn
         /// </exception>
         public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
             => new PgnParser(pgnText)._TokenizeAll();
+
+        /// <summary>
+        /// Parses source text in the PGN format.
+        /// </summary>
+        /// <param name="pgn">
+        /// The source text to parse.
+        /// </param>
+        /// <returns>
+        /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
+        /// </returns>
+        public static RootPgnSyntax Parse(string pgn)
+        {
+            var terminalList = new List<IGreenPgnSymbol>(TokenizeAll(pgn));
+
+            int startPosition = 0;
+            var errors = new List<PgnErrorInfo>();
+            foreach (var terminal in terminalList)
+            {
+                errors.AddRange(terminal.GetErrors(startPosition));
+                startPosition += terminal.Length;
+            }
+
+            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
+        }
     }
 }

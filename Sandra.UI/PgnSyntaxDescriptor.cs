@@ -44,7 +44,7 @@ namespace Sandra.UI
 
         public override RootPgnSyntax Parse(string code)
         {
-            var rootNode = new RootPgnSyntax(PgnParser.TokenizeAll(code));
+            var rootNode = PgnParser.Parse(code);
 
             if (rootNode.Errors.Count > 0)
             {

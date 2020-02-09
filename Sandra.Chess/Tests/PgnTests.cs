@@ -85,7 +85,8 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnSyntaxNodes(EmptyEnumerable<IGreenPgnSymbol>.Instance), null));
 
             Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
 
