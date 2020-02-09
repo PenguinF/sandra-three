@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion;
+using Eutherion.Text;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
@@ -108,5 +109,17 @@ namespace Sandra.Chess.Pgn
         /// </param>
         public static PgnErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start, int length)
             => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for illegal control characters in tag values.
+        /// </summary>
+        /// <param name="illegalCharacter">
+        /// The illegal control character.
+        /// </param>
+        /// <param name="position">
+        /// The position of the illegal control character.
+        /// </param>
+        public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
+            => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
     }
 }

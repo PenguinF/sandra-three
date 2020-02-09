@@ -32,6 +32,11 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
+        /// <summary>
+        /// See also <see cref="StringLiteral.EscapeCharacter"/>.
+        /// </summary>
+        private static readonly string EscapeCharacterString = "\\";
+
         private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
         {
             var category = char.GetUnicodeCategory(c);
@@ -250,22 +255,42 @@ namespace Sandra.Chess.Pgn
                         }
                         else
                         {
-                            errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
-                                $"{c}{escapedChar}",
-                                escapeSequenceStart - firstUnusedIndex,
-                                2));
+                            if (char.IsControl(escapedChar))
+                            {
+                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex));
+                            }
+
+                            if (StringLiteral.CharacterMustBeEscaped(escapedChar))
+                            {
+                                // Just don't show the control character.
+                                errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                                    EscapeCharacterString,
+                                    escapeSequenceStart - firstUnusedIndex,
+                                    2));
+                            }
+                            else
+                            {
+                                errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                                    new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
+                                    escapeSequenceStart - firstUnusedIndex,
+                                    2));
+                            }
                         }
                     }
                     else
                     {
                         // In addition to this, break out of the loop because this is now also an unterminated string.
                         errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
-                            c.ToString(),
+                            EscapeCharacterString,
                             escapeSequenceStart - firstUnusedIndex,
                             1));
 
                         break;
                     }
+                }
+                else if (char.IsControl(c))
+                {
+                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex));
                 }
                 else
                 {
