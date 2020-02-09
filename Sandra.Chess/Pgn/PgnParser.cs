@@ -30,16 +30,7 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        private readonly string pgnText;
-        private readonly int length;
-
-        private PgnParser(string pgnText)
-        {
-            this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
-            length = pgnText.Length;
-        }
-
-        private GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
+        private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
         {
             var category = char.GetUnicodeCategory(c);
 
@@ -51,9 +42,25 @@ namespace Sandra.Chess.Pgn
             return new GreenPgnIllegalCharacterSyntax(displayCharValue);
         }
 
-        // This tokenizer uses labels with goto to switch between modes of tokenization.
-        private IEnumerable<IGreenPgnSymbol> _TokenizeAll()
+        /// <summary>
+        /// Tokenizes source text in the PGN format.
+        /// </summary>
+        /// <param name="pgnText">
+        /// The PGN to tokenize.
+        /// </param>
+        /// <returns>
+        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="pgnText"/> is null/
+        /// </exception>
+        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
         {
+            // This tokenizer uses labels with goto to switch between modes of tokenization.
+
+            if (pgnText == null) throw new ArgumentNullException(nameof(pgnText));
+            int length = pgnText.Length;
+
             int currentIndex = 0;
             int firstUnusedIndex = 0;
 
@@ -143,21 +150,6 @@ namespace Sandra.Chess.Pgn
         }
 
         /// <summary>
-        /// Tokenizes source text in the PGN format.
-        /// </summary>
-        /// <param name="pgnText">
-        /// The PGN to tokenize.
-        /// </param>
-        /// <returns>
-        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="pgnText"/> is null/
-        /// </exception>
-        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
-            => new PgnParser(pgnText)._TokenizeAll();
-
-        /// <summary>
         /// Parses source text in the PGN format.
         /// </summary>
         /// <param name="pgn">
@@ -180,5 +172,7 @@ namespace Sandra.Chess.Pgn
 
             return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
         }
+
+        private PgnParser() { }
     }
 }
