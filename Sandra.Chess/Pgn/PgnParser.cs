@@ -65,27 +65,13 @@ namespace Sandra.Chess.Pgn
             int firstUnusedIndex = 0;
 
         inWhitespace:
+
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
 
-                // All legal PGN characters have a value below 0x7F.
-                if (c <= 0x7e)
-                {
-                    // Treat all control characters as whitespace.
-                    if (c > ' ')
-                    {
-                        if (firstUnusedIndex < currentIndex)
-                        {
-                            yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
-                            firstUnusedIndex = currentIndex;
-                        }
-
-                        currentIndex++;
-                        goto inSymbol;
-                    }
-                }
-                else
+                // Treat all control characters as whitespace.
+                if (c > ' ')
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
@@ -93,8 +79,17 @@ namespace Sandra.Chess.Pgn
                         firstUnusedIndex = currentIndex;
                     }
 
-                    yield return CreateIllegalCharacterSyntax(c);
-                    firstUnusedIndex++;
+                    // All legal PGN characters have a value below 0x7F.
+                    if (c <= 0x7e)
+                    {
+                        currentIndex++;
+                        goto inSymbol;
+                    }
+                    else
+                    {
+                        yield return CreateIllegalCharacterSyntax(c);
+                        firstUnusedIndex++;
+                    }
                 }
 
                 currentIndex++;
