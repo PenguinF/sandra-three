@@ -88,6 +88,10 @@ namespace Sandra.Chess.Pgn
                                 yield return GreenPgnBracketStartSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
+                            case PgnBracketEndSyntax.BracketEndCharacter:
+                                yield return GreenPgnBracketEndSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
                             default:
                                 goto inSymbol;
                         }
@@ -140,6 +144,9 @@ namespace Sandra.Chess.Pgn
                     {
                         case PgnBracketStartSyntax.BracketStartCharacter:
                             symbolToYield = GreenPgnBracketStartSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnBracketEndSyntax.BracketEndCharacter:
+                            symbolToYield = GreenPgnBracketEndSyntax.Value;
                             goto yieldSymbolThenCharacter;
                     }
                 }

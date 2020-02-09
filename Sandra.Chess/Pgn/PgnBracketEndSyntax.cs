@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the bracket end character ']' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnBracketEndSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnBracketEndSyntax"/> value.
+        /// </summary>
+        public static GreenPgnBracketEndSyntax Value { get; } = new GreenPgnBracketEndSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnBracketEndSyntax.BracketEndLength;
+
+        private GreenPgnBracketEndSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnBracketEndSyntax
+    {
+        public const char BracketEndCharacter = ']';
+        public const int BracketEndLength = 1;
+    }
 }
