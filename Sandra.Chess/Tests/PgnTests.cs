@@ -82,6 +82,20 @@ namespace Sandra.Chess.Tests
             };
         }
 
+        [Fact]
+        public void ArgumentChecks()
+        {
+            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
+
+            Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
+
+            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
+            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
+        }
+
         [Theory]
         [InlineData(-1, 0, "start")]
         [InlineData(-1, -1, "start")]
@@ -89,18 +103,6 @@ namespace Sandra.Chess.Tests
         public void OutOfRangeArgumentsInError(int start, int length, string parameterName)
         {
             Assert.Throws<ArgumentOutOfRangeException>(parameterName, () => new PgnErrorInfo(0, start, length));
-        }
-
-        [Fact]
-        public void CreateRootPgnSyntaxWithNullTerminalsThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
-        }
-
-        [Fact]
-        public void NullPgnThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
         }
 
         [Fact]
@@ -136,15 +138,6 @@ namespace Sandra.Chess.Tests
             Assert.Collection(error.Parameters, x => Assert.Equal(displayCharValue, x));
             Assert.Equal(position, error.Start);
             Assert.Equal(1, error.Length);
-        }
-
-        [Fact]
-        public void OutOfRangeArguments()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
-            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
-            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
         }
 
         [Fact]
