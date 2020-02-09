@@ -82,8 +82,16 @@ namespace Sandra.Chess.Pgn
                     // All legal PGN characters have a value below 0x7F.
                     if (c <= 0x7e)
                     {
-                        currentIndex++;
-                        goto inSymbol;
+                        switch (c)
+                        {
+                            case PgnBracketStartSyntax.BracketStartCharacter:
+                                yield return GreenPgnBracketStartSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
+                            default:
+                                currentIndex++;
+                                goto inSymbol;
+                        }
                     }
                     else
                     {
@@ -103,27 +111,13 @@ namespace Sandra.Chess.Pgn
             yield break;
 
         inSymbol:
+
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
 
-                // All legal PGN characters have a value below 0x7F.
-                if (c <= 0x7e)
-                {
-                    // Treat all control characters as whitespace.
-                    if (c <= ' ')
-                    {
-                        if (firstUnusedIndex < currentIndex)
-                        {
-                            yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
-                            firstUnusedIndex = currentIndex;
-                        }
-
-                        currentIndex++;
-                        goto inWhitespace;
-                    }
-                }
-                else
+                // Treat all control characters as whitespace.
+                if (c <= ' ')
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
@@ -131,8 +125,38 @@ namespace Sandra.Chess.Pgn
                         firstUnusedIndex = currentIndex;
                     }
 
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+
+                // All legal PGN characters have a value below 0x7F.
+                if (c <= 0x7e)
+                {
+                    switch (c)
+                    {
+                        case PgnBracketStartSyntax.BracketStartCharacter:
+                            if (firstUnusedIndex < currentIndex)
+                            {
+                                yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                            }
+
+                            yield return GreenPgnBracketStartSyntax.Value;
+                            currentIndex++;
+                            firstUnusedIndex = currentIndex;
+                            goto inWhitespace;
+                    }
+                }
+                else
+                {
+                    if (firstUnusedIndex < currentIndex)
+                    {
+                        yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                    }
+
                     yield return CreateIllegalCharacterSyntax(c);
-                    firstUnusedIndex++;
+                    currentIndex++;
+                    firstUnusedIndex = currentIndex;
+                    goto inWhitespace;
                 }
 
                 currentIndex++;

@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the bracket start character '[' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnBracketStartSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnBracketStartSyntax"/> value.
+        /// </summary>
+        public static GreenPgnBracketStartSyntax Value { get; } = new GreenPgnBracketStartSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnBracketStartSyntax.BracketStartLength;
+
+        private GreenPgnBracketStartSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnBracketStartSyntax
+    {
+        public const char BracketStartCharacter = '[';
+        public const int BracketStartLength = 1;
+    }
 }
