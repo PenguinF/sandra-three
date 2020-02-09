@@ -79,4 +79,19 @@ namespace Sandra.Chess.Pgn
 
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
+
+    public static class PgnErrorTagValueSyntax
+    {
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
+        /// </summary>
+        /// <param name="start">
+        /// The start position of the unterminated tag value.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unterminated tag value.
+        /// </param>
+        public static PgnErrorInfo Unterminated(int start, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, start, length);
+    }
 }

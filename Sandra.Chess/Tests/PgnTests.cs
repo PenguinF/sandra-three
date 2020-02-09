@@ -86,6 +86,12 @@ namespace Sandra.Chess.Tests
             }
         }
 
+        private static IEnumerable<(string, Type)> UnterminatedPgnTestSymbols()
+        {
+            yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
+        }
+
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
             => Assert.Collection(PgnParser.TokenizeAll(pgn), elementInspectors);
 
@@ -194,7 +200,7 @@ namespace Sandra.Chess.Tests
 
         public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
             => from x1 in _PgnTestSymbols
-               from x2 in _PgnTestSymbols
+               from x2 in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
                select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
 
         /// <summary>

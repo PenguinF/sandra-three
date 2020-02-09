@@ -227,7 +227,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), length - firstUnusedIndex);
+            var errors = new SingleElementEnumerable<PgnErrorInfo>(PgnErrorTagValueSyntax.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
+
+            yield return new GreenPgnErrorTagValueSyntax(length - firstUnusedIndex, errors);
         }
 
         /// <summary>
