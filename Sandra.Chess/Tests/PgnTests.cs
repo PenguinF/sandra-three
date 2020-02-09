@@ -43,9 +43,20 @@ namespace Sandra.Chess.Tests
                     return true;
                 }
             }
+            else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
+            {
+                // GreenPgnSymbol only works if it contains only alphanumeric characters.
+                if (tokenType2 == typeof(GreenPgnSymbol)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
             else if (tokenType1 == typeof(GreenPgnSymbol))
             {
-                if (tokenType1 == tokenType2)
+                if (tokenType2 == typeof(GreenPgnSymbol)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
                     resultTokenType = tokenType1;
                     return true;
@@ -68,6 +79,7 @@ namespace Sandra.Chess.Tests
                 yield return ("[", typeof(GreenPgnBracketStartSyntax));
                 yield return ("]", typeof(GreenPgnBracketEndSyntax));
                 yield return ("a1", typeof(GreenPgnSymbol));
+                yield return ("A1", typeof(GreenPgnTagNameSyntax));
             }
         }
 
@@ -94,6 +106,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
             Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));

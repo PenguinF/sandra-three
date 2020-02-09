@@ -44,6 +44,7 @@ namespace Sandra.Chess.Pgn
 
         private static IPgnForegroundSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
+            if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
             return new GreenPgnSymbol(length);
         }
 

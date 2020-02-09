@@ -19,6 +19,38 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a tag name syntax node.
+    /// </summary>
+    public sealed class GreenPgnTagNameSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTagNameSyntax"/>.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 0 or lower.
+        /// </exception>
+        public GreenPgnTagNameSyntax(int length)
+        {
+            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
 }
