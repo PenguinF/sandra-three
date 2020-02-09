@@ -30,5 +30,15 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a character is illegal.
         /// </summary>
         IllegalCharacter,
+
+        /// <summary>
+        /// Occurs when a tag value is not terminated before the end of the file.
+        /// </summary>
+        UnterminatedTagValue,
+
+        /// <summary>
+        /// Occurs when an escape sequence in a tag value is not recognized.
+        /// </summary>
+        UnrecognizedEscapeSequence,
     }
 }

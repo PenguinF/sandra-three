@@ -39,6 +39,8 @@ namespace Sandra.UI
         public static IEnumerable<KeyValuePair<LocalizedStringKey, string>> DefaultEnglishPgnErrorTranslations => new Dictionary<LocalizedStringKey, string>
         {
             { GetLocalizedStringKey(PgnErrorCode.IllegalCharacter), "illegal character '{0}'" },
+            { GetLocalizedStringKey(PgnErrorCode.UnterminatedTagValue), "unterminated tag value" },
+            { GetLocalizedStringKey(PgnErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
         };
     }
 }
