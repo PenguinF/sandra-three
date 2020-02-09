@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnTokenizer.cs
+ * PgnParser.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -26,14 +26,14 @@ using System.Globalization;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Partitions a source PGN file into separate tokens.
+    /// Partitions a source PGN file into separate tokens, then generates an abstract syntax tree from it.
     /// </summary>
-    public sealed class PgnTokenizer
+    public sealed class PgnParser
     {
         private readonly string pgnText;
         private readonly int length;
 
-        private PgnTokenizer(string pgnText)
+        private PgnParser(string pgnText)
         {
             this.pgnText = pgnText ?? throw new ArgumentNullException(nameof(pgnText));
             length = pgnText.Length;
@@ -155,6 +155,6 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="pgnText"/> is null/
         /// </exception>
         public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
-            => new PgnTokenizer(pgnText)._TokenizeAll();
+            => new PgnParser(pgnText)._TokenizeAll();
     }
 }

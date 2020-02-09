@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a terminal PGN symbol.
-    /// Instances of this type are returned by <see cref="PgnTokenizer"/>.
+    /// Instances of this type are returned by <see cref="PgnParser"/>.
     /// </summary>
     public interface IGreenPgnSymbol : ISpan
     {

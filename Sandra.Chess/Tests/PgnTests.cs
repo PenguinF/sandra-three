@@ -70,7 +70,7 @@ namespace Sandra.Chess.Tests
         }
 
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
-            => Assert.Collection(PgnTokenizer.TokenizeAll(pgn), elementInspectors);
+            => Assert.Collection(PgnParser.TokenizeAll(pgn), elementInspectors);
 
         private static Action<IGreenPgnSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
         {
@@ -100,13 +100,13 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void NullPgnThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => PgnTokenizer.TokenizeAll(null).Any());
+            Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
         }
 
         [Fact]
         public void EmptyPgnEmptyTokens()
         {
-            Assert.False(PgnTokenizer.TokenizeAll(string.Empty).Any());
+            Assert.False(PgnParser.TokenizeAll(string.Empty).Any());
         }
 
         [Theory]

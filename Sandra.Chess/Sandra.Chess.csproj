@@ -50,10 +50,10 @@
     <Compile Include="Pgn\PgnErrorCode.cs" />
     <Compile Include="Pgn\PgnErrorInfo.cs" />
     <Compile Include="Pgn\PgnIllegalCharacterSyntax.cs" />
+    <Compile Include="Pgn\PgnParser.cs" />
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
-    <Compile Include="Pgn\PgnTokenizer.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
     <Compile Include="Position.cs" />
