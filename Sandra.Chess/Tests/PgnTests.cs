@@ -83,6 +83,8 @@ namespace Sandra.Chess.Tests
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
             }
         }
 
@@ -90,6 +92,7 @@ namespace Sandra.Chess.Tests
         {
             yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\\\"", typeof(GreenPgnErrorTagValueSyntax));
         }
 
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)

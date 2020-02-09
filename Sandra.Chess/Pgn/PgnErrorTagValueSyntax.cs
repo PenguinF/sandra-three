@@ -93,5 +93,20 @@ namespace Sandra.Chess.Pgn
         /// </param>
         public static PgnErrorInfo Unterminated(int start, int length)
             => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, start, length);
+
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for unrecognized escape sequences.
+        /// </summary>
+        /// <param name="displayCharValue">
+        /// A friendly representation of the unrecognized escape sequence.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the unrecognized escape sequence.
+        /// </param>
+        /// <param name="length">
+        /// The length of the unrecognized escape sequence.
+        /// </param>
+        public static PgnErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start, int length)
+            => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
     }
 }

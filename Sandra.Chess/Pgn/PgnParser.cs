@@ -72,6 +72,7 @@ namespace Sandra.Chess.Pgn
             int currentIndex = 0;
             int firstUnusedIndex = 0;
             StringBuilder valueBuilder = new StringBuilder();
+            List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
             // Keep track of whether characters were found that cannot be in tag names.
             bool allLegalTagNameCharacters;
@@ -217,17 +218,64 @@ namespace Sandra.Chess.Pgn
                 {
                     // Include last character in the syntax node.
                     currentIndex++;
-                    yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+
+                    if (errors.Count > 0)
+                    {
+                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - firstUnusedIndex, errors);
+                        errors.Clear();
+                    }
+                    else
+                    {
+                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                    }
+
                     valueBuilder.Clear();
                     firstUnusedIndex = currentIndex;
                     goto inWhitespace;
                 }
+                else if (c == StringLiteral.EscapeCharacter)
+                {
+                    // Look ahead one character.
+                    int escapeSequenceStart = currentIndex;
+                    currentIndex++;
 
-                valueBuilder.Append(c);
+                    if (currentIndex < length)
+                    {
+                        char escapedChar = pgnText[currentIndex];
+
+                        // Only two escape sequences are supported in the PGN standard: \" and \\
+                        if (escapedChar == StringLiteral.QuoteCharacter || escapedChar == StringLiteral.EscapeCharacter)
+                        {
+                            valueBuilder.Append(escapedChar);
+                        }
+                        else
+                        {
+                            errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                                $"{c}{escapedChar}",
+                                escapeSequenceStart - firstUnusedIndex,
+                                2));
+                        }
+                    }
+                    else
+                    {
+                        // In addition to this, break out of the loop because this is now also an unterminated string.
+                        errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
+                            c.ToString(),
+                            escapeSequenceStart - firstUnusedIndex,
+                            1));
+
+                        break;
+                    }
+                }
+                else
+                {
+                    valueBuilder.Append(c);
+                }
+
                 currentIndex++;
             }
 
-            var errors = new SingleElementEnumerable<PgnErrorInfo>(PgnErrorTagValueSyntax.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
+            errors.Add(PgnErrorTagValueSyntax.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
 
             yield return new GreenPgnErrorTagValueSyntax(length - firstUnusedIndex, errors);
         }
