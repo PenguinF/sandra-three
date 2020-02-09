@@ -42,7 +42,7 @@ namespace Sandra.Chess.Pgn
             return new GreenPgnIllegalCharacterSyntax(displayCharValue);
         }
 
-        private static IPgnForegroundSymbol CreatePgnSymbol(int length)
+        private static IPgnForegroundSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
             return new GreenPgnSymbol(length);
         }
@@ -68,6 +68,9 @@ namespace Sandra.Chess.Pgn
 
             int currentIndex = 0;
             int firstUnusedIndex = 0;
+
+            // Keep track of whether characters were found that cannot be in tag names.
+            bool allLegalTagNameCharacters;
 
         inWhitespace:
 
@@ -98,6 +101,8 @@ namespace Sandra.Chess.Pgn
                                 firstUnusedIndex++;
                                 break;
                             default:
+                                // Tag names must start with an uppercase letter.
+                                allLegalTagNameCharacters = c >= 'A' && c <= 'Z';
                                 goto inSymbol;
                         }
                     }
@@ -134,7 +139,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
+                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
                         firstUnusedIndex = currentIndex;
                     }
 
@@ -153,6 +158,14 @@ namespace Sandra.Chess.Pgn
                         case PgnBracketEndSyntax.BracketEndCharacter:
                             symbolToYield = GreenPgnBracketEndSyntax.Value;
                             goto yieldSymbolThenCharacter;
+                        default:
+                            // Allow only digits, letters or the underscore character in tag names.
+                            if (allLegalTagNameCharacters
+                                && (c < '0' || c > '9' && c < 'A' || c > 'Z' && c != '_' && c < 'a' || c > 'z'))
+                            {
+                                allLegalTagNameCharacters = false;
+                            }
+                            break;
                     }
                 }
                 else
@@ -166,7 +179,7 @@ namespace Sandra.Chess.Pgn
 
             if (firstUnusedIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
+                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
             }
 
             yield break;
@@ -174,7 +187,7 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
+            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
             yield return symbolToYield;
             currentIndex++;
             firstUnusedIndex = currentIndex;
