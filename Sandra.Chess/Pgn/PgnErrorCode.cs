@@ -40,5 +40,10 @@ namespace Sandra.Chess.Pgn
         /// Occurs when an escape sequence in a tag value is not recognized.
         /// </summary>
         UnrecognizedEscapeSequence,
+
+        /// <summary>
+        /// Occurs when a control character appears in a tag value.
+        /// </summary>
+        IllegalControlCharacterInTagValue,
     }
 }

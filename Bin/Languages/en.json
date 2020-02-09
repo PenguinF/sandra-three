@@ -112,6 +112,7 @@
     "TrimmedStringTypeError": "string value which contains at least one non white-space character",
     "PgnErrorIllegalCharacter": "illegal character '{0}'",
     "PgnErrorUnterminatedTagValue": "unterminated tag value",
-    "PgnErrorUnrecognizedEscapeSequence": "unrecognized escape sequence ('{0}')"
+    "PgnErrorUnrecognizedEscapeSequence": "unrecognized escape sequence ('{0}')",
+    "PgnErrorIllegalControlCharacterInTagValue": "illegal control character '{0}' in tag value"
   }
 }
