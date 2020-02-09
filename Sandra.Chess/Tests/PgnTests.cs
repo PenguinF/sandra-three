@@ -80,6 +80,9 @@ namespace Sandra.Chess.Tests
                 yield return ("]", typeof(GreenPgnBracketEndSyntax));
                 yield return ("a1", typeof(GreenPgnSymbol));
                 yield return ("A1", typeof(GreenPgnTagNameSyntax));
+                yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
             }
         }
 

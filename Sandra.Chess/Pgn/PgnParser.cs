@@ -19,9 +19,11 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace Sandra.Chess.Pgn
 {
@@ -69,6 +71,7 @@ namespace Sandra.Chess.Pgn
 
             int currentIndex = 0;
             int firstUnusedIndex = 0;
+            StringBuilder valueBuilder = new StringBuilder();
 
             // Keep track of whether characters were found that cannot be in tag names.
             bool allLegalTagNameCharacters;
@@ -101,6 +104,8 @@ namespace Sandra.Chess.Pgn
                                 yield return GreenPgnBracketEndSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
+                            case StringLiteral.QuoteCharacter:
+                                goto inString;
                             default:
                                 // Tag names must start with an uppercase letter.
                                 allLegalTagNameCharacters = c >= 'A' && c <= 'Z';
@@ -159,6 +164,10 @@ namespace Sandra.Chess.Pgn
                         case PgnBracketEndSyntax.BracketEndCharacter:
                             symbolToYield = GreenPgnBracketEndSyntax.Value;
                             goto yieldSymbolThenCharacter;
+                        case StringLiteral.QuoteCharacter:
+                            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
+                            firstUnusedIndex = currentIndex;
+                            goto inString;
                         default:
                             // Allow only digits, letters or the underscore character in tag names.
                             if (allLegalTagNameCharacters
@@ -193,6 +202,32 @@ namespace Sandra.Chess.Pgn
             currentIndex++;
             firstUnusedIndex = currentIndex;
             goto inWhitespace;
+
+        inString:
+
+            // Eat " character, but leave firstUnusedIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // Closing quote character?
+                if (c == StringLiteral.QuoteCharacter)
+                {
+                    // Include last character in the syntax node.
+                    currentIndex++;
+                    yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                    valueBuilder.Clear();
+                    firstUnusedIndex = currentIndex;
+                    goto inWhitespace;
+                }
+
+                valueBuilder.Append(c);
+                currentIndex++;
+            }
+
+            yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), length - firstUnusedIndex);
         }
 
         /// <summary>
