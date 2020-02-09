@@ -89,7 +89,6 @@ namespace Sandra.Chess.Pgn
                                 firstUnusedIndex++;
                                 break;
                             default:
-                                currentIndex++;
                                 goto inSymbol;
                         }
                     }
@@ -111,6 +110,11 @@ namespace Sandra.Chess.Pgn
             yield break;
 
         inSymbol:
+
+            // Eat the first symbol character, but leave firstUnusedIndex unchanged.
+            currentIndex++;
+
+            IGreenPgnSymbol symbolToYield;
 
             while (currentIndex < length)
             {
@@ -135,28 +139,14 @@ namespace Sandra.Chess.Pgn
                     switch (c)
                     {
                         case PgnBracketStartSyntax.BracketStartCharacter:
-                            if (firstUnusedIndex < currentIndex)
-                            {
-                                yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
-                            }
-
-                            yield return GreenPgnBracketStartSyntax.Value;
-                            currentIndex++;
-                            firstUnusedIndex = currentIndex;
-                            goto inWhitespace;
+                            symbolToYield = GreenPgnBracketStartSyntax.Value;
+                            goto yieldSymbolThenCharacter;
                     }
                 }
                 else
                 {
-                    if (firstUnusedIndex < currentIndex)
-                    {
-                        yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
-                    }
-
-                    yield return CreateIllegalCharacterSyntax(c);
-                    currentIndex++;
-                    firstUnusedIndex = currentIndex;
-                    goto inWhitespace;
+                    symbolToYield = CreateIllegalCharacterSyntax(c);
+                    goto yieldSymbolThenCharacter;
                 }
 
                 currentIndex++;
@@ -166,6 +156,17 @@ namespace Sandra.Chess.Pgn
             {
                 yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
             }
+
+            yield break;
+
+        yieldSymbolThenCharacter:
+
+            // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
+            if (firstUnusedIndex < currentIndex) yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+            yield return symbolToYield;
+            currentIndex++;
+            firstUnusedIndex = currentIndex;
+            goto inWhitespace;
         }
 
         /// <summary>
