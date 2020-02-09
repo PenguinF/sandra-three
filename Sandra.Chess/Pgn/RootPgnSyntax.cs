@@ -80,7 +80,7 @@ namespace Sandra.Chess.Pgn
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
             => green.AsBackgroundOrForeground().Match(
                 whenOption1: backgroundGreen => PgnBackgroundSyntaxCreator.Instance.Visit(backgroundGreen, (this, index)),
-                whenOption2: foregroundGreen => new PgnSymbol(this, index, (GreenPgnSymbol)foregroundGreen));
+                whenOption2: foregroundGreen => new PgnSymbol(this, index, foregroundGreen));
 
         internal PgnSyntaxNodes(GreenPgnSyntaxNodes green)
         {

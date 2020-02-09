@@ -112,12 +112,12 @@ namespace Sandra.Chess.Pgn
     {
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
-        public GreenPgnSymbol Green { get; }
+        public IPgnForegroundSymbol Green { get; }
         public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, GreenPgnSymbol green)
+        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IPgnForegroundSymbol green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
