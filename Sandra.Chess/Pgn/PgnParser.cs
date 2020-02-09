@@ -42,6 +42,11 @@ namespace Sandra.Chess.Pgn
             return new GreenPgnIllegalCharacterSyntax(displayCharValue);
         }
 
+        private static IPgnForegroundSymbol CreatePgnSymbol(int length)
+        {
+            return new GreenPgnSymbol(length);
+        }
+
         /// <summary>
         /// Tokenizes source text in the PGN format.
         /// </summary>
@@ -129,7 +134,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
-                        yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                        yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
                         firstUnusedIndex = currentIndex;
                     }
 
@@ -161,7 +166,7 @@ namespace Sandra.Chess.Pgn
 
             if (firstUnusedIndex < currentIndex)
             {
-                yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+                yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
             }
 
             yield break;
@@ -169,7 +174,7 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (firstUnusedIndex < currentIndex) yield return new GreenPgnSymbol(currentIndex - firstUnusedIndex);
+            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(currentIndex - firstUnusedIndex);
             yield return symbolToYield;
             currentIndex++;
             firstUnusedIndex = currentIndex;
