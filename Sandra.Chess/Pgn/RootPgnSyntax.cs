@@ -23,7 +23,6 @@ using Eutherion.Text;
 using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -35,20 +34,11 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> terminals)
+        public RootPgnSyntax(GreenPgnSyntaxNodes syntax, List<PgnErrorInfo> errors)
         {
-            if (terminals == null) throw new ArgumentNullException(nameof(terminals));
-            var terminalList = terminals.ToList();
-
-            int startPosition = 0;
-            Errors = new List<PgnErrorInfo>();
-            foreach (var terminal in terminalList)
-            {
-                Errors.AddRange(terminal.GetErrors(startPosition));
-                startPosition += terminal.Length;
-            }
-
-            Syntax = new PgnSyntaxNodes(new GreenPgnSyntaxNodes(terminalList));
+            if (syntax == null) throw new ArgumentNullException(nameof(syntax));
+            Syntax = new PgnSyntaxNodes(syntax);
+            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
 
@@ -90,7 +80,7 @@ namespace Sandra.Chess.Pgn
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
             => green.AsBackgroundOrForeground().Match(
                 whenOption1: backgroundGreen => PgnBackgroundSyntaxCreator.Instance.Visit(backgroundGreen, (this, index)),
-                whenOption2: foregroundGreen => new PgnSymbol(this, index, (GreenPgnSymbol)foregroundGreen));
+                whenOption2: foregroundGreen => new PgnSymbol(this, index, foregroundGreen));
 
         internal PgnSyntaxNodes(GreenPgnSyntaxNodes green)
         {

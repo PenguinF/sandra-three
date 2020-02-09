@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorCode.cs
+ * PgnBracketStartSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,31 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Enumerates distinct PGN syntax and semantic error types.
+    /// Represents the bracket start character '[' in PGN text.
     /// </summary>
-    public enum PgnErrorCode
+    public sealed class GreenPgnBracketStartSyntax : IPgnForegroundSymbol
     {
         /// <summary>
-        /// Occurs when a character is illegal.
+        /// Gets the single <see cref="GreenPgnBracketStartSyntax"/> value.
         /// </summary>
-        IllegalCharacter,
+        public static GreenPgnBracketStartSyntax Value { get; } = new GreenPgnBracketStartSyntax();
 
         /// <summary>
-        /// Occurs when a tag value is not terminated before the end of the file.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        UnterminatedTagValue,
+        public int Length => PgnBracketStartSyntax.BracketStartLength;
 
-        /// <summary>
-        /// Occurs when an escape sequence in a tag value is not recognized.
-        /// </summary>
-        UnrecognizedEscapeSequence,
+        private GreenPgnBracketStartSyntax() { }
 
-        /// <summary>
-        /// Occurs when a control character appears in a tag value.
-        /// </summary>
-        IllegalControlCharacterInTagValue,
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnBracketStartSyntax
+    {
+        public const char BracketStartCharacter = '[';
+        public const int BracketStartLength = 1;
     }
 }

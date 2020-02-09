@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a terminal PGN symbol.
-    /// Instances of this type are returned by <see cref="PgnTokenizer"/>.
+    /// Instances of this type are returned by <see cref="PgnParser"/>.
     /// </summary>
     public interface IGreenPgnSymbol : ISpan
     {
@@ -112,12 +112,12 @@ namespace Sandra.Chess.Pgn
     {
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
-        public GreenPgnSymbol Green { get; }
+        public IPgnForegroundSymbol Green { get; }
         public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, GreenPgnSymbol green)
+        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IPgnForegroundSymbol green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

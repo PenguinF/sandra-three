@@ -31,26 +31,53 @@ namespace Sandra.UI
     /// </summary>
     public class PgnStyleSelector<TSyntaxTree, TError> : PgnSymbolVisitor<SyntaxEditor<TSyntaxTree, IPgnSymbol, TError>, Style>
     {
-        private const int illegalCharacterStyleIndex = 8;
+        private const int tagNameStyleIndex = 8;
+        private const int tagValueStyleIndex = 9;
+        private const int errorTagValueStyleIndex = 10;
+        private const int illegalCharacterStyleIndex = 11;
 
-        private static readonly Font regularFont = new Font("Consolas", 10);
+        private static readonly Font tagNameFont = new Font("Consolas", 10, FontStyle.Italic);
 
-        private static readonly Color illegalCharacterForeColor = Color.FromArgb(192, 192, 40);
+        private static readonly Color tagNameForeColor = Color.FromArgb(0xff, 0xff, 0x3c);
+        private static readonly Color tagValueForeColor = Color.FromArgb(0xff, 0xbb, 0x9e);
+        private static readonly Color errorTagValueForeColor = Color.FromArgb(0xbc, 0x82, 0x70);
+        private static readonly Color illegalCharacterForeColor = Color.FromArgb(0xa0, 0xa0, 0xa0);
 
         public static readonly PgnStyleSelector<TSyntaxTree, TError> Instance = new PgnStyleSelector<TSyntaxTree, TError>();
 
         public static void InitializeStyles(SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
+            syntaxEditor.Styles[tagNameStyleIndex].ForeColor = tagNameForeColor;
+            tagNameFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
+
+            syntaxEditor.Styles[tagValueStyleIndex].ForeColor = tagValueForeColor;
+
+            syntaxEditor.Styles[errorTagValueStyleIndex].ForeColor = errorTagValueForeColor;
+
             syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
-            regularFont.CopyTo(syntaxEditor.Styles[illegalCharacterStyleIndex]);
         }
 
         private PgnStyleSelector() { }
 
-        public override Style DefaultVisit(IPgnSymbol symbol, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax symbol, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
+
+        public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        {
+            switch (node.Green)
+            {
+                case GreenPgnTagNameSyntax _:
+                    return syntaxEditor.Styles[tagNameStyleIndex];
+                case GreenPgnTagValueSyntax _:
+                    return syntaxEditor.Styles[tagValueStyleIndex];
+                case GreenPgnErrorTagValueSyntax _:
+                    return syntaxEditor.Styles[errorTagValueStyleIndex];
+            }
+
+            return syntaxEditor.DefaultStyle;
+        }
     }
 }

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents an character which is illegal in the PGN standard.
+    /// Represents a character which is illegal in the PGN standard.
     /// </summary>
     public sealed class GreenPgnIllegalCharacterSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
     {
@@ -80,7 +80,7 @@ namespace Sandra.Chess.Pgn
     }
 
     /// <summary>
-    /// Represents an character which is illegal in the PGN standard.
+    /// Represents a character which is illegal in the PGN standard.
     /// </summary>
     public sealed class PgnIllegalCharacterSyntax : PgnBackgroundSyntax, IPgnSymbol
     {

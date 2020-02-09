@@ -151,7 +151,7 @@ namespace Eutherion.Text.Json
                             case JsonCommaSyntax.CommaCharacter:
                                 yield return GreenJsonCommaSyntax.Value;
                                 break;
-                            case JsonStringLiteralSyntax.QuoteCharacter:
+                            case StringLiteral.QuoteCharacter:
                                 currentTokenizer = InString;
                                 yield break;
                             case JsonCommentSyntax.CommentStartFirstCharacter:
@@ -218,7 +218,7 @@ namespace Eutherion.Text.Json
                 char c = json[currentIndex];
                 switch (c)
                 {
-                    case JsonStringLiteralSyntax.QuoteCharacter:
+                    case StringLiteral.QuoteCharacter:
                         currentIndex++;
                         if (errors.Count > 0)
                         {
@@ -234,7 +234,7 @@ namespace Eutherion.Text.Json
                         firstUnusedIndex = currentIndex;
                         currentTokenizer = Default;
                         yield break;
-                    case JsonStringLiteralSyntax.EscapeCharacter:
+                    case StringLiteral.EscapeCharacter:
                         // Escape sequence.
                         int escapeSequenceStart = currentIndex;
                         currentIndex++;
@@ -243,8 +243,8 @@ namespace Eutherion.Text.Json
                             char escapedChar = json[currentIndex];
                             switch (escapedChar)
                             {
-                                case JsonStringLiteralSyntax.QuoteCharacter:
-                                case JsonStringLiteralSyntax.EscapeCharacter:
+                                case StringLiteral.QuoteCharacter:
+                                case StringLiteral.EscapeCharacter:
                                 case '/':  // Weird one, but it's in the specification.
                                     valueBuilder.Append(escapedChar);
                                     break;
@@ -330,11 +330,11 @@ namespace Eutherion.Text.Json
                         }
                         break;
                     default:
-                        if (JsonStringLiteralSyntax.CharacterMustBeEscaped(c))
+                        if (StringLiteral.CharacterMustBeEscaped(c))
                         {
                             // Generate user friendly representation of the illegal character in error message.
                             errors.Add(JsonErrorStringSyntax.IllegalControlCharacter(
-                                JsonStringLiteralSyntax.EscapedCharacterString(c),
+                                StringLiteral.EscapedCharacterString(c),
                                 currentIndex - firstUnusedIndex));
                         }
                         else

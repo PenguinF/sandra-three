@@ -110,6 +110,9 @@
     "FileNameTypeError": "geldige bestandsnaam",
     "SubFolderNameTypeError": "geldige mapnaam",
     "TrimmedStringTypeError": "stringwaarde met minstens één niet-witruimte karakter",
-    "PgnErrorIllegalCharacter": "ongeldig karakter '{0}'"
+    "PgnErrorIllegalCharacter": "ongeldig karakter '{0}'",
+    "PgnErrorUnterminatedTagValue": "label waarde niet afgesloten met een '\"' karakter",
+    "PgnErrorUnrecognizedEscapeSequence": "escape karakter reeks niet herkend ('{0}')",
+    "PgnErrorIllegalControlCharacterInTagValue": "illegaal stuurkarakter '{0}' binnen label waarde"
   }
 }

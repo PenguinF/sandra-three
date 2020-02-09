@@ -43,9 +43,20 @@ namespace Sandra.Chess.Tests
                     return true;
                 }
             }
+            else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
+            {
+                // GreenPgnSymbol only works if it contains only alphanumeric characters.
+                if (tokenType2 == typeof(GreenPgnSymbol)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+            }
             else if (tokenType1 == typeof(GreenPgnSymbol))
             {
-                if (tokenType1 == tokenType2)
+                if (tokenType2 == typeof(GreenPgnSymbol)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
                     resultTokenType = tokenType1;
                     return true;
@@ -65,12 +76,29 @@ namespace Sandra.Chess.Tests
                 yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("é", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("a1".ToString(), typeof(GreenPgnSymbol));
+                yield return ("[", typeof(GreenPgnBracketStartSyntax));
+                yield return ("]", typeof(GreenPgnBracketEndSyntax));
+                yield return ("a1", typeof(GreenPgnSymbol));
+                yield return ("A1", typeof(GreenPgnTagNameSyntax));
+                yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"\\\"\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
+                yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
+                yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
             }
         }
 
+        private static IEnumerable<(string, Type)> UnterminatedPgnTestSymbols()
+        {
+            yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
+            yield return ("\"\\\"", typeof(GreenPgnErrorTagValueSyntax));
+        }
+
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
-            => Assert.Collection(PgnTokenizer.TokenizeAll(pgn), elementInspectors);
+            => Assert.Collection(PgnParser.TokenizeAll(pgn), elementInspectors);
 
         private static Action<IGreenPgnSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
         {
@@ -80,6 +108,32 @@ namespace Sandra.Chess.Tests
                 Assert.IsType(expectedTokenType, symbol);
                 Assert.Equal(expectedLength, symbol.Length);
             };
+        }
+
+        [Fact]
+        public void ArgumentChecks()
+        {
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnSyntaxNodes(EmptyEnumerable<IGreenPgnSymbol>.Instance), null));
+
+            Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
+
+            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
+            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagNameSyntax(0));
+
+            Assert.Throws<ArgumentNullException>("value", () => new GreenPgnTagValueSyntax(null, 1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnTagValueSyntax(string.Empty, 0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(-1, EmptyEnumerable<PgnErrorInfo>.Instance));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnErrorTagValueSyntax(0, EmptyEnumerable<PgnErrorInfo>.Instance));
+            Assert.Throws<ArgumentNullException>(() => new GreenPgnErrorTagValueSyntax(1, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
         }
 
         [Theory]
@@ -92,21 +146,9 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void CreateRootPgnSyntaxWithNullTerminalsThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => new RootPgnSyntax(null));
-        }
-
-        [Fact]
-        public void NullPgnThrows()
-        {
-            Assert.Throws<ArgumentNullException>(() => PgnTokenizer.TokenizeAll(null).Any());
-        }
-
-        [Fact]
         public void EmptyPgnEmptyTokens()
         {
-            Assert.False(PgnTokenizer.TokenizeAll(string.Empty).Any());
+            Assert.False(PgnParser.TokenizeAll(string.Empty).Any());
         }
 
         [Theory]
@@ -139,15 +181,6 @@ namespace Sandra.Chess.Tests
         }
 
         [Fact]
-        public void OutOfRangeArguments()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
-            Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
-            Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
-        }
-
-        [Fact]
         public void PgnSymbolsWithConstantLength()
         {
             Assert.Equal(1, new GreenPgnIllegalCharacterSyntax("\\0").Length);
@@ -172,7 +205,7 @@ namespace Sandra.Chess.Tests
 
         public static IEnumerable<object[]> TwoPgnTestSymbolCombinations
             => from x1 in _PgnTestSymbols
-               from x2 in _PgnTestSymbols
+               from x2 in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
                select new object[] { x1.Item1, x1.Item2, x2.Item1, x2.Item2 };
 
         /// <summary>

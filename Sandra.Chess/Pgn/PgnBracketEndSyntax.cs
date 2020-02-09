@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorCode.cs
+ * PgnBracketEndSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,31 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Enumerates distinct PGN syntax and semantic error types.
+    /// Represents the bracket end character ']' in PGN text.
     /// </summary>
-    public enum PgnErrorCode
+    public sealed class GreenPgnBracketEndSyntax : IPgnForegroundSymbol
     {
         /// <summary>
-        /// Occurs when a character is illegal.
+        /// Gets the single <see cref="GreenPgnBracketEndSyntax"/> value.
         /// </summary>
-        IllegalCharacter,
+        public static GreenPgnBracketEndSyntax Value { get; } = new GreenPgnBracketEndSyntax();
 
         /// <summary>
-        /// Occurs when a tag value is not terminated before the end of the file.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        UnterminatedTagValue,
+        public int Length => PgnBracketEndSyntax.BracketEndLength;
 
-        /// <summary>
-        /// Occurs when an escape sequence in a tag value is not recognized.
-        /// </summary>
-        UnrecognizedEscapeSequence,
+        private GreenPgnBracketEndSyntax() { }
 
-        /// <summary>
-        /// Occurs when a control character appears in a tag value.
-        /// </summary>
-        IllegalControlCharacterInTagValue,
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnBracketEndSyntax
+    {
+        public const char BracketEndCharacter = ']';
+        public const int BracketEndLength = 1;
     }
 }
