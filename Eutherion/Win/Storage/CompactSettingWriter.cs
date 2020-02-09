@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using Eutherion.Text.Json;
 using System.Text;
 
@@ -41,7 +42,7 @@ namespace Eutherion.Win.Storage
 
         internal void AppendString(string value)
         {
-            outputBuilder.Append(JsonStringLiteralSyntax.QuoteCharacter);
+            outputBuilder.Append(StringLiteral.QuoteCharacter);
 
             if (value != null)
             {
@@ -52,7 +53,7 @@ namespace Eutherion.Win.Storage
                 for (int i = 0; i < value.Length; i++)
                 {
                     char c = value[i];
-                    if (JsonStringLiteralSyntax.CharacterMustBeEscaped(c))
+                    if (StringLiteral.CharacterMustBeEscaped(c))
                     {
                         // Non-empty substring between this character and the last?
                         if (firstNonEscapedCharPosition < i)
@@ -64,7 +65,7 @@ namespace Eutherion.Win.Storage
                         }
 
                         // Append the escape sequence.
-                        outputBuilder.Append(JsonStringLiteralSyntax.EscapedCharacterString(c));
+                        outputBuilder.Append(StringLiteral.EscapedCharacterString(c));
 
                         firstNonEscapedCharPosition = i + 1;
                     }
@@ -79,7 +80,7 @@ namespace Eutherion.Win.Storage
                 }
             }
 
-            outputBuilder.Append(JsonStringLiteralSyntax.QuoteCharacter);
+            outputBuilder.Append(StringLiteral.QuoteCharacter);
         }
 
         public override void VisitBoolean(PBoolean value)
