@@ -317,7 +317,14 @@ namespace Eutherion.Win.AppTemplate
             if (!IsDisposed && !Disposing && !SyntaxEditor.ReadOnly)
             {
                 // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-                CloseButtonHoverColor = SyntaxEditor.ContainsChanges ? UnsavedModificationsCloseButtonHoverColor : default;
+                if (SyntaxEditor.ContainsChanges)
+                {
+                    SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
+                }
+                else
+                {
+                    ResetCloseButtonHoverColor();
+                }
             }
         }
 

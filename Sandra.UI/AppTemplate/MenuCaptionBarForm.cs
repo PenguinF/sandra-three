@@ -48,15 +48,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton closeButton;
 
         private Color titleBarBackColor;
-
-        /// <summary>
-        /// Gets or sets the currently used hover color of the close button.
-        /// </summary>
-        public Color CloseButtonHoverColor
-        {
-            get => closeButton.FlatAppearance.MouseOverBackColor;
-            set => closeButton.FlatAppearance.MouseOverBackColor = value;
-        }
+        private Color titleBarHoverColor;
 
         public MenuCaptionBarForm()
         {
@@ -148,6 +140,22 @@ namespace Eutherion.Win.AppTemplate
             return button;
         }
 
+        /// <summary>
+        /// Sets the currently used hover color of the close button.
+        /// </summary>
+        public void SetCloseButtonHoverColor(Color value)
+        {
+            closeButton.FlatAppearance.MouseOverBackColor = value;
+        }
+
+        /// <summary>
+        /// Resets the currently used hover color of the close button.
+        /// </summary>
+        public void ResetCloseButtonHoverColor()
+        {
+            closeButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+        }
+
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
@@ -176,11 +184,26 @@ namespace Eutherion.Win.AppTemplate
         private void UpdateCaptionAreaButtonsBackColor()
         {
             titleBarBackColor = Color.White;
-            MainMenuStrip.BackColor = titleBarBackColor;
-            minimizeButton.BackColor = titleBarBackColor;
-            maximizeButton.BackColor = titleBarBackColor;
-            saveButton.BackColor = titleBarBackColor;
-            closeButton.BackColor = titleBarBackColor;
+
+            if (MainMenuStrip != null)
+            {
+                MainMenuStrip.BackColor = titleBarBackColor;
+
+                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
+                {
+                    titleBarHoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                }
+            }
+
+            new[] { minimizeButton, maximizeButton, saveButton, closeButton }.ForEach(StyleButton);
+
+            Invalidate();
+        }
+
+        private void StyleButton(Button titleBarButton)
+        {
+            titleBarButton.BackColor = titleBarBackColor;
+            titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
         }
 
         private void UpdateMaximizeButtonIcon()
