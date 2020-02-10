@@ -21,6 +21,7 @@
 
 using Eutherion.UIActions;
 using Eutherion.Win.Controls;
+using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -183,7 +184,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            titleBarBackColor = Color.White;
+            titleBarBackColor = ThemeHelper.GetDwmAccentColor();
 
             if (MainMenuStrip != null)
             {
