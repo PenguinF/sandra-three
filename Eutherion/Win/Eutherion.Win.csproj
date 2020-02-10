@@ -99,6 +99,7 @@
     <Compile Include="UIActions\UIAutoHideMainMenu.cs" />
     <Compile Include="UIActions\UIMenu.cs" />
     <Compile Include="Utils\KeyUtilities.cs" />
+    <Compile Include="Utils\ThemeHelper.cs" />
     <Compile Include="WinAPI.cs" />
     <Compile Include="WorkingCopyTextFile.cs" />
   </ItemGroup>
