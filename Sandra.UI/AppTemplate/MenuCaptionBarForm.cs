@@ -20,7 +20,9 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Controls;
+using Eutherion.Win.Utils;
 using System;
 using System.Drawing;
 using System.Drawing.Text;
@@ -34,27 +36,28 @@ namespace Eutherion.Win.AppTemplate
     /// It is advisable to give the main menu strip a back color so it does not display
     /// a gradient which clashes with the custom drawn caption bar area.
     /// </summary>
-    public class MenuCaptionBarForm : UIActionForm
+    public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private const int MainMenuHorizontalMargin = 8;
 
         private const int buttonOuterRightMargin = 4;
         private const int closeButtonMargin = 4;
-        private const int captionButtonSize = 24;
+        private const int captionButtonWidth = 30;
+        private const int captionButtonHeight = 24;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
-        /// <summary>
-        /// Gets or sets the currently used hover color of the close button.
-        /// </summary>
-        public Color CloseButtonHoverColor
-        {
-            get => closeButton.FlatAppearance.MouseOverBackColor;
-            set => closeButton.FlatAppearance.MouseOverBackColor = value;
-        }
+        private Button currentHoverButton;
+
+        private bool isActive;
+        private bool inDarkMode;
+        private Color titleBarBackColor;
+        private Color titleBarForeColor;
+        private Color titleBarHoverColor;
+        private Color titleBarHoverBorderColor;
 
         public MenuCaptionBarForm()
         {
@@ -70,10 +73,10 @@ namespace Eutherion.Win.AppTemplate
             ControlBox = false;
             FormBorderStyle = FormBorderStyle.None;
 
-            minimizeButton = CreateCaptionButton(SharedResources.minimize);
+            minimizeButton = CreateCaptionButton();
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
 
-            maximizeButton = CreateCaptionButton(null);
+            maximizeButton = CreateCaptionButton();
             maximizeButton.Click += (_, __) =>
             {
                 WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
@@ -81,7 +84,7 @@ namespace Eutherion.Win.AppTemplate
             };
 
             // Specialized save button which binds on the SaveToFile UIAction.
-            saveButton = CreateCaptionButton(SharedResources.save);
+            saveButton = CreateCaptionButton();
             saveButton.Visible = false;
             saveButton.Click += (_, __) =>
             {
@@ -104,7 +107,7 @@ namespace Eutherion.Win.AppTemplate
                 saveButton.Enabled = currentActionState.Enabled;
             };
 
-            closeButton = CreateCaptionButton(SharedResources.close);
+            closeButton = CreateCaptionButton();
             closeButton.Click += (_, __) => Close();
 
             SuspendLayout();
@@ -115,6 +118,8 @@ namespace Eutherion.Win.AppTemplate
             Controls.Add(closeButton);
 
             ResumeLayout();
+
+            ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
         }
 
         protected override CreateParams CreateParams
@@ -129,11 +134,10 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        private NonSelectableButton CreateCaptionButton(Image icon)
+        private NonSelectableButton CreateCaptionButton()
         {
             var button = new NonSelectableButton
             {
-                Image = icon,
                 ImageAlign = ContentAlignment.MiddleCenter,
                 FlatStyle = FlatStyle.Flat,
                 Margin = new Padding(0),
@@ -141,9 +145,28 @@ namespace Eutherion.Win.AppTemplate
                 TabStop = false,
             };
 
-            button.FlatAppearance.BorderSize = 0;
+            button.FlatAppearance.BorderSize = 1;
+            button.MouseEnter += TitleBarButton_MouseEnter;
+            button.MouseLeave += TitleBarButton_MouseLeave;
+            button.MouseMove += TitleBarButton_MouseMove;
 
             return button;
+        }
+
+        /// <summary>
+        /// Sets the currently used hover color of the close button.
+        /// </summary>
+        public void SetCloseButtonHoverColor(Color value)
+        {
+            closeButton.FlatAppearance.MouseOverBackColor = value;
+        }
+
+        /// <summary>
+        /// Resets the currently used hover color of the close button.
+        /// </summary>
+        public void ResetCloseButtonHoverColor()
+        {
+            closeButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -158,7 +181,12 @@ namespace Eutherion.Win.AppTemplate
 
             if (e.Control == MainMenuStrip)
             {
-                MainMenuStrip.BackColorChanged += MainMenuStrip_BackColorChanged;
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
+                }
+
                 UpdateCaptionAreaButtonsBackColor();
             }
         }
@@ -167,28 +195,150 @@ namespace Eutherion.Win.AppTemplate
         {
             if (e.Control == MainMenuStrip)
             {
-                MainMenuStrip.BackColorChanged -= MainMenuStrip_BackColorChanged;
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.DropDownOpening -= MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed -= MainMenuItem_DropDownClosed;
+                }
             }
 
             base.OnControlRemoved(e);
         }
 
-        private void MainMenuStrip_BackColorChanged(object sender, EventArgs e) => UpdateCaptionAreaButtonsBackColor();
+        protected override void OnLoad(EventArgs e)
+        {
+            // For when another window is active when this form is first shown.
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnLoad(e);
+        }
+
+        private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e)
+        {
+            UpdateCaptionAreaButtonsBackColor();
+        }
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            minimizeButton.BackColor = MainMenuStrip.BackColor;
-            maximizeButton.BackColor = MainMenuStrip.BackColor;
-            saveButton.BackColor = MainMenuStrip.BackColor;
-            closeButton.BackColor = MainMenuStrip.BackColor;
+            titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
+            inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
+            titleBarForeColor = inDarkMode ? Color.White : Color.Black;
+
+            if (MainMenuStrip != null)
+            {
+                MainMenuStrip.BackColor = titleBarBackColor;
+                MainMenuStrip.ForeColor = titleBarForeColor;
+
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.ForeColor = titleBarForeColor;
+                }
+
+                if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
+                {
+                    titleBarHoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                    titleBarHoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
+                }
+            }
+
+            new[] { minimizeButton, maximizeButton, saveButton, closeButton }.ForEach(StyleButton);
+
+            if (inDarkMode)
+            {
+                closeButton.Image = SharedResources.close_white;
+                minimizeButton.Image = SharedResources.minimize_white;
+                saveButton.Image = SharedResources.save_white;
+            }
+            else
+            {
+                closeButton.Image = SharedResources.close;
+                minimizeButton.Image = SharedResources.minimize;
+                saveButton.Image = SharedResources.save;
+            }
+
+            UpdateMaximizeButtonIcon();
+
+            Invalidate();
+        }
+
+        private void StyleButton(Button titleBarButton)
+        {
+            titleBarButton.BackColor = titleBarBackColor;
+            titleBarButton.ForeColor = titleBarForeColor;
+            titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            StyleTitleBarButtonBorder(titleBarButton);
+        }
+
+        private void StyleTitleBarButtonBorder(Button titleBarButton)
+        {
+            if (titleBarButton != null)
+            {
+                titleBarButton.FlatAppearance.BorderColor
+                    = titleBarButton == currentHoverButton
+                    ? titleBarHoverBorderColor
+                    : titleBarBackColor;
+            }
+        }
+
+        private void TitleBarButton_MouseEnter(object sender, EventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = (Button)sender;
+            if (oldHoverButton != currentHoverButton)
+            {
+                StyleTitleBarButtonBorder(oldHoverButton);
+                StyleTitleBarButtonBorder(currentHoverButton);
+            }
+        }
+
+        private void TitleBarButton_MouseMove(object sender, MouseEventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = (Button)sender;
+            if (oldHoverButton != currentHoverButton)
+            {
+                StyleTitleBarButtonBorder(oldHoverButton);
+                StyleTitleBarButtonBorder(currentHoverButton);
+            }
+        }
+
+        private void TitleBarButton_MouseLeave(object sender, EventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = null;
+            StyleTitleBarButtonBorder(oldHoverButton);
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            // Use DefaultForeColor rather than titleBarForeColor when dropped down.
+            ((ToolStripDropDownItem)sender).ForeColor = DefaultForeColor;
+        }
+
+        private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
+        {
+            ((ToolStripDropDownItem)sender).ForeColor = titleBarForeColor;
         }
 
         private void UpdateMaximizeButtonIcon()
         {
             maximizeButton.Image
                 = WindowState == FormWindowState.Maximized
-                ? SharedResources.demaximize
-                : SharedResources.maximize;
+                ? (inDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
+                : (inDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            isActive = true;
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnActivated(e);
+        }
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            isActive = false;
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnDeactivate(e);
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
@@ -205,55 +355,55 @@ namespace Eutherion.Win.AppTemplate
                     .Sum();
 
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
-                int topEdge = MainMenuStrip.Height - captionButtonSize - 2;
-                int captionButtonHeight;
+                int topEdge = MainMenuStrip.Height - captionButtonHeight - 2;
+                int actualCaptionButtonHeight;
 
                 if (topEdge < 0)
                 {
                     topEdge = 0;
-                    captionButtonHeight = MainMenuStrip.Height - 2;
+                    actualCaptionButtonHeight = MainMenuStrip.Height - 2;
                 }
                 else
                 {
                     topEdge = topEdge / 2;
-                    captionButtonHeight = captionButtonSize;
+                    actualCaptionButtonHeight = captionButtonHeight;
                 }
 
                 // Use a vertical edge variable so buttons can be placed from right to left.
-                int currentVerticalEdge = ClientSize.Width - captionButtonSize - buttonOuterRightMargin;
+                int currentVerticalEdge = ClientSize.Width - captionButtonWidth - buttonOuterRightMargin;
 
                 closeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
 
                 if (saveButton.Visible)
                 {
-                    currentVerticalEdge = currentVerticalEdge - captionButtonSize;
+                    currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
 
                     saveButton.SetBounds(
                         currentVerticalEdge,
                         topEdge,
-                        captionButtonSize,
-                        captionButtonHeight);
+                        captionButtonWidth,
+                        actualCaptionButtonHeight);
                 }
 
-                currentVerticalEdge = currentVerticalEdge - captionButtonSize - closeButtonMargin;
+                currentVerticalEdge = currentVerticalEdge - captionButtonWidth - closeButtonMargin;
 
                 maximizeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
 
-                currentVerticalEdge = currentVerticalEdge - captionButtonSize;
+                currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
 
                 minimizeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
             }
             else
             {
@@ -276,9 +426,8 @@ namespace Eutherion.Win.AppTemplate
                 var g = e.Graphics;
                 int width = Width;
                 int mainMenuWidth = MainMenuStrip.Width;
-                Color mainMenuBackColor = MainMenuStrip.BackColor;
 
-                using (var captionAreaColorBrush = new SolidBrush(mainMenuBackColor))
+                using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
                 {
                     g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
                 }
@@ -318,8 +467,8 @@ namespace Eutherion.Win.AppTemplate
                         text,
                         MainMenuStrip.Font,
                         textAreaRectangle,
-                        MainMenuStrip.ForeColor,
-                        mainMenuBackColor,
+                        titleBarForeColor,
+                        titleBarBackColor,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
             }

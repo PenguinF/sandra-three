@@ -217,7 +217,6 @@ namespace Eutherion.Win.AppTemplate
             MainMenuStrip = new MenuStrip();
             UIMenuBuilder.BuildMenu(mainMenuActionHandler, new[] { fileMenu, editMenu, viewMenu }, MainMenuStrip.Items);
             Controls.Add(MainMenuStrip);
-            MainMenuStrip.BackColor = DefaultSyntaxEditorStyle.ForeColor;
 
             foreach (ToolStripDropDownItem mainMenuItem in MainMenuStrip.Items)
             {
@@ -318,7 +317,14 @@ namespace Eutherion.Win.AppTemplate
             if (!IsDisposed && !Disposing && !SyntaxEditor.ReadOnly)
             {
                 // If something can be saved, closing is dangerous, therefore use a reddish hover color.
-                CloseButtonHoverColor = SyntaxEditor.ContainsChanges ? UnsavedModificationsCloseButtonHoverColor : default;
+                if (SyntaxEditor.ContainsChanges)
+                {
+                    SetCloseButtonHoverColor(UnsavedModificationsCloseButtonHoverColor);
+                }
+                else
+                {
+                    ResetCloseButtonHoverColor();
+                }
             }
         }
 
