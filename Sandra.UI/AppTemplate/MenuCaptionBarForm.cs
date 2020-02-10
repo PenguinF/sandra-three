@@ -42,7 +42,8 @@ namespace Eutherion.Win.AppTemplate
 
         private const int buttonOuterRightMargin = 4;
         private const int closeButtonMargin = 4;
-        private const int captionButtonSize = 24;
+        private const int captionButtonWidth = 30;
+        private const int captionButtonHeight = 24;
 
         private readonly NonSelectableButton minimizeButton;
         private readonly NonSelectableButton maximizeButton;
@@ -290,55 +291,55 @@ namespace Eutherion.Win.AppTemplate
                     .Sum();
 
                 // Calculate top edge position for all caption buttons: 1 pixel above center.
-                int topEdge = MainMenuStrip.Height - captionButtonSize - 2;
-                int captionButtonHeight;
+                int topEdge = MainMenuStrip.Height - captionButtonHeight - 2;
+                int actualCaptionButtonHeight;
 
                 if (topEdge < 0)
                 {
                     topEdge = 0;
-                    captionButtonHeight = MainMenuStrip.Height - 2;
+                    actualCaptionButtonHeight = MainMenuStrip.Height - 2;
                 }
                 else
                 {
                     topEdge = topEdge / 2;
-                    captionButtonHeight = captionButtonSize;
+                    actualCaptionButtonHeight = captionButtonHeight;
                 }
 
                 // Use a vertical edge variable so buttons can be placed from right to left.
-                int currentVerticalEdge = ClientSize.Width - captionButtonSize - buttonOuterRightMargin;
+                int currentVerticalEdge = ClientSize.Width - captionButtonWidth - buttonOuterRightMargin;
 
                 closeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
 
                 if (saveButton.Visible)
                 {
-                    currentVerticalEdge = currentVerticalEdge - captionButtonSize;
+                    currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
 
                     saveButton.SetBounds(
                         currentVerticalEdge,
                         topEdge,
-                        captionButtonSize,
-                        captionButtonHeight);
+                        captionButtonWidth,
+                        actualCaptionButtonHeight);
                 }
 
-                currentVerticalEdge = currentVerticalEdge - captionButtonSize - closeButtonMargin;
+                currentVerticalEdge = currentVerticalEdge - captionButtonWidth - closeButtonMargin;
 
                 maximizeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
 
-                currentVerticalEdge = currentVerticalEdge - captionButtonSize;
+                currentVerticalEdge = currentVerticalEdge - captionButtonWidth;
 
                 minimizeButton.SetBounds(
                     currentVerticalEdge,
                     topEdge,
-                    captionButtonSize,
-                    captionButtonHeight);
+                    captionButtonWidth,
+                    actualCaptionButtonHeight);
             }
             else
             {
