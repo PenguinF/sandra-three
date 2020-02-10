@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.UIActions;
+using Eutherion.Utils;
 using Eutherion.Win.Controls;
 using Eutherion.Win.Utils;
 using System;
@@ -35,7 +36,7 @@ namespace Eutherion.Win.AppTemplate
     /// It is advisable to give the main menu strip a back color so it does not display
     /// a gradient which clashes with the custom drawn caption bar area.
     /// </summary>
-    public class MenuCaptionBarForm : UIActionForm
+    public class MenuCaptionBarForm : UIActionForm, IWeakEventTarget
     {
         private const int MainMenuHorizontalMargin = 8;
 
@@ -111,6 +112,8 @@ namespace Eutherion.Win.AppTemplate
             Controls.Add(closeButton);
 
             ResumeLayout();
+
+            ThemeHelper.UserPreferencesChanged += ThemeHelper_UserPreferencesChanged;
         }
 
         protected override CreateParams CreateParams
@@ -181,6 +184,18 @@ namespace Eutherion.Win.AppTemplate
             }
 
             base.OnControlRemoved(e);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            // For when another window is active when this form is first shown.
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnLoad(e);
+        }
+
+        private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e)
+        {
+            UpdateCaptionAreaButtonsBackColor();
         }
 
         private void UpdateCaptionAreaButtonsBackColor()

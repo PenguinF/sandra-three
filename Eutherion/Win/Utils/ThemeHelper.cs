@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Utils;
 using Microsoft.Win32;
 using System;
 using System.Drawing;
@@ -31,6 +32,22 @@ namespace Eutherion.Win.Utils
 {
     public static class ThemeHelper
     {
+        private static SafeLazy<(Color, Color)> accentColors;
+
+        static ThemeHelper()
+        {
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch
+            {
+                // Just ignore changes if this event cannot be registered.
+            }
+
+            ResetAccentColors();
+        }
+
         [DllImport("dwmapi.dll", PreserveSig = false)]
         private static extern void DwmIsCompositionEnabled(out bool enabled);
 
@@ -124,28 +141,66 @@ namespace Eutherion.Win.Utils
                 whenNothing: () => defaultValue,
                 whenJust: value => value);
 
+        private static void ResetAccentColors()
+        {
+            accentColors = new SafeLazy<(Color, Color)>(GetDwmAccentColors);
+        }
+
         /// <summary>
         /// Gets the current DWM accent color, as determined by OS user preferences.
         /// </summary>
         public static Color GetDwmAccentColor(bool isActive)
+            => isActive ? accentColors.Value.Item1 : accentColors.Value.Item2;
+
+        private static (Color, Color) GetDwmAccentColors()
         {
+            Color accentActiveColor = Color.White;
+            Color accentInactiveColor = Color.White;
+
             if (DwmEnabled
                 && GetRegistryValue(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "ColorPrevalence", 0) != 0)
             {
-                string accentColorKey = isActive ? "AccentColor" : "AccentColorInactive";
-                Maybe<int> maybeAccentColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", accentColorKey);
-                if (maybeAccentColor.IsJust(out int accentColor))
+                Maybe<int> maybeAccentActiveColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColor");
+                if (maybeAccentActiveColor.IsJust(out int accentActiveColorIntValue))
                 {
                     // Use alpha == 255. Format is ABGR.
-                    return Color.FromArgb(
-                        accentColor & 0xff,
-                        (accentColor & 0xff00) >> 8,
-                        (accentColor & 0xff0000) >> 16);
+                    accentActiveColor = Color.FromArgb(
+                        accentActiveColorIntValue & 0xff,
+                        (accentActiveColorIntValue & 0xff00) >> 8,
+                        (accentActiveColorIntValue & 0xff0000) >> 16);
+                }
+
+                Maybe<int> maybeAccentInctiveColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColorInactive");
+                if (maybeAccentInctiveColor.IsJust(out int accentInactiveColorIntValue))
+                {
+                    // Use alpha == 255. Format is ABGR.
+                    accentInactiveColor = Color.FromArgb(
+                        accentInactiveColorIntValue & 0xff,
+                        (accentInactiveColorIntValue & 0xff00) >> 8,
+                        (accentInactiveColorIntValue & 0xff0000) >> 16);
                 }
             }
 
             // Default is Color.White even when dark theme is on.
-            return Color.White;
+            return (accentActiveColor, accentInactiveColor);
+        }
+
+        // Using a weak event for static event declarations, so memory leaks are less likely.
+        private static readonly WeakEvent<_void, EventArgs> event_UserPreferencesChanged = new WeakEvent<_void, EventArgs>();
+
+        /// <summary>
+        /// <see cref="WeakEvent{TSender, TEventArgs}"/> which occurs when the system user preferences changed.
+        /// </summary>
+        public static event Action<_void, EventArgs> UserPreferencesChanged
+        {
+            add { event_UserPreferencesChanged.AddListener(value); }
+            remove { event_UserPreferencesChanged.RemoveListener(value); }
+        }
+
+        private static void SystemEvents_UserPreferenceChanged(object sender, EventArgs e)
+        {
+            ResetAccentColors();
+            event_UserPreferencesChanged.Raise(default, EventArgs.Empty);
         }
     }
 }
