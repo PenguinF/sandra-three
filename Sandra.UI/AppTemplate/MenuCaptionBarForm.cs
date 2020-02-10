@@ -51,6 +51,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton closeButton;
 
         private bool isActive;
+        private bool inDarkMode;
         private Color titleBarBackColor;
         private Color titleBarForeColor;
         private Color titleBarHoverColor;
@@ -69,10 +70,10 @@ namespace Eutherion.Win.AppTemplate
             ControlBox = false;
             FormBorderStyle = FormBorderStyle.None;
 
-            minimizeButton = CreateCaptionButton(SharedResources.minimize);
+            minimizeButton = CreateCaptionButton();
             minimizeButton.Click += (_, __) => WindowState = FormWindowState.Minimized;
 
-            maximizeButton = CreateCaptionButton(null);
+            maximizeButton = CreateCaptionButton();
             maximizeButton.Click += (_, __) =>
             {
                 WindowState = WindowState == FormWindowState.Maximized ? FormWindowState.Normal : FormWindowState.Maximized;
@@ -80,7 +81,7 @@ namespace Eutherion.Win.AppTemplate
             };
 
             // Specialized save button which binds on the SaveToFile UIAction.
-            saveButton = CreateCaptionButton(SharedResources.save);
+            saveButton = CreateCaptionButton();
             saveButton.Visible = false;
             saveButton.Click += (_, __) =>
             {
@@ -103,7 +104,7 @@ namespace Eutherion.Win.AppTemplate
                 saveButton.Enabled = currentActionState.Enabled;
             };
 
-            closeButton = CreateCaptionButton(SharedResources.close);
+            closeButton = CreateCaptionButton();
             closeButton.Click += (_, __) => Close();
 
             SuspendLayout();
@@ -130,11 +131,10 @@ namespace Eutherion.Win.AppTemplate
             }
         }
 
-        private NonSelectableButton CreateCaptionButton(Image icon)
+        private NonSelectableButton CreateCaptionButton()
         {
             var button = new NonSelectableButton
             {
-                Image = icon,
                 ImageAlign = ContentAlignment.MiddleCenter,
                 FlatStyle = FlatStyle.Flat,
                 Margin = new Padding(0),
@@ -214,7 +214,8 @@ namespace Eutherion.Win.AppTemplate
         private void UpdateCaptionAreaButtonsBackColor()
         {
             titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
-            titleBarForeColor = titleBarBackColor.GetBrightness() < 0.5f ? Color.White : Color.Black;
+            inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
+            titleBarForeColor = inDarkMode ? Color.White : Color.Black;
 
             if (MainMenuStrip != null)
             {
@@ -233,6 +234,21 @@ namespace Eutherion.Win.AppTemplate
             }
 
             new[] { minimizeButton, maximizeButton, saveButton, closeButton }.ForEach(StyleButton);
+
+            if (inDarkMode)
+            {
+                closeButton.Image = SharedResources.close_white;
+                minimizeButton.Image = SharedResources.minimize_white;
+                saveButton.Image = SharedResources.save_white;
+            }
+            else
+            {
+                closeButton.Image = SharedResources.close;
+                minimizeButton.Image = SharedResources.minimize;
+                saveButton.Image = SharedResources.save;
+            }
+
+            UpdateMaximizeButtonIcon();
 
             Invalidate();
         }
@@ -259,8 +275,8 @@ namespace Eutherion.Win.AppTemplate
         {
             maximizeButton.Image
                 = WindowState == FormWindowState.Maximized
-                ? SharedResources.demaximize
-                : SharedResources.maximize;
+                ? (inDarkMode ? SharedResources.demaximize_white : SharedResources.demaximize)
+                : (inDarkMode ? SharedResources.maximize_white : SharedResources.maximize);
         }
 
         protected override void OnActivated(EventArgs e)
