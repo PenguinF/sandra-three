@@ -398,7 +398,7 @@ namespace Eutherion.Win.UIActions
         public static void BuildMenu(UIActionHandler actionHandler, IEnumerable<UIMenuNode> rootMenuNodes, ToolStripItemCollection destination)
             => new UIMenuBuilder(actionHandler).BuildMenu(rootMenuNodes, destination);
 
-        UIActionHandler ActionHandler;
+        private readonly UIActionHandler ActionHandler;
 
         UIMenuBuilder(UIActionHandler actionHandler)
         {
