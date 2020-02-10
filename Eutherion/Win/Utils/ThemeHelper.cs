@@ -127,12 +127,13 @@ namespace Eutherion.Win.Utils
         /// <summary>
         /// Gets the current DWM accent color, as determined by OS user preferences.
         /// </summary>
-        public static Color GetDwmAccentColor()
+        public static Color GetDwmAccentColor(bool isActive)
         {
             if (DwmEnabled
                 && GetRegistryValue(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "ColorPrevalence", 0) != 0)
             {
-                Maybe<int> maybeAccentColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", "AccentColor");
+                string accentColorKey = isActive ? "AccentColor" : "AccentColorInactive";
+                Maybe<int> maybeAccentColor = GetRegistryValue<int>(Registry.CurrentUser, "Software\\Microsoft\\Windows\\DWM", accentColorKey);
                 if (maybeAccentColor.IsJust(out int accentColor))
                 {
                     // Use alpha == 255. Format is ABGR.

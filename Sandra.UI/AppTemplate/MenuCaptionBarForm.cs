@@ -48,6 +48,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
+        private bool isActive;
         private Color titleBarBackColor;
         private Color titleBarHoverColor;
 
@@ -184,7 +185,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            titleBarBackColor = ThemeHelper.GetDwmAccentColor();
+            titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
 
             if (MainMenuStrip != null)
             {
@@ -213,6 +214,20 @@ namespace Eutherion.Win.AppTemplate
                 = WindowState == FormWindowState.Maximized
                 ? SharedResources.demaximize
                 : SharedResources.maximize;
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            isActive = true;
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnActivated(e);
+        }
+
+        protected override void OnDeactivate(EventArgs e)
+        {
+            isActive = false;
+            UpdateCaptionAreaButtonsBackColor();
+            base.OnDeactivate(e);
         }
 
         protected override void OnLayout(LayoutEventArgs levent)
