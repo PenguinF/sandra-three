@@ -50,11 +50,14 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
+        private Button currentHoverButton;
+
         private bool isActive;
         private bool inDarkMode;
         private Color titleBarBackColor;
         private Color titleBarForeColor;
         private Color titleBarHoverColor;
+        private Color titleBarHoverBorderColor;
 
         public MenuCaptionBarForm()
         {
@@ -142,7 +145,10 @@ namespace Eutherion.Win.AppTemplate
                 TabStop = false,
             };
 
-            button.FlatAppearance.BorderSize = 0;
+            button.FlatAppearance.BorderSize = 1;
+            button.MouseEnter += TitleBarButton_MouseEnter;
+            button.MouseLeave += TitleBarButton_MouseLeave;
+            button.MouseMove += TitleBarButton_MouseMove;
 
             return button;
         }
@@ -230,6 +236,7 @@ namespace Eutherion.Win.AppTemplate
                 if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
                 {
                     titleBarHoverColor = professionalRenderer.ColorTable.ButtonSelectedHighlight;
+                    titleBarHoverBorderColor = professionalRenderer.ColorTable.ButtonSelectedBorder;
                 }
             }
 
@@ -258,6 +265,47 @@ namespace Eutherion.Win.AppTemplate
             titleBarButton.BackColor = titleBarBackColor;
             titleBarButton.ForeColor = titleBarForeColor;
             titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+            StyleTitleBarButtonBorder(titleBarButton);
+        }
+
+        private void StyleTitleBarButtonBorder(Button titleBarButton)
+        {
+            if (titleBarButton != null)
+            {
+                titleBarButton.FlatAppearance.BorderColor
+                    = titleBarButton == currentHoverButton
+                    ? titleBarHoverBorderColor
+                    : titleBarBackColor;
+            }
+        }
+
+        private void TitleBarButton_MouseEnter(object sender, EventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = (Button)sender;
+            if (oldHoverButton != currentHoverButton)
+            {
+                StyleTitleBarButtonBorder(oldHoverButton);
+                StyleTitleBarButtonBorder(currentHoverButton);
+            }
+        }
+
+        private void TitleBarButton_MouseMove(object sender, MouseEventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = (Button)sender;
+            if (oldHoverButton != currentHoverButton)
+            {
+                StyleTitleBarButtonBorder(oldHoverButton);
+                StyleTitleBarButtonBorder(currentHoverButton);
+            }
+        }
+
+        private void TitleBarButton_MouseLeave(object sender, EventArgs e)
+        {
+            var oldHoverButton = currentHoverButton;
+            currentHoverButton = null;
+            StyleTitleBarButtonBorder(oldHoverButton);
         }
 
         private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
