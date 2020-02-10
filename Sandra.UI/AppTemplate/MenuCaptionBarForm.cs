@@ -51,6 +51,7 @@ namespace Eutherion.Win.AppTemplate
 
         private bool isActive;
         private Color titleBarBackColor;
+        private Color titleBarForeColor;
         private Color titleBarHoverColor;
 
         public MenuCaptionBarForm()
@@ -173,6 +174,12 @@ namespace Eutherion.Win.AppTemplate
 
             if (e.Control == MainMenuStrip)
             {
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.DropDownOpening += MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed += MainMenuItem_DropDownClosed;
+                }
+
                 UpdateCaptionAreaButtonsBackColor();
             }
         }
@@ -181,6 +188,11 @@ namespace Eutherion.Win.AppTemplate
         {
             if (e.Control == MainMenuStrip)
             {
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.DropDownOpening -= MainMenuItem_DropDownOpening;
+                    mainMenuItem.DropDownClosed -= MainMenuItem_DropDownClosed;
+                }
             }
 
             base.OnControlRemoved(e);
@@ -201,10 +213,17 @@ namespace Eutherion.Win.AppTemplate
         private void UpdateCaptionAreaButtonsBackColor()
         {
             titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
+            titleBarForeColor = titleBarBackColor.GetBrightness() < 0.5f ? Color.White : Color.Black;
 
             if (MainMenuStrip != null)
             {
                 MainMenuStrip.BackColor = titleBarBackColor;
+                MainMenuStrip.ForeColor = titleBarForeColor;
+
+                foreach (var mainMenuItem in MainMenuStrip.Items.OfType<ToolStripDropDownItem>())
+                {
+                    mainMenuItem.ForeColor = titleBarForeColor;
+                }
 
                 if (MainMenuStrip.Renderer is ToolStripProfessionalRenderer professionalRenderer)
                 {
@@ -220,7 +239,19 @@ namespace Eutherion.Win.AppTemplate
         private void StyleButton(Button titleBarButton)
         {
             titleBarButton.BackColor = titleBarBackColor;
+            titleBarButton.ForeColor = titleBarForeColor;
             titleBarButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
+        }
+
+        private void MainMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            // Use DefaultForeColor rather than titleBarForeColor when dropped down.
+            ((ToolStripDropDownItem)sender).ForeColor = DefaultForeColor;
+        }
+
+        private void MainMenuItem_DropDownClosed(object sender, EventArgs e)
+        {
+            ((ToolStripDropDownItem)sender).ForeColor = titleBarForeColor;
         }
 
         private void UpdateMaximizeButtonIcon()
@@ -371,7 +402,7 @@ namespace Eutherion.Win.AppTemplate
                         text,
                         MainMenuStrip.Font,
                         textAreaRectangle,
-                        MainMenuStrip.ForeColor,
+                        titleBarForeColor,
                         titleBarBackColor,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
