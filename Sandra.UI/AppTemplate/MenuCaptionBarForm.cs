@@ -47,6 +47,8 @@ namespace Eutherion.Win.AppTemplate
         private readonly NonSelectableButton saveButton;
         private readonly NonSelectableButton closeButton;
 
+        private Color titleBarBackColor;
+
         /// <summary>
         /// Gets or sets the currently used hover color of the close button.
         /// </summary>
@@ -158,7 +160,6 @@ namespace Eutherion.Win.AppTemplate
 
             if (e.Control == MainMenuStrip)
             {
-                MainMenuStrip.BackColorChanged += MainMenuStrip_BackColorChanged;
                 UpdateCaptionAreaButtonsBackColor();
             }
         }
@@ -167,20 +168,19 @@ namespace Eutherion.Win.AppTemplate
         {
             if (e.Control == MainMenuStrip)
             {
-                MainMenuStrip.BackColorChanged -= MainMenuStrip_BackColorChanged;
             }
 
             base.OnControlRemoved(e);
         }
 
-        private void MainMenuStrip_BackColorChanged(object sender, EventArgs e) => UpdateCaptionAreaButtonsBackColor();
-
         private void UpdateCaptionAreaButtonsBackColor()
         {
-            minimizeButton.BackColor = MainMenuStrip.BackColor;
-            maximizeButton.BackColor = MainMenuStrip.BackColor;
-            saveButton.BackColor = MainMenuStrip.BackColor;
-            closeButton.BackColor = MainMenuStrip.BackColor;
+            titleBarBackColor = Color.White;
+            MainMenuStrip.BackColor = titleBarBackColor;
+            minimizeButton.BackColor = titleBarBackColor;
+            maximizeButton.BackColor = titleBarBackColor;
+            saveButton.BackColor = titleBarBackColor;
+            closeButton.BackColor = titleBarBackColor;
         }
 
         private void UpdateMaximizeButtonIcon()
@@ -276,9 +276,8 @@ namespace Eutherion.Win.AppTemplate
                 var g = e.Graphics;
                 int width = Width;
                 int mainMenuWidth = MainMenuStrip.Width;
-                Color mainMenuBackColor = MainMenuStrip.BackColor;
 
-                using (var captionAreaColorBrush = new SolidBrush(mainMenuBackColor))
+                using (var captionAreaColorBrush = new SolidBrush(titleBarBackColor))
                 {
                     g.FillRectangle(captionAreaColorBrush, new Rectangle(mainMenuWidth, 0, width - mainMenuWidth, MainMenuStrip.Height));
                 }
@@ -319,7 +318,7 @@ namespace Eutherion.Win.AppTemplate
                         MainMenuStrip.Font,
                         textAreaRectangle,
                         MainMenuStrip.ForeColor,
-                        mainMenuBackColor,
+                        titleBarBackColor,
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
             }
