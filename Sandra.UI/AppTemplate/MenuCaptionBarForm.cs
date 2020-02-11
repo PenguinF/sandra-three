@@ -105,6 +105,7 @@ namespace Eutherion.Win.AppTemplate
                 UIActionState currentActionState = ActionHandler.TryPerformAction(SharedUIAction.SaveToFile.Action, false);
                 saveButton.Visible = currentActionState.Visible;
                 saveButton.Enabled = currentActionState.Enabled;
+                if (!saveButton.Enabled) saveButton.FlatAppearance.BorderColor = titleBarBackColor;
             };
 
             closeButton = CreateCaptionButton();
@@ -273,7 +274,7 @@ namespace Eutherion.Win.AppTemplate
             if (titleBarButton != null)
             {
                 titleBarButton.FlatAppearance.BorderColor
-                    = titleBarButton == currentHoverButton
+                    = titleBarButton == currentHoverButton && titleBarButton.Enabled
                     ? titleBarHoverBorderColor
                     : titleBarBackColor;
             }
