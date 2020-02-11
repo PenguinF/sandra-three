@@ -222,7 +222,7 @@ namespace Eutherion.Win.AppTemplate
         {
             titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
             inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
-            titleBarForeColor = inDarkMode ? Color.White : Color.Black;
+            titleBarForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
 
             if (MainMenuStrip != null)
             {
