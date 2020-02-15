@@ -295,6 +295,37 @@ namespace Eutherion.Text.Json
             return unprocessedToken;
         }
 
+        private void ParseValues(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, JsonErrorCode multipleValuesErrorCode)
+        {
+            ShiftToNextForegroundToken();
+
+            var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
+            if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol)) return;
+
+            // Invariant: discriminated != null && !discriminated.IsOption1().
+            for (; ; )
+            {
+                // Always create a value node, even if it contains an undefined value.
+                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
+
+                // CurrentToken may be null, e.g. unterminated objects or arrays.
+                if (CurrentToken == null) return;
+
+                // Move to the next symbol if CurrentToken was processed.
+                if (!unprocessedToken) ShiftToNextForegroundToken();
+
+                // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
+                discriminated = CurrentToken?.AsValueDelimiterOrStarter();
+                if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol)) return;
+
+                // Two or more consecutive values not allowed.
+                Errors.Add(new JsonErrorInfo(
+                    multipleValuesErrorCode,
+                    CurrentLength - CurrentToken.Length,
+                    CurrentToken.Length));
+            }
+        }
+
         private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder)
         {
             var background = CaptureBackground();
@@ -309,43 +340,8 @@ namespace Eutherion.Text.Json
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
-
-            ShiftToNextForegroundToken();
-
-            var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-            if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
-            {
-                return CreateMultiValueNode(valueNodesBuilder);
-            }
-
-            // Invariant: discriminated != null && !discriminated.IsOption1().
-            for (; ; )
-            {
-                // Always create a value node, even if it contains an undefined value.
-                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
-
-                // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null)
-                {
-                    return CreateMultiValueNode(valueNodesBuilder);
-                }
-
-                // Move to the next symbol if CurrentToken was processed.
-                if (!unprocessedToken) ShiftToNextForegroundToken();
-
-                // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
-                discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-                if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol))
-                {
-                    return CreateMultiValueNode(valueNodesBuilder);
-                }
-
-                // Two or more consecutive values not allowed.
-                Errors.Add(new JsonErrorInfo(
-                    multipleValuesErrorCode,
-                    CurrentLength - CurrentToken.Length,
-                    CurrentToken.Length));
-            }
+            ParseValues(valueNodesBuilder, multipleValuesErrorCode);
+            return CreateMultiValueNode(valueNodesBuilder);
         }
 
         // ParseMultiValue copy, except that it handles the discriminated.IsOption1() case differently,
