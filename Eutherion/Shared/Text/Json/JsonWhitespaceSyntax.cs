@@ -38,13 +38,9 @@ namespace Eutherion.Text.Json
 
         static GreenJsonWhitespaceSyntax()
         {
+            // Do not allocate a zero length whitespace.
             SharedInstances = new GreenJsonWhitespaceSyntax[SharedWhitespaceInstanceLength - 1];
-
-            for (int i = SharedWhitespaceInstanceLength - 2; i >= 0; i--)
-            {
-                // Do not allocate a zero length whitespace.
-                SharedInstances[i] = new GreenJsonWhitespaceSyntax(i + 1);
-            }
+            SharedInstances.Fill(i => new GreenJsonWhitespaceSyntax(i + 1));
         }
 
         /// <summary>
