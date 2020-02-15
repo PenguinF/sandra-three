@@ -295,6 +295,11 @@ namespace Eutherion.Text.Json
             return unprocessedToken;
         }
 
+        private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, GreenJsonBackgroundListSyntax background)
+        {
+            return new GreenJsonMultiValueSyntax(valueNodesBuilder, background);
+        }
+
         private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
@@ -305,7 +310,7 @@ namespace Eutherion.Text.Json
             if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+                return CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
             }
 
             // Invariant: discriminated != null && !discriminated.IsOption1().
@@ -319,7 +324,7 @@ namespace Eutherion.Text.Json
                 {
                     // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                     // This means that here there's no need to capture the background.
-                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+                    return CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -330,7 +335,7 @@ namespace Eutherion.Text.Json
                 if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol))
                 {
                     // Capture the background following the last value.
-                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
+                    return CreateMultiValueNode(valueNodesBuilder, CaptureBackground());
                 }
 
                 // Two or more consecutive values not allowed.
@@ -353,7 +358,7 @@ namespace Eutherion.Text.Json
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
                 return new RootJsonSyntax(
-                    new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                    CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
                     Errors);
             }
 
@@ -390,7 +395,7 @@ namespace Eutherion.Text.Json
                         // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
                         // This means that here there's no need to capture the background.
                         return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
                             Errors);
                     }
                 }
@@ -405,14 +410,14 @@ namespace Eutherion.Text.Json
                     {
                         valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
                         return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                            CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
                             Errors);
                     }
                     else
                     {
                         // Capture the background following the last value.
                         return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
+                            CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
                             Errors);
                     }
                 }
