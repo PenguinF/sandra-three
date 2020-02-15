@@ -141,16 +141,22 @@ namespace Eutherion.Shared.Tests
                 }, JsonTokenizerTests.JsonTestSymbols().Count()).ToArray());
         }
 
+        private static readonly ParseTree NoBackground = new ParseTree<JsonBackgroundListSyntax>();
+
+        private static readonly ParseTree NoValue = new ParseTree<JsonMissingValueSyntax>();
+
+        private static readonly ParseTree NoValueOrBackground = new ParseTree<JsonValueWithBackgroundSyntax>
+        {
+            NoBackground,
+            NoValue
+        };
+
         private static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
             ("", new ParseTree<JsonMultiValueSyntax>
             {
-                new ParseTree<JsonValueWithBackgroundSyntax>
-                {
-                    new ParseTree<JsonBackgroundListSyntax>(),
-                    new ParseTree<JsonMissingValueSyntax>()
-                },
-                new ParseTree<JsonBackgroundListSyntax>()
+                NoValueOrBackground,
+                NoBackground
             }),
         };
 
@@ -161,9 +167,9 @@ namespace Eutherion.Shared.Tests
                 new ParseTree<JsonValueWithBackgroundSyntax>
                 {
                     new ParseTree<JsonBackgroundListSyntax> { new ParseTree<JsonUnterminatedMultiLineCommentSyntax>() },
-                    new ParseTree<JsonMissingValueSyntax>()
+                    NoValue
                 },
-                new ParseTree<JsonBackgroundListSyntax>()
+                NoBackground
             },
             new[] { JsonErrorCode.UnterminatedMultiLineComment } ),
         };
