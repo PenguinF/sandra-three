@@ -345,16 +345,17 @@ namespace Eutherion.Shared.Tests
             new[] { JsonErrorCode.ExpectedEof } ),
         };
 
-        private static void AssertParseTree(ParseTree expectedParseTree, JsonSyntax actualParseTree)
+        private static void AssertParseTree(ParseTree expectedParseTree, JsonSyntax expectedParent, JsonSyntax actualParseTree)
         {
             Assert.IsType(expectedParseTree.ExpectedType, actualParseTree);
+            Assert.Same(expectedParent, actualParseTree.ParentSyntax);
 
             int expectedChildCount = expectedParseTree.ChildNodes.Count;
             Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
 
             for (int i = 0; i < expectedChildCount; i++)
             {
-                AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree.GetChild(i));
+                AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree, actualParseTree.GetChild(i));
             }
         }
 
@@ -367,7 +368,7 @@ namespace Eutherion.Shared.Tests
         public void ParseTrees(string json, ParseTree parseTree, JsonErrorCode[] expectedErrors)
         {
             RootJsonSyntax rootSyntax = JsonParser.Parse(json);
-            AssertParseTree(parseTree, rootSyntax.Syntax);
+            AssertParseTree(parseTree, null, rootSyntax.Syntax);
 
             // Assert expected errors.
             Assert.Collection(
