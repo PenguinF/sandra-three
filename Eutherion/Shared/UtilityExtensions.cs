@@ -59,6 +59,15 @@ namespace Eutherion
         /// <summary>
         /// Sets a single value at each index of the array.
         /// </summary>
+        /// <typeparam name="T">
+        /// The type of the elements of the array.
+        /// </typeparam>
+        /// <param name="array">
+        /// The one-dimensional, zero-based array to fill.
+        /// </param>
+        /// <param name="value">
+        /// The value to set at each index of the array.
+        /// </param>
         public static void Fill<T>(this T[] array, T value)
         {
             for (int i = array.Length - 1; i >= 0; --i)
