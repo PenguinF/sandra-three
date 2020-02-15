@@ -30,10 +30,6 @@ namespace Eutherion.Shared.Tests
 {
     public class JsonParserTests
     {
-        private class UnexpectedJsonSymbolException : Exception
-        {
-        }
-
         private sealed class TerminalSymbolTester : JsonSymbolVisitor<IGreenJsonSymbol>
         {
             public static readonly TerminalSymbolTester Instance = new TerminalSymbolTester();
@@ -48,7 +44,6 @@ namespace Eutherion.Shared.Tests
             public override IGreenJsonSymbol VisitCurlyOpenSyntax(JsonCurlyOpenSyntax node) => node.Green;
             public override IGreenJsonSymbol VisitErrorStringSyntax(JsonErrorStringSyntax node) => node.Green;
             public override IGreenJsonSymbol VisitIntegerLiteralSyntax(JsonIntegerLiteralSyntax node) => node.Green;
-            public override IGreenJsonSymbol VisitMissingValueSyntax(JsonMissingValueSyntax node) => throw new UnexpectedJsonSymbolException();
             public override IGreenJsonSymbol VisitRootLevelValueDelimiterSyntax(JsonRootLevelValueDelimiterSyntax node) => node.Green.ValueDelimiter;
             public override IGreenJsonSymbol VisitSquareBracketCloseSyntax(JsonSquareBracketCloseSyntax node) => node.Green;
             public override IGreenJsonSymbol VisitSquareBracketOpenSyntax(JsonSquareBracketOpenSyntax node) => node.Green;
@@ -102,7 +97,7 @@ namespace Eutherion.Shared.Tests
             // Sane structure as JsonTokenizerTests.Transition: first check two symbols, then all combinations of three.
             {
                 string json = json1 + json2;
-                var expectedTokens = JsonTokenizer.TokenizeAll(json).Where(x => x.Length > 0);
+                var expectedTokens = JsonTokenizer.TokenizeAll(json);
                 Action<IJsonSymbol>[] tokenInspectors = expectedTokens.Select<IGreenJsonSymbol, Action<IJsonSymbol>>((IGreenJsonSymbol expectedGreen) => (IJsonSymbol red) =>
                 {
                     IGreenJsonSymbol actualGreen = TerminalSymbolTester.Instance.Visit(red);
@@ -112,8 +107,7 @@ namespace Eutherion.Shared.Tests
                 }).ToArray();
 
                 Assert.Collection(
-                    // Skip JsonMissingValueSyntax instances.
-                    JsonParser.Parse(json).Syntax.TerminalSymbolsInRange(0, json.Length).Where(x => x.Length > 0),
+                    JsonParser.Parse(json).Syntax.TerminalSymbolsInRange(0, json.Length),
                     tokenInspectors);
             }
 
@@ -124,7 +118,7 @@ namespace Eutherion.Shared.Tests
                 Enumerable.Repeat<Action<(string, Type)>>(x0 =>
                 {
                     string json = x0.Item1 + json1 + json2;
-                    var expectedTokens = JsonTokenizer.TokenizeAll(json).Where(x => x.Length > 0);
+                    var expectedTokens = JsonTokenizer.TokenizeAll(json);
                     Action<IJsonSymbol>[] tokenInspectors = expectedTokens.Select<IGreenJsonSymbol, Action<IJsonSymbol>>(expectedGreen => symbol =>
                     {
                         IGreenJsonSymbol actualGreen = TerminalSymbolTester.Instance.Visit(symbol);
@@ -134,8 +128,7 @@ namespace Eutherion.Shared.Tests
                     }).ToArray();
 
                     Assert.Collection(
-                        // Skip JsonMissingValueSyntax instances.
-                        JsonParser.Parse(json).Syntax.TerminalSymbolsInRange(0, json.Length).Where(x => x.Length > 0),
+                        JsonParser.Parse(json).Syntax.TerminalSymbolsInRange(0, json.Length),
                         tokenInspectors);
 
                 }, JsonTokenizerTests.JsonTestSymbols().Count()).ToArray());
