@@ -297,6 +297,11 @@ namespace Eutherion.Text.Json
 
         private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, GreenJsonBackgroundListSyntax background)
         {
+            if (valueNodesBuilder.Count == 0)
+            {
+                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(background, GreenJsonMissingValueSyntax.Value));
+                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+            }
             return new GreenJsonMultiValueSyntax(valueNodesBuilder, background);
         }
 
@@ -309,8 +314,7 @@ namespace Eutherion.Text.Json
             var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
             if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
             {
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                return CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+                return CreateMultiValueNode(valueNodesBuilder, CaptureBackground());
             }
 
             // Invariant: discriminated != null && !discriminated.IsOption1().
@@ -356,9 +360,8 @@ namespace Eutherion.Text.Json
 
             if (CurrentToken == null)
             {
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
                 return new RootJsonSyntax(
-                    CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
+                    CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
                     Errors);
             }
 
@@ -406,20 +409,9 @@ namespace Eutherion.Text.Json
                 if (CurrentToken == null)
                 {
                     // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
-                    if (valueNodesBuilder.Count == 0)
-                    {
-                        valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                        return new RootJsonSyntax(
-                            CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                            Errors);
-                    }
-                    else
-                    {
-                        // Capture the background following the last value.
-                        return new RootJsonSyntax(
-                            CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
-                            Errors);
-                    }
+                    return new RootJsonSyntax(
+                        CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
+                        Errors);
                 }
 
                 // Two or more consecutive values not allowed.
