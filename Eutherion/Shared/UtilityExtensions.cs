@@ -59,11 +59,45 @@ namespace Eutherion
         /// <summary>
         /// Sets a single value at each index of the array.
         /// </summary>
+        /// <typeparam name="T">
+        /// The type of the elements of the array.
+        /// </typeparam>
+        /// <param name="array">
+        /// The one-dimensional, zero-based array to fill.
+        /// </param>
+        /// <param name="value">
+        /// The value to set at each index of the array.
+        /// </param>
         public static void Fill<T>(this T[] array, T value)
         {
             for (int i = array.Length - 1; i >= 0; --i)
             {
                 array[i] = value;
+            }
+        }
+
+        /// <summary>
+        /// Sets a value at each index of the array.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the elements of the array.
+        /// </typeparam>
+        /// <param name="array">
+        /// The one-dimensional, zero-based array to fill.
+        /// </param>
+        /// <param name="valueFunc">
+        /// The function which given an index returns the value to set at that index of the array.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueFunc"/> is null.
+        /// </exception>
+        public static void Fill<T>(this T[] array, Func<int, T> valueFunc)
+        {
+            if (valueFunc == null) throw new ArgumentNullException(nameof(valueFunc));
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = valueFunc(i);
             }
         }
 

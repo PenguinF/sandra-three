@@ -31,6 +31,23 @@ namespace Eutherion.Text.Json
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
     public class JsonParser : JsonValueStarterSymbolVisitor<(GreenJsonValueSyntax, bool)>
     {
+        /// <summary>
+        /// Helper class which is used after the last <see cref="IGreenJsonSymbol"/>,
+        /// to reduce nullchecks during parsing, and reduce the chance of programming errors.
+        /// </summary>
+        private sealed class EofSymbol : IJsonValueDelimiterSymbol
+        {
+            public static readonly EofSymbol Value = new EofSymbol();
+
+            private EofSymbol() { }
+
+            int ISpan.Length => 0;
+
+            IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+            Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+            Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+        }
+
         private readonly IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
@@ -52,13 +69,7 @@ namespace Eutherion.Text.Json
             // Skip background until encountering something meaningful.
             for (; ; )
             {
-                IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : null;
-                if (newToken == null)
-                {
-                    CurrentToken = null;
-                    break;
-                }
-
+                IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : EofSymbol.Value;
                 Errors.AddRange(newToken.GetErrors(CurrentLength));
                 CurrentLength += newToken.Length;
 
@@ -195,28 +206,18 @@ namespace Eutherion.Text.Json
 
                 if (!isComma)
                 {
-                    // Assume missing closing bracket '}' on EOF or control symbol.
-                    bool unprocessedToken = false;
-                    if (CurrentToken == null)
+                    if (isCurlyClose)
                     {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.UnexpectedEofInObject,
-                            CurrentLength,
-                            0));
-                    }
-                    else if (!isCurlyClose)
-                    {
-                        // ']'
-                        // Do not include the control symbol in the map.
-                        unprocessedToken = true;
-
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ControlSymbolInObject,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
+                        return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: false), false);
                     }
 
-                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), unprocessedToken);
+                    // ']', EOF; assume missing closing bracket '}'.
+                    Errors.Add(new JsonErrorInfo(
+                        CurrentToken is EofSymbol ? JsonErrorCode.UnexpectedEofInObject : JsonErrorCode.ControlSymbolInObject,
+                        CurrentLength - CurrentToken.Length,
+                        CurrentToken.Length));
+
+                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: true), true);
                 }
             }
         }
@@ -244,35 +245,19 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
                 }
+                else if (CurrentToken is GreenJsonSquareBracketCloseSyntax)
+                {
+                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose: false), false);
+                }
                 else
                 {
-                    // Assume missing closing bracket ']' on EOF or control symbol.
-                    bool missingSquareBracketClose = true;
-                    bool unprocessedToken = false;
-                    if (CurrentToken == null)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.UnexpectedEofInArray,
-                            CurrentLength,
-                            0));
-                    }
-                    else if (CurrentToken is GreenJsonSquareBracketCloseSyntax)
-                    {
-                        missingSquareBracketClose = false;
-                    }
-                    else
-                    {
-                        // ':', '}'
-                        // Do not include the control symbol in the list.
-                        unprocessedToken = true;
+                    // ':', '}', EOF; assume missing closing bracket ']'.
+                    Errors.Add(new JsonErrorInfo(
+                        CurrentToken is EofSymbol ? JsonErrorCode.UnexpectedEofInArray : JsonErrorCode.ControlSymbolInArray,
+                        CurrentLength - CurrentToken.Length,
+                        CurrentToken.Length));
 
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ControlSymbolInArray,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
-                    }
-
-                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose), unprocessedToken);
+                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose: true), true);
                 }
             }
         }
@@ -285,53 +270,27 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
 
-        // Returns whether or not the current token still needs to be processed.
-        private bool ParseValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, IJsonValueStarterSymbol valueStarterSymbol)
+        private void ParseValues(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, JsonErrorCode multipleValuesErrorCode)
         {
-            // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-            var backgroundBefore = CaptureBackground();
-            (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
-            valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
-            return unprocessedToken;
-        }
-
-        private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
-        {
-            var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
-
             ShiftToNextForegroundToken();
 
-            var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-            if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
-            {
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
-            }
+            if (!CurrentToken.AsValueDelimiterOrStarter().IsOption2(out IJsonValueStarterSymbol valueStarterSymbol)) return;
 
             // Invariant: discriminated != null && !discriminated.IsOption1().
             for (; ; )
             {
                 // Always create a value node, even if it contains an undefined value.
-                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+                (GreenJsonValueSyntax currentNode, bool atValueDelimiterSymbol) = Visit(valueStarterSymbol);
+                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
-                // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null)
-                {
-                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                    // This means that here there's no need to capture the background.
-                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
-                }
-
-                // Move to the next symbol if CurrentToken was processed.
-                if (!unprocessedToken) ShiftToNextForegroundToken();
+                // Any value delimiter symbol also terminates this method.
+                if (atValueDelimiterSymbol) return;
 
                 // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
-                discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-                if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol))
-                {
-                    // Capture the background following the last value.
-                    return new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground());
-                }
+                ShiftToNextForegroundToken();
+                if (!CurrentToken.AsValueDelimiterOrStarter().IsOption2(out valueStarterSymbol)) return;
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
@@ -341,83 +300,40 @@ namespace Eutherion.Text.Json
             }
         }
 
+        private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder)
+        {
+            var background = CaptureBackground();
+            if (valueNodesBuilder.Count == 0)
+            {
+                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(background, GreenJsonMissingValueSyntax.Value));
+                return new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+            }
+            return new GreenJsonMultiValueSyntax(valueNodesBuilder, background);
+        }
+
+        private GreenJsonMultiValueSyntax ParseMultiValue(JsonErrorCode multipleValuesErrorCode)
+        {
+            var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
+            ParseValues(valueNodesBuilder, multipleValuesErrorCode);
+            return CreateMultiValueNode(valueNodesBuilder);
+        }
+
         // ParseMultiValue copy, except that it handles the discriminated.IsOption1() case differently,
         // as it cannot go to a higher level in the stack to process value delimiter symbols.
         private RootJsonSyntax Parse()
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
 
-            ShiftToNextForegroundToken();
-
-            if (CurrentToken == null)
-            {
-                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                return new RootJsonSyntax(
-                    new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                    Errors);
-            }
-
             for (; ; )
             {
-                var discriminated = CurrentToken.AsValueDelimiterOrStarter();
+                ParseValues(valueNodesBuilder, JsonErrorCode.ExpectedEof);
+                if (CurrentToken is EofSymbol) return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
 
-                bool unprocessedToken;
-                if (discriminated.IsOption1(out IJsonValueDelimiterSymbol valueDelimiterSymbol))
-                {
-                    // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
-                    if (valueNodesBuilder.Count == 0)
-                    {
-                        // Report an error if no value was encountered before the control symbol.
-                        // For all later control symbols, the last statement in this loop will
-                        // already have done it.
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ExpectedEof,
-                            CurrentLength - valueDelimiterSymbol.Length,
-                            valueDelimiterSymbol.Length));
-                    }
+                // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
+                IJsonValueDelimiterSymbol valueDelimiterSymbol = CurrentToken.AsValueDelimiterOrStarter().ToOption1();
+                BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
 
-                    BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
-                    unprocessedToken = false;
-                }
-                else
-                {
-                    // Always create a value node, even if it contains an undefined value.
-                    unprocessedToken = ParseValueNode(valueNodesBuilder, discriminated.ToOption2());
-
-                    // CurrentToken may be null, e.g. unterminated objects or arrays.
-                    if (CurrentToken == null)
-                    {
-                        // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                        // This means that here there's no need to capture the background.
-                        return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                            Errors);
-                    }
-                }
-
-                // Move to the next symbol if CurrentToken was processed.
-                if (!unprocessedToken) ShiftToNextForegroundToken();
-
-                if (CurrentToken == null)
-                {
-                    // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
-                    if (valueNodesBuilder.Count == 0)
-                    {
-                        valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(CaptureBackground(), GreenJsonMissingValueSyntax.Value));
-                        return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                            Errors);
-                    }
-                    else
-                    {
-                        // Capture the background following the last value.
-                        return new RootJsonSyntax(
-                            new GreenJsonMultiValueSyntax(valueNodesBuilder, CaptureBackground()),
-                            Errors);
-                    }
-                }
-
-                // Two or more consecutive values not allowed.
+                // Report an error if no value was encountered before the control symbol.
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,

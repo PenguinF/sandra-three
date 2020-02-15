@@ -39,13 +39,9 @@ namespace Sandra.Chess.Pgn
 
         static GreenPgnWhitespaceSyntax()
         {
+            // Do not allocate a zero length whitespace.
             SharedInstances = new GreenPgnWhitespaceSyntax[SharedWhitespaceInstanceLength - 1];
-
-            for (int i = SharedWhitespaceInstanceLength - 2; i >= 0; i--)
-            {
-                // Do not allocate a zero length whitespace.
-                SharedInstances[i] = new GreenPgnWhitespaceSyntax(i + 1);
-            }
+            SharedInstances.Fill(i => new GreenPgnWhitespaceSyntax(i + 1));
         }
 
         /// <summary>

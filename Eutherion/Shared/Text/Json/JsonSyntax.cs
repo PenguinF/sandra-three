@@ -55,19 +55,19 @@ namespace Eutherion.Text.Json
         public virtual int ChildCount => 0;
 
         /// <summary>
-        /// Gets if this syntax is a terminal symbol, i.e. if it has no child nodes.
+        /// Gets if this syntax is a terminal symbol, i.e. if it has no child nodes and its <see cref="Length"/> is greater than zero.
         /// </summary>
         /// <param name="jsonTerminalSymbol">
         /// The terminal symbol if this syntax is a terminal symbol, otherwise a default value.
         /// </param>
         /// <returns>
-        /// Whether or not this syntax is a terminal symbol, i.e. if it has no child nodes.
+        /// Whether or not this syntax is a terminal symbol, i.e. if it has no child nodes and its <see cref="Length"/> is greater than zero.
         /// </returns>
         public bool IsTerminalSymbol(out IJsonSymbol jsonTerminalSymbol)
         {
-            if (ChildCount == 0)
+            if (ChildCount == 0 && Length > 0)
             {
-                // Contract is that all subclasses with ChildCount == 0 must implement IJsonSymbol.
+                // Contract is that all subclasses with ChildCount == 0 and Length > 0 must implement IJsonSymbol.
                 jsonTerminalSymbol = (IJsonSymbol)this;
                 return true;
             }
