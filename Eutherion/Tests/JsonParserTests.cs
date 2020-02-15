@@ -359,6 +359,17 @@ namespace Eutherion.Shared.Tests
                 WhitespaceBackground
             },
             new[] { JsonErrorCode.ExpectedEof } ),
+
+            (",,", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter, RootLevelValueDelimiter },
+                    NoValue
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
         };
 
         private static int AssertParseTree(ParseTree expectedParseTree, JsonSyntax expectedParent, int expectedStart, JsonSyntax actualParseTree)
