@@ -295,8 +295,9 @@ namespace Eutherion.Text.Json
             return unprocessedToken;
         }
 
-        private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, GreenJsonBackgroundListSyntax background)
+        private GreenJsonMultiValueSyntax CreateMultiValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder)
         {
+            var background = CaptureBackground();
             if (valueNodesBuilder.Count == 0)
             {
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(background, GreenJsonMissingValueSyntax.Value));
@@ -314,7 +315,7 @@ namespace Eutherion.Text.Json
             var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
             if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol))
             {
-                return CreateMultiValueNode(valueNodesBuilder, CaptureBackground());
+                return CreateMultiValueNode(valueNodesBuilder);
             }
 
             // Invariant: discriminated != null && !discriminated.IsOption1().
@@ -326,9 +327,7 @@ namespace Eutherion.Text.Json
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null)
                 {
-                    // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                    // This means that here there's no need to capture the background.
-                    return CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty);
+                    return CreateMultiValueNode(valueNodesBuilder);
                 }
 
                 // Move to the next symbol if CurrentToken was processed.
@@ -338,8 +337,7 @@ namespace Eutherion.Text.Json
                 discriminated = CurrentToken?.AsValueDelimiterOrStarter();
                 if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol))
                 {
-                    // Capture the background following the last value.
-                    return CreateMultiValueNode(valueNodesBuilder, CaptureBackground());
+                    return CreateMultiValueNode(valueNodesBuilder);
                 }
 
                 // Two or more consecutive values not allowed.
@@ -360,9 +358,7 @@ namespace Eutherion.Text.Json
 
             if (CurrentToken == null)
             {
-                return new RootJsonSyntax(
-                    CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
-                    Errors);
+                return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
             }
 
             for (; ; )
@@ -395,11 +391,7 @@ namespace Eutherion.Text.Json
                     // CurrentToken may be null, e.g. unterminated objects or arrays.
                     if (CurrentToken == null)
                     {
-                        // Apply invariant that BackgroundBuilder is always empty after a Visit() call.
-                        // This means that here there's no need to capture the background.
-                        return new RootJsonSyntax(
-                            CreateMultiValueNode(valueNodesBuilder, GreenJsonBackgroundListSyntax.Empty),
-                            Errors);
+                        return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
                     }
                 }
 
@@ -409,9 +401,7 @@ namespace Eutherion.Text.Json
                 if (CurrentToken == null)
                 {
                     // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
-                    return new RootJsonSyntax(
-                        CreateMultiValueNode(valueNodesBuilder, CaptureBackground()),
-                        Errors);
+                    return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
                 }
 
                 // Two or more consecutive values not allowed.
