@@ -350,57 +350,16 @@ namespace Eutherion.Text.Json
         {
             var valueNodesBuilder = new List<GreenJsonValueWithBackgroundSyntax>();
 
-            ShiftToNextForegroundToken();
-
-            if (CurrentToken == null)
-            {
-                return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
-            }
-
             for (; ; )
             {
-                var discriminated = CurrentToken.AsValueDelimiterOrStarter();
+                ParseValues(valueNodesBuilder, JsonErrorCode.ExpectedEof);
+                if (CurrentToken == null) return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
 
-                bool unprocessedToken;
-                if (discriminated.IsOption1(out IJsonValueDelimiterSymbol valueDelimiterSymbol))
-                {
-                    // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
-                    if (valueNodesBuilder.Count == 0)
-                    {
-                        // Report an error if no value was encountered before the control symbol.
-                        // For all later control symbols, the last statement in this loop will
-                        // already have done it.
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ExpectedEof,
-                            CurrentLength - valueDelimiterSymbol.Length,
-                            valueDelimiterSymbol.Length));
-                    }
+                // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
+                IJsonValueDelimiterSymbol valueDelimiterSymbol = CurrentToken.AsValueDelimiterOrStarter().ToOption1();
+                BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
 
-                    BackgroundBuilder.Add(new GreenJsonRootLevelValueDelimiterSyntax(valueDelimiterSymbol));
-                    unprocessedToken = false;
-                }
-                else
-                {
-                    // Always create a value node, even if it contains an undefined value.
-                    unprocessedToken = ParseValueNode(valueNodesBuilder, discriminated.ToOption2());
-
-                    // CurrentToken may be null, e.g. unterminated objects or arrays.
-                    if (CurrentToken == null)
-                    {
-                        return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
-                    }
-                }
-
-                // Move to the next symbol if CurrentToken was processed.
-                if (!unprocessedToken) ShiftToNextForegroundToken();
-
-                if (CurrentToken == null)
-                {
-                    // valueNodesBuilder.Count == 0 at the end of e.g. "/**/ ]".
-                    return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
-                }
-
-                // Two or more consecutive values not allowed.
+                // Report an error if no value was encountered before the control symbol.
                 Errors.Add(new JsonErrorInfo(
                     JsonErrorCode.ExpectedEof,
                     CurrentLength - CurrentToken.Length,
