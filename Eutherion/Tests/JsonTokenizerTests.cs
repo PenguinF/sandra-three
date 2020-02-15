@@ -277,7 +277,7 @@ namespace Eutherion.Shared.Tests
             });
         }
 
-        private static IEnumerable<(string, Type)> JsonTestSymbols()
+        internal static IEnumerable<(string, Type)> JsonTestSymbols()
         {
             yield return (" ", typeof(GreenJsonWhitespaceSyntax));
             yield return ("/**/", typeof(GreenJsonCommentSyntax));
@@ -300,7 +300,7 @@ namespace Eutherion.Shared.Tests
             yield return ("\"\\u0\"", typeof(GreenJsonErrorStringSyntax));
         }
 
-        private static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
+        internal static IEnumerable<(string, Type)> UnterminatedJsonTestSymbols()
         {
             yield return ("//", typeof(GreenJsonCommentSyntax));
             yield return ("/*", typeof(GreenJsonUnterminatedMultiLineCommentSyntax));
