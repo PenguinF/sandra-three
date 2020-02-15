@@ -21,6 +21,7 @@
 
 using Eutherion.Text.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -56,6 +57,22 @@ namespace Eutherion.Shared.Tests
             public override IGreenJsonSymbol VisitUnknownSymbolSyntax(JsonUnknownSymbolSyntax node) => node.Green;
             public override IGreenJsonSymbol VisitUnterminatedMultiLineCommentSyntax(JsonUnterminatedMultiLineCommentSyntax node) => node.Green;
             public override IGreenJsonSymbol VisitWhitespaceSyntax(JsonWhitespaceSyntax node) => node.Green;
+        }
+
+        public abstract class ParseTree : IEnumerable<ParseTree>
+        {
+            public abstract Type ExpectedType { get; }
+            public readonly List<ParseTree> ChildNodes = new List<ParseTree>();
+
+            // To enable collection initializer syntax:
+            public IEnumerator<ParseTree> GetEnumerator() => ChildNodes.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public void Add(ParseTree child) => ChildNodes.Add(child);
+        }
+
+        public class ParseTree<T> : ParseTree where T : JsonSyntax
+        {
+            public override Type ExpectedType => typeof(T);
         }
 
         /// <summary>
@@ -122,6 +139,65 @@ namespace Eutherion.Shared.Tests
                         tokenInspectors);
 
                 }, JsonTokenizerTests.JsonTestSymbols().Count()).ToArray());
+        }
+
+        private static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
+        {
+            ("", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax>(),
+                    new ParseTree<JsonMissingValueSyntax>()
+                },
+                new ParseTree<JsonBackgroundListSyntax>()
+            }),
+        };
+
+        private static readonly List<(string, ParseTree, JsonErrorCode[])> TestParseTreesWithErrors = new List<(string, ParseTree, JsonErrorCode[])>
+        {
+            ("/*", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { new ParseTree<JsonUnterminatedMultiLineCommentSyntax>() },
+                    new ParseTree<JsonMissingValueSyntax>()
+                },
+                new ParseTree<JsonBackgroundListSyntax>()
+            },
+            new[] { JsonErrorCode.UnterminatedMultiLineComment } ),
+        };
+
+        private static void AssertParseTree(ParseTree expectedParseTree, JsonSyntax actualParseTree)
+        {
+            Assert.IsType(expectedParseTree.ExpectedType, actualParseTree);
+
+            int expectedChildCount = expectedParseTree.ChildNodes.Count;
+            Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
+
+            for (int i = 0; i < expectedChildCount; i++)
+            {
+                AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree.GetChild(i));
+            }
+        }
+
+        public static IEnumerable<object[]> GetTestParseTrees()
+            => TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<JsonErrorCode>() })
+            .Union(TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+
+        [Theory]
+        [MemberData(nameof(GetTestParseTrees))]
+        public void ParseTrees(string json, ParseTree parseTree, JsonErrorCode[] expectedErrors)
+        {
+            RootJsonSyntax rootSyntax = JsonParser.Parse(json);
+            AssertParseTree(parseTree, rootSyntax.Syntax);
+
+            // Assert expected errors.
+            Assert.Collection(
+                rootSyntax.Errors,
+                Enumerable.Range(0, expectedErrors.Length)
+                          .Select<int, Action<JsonErrorInfo>>(i => errorInfo => Assert.Equal(expectedErrors[i], errorInfo.ErrorCode))
+                          .ToArray());
         }
     }
 }
