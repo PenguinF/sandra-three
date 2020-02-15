@@ -354,6 +354,11 @@ namespace Eutherion.Shared.Tests
             int expectedChildCount = expectedParseTree.ChildNodes.Count;
             Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
 
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(expectedChildCount));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
+
             int length = 0;
             for (int i = 0; i < expectedChildCount; i++)
             {
