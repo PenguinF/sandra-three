@@ -315,6 +315,9 @@ namespace Eutherion.Shared.Tests
             }
         }
 
+        /// <summary>
+        /// <seealso cref="JsonParserTests.TwoSymbolsWithoutType"/>.
+        /// </summary>
         public static IEnumerable<object[]> TwoSymbolsOfEachType()
         {
             var symbolTypes = JsonTestSymbols();
