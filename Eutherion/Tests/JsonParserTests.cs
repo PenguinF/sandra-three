@@ -158,6 +158,8 @@ namespace Eutherion.Shared.Tests
         private static readonly ParseTree CurlyOpen = new ParseTree<JsonCurlyOpenSyntax>();
         private static readonly ParseTree SquareBracketOpen = new ParseTree<JsonSquareBracketOpenSyntax>();
 
+        private static readonly ParseTree IntegerValue = new ParseTree<JsonIntegerLiteralSyntax>();
+
         private static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
             ("", new ParseTree<JsonMultiValueSyntax>
@@ -201,7 +203,7 @@ namespace Eutherion.Shared.Tests
                 new ParseTree<JsonValueWithBackgroundSyntax>
                 {
                     NoBackground,
-                    new ParseTree<JsonIntegerLiteralSyntax>()
+                    IntegerValue
                 },
                 NoBackground
             }),
@@ -334,6 +336,27 @@ namespace Eutherion.Shared.Tests
                     NoValue
                 },
                 NoBackground
+            },
+            new[] { JsonErrorCode.ExpectedEof } ),
+
+            (" -1 //\nfalse ", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    WhitespaceBackground,
+                    IntegerValue
+                },
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax>
+                    {
+                        Whitespace,
+                        Comment,
+                        Whitespace
+                    },
+                    new ParseTree<JsonBooleanLiteralSyntax.False>()
+                },
+                WhitespaceBackground
             },
             new[] { JsonErrorCode.ExpectedEof } ),
         };
