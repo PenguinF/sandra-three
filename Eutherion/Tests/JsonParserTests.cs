@@ -624,6 +624,25 @@ namespace Eutherion.Shared.Tests
             },
             new[] { JsonErrorCode.MissingValue } ),
 
+            ("[0 ", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        new ParseTree<JsonMultiValueSyntax>
+                        {
+                            new ParseTree<JsonValueWithBackgroundSyntax> { NoBackground, IntegerValue },
+                            WhitespaceBackground
+                        }
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.UnexpectedEofInArray } ),
+
             (" [ 0  0 ] ", new ParseTree<JsonMultiValueSyntax>
             {
                 new ParseTree<JsonValueWithBackgroundSyntax>
@@ -758,6 +777,28 @@ namespace Eutherion.Shared.Tests
                 new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter }
             },
             new[] { JsonErrorCode.ControlSymbolInObject, JsonErrorCode.ExpectedEof } ),
+
+            ("{0 ", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonMapSyntax>
+                    {
+                        CurlyOpen,
+                        new ParseTree<JsonKeyValueSyntax>
+                        {
+                            new ParseTree<JsonMultiValueSyntax>
+                            {
+                                new ParseTree<JsonValueWithBackgroundSyntax> { NoBackground, IntegerValue },
+                                WhitespaceBackground
+                            }
+                        }
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.InvalidPropertyKey, JsonErrorCode.UnexpectedEofInObject } ),
 
             ("{0}", new ParseTree<JsonMultiValueSyntax>
             {
