@@ -141,7 +141,11 @@ namespace Eutherion.Shared.Tests
                 }, JsonTokenizerTests.JsonTestSymbols().Count()).ToArray());
         }
 
+        private static readonly ParseTree Whitespace = new ParseTree<JsonWhitespaceSyntax>();
+        private static readonly ParseTree Comment = new ParseTree<JsonCommentSyntax>();
+
         private static readonly ParseTree NoBackground = new ParseTree<JsonBackgroundListSyntax>();
+        private static readonly ParseTree WhitespaceBackground = new ParseTree<JsonBackgroundListSyntax> { Whitespace };
 
         private static readonly ParseTree NoValue = new ParseTree<JsonMissingValueSyntax>();
 
@@ -156,6 +160,56 @@ namespace Eutherion.Shared.Tests
             ("", new ParseTree<JsonMultiValueSyntax>
             {
                 NoValueOrBackground,
+                NoBackground
+            }),
+
+            (" ", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    WhitespaceBackground,
+                    NoValue
+                },
+                NoBackground
+            }),
+
+            ("//", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { Comment },
+                    NoValue
+                },
+                NoBackground
+            }),
+
+            ("true", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonBooleanLiteralSyntax.True>()
+                },
+                NoBackground
+            }),
+
+            ("0", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonIntegerLiteralSyntax>()
+                },
+                NoBackground
+            }),
+
+            ("\"\"", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonStringLiteralSyntax>()
+                },
                 NoBackground
             }),
         };
