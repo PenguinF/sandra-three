@@ -54,6 +54,23 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<ArgumentNullException>("value", () => JsonValue.Create(null));
         }
 
+        private const int SharedWhitespaceInstanceLengthMinusTwo = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength - 2;
+        private const int SharedWhitespaceInstanceLengthMinusOne = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength - 1;
+        private const int SharedWhitespaceInstanceLengthPlusOne = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength + 1;
+        private const int SharedWhitespaceInstanceLengthPlusTwo = GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength + 2;
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(SharedWhitespaceInstanceLengthMinusTwo)]
+        [InlineData(SharedWhitespaceInstanceLengthMinusOne)]
+        [InlineData(GreenJsonWhitespaceSyntax.SharedWhitespaceInstanceLength)]
+        [InlineData(SharedWhitespaceInstanceLengthPlusOne)]
+        [InlineData(SharedWhitespaceInstanceLengthPlusTwo)]
+        public void WhitespaceHasCorrectLength(int length)
+        {
+            Assert.Equal(length, GreenJsonWhitespaceSyntax.Create(length).Length);
+        }
+
         [Fact]
         public void JsonSymbolsWithLengthOne()
         {
