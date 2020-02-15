@@ -368,6 +368,10 @@ namespace Eutherion.Shared.Tests
                     Assert.True(actualParseTree.IsTerminalSymbol(out IJsonSymbol jsonSymbol));
                     length = jsonSymbol.Length;
                 }
+                else
+                {
+                    Assert.False(actualParseTree.IsTerminalSymbol(out _));
+                }
             }
             else
             {
