@@ -360,12 +360,26 @@ namespace Eutherion.Shared.Tests
             Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
 
             int length = 0;
-            for (int i = 0; i < expectedChildCount; i++)
+
+            if (expectedChildCount == 0)
             {
-                length += AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree, length, actualParseTree.GetChild(i));
+                if (actualParseTree.Length > 0)
+                {
+                    Assert.True(actualParseTree.IsTerminalSymbol(out IJsonSymbol jsonSymbol));
+                    length = jsonSymbol.Length;
+                }
+            }
+            else
+            {
+                Assert.False(actualParseTree.IsTerminalSymbol(out _));
+
+                for (int i = 0; i < expectedChildCount; i++)
+                {
+                    length += AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree, length, actualParseTree.GetChild(i));
+                }
             }
 
-            return actualParseTree.Length;
+            return length;
         }
 
         public static IEnumerable<object[]> GetTestParseTrees()
