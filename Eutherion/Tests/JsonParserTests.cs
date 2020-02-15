@@ -885,6 +885,29 @@ namespace Eutherion.Shared.Tests
             },
             new[] { JsonErrorCode.MissingPropertyKey, JsonErrorCode.MissingValue } ),
 
+            ("{::}", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonMapSyntax>
+                    {
+                        CurlyOpen,
+                        new ParseTree<JsonKeyValueSyntax>
+                        {
+                            NoValuesOrBackground,
+                            Colon,
+                            NoValuesOrBackground,
+                            Colon,
+                            NoValuesOrBackground
+                        },
+                        CurlyClose
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.MultiplePropertyKeySections, JsonErrorCode.MissingPropertyKey, JsonErrorCode.MissingValue } ),
+
             ("{[:[}", new ParseTree<JsonMultiValueSyntax>
             {
                 new ParseTree<JsonValueWithBackgroundSyntax>
