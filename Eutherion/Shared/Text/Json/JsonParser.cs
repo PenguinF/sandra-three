@@ -196,9 +196,11 @@ namespace Eutherion.Text.Json
                 if (!isComma)
                 {
                     // Assume missing closing bracket '}' on EOF or control symbol.
-                    bool unprocessedToken = false;
+                    bool atValueDelimiterSymbol = false;
                     if (CurrentToken == null)
                     {
+                        atValueDelimiterSymbol = true;
+
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
                             CurrentLength,
@@ -208,7 +210,7 @@ namespace Eutherion.Text.Json
                     {
                         // ']'
                         // Do not include the control symbol in the map.
-                        unprocessedToken = true;
+                        atValueDelimiterSymbol = true;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInObject,
@@ -216,7 +218,7 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), unprocessedToken);
+                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), atValueDelimiterSymbol);
                 }
             }
         }
@@ -248,9 +250,11 @@ namespace Eutherion.Text.Json
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
                     bool missingSquareBracketClose = true;
-                    bool unprocessedToken = false;
+                    bool atValueDelimiterSymbol = false;
                     if (CurrentToken == null)
                     {
+                        atValueDelimiterSymbol = true;
+
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
                             CurrentLength,
@@ -264,7 +268,7 @@ namespace Eutherion.Text.Json
                     {
                         // ':', '}'
                         // Do not include the control symbol in the list.
-                        unprocessedToken = true;
+                        atValueDelimiterSymbol = true;
 
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInArray,
@@ -272,7 +276,7 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
 
-                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose), unprocessedToken);
+                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose), atValueDelimiterSymbol);
                 }
             }
         }
@@ -298,16 +302,14 @@ namespace Eutherion.Text.Json
                 // Always create a value node, even if it contains an undefined value.
                 // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
                 var backgroundBefore = CaptureBackground();
-                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
+                (GreenJsonValueSyntax currentNode, bool atValueDelimiterSymbol) = Visit(valueStarterSymbol);
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
-                // CurrentToken may be null, e.g. unterminated objects or arrays.
-                if (CurrentToken == null) return;
-
-                // Move to the next symbol if CurrentToken was processed.
-                if (!unprocessedToken) ShiftToNextForegroundToken();
+                // Any value delimiter symbol (also true if CurrentToken == null) also terminates this method.
+                if (atValueDelimiterSymbol) return;
 
                 // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
+                ShiftToNextForegroundToken();
                 discriminated = CurrentToken?.AsValueDelimiterOrStarter();
                 if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol)) return;
 
