@@ -69,10 +69,10 @@ namespace Eutherion.Text.Json
             // Skip background until encountering something meaningful.
             for (; ; )
             {
-                IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : null;
-                if (newToken == null)
+                IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : EofSymbol.Value;
+                if (newToken is EofSymbol)
                 {
-                    CurrentToken = null;
+                    CurrentToken = EofSymbol.Value;
                     break;
                 }
 
@@ -218,7 +218,7 @@ namespace Eutherion.Text.Json
                     }
 
                     // Assume missing closing bracket '}' on EOF or control symbol.
-                    if (CurrentToken == null)
+                    if (CurrentToken is EofSymbol)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
@@ -270,7 +270,7 @@ namespace Eutherion.Text.Json
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
-                    if (CurrentToken == null)
+                    if (CurrentToken is EofSymbol)
                     {
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
@@ -359,7 +359,7 @@ namespace Eutherion.Text.Json
             for (; ; )
             {
                 ParseValues(valueNodesBuilder, JsonErrorCode.ExpectedEof);
-                if (CurrentToken == null) return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
+                if (CurrentToken is EofSymbol) return new RootJsonSyntax(CreateMultiValueNode(valueNodesBuilder), Errors);
 
                 // ] } , : -- treat all of these at the top level as an undefined symbol without any semantic meaning.
                 IJsonValueDelimiterSymbol valueDelimiterSymbol = CurrentToken.AsValueDelimiterOrStarter().ToOption1();
