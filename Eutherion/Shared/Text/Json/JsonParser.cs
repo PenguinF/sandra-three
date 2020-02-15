@@ -285,16 +285,6 @@ namespace Eutherion.Text.Json
         public override (GreenJsonValueSyntax, bool) VisitUndefinedValueSyntax(GreenJsonUndefinedValueSyntax symbol) => (symbol, false);
         public override (GreenJsonValueSyntax, bool) VisitUnknownSymbolSyntax(GreenJsonUnknownSymbolSyntax symbol) => (symbol, false);
 
-        // Returns whether or not the current token still needs to be processed.
-        private bool ParseValueNode(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, IJsonValueStarterSymbol valueStarterSymbol)
-        {
-            // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
-            var backgroundBefore = CaptureBackground();
-            (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
-            valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
-            return unprocessedToken;
-        }
-
         private void ParseValues(List<GreenJsonValueWithBackgroundSyntax> valueNodesBuilder, JsonErrorCode multipleValuesErrorCode)
         {
             ShiftToNextForegroundToken();
@@ -306,7 +296,10 @@ namespace Eutherion.Text.Json
             for (; ; )
             {
                 // Always create a value node, even if it contains an undefined value.
-                bool unprocessedToken = ParseValueNode(valueNodesBuilder, valueStarterSymbol);
+                // Have to clear the BackgroundBuilder before entering a recursive Visit() call.
+                var backgroundBefore = CaptureBackground();
+                (GreenJsonValueSyntax currentNode, bool unprocessedToken) = Visit(valueStarterSymbol);
+                valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
                 // CurrentToken may be null, e.g. unterminated objects or arrays.
                 if (CurrentToken == null) return;
