@@ -195,30 +195,30 @@ namespace Eutherion.Text.Json
 
                 if (!isComma)
                 {
+                    if (isCurlyClose)
+                    {
+                        return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: false), false);
+                    }
+
                     // Assume missing closing bracket '}' on EOF or control symbol.
-                    bool atValueDelimiterSymbol = false;
                     if (CurrentToken == null)
                     {
-                        atValueDelimiterSymbol = true;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInObject,
                             CurrentLength,
                             0));
                     }
-                    else if (!isCurlyClose)
+                    else
                     {
                         // ']'
                         // Do not include the control symbol in the map.
-                        atValueDelimiterSymbol = true;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInObject,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: !isCurlyClose), atValueDelimiterSymbol);
+                    return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: true), true);
                 }
             }
         }
@@ -246,37 +246,31 @@ namespace Eutherion.Text.Json
                             CurrentToken.Length));
                     }
                 }
+                else if (CurrentToken is GreenJsonSquareBracketCloseSyntax)
+                {
+                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose: false), false);
+                }
                 else
                 {
                     // Assume missing closing bracket ']' on EOF or control symbol.
-                    bool missingSquareBracketClose = true;
-                    bool atValueDelimiterSymbol = false;
                     if (CurrentToken == null)
                     {
-                        atValueDelimiterSymbol = true;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.UnexpectedEofInArray,
                             CurrentLength,
                             0));
                     }
-                    else if (CurrentToken is GreenJsonSquareBracketCloseSyntax)
-                    {
-                        missingSquareBracketClose = false;
-                    }
                     else
                     {
                         // ':', '}'
                         // Do not include the control symbol in the list.
-                        atValueDelimiterSymbol = true;
-
                         Errors.Add(new JsonErrorInfo(
                             JsonErrorCode.ControlSymbolInArray,
                             CurrentLength - CurrentToken.Length,
                             CurrentToken.Length));
                     }
 
-                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose), atValueDelimiterSymbol);
+                    return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose: true), true);
                 }
             }
         }
