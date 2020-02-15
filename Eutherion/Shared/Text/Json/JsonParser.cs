@@ -70,12 +70,6 @@ namespace Eutherion.Text.Json
             for (; ; )
             {
                 IGreenJsonSymbol newToken = Tokens.MoveNext() ? Tokens.Current : EofSymbol.Value;
-                if (newToken is EofSymbol)
-                {
-                    CurrentToken = EofSymbol.Value;
-                    break;
-                }
-
                 Errors.AddRange(newToken.GetErrors(CurrentLength));
                 CurrentLength += newToken.Length;
 
@@ -217,23 +211,11 @@ namespace Eutherion.Text.Json
                         return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: false), false);
                     }
 
-                    // Assume missing closing bracket '}' on EOF or control symbol.
-                    if (CurrentToken is EofSymbol)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.UnexpectedEofInObject,
-                            CurrentLength,
-                            0));
-                    }
-                    else
-                    {
-                        // ']'
-                        // Do not include the control symbol in the map.
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ControlSymbolInObject,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
-                    }
+                    // ']', EOF; assume missing closing bracket '}'.
+                    Errors.Add(new JsonErrorInfo(
+                        CurrentToken is EofSymbol ? JsonErrorCode.UnexpectedEofInObject : JsonErrorCode.ControlSymbolInObject,
+                        CurrentLength - CurrentToken.Length,
+                        CurrentToken.Length));
 
                     return (new GreenJsonMapSyntax(mapBuilder, missingCurlyClose: true), true);
                 }
@@ -269,23 +251,11 @@ namespace Eutherion.Text.Json
                 }
                 else
                 {
-                    // Assume missing closing bracket ']' on EOF or control symbol.
-                    if (CurrentToken is EofSymbol)
-                    {
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.UnexpectedEofInArray,
-                            CurrentLength,
-                            0));
-                    }
-                    else
-                    {
-                        // ':', '}'
-                        // Do not include the control symbol in the list.
-                        Errors.Add(new JsonErrorInfo(
-                            JsonErrorCode.ControlSymbolInArray,
-                            CurrentLength - CurrentToken.Length,
-                            CurrentToken.Length));
-                    }
+                    // ':', '}', EOF; assume missing closing bracket ']'.
+                    Errors.Add(new JsonErrorInfo(
+                        CurrentToken is EofSymbol ? JsonErrorCode.UnexpectedEofInArray : JsonErrorCode.ControlSymbolInArray,
+                        CurrentLength - CurrentToken.Length,
+                        CurrentToken.Length));
 
                     return (new GreenJsonListSyntax(listBuilder, missingSquareBracketClose: true), true);
                 }
@@ -304,8 +274,7 @@ namespace Eutherion.Text.Json
         {
             ShiftToNextForegroundToken();
 
-            var discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-            if (discriminated == null || !discriminated.IsOption2(out IJsonValueStarterSymbol valueStarterSymbol)) return;
+            if (!CurrentToken.AsValueDelimiterOrStarter().IsOption2(out IJsonValueStarterSymbol valueStarterSymbol)) return;
 
             // Invariant: discriminated != null && !discriminated.IsOption1().
             for (; ; )
@@ -316,13 +285,12 @@ namespace Eutherion.Text.Json
                 (GreenJsonValueSyntax currentNode, bool atValueDelimiterSymbol) = Visit(valueStarterSymbol);
                 valueNodesBuilder.Add(new GreenJsonValueWithBackgroundSyntax(backgroundBefore, currentNode));
 
-                // Any value delimiter symbol (also true if CurrentToken == null) also terminates this method.
+                // Any value delimiter symbol also terminates this method.
                 if (atValueDelimiterSymbol) return;
 
                 // If discriminated.IsOption2() is false in the first iteration, it means that exactly one value was parsed, as desired.
                 ShiftToNextForegroundToken();
-                discriminated = CurrentToken?.AsValueDelimiterOrStarter();
-                if (discriminated == null || !discriminated.IsOption2(out valueStarterSymbol)) return;
+                if (!CurrentToken.AsValueDelimiterOrStarter().IsOption2(out valueStarterSymbol)) return;
 
                 // Two or more consecutive values not allowed.
                 Errors.Add(new JsonErrorInfo(
