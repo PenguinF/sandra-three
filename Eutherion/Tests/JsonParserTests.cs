@@ -155,10 +155,22 @@ namespace Eutherion.Shared.Tests
             NoBackground
         };
 
+        private static readonly ParseTree Comma = new ParseTree<JsonCommaSyntax>();
         private static readonly ParseTree CurlyOpen = new ParseTree<JsonCurlyOpenSyntax>();
+        private static readonly ParseTree SquareBracketClose = new ParseTree<JsonSquareBracketCloseSyntax>();
         private static readonly ParseTree SquareBracketOpen = new ParseTree<JsonSquareBracketOpenSyntax>();
 
         private static readonly ParseTree IntegerValue = new ParseTree<JsonIntegerLiteralSyntax>();
+
+        private static readonly ParseTree IntegerValueWithoutBackground = new ParseTree<JsonMultiValueSyntax>
+        {
+            new ParseTree<JsonValueWithBackgroundSyntax>
+            {
+                NoBackground,
+                IntegerValue
+            },
+            NoBackground
+        };
 
         private static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
@@ -198,15 +210,7 @@ namespace Eutherion.Shared.Tests
                 NoBackground
             }),
 
-            ("0", new ParseTree<JsonMultiValueSyntax>
-            {
-                new ParseTree<JsonValueWithBackgroundSyntax>
-                {
-                    NoBackground,
-                    IntegerValue
-                },
-                NoBackground
-            }),
+            ("0", IntegerValueWithoutBackground),
 
             ("\"\"", new ParseTree<JsonMultiValueSyntax>
             {
@@ -214,6 +218,70 @@ namespace Eutherion.Shared.Tests
                 {
                     NoBackground,
                     new ParseTree<JsonStringLiteralSyntax>()
+                },
+                NoBackground
+            }),
+
+            ("[]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground,
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            }),
+
+            ("[0]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        IntegerValueWithoutBackground,
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            }),
+
+            ("[0,]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        IntegerValueWithoutBackground,
+                        Comma,
+                        NoValuesOrBackground,
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            }),
+
+            ("[0,1]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        IntegerValueWithoutBackground,
+                        Comma,
+                        IntegerValueWithoutBackground,
+                        SquareBracketClose
+                    }
                 },
                 NoBackground
             }),
@@ -339,6 +407,17 @@ namespace Eutherion.Shared.Tests
             },
             new[] { JsonErrorCode.ExpectedEof } ),
 
+            ("//\n]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { Comment, Whitespace, RootLevelValueDelimiter },
+                    NoValue
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.ExpectedEof } ),
+
             (" -1 //\nfalse ", new ParseTree<JsonMultiValueSyntax>
             {
                 new ParseTree<JsonValueWithBackgroundSyntax>
@@ -370,6 +449,226 @@ namespace Eutherion.Shared.Tests
                 NoBackground
             },
             new[] { JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            ("0,,", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    IntegerValue
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter, RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            (",0,", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter },
+                    IntegerValue
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            (",,0", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter, RootLevelValueDelimiter },
+                    IntegerValue
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            ("[,]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground,
+                        Comma,
+                        NoValuesOrBackground,
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.MissingValue } ),
+
+            ("[,0]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground,
+                        Comma,
+                        IntegerValueWithoutBackground,
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.MissingValue } ),
+
+            (" [ 0  0 ] ", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    WhitespaceBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        new ParseTree<JsonMultiValueSyntax>
+                        {
+                            new ParseTree<JsonValueWithBackgroundSyntax> { WhitespaceBackground, IntegerValue },
+                            new ParseTree<JsonValueWithBackgroundSyntax> { WhitespaceBackground, IntegerValue },
+                            WhitespaceBackground
+                        },
+                        SquareBracketClose
+                    }
+                },
+                WhitespaceBackground
+            },
+            new[] { JsonErrorCode.MultipleValues } ),
+
+            ("[[]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        new ParseTree<JsonMultiValueSyntax>
+                        {
+                            new ParseTree<JsonValueWithBackgroundSyntax>
+                            {
+                                NoBackground,
+                                new ParseTree<JsonListSyntax>
+                                {
+                                    SquareBracketOpen,
+                                    NoValuesOrBackground,
+                                    SquareBracketClose
+                                }
+                            },
+                            NoBackground
+                        }
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.UnexpectedEofInArray } ),
+
+            ("[]]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground,
+                        SquareBracketClose
+                    }
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ExpectedEof } ),
+
+            ("[:]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground
+                    }
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter, RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ControlSymbolInArray, JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            ("[{]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        new ParseTree<JsonMultiValueSyntax>
+                        {
+                            new ParseTree<JsonValueWithBackgroundSyntax>
+                            {
+                                NoBackground,
+                                new ParseTree<JsonMapSyntax>
+                                {
+                                    CurlyOpen,
+                                    new ParseTree<JsonKeyValueSyntax> { NoValuesOrBackground }
+                                }
+                            },
+                            NoBackground
+                        },
+                        SquareBracketClose
+                    }
+                },
+                NoBackground
+            },
+            new[] { JsonErrorCode.ControlSymbolInObject } ),
+
+            ("[}]", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        NoValuesOrBackground
+                    }
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter, RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ControlSymbolInArray, JsonErrorCode.ExpectedEof, JsonErrorCode.ExpectedEof } ),
+
+            ("[{]}", new ParseTree<JsonMultiValueSyntax>
+            {
+                new ParseTree<JsonValueWithBackgroundSyntax>
+                {
+                    NoBackground,
+                    new ParseTree<JsonListSyntax>
+                    {
+                        SquareBracketOpen,
+                        new ParseTree<JsonMultiValueSyntax>
+                        {
+                            new ParseTree<JsonValueWithBackgroundSyntax>
+                            {
+                                NoBackground,
+                                new ParseTree<JsonMapSyntax>
+                                {
+                                    CurlyOpen,
+                                    new ParseTree<JsonKeyValueSyntax> { NoValuesOrBackground }
+                                }
+                            },
+                            NoBackground
+                        },
+                        SquareBracketClose
+                    }
+                },
+                new ParseTree<JsonBackgroundListSyntax> { RootLevelValueDelimiter }
+            },
+            new[] { JsonErrorCode.ControlSymbolInObject, JsonErrorCode.ExpectedEof } ),
         };
 
         private static int AssertParseTree(ParseTree expectedParseTree, JsonSyntax expectedParent, int expectedStart, JsonSyntax actualParseTree)
