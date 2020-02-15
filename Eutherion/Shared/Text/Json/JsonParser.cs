@@ -31,6 +31,23 @@ namespace Eutherion.Text.Json
     // Visit calls return the parsed value syntax node, and true if the current token must still be processed.
     public class JsonParser : JsonValueStarterSymbolVisitor<(GreenJsonValueSyntax, bool)>
     {
+        /// <summary>
+        /// Helper class which is used after the last <see cref="IGreenJsonSymbol"/>,
+        /// to reduce nullchecks during parsing, and reduce the chance of programming errors.
+        /// </summary>
+        private sealed class EofSymbol : IJsonValueDelimiterSymbol
+        {
+            public static readonly EofSymbol Value = new EofSymbol();
+
+            private EofSymbol() { }
+
+            int ISpan.Length => 0;
+
+            IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
+            Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
+            Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
+        }
+
         private readonly IEnumerator<IGreenJsonSymbol> Tokens;
         private readonly string Json;
         private readonly List<JsonErrorInfo> Errors = new List<JsonErrorInfo>();
