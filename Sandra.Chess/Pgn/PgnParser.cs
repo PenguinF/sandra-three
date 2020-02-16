@@ -33,15 +33,16 @@ namespace Sandra.Chess.Pgn
     {
         #region PGN character classes
 
-        private const uint IllegalCharacter = 0;
-        private const uint WhitespaceCharacter = 0x1;
-        private const uint SymbolCharacter = 0x1 << 1;
+        private const ulong IllegalCharacter = 0;
+        private const ulong WhitespaceCharacter = 0x1;
+        private const ulong SymbolCharacter = 0x1 << 1;
+        private const ulong UppercaseLetterCharacter = 0x1 << 2;
 
         /// <summary>
         /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
         /// A value of 0 means the character is not allowed.
         /// </summary>
-        private static readonly uint[] PgnCharacterClassTable = new uint[0x100];
+        private static readonly ulong[] PgnCharacterClassTable = new ulong[0x100];
 
         static PgnParser()
         {
@@ -62,6 +63,9 @@ namespace Sandra.Chess.Pgn
 
             // 0xc0..0xff: allowed and encouraged.
             for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // Upper case letter characters.
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
 
             // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
             PgnCharacterClassTable['<'] = 0;
@@ -119,7 +123,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                uint characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
                 if (characterClass != WhitespaceCharacter)
                 {
@@ -162,7 +166,7 @@ namespace Sandra.Chess.Pgn
                                 goto inString;
                             default:
                                 // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = c >= 'A' && c <= 'Z';
+                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
                                 goto inSymbol;
                         }
                     }
@@ -193,7 +197,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                uint characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
                 if (characterClass == WhitespaceCharacter)
                 {
