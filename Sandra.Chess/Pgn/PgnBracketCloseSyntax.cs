@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnBracketStartSyntax.cs
+ * PgnBracketCloseSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -25,29 +25,29 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents the bracket start character '[' in PGN text.
+    /// Represents the bracket close character ']' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketStartSyntax : IPgnForegroundSymbol
+    public sealed class GreenPgnBracketCloseSyntax : IPgnForegroundSymbol
     {
         /// <summary>
-        /// Gets the single <see cref="GreenPgnBracketStartSyntax"/> value.
+        /// Gets the single <see cref="GreenPgnBracketCloseSyntax"/> value.
         /// </summary>
-        public static GreenPgnBracketStartSyntax Value { get; } = new GreenPgnBracketStartSyntax();
+        public static GreenPgnBracketCloseSyntax Value { get; } = new GreenPgnBracketCloseSyntax();
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnBracketStartSyntax.BracketStartLength;
+        public int Length => PgnBracketCloseSyntax.BracketCloseLength;
 
-        private GreenPgnBracketStartSyntax() { }
+        private GreenPgnBracketCloseSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
         Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 
-    public static class PgnBracketStartSyntax
+    public static class PgnBracketCloseSyntax
     {
-        public const char BracketStartCharacter = '[';
-        public const int BracketStartLength = 1;
+        public const char BracketCloseCharacter = ']';
+        public const int BracketCloseLength = 1;
     }
 }

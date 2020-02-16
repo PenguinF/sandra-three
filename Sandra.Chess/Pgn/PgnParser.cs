@@ -95,12 +95,12 @@ namespace Sandra.Chess.Pgn
                     {
                         switch (c)
                         {
-                            case PgnBracketStartSyntax.BracketStartCharacter:
-                                yield return GreenPgnBracketStartSyntax.Value;
+                            case PgnBracketOpenSyntax.BracketOpenCharacter:
+                                yield return GreenPgnBracketOpenSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
-                            case PgnBracketEndSyntax.BracketEndCharacter:
-                                yield return GreenPgnBracketEndSyntax.Value;
+                            case PgnBracketCloseSyntax.BracketCloseCharacter:
+                                yield return GreenPgnBracketCloseSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
                             case StringLiteral.QuoteCharacter:
@@ -157,11 +157,11 @@ namespace Sandra.Chess.Pgn
                 {
                     switch (c)
                     {
-                        case PgnBracketStartSyntax.BracketStartCharacter:
-                            symbolToYield = GreenPgnBracketStartSyntax.Value;
+                        case PgnBracketOpenSyntax.BracketOpenCharacter:
+                            symbolToYield = GreenPgnBracketOpenSyntax.Value;
                             goto yieldSymbolThenCharacter;
-                        case PgnBracketEndSyntax.BracketEndCharacter:
-                            symbolToYield = GreenPgnBracketEndSyntax.Value;
+                        case PgnBracketCloseSyntax.BracketCloseCharacter:
+                            symbolToYield = GreenPgnBracketCloseSyntax.Value;
                             goto yieldSymbolThenCharacter;
                         case StringLiteral.QuoteCharacter:
                             if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
