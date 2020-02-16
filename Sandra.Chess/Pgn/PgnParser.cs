@@ -45,11 +45,23 @@ namespace Sandra.Chess.Pgn
 
         static PgnParser()
         {
-            // 0x00..0x20: treat all control characters as whitespace.
-            for (char c = '\0'; c <= ' '; c++) PgnCharacterClassTable[c] |= WhitespaceCharacter;
+            // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
+            PgnCharacterClassTable['\t'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\n'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\v'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\r'] |= WhitespaceCharacter;
+            PgnCharacterClassTable[' '] |= WhitespaceCharacter;
 
             // 0x21..0x7e
             for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // 0xa0..0xbf: discouraged but allowed.
+            // Treat 0xa0 as a space separator.
+            PgnCharacterClassTable[0xa0] |= WhitespaceCharacter;
+            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // 0xc0..0xff: allowed and encouraged.
+            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
 
             // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
             PgnCharacterClassTable['<'] = 0;
