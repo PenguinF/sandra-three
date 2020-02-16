@@ -31,6 +31,29 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
+        #region PGN character classes
+
+        private const uint IllegalCharacter = 0;
+        private const uint WhitespaceCharacter = 0x1;
+        private const uint SymbolCharacter = 0x1 << 1;
+
+        /// <summary>
+        /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
+        /// A value of 0 means the character is not allowed.
+        /// </summary>
+        private static readonly uint[] PgnCharacterClassTable = new uint[0x100];
+
+        static PgnParser()
+        {
+            // 0x00..0x20: treat all control characters as whitespace.
+            for (char c = '\0'; c <= ' '; c++) PgnCharacterClassTable[c] |= WhitespaceCharacter;
+
+            // 0x21..0x7e
+            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+        }
+
+        #endregion PGN character classes
+
         /// <summary>
         /// See also <see cref="StringLiteral.EscapeCharacter"/>.
         /// </summary>
@@ -80,9 +103,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
+                uint characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
-                // Treat all control characters as whitespace.
-                if (c > ' ')
+                if (characterClass != WhitespaceCharacter)
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
@@ -91,7 +114,7 @@ namespace Sandra.Chess.Pgn
                     }
 
                     // All legal PGN characters have a value below 0x7F.
-                    if (c <= 0x7e)
+                    if (characterClass != IllegalCharacter)
                     {
                         switch (c)
                         {
@@ -154,9 +177,9 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
+                uint characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
-                // Treat all control characters as whitespace.
-                if (c <= ' ')
+                if (characterClass == WhitespaceCharacter)
                 {
                     if (firstUnusedIndex < currentIndex)
                     {
@@ -169,7 +192,7 @@ namespace Sandra.Chess.Pgn
                 }
 
                 // All legal PGN characters have a value below 0x7F.
-                if (c <= 0x7e)
+                if (characterClass != IllegalCharacter)
                 {
                     switch (c)
                     {
