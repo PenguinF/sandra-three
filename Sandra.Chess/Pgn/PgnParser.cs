@@ -50,6 +50,10 @@ namespace Sandra.Chess.Pgn
 
             // 0x21..0x7e
             for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
+            PgnCharacterClassTable['<'] = 0;
+            PgnCharacterClassTable['>'] = 0;
         }
 
         #endregion PGN character classes

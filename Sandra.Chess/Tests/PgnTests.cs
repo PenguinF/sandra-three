@@ -75,7 +75,8 @@ namespace Sandra.Chess.Tests
                 yield return (" ", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("é", typeof(GreenPgnIllegalCharacterSyntax));
+                yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
+                yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
                 yield return ("*", typeof(GreenPgnAsteriskSyntax));
                 yield return ("[", typeof(GreenPgnBracketOpenSyntax));
                 yield return ("]", typeof(GreenPgnBracketCloseSyntax));
