@@ -95,12 +95,28 @@ namespace Sandra.Chess.Pgn
                     {
                         switch (c)
                         {
+                            case PgnAsteriskSyntax.AsteriskCharacter:
+                                yield return GreenPgnAsteriskSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
                             case PgnBracketOpenSyntax.BracketOpenCharacter:
                                 yield return GreenPgnBracketOpenSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
                             case PgnBracketCloseSyntax.BracketCloseCharacter:
                                 yield return GreenPgnBracketCloseSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
+                            case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                                yield return GreenPgnParenthesisCloseSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
+                            case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                                yield return GreenPgnParenthesisOpenSyntax.Value;
+                                firstUnusedIndex++;
+                                break;
+                            case PgnPeriodSyntax.PeriodCharacter:
+                                yield return GreenPgnPeriodSyntax.Value;
                                 firstUnusedIndex++;
                                 break;
                             case StringLiteral.QuoteCharacter:
@@ -157,11 +173,23 @@ namespace Sandra.Chess.Pgn
                 {
                     switch (c)
                     {
+                        case PgnAsteriskSyntax.AsteriskCharacter:
+                            symbolToYield = GreenPgnAsteriskSyntax.Value;
+                            goto yieldSymbolThenCharacter;
                         case PgnBracketOpenSyntax.BracketOpenCharacter:
                             symbolToYield = GreenPgnBracketOpenSyntax.Value;
                             goto yieldSymbolThenCharacter;
                         case PgnBracketCloseSyntax.BracketCloseCharacter:
                             symbolToYield = GreenPgnBracketCloseSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                            symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                            symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnPeriodSyntax.PeriodCharacter:
+                            symbolToYield = GreenPgnPeriodSyntax.Value;
                             goto yieldSymbolThenCharacter;
                         case StringLiteral.QuoteCharacter:
                             if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);

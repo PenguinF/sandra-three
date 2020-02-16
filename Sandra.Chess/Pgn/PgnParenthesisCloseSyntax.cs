@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the parenthesis close character ')' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnParenthesisCloseSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnParenthesisCloseSyntax"/> value.
+        /// </summary>
+        public static GreenPgnParenthesisCloseSyntax Value { get; } = new GreenPgnParenthesisCloseSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnParenthesisCloseSyntax.ParenthesisCloseLength;
+
+        private GreenPgnParenthesisCloseSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnParenthesisCloseSyntax
+    {
+        public const char ParenthesisCloseCharacter = ')';
+        public const int ParenthesisCloseLength = 1;
+    }
 }

@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the asterisk character '*' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnAsteriskSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnAsteriskSyntax"/> value.
+        /// </summary>
+        public static GreenPgnAsteriskSyntax Value { get; } = new GreenPgnAsteriskSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnAsteriskSyntax.AsteriskLength;
+
+        private GreenPgnAsteriskSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnAsteriskSyntax
+    {
+        public const char AsteriskCharacter = '*';
+        public const int AsteriskLength = 1;
+    }
 }

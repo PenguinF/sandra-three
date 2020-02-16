@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the period character '.' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnPeriodSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnPeriodSyntax"/> value.
+        /// </summary>
+        public static GreenPgnPeriodSyntax Value { get; } = new GreenPgnPeriodSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnPeriodSyntax.PeriodLength;
+
+        private GreenPgnPeriodSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnPeriodSyntax
+    {
+        public const char PeriodCharacter = '.';
+        public const int PeriodLength = 1;
+    }
 }

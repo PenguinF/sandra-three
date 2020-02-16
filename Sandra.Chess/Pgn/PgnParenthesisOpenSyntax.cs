@@ -19,6 +19,35 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the parenthesis open character '(' in PGN text.
+    /// </summary>
+    public sealed class GreenPgnParenthesisOpenSyntax : IPgnForegroundSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnParenthesisOpenSyntax"/> value.
+        /// </summary>
+        public static GreenPgnParenthesisOpenSyntax Value { get; } = new GreenPgnParenthesisOpenSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnParenthesisOpenSyntax.ParenthesisOpenLength;
+
+        private GreenPgnParenthesisOpenSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
+    }
+
+    public static class PgnParenthesisOpenSyntax
+    {
+        public const char ParenthesisOpenCharacter = '(';
+        public const int ParenthesisOpenLength = 1;
+    }
 }
