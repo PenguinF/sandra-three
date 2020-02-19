@@ -26,17 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json colon syntax node.
     /// </summary>
-    public sealed class GreenJsonColonSyntax : IJsonValueDelimiterSymbol
+    public sealed class GreenJsonColonSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonColonSyntax Value = new GreenJsonColonSyntax();
 
         public int Length => JsonColonSyntax.ColonLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.Colon;
+
         private GreenJsonColonSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
     }
 
     /// <summary>

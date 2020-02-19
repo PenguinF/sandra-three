@@ -26,21 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json square bracket open syntax node.
     /// </summary>
-    public sealed class GreenJsonSquareBracketOpenSyntax : IJsonValueStarterSymbol
+    public sealed class GreenJsonSquareBracketOpenSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonSquareBracketOpenSyntax Value = new GreenJsonSquareBracketOpenSyntax();
 
         public int Length => JsonSquareBracketOpenSyntax.SquareBracketOpenLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.BracketOpen;
+
         private GreenJsonSquareBracketOpenSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitSquareBracketOpenSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitSquareBracketOpenSyntax(this, arg);
     }
 
     /// <summary>

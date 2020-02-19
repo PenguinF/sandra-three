@@ -27,7 +27,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node.
     /// </summary>
-    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
+    public sealed class GreenJsonStringLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         /// <summary>
         /// Gets the value of this syntax node.
@@ -39,6 +39,8 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length { get; }
 
+        public JsonSymbolType SymbolType => JsonSymbolType.StringLiteral;
+
         public GreenJsonStringLiteralSyntax(string value, int length)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -47,12 +49,6 @@ namespace Eutherion.Text.Json
         }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitStringLiteralSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitStringLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitStringLiteralSyntax(this);

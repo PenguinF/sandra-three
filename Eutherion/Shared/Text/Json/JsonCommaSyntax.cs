@@ -26,17 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json comma syntax node.
     /// </summary>
-    public sealed class GreenJsonCommaSyntax : IJsonValueDelimiterSymbol
+    public sealed class GreenJsonCommaSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonCommaSyntax Value = new GreenJsonCommaSyntax();
 
         public int Length => JsonCommaSyntax.CommaLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.Comma;
+
         private GreenJsonCommaSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
     }
 
     /// <summary>
