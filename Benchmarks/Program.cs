@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
 namespace Benchmarks
@@ -27,16 +28,21 @@ namespace Benchmarks
     {
         static void Main(string[] args)
         {
-            // Suggested command line args: --filter *
-            // See project properties, Debug tab.
+            // Command line args examples:
+            // --filter *
+            // --filter JsonParserBenchmarks
             new BenchmarkSwitcher(typeof(Program).Assembly).Run(args);
         }
+    }
 
+    [RyuJitX64Job]
+    public class IndependentBenchmarks
+    {
         // Serves as an independent non-trivial baseline method which depends about linearly on its input size.
         // Might be useful when comparing benchmarks run on different machines.
         //
         // Example:
-        // > Enumerable.Range(0, 40).Select(Benchmarks.Program.GetPrime).ToArray()
+        // > Enumerable.Range(0, 40).Select(Benchmarks.IndependentBenchmarks.GetPrime).ToArray()
         // int[40] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173 }
         public static int GetPrime(int primeIndex)
         {
@@ -60,5 +66,11 @@ namespace Benchmarks
                 while (sieve[index]) index++;
             }
         }
+
+        [Params(45, 450)]
+        public int N { get; set; }
+
+        [Benchmark]
+        public int GetPrime() => GetPrime(N);
     }
 }

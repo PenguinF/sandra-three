@@ -20,15 +20,30 @@
 #endregion
 
 using BenchmarkDotNet.Attributes;
+using Eutherion.Text.Json;
 
 namespace Benchmarks
 {
+    [RyuJitX64Job]
     public class JsonParserBenchmarks
     {
         [Params(45, 450)]
-        public int InputSize { get; set; }
+        public int N { get; set; }
 
-        [Benchmark(Baseline = true)]
-        public int GetPrime() => Program.GetPrime(InputSize);
+        [Params(
+            " \r\n",
+            "false ",
+            "{[",
+            "/**/ [ {\"\" : 8, \"\\n\" : [] } ]"
+            )]
+        public string Json { get; set; }
+
+        private string repeatedJson;
+
+        [GlobalSetup(Target = nameof(Parse))]
+        public void Setup() => repeatedJson = string.Concat(Json, N);
+
+        [Benchmark]
+        public RootJsonSyntax Parse() => JsonParser.Parse(repeatedJson);
     }
 }
