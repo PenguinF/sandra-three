@@ -29,7 +29,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a string literal value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenJsonErrorStringSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
+    public sealed class GreenJsonErrorStringSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         internal ReadOnlyList<JsonErrorInfo> Errors { get; }
 
@@ -54,6 +54,8 @@ namespace Eutherion.Text.Json
                 error.Length,
                 error.Parameters));
 
+        public JsonSymbolType SymbolType => JsonSymbolType.ErrorString;
+
         public GreenJsonErrorStringSyntax(int length, params JsonErrorInfo[] errors)
         {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
@@ -67,13 +69,6 @@ namespace Eutherion.Text.Json
             Length = length;
             Errors = ReadOnlyList<JsonErrorInfo>.Create(errors);
         }
-
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitErrorStringSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorStringSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitErrorStringSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitErrorStringSyntax(this);

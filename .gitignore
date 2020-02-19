@@ -62,3 +62,6 @@ bld/
 
 # SandraChess specific
 *.[pP][gG][nN]
+
+# Manually saved benchmark results
+/Benchmarks/results*

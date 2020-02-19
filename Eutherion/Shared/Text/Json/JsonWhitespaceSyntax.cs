@@ -48,6 +48,8 @@ namespace Eutherion.Text.Json
         /// </summary>
         public override int Length { get; }
 
+        public JsonSymbolType SymbolType => JsonSymbolType.Whitespace;
+
         /// <summary>
         /// Initializes a new instance of <see cref="GreenJsonWhitespaceSyntax"/> with a specified length.
         /// </summary>
@@ -70,7 +72,6 @@ namespace Eutherion.Text.Json
         private GreenJsonWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);

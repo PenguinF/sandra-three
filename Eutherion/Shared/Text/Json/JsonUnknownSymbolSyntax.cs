@@ -27,7 +27,7 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an unknown symbol.
     /// </summary>
-    public sealed class GreenJsonUnknownSymbolSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
+    public sealed class GreenJsonUnknownSymbolSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         /// <summary>
         /// Gets a friendly representation of the unknown symbol.
@@ -38,6 +38,8 @@ namespace Eutherion.Text.Json
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public override int Length => JsonUnknownSymbolSyntax.UnknownSymbolLength;
+
+        public JsonSymbolType SymbolType => JsonSymbolType.UnknownSymbol;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenJsonUnknownSymbolSyntax"/>.
@@ -71,12 +73,6 @@ namespace Eutherion.Text.Json
         public JsonErrorInfo GetError(int startPosition) => JsonUnknownSymbolSyntax.CreateError(DisplayCharValue, startPosition);
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnknownSymbolSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUnknownSymbolSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUnknownSymbolSyntax(this);

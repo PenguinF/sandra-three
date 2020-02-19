@@ -27,11 +27,13 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents an integer literal value syntax node.
     /// </summary>
-    public sealed class GreenJsonIntegerLiteralSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
+    public sealed class GreenJsonIntegerLiteralSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         public BigInteger Value { get; }
 
         public override int Length { get; }
+
+        public JsonSymbolType SymbolType => JsonSymbolType.IntegerLiteral;
 
         public GreenJsonIntegerLiteralSyntax(BigInteger value, int length)
         {
@@ -40,12 +42,6 @@ namespace Eutherion.Text.Json
         }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitIntegerLiteralSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitIntegerLiteralSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitIntegerLiteralSyntax(this);

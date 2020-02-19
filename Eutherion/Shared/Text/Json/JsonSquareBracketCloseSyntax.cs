@@ -26,17 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json square bracket close syntax node.
     /// </summary>
-    public sealed class GreenJsonSquareBracketCloseSyntax : IJsonValueDelimiterSymbol
+    public sealed class GreenJsonSquareBracketCloseSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonSquareBracketCloseSyntax Value = new GreenJsonSquareBracketCloseSyntax();
 
         public int Length => JsonSquareBracketCloseSyntax.SquareBracketCloseLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.BracketClose;
+
         private GreenJsonSquareBracketCloseSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
     }
 
     /// <summary>

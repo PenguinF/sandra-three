@@ -47,7 +47,6 @@
     <Compile Include="SafeLazy.cs" />
     <Compile Include="SafeLazyObject.cs" />
     <Compile Include="Text\ISpan.cs" />
-    <Compile Include="Text\Json\IJsonForegroundSymbol.cs" />
     <Compile Include="Text\Json\IJsonSymbol.cs" />
     <Compile Include="Text\Json\JsonBackgroundListSyntax.cs" />
     <Compile Include="Text\Json\JsonBackgroundSyntax.cs" />
@@ -72,6 +71,7 @@
     <Compile Include="Text\Json\JsonSquareBracketCloseSyntax.cs" />
     <Compile Include="Text\Json\JsonSquareBracketOpenSyntax.cs" />
     <Compile Include="Text\Json\JsonStringLiteralSyntax.cs" />
+    <Compile Include="Text\Json\JsonSymbolType.cs" />
     <Compile Include="Text\Json\JsonSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonSyntax.cs" />
     <Compile Include="Text\Json\JsonTokenizer.cs" />
@@ -79,7 +79,6 @@
     <Compile Include="Text\Json\JsonUnknownSymbolSyntax.cs" />
     <Compile Include="Text\Json\JsonUnterminatedMultiLineCommentSyntax.cs" />
     <Compile Include="Text\Json\JsonValue.cs" />
-    <Compile Include="Text\Json\JsonValueStarterSymbolVisitor.cs" />
     <Compile Include="Text\Json\JsonValueSyntax.cs" />
     <Compile Include="Text\Json\JsonValueSyntaxVisitor.cs" />
     <Compile Include="Text\Json\JsonValueWithBackgroundSyntax.cs" />

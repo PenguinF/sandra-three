@@ -26,17 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json curly close syntax node.
     /// </summary>
-    public sealed class GreenJsonCurlyCloseSyntax : IJsonValueDelimiterSymbol
+    public sealed class GreenJsonCurlyCloseSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonCurlyCloseSyntax Value = new GreenJsonCurlyCloseSyntax();
 
         public int Length => JsonCurlyCloseSyntax.CurlyCloseLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.CurlyClose;
+
         private GreenJsonCurlyCloseSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
     }
 
     /// <summary>
