@@ -27,23 +27,19 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json syntax node with an undefined or unsupported value.
     /// </summary>
-    public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax, IJsonValueStarterSymbol
+    public sealed class GreenJsonUndefinedValueSyntax : GreenJsonValueSyntax, IGreenJsonSymbol
     {
         public string UndefinedValue { get; }
 
         public override int Length => UndefinedValue.Length;
+
+        public JsonSymbolType SymbolType => JsonSymbolType.UndefinedValue;
 
         public GreenJsonUndefinedValueSyntax(string undefinedValue) => UndefinedValue = undefinedValue ?? throw new ArgumentNullException(nameof(undefinedValue));
 
         public JsonErrorInfo GetError(int position) => JsonUndefinedValueSyntax.CreateError(UndefinedValue, position, Length);
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUndefinedValueSyntax(this, arg);
 
         public override void Accept(GreenJsonValueSyntaxVisitor visitor) => visitor.VisitUndefinedValueSyntax(this);
         public override TResult Accept<TResult>(GreenJsonValueSyntaxVisitor<TResult> visitor) => visitor.VisitUndefinedValueSyntax(this);

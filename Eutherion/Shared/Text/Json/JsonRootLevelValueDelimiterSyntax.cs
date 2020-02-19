@@ -19,6 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Diagnostics;
+
 namespace Eutherion.Text.Json
 {
     /// <summary>
@@ -27,11 +30,15 @@ namespace Eutherion.Text.Json
     /// </summary>
     public sealed class GreenJsonRootLevelValueDelimiterSyntax : GreenJsonBackgroundSyntax
     {
-        public IJsonValueDelimiterSymbol ValueDelimiter { get; }
+        public IGreenJsonSymbol ValueDelimiter { get; }
 
         public override int Length => ValueDelimiter.Length;
 
-        public GreenJsonRootLevelValueDelimiterSyntax(IJsonValueDelimiterSymbol valueDelimiter) => ValueDelimiter = valueDelimiter;
+        public GreenJsonRootLevelValueDelimiterSyntax(IGreenJsonSymbol valueDelimiter)
+        {
+            ValueDelimiter = valueDelimiter ?? throw new ArgumentNullException(nameof(valueDelimiter));
+            Debug.Assert(ValueDelimiter.SymbolType >= JsonParser.ValueDelimiterThreshold);
+        }
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitRootLevelValueDelimiterSyntax(this);

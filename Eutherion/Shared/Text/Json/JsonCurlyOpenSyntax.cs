@@ -26,21 +26,17 @@ namespace Eutherion.Text.Json
     /// <summary>
     /// Represents a json curly open syntax node.
     /// </summary>
-    public sealed class GreenJsonCurlyOpenSyntax : IJsonValueStarterSymbol
+    public sealed class GreenJsonCurlyOpenSyntax : IGreenJsonSymbol
     {
         public static readonly GreenJsonCurlyOpenSyntax Value = new GreenJsonCurlyOpenSyntax();
 
         public int Length => JsonCurlyOpenSyntax.CurlyOpenLength;
 
+        public JsonSymbolType SymbolType => JsonSymbolType.CurlyOpen;
+
         private GreenJsonCurlyOpenSyntax() { }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
-        Union<IJsonValueDelimiterSymbol, IJsonValueStarterSymbol> IJsonForegroundSymbol.AsValueDelimiterOrStarter() => this;
-
-        void IJsonValueStarterSymbol.Accept(JsonValueStarterSymbolVisitor visitor) => visitor.VisitCurlyOpenSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<TResult>(JsonValueStarterSymbolVisitor<TResult> visitor) => visitor.VisitCurlyOpenSyntax(this);
-        TResult IJsonValueStarterSymbol.Accept<T, TResult>(JsonValueStarterSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCurlyOpenSyntax(this, arg);
     }
 
     /// <summary>

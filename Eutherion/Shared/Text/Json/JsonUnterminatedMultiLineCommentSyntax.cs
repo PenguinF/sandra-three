@@ -33,6 +33,8 @@ namespace Eutherion.Text.Json
 
         public JsonErrorInfo GetError(int startPosition) => JsonUnterminatedMultiLineCommentSyntax.CreateError(startPosition, Length);
 
+        public JsonSymbolType SymbolType => JsonSymbolType.UnterminatedMultiLineComment;
+
         public GreenJsonUnterminatedMultiLineCommentSyntax(int length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
@@ -40,7 +42,6 @@ namespace Eutherion.Text.Json
         }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<JsonErrorInfo>(GetError(startPosition));
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitUnterminatedMultiLineCommentSyntax(this);

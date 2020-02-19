@@ -31,6 +31,8 @@ namespace Eutherion.Text.Json
     {
         public override int Length { get; }
 
+        public JsonSymbolType SymbolType => JsonSymbolType.Comment;
+
         public GreenJsonCommentSyntax(int length)
         {
             if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
@@ -38,7 +40,6 @@ namespace Eutherion.Text.Json
         }
 
         IEnumerable<JsonErrorInfo> IGreenJsonSymbol.GetErrors(int startPosition) => EmptyEnumerable<JsonErrorInfo>.Instance;
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> IGreenJsonSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenJsonBackgroundSyntaxVisitor visitor) => visitor.VisitCommentSyntax(this);
         public override TResult Accept<TResult>(GreenJsonBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);

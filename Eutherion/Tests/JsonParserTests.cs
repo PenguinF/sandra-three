@@ -70,6 +70,66 @@ namespace Eutherion.Shared.Tests
             public override Type ExpectedType => typeof(T);
         }
 
+        private enum JsonSymbolTypeClass { Background, ValueStarter, ValueDelimiter }
+
+        private static void AssertJsonSymbolType(JsonSymbolType jsonSymbolType, JsonSymbolTypeClass expectedJsonSymbolTypeClass)
+        {
+            switch (expectedJsonSymbolTypeClass)
+            {
+                case JsonSymbolTypeClass.Background:
+                    Assert.True(jsonSymbolType < JsonParser.ForegroundThreshold);
+                    Assert.True(jsonSymbolType < JsonParser.ValueDelimiterThreshold);
+                    break;
+                case JsonSymbolTypeClass.ValueStarter:
+                    Assert.False(jsonSymbolType < JsonParser.ForegroundThreshold);
+                    Assert.True(jsonSymbolType < JsonParser.ValueDelimiterThreshold);
+                    break;
+                case JsonSymbolTypeClass.ValueDelimiter:
+                default:
+                    Assert.False(jsonSymbolType < JsonParser.ForegroundThreshold);
+                    Assert.False(jsonSymbolType < JsonParser.ValueDelimiterThreshold);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Checks if assumptions by <see cref="JsonParser"/> still apply.
+        /// </summary>
+        [Fact]
+        public void JsonSymbolTypeAssumptions()
+        {
+            new[]
+            {
+                JsonSymbolType.Whitespace,
+                JsonSymbolType.Comment,
+                JsonSymbolType.UnterminatedMultiLineComment,
+            }
+            .ForEach(x => AssertJsonSymbolType(x, JsonSymbolTypeClass.Background));
+
+            new[]
+            {
+                JsonSymbolType.BooleanLiteral,
+                JsonSymbolType.IntegerLiteral,
+                JsonSymbolType.StringLiteral,
+                JsonSymbolType.ErrorString,
+                JsonSymbolType.UndefinedValue,
+                JsonSymbolType.UnknownSymbol,
+                JsonSymbolType.CurlyOpen,
+                JsonSymbolType.BracketOpen,
+            }
+            .ForEach(x => AssertJsonSymbolType(x, JsonSymbolTypeClass.ValueStarter));
+
+            new[]
+            {
+                JsonSymbolType.Colon,
+                JsonSymbolType.Comma,
+                JsonSymbolType.CurlyClose,
+                JsonSymbolType.BracketClose,
+                JsonSymbolType.Eof,
+            }
+            .ForEach(x => AssertJsonSymbolType(x, JsonSymbolTypeClass.ValueDelimiter));
+        }
+
         /// <summary>
         /// <seealso cref="JsonTokenizerTests.TwoSymbolsOfEachType"/>.
         /// </summary>

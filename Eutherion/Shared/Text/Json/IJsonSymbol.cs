@@ -41,12 +41,9 @@ namespace Eutherion.Text.Json
         IEnumerable<JsonErrorInfo> GetErrors(int startPosition);
 
         /// <summary>
-        /// Converts this symbol into either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="IJsonForegroundSymbol"/>.
+        /// Gets the type of this symbol.
         /// </summary>
-        /// <returns>
-        /// Either a <see cref="GreenJsonBackgroundSyntax"/> or a <see cref="IJsonForegroundSymbol"/>.
-        /// </returns>
-        Union<GreenJsonBackgroundSyntax, IJsonForegroundSymbol> AsBackgroundOrForeground();
+        JsonSymbolType SymbolType { get; }
     }
 
     /// <summary>

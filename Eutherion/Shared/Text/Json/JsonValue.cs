@@ -36,7 +36,7 @@ namespace Eutherion.Text.Json
         public static readonly string False = "false";
         public static readonly string True = "true";
 
-        public static IJsonValueStarterSymbol Create(string value)
+        public static IGreenJsonSymbol Create(string value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length <= 0) throw new ArgumentException(nameof(value));
