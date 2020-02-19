@@ -19,12 +19,46 @@
 **********************************************************************************/
 #endregion
 
+using BenchmarkDotNet.Running;
+
 namespace Benchmarks
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            // Suggested command line args: --filter *
+            // See project properties, Debug tab.
+            new BenchmarkSwitcher(typeof(Program).Assembly).Run(args);
+        }
+
+        // Serves as an independent non-trivial baseline method which depends about linearly on its input size.
+        // Might be useful when comparing benchmarks run on different machines.
+        //
+        // Example:
+        // > Enumerable.Range(0, 40).Select(Benchmarks.Program.GetPrime).ToArray()
+        // int[40] { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173 }
+        public static int GetPrime(int primeIndex)
+        {
+            // 20 = some wild guess at the ratio between primes and non-primes.
+            // sieve[index] == true if 'index' is definitely non-prime.
+            // sieve[0] and sieve[1] are ignored.
+            bool[] sieve = new bool[primeIndex * 20];
+
+            int index = 2;
+            int foundPrimes = 0;
+
+            for (; ; )
+            {
+                if (foundPrimes == primeIndex) return index;
+                for (int i = index * index; i < sieve.Length; i += index) sieve[i] = true;
+
+                foundPrimes++;
+                index++;
+
+                // This throws IndexOutOfRangeException if the sieve is too small.
+                while (sieve[index]) index++;
+            }
         }
     }
 }
