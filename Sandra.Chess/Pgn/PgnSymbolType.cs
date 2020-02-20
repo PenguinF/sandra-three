@@ -47,6 +47,11 @@ namespace Sandra.Chess.Pgn
         UnterminatedComment,
 
         /// <summary>
+        /// Type of a syntax node which contains a PGN escape sqquence.
+        /// </summary>
+        Escape,
+
+        /// <summary>
         /// Type of the asterisk character '*' in PGN text.
         /// </summary>
         Asterisk,

@@ -40,7 +40,7 @@ namespace Sandra.Chess.Pgn
         public PgnSymbolType SymbolType => PgnSymbolType.UnterminatedComment;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnCommentSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenPgnUnterminatedCommentSyntax"/>.
         /// </summary>
         /// <param name="length">
         /// The length of the syntax node, including delimiter characters ';' '{' '}',

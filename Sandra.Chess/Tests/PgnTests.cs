@@ -151,6 +151,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(0));
         }
 
         [Theory]
@@ -378,6 +381,35 @@ namespace Sandra.Chess.Tests
                     commentedPgn,
                     ExpectToken<GreenPgnCommentSyntax>(2 + pgn.Length));
             }
+        }
+
+        [Fact]
+        public void EscapeMechanism()
+        {
+            AssertTokens(
+                "% ",
+                ExpectToken<GreenPgnEscapeSyntax>(2));
+
+            AssertTokens(
+                " %",
+                ExpectToken<GreenPgnWhitespaceSyntax>(1),
+                ExpectToken<GreenPgnSymbol>(1));
+
+            AssertTokens(
+                "\n%\n\n",
+                ExpectToken<GreenPgnWhitespaceSyntax>(1),
+                ExpectToken<GreenPgnEscapeSyntax>(1),
+                ExpectToken<GreenPgnWhitespaceSyntax>(2));
+
+            // Don't trigger escape mechanism inside comments or strings.
+            // It would mean that tokens overlap.
+            AssertTokens(
+                "{\n%}",
+                ExpectToken<GreenPgnCommentSyntax>(4));
+
+            AssertTokens(
+                "\"\n%\"",
+                ExpectToken<GreenPgnErrorTagValueSyntax>(4));
         }
     }
 }

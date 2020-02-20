@@ -179,6 +179,10 @@ namespace Sandra.Chess.Pgn
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
                                 goto inMultiLineComment;
+                            case PgnEscapeSyntax.EscapeCharacter:
+                                // Escape mechanism only triggered directly after a newline.
+                                if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
+                                goto default;
                             default:
                                 // Tag names must start with an uppercase letter.
                                 allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
@@ -431,6 +435,41 @@ namespace Sandra.Chess.Pgn
             }
 
             yield return new GreenPgnCommentSyntax(length - symbolStartIndex);
+            yield break;
+
+        inEscapeSequence:
+
+            // Copy of inEndOfLineComment above, except with a different trigger and result.
+            currentIndex++;
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+                if (c == '\r')
+                {
+                    currentIndex++;
+                    if (currentIndex < length)
+                    {
+                        char secondChar = pgnText[currentIndex];
+                        if (secondChar == '\n')
+                        {
+                            yield return new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex);
+                            symbolStartIndex = currentIndex - 1;
+                            currentIndex++;
+                            goto inWhitespace;
+                        }
+                    }
+                }
+                else if (c == '\n')
+                {
+                    yield return new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex);
+                    symbolStartIndex = currentIndex;
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+                currentIndex++;
+            }
+
+            yield return new GreenPgnEscapeSyntax(length - symbolStartIndex);
             yield break;
 
         inMultiLineComment:
