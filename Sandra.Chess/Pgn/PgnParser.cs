@@ -324,7 +324,7 @@ namespace Sandra.Chess.Pgn
                         {
                             if (char.IsControl(escapedChar))
                             {
-                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex));
+                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex - symbolStartIndex));
                             }
 
                             if (StringLiteral.CharacterMustBeEscaped(escapedChar))
@@ -357,7 +357,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (char.IsControl(c))
                 {
-                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex));
+                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex - symbolStartIndex));
                 }
                 else
                 {
