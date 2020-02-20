@@ -37,6 +37,8 @@ namespace Sandra.Chess.Pgn
         private const ulong WhitespaceCharacter = 0x1;
         private const ulong SymbolCharacter = 0x1 << 1;
         private const ulong UppercaseLetterCharacter = 0x1 << 2;
+        private const ulong LowercaseLetterCharacter = 0x1 << 3;
+        private const ulong DigitCharacter = 0x1 << 4;
 
         /// <summary>
         /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
@@ -64,8 +66,13 @@ namespace Sandra.Chess.Pgn
             // 0xc0..0xff: allowed and encouraged.
             for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
 
-            // Upper case letter characters.
+            // Letters, digits.
             for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
+            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
+            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] |= DigitCharacter;
+
+            // Treat the underscore as a lower case character.
+            PgnCharacterClassTable['_'] |= LowercaseLetterCharacter;
 
             // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
             PgnCharacterClassTable['<'] = 0;
@@ -236,15 +243,11 @@ namespace Sandra.Chess.Pgn
                             if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
                             firstUnusedIndex = currentIndex;
                             goto inString;
-                        default:
-                            // Allow only digits, letters or the underscore character in tag names.
-                            if (allLegalTagNameCharacters
-                                && (c < '0' || c > '9' && c < 'A' || c > 'Z' && c != '_' && c < 'a' || c > 'z'))
-                            {
-                                allLegalTagNameCharacters = false;
-                            }
-                            break;
                     }
+
+                    // Allow only digits, letters or the underscore character in tag names.
+                    const ulong letterOrDigit = UppercaseLetterCharacter | LowercaseLetterCharacter | DigitCharacter;
+                    allLegalTagNameCharacters = allLegalTagNameCharacters && characterClass.Test(letterOrDigit);
                 }
                 else
                 {
