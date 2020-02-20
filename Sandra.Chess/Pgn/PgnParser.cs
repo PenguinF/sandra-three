@@ -31,6 +31,8 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
+        internal const PgnSymbolType ForegroundThreshold = PgnSymbolType.Asterisk;
+
         #region PGN character classes
 
         private const ulong IllegalCharacter = 0;
@@ -92,7 +94,7 @@ namespace Sandra.Chess.Pgn
                 ? StringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c));
 
-        private static IPgnForegroundSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
+        private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
             if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
             return new GreenPgnSymbol(length);

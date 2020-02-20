@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using System;
 using System.Collections.Generic;
 
@@ -28,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : IPgnForegroundSymbol
+    public sealed class GreenPgnTagValueSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the value of this syntax node.
@@ -39,6 +38,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.TagValue;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagValueSyntax"/>.
@@ -63,6 +67,5 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 }

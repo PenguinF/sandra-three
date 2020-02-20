@@ -61,6 +61,7 @@
     <Compile Include="Pgn\PgnParser.cs" />
     <Compile Include="Pgn\PgnPeriodSyntax.cs" />
     <Compile Include="Pgn\PgnSingleLineCommentSyntax.cs" />
+    <Compile Include="Pgn\PgnSymbolType.cs" />
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />

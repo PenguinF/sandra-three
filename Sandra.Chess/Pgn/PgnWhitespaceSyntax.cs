@@ -50,6 +50,11 @@ namespace Sandra.Chess.Pgn
         public override int Length { get; }
 
         /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.Whitespace;
+
+        /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnWhitespaceSyntax"/> with a specified length.
         /// </summary>
         /// <param name="length">
@@ -71,7 +76,6 @@ namespace Sandra.Chess.Pgn
         private GreenPgnWhitespaceSyntax(int length) => Length = length;
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitWhitespaceSyntax(this);
         public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitWhitespaceSyntax(this);

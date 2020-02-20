@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -27,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the bracket open character '[' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketOpenSyntax : IPgnForegroundSymbol
+    public sealed class GreenPgnBracketOpenSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnBracketOpenSyntax"/> value.
@@ -39,10 +38,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => PgnBracketOpenSyntax.BracketOpenLength;
 
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.BracketOpen;
+
         private GreenPgnBracketOpenSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 
     public static class PgnBracketOpenSyntax

@@ -78,9 +78,16 @@ namespace Sandra.Chess.Pgn
         public override int GetChildStartPosition(int index) => Green.ChildNodes.GetElementOffset(index);
 
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
-            => green.AsBackgroundOrForeground().Match(
-                whenOption1: backgroundGreen => PgnBackgroundSyntaxCreator.Instance.Visit(backgroundGreen, (this, index)),
-                whenOption2: foregroundGreen => new PgnSymbol(this, index, foregroundGreen));
+        {
+            if (green.SymbolType < PgnParser.ForegroundThreshold)
+            {
+                return PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)green, (this, index));
+            }
+            else
+            {
+                return new PgnSymbol(this, index, green);
+            }
+        }
 
         internal PgnSyntaxNodes(GreenPgnSyntaxNodes green)
         {
