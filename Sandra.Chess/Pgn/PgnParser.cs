@@ -133,7 +133,6 @@ namespace Sandra.Chess.Pgn
                         firstUnusedIndex = currentIndex;
                     }
 
-                    // All legal PGN characters have a value below 0x7F.
                     if (characterClass != IllegalCharacter)
                     {
                         switch (c)
@@ -211,7 +210,6 @@ namespace Sandra.Chess.Pgn
                     goto inWhitespace;
                 }
 
-                // All legal PGN characters have a value below 0x7F.
                 if (characterClass != IllegalCharacter)
                 {
                     switch (c)
