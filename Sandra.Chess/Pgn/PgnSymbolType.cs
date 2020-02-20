@@ -37,6 +37,11 @@ namespace Sandra.Chess.Pgn
         IllegalCharacter,
 
         /// <summary>
+        /// Type of a PGN syntax node which contains a comment.
+        /// </summary>
+        Comment,
+
+        /// <summary>
         /// Type of the asterisk character '*' in PGN text.
         /// </summary>
         Asterisk,

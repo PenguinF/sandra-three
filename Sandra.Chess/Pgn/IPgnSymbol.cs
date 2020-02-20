@@ -82,6 +82,7 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
+            public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;

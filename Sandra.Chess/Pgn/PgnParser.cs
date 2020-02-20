@@ -172,6 +172,8 @@ namespace Sandra.Chess.Pgn
                                 break;
                             case StringLiteral.QuoteCharacter:
                                 goto inString;
+                            case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                                goto inEndOfLineComment;
                             default:
                                 // Tag names must start with an uppercase letter.
                                 allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
@@ -197,7 +199,7 @@ namespace Sandra.Chess.Pgn
 
         inSymbol:
 
-            // Eat the first symbol character, but leave firstUnusedIndex unchanged.
+            // Eat the first symbol character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
             IGreenPgnSymbol symbolToYield;
@@ -245,6 +247,10 @@ namespace Sandra.Chess.Pgn
                             if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
                             symbolStartIndex = currentIndex;
                             goto inString;
+                        case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
+                            goto inEndOfLineComment;
                     }
 
                     // Allow only digits, letters or the underscore character in tag names.
@@ -278,7 +284,7 @@ namespace Sandra.Chess.Pgn
 
         inString:
 
-            // Eat " character, but leave firstUnusedIndex unchanged.
+            // Eat " character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
             while (currentIndex < length)
@@ -370,6 +376,52 @@ namespace Sandra.Chess.Pgn
             errors.Add(PgnErrorTagValueSyntax.Unterminated(symbolStartIndex, length - symbolStartIndex));
 
             yield return new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors);
+            yield break;
+
+        inEndOfLineComment:
+
+            // Eat the ';' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                if (c == '\r')
+                {
+                    // Can already eat this whitespace character.
+                    currentIndex++;
+
+                    // Look ahead to see if the next character is a linefeed.
+                    // Otherwise, the '\r' just becomes part of the comment.
+                    if (currentIndex < length)
+                    {
+                        char secondChar = pgnText[currentIndex];
+                        if (secondChar == '\n')
+                        {
+                            yield return new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex);
+
+                            // Eat the '\n'.
+                            symbolStartIndex = currentIndex - 1;
+                            currentIndex++;
+                            goto inWhitespace;
+                        }
+                    }
+                }
+                else if (c == '\n')
+                {
+                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+
+                    // Eat the '\n'.
+                    symbolStartIndex = currentIndex;
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+
+                currentIndex++;
+            }
+
+            yield return new GreenPgnCommentSyntax(length - symbolStartIndex);
         }
 
         /// <summary>
