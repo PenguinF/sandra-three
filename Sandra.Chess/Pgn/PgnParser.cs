@@ -118,7 +118,7 @@ namespace Sandra.Chess.Pgn
             int length = pgnText.Length;
 
             int currentIndex = 0;
-            int firstUnusedIndex = 0;
+            int symbolStartIndex = 0;
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
@@ -134,10 +134,10 @@ namespace Sandra.Chess.Pgn
 
                 if (characterClass != WhitespaceCharacter)
                 {
-                    if (firstUnusedIndex < currentIndex)
+                    if (symbolStartIndex < currentIndex)
                     {
-                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
-                        firstUnusedIndex = currentIndex;
+                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
+                        symbolStartIndex = currentIndex;
                     }
 
                     if (characterClass != IllegalCharacter)
@@ -146,27 +146,27 @@ namespace Sandra.Chess.Pgn
                         {
                             case PgnAsteriskSyntax.AsteriskCharacter:
                                 yield return GreenPgnAsteriskSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case PgnBracketOpenSyntax.BracketOpenCharacter:
                                 yield return GreenPgnBracketOpenSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case PgnBracketCloseSyntax.BracketCloseCharacter:
                                 yield return GreenPgnBracketCloseSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
                                 yield return GreenPgnParenthesisCloseSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
                                 yield return GreenPgnParenthesisOpenSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case PgnPeriodSyntax.PeriodCharacter:
                                 yield return GreenPgnPeriodSyntax.Value;
-                                firstUnusedIndex++;
+                                symbolStartIndex++;
                                 break;
                             case StringLiteral.QuoteCharacter:
                                 goto inString;
@@ -179,16 +179,16 @@ namespace Sandra.Chess.Pgn
                     else
                     {
                         yield return CreateIllegalCharacterSyntax(c);
-                        firstUnusedIndex++;
+                        symbolStartIndex++;
                     }
                 }
 
                 currentIndex++;
             }
 
-            if (firstUnusedIndex < currentIndex)
+            if (symbolStartIndex < currentIndex)
             {
-                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -207,10 +207,10 @@ namespace Sandra.Chess.Pgn
 
                 if (characterClass == WhitespaceCharacter)
                 {
-                    if (firstUnusedIndex < currentIndex)
+                    if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
-                        firstUnusedIndex = currentIndex;
+                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                        symbolStartIndex = currentIndex;
                     }
 
                     currentIndex++;
@@ -240,8 +240,8 @@ namespace Sandra.Chess.Pgn
                             symbolToYield = GreenPgnPeriodSyntax.Value;
                             goto yieldSymbolThenCharacter;
                         case StringLiteral.QuoteCharacter:
-                            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
-                            firstUnusedIndex = currentIndex;
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
                             goto inString;
                     }
 
@@ -258,9 +258,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            if (firstUnusedIndex < currentIndex)
+            if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
+                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -268,10 +268,10 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
+            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
             yield return symbolToYield;
             currentIndex++;
-            firstUnusedIndex = currentIndex;
+            symbolStartIndex = currentIndex;
             goto inWhitespace;
 
         inString:
@@ -291,16 +291,16 @@ namespace Sandra.Chess.Pgn
 
                     if (errors.Count > 0)
                     {
-                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - firstUnusedIndex, errors);
+                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors);
                         errors.Clear();
                     }
                     else
                     {
-                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - symbolStartIndex);
                     }
 
                     valueBuilder.Clear();
-                    firstUnusedIndex = currentIndex;
+                    symbolStartIndex = currentIndex;
                     goto inWhitespace;
                 }
                 else if (c == StringLiteral.EscapeCharacter)
@@ -330,14 +330,14 @@ namespace Sandra.Chess.Pgn
                                 // Just don't show the control character.
                                 errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                                     EscapeCharacterString,
-                                    escapeSequenceStart - firstUnusedIndex,
+                                    escapeSequenceStart - symbolStartIndex,
                                     2));
                             }
                             else
                             {
                                 errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                                     new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
-                                    escapeSequenceStart - firstUnusedIndex,
+                                    escapeSequenceStart - symbolStartIndex,
                                     2));
                             }
                         }
@@ -347,7 +347,7 @@ namespace Sandra.Chess.Pgn
                         // In addition to this, break out of the loop because this is now also an unterminated string.
                         errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                             EscapeCharacterString,
-                            escapeSequenceStart - firstUnusedIndex,
+                            escapeSequenceStart - symbolStartIndex,
                             1));
 
                         break;
@@ -365,9 +365,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnErrorTagValueSyntax.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
+            errors.Add(PgnErrorTagValueSyntax.Unterminated(symbolStartIndex, length - symbolStartIndex));
 
-            yield return new GreenPgnErrorTagValueSyntax(length - firstUnusedIndex, errors);
+            yield return new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors);
         }
 
         /// <summary>
