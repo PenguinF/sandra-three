@@ -92,6 +92,7 @@ namespace Sandra.Chess.Tests
                 yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
                 yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
+                yield return ("{}", typeof(GreenPgnCommentSyntax));
             }
         }
 
@@ -101,6 +102,7 @@ namespace Sandra.Chess.Tests
             yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\\"", typeof(GreenPgnErrorTagValueSyntax));
             yield return (";\r", typeof(GreenPgnCommentSyntax));
+            yield return ("{", typeof(GreenPgnUnterminatedCommentSyntax));
         }
 
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
@@ -146,6 +148,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnCommentSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnCommentSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(0));
         }
 
         [Theory]
@@ -303,7 +308,7 @@ namespace Sandra.Chess.Tests
         public void SingleLineCommentTransitions(string pgn, Type type)
         {
             // Single line comment + symbol.
-            // Special treatment if 'pgn' starts with a linebreak.
+            // Special treatment if 'pgn' contains a linebreak.
             var commentThenPgn = ";" + pgn;
 
             int linefeedIndex = pgn.IndexOf('\n');
@@ -342,6 +347,36 @@ namespace Sandra.Chess.Tests
                     ExpectToken<GreenPgnCommentSyntax>(1),
                     ExpectToken<GreenPgnWhitespaceSyntax>(1),
                     ExpectToken(type, pgn.Length));
+            }
+        }
+
+        public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
+            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+               select new object[] { x.Item1 };
+
+        /// <summary>
+        /// Tests that all symbols are eaten by a multi-line comment.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(AllPgnTestSymbolsWithoutTypes))]
+        public void MultiLineCommentTransitions(string pgn)
+        {
+            // Symbol embedded in a multi-line comment.
+            // Special treatment if 'pgn' contains a '}'.
+            var commentedPgn = "{" + pgn + "}";
+
+            int curlyCloseIndex = pgn.IndexOf('}');
+            if (curlyCloseIndex >= 0)
+            {
+                var symbols = PgnParser.TokenizeAll(commentedPgn).ToList();
+                Assert.True(symbols.Count >= 2);
+                ExpectToken<GreenPgnCommentSyntax>(2 + curlyCloseIndex)(symbols[0]);
+            }
+            else
+            {
+                AssertTokens(
+                    commentedPgn,
+                    ExpectToken<GreenPgnCommentSyntax>(2 + pgn.Length));
             }
         }
     }

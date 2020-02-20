@@ -45,5 +45,10 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a control character appears in a tag value.
         /// </summary>
         IllegalControlCharacterInTagValue,
+
+        /// <summary>
+        /// Occurs when a comment is not terminated before the end of the file.
+        /// </summary>
+        UnterminatedMultiLineComment,
     }
 }

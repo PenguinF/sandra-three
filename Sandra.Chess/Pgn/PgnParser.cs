@@ -79,6 +79,9 @@ namespace Sandra.Chess.Pgn
             // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
             PgnCharacterClassTable['<'] = 0;
             PgnCharacterClassTable['>'] = 0;
+
+            // Special case: this character delimits multi-line comments, and is otherwise only valid inside strings.
+            PgnCharacterClassTable['}'] = 0;
         }
 
         #endregion PGN character classes
@@ -174,6 +177,8 @@ namespace Sandra.Chess.Pgn
                                 goto inString;
                             case PgnCommentSyntax.EndOfLineCommentStartCharacter:
                                 goto inEndOfLineComment;
+                            case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                                goto inMultiLineComment;
                             default:
                                 // Tag names must start with an uppercase letter.
                                 allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
@@ -251,6 +256,10 @@ namespace Sandra.Chess.Pgn
                             if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
                             symbolStartIndex = currentIndex;
                             goto inEndOfLineComment;
+                        case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
+                            goto inMultiLineComment;
                     }
 
                     // Allow only digits, letters or the underscore character in tag names.
@@ -422,6 +431,29 @@ namespace Sandra.Chess.Pgn
             }
 
             yield return new GreenPgnCommentSyntax(length - symbolStartIndex);
+            yield break;
+
+        inMultiLineComment:
+
+            // Eat the '{' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // Any character here, including the delimiter '}', is part of the comment.
+                currentIndex++;
+
+                if (c == PgnCommentSyntax.MultiLineCommentEndCharacter)
+                {
+                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+                    symbolStartIndex = currentIndex;
+                    goto inWhitespace;
+                }
+            }
+
+            yield return new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex);
         }
 
         /// <summary>

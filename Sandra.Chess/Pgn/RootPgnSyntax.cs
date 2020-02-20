@@ -66,6 +66,9 @@ namespace Sandra.Chess.Pgn
             public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
 
+            public override PgnSyntax VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnUnterminatedCommentSyntax(parent.Item1, parent.Item2, green);
+
             public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
         }

@@ -42,6 +42,11 @@ namespace Sandra.Chess.Pgn
         Comment,
 
         /// <summary>
+        /// Type of a PGN syntax node which contains an unterminated comment.
+        /// </summary>
+        UnterminatedComment,
+
+        /// <summary>
         /// Type of the asterisk character '*' in PGN text.
         /// </summary>
         Asterisk,

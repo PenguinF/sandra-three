@@ -70,6 +70,16 @@ namespace Sandra.Chess.Pgn
         public const char EndOfLineCommentStartCharacter = ';';
 
         /// <summary>
+        /// The character which starts an end-of-line comment.
+        /// </summary>
+        public const char MultiLineCommentStartCharacter = '{';
+
+        /// <summary>
+        /// The character which starts an end-of-line comment.
+        /// </summary>
+        public const char MultiLineCommentEndCharacter = '}';
+
+        /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
         /// </summary>
         public GreenPgnCommentSyntax Green { get; }
