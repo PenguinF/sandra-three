@@ -114,6 +114,6 @@
     "PgnErrorUnterminatedTagValue": "label waarde niet afgesloten met een '\"' karakter",
     "PgnErrorUnrecognizedEscapeSequence": "escape karakter reeks niet herkend ('{0}')",
     "PgnErrorIllegalControlCharacterInTagValue": "illegaal stuurkarakter '{0}' binnen label waarde",
-    "PgnErrorUnterminatedMultiLineComment": "multi-regel commentaar niet afgesloten met '}' karakter"
+    "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter"
   }
 }
