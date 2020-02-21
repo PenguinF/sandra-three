@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 using System;
@@ -31,7 +30,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenPgnErrorTagValueSyntax : IPgnForegroundSymbol
+    public sealed class GreenPgnErrorTagValueSyntax : IGreenPgnSymbol
     {
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
@@ -39,6 +38,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the length of the text span corresponding with this syntax node.
         /// </summary>
         public int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.ErrorTagValue;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnErrorTagValueSyntax"/>.
@@ -77,8 +81,6 @@ namespace Sandra.Chess.Pgn
                 error.Start + startPosition,
                 error.Length,
                 error.Parameters));
-
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 
     public static class PgnErrorTagValueSyntax

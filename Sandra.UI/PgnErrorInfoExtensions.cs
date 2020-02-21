@@ -42,6 +42,7 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.UnterminatedTagValue), "unterminated tag value" },
             { GetLocalizedStringKey(PgnErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
             { GetLocalizedStringKey(PgnErrorCode.IllegalControlCharacterInTagValue), "illegal control character '{0}' in tag value" },
+            { GetLocalizedStringKey(PgnErrorCode.UnterminatedMultiLineComment), "unterminated comment" },
         };
     }
 }

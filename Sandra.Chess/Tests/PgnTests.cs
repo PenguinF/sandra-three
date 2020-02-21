@@ -75,9 +75,14 @@ namespace Sandra.Chess.Tests
                 yield return (" ", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\r", typeof(GreenPgnWhitespaceSyntax));
                 yield return ("\n", typeof(GreenPgnWhitespaceSyntax));
-                yield return ("é", typeof(GreenPgnIllegalCharacterSyntax));
-                yield return ("[", typeof(GreenPgnBracketStartSyntax));
-                yield return ("]", typeof(GreenPgnBracketEndSyntax));
+                yield return ("<", typeof(GreenPgnIllegalCharacterSyntax));
+                yield return ("Ā", typeof(GreenPgnIllegalCharacterSyntax));
+                yield return ("*", typeof(GreenPgnAsteriskSyntax));
+                yield return ("[", typeof(GreenPgnBracketOpenSyntax));
+                yield return ("]", typeof(GreenPgnBracketCloseSyntax));
+                yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
+                yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
+                yield return (".", typeof(GreenPgnPeriodSyntax));
                 yield return ("a1", typeof(GreenPgnSymbol));
                 yield return ("A1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
@@ -87,6 +92,7 @@ namespace Sandra.Chess.Tests
                 yield return ("\"é\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
                 yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
+                yield return ("{}", typeof(GreenPgnCommentSyntax));
             }
         }
 
@@ -95,6 +101,8 @@ namespace Sandra.Chess.Tests
             yield return ("\"", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\", typeof(GreenPgnErrorTagValueSyntax));
             yield return ("\"\\\"", typeof(GreenPgnErrorTagValueSyntax));
+            yield return (";\r", typeof(GreenPgnCommentSyntax));
+            yield return ("{", typeof(GreenPgnUnterminatedCommentSyntax));
         }
 
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
@@ -109,6 +117,9 @@ namespace Sandra.Chess.Tests
                 Assert.Equal(expectedLength, symbol.Length);
             };
         }
+
+        private static Action<IGreenPgnSymbol> ExpectToken<TExpected>(int expectedLength)
+            => ExpectToken(typeof(TExpected), expectedLength);
 
         [Fact]
         public void ArgumentChecks()
@@ -134,6 +145,15 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => GreenPgnWhitespaceSyntax.Create(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnCommentSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnterminatedCommentSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(0));
         }
 
         [Theory]
@@ -277,6 +297,119 @@ namespace Sandra.Chess.Tests
                             ExpectToken(type2, pgn2.Length));
                     }
                 }, _PgnTestSymbols.Count()).ToArray());
+        }
+
+        public static IEnumerable<object[]> AllPgnTestSymbols
+            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+               select new object[] { x.Item1, x.Item2 };
+
+        /// <summary>
+        /// Tests all combinations of a single line comment followed by another symbol.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(AllPgnTestSymbols))]
+        public void SingleLineCommentTransitions(string pgn, Type type)
+        {
+            // Single line comment + symbol.
+            // Special treatment if 'pgn' contains a linebreak.
+            var commentThenPgn = ";" + pgn;
+
+            int linefeedIndex = pgn.IndexOf('\n');
+            if (linefeedIndex >= 0)
+            {
+                // Special case: the pgn contains a '\n'.
+                // Only assert the single line comment, and that the next symbol is whitespace.
+                var symbols = PgnParser.TokenizeAll(commentThenPgn).ToList();
+                Assert.True(symbols.Count >= 2);
+                ExpectToken<GreenPgnCommentSyntax>(1 + linefeedIndex)(symbols[0]);
+                Assert.IsType<GreenPgnWhitespaceSyntax>(symbols[1]);
+            }
+            else
+            {
+                // Single line comment should eat everything.
+                AssertTokens(
+                    commentThenPgn,
+                    ExpectToken<GreenPgnCommentSyntax>(1 + pgn.Length));
+            }
+
+            // Single line comment + newline + token.
+            var commentThenNewLineThenPgn = ";\n" + pgn;
+
+            if (type == typeof(GreenPgnWhitespaceSyntax))
+            {
+                // Second token should include the '\n'.
+                AssertTokens(
+                    commentThenNewLineThenPgn,
+                    ExpectToken<GreenPgnCommentSyntax>(1),
+                    ExpectToken<GreenPgnWhitespaceSyntax>(1 + pgn.Length));
+            }
+            else
+            {
+                AssertTokens(
+                    commentThenNewLineThenPgn,
+                    ExpectToken<GreenPgnCommentSyntax>(1),
+                    ExpectToken<GreenPgnWhitespaceSyntax>(1),
+                    ExpectToken(type, pgn.Length));
+            }
+        }
+
+        public static IEnumerable<object[]> AllPgnTestSymbolsWithoutTypes
+            => from x in _PgnTestSymbols.Union(UnterminatedPgnTestSymbols())
+               select new object[] { x.Item1 };
+
+        /// <summary>
+        /// Tests that all symbols are eaten by a multi-line comment.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(AllPgnTestSymbolsWithoutTypes))]
+        public void MultiLineCommentTransitions(string pgn)
+        {
+            // Symbol embedded in a multi-line comment.
+            // Special treatment if 'pgn' contains a '}'.
+            var commentedPgn = "{" + pgn + "}";
+
+            int curlyCloseIndex = pgn.IndexOf('}');
+            if (curlyCloseIndex >= 0)
+            {
+                var symbols = PgnParser.TokenizeAll(commentedPgn).ToList();
+                Assert.True(symbols.Count >= 2);
+                ExpectToken<GreenPgnCommentSyntax>(2 + curlyCloseIndex)(symbols[0]);
+            }
+            else
+            {
+                AssertTokens(
+                    commentedPgn,
+                    ExpectToken<GreenPgnCommentSyntax>(2 + pgn.Length));
+            }
+        }
+
+        [Fact]
+        public void EscapeMechanism()
+        {
+            AssertTokens(
+                "% ",
+                ExpectToken<GreenPgnEscapeSyntax>(2));
+
+            AssertTokens(
+                " %",
+                ExpectToken<GreenPgnWhitespaceSyntax>(1),
+                ExpectToken<GreenPgnSymbol>(1));
+
+            AssertTokens(
+                "\n%\n\n",
+                ExpectToken<GreenPgnWhitespaceSyntax>(1),
+                ExpectToken<GreenPgnEscapeSyntax>(1),
+                ExpectToken<GreenPgnWhitespaceSyntax>(2));
+
+            // Don't trigger escape mechanism inside comments or strings.
+            // It would mean that tokens overlap.
+            AssertTokens(
+                "{\n%}",
+                ExpectToken<GreenPgnCommentSyntax>(4));
+
+            AssertTokens(
+                "\"\n%\"",
+                ExpectToken<GreenPgnErrorTagValueSyntax>(4));
         }
     }
 }

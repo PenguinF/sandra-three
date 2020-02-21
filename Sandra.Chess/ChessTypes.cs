@@ -21,6 +21,7 @@
 
 using Sandra.Chess;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace Sandra.Chess
 {
@@ -196,16 +197,19 @@ namespace Sandra
         /// <summary>
         /// Tests if a vector has any set bits.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Test(this ulong vector) => vector != 0;
 
         /// <summary>
         /// Tests if a vector is equal to zero or a power of two, i.e. is true for zero or one bits exactly.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsMaxOneBit(this ulong vector) => !vector.Test(vector - 1);
 
         /// <summary>
         /// Tests if another vector has any bits in common with this one.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Test(this ulong vector, ulong otherVector) => (vector & otherVector) != 0;
 
         /// <summary>

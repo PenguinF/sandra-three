@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Text;
 using System.Collections.Generic;
 
@@ -43,28 +42,21 @@ namespace Sandra.Chess.Pgn
         IEnumerable<PgnErrorInfo> GetErrors(int startPosition);
 
         /// <summary>
-        /// Converts this symbol into either a <see cref="GreenPgnBackgroundSyntax"/> or a <see cref="IPgnForegroundSymbol"/>.
+        /// Gets the type of this symbol.
         /// </summary>
-        /// <returns>
-        /// Either a <see cref="GreenPgnBackgroundSyntax"/> or a <see cref="IPgnForegroundSymbol"/>.
-        /// </returns>
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> AsBackgroundOrForeground();
-    }
-
-    public interface IPgnForegroundSymbol : IGreenPgnSymbol
-    {
+        PgnSymbolType SymbolType { get; }
     }
 
     // Temporary placeholder
-    public class GreenPgnSymbol : IPgnForegroundSymbol
+    public class GreenPgnSymbol : IGreenPgnSymbol
     {
         public int Length { get; }
+
+        public PgnSymbolType SymbolType => PgnSymbolType.OtherNotSpecified;
 
         public GreenPgnSymbol(int length) => Length = length;
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 
     /// <summary>
@@ -90,8 +82,11 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
+            public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
+            public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
+            public override PgnSyntax VisitUnterminatedCommentSyntax(PgnUnterminatedCommentSyntax node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
         }
 
@@ -112,12 +107,12 @@ namespace Sandra.Chess.Pgn
     {
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
-        public IPgnForegroundSymbol Green { get; }
+        public IGreenPgnSymbol Green { get; }
         public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IPgnForegroundSymbol green)
+        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IGreenPgnSymbol green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

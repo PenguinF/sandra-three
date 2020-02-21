@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorCode.cs
+ * PgnParenthesisCloseSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,36 +19,38 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Enumerates distinct PGN syntax and semantic error types.
+    /// Represents the parenthesis close character ')' in PGN text.
     /// </summary>
-    public enum PgnErrorCode
+    public sealed class GreenPgnParenthesisCloseSyntax : IGreenPgnSymbol
     {
         /// <summary>
-        /// Occurs when a character is illegal.
+        /// Gets the single <see cref="GreenPgnParenthesisCloseSyntax"/> value.
         /// </summary>
-        IllegalCharacter,
+        public static GreenPgnParenthesisCloseSyntax Value { get; } = new GreenPgnParenthesisCloseSyntax();
 
         /// <summary>
-        /// Occurs when a tag value is not terminated before the end of the file.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        UnterminatedTagValue,
+        public int Length => PgnParenthesisCloseSyntax.ParenthesisCloseLength;
 
         /// <summary>
-        /// Occurs when an escape sequence in a tag value is not recognized.
+        /// Gets the type of this symbol.
         /// </summary>
-        UnrecognizedEscapeSequence,
+        public PgnSymbolType SymbolType => PgnSymbolType.ParenthesisClose;
 
-        /// <summary>
-        /// Occurs when a control character appears in a tag value.
-        /// </summary>
-        IllegalControlCharacterInTagValue,
+        private GreenPgnParenthesisCloseSyntax() { }
 
-        /// <summary>
-        /// Occurs when a comment is not terminated before the end of the file.
-        /// </summary>
-        UnterminatedMultiLineComment,
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnParenthesisCloseSyntax
+    {
+        public const char ParenthesisCloseCharacter = ')';
+        public const int ParenthesisCloseLength = 1;
     }
 }

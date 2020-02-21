@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorCode.cs
+ * PgnAsteriskSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,36 +19,38 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Enumerates distinct PGN syntax and semantic error types.
+    /// Represents the asterisk character '*' in PGN text.
     /// </summary>
-    public enum PgnErrorCode
+    public sealed class GreenPgnAsteriskSyntax : IGreenPgnSymbol
     {
         /// <summary>
-        /// Occurs when a character is illegal.
+        /// Gets the single <see cref="GreenPgnAsteriskSyntax"/> value.
         /// </summary>
-        IllegalCharacter,
+        public static GreenPgnAsteriskSyntax Value { get; } = new GreenPgnAsteriskSyntax();
 
         /// <summary>
-        /// Occurs when a tag value is not terminated before the end of the file.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        UnterminatedTagValue,
+        public int Length => PgnAsteriskSyntax.AsteriskLength;
 
         /// <summary>
-        /// Occurs when an escape sequence in a tag value is not recognized.
+        /// Gets the type of this symbol.
         /// </summary>
-        UnrecognizedEscapeSequence,
+        public PgnSymbolType SymbolType => PgnSymbolType.Asterisk;
 
-        /// <summary>
-        /// Occurs when a control character appears in a tag value.
-        /// </summary>
-        IllegalControlCharacterInTagValue,
+        private GreenPgnAsteriskSyntax() { }
 
-        /// <summary>
-        /// Occurs when a comment is not terminated before the end of the file.
-        /// </summary>
-        UnterminatedMultiLineComment,
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnAsteriskSyntax
+    {
+        public const char AsteriskCharacter = '*';
+        public const int AsteriskLength = 1;
     }
 }

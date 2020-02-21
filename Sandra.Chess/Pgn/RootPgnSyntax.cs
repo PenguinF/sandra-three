@@ -60,8 +60,17 @@ namespace Sandra.Chess.Pgn
 
             private PgnBackgroundSyntaxCreator() { }
 
+            public override PgnSyntax VisitCommentSyntax(GreenPgnCommentSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnCommentSyntax(parent.Item1, parent.Item2, green);
+
+            public override PgnSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnEscapeSyntax(parent.Item1, parent.Item2, green);
+
             public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
+
+            public override PgnSyntax VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnUnterminatedCommentSyntax(parent.Item1, parent.Item2, green);
 
             public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
@@ -78,9 +87,16 @@ namespace Sandra.Chess.Pgn
         public override int GetChildStartPosition(int index) => Green.ChildNodes.GetElementOffset(index);
 
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
-            => green.AsBackgroundOrForeground().Match(
-                whenOption1: backgroundGreen => PgnBackgroundSyntaxCreator.Instance.Visit(backgroundGreen, (this, index)),
-                whenOption2: foregroundGreen => new PgnSymbol(this, index, foregroundGreen));
+        {
+            if (green.SymbolType < PgnParser.ForegroundThreshold)
+            {
+                return PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)green, (this, index));
+            }
+            else
+            {
+                return new PgnSymbol(this, index, green);
+            }
+        }
 
         internal PgnSyntaxNodes(GreenPgnSyntaxNodes green)
         {

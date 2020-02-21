@@ -22,7 +22,6 @@
 using Eutherion.Text;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 namespace Sandra.Chess.Pgn
@@ -32,24 +31,73 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
+        internal const PgnSymbolType ForegroundThreshold = PgnSymbolType.Asterisk;
+
+        #region PGN character classes
+
+        private const ulong IllegalCharacter = 0;
+        private const ulong WhitespaceCharacter = 0x1;
+        private const ulong SymbolCharacter = 0x1 << 1;
+        private const ulong UppercaseLetterCharacter = 0x1 << 2;
+        private const ulong LowercaseLetterCharacter = 0x1 << 3;
+        private const ulong DigitCharacter = 0x1 << 4;
+
+        /// <summary>
+        /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
+        /// A value of 0 means the character is not allowed.
+        /// </summary>
+        private static readonly ulong[] PgnCharacterClassTable = new ulong[0x100];
+
+        static PgnParser()
+        {
+            // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
+            PgnCharacterClassTable['\t'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\n'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\v'] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\r'] |= WhitespaceCharacter;
+            PgnCharacterClassTable[' '] |= WhitespaceCharacter;
+
+            // 0x21..0x7e
+            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // 0xa0..0xbf: discouraged but allowed.
+            // Treat 0xa0 as a space separator.
+            PgnCharacterClassTable[0xa0] |= WhitespaceCharacter;
+            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // 0xc0..0xff: allowed and encouraged.
+            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+
+            // Letters, digits.
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
+            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
+            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] |= DigitCharacter;
+
+            // Treat the underscore as a lower case character.
+            PgnCharacterClassTable['_'] |= LowercaseLetterCharacter;
+
+            // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
+            PgnCharacterClassTable['<'] = 0;
+            PgnCharacterClassTable['>'] = 0;
+
+            // Special case: this character delimits multi-line comments, and is otherwise only valid inside strings.
+            PgnCharacterClassTable['}'] = 0;
+        }
+
+        #endregion PGN character classes
+
         /// <summary>
         /// See also <see cref="StringLiteral.EscapeCharacter"/>.
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
         private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
-        {
-            var category = char.GetUnicodeCategory(c);
+            => new GreenPgnIllegalCharacterSyntax(
+                StringLiteral.CharacterMustBeEscaped(c)
+                ? StringLiteral.EscapedCharacterString(c)
+                : Convert.ToString(c));
 
-            string displayCharValue = category == UnicodeCategory.OtherNotAssigned
-                                   || category == UnicodeCategory.Control
-                ? $"\\u{((int)c).ToString("x4")}"
-                : Convert.ToString(c);
-
-            return new GreenPgnIllegalCharacterSyntax(displayCharValue);
-        }
-
-        private static IPgnForegroundSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
+        private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
             if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
             return new GreenPgnSymbol(length);
@@ -75,7 +123,7 @@ namespace Sandra.Chess.Pgn
             int length = pgnText.Length;
 
             int currentIndex = 0;
-            int firstUnusedIndex = 0;
+            int symbolStartIndex = 0;
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
@@ -87,57 +135,80 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
+                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
-                // Treat all control characters as whitespace.
-                if (c > ' ')
+                if (characterClass != WhitespaceCharacter)
                 {
-                    if (firstUnusedIndex < currentIndex)
+                    if (symbolStartIndex < currentIndex)
                     {
-                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
-                        firstUnusedIndex = currentIndex;
+                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
+                        symbolStartIndex = currentIndex;
                     }
 
-                    // All legal PGN characters have a value below 0x7F.
-                    if (c <= 0x7e)
+                    if (characterClass != IllegalCharacter)
                     {
                         switch (c)
                         {
-                            case PgnBracketStartSyntax.BracketStartCharacter:
-                                yield return GreenPgnBracketStartSyntax.Value;
-                                firstUnusedIndex++;
+                            case PgnAsteriskSyntax.AsteriskCharacter:
+                                yield return GreenPgnAsteriskSyntax.Value;
+                                symbolStartIndex++;
                                 break;
-                            case PgnBracketEndSyntax.BracketEndCharacter:
-                                yield return GreenPgnBracketEndSyntax.Value;
-                                firstUnusedIndex++;
+                            case PgnBracketOpenSyntax.BracketOpenCharacter:
+                                yield return GreenPgnBracketOpenSyntax.Value;
+                                symbolStartIndex++;
+                                break;
+                            case PgnBracketCloseSyntax.BracketCloseCharacter:
+                                yield return GreenPgnBracketCloseSyntax.Value;
+                                symbolStartIndex++;
+                                break;
+                            case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                                yield return GreenPgnParenthesisCloseSyntax.Value;
+                                symbolStartIndex++;
+                                break;
+                            case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                                yield return GreenPgnParenthesisOpenSyntax.Value;
+                                symbolStartIndex++;
+                                break;
+                            case PgnPeriodSyntax.PeriodCharacter:
+                                yield return GreenPgnPeriodSyntax.Value;
+                                symbolStartIndex++;
                                 break;
                             case StringLiteral.QuoteCharacter:
                                 goto inString;
+                            case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                                goto inEndOfLineComment;
+                            case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                                goto inMultiLineComment;
+                            case PgnEscapeSyntax.EscapeCharacter:
+                                // Escape mechanism only triggered directly after a newline.
+                                if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
+                                goto default;
                             default:
                                 // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = c >= 'A' && c <= 'Z';
+                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
                                 goto inSymbol;
                         }
                     }
                     else
                     {
                         yield return CreateIllegalCharacterSyntax(c);
-                        firstUnusedIndex++;
+                        symbolStartIndex++;
                     }
                 }
 
                 currentIndex++;
             }
 
-            if (firstUnusedIndex < currentIndex)
+            if (symbolStartIndex < currentIndex)
             {
-                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - firstUnusedIndex);
+                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
             }
 
             yield break;
 
         inSymbol:
 
-            // Eat the first symbol character, but leave firstUnusedIndex unchanged.
+            // Eat the first symbol character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
             IGreenPgnSymbol symbolToYield;
@@ -145,44 +216,59 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
+                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
 
-                // Treat all control characters as whitespace.
-                if (c <= ' ')
+                if (characterClass == WhitespaceCharacter)
                 {
-                    if (firstUnusedIndex < currentIndex)
+                    if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
-                        firstUnusedIndex = currentIndex;
+                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                        symbolStartIndex = currentIndex;
                     }
 
                     currentIndex++;
                     goto inWhitespace;
                 }
 
-                // All legal PGN characters have a value below 0x7F.
-                if (c <= 0x7e)
+                if (characterClass != IllegalCharacter)
                 {
                     switch (c)
                     {
-                        case PgnBracketStartSyntax.BracketStartCharacter:
-                            symbolToYield = GreenPgnBracketStartSyntax.Value;
+                        case PgnAsteriskSyntax.AsteriskCharacter:
+                            symbolToYield = GreenPgnAsteriskSyntax.Value;
                             goto yieldSymbolThenCharacter;
-                        case PgnBracketEndSyntax.BracketEndCharacter:
-                            symbolToYield = GreenPgnBracketEndSyntax.Value;
+                        case PgnBracketOpenSyntax.BracketOpenCharacter:
+                            symbolToYield = GreenPgnBracketOpenSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnBracketCloseSyntax.BracketCloseCharacter:
+                            symbolToYield = GreenPgnBracketCloseSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                            symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                            symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
+                            goto yieldSymbolThenCharacter;
+                        case PgnPeriodSyntax.PeriodCharacter:
+                            symbolToYield = GreenPgnPeriodSyntax.Value;
                             goto yieldSymbolThenCharacter;
                         case StringLiteral.QuoteCharacter:
-                            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
-                            firstUnusedIndex = currentIndex;
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
                             goto inString;
-                        default:
-                            // Allow only digits, letters or the underscore character in tag names.
-                            if (allLegalTagNameCharacters
-                                && (c < '0' || c > '9' && c < 'A' || c > 'Z' && c != '_' && c < 'a' || c > 'z'))
-                            {
-                                allLegalTagNameCharacters = false;
-                            }
-                            break;
+                        case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
+                            goto inEndOfLineComment;
+                        case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
+                            goto inMultiLineComment;
                     }
+
+                    // Allow only digits, letters or the underscore character in tag names.
+                    const ulong letterOrDigit = UppercaseLetterCharacter | LowercaseLetterCharacter | DigitCharacter;
+                    allLegalTagNameCharacters = allLegalTagNameCharacters && characterClass.Test(letterOrDigit);
                 }
                 else
                 {
@@ -193,9 +279,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            if (firstUnusedIndex < currentIndex)
+            if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
+                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -203,15 +289,15 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (firstUnusedIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - firstUnusedIndex);
+            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
             yield return symbolToYield;
             currentIndex++;
-            firstUnusedIndex = currentIndex;
+            symbolStartIndex = currentIndex;
             goto inWhitespace;
 
         inString:
 
-            // Eat " character, but leave firstUnusedIndex unchanged.
+            // Eat " character, but leave symbolStartIndex unchanged.
             currentIndex++;
 
             while (currentIndex < length)
@@ -226,16 +312,16 @@ namespace Sandra.Chess.Pgn
 
                     if (errors.Count > 0)
                     {
-                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - firstUnusedIndex, errors);
+                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors);
                         errors.Clear();
                     }
                     else
                     {
-                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - firstUnusedIndex);
+                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - symbolStartIndex);
                     }
 
                     valueBuilder.Clear();
-                    firstUnusedIndex = currentIndex;
+                    symbolStartIndex = currentIndex;
                     goto inWhitespace;
                 }
                 else if (c == StringLiteral.EscapeCharacter)
@@ -257,7 +343,7 @@ namespace Sandra.Chess.Pgn
                         {
                             if (char.IsControl(escapedChar))
                             {
-                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex));
+                                errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(escapedChar, currentIndex - symbolStartIndex));
                             }
 
                             if (StringLiteral.CharacterMustBeEscaped(escapedChar))
@@ -265,14 +351,14 @@ namespace Sandra.Chess.Pgn
                                 // Just don't show the control character.
                                 errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                                     EscapeCharacterString,
-                                    escapeSequenceStart - firstUnusedIndex,
+                                    escapeSequenceStart - symbolStartIndex,
                                     2));
                             }
                             else
                             {
                                 errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                                     new string(new[] { StringLiteral.EscapeCharacter, escapedChar }),
-                                    escapeSequenceStart - firstUnusedIndex,
+                                    escapeSequenceStart - symbolStartIndex,
                                     2));
                             }
                         }
@@ -282,7 +368,7 @@ namespace Sandra.Chess.Pgn
                         // In addition to this, break out of the loop because this is now also an unterminated string.
                         errors.Add(PgnErrorTagValueSyntax.UnrecognizedEscapeSequence(
                             EscapeCharacterString,
-                            escapeSequenceStart - firstUnusedIndex,
+                            escapeSequenceStart - symbolStartIndex,
                             1));
 
                         break;
@@ -290,7 +376,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (char.IsControl(c))
                 {
-                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex));
+                    errors.Add(PgnErrorTagValueSyntax.IllegalControlCharacter(c, currentIndex - symbolStartIndex));
                 }
                 else
                 {
@@ -300,9 +386,113 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnErrorTagValueSyntax.Unterminated(firstUnusedIndex, length - firstUnusedIndex));
+            errors.Add(PgnErrorTagValueSyntax.Unterminated(symbolStartIndex, length - symbolStartIndex));
 
-            yield return new GreenPgnErrorTagValueSyntax(length - firstUnusedIndex, errors);
+            yield return new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors);
+            yield break;
+
+        inEndOfLineComment:
+
+            // Eat the ';' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                if (c == '\r')
+                {
+                    // Can already eat this whitespace character.
+                    currentIndex++;
+
+                    // Look ahead to see if the next character is a linefeed.
+                    // Otherwise, the '\r' just becomes part of the comment.
+                    if (currentIndex < length)
+                    {
+                        char secondChar = pgnText[currentIndex];
+                        if (secondChar == '\n')
+                        {
+                            yield return new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex);
+
+                            // Eat the '\n'.
+                            symbolStartIndex = currentIndex - 1;
+                            currentIndex++;
+                            goto inWhitespace;
+                        }
+                    }
+                }
+                else if (c == '\n')
+                {
+                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+
+                    // Eat the '\n'.
+                    symbolStartIndex = currentIndex;
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+
+                currentIndex++;
+            }
+
+            yield return new GreenPgnCommentSyntax(length - symbolStartIndex);
+            yield break;
+
+        inEscapeSequence:
+
+            // Copy of inEndOfLineComment above, except with a different trigger and result.
+            currentIndex++;
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+                if (c == '\r')
+                {
+                    currentIndex++;
+                    if (currentIndex < length)
+                    {
+                        char secondChar = pgnText[currentIndex];
+                        if (secondChar == '\n')
+                        {
+                            yield return new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex);
+                            symbolStartIndex = currentIndex - 1;
+                            currentIndex++;
+                            goto inWhitespace;
+                        }
+                    }
+                }
+                else if (c == '\n')
+                {
+                    yield return new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex);
+                    symbolStartIndex = currentIndex;
+                    currentIndex++;
+                    goto inWhitespace;
+                }
+                currentIndex++;
+            }
+
+            yield return new GreenPgnEscapeSyntax(length - symbolStartIndex);
+            yield break;
+
+        inMultiLineComment:
+
+            // Eat the '{' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            while (currentIndex < length)
+            {
+                char c = pgnText[currentIndex];
+
+                // Any character here, including the delimiter '}', is part of the comment.
+                currentIndex++;
+
+                if (c == PgnCommentSyntax.MultiLineCommentEndCharacter)
+                {
+                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+                    symbolStartIndex = currentIndex;
+                    goto inWhitespace;
+                }
+            }
+
+            yield return new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex);
         }
 
         /// <summary>

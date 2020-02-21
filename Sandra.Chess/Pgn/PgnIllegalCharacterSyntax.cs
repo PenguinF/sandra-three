@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using System;
 using System.Collections.Generic;
 
@@ -39,6 +38,11 @@ namespace Sandra.Chess.Pgn
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public override int Length => PgnIllegalCharacterSyntax.IllegalCharacterLength;
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.IllegalCharacter;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnIllegalCharacterSyntax"/>.
@@ -72,7 +76,6 @@ namespace Sandra.Chess.Pgn
         public PgnErrorInfo GetError(int startPosition) => PgnIllegalCharacterSyntax.CreateError(DisplayCharValue, startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
 
         public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitIllegalCharacterSyntax(this);
         public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitIllegalCharacterSyntax(this);

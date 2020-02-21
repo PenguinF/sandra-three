@@ -35,35 +35,53 @@ namespace Sandra.UI
         private const int tagValueStyleIndex = 9;
         private const int errorTagValueStyleIndex = 10;
         private const int illegalCharacterStyleIndex = 11;
+        private const int symbolStyleIndex = 12;
+        private const int escapedLineStyleIndex = 13;
 
-        private static readonly Font tagNameFont = new Font("Consolas", 10, FontStyle.Italic);
+        private static readonly Font tagNameAndEscapeFont = new Font("Consolas", 10, FontStyle.Italic);
 
-        private static readonly Color tagNameForeColor = Color.FromArgb(0xff, 0xff, 0x3c);
+        private static readonly Color tagNameForeColor = Color.FromArgb(0x90, 0xff, 0xf0);
         private static readonly Color tagValueForeColor = Color.FromArgb(0xff, 0xbb, 0x9e);
         private static readonly Color errorTagValueForeColor = Color.FromArgb(0xbc, 0x82, 0x70);
         private static readonly Color illegalCharacterForeColor = Color.FromArgb(0xa0, 0xa0, 0xa0);
+        private static readonly Color symbolForeColor = Color.FromArgb(0xff, 0xff, 0xa0);
+        private static readonly Color escapeForeColor = Color.FromArgb(0x8c, 0x8c, 0x8c);
 
         public static readonly PgnStyleSelector<TSyntaxTree, TError> Instance = new PgnStyleSelector<TSyntaxTree, TError>();
 
         public static void InitializeStyles(SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
             syntaxEditor.Styles[tagNameStyleIndex].ForeColor = tagNameForeColor;
-            tagNameFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
+            tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
 
             syntaxEditor.Styles[tagValueStyleIndex].ForeColor = tagValueForeColor;
 
             syntaxEditor.Styles[errorTagValueStyleIndex].ForeColor = errorTagValueForeColor;
 
             syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
+
+            syntaxEditor.Styles[symbolStyleIndex].ForeColor = symbolForeColor;
+
+            syntaxEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
+            tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[escapedLineStyleIndex]);
         }
 
         private PgnStyleSelector() { }
 
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[symbolStyleIndex];
+
+        public override Style VisitCommentSyntax(PgnCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
+
+        public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[escapedLineStyleIndex];
 
         public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
+
+        public override Style VisitUnterminatedCommentSyntax(PgnUnterminatedCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.DefaultStyle;
 
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
@@ -77,7 +95,7 @@ namespace Sandra.UI
                     return syntaxEditor.Styles[errorTagValueStyleIndex];
             }
 
-            return syntaxEditor.DefaultStyle;
+            return syntaxEditor.Styles[symbolStyleIndex];
         }
     }
 }

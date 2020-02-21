@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnBracketStartSyntax.cs
+ * PgnPeriodSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,35 +19,38 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents the bracket start character '[' in PGN text.
+    /// Represents the period character '.' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketStartSyntax : IPgnForegroundSymbol
+    public sealed class GreenPgnPeriodSyntax : IGreenPgnSymbol
     {
         /// <summary>
-        /// Gets the single <see cref="GreenPgnBracketStartSyntax"/> value.
+        /// Gets the single <see cref="GreenPgnPeriodSyntax"/> value.
         /// </summary>
-        public static GreenPgnBracketStartSyntax Value { get; } = new GreenPgnBracketStartSyntax();
+        public static GreenPgnPeriodSyntax Value { get; } = new GreenPgnPeriodSyntax();
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnBracketStartSyntax.BracketStartLength;
+        public int Length => PgnPeriodSyntax.PeriodLength;
 
-        private GreenPgnBracketStartSyntax() { }
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.Period;
+
+        private GreenPgnPeriodSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-        Union<GreenPgnBackgroundSyntax, IPgnForegroundSymbol> IGreenPgnSymbol.AsBackgroundOrForeground() => this;
     }
 
-    public static class PgnBracketStartSyntax
+    public static class PgnPeriodSyntax
     {
-        public const char BracketStartCharacter = '[';
-        public const int BracketStartLength = 1;
+        public const char PeriodCharacter = '.';
+        public const int PeriodLength = 1;
     }
 }

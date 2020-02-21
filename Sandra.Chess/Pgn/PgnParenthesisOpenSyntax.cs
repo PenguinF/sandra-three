@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnErrorCode.cs
+ * PgnParenthesisOpenSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -19,36 +19,38 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Enumerates distinct PGN syntax and semantic error types.
+    /// Represents the parenthesis open character '(' in PGN text.
     /// </summary>
-    public enum PgnErrorCode
+    public sealed class GreenPgnParenthesisOpenSyntax : IGreenPgnSymbol
     {
         /// <summary>
-        /// Occurs when a character is illegal.
+        /// Gets the single <see cref="GreenPgnParenthesisOpenSyntax"/> value.
         /// </summary>
-        IllegalCharacter,
+        public static GreenPgnParenthesisOpenSyntax Value { get; } = new GreenPgnParenthesisOpenSyntax();
 
         /// <summary>
-        /// Occurs when a tag value is not terminated before the end of the file.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        UnterminatedTagValue,
+        public int Length => PgnParenthesisOpenSyntax.ParenthesisOpenLength;
 
         /// <summary>
-        /// Occurs when an escape sequence in a tag value is not recognized.
+        /// Gets the type of this symbol.
         /// </summary>
-        UnrecognizedEscapeSequence,
+        public PgnSymbolType SymbolType => PgnSymbolType.ParenthesisOpen;
 
-        /// <summary>
-        /// Occurs when a control character appears in a tag value.
-        /// </summary>
-        IllegalControlCharacterInTagValue,
+        private GreenPgnParenthesisOpenSyntax() { }
 
-        /// <summary>
-        /// Occurs when a comment is not terminated before the end of the file.
-        /// </summary>
-        UnterminatedMultiLineComment,
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnParenthesisOpenSyntax
+    {
+        public const char ParenthesisOpenCharacter = '(';
+        public const int ParenthesisOpenLength = 1;
     }
 }
