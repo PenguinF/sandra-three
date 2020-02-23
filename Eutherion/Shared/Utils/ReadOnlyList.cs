@@ -69,9 +69,9 @@ namespace System.Collections.Generic
         internal static ReadOnlyList<T> DangerousCreateFromArray(T[] array)
             => array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
 
-        private readonly T[] array;
+        internal readonly T[] ReadOnlyArray;
 
-        private ReadOnlyList(T[] array) => this.array = array;
+        private ReadOnlyList(T[] array) => ReadOnlyArray = array;
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.
@@ -85,12 +85,12 @@ namespace System.Collections.Generic
         /// <exception cref="IndexOutOfRangeException">
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
-        public T this[int index] => array[index];
+        public T this[int index] => ReadOnlyArray[index];
 
         /// <summary>
         /// Gets the number of elements in the list.
         /// </summary>
-        public int Count => array.Length;
+        public int Count => ReadOnlyArray.Length;
 
         /// <summary>
         /// Returns an enumerator that iterates through the list.
@@ -98,7 +98,7 @@ namespace System.Collections.Generic
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
         /// </returns>
-        public IEnumerator<T> GetEnumerator() => ((ICollection<T>)array).GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => ((ICollection<T>)ReadOnlyArray).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

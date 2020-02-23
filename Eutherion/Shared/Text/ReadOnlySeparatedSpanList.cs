@@ -176,7 +176,7 @@ namespace Eutherion.Text
         /// </exception>
         public static ReadOnlySeparatedSpanList<TSpan, TSeparator> Create(IEnumerable<TSpan> source, TSeparator separator)
         {
-            var array = source.ToArrayEx();
+            var array = source is ReadOnlyList<TSpan> readOnlyList ? readOnlyList.ReadOnlyArray : source.ToArrayEx();
             if (separator == null) throw new ArgumentNullException(nameof(separator));
             if (array.Length == 0) return Empty;
             if (array.Length == 1) return new OneElement(array[0]);
