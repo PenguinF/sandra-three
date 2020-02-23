@@ -52,22 +52,8 @@ namespace System.Collections.Generic
         {
             if (source is ReadOnlyList<T> readOnlyList) return readOnlyList;
             var array = source.ToArrayEx();
-            return DangerousCreateFromArray(array);
+            return array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
         }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="ReadOnlyList{T}"/> from an existing array.
-        /// The <see cref="ReadOnlyList{T}"/> assumes ownership of the array, i.e. the array
-        /// should not be modified after being wrapped within the <see cref="ReadOnlyList{T}"/>.
-        /// </summary>
-        /// <param name="array">
-        /// The array with the elements of the <see cref="ReadOnlyList{T}"/>.
-        /// </param>
-        /// <returns>
-        /// The initialized <see cref="ReadOnlyList{T}"/>.
-        /// </returns>
-        internal static ReadOnlyList<T> DangerousCreateFromArray(T[] array)
-            => array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
 
         internal readonly T[] ReadOnlyArray;
 
