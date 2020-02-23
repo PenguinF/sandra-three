@@ -19,12 +19,9 @@
 **********************************************************************************/
 #endregion
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Eutherion.Utils
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Represents a read-only list of elements that can be accessed by index.

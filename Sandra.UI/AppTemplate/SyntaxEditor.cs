@@ -21,7 +21,6 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
-using Eutherion.Utils;
 using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
