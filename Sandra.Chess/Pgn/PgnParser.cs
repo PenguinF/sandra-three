@@ -200,6 +200,8 @@ namespace Sandra.Chess.Pgn
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
                                 goto inMultiLineComment;
+                            case PgnNagSyntax.NagCharacter:
+                                goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
@@ -285,6 +287,10 @@ namespace Sandra.Chess.Pgn
                             if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
                             symbolStartIndex = currentIndex;
                             goto inMultiLineComment;
+                        case PgnNagSyntax.NagCharacter:
+                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                            symbolStartIndex = currentIndex;
+                            goto inNumericAnnotationGlyph;
                     }
 
                     // Allow only digits, letters or the underscore character in tag names.
@@ -516,6 +522,45 @@ namespace Sandra.Chess.Pgn
             }
 
             yield return new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex);
+            yield break;
+
+        inNumericAnnotationGlyph:
+
+            // Eat the '$' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            int annotationValue = 0;
+            bool emptyNag = true;
+            bool overflowNag = false;
+
+            while (currentIndex < length)
+            {
+                int digit = pgnText[currentIndex] - '0';
+
+                if (digit < 0 || digit > 9)
+                {
+                    if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
+                    else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex);
+                    else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
+
+                    symbolStartIndex = currentIndex;
+                    goto inWhitespace;
+                }
+
+                emptyNag = false;
+
+                if (!overflowNag)
+                {
+                    annotationValue = annotationValue * 10 + digit;
+                    if (annotationValue >= 0x100) overflowNag = true;
+                }
+
+                currentIndex++;
+            }
+
+            if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
+            else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex);
+            else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
         }
 
         /// <summary>
