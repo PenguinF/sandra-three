@@ -86,8 +86,8 @@ namespace Sandra.Chess.Tests
                 yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
                 yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
                 yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1", typeof(GreenPgnUnknownSymbolSyntax));
-                yield return ("A1", typeof(GreenPgnTagNameSyntax));
+                yield return ("a1=", typeof(GreenPgnUnknownSymbolSyntax));
+                yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
