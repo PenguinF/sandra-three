@@ -45,11 +45,14 @@ namespace Sandra.Chess.Tests
             }
             else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
             {
-                // GreenPgnSymbol only works if it contains only alphanumeric characters.
-                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
-                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                if (tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
                     resultTokenType = tokenType1;
+                    return true;
+                }
+                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax))
+                {
+                    resultTokenType = tokenType2;
                     return true;
                 }
             }
