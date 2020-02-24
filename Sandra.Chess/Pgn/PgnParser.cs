@@ -69,9 +69,13 @@ namespace Sandra.Chess.Pgn
             for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
 
             // Letters, digits.
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
-            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
             for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] |= DigitCharacter;
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
+            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;  //0xc0-0xd6
+            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;  //0xd8-0xde
+            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
+            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;  //0xdf-0xf6
+            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;  //0xf8-0xff
 
             // Treat the underscore as a lower case character.
             PgnCharacterClassTable['_'] |= LowercaseLetterCharacter;
