@@ -89,6 +89,10 @@ namespace Sandra.Chess.Pgn
             PgnCharacterClassTable['}'] = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong GetCharacterClass(char pgnCharacter)
+            => pgnCharacter <= 0xff ? PgnCharacterClassTable[pgnCharacter] : IllegalCharacter;
+
         #endregion PGN character classes
 
         /// <summary>
@@ -142,7 +146,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                ulong characterClass = GetCharacterClass(c);
 
                 if (characterClass != WhitespaceCharacter)
                 {
@@ -223,7 +227,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                ulong characterClass = GetCharacterClass(c);
 
                 if (characterClass == WhitespaceCharacter)
                 {
