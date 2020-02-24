@@ -185,7 +185,7 @@ namespace Sandra.Chess.Pgn
                                 goto default;
                             default:
                                 // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
+                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter | LowercaseLetterCharacter);
                                 goto inSymbol;
                         }
                     }
