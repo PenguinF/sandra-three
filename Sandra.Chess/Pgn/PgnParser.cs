@@ -36,20 +36,20 @@ namespace Sandra.Chess.Pgn
 
         #region PGN character classes
 
-        private const ulong IllegalCharacter = 0;
+        private const int IllegalCharacter = 0;
 
-        private const ulong UppercaseLetterCharacter = 1;
-        private const ulong LowercaseLetterCharacter = 2;
-        private const ulong DigitCharacter = 3;
+        private const int UppercaseLetterCharacter = 1;
+        private const int LowercaseLetterCharacter = 2;
+        private const int DigitCharacter = 3;
 
-        private const ulong SpecialCharacter = 1 << 6;
-        private const ulong WhitespaceCharacter = 1 << 7;
+        private const int SpecialCharacter = 1 << 6;
+        private const int WhitespaceCharacter = 1 << 7;
 
         /// <summary>
         /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
         /// A value of 0 means the character is not allowed.
         /// </summary>
-        private static readonly ulong[] PgnCharacterClassTable = new ulong[0x100];
+        private static readonly int[] PgnCharacterClassTable = new int[0x100];
 
         static PgnParser()
         {
@@ -93,7 +93,7 @@ namespace Sandra.Chess.Pgn
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ulong GetCharacterClass(char pgnCharacter)
+        private static int GetCharacterClass(char pgnCharacter)
             => pgnCharacter <= 0xff ? PgnCharacterClassTable[pgnCharacter] : IllegalCharacter;
 
         #endregion PGN character classes
@@ -149,7 +149,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = GetCharacterClass(c);
+                int characterClass = GetCharacterClass(c);
 
                 if (characterClass != WhitespaceCharacter)
                 {
@@ -230,7 +230,7 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = GetCharacterClass(c);
+                int characterClass = GetCharacterClass(c);
 
                 if (characterClass == WhitespaceCharacter)
                 {
