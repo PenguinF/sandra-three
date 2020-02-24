@@ -46,16 +46,16 @@ namespace Sandra.Chess.Tests
             else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
             {
                 // GreenPgnSymbol only works if it contains only alphanumeric characters.
-                if (tokenType2 == typeof(GreenPgnSymbol)
+                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
                     resultTokenType = tokenType1;
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(GreenPgnSymbol))
+            else if (tokenType1 == typeof(GreenPgnUnknownSymbolSyntax))
             {
-                if (tokenType2 == typeof(GreenPgnSymbol)
+                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
                     resultTokenType = tokenType1;
@@ -83,7 +83,7 @@ namespace Sandra.Chess.Tests
                 yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
                 yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
                 yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1", typeof(GreenPgnSymbol));
+                yield return ("a1", typeof(GreenPgnUnknownSymbolSyntax));
                 yield return ("A1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
@@ -393,7 +393,7 @@ namespace Sandra.Chess.Tests
             AssertTokens(
                 " %",
                 ExpectToken<GreenPgnWhitespaceSyntax>(1),
-                ExpectToken<GreenPgnSymbol>(1));
+                ExpectToken<GreenPgnUnknownSymbolSyntax>(1));
 
             AssertTokens(
                 "\n%\n\n",

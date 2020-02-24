@@ -100,7 +100,7 @@ namespace Sandra.Chess.Pgn
         private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
             if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
-            return new GreenPgnSymbol(length);
+            return new GreenPgnUnknownSymbolSyntax(length);
         }
 
         /// <summary>

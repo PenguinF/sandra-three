@@ -19,6 +19,33 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a PGN syntax node with an unknown symbol.
+    /// </summary>
+    public sealed class GreenPgnUnknownSymbolSyntax : IGreenPgnSymbol
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.Unknown;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnUnknownSymbolSyntax"/>.
+        /// </summary>
+        public GreenPgnUnknownSymbolSyntax(int length)
+        {
+            Length = length;
+        }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
 }

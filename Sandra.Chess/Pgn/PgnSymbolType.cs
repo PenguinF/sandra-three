@@ -67,11 +67,6 @@ namespace Sandra.Chess.Pgn
         BracketOpen,
 
         /// <summary>
-        /// Type of a tag value syntax node which contains errors.
-        /// </summary>
-        ErrorTagValue,
-
-        /// <summary>
         /// Type of the parenthesis close character ')' in PGN text.
         /// </summary>
         ParenthesisClose,
@@ -96,6 +91,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         TagValue,
 
-        OtherNotSpecified
+        /// <summary>
+        /// Type of a tag value syntax node which contains errors.
+        /// </summary>
+        ErrorTagValue,
+
+        /// <summary>
+        /// Type of a PGN syntax node with an unknown symbol.
+        /// </summary>
+        Unknown
     }
 }
