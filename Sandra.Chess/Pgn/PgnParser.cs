@@ -22,6 +22,7 @@
 using Eutherion.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -63,14 +64,27 @@ namespace Sandra.Chess.Pgn
             // Treat 0xa0 as a space separator too.
             PgnCharacterClassTable[0xa0] = WhitespaceCharacter;
 
-            // 0x21..0x7e
-            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
-
-            // 0xa0..0xbf: discouraged but allowed.
-            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
-
-            // 0xc0..0xff: allowed and encouraged.
-            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
+            new[]
+            {
+                PgnAsteriskSyntax.AsteriskCharacter,
+                PgnBracketOpenSyntax.BracketOpenCharacter,
+                PgnBracketCloseSyntax.BracketCloseCharacter,
+                PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
+                PgnParenthesisOpenSyntax.ParenthesisOpenCharacter,
+                PgnPeriodSyntax.PeriodCharacter,
+                StringLiteral.QuoteCharacter,
+                PgnCommentSyntax.EndOfLineCommentStartCharacter,
+                PgnCommentSyntax.MultiLineCommentStartCharacter,
+                PgnEscapeSyntax.EscapeCharacter,
+                '$',
+                '-',
+                '/',
+                '=',
+                '+',
+                '#',
+                '!',
+                '?',
+            }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
 
             // Letters, digits.
             for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] = DigitCharacter;
@@ -83,13 +97,6 @@ namespace Sandra.Chess.Pgn
 
             // Treat the underscore as a lower case character.
             PgnCharacterClassTable['_'] = LowercaseLetterCharacter;
-
-            // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
-            PgnCharacterClassTable['<'] = 0;
-            PgnCharacterClassTable['>'] = 0;
-
-            // Special case: this character delimits multi-line comments, and is otherwise only valid inside strings.
-            PgnCharacterClassTable['}'] = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
