@@ -22,6 +22,7 @@
 using Eutherion.Text;
 using Eutherion.Utils;
 using Eutherion.Win.AppTemplate;
+using Sandra.Chess.Pgn;
 using Sandra.PgnDeprecated;
 using ScintillaNET;
 using System;
@@ -110,11 +111,6 @@ namespace Sandra.UI
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Standardized PGN notation for pieces.
-        /// </summary>
-        private const string PgnPieceSymbols = "NBRQK";
-
         private readonly LocalizedString localizedPieceSymbols = new LocalizedString(LocalizedStringKeys.PieceSymbols);
 
         private enum MoveFormattingOption
@@ -155,7 +151,7 @@ namespace Sandra.UI
             string pieceSymbols;
             if (moveFormattingOption == MoveFormattingOption.UsePgn)
             {
-                pieceSymbols = PgnPieceSymbols;
+                pieceSymbols = PgnMoveSyntax.PieceSymbols;
             }
             else
             {
@@ -163,7 +159,7 @@ namespace Sandra.UI
                 if (pieceSymbols.Length != 5 && pieceSymbols.Length != 6)
                 {
                     // Revert back to PGN.
-                    pieceSymbols = PgnPieceSymbols;
+                    pieceSymbols = PgnMoveSyntax.PieceSymbols;
                 }
             }
 

@@ -21,4 +21,11 @@
 
 namespace Sandra.Chess.Pgn
 {
+    public static class PgnMoveSyntax
+    {
+        /// <summary>
+        /// Standardized PGN notation for pieces.
+        /// </summary>
+        public const string PieceSymbols = "NBRQK";
+    }
 }
