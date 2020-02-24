@@ -69,7 +69,7 @@ namespace Sandra.UI
         private PgnStyleSelector() { }
 
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
-            => syntaxEditor.Styles[symbolStyleIndex];
+            => syntaxEditor.Styles[illegalCharacterStyleIndex];
 
         public override Style VisitCommentSyntax(PgnCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
@@ -93,9 +93,11 @@ namespace Sandra.UI
                     return syntaxEditor.Styles[tagValueStyleIndex];
                 case PgnSymbolType.ErrorTagValue:
                     return syntaxEditor.Styles[errorTagValueStyleIndex];
+                case PgnSymbolType.Unknown:
+                    return syntaxEditor.Styles[illegalCharacterStyleIndex];
             }
 
-            return syntaxEditor.Styles[symbolStyleIndex];
+            return syntaxEditor.DefaultStyle;
         }
     }
 }
