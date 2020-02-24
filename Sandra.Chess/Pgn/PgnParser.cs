@@ -37,11 +37,13 @@ namespace Sandra.Chess.Pgn
         #region PGN character classes
 
         private const ulong IllegalCharacter = 0;
-        private const ulong WhitespaceCharacter = 0x1;
-        private const ulong SymbolCharacter = 0x1 << 1;
-        private const ulong UppercaseLetterCharacter = 0x1 << 2;
-        private const ulong LowercaseLetterCharacter = 0x1 << 3;
-        private const ulong DigitCharacter = 0x1 << 4;
+
+        private const ulong UppercaseLetterCharacter = 1;
+        private const ulong LowercaseLetterCharacter = 2;
+        private const ulong DigitCharacter = 3;
+
+        private const ulong SpecialCharacter = 1 << 6;
+        private const ulong WhitespaceCharacter = 1 << 7;
 
         /// <summary>
         /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
@@ -52,34 +54,35 @@ namespace Sandra.Chess.Pgn
         static PgnParser()
         {
             // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
-            PgnCharacterClassTable['\t'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\n'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\v'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\r'] |= WhitespaceCharacter;
-            PgnCharacterClassTable[' '] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\t'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\n'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\v'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\r'] = WhitespaceCharacter;
+            PgnCharacterClassTable[' '] = WhitespaceCharacter;
+
+            // Treat 0xa0 as a space separator too.
+            PgnCharacterClassTable[0xa0] = WhitespaceCharacter;
 
             // 0x21..0x7e
-            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
 
             // 0xa0..0xbf: discouraged but allowed.
-            // Treat 0xa0 as a space separator.
-            PgnCharacterClassTable[0xa0] |= WhitespaceCharacter;
-            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
 
             // 0xc0..0xff: allowed and encouraged.
-            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = SpecialCharacter;
 
             // Letters, digits.
-            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] |= DigitCharacter;
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
-            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;  //0xc0-0xd6
-            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;  //0xd8-0xde
-            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
-            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;  //0xdf-0xf6
-            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;  //0xf8-0xff
+            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] = DigitCharacter;
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;
+            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;  //0xc0-0xd6
+            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;  //0xd8-0xde
+            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;
+            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;  //0xdf-0xf6
+            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;  //0xf8-0xff
 
             // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] |= LowercaseLetterCharacter;
+            PgnCharacterClassTable['_'] = LowercaseLetterCharacter;
 
             // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
             PgnCharacterClassTable['<'] = 0;
@@ -196,7 +199,7 @@ namespace Sandra.Chess.Pgn
                                 goto default;
                             default:
                                 // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter | LowercaseLetterCharacter);
+                                allLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
                                 goto inSymbol;
                         }
                     }
@@ -278,8 +281,10 @@ namespace Sandra.Chess.Pgn
                     }
 
                     // Allow only digits, letters or the underscore character in tag names.
-                    const ulong letterOrDigit = UppercaseLetterCharacter | LowercaseLetterCharacter | DigitCharacter;
-                    allLegalTagNameCharacters = allLegalTagNameCharacters && characterClass.Test(letterOrDigit);
+                    allLegalTagNameCharacters = allLegalTagNameCharacters &&
+                        (characterClass == UppercaseLetterCharacter
+                        || characterClass == LowercaseLetterCharacter
+                        || characterClass == DigitCharacter);
                 }
                 else
                 {
