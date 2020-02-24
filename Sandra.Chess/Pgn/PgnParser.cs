@@ -22,6 +22,7 @@
 using Eutherion.Text;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Sandra.Chess.Pgn
@@ -95,12 +96,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
             => new GreenPgnIllegalCharacterSyntax(
                 StringLiteral.CharacterMustBeEscaped(c)
                 ? StringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
         {
             if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
