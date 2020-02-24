@@ -114,6 +114,8 @@
     "PgnErrorUnterminatedTagValue": "unterminated tag value",
     "PgnErrorUnrecognizedEscapeSequence": "unrecognized escape sequence ('{0}')",
     "PgnErrorIllegalControlCharacterInTagValue": "illegal control character '{0}' in tag value",
-    "PgnErrorUnterminatedMultiLineComment": "unterminated comment"
+    "PgnErrorUnterminatedMultiLineComment": "unterminated comment",
+    "PgnErrorEmptyNag": "expected integer value after annotation '$'",
+    "PgnErrorOverflowNag": "expected integer value between 0 and 255 for annotation, but found '{0}'"
   }
 }

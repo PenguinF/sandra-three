@@ -114,6 +114,8 @@
     "PgnErrorUnterminatedTagValue": "label waarde niet afgesloten met een '\"' karakter",
     "PgnErrorUnrecognizedEscapeSequence": "escape karakter reeks niet herkend ('{0}')",
     "PgnErrorIllegalControlCharacterInTagValue": "illegaal stuurkarakter '{0}' binnen label waarde",
-    "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter"
+    "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter",
+    "PgnErrorEmptyNag": "geheel getal verwacht na annotatie '$'",
+    "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'"
   }
 }

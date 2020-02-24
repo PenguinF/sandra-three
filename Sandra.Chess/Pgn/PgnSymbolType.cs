@@ -97,6 +97,21 @@ namespace Sandra.Chess.Pgn
         ErrorTagValue,
 
         /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node.
+        /// </summary>
+        Nag,
+
+        /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node with an empty annotation.
+        /// </summary>
+        EmptyNag,
+
+        /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node with an annotation value of 256 or larger.
+        /// </summary>
+        OverflowNag,
+
+        /// <summary>
         /// Type of a PGN syntax node with an unknown symbol.
         /// </summary>
         Unknown

@@ -21,4 +21,43 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents an annotation to a move or position in PGN.
+    /// </summary>
+    public enum PgnAnnotation
+    {
+        Null,
+        GoodMove,
+        PoorMove,
+        VeryGoodMove,
+        VeryPoorMove,
+        SpeculativeMove,
+        QuestionableMove,
+        ForcedMove,
+        SingularMove,
+        WorstMove,
+
+        DrawishPosition,
+        QuietPosition,
+        ActivePosition,
+        UnclearPosition,
+        WhiteSlightAdvantage,
+        BlackSlightAdvantage,
+        WhiteModerateAdvantage,
+        BlackModerateAdvantage,
+        WhiteDecisiveAdvantage,
+        BlackDecisiveAdvantage,
+
+        WhiteInZugzwang = 22,
+        BlackInZugZwang,
+
+        WhiteHasInitiative = 36,
+        BlackHasInitiative,
+        WhiteHasLastingInitiative,
+        BlackHasLastingInitiative,
+        WhiteHasAttack,
+        BlackHasAttack,
+
+        Novelty = 146,
+    }
 }

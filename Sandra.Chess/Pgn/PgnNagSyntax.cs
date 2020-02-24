@@ -19,6 +19,56 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a Numeric Annotation Glyph syntax node.
+    /// </summary>
+    public sealed class GreenPgnNagSyntax : IGreenPgnSymbol
+    {
+        /// <summary>
+        /// Gets the annotation value of this syntax node.
+        /// </summary>
+        public PgnAnnotation Annotation { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.Nag;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnNagSyntax"/>.
+        /// </summary>
+        /// <param name="annotation">
+        /// The annotation value.
+        /// </param>
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create, including the '$' character.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 1 or lower.
+        /// </exception>
+        public GreenPgnNagSyntax(PgnAnnotation annotation, int length)
+        {
+            Annotation = annotation;
+            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnNagSyntax
+    {
+        public const char NagCharacter = '$';
+        public const int NagLength = 1;
+    }
 }

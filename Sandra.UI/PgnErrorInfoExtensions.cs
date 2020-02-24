@@ -43,6 +43,8 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.UnrecognizedEscapeSequence), "unrecognized escape sequence ('{0}')" },
             { GetLocalizedStringKey(PgnErrorCode.IllegalControlCharacterInTagValue), "illegal control character '{0}' in tag value" },
             { GetLocalizedStringKey(PgnErrorCode.UnterminatedMultiLineComment), "unterminated comment" },
+            { GetLocalizedStringKey(PgnErrorCode.EmptyNag), "expected integer value after annotation '$'" },
+            { GetLocalizedStringKey(PgnErrorCode.OverflowNag), "expected integer value between 0 and 255 for annotation, but found '{0}'" },
         };
     }
 }
