@@ -85,13 +85,13 @@ namespace Sandra.UI
 
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
-            switch (node.Green)
+            switch (node.Green.SymbolType)
             {
-                case GreenPgnTagNameSyntax _:
+                case PgnSymbolType.TagName:
                     return syntaxEditor.Styles[tagNameStyleIndex];
-                case GreenPgnTagValueSyntax _:
+                case PgnSymbolType.TagValue:
                     return syntaxEditor.Styles[tagValueStyleIndex];
-                case GreenPgnErrorTagValueSyntax _:
+                case PgnSymbolType.ErrorTagValue:
                     return syntaxEditor.Styles[errorTagValueStyleIndex];
             }
 
