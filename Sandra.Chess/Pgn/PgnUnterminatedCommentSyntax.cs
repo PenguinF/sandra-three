@@ -56,10 +56,10 @@ namespace Sandra.Chess.Pgn
         /// Generates the error associated with this symbol at a given start position.
         /// </summary>
         /// <param name="startPosition">
-        /// The start position for which to generate the errors.
+        /// The start position for which to generate the error.
         /// </param>
         /// <returns>
-        /// The errors associated with this symbol.
+        /// The error associated with this symbol.
         /// </returns>
         public PgnErrorInfo GetError(int startPosition) => PgnUnterminatedCommentSyntax.CreateError(startPosition, Length);
 
