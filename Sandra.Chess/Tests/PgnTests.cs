@@ -520,7 +520,7 @@ namespace Sandra.Chess.Tests
                     new SingleElementEnumerable<string>($"{m}")
                     .Union(new SingleElementEnumerable<string>($"P{m}")));
 
-            foreach (var pawnMove in pawnMoves) yield return SMTestCase<GreenPgnTagNameSyntax>(pawnMove);
+            foreach (var pawnMove in pawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(pawnMove);
 
             // Allow promotion to king, then assume the other piece letters work too.
             var promotionMoves = fileRanks.Union(capturePawnMoves).Select(m => $"{m}=K");

@@ -92,6 +92,15 @@ namespace Sandra.Chess.Pgn
         // 'a'-'h' OR 'Pa'-'Ph'
         private const int StateGotFile = 22;
 
+        // E.g. 'ex', 'Pex'
+        private const int StatePawnCaptures = 23;
+
+        // E.g. 'exd', 'Pexd'
+        private const int StatePawnCapturesFile = 24;
+
+        // E.g. 'e4', 'exd4', 'Pe4', 'Pexd4'
+        private const int StatePawnMoveComplete = 25;
+
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -103,12 +112,16 @@ namespace Sandra.Chess.Pgn
 
         private const ulong ValidMoveTextStates
             = 1ul << StateCastlingMove3
-            | 1ul << StateCastlingMove5;
+            | 1ul << StateCastlingMove5
+            | 1ul << StatePawnMoveComplete;
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
             | 1ul << StateP
             | 1ul << StateGotFile
+            | 1ul << StatePawnCaptures
+            | 1ul << StatePawnCapturesFile
+            | 1ul << StatePawnMoveComplete
             | 1ul << StateValidTagName;
 
         // This table is used to transition from state to state given a character class index.
@@ -165,7 +178,9 @@ namespace Sandra.Chess.Pgn
 
             // Allow only digits, letters or the underscore character in tag names.
             // Some of the transitions here are overwritten below for specific move parsing.
-            new[] { StateO, StateP, StateGotFile, StateValidTagName }.ForEach(state =>
+            new[] { StateO, StateP, StateGotFile,
+                    StatePawnCaptures, StatePawnCapturesFile, StatePawnMoveComplete,
+                    StateValidTagName }.ForEach(state =>
             {
                 StateTransitionTable[state, Digit0] = StateValidTagName;
                 StateTransitionTable[state, Digit1] = StateValidTagName;
@@ -189,6 +204,15 @@ namespace Sandra.Chess.Pgn
 
             // Pawn moves: optional 'P' followed by file + rank, or file + 'x' + file + rank.
             StateTransitionTable[StateP, LowercaseAtoH] = StateGotFile;
+            StateTransitionTable[StateGotFile, Digit1] = StatePawnMoveComplete;
+            StateTransitionTable[StateGotFile, Digit2] = StatePawnMoveComplete;
+            StateTransitionTable[StateGotFile, Digit3_8] = StatePawnMoveComplete;
+
+            StateTransitionTable[StateGotFile, LowercaseX] = StatePawnCaptures;
+            StateTransitionTable[StatePawnCaptures, LowercaseAtoH] = StatePawnCapturesFile;
+            StateTransitionTable[StatePawnCapturesFile, Digit1] = StatePawnMoveComplete;
+            StateTransitionTable[StatePawnCapturesFile, Digit2] = StatePawnMoveComplete;
+            StateTransitionTable[StatePawnCapturesFile, Digit3_8] = StatePawnMoveComplete;
         }
 
         private int CurrentState;
