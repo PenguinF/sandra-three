@@ -463,8 +463,8 @@ namespace Eutherion.Win.AppTemplate
     /// </summary>
     public static class DefaultSyntaxEditorStyle
     {
-        public static readonly Color BackColor = Color.FromArgb(16, 16, 16);
-        public static readonly Color ForeColor = Color.WhiteSmoke;
+        public static readonly Color BackColor = Color.FromArgb(0x21, 0x22, 0x1c);
+        public static readonly Color ForeColor = Color.AntiqueWhite;
         public static readonly Font Font = new Font("Consolas", 10);
 
         /// <summary>
