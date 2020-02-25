@@ -503,7 +503,7 @@ namespace Sandra.Chess.Tests
             foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnMoveNumberSyntax>(moveNumber);
 
             // Termination markers.
-            yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("1/2-1/2");
+            yield return SMTestCase<GreenPgnDrawMarkerSyntax>("1/2-1/2");
             yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("1-0");
             yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("0-1");
 

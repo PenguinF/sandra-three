@@ -55,10 +55,21 @@ namespace Sandra.Chess.Pgn
         // The default state 0 indicates that the machine has entered an invalid state, and will never become valid again.
         private const int StateStart = 1;
 
+        // Game termination marker accepting states placed before any other accepting state, for inequality check in Yield().
+        // State1 '1' -> StateDraw2 '1/' -> ... -> StateDraw7 '1/2-1/2'
+        private const int StateDraw2 = 2;
+        private const int StateDraw3 = 3;
+        private const int StateDraw4 = 4;
+        private const int StateDraw5 = 5;
+        private const int StateDraw6 = 6;
+        private const int StateDraw7 = 7;
+
         // Distinct states after the first character was a digit.
-        private const int State0 = 2;
-        private const int State1 = 3;
-        private const int StateValidMoveNumber = 4;
+        private const int State0 = 8;
+        private const int State1 = 9;
+
+        // All digits.
+        private const int StateValidMoveNumber = 10;
 
         private const int StateValidTagName = 39;
 
@@ -98,6 +109,14 @@ namespace Sandra.Chess.Pgn
                 StateTransitionTable[state, Digit9] = StateValidMoveNumber;
             });
 
+            // Termination markers.
+            StateTransitionTable[State1, Slash] = StateDraw2;
+            StateTransitionTable[StateDraw2, Digit2] = StateDraw3;
+            StateTransitionTable[StateDraw3, Dash] = StateDraw4;
+            StateTransitionTable[StateDraw4, Digit1] = StateDraw5;
+            StateTransitionTable[StateDraw5, Slash] = StateDraw6;
+            StateTransitionTable[StateDraw6, Digit2] = StateDraw7;
+
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
             StateTransitionTable[StateStart, LetterO] = StateValidTagName;
@@ -133,9 +152,17 @@ namespace Sandra.Chess.Pgn
 
         public IGreenPgnSymbol Yield(int length)
         {
-            ulong resultState = 1ul << CurrentState;
-            if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
-            if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
+            if (CurrentState < State0)
+            {
+                if (CurrentState == StateDraw7) return GreenPgnDrawMarkerSyntax.Value;
+            }
+            else
+            {
+                ulong resultState = 1ul << CurrentState;
+                if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
+                if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
+            }
+
             return null;
         }
     }
