@@ -45,6 +45,7 @@ namespace Sandra.UI
             { GetLocalizedStringKey(PgnErrorCode.UnterminatedMultiLineComment), "unterminated comment" },
             { GetLocalizedStringKey(PgnErrorCode.EmptyNag), "expected integer value after annotation '$'" },
             { GetLocalizedStringKey(PgnErrorCode.OverflowNag), "expected integer value between 0 and 255 for annotation, but found '{0}'" },
+            { GetLocalizedStringKey(PgnErrorCode.UnknownSymbol), "unrecognized move or name '{0}'" },
         };
     }
 }

@@ -116,6 +116,7 @@
     "PgnErrorIllegalControlCharacterInTagValue": "illegaal stuurkarakter '{0}' binnen label waarde",
     "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter",
     "PgnErrorEmptyNag": "geheel getal verwacht na annotatie '$'",
-    "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'"
+    "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'",
+    "PgnErrorUnknownSymbol": "zet of naam niet herkend '{0}'"
   }
 }

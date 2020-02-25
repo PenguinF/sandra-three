@@ -130,8 +130,9 @@ namespace Sandra.Chess.Pgn
                 : Convert.ToString(c));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, int length)
-            => symbolBuilder.Yield(length) ?? new GreenPgnUnknownSymbolSyntax(length);
+        private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
+            => symbolBuilder.Yield(length)
+            ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length));
 
         /// <summary>
         /// Tokenizes source text in the PGN format.
@@ -261,7 +262,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                        yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                         symbolStartIndex = currentIndex;
                     }
 
@@ -299,19 +300,19 @@ namespace Sandra.Chess.Pgn
                                 symbolToYield = GreenPgnPeriodSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case StringLiteral.QuoteCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inString;
                             case PgnCommentSyntax.EndOfLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inMultiLineComment;
                             case PgnNagSyntax.NagCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
@@ -333,7 +334,7 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+                yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -341,7 +342,7 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
+            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
             yield return symbolToYield;
             currentIndex++;
             symbolStartIndex = currentIndex;
