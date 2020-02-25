@@ -26,6 +26,28 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     internal struct PgnSymbolStateMachine
     {
-        public bool AllLegalTagNameCharacters;
+        internal const int UppercaseLetterCharacter = 1;
+        internal const int LowercaseLetterCharacter = 2;
+        internal const int DigitCharacter = 3;
+        internal const int OtherSymbolCharacter = 4;
+
+        private bool AllLegalTagNameCharacters;
+
+        public void Start(int characterClass)
+            // Tag names must start with an uppercase letter.
+            => AllLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
+
+        public void Transition(int characterClass)
+            // Allow only digits, letters or the underscore character in tag names.
+            => AllLegalTagNameCharacters = AllLegalTagNameCharacters &&
+                (characterClass == UppercaseLetterCharacter
+                || characterClass == LowercaseLetterCharacter
+                || characterClass == DigitCharacter);
+
+        public IGreenPgnSymbol Yield(int length)
+        {
+            if (AllLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
+            return null;
+        }
     }
 }

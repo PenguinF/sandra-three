@@ -42,11 +42,6 @@ namespace Sandra.Chess.Pgn
         // Symbol characters in discrete partitions of character sets.
         private const int SymbolCharacterMask = 0x3f;
 
-        private const int UppercaseLetterCharacter = 1;
-        private const int LowercaseLetterCharacter = 2;
-        private const int DigitCharacter = 3;
-        private const int OtherSymbolCharacter = 4;
-
         private const int SpecialCharacter = 1 << 6;
         private const int WhitespaceCharacter = 1 << 7;
 
@@ -84,16 +79,16 @@ namespace Sandra.Chess.Pgn
             }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
 
             // Letters, digits.
-            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] = DigitCharacter;
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;
-            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;  //0xc0-0xd6
-            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = UppercaseLetterCharacter;  //0xd8-0xde
-            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;
-            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;  //0xdf-0xf6
-            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = LowercaseLetterCharacter;  //0xf8-0xff
+            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.DigitCharacter;
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;
+            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;  //0xc0-0xd6
+            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;  //0xd8-0xde
+            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;
+            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;  //0xdf-0xf6
+            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;  //0xf8-0xff
 
             // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] = LowercaseLetterCharacter;
+            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.LowercaseLetterCharacter;
 
             new[]
             {
@@ -104,7 +99,7 @@ namespace Sandra.Chess.Pgn
                 '#',
                 '!',
                 '?',
-            }.ForEach(c => PgnCharacterClassTable[c] = OtherSymbolCharacter);
+            }.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherSymbolCharacter);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -127,10 +122,7 @@ namespace Sandra.Chess.Pgn
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, int length)
-        {
-            if (symbolBuilder.AllLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
-            return new GreenPgnUnknownSymbolSyntax(length);
-        }
+            => symbolBuilder.Yield(length) ?? new GreenPgnUnknownSymbolSyntax(length);
 
         /// <summary>
         /// Tokenizes source text in the PGN format.
@@ -179,8 +171,7 @@ namespace Sandra.Chess.Pgn
                         int symbolCharacterClass = characterClass & SymbolCharacterMask;
                         if (symbolCharacterClass != 0)
                         {
-                            // Tag names must start with an uppercase letter.
-                            symbolBuilder.AllLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
+                            symbolBuilder.Start(symbolCharacterClass);
                             goto inSymbol;
                         }
 
@@ -274,11 +265,7 @@ namespace Sandra.Chess.Pgn
                     int symbolCharacterClass = characterClass & SymbolCharacterMask;
                     if (symbolCharacterClass != 0)
                     {
-                        // Allow only digits, letters or the underscore character in tag names.
-                        symbolBuilder.AllLegalTagNameCharacters = symbolBuilder.AllLegalTagNameCharacters &&
-                            (characterClass == UppercaseLetterCharacter
-                            || characterClass == LowercaseLetterCharacter
-                            || characterClass == DigitCharacter);
+                        symbolBuilder.Transition(symbolCharacterClass);
                     }
                     else
                     {
