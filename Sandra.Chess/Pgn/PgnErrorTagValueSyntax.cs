@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using Eutherion.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +34,7 @@ namespace Sandra.Chess.Pgn
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
+        /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length { get; }
 

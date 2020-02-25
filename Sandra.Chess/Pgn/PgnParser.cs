@@ -22,6 +22,8 @@
 using Eutherion.Text;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Sandra.Chess.Pgn
@@ -35,54 +37,83 @@ namespace Sandra.Chess.Pgn
 
         #region PGN character classes
 
-        private const ulong IllegalCharacter = 0;
-        private const ulong WhitespaceCharacter = 0x1;
-        private const ulong SymbolCharacter = 0x1 << 1;
-        private const ulong UppercaseLetterCharacter = 0x1 << 2;
-        private const ulong LowercaseLetterCharacter = 0x1 << 3;
-        private const ulong DigitCharacter = 0x1 << 4;
+        private const int IllegalCharacter = 0;
+
+        // Symbol characters in discrete partitions of character sets.
+        private const int SymbolCharacterMask = 0x3f;
+
+        private const int SpecialCharacter = 1 << 6;
+        private const int WhitespaceCharacter = 1 << 7;
 
         /// <summary>
         /// Contains a bitfield of character classes relevant for PGN, for each 8-bit character.
         /// A value of 0 means the character is not allowed.
         /// </summary>
-        private static readonly ulong[] PgnCharacterClassTable = new ulong[0x100];
+        private static readonly int[] PgnCharacterClassTable = new int[0x100];
 
         static PgnParser()
         {
             // 0x00..0x20: treat 4 control characters and ' ' as whitespace.
-            PgnCharacterClassTable['\t'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\n'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\v'] |= WhitespaceCharacter;
-            PgnCharacterClassTable['\r'] |= WhitespaceCharacter;
-            PgnCharacterClassTable[' '] |= WhitespaceCharacter;
+            PgnCharacterClassTable['\t'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\n'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\v'] = WhitespaceCharacter;
+            PgnCharacterClassTable['\r'] = WhitespaceCharacter;
+            PgnCharacterClassTable[' '] = WhitespaceCharacter;
 
-            // 0x21..0x7e
-            for (char c = '!'; c <= '~'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            // Treat 0xa0 as a space separator too.
+            PgnCharacterClassTable[0xa0] = WhitespaceCharacter;
 
-            // 0xa0..0xbf: discouraged but allowed.
-            // Treat 0xa0 as a space separator.
-            PgnCharacterClassTable[0xa0] |= WhitespaceCharacter;
-            for (char c = '¡'; c <= '¿'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            new[]
+            {
+                PgnAsteriskSyntax.AsteriskCharacter,
+                PgnBracketOpenSyntax.BracketOpenCharacter,
+                PgnBracketCloseSyntax.BracketCloseCharacter,
+                PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
+                PgnParenthesisOpenSyntax.ParenthesisOpenCharacter,
+                PgnPeriodSyntax.PeriodCharacter,
+                StringLiteral.QuoteCharacter,
+                PgnCommentSyntax.EndOfLineCommentStartCharacter,
+                PgnCommentSyntax.MultiLineCommentStartCharacter,
+                PgnNagSyntax.NagCharacter,
+                PgnEscapeSyntax.EscapeCharacter,
+            }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
 
-            // 0xc0..0xff: allowed and encouraged.
-            for (char c = 'À'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] |= SymbolCharacter;
+            // Digits.
+            PgnCharacterClassTable['0'] = PgnSymbolStateMachine.Digit0;
+            PgnCharacterClassTable['1'] = PgnSymbolStateMachine.Digit1;
+            PgnCharacterClassTable['2'] = PgnSymbolStateMachine.Digit2;
+            for (char c = '3'; c <= '8'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.Digit3_8;
+            PgnCharacterClassTable['9'] = PgnSymbolStateMachine.Digit9;
 
-            // Letters, digits.
-            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] |= UppercaseLetterCharacter;
-            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] |= LowercaseLetterCharacter;
-            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] |= DigitCharacter;
+            // Letters.
+            for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;
+            for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xc0-0xd6
+            for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xd8-0xde
+            for (char c = 'a'; c <= 'h'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseAtoH;
+            for (char c = 'i'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;
+            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xdf-0xf6
+            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xf8-0xff
 
             // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] |= LowercaseLetterCharacter;
+            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.OtherLowercaseLetter;
 
-            // < and > are reserved for future expansion according to the PGN spec. Therefore treat as illegal.
-            PgnCharacterClassTable['<'] = 0;
-            PgnCharacterClassTable['>'] = 0;
-
-            // Special case: this character delimits multi-line comments, and is otherwise only valid inside strings.
-            PgnCharacterClassTable['}'] = 0;
+            // Special cases.
+            PgnCharacterClassTable['O'] = PgnSymbolStateMachine.LetterO;
+            PgnCharacterClassTable['P'] = PgnSymbolStateMachine.LetterP;
+            PgnMoveSyntax.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
+            PgnCharacterClassTable['x'] = PgnSymbolStateMachine.LowercaseX;
+            PgnCharacterClassTable['-'] = PgnSymbolStateMachine.Dash;
+            PgnCharacterClassTable['/'] = PgnSymbolStateMachine.Slash;
+            PgnCharacterClassTable['='] = PgnSymbolStateMachine.EqualitySign;
+            PgnCharacterClassTable['+'] = PgnSymbolStateMachine.PlusOrOctothorpe;
+            PgnCharacterClassTable['#'] = PgnSymbolStateMachine.PlusOrOctothorpe;
+            PgnCharacterClassTable['!'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
+            PgnCharacterClassTable['?'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetCharacterClass(char pgnCharacter)
+            => pgnCharacter <= 0xff ? PgnCharacterClassTable[pgnCharacter] : IllegalCharacter;
 
         #endregion PGN character classes
 
@@ -91,17 +122,17 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         private static readonly string EscapeCharacterString = "\\";
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static GreenPgnIllegalCharacterSyntax CreateIllegalCharacterSyntax(char c)
             => new GreenPgnIllegalCharacterSyntax(
                 StringLiteral.CharacterMustBeEscaped(c)
                 ? StringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c));
 
-        private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
-        {
-            if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
-            return new GreenPgnSymbol(length);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
+            => symbolBuilder.Yield(length)
+            ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length));
 
         /// <summary>
         /// Tokenizes source text in the PGN format.
@@ -127,15 +158,15 @@ namespace Sandra.Chess.Pgn
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
-            // Keep track of whether characters were found that cannot be in tag names.
-            bool allLegalTagNameCharacters;
+            // Reusable structure to build green PGN symbols.
+            PgnSymbolStateMachine symbolBuilder = default;
 
         inWhitespace:
 
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                int characterClass = GetCharacterClass(c);
 
                 if (characterClass != WhitespaceCharacter)
                 {
@@ -147,6 +178,13 @@ namespace Sandra.Chess.Pgn
 
                     if (characterClass != IllegalCharacter)
                     {
+                        int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                        if (symbolCharacterClass != 0)
+                        {
+                            symbolBuilder.Start(symbolCharacterClass);
+                            goto inSymbol;
+                        }
+
                         switch (c)
                         {
                             case PgnAsteriskSyntax.AsteriskCharacter:
@@ -179,14 +217,16 @@ namespace Sandra.Chess.Pgn
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
                                 goto inMultiLineComment;
+                            case PgnNagSyntax.NagCharacter:
+                                goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
-                                goto default;
+                                yield return CreateIllegalCharacterSyntax(c);
+                                symbolStartIndex++;
+                                break;
                             default:
-                                // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = characterClass.Test(UppercaseLetterCharacter);
-                                goto inSymbol;
+                                throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
                         }
                     }
                     else
@@ -216,13 +256,13 @@ namespace Sandra.Chess.Pgn
             while (currentIndex < length)
             {
                 char c = pgnText[currentIndex];
-                ulong characterClass = c <= 0xff ? PgnCharacterClassTable[c] : IllegalCharacter;
+                int characterClass = GetCharacterClass(c);
 
                 if (characterClass == WhitespaceCharacter)
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                        yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                         symbolStartIndex = currentIndex;
                     }
 
@@ -232,43 +272,56 @@ namespace Sandra.Chess.Pgn
 
                 if (characterClass != IllegalCharacter)
                 {
-                    switch (c)
+                    int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                    if (symbolCharacterClass != 0)
                     {
-                        case PgnAsteriskSyntax.AsteriskCharacter:
-                            symbolToYield = GreenPgnAsteriskSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnBracketOpenSyntax.BracketOpenCharacter:
-                            symbolToYield = GreenPgnBracketOpenSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnBracketCloseSyntax.BracketCloseCharacter:
-                            symbolToYield = GreenPgnBracketCloseSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
-                            symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
-                            symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnPeriodSyntax.PeriodCharacter:
-                            symbolToYield = GreenPgnPeriodSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case StringLiteral.QuoteCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inString;
-                        case PgnCommentSyntax.EndOfLineCommentStartCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inEndOfLineComment;
-                        case PgnCommentSyntax.MultiLineCommentStartCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inMultiLineComment;
+                        symbolBuilder.Transition(symbolCharacterClass);
                     }
-
-                    // Allow only digits, letters or the underscore character in tag names.
-                    const ulong letterOrDigit = UppercaseLetterCharacter | LowercaseLetterCharacter | DigitCharacter;
-                    allLegalTagNameCharacters = allLegalTagNameCharacters && characterClass.Test(letterOrDigit);
+                    else
+                    {
+                        switch (c)
+                        {
+                            case PgnAsteriskSyntax.AsteriskCharacter:
+                                symbolToYield = GreenPgnAsteriskSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnBracketOpenSyntax.BracketOpenCharacter:
+                                symbolToYield = GreenPgnBracketOpenSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnBracketCloseSyntax.BracketCloseCharacter:
+                                symbolToYield = GreenPgnBracketCloseSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                                symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                                symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnPeriodSyntax.PeriodCharacter:
+                                symbolToYield = GreenPgnPeriodSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case StringLiteral.QuoteCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inString;
+                            case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inEndOfLineComment;
+                            case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inMultiLineComment;
+                            case PgnNagSyntax.NagCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inNumericAnnotationGlyph;
+                            case PgnEscapeSyntax.EscapeCharacter:
+                                symbolToYield = CreateIllegalCharacterSyntax(c);
+                                goto yieldSymbolThenCharacter;
+                            default:
+                                throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
+                        }
+                    }
                 }
                 else
                 {
@@ -281,7 +334,7 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -289,7 +342,7 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
             yield return symbolToYield;
             currentIndex++;
             symbolStartIndex = currentIndex;
@@ -493,6 +546,45 @@ namespace Sandra.Chess.Pgn
             }
 
             yield return new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex);
+            yield break;
+
+        inNumericAnnotationGlyph:
+
+            // Eat the '$' character, but leave symbolStartIndex unchanged.
+            currentIndex++;
+
+            int annotationValue = 0;
+            bool emptyNag = true;
+            bool overflowNag = false;
+
+            while (currentIndex < length)
+            {
+                int digit = pgnText[currentIndex] - '0';
+
+                if (digit < 0 || digit > 9)
+                {
+                    if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
+                    else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex);
+                    else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
+
+                    symbolStartIndex = currentIndex;
+                    goto inWhitespace;
+                }
+
+                emptyNag = false;
+
+                if (!overflowNag)
+                {
+                    annotationValue = annotationValue * 10 + digit;
+                    if (annotationValue >= 0x100) overflowNag = true;
+                }
+
+                currentIndex++;
+            }
+
+            if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
+            else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex);
+            else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
         }
 
         /// <summary>

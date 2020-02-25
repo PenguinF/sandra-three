@@ -67,11 +67,6 @@ namespace Sandra.Chess.Pgn
         BracketOpen,
 
         /// <summary>
-        /// Type of a tag value syntax node which contains errors.
-        /// </summary>
-        ErrorTagValue,
-
-        /// <summary>
         /// Type of the parenthesis close character ')' in PGN text.
         /// </summary>
         ParenthesisClose,
@@ -96,6 +91,54 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         TagValue,
 
-        OtherNotSpecified
+        /// <summary>
+        /// Type of a tag value syntax node which contains errors.
+        /// </summary>
+        ErrorTagValue,
+
+        /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node.
+        /// </summary>
+        Nag,
+
+        /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node with an empty annotation.
+        /// </summary>
+        EmptyNag,
+
+        /// <summary>
+        /// Type of a Numeric Annotation Glyph syntax node with an annotation value of 256 or larger.
+        /// </summary>
+        OverflowNag,
+
+        /// <summary>
+        /// Type of a syntax node which contains an integer move number.
+        /// </summary>
+        MoveNumber,
+
+        /// <summary>
+        /// Type of a syntax node which contains a move text.
+        /// </summary>
+        Move,
+
+        /// <summary>
+        /// Type of the draw game termination marker "1/2-1/2".
+        /// </summary>
+        DrawMarker,
+
+        /// <summary>
+        /// Type of the white win game termination marker "1-0".
+        /// </summary>
+        WhiteWinMarker,
+
+        /// <summary>
+        /// Type of the black win game termination marker "0-1".
+        /// </summary>
+        BlackWinMarker,
+
+        /// <summary>
+        /// Type of a PGN syntax node with an unknown symbol.
+        /// </summary>
+        Unknown
     }
 }

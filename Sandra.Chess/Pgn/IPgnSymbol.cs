@@ -47,18 +47,6 @@ namespace Sandra.Chess.Pgn
         PgnSymbolType SymbolType { get; }
     }
 
-    // Temporary placeholder
-    public class GreenPgnSymbol : IGreenPgnSymbol
-    {
-        public int Length { get; }
-
-        public PgnSymbolType SymbolType => PgnSymbolType.OtherNotSpecified;
-
-        public GreenPgnSymbol(int length) => Length = length;
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-    }
-
     /// <summary>
     /// Represents a terminal PGN symbol.
     /// These are all <see cref="PgnSyntax"/> nodes which have no child <see cref="PgnSyntax"/> nodes.

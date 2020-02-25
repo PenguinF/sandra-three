@@ -50,5 +50,20 @@ namespace Sandra.Chess.Pgn
         /// Occurs when a comment is not terminated before the end of the file.
         /// </summary>
         UnterminatedMultiLineComment,
+
+        /// <summary>
+        /// Occurs when a '$' character is not followed by an integer value.
+        /// </summary>
+        EmptyNag,
+
+        /// <summary>
+        /// Occurs when a '$' character is followed by an integer value which is too large (256 or higher).
+        /// </summary>
+        OverflowNag,
+
+        /// <summary>
+        /// Occurs when a symbol is not recognized as a move text, tag name, move number, or game termination marker.
+        /// </summary>
+        UnknownSymbol,
     }
 }

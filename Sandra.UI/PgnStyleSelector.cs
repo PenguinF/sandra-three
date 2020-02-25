@@ -35,8 +35,10 @@ namespace Sandra.UI
         private const int tagValueStyleIndex = 9;
         private const int errorTagValueStyleIndex = 10;
         private const int illegalCharacterStyleIndex = 11;
-        private const int symbolStyleIndex = 12;
-        private const int escapedLineStyleIndex = 13;
+        private const int moveNumberStyleIndex = 12;
+        private const int moveTextStyleIndex = 13;
+        private const int errorNagStyleIndex = 14;
+        private const int escapedLineStyleIndex = 15;
 
         private static readonly Font tagNameAndEscapeFont = new Font("Consolas", 10, FontStyle.Italic);
 
@@ -44,7 +46,9 @@ namespace Sandra.UI
         private static readonly Color tagValueForeColor = Color.FromArgb(0xff, 0xbb, 0x9e);
         private static readonly Color errorTagValueForeColor = Color.FromArgb(0xbc, 0x82, 0x70);
         private static readonly Color illegalCharacterForeColor = Color.FromArgb(0xa0, 0xa0, 0xa0);
-        private static readonly Color symbolForeColor = Color.FromArgb(0xff, 0xff, 0xa0);
+        private static readonly Color moveNumberForeColor = Color.FromArgb(0xcc, 0xcc, 0x92);
+        private static readonly Color moveTextForeColor = Color.FromArgb(0xbb, 0xff, 0x9e);
+        private static readonly Color errorNagForeColor = Color.FromArgb(0x82, 0xbc, 0x70);
         private static readonly Color escapeForeColor = Color.FromArgb(0x8c, 0x8c, 0x8c);
 
         public static readonly PgnStyleSelector<TSyntaxTree, TError> Instance = new PgnStyleSelector<TSyntaxTree, TError>();
@@ -55,12 +59,11 @@ namespace Sandra.UI
             tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
 
             syntaxEditor.Styles[tagValueStyleIndex].ForeColor = tagValueForeColor;
-
             syntaxEditor.Styles[errorTagValueStyleIndex].ForeColor = errorTagValueForeColor;
-
             syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
-
-            syntaxEditor.Styles[symbolStyleIndex].ForeColor = symbolForeColor;
+            syntaxEditor.Styles[moveNumberStyleIndex].ForeColor = moveNumberForeColor;
+            syntaxEditor.Styles[moveTextStyleIndex].ForeColor = moveTextForeColor;
+            syntaxEditor.Styles[errorNagStyleIndex].ForeColor = errorNagForeColor;
 
             syntaxEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
             tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[escapedLineStyleIndex]);
@@ -69,7 +72,7 @@ namespace Sandra.UI
         private PgnStyleSelector() { }
 
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
-            => syntaxEditor.Styles[symbolStyleIndex];
+            => syntaxEditor.Styles[illegalCharacterStyleIndex];
 
         public override Style VisitCommentSyntax(PgnCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
@@ -85,17 +88,36 @@ namespace Sandra.UI
 
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
-            switch (node.Green)
+            switch (node.Green.SymbolType)
             {
-                case GreenPgnTagNameSyntax _:
+                case PgnSymbolType.TagName:
                     return syntaxEditor.Styles[tagNameStyleIndex];
-                case GreenPgnTagValueSyntax _:
+                case PgnSymbolType.TagValue:
                     return syntaxEditor.Styles[tagValueStyleIndex];
-                case GreenPgnErrorTagValueSyntax _:
+                case PgnSymbolType.ErrorTagValue:
                     return syntaxEditor.Styles[errorTagValueStyleIndex];
+                case PgnSymbolType.Nag:
+                    return syntaxEditor.Styles[moveTextStyleIndex];
+                case PgnSymbolType.EmptyNag:
+                    // Don't darken this one, got to go through this state before creating a valid NAG.
+                    return syntaxEditor.Styles[moveTextStyleIndex];
+                case PgnSymbolType.OverflowNag:
+                    return syntaxEditor.Styles[errorNagStyleIndex];
+                case PgnSymbolType.Period:
+                case PgnSymbolType.MoveNumber:
+                    return syntaxEditor.Styles[moveNumberStyleIndex];
+                case PgnSymbolType.Move:
+                    return syntaxEditor.Styles[moveTextStyleIndex];
+                case PgnSymbolType.Asterisk:
+                case PgnSymbolType.DrawMarker:
+                case PgnSymbolType.WhiteWinMarker:
+                case PgnSymbolType.BlackWinMarker:
+                    return syntaxEditor.Styles[moveTextStyleIndex];
+                case PgnSymbolType.Unknown:
+                    return syntaxEditor.Styles[illegalCharacterStyleIndex];
             }
 
-            return syntaxEditor.Styles[symbolStyleIndex];
+            return syntaxEditor.DefaultStyle;
         }
     }
 }

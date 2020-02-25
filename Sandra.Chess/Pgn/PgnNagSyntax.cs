@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnTagValueSyntax.cs
+ * PgnNagSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -25,14 +25,14 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a tag value syntax node.
+    /// Represents a Numeric Annotation Glyph syntax node.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnNagSyntax : IGreenPgnSymbol
     {
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the annotation value of this syntax node.
         /// </summary>
-        public string Value { get; }
+        public PgnAnnotation Annotation { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -42,30 +42,33 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.TagValue;
+        public PgnSymbolType SymbolType => PgnSymbolType.Nag;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnTagValueSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenPgnNagSyntax"/>.
         /// </summary>
-        /// <param name="value">
-        /// The value of the tag.
+        /// <param name="annotation">
+        /// The annotation value.
         /// </param>
         /// <param name="length">
-        /// The length of the text span corresponding with the node to create.
+        /// The length of the text span corresponding with the node to create, including the '$' character.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="length"/> is 0 or lower.
+        /// <paramref name="length"/> is 1 or lower.
         /// </exception>
-        public GreenPgnTagValueSyntax(string value, int length)
+        public GreenPgnNagSyntax(PgnAnnotation annotation, int length)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
+            Annotation = annotation;
+            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnNagSyntax
+    {
+        public const char NagCharacter = '$';
+        public const int NagLength = 1;
     }
 }

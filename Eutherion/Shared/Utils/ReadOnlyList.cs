@@ -19,12 +19,9 @@
 **********************************************************************************/
 #endregion
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Eutherion.Utils
+namespace System.Collections.Generic
 {
     /// <summary>
     /// Represents a read-only list of elements that can be accessed by index.
@@ -55,26 +52,12 @@ namespace Eutherion.Utils
         {
             if (source is ReadOnlyList<T> readOnlyList) return readOnlyList;
             var array = source.ToArrayEx();
-            return DangerousCreateFromArray(array);
+            return array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="ReadOnlyList{T}"/> from an existing array.
-        /// The <see cref="ReadOnlyList{T}"/> assumes ownership of the array, i.e. the array
-        /// should not be modified after being wrapped within the <see cref="ReadOnlyList{T}"/>.
-        /// </summary>
-        /// <param name="array">
-        /// The array with the elements of the <see cref="ReadOnlyList{T}"/>.
-        /// </param>
-        /// <returns>
-        /// The initialized <see cref="ReadOnlyList{T}"/>.
-        /// </returns>
-        internal static ReadOnlyList<T> DangerousCreateFromArray(T[] array)
-            => array.Length == 0 ? Empty : new ReadOnlyList<T>(array);
+        internal readonly T[] ReadOnlyArray;
 
-        private readonly T[] array;
-
-        private ReadOnlyList(T[] array) => this.array = array;
+        private ReadOnlyList(T[] array) => ReadOnlyArray = array;
 
         /// <summary>
         /// Gets the element at the specified index in the read-only list.
@@ -88,12 +71,12 @@ namespace Eutherion.Utils
         /// <exception cref="IndexOutOfRangeException">
         /// <paramref name="index"/>is less than 0 or greater than or equal to <see cref="Count"/>.
         /// </exception>
-        public T this[int index] => array[index];
+        public T this[int index] => ReadOnlyArray[index];
 
         /// <summary>
         /// Gets the number of elements in the list.
         /// </summary>
-        public int Count => array.Length;
+        public int Count => ReadOnlyArray.Length;
 
         /// <summary>
         /// Returns an enumerator that iterates through the list.
@@ -101,7 +84,7 @@ namespace Eutherion.Utils
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the list.
         /// </returns>
-        public IEnumerator<T> GetEnumerator() => ((ICollection<T>)array).GetEnumerator();
+        public IEnumerator<T> GetEnumerator() => ((ICollection<T>)ReadOnlyArray).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnTagValueSyntax.cs
+ * PgnMoveNumberSyntax.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -25,15 +25,10 @@ using System.Collections.Generic;
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents a tag value syntax node.
+    /// Represents a syntax node which contains an integer move number.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnMoveNumberSyntax : IGreenPgnSymbol
     {
-        /// <summary>
-        /// Gets the value of this syntax node.
-        /// </summary>
-        public string Value { get; }
-
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
@@ -42,26 +37,19 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.TagValue;
+        public PgnSymbolType SymbolType => PgnSymbolType.MoveNumber;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnTagValueSyntax"/>.
+        /// Initializes a new instance of <see cref="GreenPgnMoveNumberSyntax"/>.
         /// </summary>
-        /// <param name="value">
-        /// The value of the tag.
-        /// </param>
         /// <param name="length">
         /// The length of the text span corresponding with the node to create.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
-        public GreenPgnTagValueSyntax(string value, int length)
+        public GreenPgnMoveNumberSyntax(int length)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }

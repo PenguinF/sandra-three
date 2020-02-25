@@ -125,7 +125,7 @@ namespace Eutherion.Text
         public static ReadOnlySpanList<TSpan> Create(IEnumerable<TSpan> source)
         {
             if (source is ReadOnlySpanList<TSpan> readOnlySpanList) return readOnlySpanList;
-            var array = source.ToArrayEx();
+            var array = source is ReadOnlyList<TSpan> readOnlyList ? readOnlyList.ReadOnlyArray : source.ToArrayEx();
             if (array.Length == 0) return Empty;
             if (array.Length == 1) return new OneElement(array[0]);
             return new TwoOrMoreElements(array);

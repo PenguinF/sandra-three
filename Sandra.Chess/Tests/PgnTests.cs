@@ -45,20 +45,49 @@ namespace Sandra.Chess.Tests
             }
             else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
             {
-                // GreenPgnSymbol only works if it contains only alphanumeric characters.
-                if (tokenType2 == typeof(GreenPgnSymbol)
-                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                if (tokenType2 == typeof(GreenPgnTagNameSyntax)
+                    || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax))
+                {
+                    resultTokenType = tokenType2;
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(GreenPgnUnknownSymbolSyntax))
+            {
+                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax)
+                    || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
                     resultTokenType = tokenType1;
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(GreenPgnSymbol))
+            else if (tokenType1 == typeof(GreenPgnEmptyNagSyntax)
+                || tokenType1 == typeof(GreenPgnNagSyntax)
+                || tokenType1 == typeof(GreenPgnOverflowNagSyntax))
             {
-                if (tokenType2 == typeof(GreenPgnSymbol)
-                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                if (tokenType2 == typeof(GreenPgnMoveNumberSyntax))
+                {
+                    resultTokenType = typeof(GreenPgnOverflowNagSyntax);
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(GreenPgnMoveNumberSyntax))
+            {
+                if (tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
                     resultTokenType = tokenType1;
+                    return true;
+                }
+                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                {
+                    resultTokenType = typeof(GreenPgnUnknownSymbolSyntax);
                     return true;
                 }
             }
@@ -83,8 +112,8 @@ namespace Sandra.Chess.Tests
                 yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
                 yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
                 yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1", typeof(GreenPgnSymbol));
-                yield return ("A1", typeof(GreenPgnTagNameSyntax));
+                yield return ("a1=", typeof(GreenPgnUnknownSymbolSyntax));
+                yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\"a1\"", typeof(GreenPgnTagValueSyntax));
@@ -93,6 +122,10 @@ namespace Sandra.Chess.Tests
                 yield return ("\"\\n\"", typeof(GreenPgnErrorTagValueSyntax));
                 yield return ("\"\n\"", typeof(GreenPgnErrorTagValueSyntax));
                 yield return ("{}", typeof(GreenPgnCommentSyntax));
+                yield return ("$", typeof(GreenPgnEmptyNagSyntax));
+                yield return ("$1", typeof(GreenPgnNagSyntax));
+                yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
+                yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
             }
         }
 
@@ -154,6 +187,25 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnEscapeSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, -1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnNagSyntax(PgnAnnotation.Null, 1));
+
+            Assert.Throws<ArgumentNullException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(null));
+            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax(""));
+            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$"));
+            Assert.Throws<ArgumentOutOfRangeException>("overflowNagText", () => new GreenPgnOverflowNagSyntax("$99"));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1));
+
+            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(null));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnknownSymbolSyntax(""));
         }
 
         [Theory]
@@ -393,7 +445,12 @@ namespace Sandra.Chess.Tests
             AssertTokens(
                 " %",
                 ExpectToken<GreenPgnWhitespaceSyntax>(1),
-                ExpectToken<GreenPgnSymbol>(1));
+                ExpectToken<GreenPgnIllegalCharacterSyntax>(1));
+
+            AssertTokens(
+                "z%",
+                ExpectToken<GreenPgnTagNameSyntax>(1),
+                ExpectToken<GreenPgnIllegalCharacterSyntax>(1));
 
             AssertTokens(
                 "\n%\n\n",
@@ -408,8 +465,191 @@ namespace Sandra.Chess.Tests
                 ExpectToken<GreenPgnCommentSyntax>(4));
 
             AssertTokens(
+                ";%",
+                ExpectToken<GreenPgnCommentSyntax>(2));
+
+            AssertTokens(
                 "\"\n%\"",
                 ExpectToken<GreenPgnErrorTagValueSyntax>(4));
+        }
+
+        private static (string, Type) SMTestCase<T>(string pgn)
+            => (pgn, typeof(T));
+
+        private static IEnumerable<(string, Type)> StateMachineSymbols()
+        {
+            // Special case because if '%' is the first character on a line, it triggers the escape mechanism.
+            yield return SMTestCase<GreenPgnEscapeSyntax>("%");
+
+            const string fileLetters = "ah";
+            const string nonFileLetters = "NOPXix";
+            const string allLetters = nonFileLetters + fileLetters;
+            const string nonRankDigits = "09";
+            const string rankDigits = "1238";
+            const string allDigits = nonRankDigits + rankDigits;
+
+            // Test cases with 1 and 2 characters.
+            var uppercaseTagNames = nonFileLetters.SelectMany(x =>
+                new SingleElementEnumerable<string>($"{x}")
+                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+
+            foreach (var uppercaseTagName in uppercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(uppercaseTagName);
+
+            var lowercaseTagNames = fileLetters.SelectMany(x =>
+                new SingleElementEnumerable<string>($"{x}")
+                .Union(allLetters.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}")))
+                .Union(nonRankDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+
+            foreach (var lowercaseTagName in lowercaseTagNames) yield return SMTestCase<GreenPgnTagNameSyntax>(lowercaseTagName);
+
+            var moveNumbers = allDigits.SelectMany(x =>
+                new SingleElementEnumerable<string>($"{x}")
+                .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
+
+            foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnMoveNumberSyntax>(moveNumber);
+
+            // Termination markers.
+            yield return SMTestCase<GreenPgnDrawMarkerSyntax>("1/2-1/2");
+            yield return SMTestCase<GreenPgnWhiteWinMarkerSyntax>("1-0");
+            yield return SMTestCase<GreenPgnBlackWinMarkerSyntax>("0-1");
+
+            // Castling moves.
+            yield return SMTestCase<GreenPgnMoveSyntax>("O-O");
+            yield return SMTestCase<GreenPgnMoveSyntax>("O-O-O");
+
+            // Pawn moves.
+            var fileRanks = fileLetters.SelectMany(x => rankDigits.Select(y => $"{x}{y}"));
+            var capturePawnMoves = fileLetters.SelectMany(x => fileRanks.Select(xy => $"{x}x{xy}"));
+
+            var pawnMoves = fileRanks
+                .Union(capturePawnMoves).SelectMany(m =>
+                    new SingleElementEnumerable<string>($"{m}")
+                    .Union(new SingleElementEnumerable<string>($"P{m}")));
+
+            foreach (var pawnMove in pawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(pawnMove);
+
+            // Allow promotion to king, then assume the other piece letters work too.
+            var promotionMoves = fileRanks.Union(capturePawnMoves).Select(m => $"{m}=K");
+
+            foreach (var promotionMove in promotionMoves) yield return SMTestCase<GreenPgnMoveSyntax>(promotionMove);
+
+            // Non-pawn moves.
+            var simpleNonPawnMoves = fileRanks.Select(xy => $"Q{xy}");
+            var disambiguationMoves1 = fileLetters.SelectMany(x => fileRanks.Select(xy => $"Q{x}{xy}"));
+            var disambiguationMoves2 = rankDigits.SelectMany(y => fileRanks.Select(xy => $"Q{y}{xy}"));
+            var disambiguationMoves3 = fileRanks.Select(xy => $"Qa1{xy}");
+
+            var nonPawnMoves = simpleNonPawnMoves
+                .Union(disambiguationMoves1)
+                .Union(disambiguationMoves2)
+                .Union(disambiguationMoves3);
+
+            foreach (var nonPawnMove in nonPawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(nonPawnMove);
+
+            // Incomplete and invalid moves that are valid tag names (3 characters and longer).
+            var invalidMoves = new[]
+            {
+                "Pax", "Bax", "P1x", "B1x",
+                "Pah", "Bah", "P1h", "B1h",
+                "axh", "Paxh",
+                "ax8", "Pax8",
+                "ah8", "Pah8",
+                "xa1", "Pxa1",
+                "P1xa1",
+                "a1xa1", "Pa1xa1",
+                "Pi1", "Pi8", "Pa0", "Pa9", "P10", "Pa10", "Pa11",
+                "Ni1", "Ni8", "Na0", "Na9", "N10", "Na10", "Na11",
+                "Pxi1", "Pxi8", "Pxa0", "Pxa9", "Px10", "Pxa10", "Pxa11",
+                "Nxi1", "Nxi8", "Nxa0", "Nxa9", "Nx10", "Nxa10", "Nxa11",
+                "R0a8", "R9a8", "Ria8", "Ri1a8", "Ri8a8", "Ra0a8", "Ra9a8", "Ra10a8", "Ra11a8",
+                "R0xa8", "R9xa8", "Rixa8", "Ri1xa8", "Ri8xa8", "Ra0xa8", "Ra9xa8", "Ra10xa8", "Ra11xa8",
+                "Oa1", "Oa1xb2",
+            };
+
+            foreach (var invalidPawnMove in invalidMoves) yield return SMTestCase<GreenPgnTagNameSyntax>(invalidPawnMove);
+
+            var movesWithAnnotations = new[]
+            {
+                "a1!!", "Pa1?!?",
+                "axh8+", "axh8#",
+                "h8=N+", "h8=N#",
+                "axh2+!", "axh2#!",
+                "h8=N+?", "h8=N#?",
+                "Be4+?", "Red5!!", "O-O-O#", "Q1a8??", "Ke1e2#?!",
+            };
+
+            foreach (var movesWithAnnotation in movesWithAnnotations) yield return SMTestCase<GreenPgnMoveSyntax>(movesWithAnnotation);
+        }
+
+        public static IEnumerable<object[]> StateMachineValidSymbols
+            => from x in StateMachineSymbols()
+               select new object[] { x.Item1, x.Item2 };
+
+        [Theory]
+        [MemberData(nameof(StateMachineValidSymbols))]
+        public void SymbolStateMachine(string pgn, Type type)
+        {
+            AssertTokens(pgn, ExpectToken(type, pgn.Length));
+        }
+
+        private static readonly string[] InvalidSymbols = new string[]
+        {
+            "N-", "h-", "0-", "--", "-",
+            "N/", "h/", "0/", "-/", "/",
+            "N=", "h=", "0=", "-=", "=",
+            "N+", "h+", "0+", "-+", "+",
+            "N#", "h#", "0#", "-#", "#",
+            "N!", "h!", "0!", "-!", "!",
+            "N?", "h?", "0?", "-?", "?",
+
+            "0N", "0O", "0P", "0X", "0a", "0h", "0i", "0x",
+            "1N", "1O", "1P", "1X", "1a", "1h", "1i", "1x",
+            "2N", "2O", "2P", "2X", "2a", "2h", "2i", "2x",
+            "3N", "3O", "3P", "3X", "3a", "3h", "3i", "3x",
+            "8N", "8O", "8P", "8X", "8a", "8h", "8i", "8x",
+            "9N", "9O", "9P", "9X", "9a", "9h", "9i", "9x",
+
+            // Incomplete and invalid game termination markers.
+            "1/", "1/2", "1/2-", "1/2-1", "1/2-1/", "1-", "0-",
+            "0-0", "1-1", "1/2-0", "1/2-1", "0-1/2", "1-1/2",
+            "1/2-1/0", "1/2-1/1", "1/2-1/3", "1/2-1/8", "1/2-1/9",
+
+            // Incomplete and invalid moves.
+            "1xa1", "h1-0","h1-O", "h1-O-O", "hO-O", "a1-h8",
+            "h8=", "Ph8=", "axh8=",
+            "h8=P", "Ph8=P", "axh8=P",
+            "h8=+", "Ph8=+", "axh8=+",
+            "h8!+", "Ph8!+", "axh8!+",
+            "h8=!", "Ph8=!", "axh8=!",
+            "h8!=N", "Ph8!=N", "axh8!=N",
+            "h8+=N", "Ph8+=N", "axh8+=N",
+
+            "Na1++", "N1a1++", "Naa1++", "Na1a1++", "N1aa1++",
+            "Na1=Q", "N1a1=Q", "Naa1=Q", "Na1a1=Q", "N1aa1=Q",
+            "Na1!+", "N1a1!+", "Naa1!+", "Na1a1!+", "N1aa1!+",
+
+            // No interference between castling moves and other types of symbols.
+            "Oa1xb2+",
+            "N-", "N-O-", "N-O-O-", "N-O-O-O", "N-O", "N-O-O",
+            "O-", "O-O-", "O-O-O-", "O-O-O-O",
+            "P-", "P-O-", "P-O-O-", "P-O-O-O", "P-O", "P-O-O",
+            "0-0-0",
+
+            // Check or annotation in the wrong place.
+            "O-+", "O-O-+", "Pe+", "Qe+", "Q2+", "Q2e+", "ax+", "axb+", "Qx+", "Qdx+", "Qd2x+", "Qd2xe+",
+            "O-!", "O-O-!", "Pe!", "Qe!", "Q2!", "Q2e!", "ax!", "axb!", "Qx!", "Qdx!", "Qd2x!", "Qd2xe!",
+        };
+
+        public static IEnumerable<object[]> StateMachineInvalidSymbols
+            => from x in InvalidSymbols
+               select new object[] { x };
+
+        [Theory]
+        [MemberData(nameof(StateMachineInvalidSymbols))]
+        public void SymbolStateMachineInvalidSymbols(string pgn)
+        {
+            AssertTokens(pgn, ExpectToken<GreenPgnUnknownSymbolSyntax>(pgn.Length));
         }
     }
 }
