@@ -126,9 +126,9 @@ namespace Sandra.Chess.Pgn
                 : Convert.ToString(c));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IGreenPgnSymbol CreatePgnSymbol(bool allLegalTagNameCharacters, int length)
+        private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, int length)
         {
-            if (allLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
+            if (symbolBuilder.AllLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
             return new GreenPgnUnknownSymbolSyntax(length);
         }
 
@@ -156,8 +156,8 @@ namespace Sandra.Chess.Pgn
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
-            // Keep track of whether characters were found that cannot be in tag names.
-            bool allLegalTagNameCharacters;
+            // Reusable structure to build green PGN symbols.
+            PgnSymbolStateMachine symbolBuilder = default;
 
         inWhitespace:
 
@@ -180,7 +180,7 @@ namespace Sandra.Chess.Pgn
                         if (symbolCharacterClass != 0)
                         {
                             // Tag names must start with an uppercase letter.
-                            allLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
+                            symbolBuilder.AllLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
                             goto inSymbol;
                         }
 
@@ -261,7 +261,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                        yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
                         symbolStartIndex = currentIndex;
                     }
 
@@ -275,7 +275,7 @@ namespace Sandra.Chess.Pgn
                     if (symbolCharacterClass != 0)
                     {
                         // Allow only digits, letters or the underscore character in tag names.
-                        allLegalTagNameCharacters = allLegalTagNameCharacters &&
+                        symbolBuilder.AllLegalTagNameCharacters = symbolBuilder.AllLegalTagNameCharacters &&
                             (characterClass == UppercaseLetterCharacter
                             || characterClass == LowercaseLetterCharacter
                             || characterClass == DigitCharacter);
@@ -303,19 +303,19 @@ namespace Sandra.Chess.Pgn
                                 symbolToYield = GreenPgnPeriodSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case StringLiteral.QuoteCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inString;
                             case PgnCommentSyntax.EndOfLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inMultiLineComment;
                             case PgnNagSyntax.NagCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
@@ -337,7 +337,7 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
             }
 
             yield break;
@@ -345,7 +345,7 @@ namespace Sandra.Chess.Pgn
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, currentIndex - symbolStartIndex);
             yield return symbolToYield;
             currentIndex++;
             symbolStartIndex = currentIndex;

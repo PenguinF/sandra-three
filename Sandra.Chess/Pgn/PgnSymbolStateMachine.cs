@@ -21,4 +21,11 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Contains a state machine which is used during parsing of <see cref="IGreenPgnSymbol"/> instances.
+    /// </summary>
+    internal struct PgnSymbolStateMachine
+    {
+        public bool AllLegalTagNameCharacters;
+    }
 }
