@@ -27,10 +27,17 @@ namespace Sandra.Chess.Pgn
     internal struct PgnSymbolStateMachine
     {
         // Offset with value 1, because 0 is the illegal character class in the PGN parser.
-        internal const int UppercaseLetterCharacter = 1;
-        internal const int LowercaseLetterCharacter = 2;
-        internal const int DigitCharacter = 3;
-        internal const int OtherSymbolCharacter = 4;
+        internal const int Digit0 = 1;
+        internal const int Digit1 = 2;
+        internal const int Digit2 = 3;
+        internal const int Digit3_8 = 4;
+        internal const int Digit9 = 5;
+
+        internal const int UppercaseLetterCharacter = 6;
+
+        internal const int LowercaseLetterCharacter = 10;
+
+        internal const int OtherSymbolCharacter = 12;
 
         internal const int CharacterClassLength = 18;
 
@@ -59,7 +66,11 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateStart, LowercaseLetterCharacter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
-            StateTransitionTable[StateValidTagName, DigitCharacter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, Digit0] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, Digit1] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, Digit2] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, Digit3_8] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, Digit9] = StateValidTagName;
             StateTransitionTable[StateValidTagName, UppercaseLetterCharacter] = StateValidTagName;
             StateTransitionTable[StateValidTagName, LowercaseLetterCharacter] = StateValidTagName;
         }

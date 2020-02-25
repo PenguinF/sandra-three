@@ -78,8 +78,14 @@ namespace Sandra.Chess.Pgn
                 PgnEscapeSyntax.EscapeCharacter,
             }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
 
-            // Letters, digits.
-            for (char c = '0'; c <= '9'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.DigitCharacter;
+            // Digits.
+            PgnCharacterClassTable['0'] = PgnSymbolStateMachine.Digit0;
+            PgnCharacterClassTable['1'] = PgnSymbolStateMachine.Digit1;
+            PgnCharacterClassTable['2'] = PgnSymbolStateMachine.Digit2;
+            for (char c = '3'; c <= '8'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.Digit3_8;
+            PgnCharacterClassTable['9'] = PgnSymbolStateMachine.Digit9;
+
+            // Letters.
             for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;
             for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;  //0xc0-0xd6
             for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.UppercaseLetterCharacter;  //0xd8-0xde
