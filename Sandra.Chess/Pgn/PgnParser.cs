@@ -205,7 +205,9 @@ namespace Sandra.Chess.Pgn
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
-                                goto default;
+                                yield return CreateIllegalCharacterSyntax(c);
+                                symbolStartIndex++;
+                                break;
                             default:
                                 // Tag names must start with an uppercase letter.
                                 allLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
@@ -291,6 +293,9 @@ namespace Sandra.Chess.Pgn
                             if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
                             symbolStartIndex = currentIndex;
                             goto inNumericAnnotationGlyph;
+                        case PgnEscapeSyntax.EscapeCharacter:
+                            symbolToYield = CreateIllegalCharacterSyntax(c);
+                            goto yieldSymbolThenCharacter;
                     }
 
                     // Allow only digits, letters or the underscore character in tag names.

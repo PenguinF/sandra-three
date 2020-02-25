@@ -408,7 +408,12 @@ namespace Sandra.Chess.Tests
             AssertTokens(
                 " %",
                 ExpectToken<GreenPgnWhitespaceSyntax>(1),
-                ExpectToken<GreenPgnUnknownSymbolSyntax>(1));
+                ExpectToken<GreenPgnIllegalCharacterSyntax>(1));
+
+            AssertTokens(
+                "z%",
+                ExpectToken<GreenPgnTagNameSyntax>(1),
+                ExpectToken<GreenPgnIllegalCharacterSyntax>(1));
 
             AssertTokens(
                 "\n%\n\n",
@@ -421,6 +426,10 @@ namespace Sandra.Chess.Tests
             AssertTokens(
                 "{\n%}",
                 ExpectToken<GreenPgnCommentSyntax>(4));
+
+            AssertTokens(
+                ";%",
+                ExpectToken<GreenPgnCommentSyntax>(2));
 
             AssertTokens(
                 "\"\n%\"",
@@ -549,7 +558,6 @@ namespace Sandra.Chess.Tests
 
         private static readonly string[] InvalidSymbols = new string[]
         {
-            "N%", "h%", "0%", "-%",
             "N-", "h-", "0-", "--", "-",
             "N/", "h/", "0/", "-/", "/",
             "N=", "h=", "0=", "-=", "=",
