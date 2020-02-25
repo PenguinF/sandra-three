@@ -504,8 +504,8 @@ namespace Sandra.Chess.Tests
 
             // Termination markers.
             yield return SMTestCase<GreenPgnDrawMarkerSyntax>("1/2-1/2");
-            yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("1-0");
-            yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("0-1");
+            yield return SMTestCase<GreenPgnWhiteWinMarkerSyntax>("1-0");
+            yield return SMTestCase<GreenPgnBlackWinMarkerSyntax>("0-1");
 
             // Castling moves.
             yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("O-O");

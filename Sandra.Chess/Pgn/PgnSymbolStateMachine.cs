@@ -64,12 +64,20 @@ namespace Sandra.Chess.Pgn
         private const int StateDraw6 = 6;
         private const int StateDraw7 = 7;
 
+        // State1 '1' -> StateWhiteWins2 '1-' -> StateWhiteWins3 '1-0'
+        private const int StateWhiteWins2 = 8;
+        private const int StateWhiteWins3 = 9;
+
+        // State0 '0' -> StateBlackWins2 '0-' -> StateBlackWins2 '0-1'
+        private const int StateBlackWins2 = 10;
+        private const int StateBlackWins3 = 11;
+
         // Distinct states after the first character was a digit.
-        private const int State0 = 8;
-        private const int State1 = 9;
+        private const int State0 = 12;
+        private const int State1 = 13;
 
         // All digits.
-        private const int StateValidMoveNumber = 10;
+        private const int StateValidMoveNumber = 14;
 
         private const int StateValidTagName = 39;
 
@@ -117,6 +125,12 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateDraw5, Slash] = StateDraw6;
             StateTransitionTable[StateDraw6, Digit2] = StateDraw7;
 
+            StateTransitionTable[State1, Dash] = StateWhiteWins2;
+            StateTransitionTable[StateWhiteWins2, Digit0] = StateWhiteWins3;
+
+            StateTransitionTable[State0, Dash] = StateBlackWins2;
+            StateTransitionTable[StateBlackWins2, Digit1] = StateBlackWins3;
+
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
             StateTransitionTable[StateStart, LetterO] = StateValidTagName;
@@ -155,6 +169,8 @@ namespace Sandra.Chess.Pgn
             if (CurrentState < State0)
             {
                 if (CurrentState == StateDraw7) return GreenPgnDrawMarkerSyntax.Value;
+                if (CurrentState == StateWhiteWins3) return GreenPgnWhiteWinMarkerSyntax.Value;
+                if (CurrentState == StateBlackWins3) return GreenPgnBlackWinMarkerSyntax.Value;
             }
             else
             {
