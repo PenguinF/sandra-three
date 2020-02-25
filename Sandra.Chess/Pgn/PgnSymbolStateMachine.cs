@@ -38,9 +38,15 @@ namespace Sandra.Chess.Pgn
         internal const int OtherPieceLetter = 8;
         internal const int OtherUpperCaseLetter = 9;
 
-        internal const int LowercaseLetterCharacter = 10;
+        internal const int LowercaseAtoH = 10;
+        internal const int LowercaseX = 11;
+        internal const int OtherLowercaseLetter = 12;
 
-        internal const int OtherSymbolCharacter = 12;
+        internal const int Dash = 13;
+        internal const int Slash = 14;
+        internal const int EqualitySign = 15;
+        internal const int PlusOrOctothorpe = 16;
+        internal const int ExclamationOrQuestionMark = 17;
 
         internal const int CharacterClassLength = 18;
 
@@ -69,7 +75,9 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateStart, LetterP] = StateValidTagName;
             StateTransitionTable[StateStart, OtherPieceLetter] = StateValidTagName;
             StateTransitionTable[StateStart, OtherUpperCaseLetter] = StateValidTagName;
-            StateTransitionTable[StateStart, LowercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateStart, LowercaseAtoH] = StateValidTagName;
+            StateTransitionTable[StateStart, LowercaseX] = StateValidTagName;
+            StateTransitionTable[StateStart, OtherLowercaseLetter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
             StateTransitionTable[StateValidTagName, Digit0] = StateValidTagName;
@@ -81,7 +89,9 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateValidTagName, LetterP] = StateValidTagName;
             StateTransitionTable[StateValidTagName, OtherPieceLetter] = StateValidTagName;
             StateTransitionTable[StateValidTagName, OtherUpperCaseLetter] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, LowercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, LowercaseAtoH] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, LowercaseX] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, OtherLowercaseLetter] = StateValidTagName;
         }
 
         private int CurrentState;

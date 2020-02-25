@@ -89,27 +89,26 @@ namespace Sandra.Chess.Pgn
             for (char c = 'A'; c <= 'Z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;
             for (char c = 'À'; c <= 'Ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xc0-0xd6
             for (char c = 'Ø'; c <= 'Þ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherUpperCaseLetter;  //0xd8-0xde
-            for (char c = 'a'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;
-            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;  //0xdf-0xf6
-            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseLetterCharacter;  //0xf8-0xff
+            for (char c = 'a'; c <= 'h'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.LowercaseAtoH;
+            for (char c = 'i'; c <= 'z'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;
+            for (char c = 'ß'; c <= 'ö'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xdf-0xf6
+            for (char c = 'ø'; c <= 'ÿ'; c++) PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherLowercaseLetter;  //0xf8-0xff
 
             // Treat the underscore as a lower case character.
-            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.LowercaseLetterCharacter;
+            PgnCharacterClassTable['_'] = PgnSymbolStateMachine.OtherLowercaseLetter;
 
             // Special cases.
             PgnCharacterClassTable['O'] = PgnSymbolStateMachine.LetterO;
             PgnCharacterClassTable['P'] = PgnSymbolStateMachine.LetterP;
             PgnMoveSyntax.PieceSymbols.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherPieceLetter);
-            new[]
-            {
-                '-',
-                '/',
-                '=',
-                '+',
-                '#',
-                '!',
-                '?',
-            }.ForEach(c => PgnCharacterClassTable[c] = PgnSymbolStateMachine.OtherSymbolCharacter);
+            PgnCharacterClassTable['x'] = PgnSymbolStateMachine.LowercaseX;
+            PgnCharacterClassTable['-'] = PgnSymbolStateMachine.Dash;
+            PgnCharacterClassTable['/'] = PgnSymbolStateMachine.Slash;
+            PgnCharacterClassTable['='] = PgnSymbolStateMachine.EqualitySign;
+            PgnCharacterClassTable['+'] = PgnSymbolStateMachine.PlusOrOctothorpe;
+            PgnCharacterClassTable['#'] = PgnSymbolStateMachine.PlusOrOctothorpe;
+            PgnCharacterClassTable['!'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
+            PgnCharacterClassTable['?'] = PgnSymbolStateMachine.ExclamationOrQuestionMark;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
