@@ -26,27 +26,56 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     internal struct PgnSymbolStateMachine
     {
+        // Offset with value 1, because 0 is the illegal character class in the PGN parser.
         internal const int UppercaseLetterCharacter = 1;
         internal const int LowercaseLetterCharacter = 2;
         internal const int DigitCharacter = 3;
         internal const int OtherSymbolCharacter = 4;
 
-        private bool AllLegalTagNameCharacters;
+        internal const int CharacterClassLength = 18;
+
+        // The default state 0 indicates that the machine has entered an invalid state, and will never become valid again.
+        private const int StateStart = 1;
+
+        private const int StateValidTagName = 40;
+
+        private const int StateLength = 41;
+
+        private const ulong ValidTagNameStates
+            = 1ul << StateValidTagName;
+
+        // This table is used to transition from state to state given a character class index.
+        // It is a low level implementation of a regular expression; it is a theorem
+        // that regular expressions and finite automata are equivalent in their expressive power.
+        private static readonly int[,] StateTransitionTable;
+
+        static PgnSymbolStateMachine()
+        {
+            StateTransitionTable = new int[StateLength, CharacterClassLength];
+
+            // Tag names must start with a letter or underscore.
+            // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
+            StateTransitionTable[StateStart, UppercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateStart, LowercaseLetterCharacter] = StateValidTagName;
+
+            // Allow only digits, letters or the underscore character in tag names.
+            StateTransitionTable[StateValidTagName, DigitCharacter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, UppercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, LowercaseLetterCharacter] = StateValidTagName;
+        }
+
+        private int CurrentState;
 
         public void Start(int characterClass)
-            // Tag names must start with an uppercase letter.
-            => AllLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
+            => CurrentState = StateTransitionTable[StateStart, characterClass];
 
         public void Transition(int characterClass)
-            // Allow only digits, letters or the underscore character in tag names.
-            => AllLegalTagNameCharacters = AllLegalTagNameCharacters &&
-                (characterClass == UppercaseLetterCharacter
-                || characterClass == LowercaseLetterCharacter
-                || characterClass == DigitCharacter);
+            => CurrentState = StateTransitionTable[CurrentState, characterClass];
 
         public IGreenPgnSymbol Yield(int length)
         {
-            if (AllLegalTagNameCharacters) return new GreenPgnTagNameSyntax(length);
+            ulong resultState = 1ul << CurrentState;
+            if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
             return null;
         }
     }
