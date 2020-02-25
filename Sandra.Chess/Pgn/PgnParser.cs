@@ -39,9 +39,13 @@ namespace Sandra.Chess.Pgn
 
         private const int IllegalCharacter = 0;
 
+        // Symbol characters in discrete partitions of character sets.
+        private const int SymbolCharacterMask = 0x3f;
+
         private const int UppercaseLetterCharacter = 1;
         private const int LowercaseLetterCharacter = 2;
         private const int DigitCharacter = 3;
+        private const int OtherSymbolCharacter = 4;
 
         private const int SpecialCharacter = 1 << 6;
         private const int WhitespaceCharacter = 1 << 7;
@@ -77,13 +81,6 @@ namespace Sandra.Chess.Pgn
                 PgnCommentSyntax.MultiLineCommentStartCharacter,
                 PgnNagSyntax.NagCharacter,
                 PgnEscapeSyntax.EscapeCharacter,
-                '-',
-                '/',
-                '=',
-                '+',
-                '#',
-                '!',
-                '?',
             }.ForEach(c => PgnCharacterClassTable[c] = SpecialCharacter);
 
             // Letters, digits.
@@ -97,6 +94,17 @@ namespace Sandra.Chess.Pgn
 
             // Treat the underscore as a lower case character.
             PgnCharacterClassTable['_'] = LowercaseLetterCharacter;
+
+            new[]
+            {
+                '-',
+                '/',
+                '=',
+                '+',
+                '#',
+                '!',
+                '?',
+            }.ForEach(c => PgnCharacterClassTable[c] = OtherSymbolCharacter);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,6 +176,14 @@ namespace Sandra.Chess.Pgn
 
                     if (characterClass != IllegalCharacter)
                     {
+                        int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                        if (symbolCharacterClass != 0)
+                        {
+                            // Tag names must start with an uppercase letter.
+                            allLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
+                            goto inSymbol;
+                        }
+
                         switch (c)
                         {
                             case PgnAsteriskSyntax.AsteriskCharacter:
@@ -209,9 +225,7 @@ namespace Sandra.Chess.Pgn
                                 symbolStartIndex++;
                                 break;
                             default:
-                                // Tag names must start with an uppercase letter.
-                                allLegalTagNameCharacters = characterClass == UppercaseLetterCharacter || characterClass == LowercaseLetterCharacter;
-                                goto inSymbol;
+                                throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
                         }
                     }
                     else
@@ -257,52 +271,60 @@ namespace Sandra.Chess.Pgn
 
                 if (characterClass != IllegalCharacter)
                 {
-                    switch (c)
+                    int symbolCharacterClass = characterClass & SymbolCharacterMask;
+                    if (symbolCharacterClass != 0)
                     {
-                        case PgnAsteriskSyntax.AsteriskCharacter:
-                            symbolToYield = GreenPgnAsteriskSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnBracketOpenSyntax.BracketOpenCharacter:
-                            symbolToYield = GreenPgnBracketOpenSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnBracketCloseSyntax.BracketCloseCharacter:
-                            symbolToYield = GreenPgnBracketCloseSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
-                            symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
-                            symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case PgnPeriodSyntax.PeriodCharacter:
-                            symbolToYield = GreenPgnPeriodSyntax.Value;
-                            goto yieldSymbolThenCharacter;
-                        case StringLiteral.QuoteCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inString;
-                        case PgnCommentSyntax.EndOfLineCommentStartCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inEndOfLineComment;
-                        case PgnCommentSyntax.MultiLineCommentStartCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inMultiLineComment;
-                        case PgnNagSyntax.NagCharacter:
-                            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
-                            symbolStartIndex = currentIndex;
-                            goto inNumericAnnotationGlyph;
-                        case PgnEscapeSyntax.EscapeCharacter:
-                            symbolToYield = CreateIllegalCharacterSyntax(c);
-                            goto yieldSymbolThenCharacter;
+                        // Allow only digits, letters or the underscore character in tag names.
+                        allLegalTagNameCharacters = allLegalTagNameCharacters &&
+                            (characterClass == UppercaseLetterCharacter
+                            || characterClass == LowercaseLetterCharacter
+                            || characterClass == DigitCharacter);
                     }
-
-                    // Allow only digits, letters or the underscore character in tag names.
-                    allLegalTagNameCharacters = allLegalTagNameCharacters &&
-                        (characterClass == UppercaseLetterCharacter
-                        || characterClass == LowercaseLetterCharacter
-                        || characterClass == DigitCharacter);
+                    else
+                    {
+                        switch (c)
+                        {
+                            case PgnAsteriskSyntax.AsteriskCharacter:
+                                symbolToYield = GreenPgnAsteriskSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnBracketOpenSyntax.BracketOpenCharacter:
+                                symbolToYield = GreenPgnBracketOpenSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnBracketCloseSyntax.BracketCloseCharacter:
+                                symbolToYield = GreenPgnBracketCloseSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
+                                symbolToYield = GreenPgnParenthesisCloseSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
+                                symbolToYield = GreenPgnParenthesisOpenSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case PgnPeriodSyntax.PeriodCharacter:
+                                symbolToYield = GreenPgnPeriodSyntax.Value;
+                                goto yieldSymbolThenCharacter;
+                            case StringLiteral.QuoteCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inString;
+                            case PgnCommentSyntax.EndOfLineCommentStartCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inEndOfLineComment;
+                            case PgnCommentSyntax.MultiLineCommentStartCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inMultiLineComment;
+                            case PgnNagSyntax.NagCharacter:
+                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(allLegalTagNameCharacters, currentIndex - symbolStartIndex);
+                                symbolStartIndex = currentIndex;
+                                goto inNumericAnnotationGlyph;
+                            case PgnEscapeSyntax.EscapeCharacter:
+                                symbolToYield = CreateIllegalCharacterSyntax(c);
+                                goto yieldSymbolThenCharacter;
+                            default:
+                                throw new InvalidOperationException("Case statement on special characters is not exhaustive.");
+                        }
+                    }
                 }
                 else
                 {
