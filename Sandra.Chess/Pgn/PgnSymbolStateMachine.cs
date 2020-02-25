@@ -81,6 +81,7 @@ namespace Sandra.Chess.Pgn
 
         // Distinct states after the first character was a letter.
         private const int StateO = 15;
+        private const int StateP = 16;
 
         // StateO 'O' -> StateCastlingMove2 'O-' -> StateCastlingMove3 'O-O' -> StateCastlingMove4 'O-O-' -> StateCastlingMove5 'O-O-O'
         private const int StateCastlingMove2 = 18;
@@ -103,6 +104,7 @@ namespace Sandra.Chess.Pgn
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
+            | 1ul << StateP
             | 1ul << StateValidTagName;
 
         // This table is used to transition from state to state given a character class index.
@@ -147,10 +149,10 @@ namespace Sandra.Chess.Pgn
 
             // States when the first character is a letter.
             StateTransitionTable[StateStart, LetterO] = StateO;
+            StateTransitionTable[StateStart, LetterP] = StateP;
 
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
-            StateTransitionTable[StateStart, LetterP] = StateValidTagName;
             StateTransitionTable[StateStart, OtherPieceLetter] = StateValidTagName;
             StateTransitionTable[StateStart, OtherUpperCaseLetter] = StateValidTagName;
             StateTransitionTable[StateStart, LowercaseAtoH] = StateValidTagName;
@@ -158,7 +160,7 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateStart, OtherLowercaseLetter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
-            new[] { StateO, StateValidTagName }.ForEach(state =>
+            new[] { StateO, StateP, StateValidTagName }.ForEach(state =>
             {
                 StateTransitionTable[state, Digit0] = StateValidTagName;
                 StateTransitionTable[state, Digit1] = StateValidTagName;
