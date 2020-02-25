@@ -112,6 +112,11 @@ namespace Sandra.Chess.Pgn
         OverflowNag,
 
         /// <summary>
+        /// Type of a syntax node which contains an integer move number.
+        /// </summary>
+        MoveNumber,
+
+        /// <summary>
         /// Type of a PGN syntax node with an unknown symbol.
         /// </summary>
         Unknown
