@@ -79,6 +79,9 @@ namespace Sandra.Chess.Pgn
         // All digits.
         private const int StateValidMoveNumber = 14;
 
+        // Distinct states after the first character was a letter.
+        private const int StateO = 15;
+
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -89,7 +92,8 @@ namespace Sandra.Chess.Pgn
             | 1ul << StateValidMoveNumber;
 
         private const ulong ValidTagNameStates
-            = 1ul << StateValidTagName;
+            = 1ul << StateO
+            | 1ul << StateValidTagName;
 
         // This table is used to transition from state to state given a character class index.
         // It is a low level implementation of a regular expression; it is a theorem
@@ -131,9 +135,11 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[State0, Dash] = StateBlackWins2;
             StateTransitionTable[StateBlackWins2, Digit1] = StateBlackWins3;
 
+            // States when the first character is a letter.
+            StateTransitionTable[StateStart, LetterO] = StateO;
+
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
-            StateTransitionTable[StateStart, LetterO] = StateValidTagName;
             StateTransitionTable[StateStart, LetterP] = StateValidTagName;
             StateTransitionTable[StateStart, OtherPieceLetter] = StateValidTagName;
             StateTransitionTable[StateStart, OtherUpperCaseLetter] = StateValidTagName;
@@ -142,18 +148,21 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateStart, OtherLowercaseLetter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
-            StateTransitionTable[StateValidTagName, Digit0] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, Digit1] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, Digit2] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, Digit3_8] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, Digit9] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, LetterO] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, LetterP] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, OtherPieceLetter] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, OtherUpperCaseLetter] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, LowercaseAtoH] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, LowercaseX] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, OtherLowercaseLetter] = StateValidTagName;
+            new[] { StateO, StateValidTagName }.ForEach(state =>
+            {
+                StateTransitionTable[state, Digit0] = StateValidTagName;
+                StateTransitionTable[state, Digit1] = StateValidTagName;
+                StateTransitionTable[state, Digit2] = StateValidTagName;
+                StateTransitionTable[state, Digit3_8] = StateValidTagName;
+                StateTransitionTable[state, Digit9] = StateValidTagName;
+                StateTransitionTable[state, LetterO] = StateValidTagName;
+                StateTransitionTable[state, LetterP] = StateValidTagName;
+                StateTransitionTable[state, OtherPieceLetter] = StateValidTagName;
+                StateTransitionTable[state, OtherUpperCaseLetter] = StateValidTagName;
+                StateTransitionTable[state, LowercaseAtoH] = StateValidTagName;
+                StateTransitionTable[state, LowercaseX] = StateValidTagName;
+                StateTransitionTable[state, OtherLowercaseLetter] = StateValidTagName;
+            });
         }
 
         private int CurrentState;
