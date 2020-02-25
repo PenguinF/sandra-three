@@ -89,6 +89,9 @@ namespace Sandra.Chess.Pgn
         private const int StateCastlingMove4 = 20;
         private const int StateCastlingMove5 = 21;
 
+        // 'a'-'h' OR 'Pa'-'Ph'
+        private const int StateGotFile = 22;
+
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -105,6 +108,7 @@ namespace Sandra.Chess.Pgn
         private const ulong ValidTagNameStates
             = 1ul << StateO
             | 1ul << StateP
+            | 1ul << StateGotFile
             | 1ul << StateValidTagName;
 
         // This table is used to transition from state to state given a character class index.
@@ -150,17 +154,18 @@ namespace Sandra.Chess.Pgn
             // States when the first character is a letter.
             StateTransitionTable[StateStart, LetterO] = StateO;
             StateTransitionTable[StateStart, LetterP] = StateP;
+            StateTransitionTable[StateStart, LowercaseAtoH] = StateGotFile;
 
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
             StateTransitionTable[StateStart, OtherPieceLetter] = StateValidTagName;
             StateTransitionTable[StateStart, OtherUpperCaseLetter] = StateValidTagName;
-            StateTransitionTable[StateStart, LowercaseAtoH] = StateValidTagName;
             StateTransitionTable[StateStart, LowercaseX] = StateValidTagName;
             StateTransitionTable[StateStart, OtherLowercaseLetter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
-            new[] { StateO, StateP, StateValidTagName }.ForEach(state =>
+            // Some of the transitions here are overwritten below for specific move parsing.
+            new[] { StateO, StateP, StateGotFile, StateValidTagName }.ForEach(state =>
             {
                 StateTransitionTable[state, Digit0] = StateValidTagName;
                 StateTransitionTable[state, Digit1] = StateValidTagName;
@@ -181,6 +186,9 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateCastlingMove2, LetterO] = StateCastlingMove3;
             StateTransitionTable[StateCastlingMove3, Dash] = StateCastlingMove4;
             StateTransitionTable[StateCastlingMove4, LetterO] = StateCastlingMove5;
+
+            // Pawn moves: optional 'P' followed by file + rank, or file + 'x' + file + rank.
+            StateTransitionTable[StateP, LowercaseAtoH] = StateGotFile;
         }
 
         private int CurrentState;
