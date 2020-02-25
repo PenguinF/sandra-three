@@ -199,6 +199,10 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(0));
+
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(-1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1));
         }
 
         [Theory]
