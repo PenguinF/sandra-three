@@ -33,7 +33,10 @@ namespace Sandra.Chess.Pgn
         internal const int Digit3_8 = 4;
         internal const int Digit9 = 5;
 
-        internal const int UppercaseLetterCharacter = 6;
+        internal const int LetterO = 6;
+        internal const int LetterP = 7;
+        internal const int OtherPieceLetter = 8;
+        internal const int OtherUpperCaseLetter = 9;
 
         internal const int LowercaseLetterCharacter = 10;
 
@@ -62,7 +65,10 @@ namespace Sandra.Chess.Pgn
 
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
-            StateTransitionTable[StateStart, UppercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateStart, LetterO] = StateValidTagName;
+            StateTransitionTable[StateStart, LetterP] = StateValidTagName;
+            StateTransitionTable[StateStart, OtherPieceLetter] = StateValidTagName;
+            StateTransitionTable[StateStart, OtherUpperCaseLetter] = StateValidTagName;
             StateTransitionTable[StateStart, LowercaseLetterCharacter] = StateValidTagName;
 
             // Allow only digits, letters or the underscore character in tag names.
@@ -71,7 +77,10 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StateValidTagName, Digit2] = StateValidTagName;
             StateTransitionTable[StateValidTagName, Digit3_8] = StateValidTagName;
             StateTransitionTable[StateValidTagName, Digit9] = StateValidTagName;
-            StateTransitionTable[StateValidTagName, UppercaseLetterCharacter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, LetterO] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, LetterP] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, OtherPieceLetter] = StateValidTagName;
+            StateTransitionTable[StateValidTagName, OtherUpperCaseLetter] = StateValidTagName;
             StateTransitionTable[StateValidTagName, LowercaseLetterCharacter] = StateValidTagName;
         }
 
