@@ -100,14 +100,44 @@ namespace Sandra.Chess.Pgn
         private const int StatePawnCapturesFile = 24;
 
         // E.g. 'e4', 'exd4', 'Pe4', 'Pexd4'
+        // Distinct from StatePieceMoveComplete because this can still be followed by a promotion.
         private const int StatePawnMoveComplete = 25;
 
         // E.g. 'e8=', 'exd8=', 'Pe8=', 'Pexd8='
         private const int StatePawnMovePromoteTo = 26;
 
         // E.g. 'e8=Q', 'exd8=N', 'Pe8=Q', 'Pexd8=N'
+        // Distinct from StatePieceMoveComplete because this is not a valid tag name.
         private const int StatePromotionMove = 27;
 
+        // 'Q2'
+        private const int StatePieceRank = 28;
+
+        // 'Qe'
+        private const int StatePieceFile = 29;
+
+        // 'Q2e'
+        private const int StatePieceRankFile = 30;
+
+        // 'Qe3' - distinct from StatePieceMoveComplete because this can still be followed by a capture.
+        private const int StatePieceFileRank = 31;
+
+        // 'Qde'
+        private const int StatePieceFileFile = 32;
+
+        // 'Qd2e'
+        private const int StatePieceFileRankFile = 33;
+
+        // E.g. 'Qx', 'Q2x', 'Qdx', 'Qd2x'
+        private const int StatePieceCaptures = 34;
+
+        // E.g. 'Qxe', 'Q2xe', 'Qdxe', 'Qd2xe'
+        private const int StatePieceCapturesFile = 35;
+
+        // E.g. 'Q2e3', 'Qde3', 'Qd2e3', 'Qxe3', 'Q2xe3', 'Qdxe3', 'Qd2xe3'
+        private const int StatePieceMoveComplete = 36;
+
+        // Any combination of letters, digits and underscores, not starting with a digit.
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -121,7 +151,9 @@ namespace Sandra.Chess.Pgn
             = 1ul << StateCastlingMove3
             | 1ul << StateCastlingMove5
             | 1ul << StatePawnMoveComplete
-            | 1ul << StatePromotionMove;
+            | 1ul << StatePromotionMove
+            | 1ul << StatePieceFileRank
+            | 1ul << StatePieceMoveComplete;
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
@@ -131,6 +163,15 @@ namespace Sandra.Chess.Pgn
             | 1ul << StatePawnCaptures
             | 1ul << StatePawnCapturesFile
             | 1ul << StatePawnMoveComplete
+            | 1ul << StatePieceRank
+            | 1ul << StatePieceFile
+            | 1ul << StatePieceRankFile
+            | 1ul << StatePieceFileRank
+            | 1ul << StatePieceFileFile
+            | 1ul << StatePieceFileRankFile
+            | 1ul << StatePieceCaptures
+            | 1ul << StatePieceCapturesFile
+            | 1ul << StatePieceMoveComplete
             | 1ul << StateValidTagName;
 
         // This table is used to transition from state to state given a character class index.
@@ -189,6 +230,8 @@ namespace Sandra.Chess.Pgn
             // Some of the transitions here are overwritten below for specific move parsing.
             new[] { StateO, StateP, StatePiece, StateGotFile,
                     StatePawnCaptures, StatePawnCapturesFile, StatePawnMoveComplete,
+                    StatePieceRank, StatePieceFile, StatePieceRankFile, StatePieceFileRank, StatePieceFileFile,
+                    StatePieceFileRankFile, StatePieceCaptures, StatePieceCapturesFile, StatePieceMoveComplete,
                     StateValidTagName }.ForEach(state =>
             {
                 StateTransitionTable[state, Digit0] = StateValidTagName;
@@ -226,6 +269,45 @@ namespace Sandra.Chess.Pgn
             // Promotion moves: start from a completed pawn move, expect '=' + piece letter.
             StateTransitionTable[StatePawnMoveComplete, EqualitySign] = StatePawnMovePromoteTo;
             StateTransitionTable[StatePawnMovePromoteTo, OtherPieceLetter] = StatePromotionMove;
+
+            // Non-pawn moves: piece + disambiguation + optional 'x' + file + rank.
+
+            // Rank disambiguation ('N2f3').
+            StateTransitionTable[StatePiece, Digit1] = StatePieceRank;
+            StateTransitionTable[StatePiece, Digit2] = StatePieceRank;
+            StateTransitionTable[StatePiece, Digit3_8] = StatePieceRank;
+
+            StateTransitionTable[StatePieceRank, LowercaseAtoH] = StatePieceRankFile;
+            StateTransitionTable[StatePieceRankFile, Digit1] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceRankFile, Digit2] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceRankFile, Digit3_8] = StatePieceMoveComplete;
+
+            // Piece followed by a file.
+            StateTransitionTable[StatePiece, LowercaseAtoH] = StatePieceFile;
+
+            StateTransitionTable[StatePieceFile, Digit1] = StatePieceFileRank;
+            StateTransitionTable[StatePieceFile, Digit2] = StatePieceFileRank;
+            StateTransitionTable[StatePieceFile, Digit3_8] = StatePieceFileRank;
+            StateTransitionTable[StatePieceFileRank, LowercaseAtoH] = StatePieceFileRankFile;
+            StateTransitionTable[StatePieceFileRankFile, Digit1] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceFileRankFile, Digit2] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceFileRankFile, Digit3_8] = StatePieceMoveComplete;
+
+            StateTransitionTable[StatePieceFile, LowercaseAtoH] = StatePieceFileFile;
+            StateTransitionTable[StatePieceFileFile, Digit1] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceFileFile, Digit2] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceFileFile, Digit3_8] = StatePieceMoveComplete;
+
+            // Captures. ('Nx', 'N2x', 'Nex', 'Qe3x')
+            StateTransitionTable[StatePiece, LowercaseX] = StatePieceCaptures;
+            StateTransitionTable[StatePieceRank, LowercaseX] = StatePieceCaptures;
+            StateTransitionTable[StatePieceFile, LowercaseX] = StatePieceCaptures;
+            StateTransitionTable[StatePieceFileRank, LowercaseX] = StatePieceCaptures;
+
+            StateTransitionTable[StatePieceCaptures, LowercaseAtoH] = StatePieceCapturesFile;
+            StateTransitionTable[StatePieceCapturesFile, Digit1] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceCapturesFile, Digit2] = StatePieceMoveComplete;
+            StateTransitionTable[StatePieceCapturesFile, Digit3_8] = StatePieceMoveComplete;
         }
 
         private int CurrentState;

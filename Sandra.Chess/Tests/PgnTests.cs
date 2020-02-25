@@ -542,7 +542,7 @@ namespace Sandra.Chess.Tests
                 .Union(disambiguationMoves2)
                 .Union(disambiguationMoves3);
 
-            foreach (var nonPawnMove in nonPawnMoves) yield return SMTestCase<GreenPgnTagNameSyntax>(nonPawnMove);
+            foreach (var nonPawnMove in nonPawnMoves) yield return SMTestCase<GreenPgnMoveSyntax>(nonPawnMove);
 
             // Incomplete and invalid moves that are valid tag names (3 characters and longer).
             var invalidMoves = new[]
