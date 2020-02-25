@@ -82,6 +82,12 @@ namespace Sandra.Chess.Pgn
         // Distinct states after the first character was a letter.
         private const int StateO = 15;
 
+        // StateO 'O' -> StateCastlingMove2 'O-' -> StateCastlingMove3 'O-O' -> StateCastlingMove4 'O-O-' -> StateCastlingMove5 'O-O-O'
+        private const int StateCastlingMove2 = 18;
+        private const int StateCastlingMove3 = 19;
+        private const int StateCastlingMove4 = 20;
+        private const int StateCastlingMove5 = 21;
+
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -90,6 +96,10 @@ namespace Sandra.Chess.Pgn
             = 1ul << State0
             | 1ul << State1
             | 1ul << StateValidMoveNumber;
+
+        private const ulong ValidMoveTextStates
+            = 1ul << StateCastlingMove3
+            | 1ul << StateCastlingMove5;
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
@@ -163,6 +173,12 @@ namespace Sandra.Chess.Pgn
                 StateTransitionTable[state, LowercaseX] = StateValidTagName;
                 StateTransitionTable[state, OtherLowercaseLetter] = StateValidTagName;
             });
+
+            // Castling moves.
+            StateTransitionTable[StateO, Dash] = StateCastlingMove2;
+            StateTransitionTable[StateCastlingMove2, LetterO] = StateCastlingMove3;
+            StateTransitionTable[StateCastlingMove3, Dash] = StateCastlingMove4;
+            StateTransitionTable[StateCastlingMove4, LetterO] = StateCastlingMove5;
         }
 
         private int CurrentState;
@@ -185,6 +201,7 @@ namespace Sandra.Chess.Pgn
             {
                 ulong resultState = 1ul << CurrentState;
                 if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
+                if (ValidMoveTextStates.Test(resultState)) return new GreenPgnMoveSyntax(length);
                 if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
             }
 

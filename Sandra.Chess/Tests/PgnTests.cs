@@ -508,8 +508,8 @@ namespace Sandra.Chess.Tests
             yield return SMTestCase<GreenPgnBlackWinMarkerSyntax>("0-1");
 
             // Castling moves.
-            yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("O-O");
-            yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("O-O-O");
+            yield return SMTestCase<GreenPgnMoveSyntax>("O-O");
+            yield return SMTestCase<GreenPgnMoveSyntax>("O-O-O");
 
             // Pawn moves.
             var fileRanks = fileLetters.SelectMany(x => rankDigits.Select(y => $"{x}{y}"));
