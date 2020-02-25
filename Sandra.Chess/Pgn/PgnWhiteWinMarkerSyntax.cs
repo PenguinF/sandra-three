@@ -19,6 +19,37 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the white win game termination marker "1-0".
+    /// </summary>
+    public sealed class GreenPgnWhiteWinMarkerSyntax : IGreenPgnSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnWhiteWinMarkerSyntax"/> value.
+        /// </summary>
+        public static GreenPgnWhiteWinMarkerSyntax Value { get; } = new GreenPgnWhiteWinMarkerSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnWhiteWinMarkerSyntax.WhiteWinMarkerLength;
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.WhiteWinMarker;
+
+        private GreenPgnWhiteWinMarkerSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnWhiteWinMarkerSyntax
+    {
+        public const int WhiteWinMarkerLength = 3;
+    }
 }

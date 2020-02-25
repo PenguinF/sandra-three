@@ -117,6 +117,21 @@ namespace Sandra.Chess.Pgn
         MoveNumber,
 
         /// <summary>
+        /// Type of the draw game termination marker "1/2-1/2".
+        /// </summary>
+        DrawMarker,
+
+        /// <summary>
+        /// Type of the white win game termination marker "1-0".
+        /// </summary>
+        WhiteWinMarker,
+
+        /// <summary>
+        /// Type of the black win game termination marker "0-1".
+        /// </summary>
+        BlackWinMarker,
+
+        /// <summary>
         /// Type of a PGN syntax node with an unknown symbol.
         /// </summary>
         Unknown

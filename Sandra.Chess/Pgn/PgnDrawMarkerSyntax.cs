@@ -19,6 +19,37 @@
 **********************************************************************************/
 #endregion
 
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents the draw game termination marker "1/2-1/2".
+    /// </summary>
+    public sealed class GreenPgnDrawMarkerSyntax : IGreenPgnSymbol
+    {
+        /// <summary>
+        /// Gets the single <see cref="GreenPgnDrawMarkerSyntax"/> value.
+        /// </summary>
+        public static GreenPgnDrawMarkerSyntax Value { get; } = new GreenPgnDrawMarkerSyntax();
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => PgnDrawMarkerSyntax.DrawMarkerLength;
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.DrawMarker;
+
+        private GreenPgnDrawMarkerSyntax() { }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
+    public static class PgnDrawMarkerSyntax
+    {
+        public const int DrawMarkerLength = 7;
+    }
 }
