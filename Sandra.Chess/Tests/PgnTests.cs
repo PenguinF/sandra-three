@@ -529,7 +529,7 @@ namespace Sandra.Chess.Tests
             // Allow promotion to king, then assume the other piece letters work too.
             var promotionMoves = fileRanks.Union(capturePawnMoves).Select(m => $"{m}=K");
 
-            foreach (var promotionMove in promotionMoves) yield return SMTestCase<GreenPgnUnknownSymbolSyntax>(promotionMove);
+            foreach (var promotionMove in promotionMoves) yield return SMTestCase<GreenPgnMoveSyntax>(promotionMove);
 
             // Non-pawn moves.
             var simpleNonPawnMoves = fileRanks.Select(xy => $"Q{xy}");

@@ -101,6 +101,12 @@ namespace Sandra.Chess.Pgn
         // E.g. 'e4', 'exd4', 'Pe4', 'Pexd4'
         private const int StatePawnMoveComplete = 25;
 
+        // E.g. 'e8=', 'exd8=', 'Pe8=', 'Pexd8='
+        private const int StatePawnMovePromoteTo = 26;
+
+        // E.g. 'e8=Q', 'exd8=N', 'Pe8=Q', 'Pexd8=N'
+        private const int StatePromotionMove = 27;
+
         private const int StateValidTagName = 39;
 
         private const int StateLength = 40;
@@ -113,7 +119,8 @@ namespace Sandra.Chess.Pgn
         private const ulong ValidMoveTextStates
             = 1ul << StateCastlingMove3
             | 1ul << StateCastlingMove5
-            | 1ul << StatePawnMoveComplete;
+            | 1ul << StatePawnMoveComplete
+            | 1ul << StatePromotionMove;
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
@@ -213,6 +220,10 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StatePawnCapturesFile, Digit1] = StatePawnMoveComplete;
             StateTransitionTable[StatePawnCapturesFile, Digit2] = StatePawnMoveComplete;
             StateTransitionTable[StatePawnCapturesFile, Digit3_8] = StatePawnMoveComplete;
+
+            // Promotion moves: start from a completed pawn move, expect '=' + piece letter.
+            StateTransitionTable[StatePawnMoveComplete, EqualitySign] = StatePawnMovePromoteTo;
+            StateTransitionTable[StatePawnMovePromoteTo, OtherPieceLetter] = StatePromotionMove;
         }
 
         private int CurrentState;
