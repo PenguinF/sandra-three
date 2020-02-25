@@ -137,6 +137,12 @@ namespace Sandra.Chess.Pgn
         // E.g. 'Q2e3', 'Qde3', 'Qd2e3', 'Qxe3', 'Q2xe3', 'Qdxe3', 'Qd2xe3'
         private const int StatePieceMoveComplete = 36;
 
+        // E.g. 'Qe3+', 'Qe3#'
+        private const int StateMoveWithCheckOrMate = 37;
+
+        // E.g. 'Qe3!' 'Qe3+?', 'e8=N#!?', 'O-O-O??'
+        private const int StateMoveWithAnnotations = 38;
+
         // Any combination of letters, digits and underscores, not starting with a digit.
         private const int StateValidTagName = 39;
 
@@ -153,7 +159,9 @@ namespace Sandra.Chess.Pgn
             | 1ul << StatePawnMoveComplete
             | 1ul << StatePromotionMove
             | 1ul << StatePieceFileRank
-            | 1ul << StatePieceMoveComplete;
+            | 1ul << StatePieceMoveComplete
+            | 1ul << StateMoveWithCheckOrMate
+            | 1ul << StateMoveWithAnnotations;
 
         private const ulong ValidTagNameStates
             = 1ul << StateO
@@ -308,6 +316,17 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable[StatePieceCapturesFile, Digit1] = StatePieceMoveComplete;
             StateTransitionTable[StatePieceCapturesFile, Digit2] = StatePieceMoveComplete;
             StateTransitionTable[StatePieceCapturesFile, Digit3_8] = StatePieceMoveComplete;
+
+            // Check, mate, arbitrary number of annotations ! or ?.
+            // Below list is the exact same combination of accepting states as in ValidMoveTextStates,
+            // with StateMoveWithCheckOrMate and StateMoveWithAnnotations possibly being different.
+            new[] { StateCastlingMove3, StateCastlingMove5, StatePawnMoveComplete, StatePromotionMove,
+                    StatePieceFileRank, StatePieceMoveComplete }.ForEach(
+                state => StateTransitionTable[state, PlusOrOctothorpe] = StateMoveWithCheckOrMate);
+
+            new[] { StateCastlingMove3, StateCastlingMove5, StatePawnMoveComplete, StatePromotionMove,
+                    StatePieceFileRank, StatePieceMoveComplete, StateMoveWithCheckOrMate, StateMoveWithAnnotations }.ForEach(
+                state => StateTransitionTable[state, ExclamationOrQuestionMark] = StateMoveWithAnnotations);
         }
 
         private int CurrentState;

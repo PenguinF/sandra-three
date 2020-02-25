@@ -576,7 +576,7 @@ namespace Sandra.Chess.Tests
                 "Be4+?", "Red5!!", "O-O-O#", "Q1a8??", "Ke1e2#?!",
             };
 
-            foreach (var movesWithAnnotation in movesWithAnnotations) yield return SMTestCase<GreenPgnUnknownSymbolSyntax>(movesWithAnnotation);
+            foreach (var movesWithAnnotation in movesWithAnnotations) yield return SMTestCase<GreenPgnMoveSyntax>(movesWithAnnotation);
         }
 
         public static IEnumerable<object[]> StateMachineValidSymbols
