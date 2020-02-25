@@ -45,7 +45,8 @@ namespace Sandra.Chess.Tests
             }
             else if (tokenType1 == typeof(GreenPgnTagNameSyntax))
             {
-                if (tokenType2 == typeof(GreenPgnTagNameSyntax))
+                if (tokenType2 == typeof(GreenPgnTagNameSyntax)
+                    || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
                     resultTokenType = tokenType1;
                     return true;
@@ -59,9 +60,34 @@ namespace Sandra.Chess.Tests
             else if (tokenType1 == typeof(GreenPgnUnknownSymbolSyntax))
             {
                 if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
-                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax)
+                    || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
                     resultTokenType = tokenType1;
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(GreenPgnEmptyNagSyntax)
+                || tokenType1 == typeof(GreenPgnNagSyntax)
+                || tokenType1 == typeof(GreenPgnOverflowNagSyntax))
+            {
+                if (tokenType2 == typeof(GreenPgnMoveNumberSyntax))
+                {
+                    resultTokenType = typeof(GreenPgnOverflowNagSyntax);
+                    return true;
+                }
+            }
+            else if (tokenType1 == typeof(GreenPgnMoveNumberSyntax))
+            {
+                if (tokenType2 == typeof(GreenPgnMoveNumberSyntax))
+                {
+                    resultTokenType = tokenType1;
+                    return true;
+                }
+                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                    || tokenType2 == typeof(GreenPgnTagNameSyntax))
+                {
+                    resultTokenType = typeof(GreenPgnUnknownSymbolSyntax);
                     return true;
                 }
             }
@@ -99,6 +125,7 @@ namespace Sandra.Chess.Tests
                 yield return ("$", typeof(GreenPgnEmptyNagSyntax));
                 yield return ("$1", typeof(GreenPgnNagSyntax));
                 yield return ("$256", typeof(GreenPgnOverflowNagSyntax));
+                yield return ("256", typeof(GreenPgnMoveNumberSyntax));  // pick a big move number to safely predict GreenPgnOverflowNagSyntax.
             }
         }
 
@@ -473,7 +500,7 @@ namespace Sandra.Chess.Tests
                 new SingleElementEnumerable<string>($"{x}")
                 .Union(allDigits.SelectMany(y => new SingleElementEnumerable<string>($"{x}{y}"))));
 
-            foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnUnknownSymbolSyntax>(moveNumber);
+            foreach (var moveNumber in moveNumbers) yield return SMTestCase<GreenPgnMoveNumberSyntax>(moveNumber);
 
             // Termination markers.
             yield return SMTestCase<GreenPgnUnknownSymbolSyntax>("1/2-1/2");

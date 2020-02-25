@@ -53,9 +53,15 @@ namespace Sandra.Chess.Pgn
         // The default state 0 indicates that the machine has entered an invalid state, and will never become valid again.
         private const int StateStart = 1;
 
+        // Distinct states after the first character was a digit.
+        private const int StateValidMoveNumber = 5;
+
         private const int StateValidTagName = 40;
 
         private const int StateLength = 41;
+
+        private const ulong ValidMoveNumberStates
+            = 1ul << StateValidMoveNumber;
 
         private const ulong ValidTagNameStates
             = 1ul << StateValidTagName;
@@ -68,6 +74,20 @@ namespace Sandra.Chess.Pgn
         static PgnSymbolStateMachine()
         {
             StateTransitionTable = new int[StateLength, CharacterClassLength];
+
+            // When the first character is a digit.
+            StateTransitionTable[StateStart, Digit0] = StateValidMoveNumber;
+            StateTransitionTable[StateStart, Digit1] = StateValidMoveNumber;
+            StateTransitionTable[StateStart, Digit2] = StateValidMoveNumber;
+            StateTransitionTable[StateStart, Digit3_8] = StateValidMoveNumber;
+            StateTransitionTable[StateStart, Digit9] = StateValidMoveNumber;
+
+            // Valid move numbers are digits only.
+            StateTransitionTable[StateValidMoveNumber, Digit0] = StateValidMoveNumber;
+            StateTransitionTable[StateValidMoveNumber, Digit1] = StateValidMoveNumber;
+            StateTransitionTable[StateValidMoveNumber, Digit2] = StateValidMoveNumber;
+            StateTransitionTable[StateValidMoveNumber, Digit3_8] = StateValidMoveNumber;
+            StateTransitionTable[StateValidMoveNumber, Digit9] = StateValidMoveNumber;
 
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
@@ -105,6 +125,7 @@ namespace Sandra.Chess.Pgn
         public IGreenPgnSymbol Yield(int length)
         {
             ulong resultState = 1ul << CurrentState;
+            if (ValidMoveNumberStates.Test(resultState)) return new GreenPgnMoveNumberSyntax(length);
             if (ValidTagNameStates.Test(resultState)) return new GreenPgnTagNameSyntax(length);
             return null;
         }
