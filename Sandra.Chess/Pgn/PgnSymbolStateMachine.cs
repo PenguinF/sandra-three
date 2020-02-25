@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Linq;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -54,14 +56,18 @@ namespace Sandra.Chess.Pgn
         private const int StateStart = 1;
 
         // Distinct states after the first character was a digit.
-        private const int StateValidMoveNumber = 5;
+        private const int State0 = 2;
+        private const int State1 = 3;
+        private const int StateValidMoveNumber = 4;
 
-        private const int StateValidTagName = 40;
+        private const int StateValidTagName = 39;
 
-        private const int StateLength = 41;
+        private const int StateLength = 40;
 
         private const ulong ValidMoveNumberStates
-            = 1ul << StateValidMoveNumber;
+            = 1ul << State0
+            | 1ul << State1
+            | 1ul << StateValidMoveNumber;
 
         private const ulong ValidTagNameStates
             = 1ul << StateValidTagName;
@@ -76,18 +82,21 @@ namespace Sandra.Chess.Pgn
             StateTransitionTable = new int[StateLength, CharacterClassLength];
 
             // When the first character is a digit.
-            StateTransitionTable[StateStart, Digit0] = StateValidMoveNumber;
-            StateTransitionTable[StateStart, Digit1] = StateValidMoveNumber;
+            StateTransitionTable[StateStart, Digit0] = State0;
+            StateTransitionTable[StateStart, Digit1] = State1;
             StateTransitionTable[StateStart, Digit2] = StateValidMoveNumber;
             StateTransitionTable[StateStart, Digit3_8] = StateValidMoveNumber;
             StateTransitionTable[StateStart, Digit9] = StateValidMoveNumber;
 
             // Valid move numbers are digits only.
-            StateTransitionTable[StateValidMoveNumber, Digit0] = StateValidMoveNumber;
-            StateTransitionTable[StateValidMoveNumber, Digit1] = StateValidMoveNumber;
-            StateTransitionTable[StateValidMoveNumber, Digit2] = StateValidMoveNumber;
-            StateTransitionTable[StateValidMoveNumber, Digit3_8] = StateValidMoveNumber;
-            StateTransitionTable[StateValidMoveNumber, Digit9] = StateValidMoveNumber;
+            new[] { State0, State1, StateValidMoveNumber }.ForEach(state =>
+            {
+                StateTransitionTable[state, Digit0] = StateValidMoveNumber;
+                StateTransitionTable[state, Digit1] = StateValidMoveNumber;
+                StateTransitionTable[state, Digit2] = StateValidMoveNumber;
+                StateTransitionTable[state, Digit3_8] = StateValidMoveNumber;
+                StateTransitionTable[state, Digit9] = StateValidMoveNumber;
+            });
 
             // Tag names must start with a letter or underscore.
             // This deviates from the PGN standard which only allows tag names to start with uppercase letters.
