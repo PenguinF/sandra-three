@@ -19,8 +19,47 @@
 **********************************************************************************/
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a syntax node which contains a move text.
+    /// </summary>
+    /// <remarks>
+    /// When encountered in a tag pair, this node may be reinterpreted as a <see cref="GreenPgnTagNameSyntax"/>.
+    /// </remarks>
+    public sealed class GreenPgnMoveSyntax : IGreenPgnSymbol
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Gets the type of this symbol.
+        /// </summary>
+        public PgnSymbolType SymbolType => PgnSymbolType.Move;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnMoveSyntax"/>.
+        /// </summary>
+        /// <param name="length">
+        /// The length of the text span corresponding with the node to create.
+        /// </param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="length"/> is 1 or lower.
+        /// </exception>
+        public GreenPgnMoveSyntax(int length)
+        {
+            if (length <= 1) throw new ArgumentOutOfRangeException(nameof(length));
+            Length = length;
+        }
+
+        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+    }
+
     public static class PgnMoveSyntax
     {
         /// <summary>

@@ -117,6 +117,11 @@ namespace Sandra.Chess.Pgn
         MoveNumber,
 
         /// <summary>
+        /// Type of a syntax node which contains a move text.
+        /// </summary>
+        Move,
+
+        /// <summary>
         /// Type of the draw game termination marker "1/2-1/2".
         /// </summary>
         DrawMarker,
