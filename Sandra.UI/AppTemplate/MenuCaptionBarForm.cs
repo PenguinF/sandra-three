@@ -58,6 +58,7 @@ namespace Eutherion.Win.AppTemplate
         private Color titleBarForeColor;
         private Color titleBarHoverColor;
         private Color titleBarHoverBorderColor;
+        private Color? closeButtonHoverColorOverride;
 
         public MenuCaptionBarForm()
         {
@@ -159,6 +160,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public void SetCloseButtonHoverColor(Color value)
         {
+            closeButtonHoverColorOverride = value;
             closeButton.FlatAppearance.MouseOverBackColor = value;
         }
 
@@ -167,6 +169,7 @@ namespace Eutherion.Win.AppTemplate
         /// </summary>
         public void ResetCloseButtonHoverColor()
         {
+            closeButtonHoverColorOverride = null;
             closeButton.FlatAppearance.MouseOverBackColor = titleBarHoverColor;
         }
 
@@ -242,6 +245,12 @@ namespace Eutherion.Win.AppTemplate
             }
 
             new[] { minimizeButton, maximizeButton, saveButton, closeButton }.ForEach(StyleButton);
+
+            if (closeButtonHoverColorOverride != null)
+            {
+                // Reapply override after StyleButton reset the hover color.
+                closeButton.FlatAppearance.MouseOverBackColor = closeButtonHoverColorOverride.Value;
+            }
 
             if (inDarkMode)
             {
