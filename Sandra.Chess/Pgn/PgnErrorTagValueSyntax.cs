@@ -87,14 +87,11 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
         /// </summary>
-        /// <param name="start">
-        /// The start position of the unterminated tag value.
-        /// </param>
         /// <param name="length">
         /// The length of the unterminated tag value.
         /// </param>
-        public static PgnErrorInfo Unterminated(int start, int length)
-            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, start, length);
+        public static PgnErrorInfo Unterminated(int length)
+            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, 0, length);
 
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unrecognized escape sequences.
