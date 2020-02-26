@@ -439,7 +439,7 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            errors.Add(PgnErrorTagValueSyntax.Unterminated(symbolStartIndex, length - symbolStartIndex));
+            errors.Add(PgnErrorTagValueSyntax.Unterminated(length - symbolStartIndex));
 
             yield return new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors);
             yield break;
