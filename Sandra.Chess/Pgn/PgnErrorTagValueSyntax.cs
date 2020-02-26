@@ -103,7 +103,7 @@ namespace Sandra.Chess.Pgn
         /// A friendly representation of the unrecognized escape sequence.
         /// </param>
         /// <param name="start">
-        /// The start position of the unrecognized escape sequence.
+        /// The start position of the unrecognized escape sequence relative to the start position of the tag value.
         /// </param>
         /// <param name="length">
         /// The length of the unrecognized escape sequence.
@@ -118,7 +118,7 @@ namespace Sandra.Chess.Pgn
         /// The illegal control character.
         /// </param>
         /// <param name="position">
-        /// The position of the illegal control character.
+        /// The position of the illegal control character relative to the start position of the tag value.
         /// </param>
         public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
             => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
