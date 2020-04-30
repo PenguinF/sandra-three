@@ -146,6 +146,8 @@ namespace Sandra.Chess.Pgn
         /// </exception>
         public static RootPgnSyntax Parse(string pgn)
         {
+            if (pgn == null) throw new ArgumentNullException(nameof(pgn));
+
             var terminalList = new List<IGreenPgnSymbol>(new PgnParser().TokenizeAll(pgn));
 
             int startPosition = 0;
@@ -163,7 +165,6 @@ namespace Sandra.Chess.Pgn
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
-            if (pgnText == null) throw new ArgumentNullException(nameof(pgnText));
             int length = pgnText.Length;
 
             int currentIndex = 0;
