@@ -96,25 +96,23 @@ namespace Sandra.UI
                     return syntaxEditor.Styles[tagValueStyleIndex];
                 case PgnSymbolType.ErrorTagValue:
                     return syntaxEditor.Styles[errorTagValueStyleIndex];
+                case PgnSymbolType.MoveNumber:
+                case PgnSymbolType.Period:
+                    return syntaxEditor.Styles[moveNumberStyleIndex];
+                case PgnSymbolType.Move:
                 case PgnSymbolType.Nag:
-                    return syntaxEditor.Styles[moveTextStyleIndex];
+                // Don't darken this one like OverflowNag, got to go through this state before creating a valid NAG.
                 case PgnSymbolType.EmptyNag:
-                    // Don't darken this one, got to go through this state before creating a valid NAG.
                     return syntaxEditor.Styles[moveTextStyleIndex];
                 case PgnSymbolType.OverflowNag:
                     return syntaxEditor.Styles[errorNagStyleIndex];
-                case PgnSymbolType.Period:
-                case PgnSymbolType.MoveNumber:
-                    return syntaxEditor.Styles[moveNumberStyleIndex];
-                case PgnSymbolType.Move:
-                    return syntaxEditor.Styles[moveTextStyleIndex];
+                case PgnSymbolType.Unknown:
+                    return syntaxEditor.Styles[illegalCharacterStyleIndex];
                 case PgnSymbolType.Asterisk:
                 case PgnSymbolType.DrawMarker:
                 case PgnSymbolType.WhiteWinMarker:
                 case PgnSymbolType.BlackWinMarker:
                     return syntaxEditor.Styles[moveTextStyleIndex];
-                case PgnSymbolType.Unknown:
-                    return syntaxEditor.Styles[illegalCharacterStyleIndex];
             }
 
             return syntaxEditor.DefaultStyle;
