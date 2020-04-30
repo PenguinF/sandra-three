@@ -138,8 +138,13 @@ namespace Sandra.Chess.Tests
             yield return ("{", typeof(GreenPgnUnterminatedCommentSyntax));
         }
 
+        private static IEnumerable<IGreenPgnSymbol> TerminalSymbols(string pgn)
+        {
+            return PgnParser.TokenizeAll(pgn);
+        }
+
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
-            => Assert.Collection(PgnParser.TokenizeAll(pgn), elementInspectors);
+            => Assert.Collection(TerminalSymbols(pgn), elementInspectors);
 
         private static Action<IGreenPgnSymbol> ExpectToken(Type expectedTokenType, int expectedLength)
         {
@@ -160,7 +165,7 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
             Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnSyntaxNodes(EmptyEnumerable<IGreenPgnSymbol>.Instance), null));
 
-            Assert.Throws<ArgumentNullException>(() => PgnParser.TokenizeAll(null).Any());
+            Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
             Assert.Throws<ArgumentNullException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(null));
             Assert.Throws<ArgumentException>("displayCharValue", () => new GreenPgnIllegalCharacterSyntax(string.Empty));
@@ -220,7 +225,7 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void EmptyPgnEmptyTokens()
         {
-            Assert.False(PgnParser.TokenizeAll(string.Empty).Any());
+            Assert.False(TerminalSymbols(string.Empty).Any());
         }
 
         [Theory]
@@ -371,7 +376,7 @@ namespace Sandra.Chess.Tests
             {
                 // Special case: the pgn contains a '\n'.
                 // Only assert the single line comment, and that the next symbol is whitespace.
-                var symbols = PgnParser.TokenizeAll(commentThenPgn).ToList();
+                var symbols = TerminalSymbols(commentThenPgn).ToList();
                 Assert.True(symbols.Count >= 2);
                 ExpectToken<GreenPgnCommentSyntax>(1 + linefeedIndex)(symbols[0]);
                 Assert.IsType<GreenPgnWhitespaceSyntax>(symbols[1]);
@@ -423,7 +428,7 @@ namespace Sandra.Chess.Tests
             int curlyCloseIndex = pgn.IndexOf('}');
             if (curlyCloseIndex >= 0)
             {
-                var symbols = PgnParser.TokenizeAll(commentedPgn).ToList();
+                var symbols = TerminalSymbols(commentedPgn).ToList();
                 Assert.True(symbols.Count >= 2);
                 ExpectToken<GreenPgnCommentSyntax>(2 + curlyCloseIndex)(symbols[0]);
             }
