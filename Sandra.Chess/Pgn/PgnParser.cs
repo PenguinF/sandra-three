@@ -133,6 +133,30 @@ namespace Sandra.Chess.Pgn
             ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length));
 
         /// <summary>
+        /// Parses source text in the PGN format.
+        /// </summary>
+        /// <param name="pgn">
+        /// The source text to parse.
+        /// </param>
+        /// <returns>
+        /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
+        /// </returns>
+        public static RootPgnSyntax Parse(string pgn)
+        {
+            var terminalList = new List<IGreenPgnSymbol>(TokenizeAll(pgn));
+
+            int startPosition = 0;
+            var errors = new List<PgnErrorInfo>();
+            foreach (var terminal in terminalList)
+            {
+                errors.AddRange(terminal.GetErrors(startPosition));
+                startPosition += terminal.Length;
+            }
+
+            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
+        }
+
+        /// <summary>
         /// Tokenizes source text in the PGN format.
         /// </summary>
         /// <param name="pgnText">
@@ -583,30 +607,6 @@ namespace Sandra.Chess.Pgn
             if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
             else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex);
             else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
-        }
-
-        /// <summary>
-        /// Parses source text in the PGN format.
-        /// </summary>
-        /// <param name="pgn">
-        /// The source text to parse.
-        /// </param>
-        /// <returns>
-        /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
-        /// </returns>
-        public static RootPgnSyntax Parse(string pgn)
-        {
-            var terminalList = new List<IGreenPgnSymbol>(TokenizeAll(pgn));
-
-            int startPosition = 0;
-            var errors = new List<PgnErrorInfo>();
-            foreach (var terminal in terminalList)
-            {
-                errors.AddRange(terminal.GetErrors(startPosition));
-                startPosition += terminal.Length;
-            }
-
-            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
         }
 
         private PgnParser() { }
