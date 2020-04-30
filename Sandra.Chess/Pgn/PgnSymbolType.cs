@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Runtime.CompilerServices;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -140,5 +142,17 @@ namespace Sandra.Chess.Pgn
         /// Type of the black win game termination marker "0-1".
         /// </summary>
         BlackWinMarker,
+    }
+
+    /// <summary>
+    /// Contains methods to categorize different <see cref="PgnSymbolType"/> values.
+    /// </summary>
+    public static class PgnSymbolTypeExtensions
+    {
+        /// <summary>
+        /// Returns if the symbol type is background, i.e. always ignored.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsBackground(this PgnSymbolType symbolType) => symbolType < PgnSymbolType.BracketOpen;
     }
 }

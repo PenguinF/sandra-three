@@ -33,8 +33,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        internal const PgnSymbolType ForegroundThreshold = PgnSymbolType.BracketOpen;
-
         #region PGN character classes
 
         private const int IllegalCharacter = 0;

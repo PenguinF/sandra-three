@@ -88,7 +88,7 @@ namespace Sandra.Chess.Pgn
 
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
         {
-            if (green.SymbolType < PgnParser.ForegroundThreshold)
+            if (green.SymbolType.IsBackground())
             {
                 return PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)green, (this, index));
             }
