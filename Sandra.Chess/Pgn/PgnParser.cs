@@ -33,8 +33,6 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnParser
     {
-        internal const PgnSymbolType ForegroundThreshold = PgnSymbolType.Asterisk;
-
         #region PGN character classes
 
         private const int IllegalCharacter = 0;
@@ -129,28 +127,55 @@ namespace Sandra.Chess.Pgn
                 ? StringLiteral.EscapedCharacterString(c)
                 : Convert.ToString(c));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static IGreenPgnSymbol CreatePgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
-            => symbolBuilder.Yield(length)
-            ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length));
-
         /// <summary>
-        /// Tokenizes source text in the PGN format.
+        /// Parses source text in the PGN format.
         /// </summary>
-        /// <param name="pgnText">
-        /// The PGN to tokenize.
+        /// <param name="pgn">
+        /// The source text to parse.
         /// </param>
         /// <returns>
-        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
+        /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="pgnText"/> is null/
+        /// <paramref name="pgn"/> is null.
         /// </exception>
-        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
+        public static RootPgnSyntax Parse(string pgn)
+        {
+            if (pgn == null) throw new ArgumentNullException(nameof(pgn));
+
+            var parser = new PgnParser();
+            parser.TokenizeAll(pgn);
+            var terminalList = parser.SymbolBuilder;
+
+            int startPosition = 0;
+            var errors = new List<PgnErrorInfo>();
+            foreach (var terminal in terminalList)
+            {
+                errors.AddRange(terminal.GetErrors(startPosition));
+                startPosition += terminal.Length;
+            }
+
+            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
+        }
+
+        private readonly List<IGreenPgnSymbol> SymbolBuilder;
+
+        private PgnParser()
+        {
+            SymbolBuilder = new List<IGreenPgnSymbol>();
+        }
+
+        private void Yield(IGreenPgnSymbol token) => SymbolBuilder.Add(token);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
+            => Yield(symbolBuilder.Yield(length)
+                     ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length)));
+
+        private void TokenizeAll(string pgnText)
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
-            if (pgnText == null) throw new ArgumentNullException(nameof(pgnText));
             int length = pgnText.Length;
 
             int currentIndex = 0;
@@ -172,7 +197,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
+                        Yield(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
                         symbolStartIndex = currentIndex;
                     }
 
@@ -188,27 +213,27 @@ namespace Sandra.Chess.Pgn
                         switch (c)
                         {
                             case PgnAsteriskSyntax.AsteriskCharacter:
-                                yield return GreenPgnAsteriskSyntax.Value;
+                                Yield(GreenPgnAsteriskSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case PgnBracketOpenSyntax.BracketOpenCharacter:
-                                yield return GreenPgnBracketOpenSyntax.Value;
+                                Yield(GreenPgnBracketOpenSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case PgnBracketCloseSyntax.BracketCloseCharacter:
-                                yield return GreenPgnBracketCloseSyntax.Value;
+                                Yield(GreenPgnBracketCloseSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case PgnParenthesisCloseSyntax.ParenthesisCloseCharacter:
-                                yield return GreenPgnParenthesisCloseSyntax.Value;
+                                Yield(GreenPgnParenthesisCloseSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case PgnParenthesisOpenSyntax.ParenthesisOpenCharacter:
-                                yield return GreenPgnParenthesisOpenSyntax.Value;
+                                Yield(GreenPgnParenthesisOpenSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case PgnPeriodSyntax.PeriodCharacter:
-                                yield return GreenPgnPeriodSyntax.Value;
+                                Yield(GreenPgnPeriodSyntax.Value);
                                 symbolStartIndex++;
                                 break;
                             case StringLiteral.QuoteCharacter:
@@ -222,7 +247,7 @@ namespace Sandra.Chess.Pgn
                             case PgnEscapeSyntax.EscapeCharacter:
                                 // Escape mechanism only triggered directly after a newline.
                                 if (currentIndex == 0 || pgnText[currentIndex - 1] == '\n') goto inEscapeSequence;
-                                yield return CreateIllegalCharacterSyntax(c);
+                                Yield(CreateIllegalCharacterSyntax(c));
                                 symbolStartIndex++;
                                 break;
                             default:
@@ -231,7 +256,7 @@ namespace Sandra.Chess.Pgn
                     }
                     else
                     {
-                        yield return CreateIllegalCharacterSyntax(c);
+                        Yield(CreateIllegalCharacterSyntax(c));
                         symbolStartIndex++;
                     }
                 }
@@ -241,10 +266,10 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                yield return GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex);
+                Yield(GreenPgnWhitespaceSyntax.Create(currentIndex - symbolStartIndex));
             }
 
-            yield break;
+            return;
 
         inSymbol:
 
@@ -262,7 +287,7 @@ namespace Sandra.Chess.Pgn
                 {
                     if (symbolStartIndex < currentIndex)
                     {
-                        yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                        YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                         symbolStartIndex = currentIndex;
                     }
 
@@ -300,19 +325,19 @@ namespace Sandra.Chess.Pgn
                                 symbolToYield = GreenPgnPeriodSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case StringLiteral.QuoteCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inString;
                             case PgnCommentSyntax.EndOfLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inEndOfLineComment;
                             case PgnCommentSyntax.MultiLineCommentStartCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inMultiLineComment;
                             case PgnNagSyntax.NagCharacter:
-                                if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                                if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
                                 symbolStartIndex = currentIndex;
                                 goto inNumericAnnotationGlyph;
                             case PgnEscapeSyntax.EscapeCharacter:
@@ -334,16 +359,16 @@ namespace Sandra.Chess.Pgn
 
             if (symbolStartIndex < currentIndex)
             {
-                yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+                YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
             }
 
-            yield break;
+            return;
 
         yieldSymbolThenCharacter:
 
             // Yield a GreenPgnSymbol, then symbolToYield, then go to whitespace.
-            if (symbolStartIndex < currentIndex) yield return CreatePgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
-            yield return symbolToYield;
+            if (symbolStartIndex < currentIndex) YieldPgnSymbol(ref symbolBuilder, pgnText, symbolStartIndex, currentIndex - symbolStartIndex);
+            Yield(symbolToYield);
             currentIndex++;
             symbolStartIndex = currentIndex;
             goto inWhitespace;
@@ -365,12 +390,12 @@ namespace Sandra.Chess.Pgn
 
                     if (errors.Count > 0)
                     {
-                        yield return new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors);
+                        Yield(new GreenPgnErrorTagValueSyntax(currentIndex - symbolStartIndex, errors));
                         errors.Clear();
                     }
                     else
                     {
-                        yield return new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - symbolStartIndex);
+                        Yield(new GreenPgnTagValueSyntax(valueBuilder.ToString(), currentIndex - symbolStartIndex));
                     }
 
                     valueBuilder.Clear();
@@ -441,8 +466,8 @@ namespace Sandra.Chess.Pgn
 
             errors.Add(PgnErrorTagValueSyntax.Unterminated(length - symbolStartIndex));
 
-            yield return new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors);
-            yield break;
+            Yield(new GreenPgnErrorTagValueSyntax(length - symbolStartIndex, errors));
+            return;
 
         inEndOfLineComment:
 
@@ -465,7 +490,7 @@ namespace Sandra.Chess.Pgn
                         char secondChar = pgnText[currentIndex];
                         if (secondChar == '\n')
                         {
-                            yield return new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex);
+                            Yield(new GreenPgnCommentSyntax(currentIndex - 1 - symbolStartIndex));
 
                             // Eat the '\n'.
                             symbolStartIndex = currentIndex - 1;
@@ -476,7 +501,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (c == '\n')
                 {
-                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+                    Yield(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
 
                     // Eat the '\n'.
                     symbolStartIndex = currentIndex;
@@ -487,8 +512,8 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            yield return new GreenPgnCommentSyntax(length - symbolStartIndex);
-            yield break;
+            Yield(new GreenPgnCommentSyntax(length - symbolStartIndex));
+            return;
 
         inEscapeSequence:
 
@@ -505,7 +530,7 @@ namespace Sandra.Chess.Pgn
                         char secondChar = pgnText[currentIndex];
                         if (secondChar == '\n')
                         {
-                            yield return new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex);
+                            Yield(new GreenPgnEscapeSyntax(currentIndex - 1 - symbolStartIndex));
                             symbolStartIndex = currentIndex - 1;
                             currentIndex++;
                             goto inWhitespace;
@@ -514,7 +539,7 @@ namespace Sandra.Chess.Pgn
                 }
                 else if (c == '\n')
                 {
-                    yield return new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex);
+                    Yield(new GreenPgnEscapeSyntax(currentIndex - symbolStartIndex));
                     symbolStartIndex = currentIndex;
                     currentIndex++;
                     goto inWhitespace;
@@ -522,8 +547,8 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            yield return new GreenPgnEscapeSyntax(length - symbolStartIndex);
-            yield break;
+            Yield(new GreenPgnEscapeSyntax(length - symbolStartIndex));
+            return;
 
         inMultiLineComment:
 
@@ -539,14 +564,14 @@ namespace Sandra.Chess.Pgn
 
                 if (c == PgnCommentSyntax.MultiLineCommentEndCharacter)
                 {
-                    yield return new GreenPgnCommentSyntax(currentIndex - symbolStartIndex);
+                    Yield(new GreenPgnCommentSyntax(currentIndex - symbolStartIndex));
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
                 }
             }
 
-            yield return new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex);
-            yield break;
+            Yield(new GreenPgnUnterminatedCommentSyntax(length - symbolStartIndex));
+            return;
 
         inNumericAnnotationGlyph:
 
@@ -563,9 +588,9 @@ namespace Sandra.Chess.Pgn
 
                 if (digit < 0 || digit > 9)
                 {
-                    if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
-                    else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex);
-                    else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
+                    if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
+                    else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, currentIndex - symbolStartIndex));
+                    else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
 
                     symbolStartIndex = currentIndex;
                     goto inWhitespace;
@@ -582,35 +607,9 @@ namespace Sandra.Chess.Pgn
                 currentIndex++;
             }
 
-            if (emptyNag) yield return GreenPgnEmptyNagSyntax.Value;
-            else if (!overflowNag) yield return new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex);
-            else yield return new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex));
+            if (emptyNag) Yield(GreenPgnEmptyNagSyntax.Value);
+            else if (!overflowNag) Yield(new GreenPgnNagSyntax((PgnAnnotation)annotationValue, length - symbolStartIndex));
+            else Yield(new GreenPgnOverflowNagSyntax(pgnText.Substring(symbolStartIndex, currentIndex - symbolStartIndex)));
         }
-
-        /// <summary>
-        /// Parses source text in the PGN format.
-        /// </summary>
-        /// <param name="pgn">
-        /// The source text to parse.
-        /// </param>
-        /// <returns>
-        /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
-        /// </returns>
-        public static RootPgnSyntax Parse(string pgn)
-        {
-            var terminalList = new List<IGreenPgnSymbol>(TokenizeAll(pgn));
-
-            int startPosition = 0;
-            var errors = new List<PgnErrorInfo>();
-            foreach (var terminal in terminalList)
-            {
-                errors.AddRange(terminal.GetErrors(startPosition));
-                startPosition += terminal.Length;
-            }
-
-            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
-        }
-
-        private PgnParser() { }
     }
 }

@@ -29,10 +29,8 @@ namespace Sandra.Chess.Pgn
     {
         public virtual void DefaultVisit(GreenPgnBackgroundSyntax node) { }
         public virtual void Visit(GreenPgnBackgroundSyntax node) { if (node != null) node.Accept(this); }
-        public virtual void VisitCommentSyntax(GreenPgnCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitEscapeSyntax(GreenPgnEscapeSyntax node) => DefaultVisit(node);
         public virtual void VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node) => DefaultVisit(node);
-        public virtual void VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax node) => DefaultVisit(node);
         public virtual void VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node) => DefaultVisit(node);
     }
 
@@ -44,10 +42,8 @@ namespace Sandra.Chess.Pgn
     {
         public virtual TResult DefaultVisit(GreenPgnBackgroundSyntax node) => default;
         public virtual TResult Visit(GreenPgnBackgroundSyntax node) => node == null ? default : node.Accept(this);
-        public virtual TResult VisitCommentSyntax(GreenPgnCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitEscapeSyntax(GreenPgnEscapeSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax node) => DefaultVisit(node);
         public virtual TResult VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node) => DefaultVisit(node);
     }
 
@@ -59,10 +55,8 @@ namespace Sandra.Chess.Pgn
     {
         public virtual TResult DefaultVisit(GreenPgnBackgroundSyntax node, T arg) => default;
         public virtual TResult Visit(GreenPgnBackgroundSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
-        public virtual TResult VisitCommentSyntax(GreenPgnCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitEscapeSyntax(GreenPgnEscapeSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax node, T arg) => DefaultVisit(node, arg);
     }
 }

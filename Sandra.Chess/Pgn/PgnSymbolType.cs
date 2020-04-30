@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using System.Runtime.CompilerServices;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
@@ -37,6 +39,11 @@ namespace Sandra.Chess.Pgn
         IllegalCharacter,
 
         /// <summary>
+        /// Type of a syntax node which contains a PGN escape sqquence.
+        /// </summary>
+        Escape,
+
+        /// <summary>
         /// Type of a PGN syntax node which contains a comment.
         /// </summary>
         Comment,
@@ -47,39 +54,14 @@ namespace Sandra.Chess.Pgn
         UnterminatedComment,
 
         /// <summary>
-        /// Type of a syntax node which contains a PGN escape sqquence.
-        /// </summary>
-        Escape,
-
-        /// <summary>
-        /// Type of the asterisk character '*' in PGN text.
-        /// </summary>
-        Asterisk,
-
-        /// <summary>
-        /// Type of the bracket close character ']' in PGN text.
-        /// </summary>
-        BracketClose,
-
-        /// <summary>
         /// Type of the bracket open character '[' in PGN text.
         /// </summary>
         BracketOpen,
 
         /// <summary>
-        /// Type of the parenthesis close character ')' in PGN text.
+        /// Type of the bracket close character ']' in PGN text.
         /// </summary>
-        ParenthesisClose,
-
-        /// <summary>
-        /// Type of the parenthesis open character '(' in PGN text.
-        /// </summary>
-        ParenthesisOpen,
-
-        /// <summary>
-        /// Type of the period character '.' in PGN text.
-        /// </summary>
-        Period,
+        BracketClose,
 
         /// <summary>
         /// Type of a tag name syntax node.
@@ -97,6 +79,26 @@ namespace Sandra.Chess.Pgn
         ErrorTagValue,
 
         /// <summary>
+        /// Type of a syntax node which contains an integer move number.
+        /// </summary>
+        MoveNumber,
+
+        /// <summary>
+        /// Type of the period character '.' in PGN text.
+        /// </summary>
+        Period,
+
+        /// <summary>
+        /// Type of a syntax node which contains a move text.
+        /// </summary>
+        Move,
+
+        /// <summary>
+        /// Type of a PGN syntax node with an unknown symbol.
+        /// </summary>
+        Unknown,
+
+        /// <summary>
         /// Type of a Numeric Annotation Glyph syntax node.
         /// </summary>
         Nag,
@@ -112,14 +114,19 @@ namespace Sandra.Chess.Pgn
         OverflowNag,
 
         /// <summary>
-        /// Type of a syntax node which contains an integer move number.
+        /// Type of the parenthesis open character '(' in PGN text.
         /// </summary>
-        MoveNumber,
+        ParenthesisOpen,
 
         /// <summary>
-        /// Type of a syntax node which contains a move text.
+        /// Type of the parenthesis close character ')' in PGN text.
         /// </summary>
-        Move,
+        ParenthesisClose,
+
+        /// <summary>
+        /// Type of the asterisk character '*' in PGN text.
+        /// </summary>
+        Asterisk,
 
         /// <summary>
         /// Type of the draw game termination marker "1/2-1/2".
@@ -135,10 +142,17 @@ namespace Sandra.Chess.Pgn
         /// Type of the black win game termination marker "0-1".
         /// </summary>
         BlackWinMarker,
+    }
 
+    /// <summary>
+    /// Contains methods to categorize different <see cref="PgnSymbolType"/> values.
+    /// </summary>
+    public static class PgnSymbolTypeExtensions
+    {
         /// <summary>
-        /// Type of a PGN syntax node with an unknown symbol.
+        /// Returns if the symbol type is background, i.e. always ignored.
         /// </summary>
-        Unknown
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsBackground(this PgnSymbolType symbolType) => symbolType < PgnSymbolType.Comment;
     }
 }

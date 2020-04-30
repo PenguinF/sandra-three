@@ -27,12 +27,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains an unterminated comment.
     /// </summary>
-    public sealed class GreenPgnUnterminatedCommentSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnUnterminatedCommentSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length { get; }
+        public int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -64,16 +64,12 @@ namespace Sandra.Chess.Pgn
         public PgnErrorInfo GetError(int startPosition) => PgnUnterminatedCommentSyntax.CreateError(startPosition, Length);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitUnterminatedCommentSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitUnterminatedCommentSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedCommentSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a PGN syntax node which contains an unterminated comment.
     /// </summary>
-    public sealed class PgnUnterminatedCommentSyntax : PgnBackgroundSyntax, IPgnSymbol
+    public static class PgnUnterminatedCommentSyntax
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for an unterminated comment.
@@ -86,23 +82,5 @@ namespace Sandra.Chess.Pgn
         /// </param>
         public static PgnErrorInfo CreateError(int start, int length)
             => new PgnErrorInfo(PgnErrorCode.UnterminatedMultiLineComment, start, length);
-
-        /// <summary>
-        /// Gets the bottom-up only 'green' representation of this syntax node.
-        /// </summary>
-        public GreenPgnUnterminatedCommentSyntax Green { get; }
-
-        /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
-        /// </summary>
-        public override int Length => Green.Length;
-
-        internal PgnUnterminatedCommentSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnUnterminatedCommentSyntax green)
-            : base(parent, parentIndex)
-            => Green = green;
-
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitUnterminatedCommentSyntax(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitUnterminatedCommentSyntax(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitUnterminatedCommentSyntax(this, arg);
     }
 }

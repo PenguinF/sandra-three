@@ -60,17 +60,11 @@ namespace Sandra.Chess.Pgn
 
             private PgnBackgroundSyntaxCreator() { }
 
-            public override PgnSyntax VisitCommentSyntax(GreenPgnCommentSyntax green, (PgnSyntaxNodes, int) parent)
-                => new PgnCommentSyntax(parent.Item1, parent.Item2, green);
-
             public override PgnSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnEscapeSyntax(parent.Item1, parent.Item2, green);
 
             public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
-
-            public override PgnSyntax VisitUnterminatedCommentSyntax(GreenPgnUnterminatedCommentSyntax green, (PgnSyntaxNodes, int) parent)
-                => new PgnUnterminatedCommentSyntax(parent.Item1, parent.Item2, green);
 
             public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)
                 => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
@@ -88,7 +82,7 @@ namespace Sandra.Chess.Pgn
 
         private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
         {
-            if (green.SymbolType < PgnParser.ForegroundThreshold)
+            if (green.SymbolType.IsBackground())
             {
                 return PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)green, (this, index));
             }
