@@ -30,6 +30,15 @@ namespace Sandra.Chess.Tests
 {
     public class PgnTests
     {
+        private sealed class ToGreenSymbolConverter : PgnSymbolVisitor<IGreenPgnSymbol>
+        {
+            public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
+
+            public override IGreenPgnSymbol VisitPgnSymbol(PgnSymbol node) => node.Green;
+        }
+
         /// <summary>
         /// Indicates if two symbols of the same type should combine into one.
         /// </summary>
@@ -140,7 +149,16 @@ namespace Sandra.Chess.Tests
 
         private static IEnumerable<IGreenPgnSymbol> TerminalSymbols(string pgn)
         {
-            return PgnParser.TokenizeAll(pgn);
+            var rootPgnSyntax = PgnParser.Parse(pgn).Syntax;
+            var converter = new ToGreenSymbolConverter();
+
+            var totalLength = 0;
+            foreach (var symbol in rootPgnSyntax.TerminalSymbolsInRange(0, pgn.Length))
+            {
+                Assert.Equal(totalLength, symbol.ToSyntax().AbsoluteStart);
+                totalLength += symbol.Length;
+                yield return converter.Visit(symbol);
+            }
         }
 
         private static void AssertTokens(string pgn, params Action<IGreenPgnSymbol>[] elementInspectors)
