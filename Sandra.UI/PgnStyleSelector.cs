@@ -74,17 +74,11 @@ namespace Sandra.UI
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
 
-        public override Style VisitCommentSyntax(PgnCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
-            => syntaxEditor.DefaultStyle;
-
         public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[escapedLineStyleIndex];
 
         public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
-
-        public override Style VisitUnterminatedCommentSyntax(PgnUnterminatedCommentSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
-            => syntaxEditor.DefaultStyle;
 
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {

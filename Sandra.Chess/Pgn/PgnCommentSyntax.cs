@@ -27,12 +27,12 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains a comment.
     /// </summary>
-    public sealed class GreenPgnCommentSyntax : GreenPgnBackgroundSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnCommentSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length { get; }
+        public int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -53,16 +53,12 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-
-        public override void Accept(GreenPgnBackgroundSyntaxVisitor visitor) => visitor.VisitCommentSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnBackgroundSyntaxVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnBackgroundSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }
 
     /// <summary>
     /// Represents a PGN syntax node which contains a comment.
     /// </summary>
-    public sealed class PgnCommentSyntax : PgnBackgroundSyntax, IPgnSymbol
+    public static class PgnCommentSyntax
     {
         /// <summary>
         /// The character which starts an end-of-line comment.
@@ -78,23 +74,5 @@ namespace Sandra.Chess.Pgn
         /// The character which starts an end-of-line comment.
         /// </summary>
         public const char MultiLineCommentEndCharacter = '}';
-
-        /// <summary>
-        /// Gets the bottom-up only 'green' representation of this syntax node.
-        /// </summary>
-        public GreenPgnCommentSyntax Green { get; }
-
-        /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
-        /// </summary>
-        public override int Length => Green.Length;
-
-        internal PgnCommentSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnCommentSyntax green)
-            : base(parent, parentIndex)
-            => Green = green;
-
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitCommentSyntax(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }
 }
