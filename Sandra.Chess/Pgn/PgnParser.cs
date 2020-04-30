@@ -141,9 +141,12 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// A <see cref="RootPgnSyntax"/> containing the parse syntax tree and parse errors.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="pgn"/> is null.
+        /// </exception>
         public static RootPgnSyntax Parse(string pgn)
         {
-            var terminalList = new List<IGreenPgnSymbol>(TokenizeAll(pgn));
+            var terminalList = new List<IGreenPgnSymbol>(new PgnParser().TokenizeAll(pgn));
 
             int startPosition = 0;
             var errors = new List<PgnErrorInfo>();
@@ -156,19 +159,7 @@ namespace Sandra.Chess.Pgn
             return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
         }
 
-        /// <summary>
-        /// Tokenizes source text in the PGN format.
-        /// </summary>
-        /// <param name="pgnText">
-        /// The PGN to tokenize.
-        /// </param>
-        /// <returns>
-        /// An enumeration of <see cref="IGreenPgnSymbol"/> instances.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="pgnText"/> is null/
-        /// </exception>
-        public static IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
+        private IEnumerable<IGreenPgnSymbol> TokenizeAll(string pgnText)
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
