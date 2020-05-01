@@ -148,7 +148,7 @@ namespace Sandra.Chess.Pgn
             parser.ParsePgnText(pgn);
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
-                parser.CaptureBackground(),
+                parser.BackgroundBuilder,
                 parser.Errors);
         }
 
@@ -165,13 +165,6 @@ namespace Sandra.Chess.Pgn
             SymbolBuilder = new List<GreenPgnForegroundSyntax>();
         }
 
-        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
-        {
-            var background = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(BackgroundBuilder);
-            BackgroundBuilder.Clear();
-            return background;
-        }
-
         private void Yield(IGreenPgnSymbol symbol)
         {
             Errors.AddRange(symbol.GetErrors(symbolStartIndex));
@@ -182,7 +175,8 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(CaptureBackground(), symbol));
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(BackgroundBuilder, symbol));
+                BackgroundBuilder.Clear();
             }
         }
 

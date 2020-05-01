@@ -35,12 +35,12 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), backgroundAfter);
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter));
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -55,9 +55,9 @@ namespace Sandra.Chess.Pgn.Temp
 
         public int Length => BackgroundBefore.Length + ForegroundNode.Length;
 
-        public GreenPgnForegroundSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
+        public GreenPgnForegroundSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
         {
-            BackgroundBefore = backgroundBefore;
+            BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
             ForegroundNode = foreground;
         }
     }
