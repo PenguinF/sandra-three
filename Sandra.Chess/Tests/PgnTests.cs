@@ -181,7 +181,7 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(new GreenPgnSyntaxNodes(EmptyEnumerable<IGreenPgnSymbol>.Instance), null));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnSymbol>.Instance, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 

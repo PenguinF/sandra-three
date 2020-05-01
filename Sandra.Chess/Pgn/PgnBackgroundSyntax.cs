@@ -57,7 +57,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.Green.ChildNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Green.GetElementOffset(ParentIndex);
 
         /// <summary>
         /// Gets the parent syntax node of this instance.

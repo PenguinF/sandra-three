@@ -146,7 +146,7 @@ namespace Sandra.Chess.Pgn
             var parser = new PgnParser();
             parser.ParsePgnText(pgn);
             return new RootPgnSyntax(
-                new GreenPgnSyntaxNodes(parser.SymbolBuilder),
+                parser.SymbolBuilder,
                 parser.Errors);
         }
 
