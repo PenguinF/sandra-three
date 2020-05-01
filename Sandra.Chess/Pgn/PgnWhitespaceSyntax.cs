@@ -97,7 +97,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int Length => Green.Length;
 
-        internal PgnWhitespaceSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnWhitespaceSyntax green)
+        internal PgnWhitespaceSyntax(PgnBackgroundListSyntax parent, int parentIndex, GreenPgnWhitespaceSyntax green)
             : base(parent, parentIndex)
             => Green = green;
 

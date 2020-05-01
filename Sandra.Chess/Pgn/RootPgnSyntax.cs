@@ -34,10 +34,10 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax));
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), backgroundAfter);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -45,12 +45,14 @@ namespace Sandra.Chess.Pgn
     // Temporary placeholder
     public class GreenPgnForegroundSyntax : ISpan
     {
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
 
-        public int Length => ForegroundNode.Length;
+        public int Length => BackgroundBefore.Length + ForegroundNode.Length;
 
-        public GreenPgnForegroundSyntax(IGreenPgnSymbol foreground)
+        public GreenPgnForegroundSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
         {
+            BackgroundBefore = backgroundBefore;
             ForegroundNode = foreground;
         }
     }
@@ -59,34 +61,71 @@ namespace Sandra.Chess.Pgn
     public class PgnSyntaxNodes : PgnSyntax
     {
         public ReadOnlySpanList<GreenPgnForegroundSyntax> Green { get; }
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundAfter { get; }
         public SafeLazyObjectCollection<PgnSyntax> ChildNodes { get; }
         public override int Start => 0;
-        public override int Length => Green.Length;
+        public override int Length => Green.Length + BackgroundAfter.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
         public override int ChildCount => ChildNodes.Count;
         public override PgnSyntax GetChild(int index) => ChildNodes[index];
-        public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        private PgnSyntax CreateChildNode(IGreenPgnSymbol green, int index)
+        public override int GetChildStartPosition(int index)
         {
-            if (green.SymbolType.IsBackground())
+            int greenIndex = index >> 1;
+
+            if (index == ChildCount - 1)
             {
-                return PgnBackgroundListSyntax.PgnBackgroundSyntaxCreator.Instance.Visit((GreenPgnBackgroundSyntax)green, (this, index));
+                // Background after.
+                return Green.Length;
             }
-            else
+
+            GreenPgnForegroundSyntax green = Green[greenIndex];
+
+            if ((index & 1) == 0)
             {
-                return new PgnSymbol(this, index, green);
+                // 0, 2, ...
+                // Some background before.
+                return Green.GetElementOffset(greenIndex);
             }
+
+            // 1, 3, ...
+            // Foreground node.
+            return Green.GetElementOffset(greenIndex) + green.BackgroundBefore.Length;
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green)
+        private PgnSyntax CreateChildNode(int index)
+        {
+            int greenIndex = index >> 1;
+
+            if (index == ChildCount - 1)
+            {
+                // Background after.
+                return new PgnBackgroundListSyntax(this, greenIndex, BackgroundAfter);
+            }
+
+            GreenPgnForegroundSyntax green = Green[greenIndex];
+
+            if ((index & 1) == 0)
+            {
+                // 0, 2, ...
+                // Some background before.
+                return new PgnBackgroundListSyntax(this, greenIndex, green.BackgroundBefore);
+            }
+
+            // 1, 3, ...
+            // Foreground node.
+            return new PgnSymbol(this, greenIndex, green.ForegroundNode);
+        }
+
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
             Green = green;
+            BackgroundAfter = backgroundAfter;
 
             ChildNodes = new SafeLazyObjectCollection<PgnSyntax>(
-                green.Count,
-                index => CreateChildNode(green[index].ForegroundNode, index));
+                green.Count * 2 + 1,
+                index => CreateChildNode(index));
         }
     }
 }

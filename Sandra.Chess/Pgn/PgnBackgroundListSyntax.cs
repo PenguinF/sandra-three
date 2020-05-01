@@ -19,27 +19,91 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using Eutherion.Utils;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a node with background symbols in an abstract PGN syntax tree.
     /// </summary>
-    public sealed class PgnBackgroundListSyntax
+    public sealed class PgnBackgroundListSyntax : PgnSyntax
     {
-        internal class PgnBackgroundSyntaxCreator : GreenPgnBackgroundSyntaxVisitor<(PgnSyntaxNodes, int), PgnSyntax>
+        private class PgnBackgroundSyntaxCreator : GreenPgnBackgroundSyntaxVisitor<(PgnBackgroundListSyntax, int), PgnBackgroundSyntax>
         {
             public static readonly PgnBackgroundSyntaxCreator Instance = new PgnBackgroundSyntaxCreator();
 
             private PgnBackgroundSyntaxCreator() { }
 
-            public override PgnSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnSyntaxNodes, int) parent)
+            public override PgnBackgroundSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnBackgroundListSyntax, int) parent)
                 => new PgnEscapeSyntax(parent.Item1, parent.Item2, green);
 
-            public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
+            public override PgnBackgroundSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnBackgroundListSyntax, int) parent)
                 => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
 
-            public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)
+            public override PgnBackgroundSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnBackgroundListSyntax, int) parent)
                 => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
+        }
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnSyntaxNodes Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent's collection.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' read-only list with background nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> Green { get; }
+
+        /// <summary>
+        /// Gets the collection of background nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnBackgroundSyntax> BackgroundNodes { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => ParentIndex == Parent.Green.Count ? Parent.Green.Length : Parent.Green.GetElementOffset(ParentIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => BackgroundNodes.Count;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override PgnSyntax GetChild(int index) => BackgroundNodes[index];
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
+
+        internal PgnBackgroundListSyntax(PgnSyntaxNodes parent, int parentIndex, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+            Green = green;
+
+            BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
+                green.Count,
+                index => PgnBackgroundSyntaxCreator.Instance.Visit(green[index], (this, index)));
         }
     }
 }

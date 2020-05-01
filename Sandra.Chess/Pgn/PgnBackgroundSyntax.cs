@@ -47,7 +47,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public PgnBackgroundListSyntax Parent { get; }
 
         /// <summary>
         /// Gets the index of this syntax node in its parent.
@@ -64,7 +64,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnBackgroundSyntax(PgnSyntaxNodes parent, int parentIndex)
+        internal PgnBackgroundSyntax(PgnBackgroundListSyntax parent, int parentIndex)
         {
             Parent = parent;
             ParentIndex = parentIndex;

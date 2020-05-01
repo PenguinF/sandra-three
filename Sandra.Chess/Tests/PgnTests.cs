@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
 using Sandra.Chess.Pgn;
 using System;
 using System.Collections.Generic;
@@ -180,8 +181,8 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null));
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 

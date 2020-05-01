@@ -147,10 +147,12 @@ namespace Sandra.Chess.Pgn
             parser.ParsePgnText(pgn);
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
+                parser.CaptureBackground(),
                 parser.Errors);
         }
 
         private readonly List<PgnErrorInfo> Errors;
+        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
@@ -158,13 +160,29 @@ namespace Sandra.Chess.Pgn
         private PgnParser()
         {
             Errors = new List<PgnErrorInfo>();
+            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             SymbolBuilder = new List<GreenPgnForegroundSyntax>();
+        }
+
+        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
+        {
+            var background = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(BackgroundBuilder);
+            BackgroundBuilder.Clear();
+            return background;
         }
 
         private void Yield(IGreenPgnSymbol symbol)
         {
             Errors.AddRange(symbol.GetErrors(symbolStartIndex));
-            SymbolBuilder.Add(new GreenPgnForegroundSyntax(symbol));
+
+            if (symbol.SymbolType.IsBackground())
+            {
+                BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
+            }
+            else
+            {
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(CaptureBackground(), symbol));
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
