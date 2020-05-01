@@ -19,6 +19,51 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a PGN syntax node which contains a comment and its preceding background.
+    /// </summary>
+    public sealed class GreenPgnTriviaElementSyntax : ISpan
+    {
+        /// <summary>
+        /// Gets the background symbols which directly precede the comment foreground node.
+        /// </summary>
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
+
+        /// <summary>
+        /// Gets the foreground node which contains the comment.
+        /// </summary>
+        public GreenPgnCommentSyntax CommentNode { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTriviaElementSyntax"/>.
+        /// </summary>
+        /// <param name="backgroundBefore">
+        /// The background symbols which directly precede the comment foreground node.
+        /// </param>
+        /// <param name="contentNode">
+        /// The foreground node which contains the comment.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="backgroundBefore"/> and/or <paramref name="commentNode"/> are null.
+        /// </exception>
+        public GreenPgnTriviaElementSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, GreenPgnCommentSyntax commentNode)
+        {
+            if (backgroundBefore == null) throw new ArgumentNullException(nameof(backgroundBefore));
+
+            BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
+            CommentNode = commentNode ?? throw new ArgumentNullException(nameof(commentNode));
+            Length = BackgroundBefore.Length + CommentNode.Length;
+        }
+    }
 }

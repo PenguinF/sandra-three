@@ -146,6 +146,8 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser();
             parser.ParsePgnText(pgn);
+            parser.SymbolBuilder.AddRange(parser.TriviaBuilder.Select(x => new GreenPgnForegroundSyntax(x.BackgroundBefore, x.CommentNode)));
+
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
                 parser.BackgroundBuilder,
@@ -154,6 +156,7 @@ namespace Sandra.Chess.Pgn
 
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
@@ -162,6 +165,7 @@ namespace Sandra.Chess.Pgn
         {
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
+            TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             SymbolBuilder = new List<GreenPgnForegroundSyntax>();
         }
 
@@ -173,10 +177,17 @@ namespace Sandra.Chess.Pgn
             {
                 BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
             }
+            else if (symbol.SymbolType.IsTrivia())
+            {
+                TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, (GreenPgnCommentSyntax)symbol));
+                BackgroundBuilder.Clear();
+            }
             else
             {
+                SymbolBuilder.AddRange(TriviaBuilder.Select(x => new GreenPgnForegroundSyntax(x.BackgroundBefore, x.CommentNode)));
                 SymbolBuilder.Add(new GreenPgnForegroundSyntax(BackgroundBuilder, symbol));
                 BackgroundBuilder.Clear();
+                TriviaBuilder.Clear();
             }
         }
 
