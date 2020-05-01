@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains a comment.
     /// </summary>
-    public sealed class GreenPgnCommentSyntax : IGreenPgnSymbol
+    public class GreenPgnCommentSyntax : IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
@@ -37,7 +37,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Comment;
+        public virtual PgnSymbolType SymbolType => PgnSymbolType.Comment;
+
+        /// <summary>
+        /// Gets if this is an unterminated comment.
+        /// </summary>
+        public virtual bool IsUnterminated => false;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnCommentSyntax"/>.
