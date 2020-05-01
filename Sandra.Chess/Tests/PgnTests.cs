@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Sandra.Chess.Pgn;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

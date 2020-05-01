@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -43,8 +44,10 @@ namespace Sandra.Chess.Pgn
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
+}
 
-    // Temporary placeholder
+namespace Sandra.Chess.Pgn.Temp
+{
     public class GreenPgnForegroundSyntax : ISpan
     {
         public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
@@ -59,7 +62,6 @@ namespace Sandra.Chess.Pgn
         }
     }
 
-    // Temporary placeholder
     public class PgnSyntaxNodes : PgnSyntax
     {
         public ReadOnlySpanList<GreenPgnForegroundSyntax> Green { get; }

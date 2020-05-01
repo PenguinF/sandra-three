@@ -21,6 +21,7 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
+using Sandra.Chess.Pgn.Temp;
 
 namespace Sandra.Chess.Pgn
 {

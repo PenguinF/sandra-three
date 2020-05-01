@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -72,8 +73,9 @@ namespace Sandra.Chess.Pgn
 
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
-            public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
+
+            public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
         }
 
         /// <summary>
@@ -87,8 +89,10 @@ namespace Sandra.Chess.Pgn
         /// </returns>
         public static PgnSyntax ToSyntax(this IPgnSymbol pgnSymbol) => pgnSymbol.Accept(ToPgnSyntaxConverter.Instance);
     }
+}
 
-    // Temporary placeholder
+namespace Sandra.Chess.Pgn.Temp
+{
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
         public PgnSyntaxNodes Parent { get; }

@@ -21,6 +21,7 @@
 
 using Eutherion.Win.AppTemplate;
 using Sandra.Chess.Pgn;
+using Sandra.Chess.Pgn.Temp;
 using ScintillaNET;
 using System.Drawing;
 

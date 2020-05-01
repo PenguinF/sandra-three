@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
