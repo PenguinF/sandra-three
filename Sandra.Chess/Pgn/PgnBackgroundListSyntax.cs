@@ -21,4 +21,25 @@
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a node with background symbols in an abstract PGN syntax tree.
+    /// </summary>
+    public sealed class PgnBackgroundListSyntax
+    {
+        internal class PgnBackgroundSyntaxCreator : GreenPgnBackgroundSyntaxVisitor<(PgnSyntaxNodes, int), PgnSyntax>
+        {
+            public static readonly PgnBackgroundSyntaxCreator Instance = new PgnBackgroundSyntaxCreator();
+
+            private PgnBackgroundSyntaxCreator() { }
+
+            public override PgnSyntax VisitEscapeSyntax(GreenPgnEscapeSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnEscapeSyntax(parent.Item1, parent.Item2, green);
+
+            public override PgnSyntax VisitIllegalCharacterSyntax(GreenPgnIllegalCharacterSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnIllegalCharacterSyntax(parent.Item1, parent.Item2, green);
+
+            public override PgnSyntax VisitWhitespaceSyntax(GreenPgnWhitespaceSyntax green, (PgnSyntaxNodes, int) parent)
+                => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
+        }
+    }
 }
