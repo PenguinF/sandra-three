@@ -98,7 +98,7 @@ namespace Sandra.Chess.Pgn.Temp
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
         public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Green.GetElementOffset(ParentIndex) + Parent.Green[ParentIndex].BackgroundBefore.Length;
+        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex) + Parent.GreenForegroundNodes[ParentIndex].BackgroundBefore.Length;
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 

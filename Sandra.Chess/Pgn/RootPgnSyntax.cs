@@ -64,15 +64,17 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSyntaxNodes : PgnSyntax
     {
-        public ReadOnlySpanList<GreenPgnForegroundSyntax> Green { get; }
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundAfter { get; }
-        public SafeLazyObjectCollection<PgnSyntax> ChildNodes { get; }
+        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
+        public ReadOnlySpanList<GreenPgnBackgroundSyntax> GreenBackgroundAfter { get; }
+
+        public SafeLazyObjectCollection<PgnSyntax> ForegroundNodes { get; }
+
         public override int Start => 0;
-        public override int Length => Green.Length + BackgroundAfter.Length;
+        public override int Length => GreenForegroundNodes.Length + GreenBackgroundAfter.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
-        public override int ChildCount => ChildNodes.Count;
-        public override PgnSyntax GetChild(int index) => ChildNodes[index];
+        public override int ChildCount => ForegroundNodes.Count;
+        public override PgnSyntax GetChild(int index) => ForegroundNodes[index];
 
         public override int GetChildStartPosition(int index)
         {
@@ -81,21 +83,21 @@ namespace Sandra.Chess.Pgn.Temp
             if (index == ChildCount - 1)
             {
                 // Background after.
-                return Green.Length;
+                return GreenForegroundNodes.Length;
             }
 
-            GreenPgnForegroundSyntax green = Green[greenIndex];
+            GreenPgnForegroundSyntax green = GreenForegroundNodes[greenIndex];
 
             if ((index & 1) == 0)
             {
                 // 0, 2, ...
                 // Some background before.
-                return Green.GetElementOffset(greenIndex);
+                return GreenForegroundNodes.GetElementOffset(greenIndex);
             }
 
             // 1, 3, ...
             // Foreground node.
-            return Green.GetElementOffset(greenIndex) + green.BackgroundBefore.Length;
+            return GreenForegroundNodes.GetElementOffset(greenIndex) + green.BackgroundBefore.Length;
         }
 
         private PgnSyntax CreateChildNode(int index)
@@ -105,10 +107,10 @@ namespace Sandra.Chess.Pgn.Temp
             if (index == ChildCount - 1)
             {
                 // Background after.
-                return new PgnBackgroundListSyntax(this, greenIndex, BackgroundAfter);
+                return new PgnBackgroundListSyntax(this, greenIndex, GreenBackgroundAfter);
             }
 
-            GreenPgnForegroundSyntax green = Green[greenIndex];
+            GreenPgnForegroundSyntax green = GreenForegroundNodes[greenIndex];
 
             if ((index & 1) == 0)
             {
@@ -124,10 +126,10 @@ namespace Sandra.Chess.Pgn.Temp
 
         internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
-            Green = green;
-            BackgroundAfter = backgroundAfter;
+            GreenForegroundNodes = green;
+            GreenBackgroundAfter = backgroundAfter;
 
-            ChildNodes = new SafeLazyObjectCollection<PgnSyntax>(
+            ForegroundNodes = new SafeLazyObjectCollection<PgnSyntax>(
                 green.Count * 2 + 1,
                 index => CreateChildNode(index));
         }

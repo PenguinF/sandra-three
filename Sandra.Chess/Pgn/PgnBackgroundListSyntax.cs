@@ -69,7 +69,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => ParentIndex == Parent.Green.Count ? Parent.Green.Length : Parent.Green.GetElementOffset(ParentIndex);
+        public override int Start => ParentIndex == Parent.GreenForegroundNodes.Count ? Parent.GreenForegroundNodes.Length : Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
