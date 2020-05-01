@@ -145,27 +145,27 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser();
             parser.TokenizeAll(pgn);
-            var terminalList = parser.SymbolBuilder;
-
-            int startPosition = 0;
-            var errors = new List<PgnErrorInfo>();
-            foreach (var terminal in terminalList)
-            {
-                errors.AddRange(terminal.GetErrors(startPosition));
-                startPosition += terminal.Length;
-            }
-
-            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
+            return new RootPgnSyntax(
+                new GreenPgnSyntaxNodes(parser.SymbolBuilder),
+                parser.Errors);
         }
 
+        private readonly List<PgnErrorInfo> Errors;
         private readonly List<IGreenPgnSymbol> SymbolBuilder;
+
+        private int symbolStartIndex;
 
         private PgnParser()
         {
+            Errors = new List<PgnErrorInfo>();
             SymbolBuilder = new List<IGreenPgnSymbol>();
         }
 
-        private void Yield(IGreenPgnSymbol token) => SymbolBuilder.Add(token);
+        private void Yield(IGreenPgnSymbol token)
+        {
+            Errors.AddRange(token.GetErrors(symbolStartIndex));
+            SymbolBuilder.Add(token);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
@@ -176,10 +176,9 @@ namespace Sandra.Chess.Pgn
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
-            int length = pgnText.Length;
+            int length = symbolStartIndex + pgnText.Length;
 
-            int currentIndex = 0;
-            int symbolStartIndex = 0;
+            int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 
