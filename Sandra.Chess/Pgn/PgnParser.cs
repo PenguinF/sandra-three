@@ -161,10 +161,10 @@ namespace Sandra.Chess.Pgn
             SymbolBuilder = new List<IGreenPgnSymbol>();
         }
 
-        private void Yield(IGreenPgnSymbol token)
+        private void Yield(IGreenPgnSymbol symbol)
         {
-            Errors.AddRange(token.GetErrors(symbolStartIndex));
-            SymbolBuilder.Add(token);
+            Errors.AddRange(symbol.GetErrors(symbolStartIndex));
+            SymbolBuilder.Add(symbol);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
