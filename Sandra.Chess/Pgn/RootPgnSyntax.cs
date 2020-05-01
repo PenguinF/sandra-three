@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
@@ -69,12 +70,21 @@ namespace Sandra.Chess.Pgn.Temp
 
         public SafeLazyObjectCollection<PgnSyntax> ForegroundNodes { get; }
 
+        private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundAfter;
+        public PgnBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
+
         public override int Start => 0;
         public override int Length => GreenForegroundNodes.Length + GreenBackgroundAfter.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
-        public override int ChildCount => ForegroundNodes.Count;
-        public override PgnSyntax GetChild(int index) => ForegroundNodes[index];
+        public override int ChildCount => ForegroundNodes.Count + 1;
+
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index < ForegroundNodes.Count) return ForegroundNodes[index];
+            if (index == ForegroundNodes.Count) return BackgroundAfter;
+            throw new IndexOutOfRangeException();
+        }
 
         public override int GetChildStartPosition(int index)
         {
@@ -104,12 +114,6 @@ namespace Sandra.Chess.Pgn.Temp
         {
             int greenIndex = index >> 1;
 
-            if (index == ChildCount - 1)
-            {
-                // Background after.
-                return new PgnBackgroundListSyntax(this, greenIndex, GreenBackgroundAfter);
-            }
-
             GreenPgnForegroundSyntax green = GreenForegroundNodes[greenIndex];
 
             if ((index & 1) == 0)
@@ -124,14 +128,18 @@ namespace Sandra.Chess.Pgn.Temp
             return new PgnSymbol(this, greenIndex, green.ForegroundNode);
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
+                                ReadOnlySpanList<GreenPgnBackgroundSyntax> greenBackgroundAfter)
         {
-            GreenForegroundNodes = green;
-            GreenBackgroundAfter = backgroundAfter;
+            GreenForegroundNodes = greenForegroundNodes;
+            GreenBackgroundAfter = greenBackgroundAfter;
 
             ForegroundNodes = new SafeLazyObjectCollection<PgnSyntax>(
-                green.Count * 2 + 1,
+                greenForegroundNodes.Count * 2,
                 index => CreateChildNode(index));
+
+            backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(
+                () => new PgnBackgroundListSyntax(this, greenForegroundNodes.Count, greenBackgroundAfter));
         }
     }
 }
