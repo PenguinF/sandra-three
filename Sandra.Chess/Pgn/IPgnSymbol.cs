@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
@@ -93,6 +94,26 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
+    public class PgnSymbolWithTrivia
+    {
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+        public GreenPgnForegroundSyntax Green { get; }
+
+        private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundBefore;
+        public PgnBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
+
+        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
+        public PgnSymbol PgnSymbol => pgnSymbol.Object;
+
+        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnForegroundSyntax green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+            Green = green;
+        }
+    }
+
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
         public PgnSyntaxNodes Parent { get; }
