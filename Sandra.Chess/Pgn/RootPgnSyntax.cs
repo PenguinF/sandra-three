@@ -34,11 +34,24 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<IGreenPgnSymbol> syntax, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnSymbol>.Create(syntax));
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax));
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+        }
+    }
+
+    // Temporary placeholder
+    public class GreenPgnForegroundSyntax : ISpan
+    {
+        public IGreenPgnSymbol ForegroundNode { get; }
+
+        public int Length => ForegroundNode.Length;
+
+        public GreenPgnForegroundSyntax(IGreenPgnSymbol foreground)
+        {
+            ForegroundNode = foreground;
         }
     }
 
@@ -61,7 +74,7 @@ namespace Sandra.Chess.Pgn
                 => new PgnWhitespaceSyntax(parent.Item1, parent.Item2, green);
         }
 
-        public ReadOnlySpanList<IGreenPgnSymbol> Green { get; }
+        public ReadOnlySpanList<GreenPgnForegroundSyntax> Green { get; }
         public SafeLazyObjectCollection<PgnSyntax> ChildNodes { get; }
         public override int Start => 0;
         public override int Length => Green.Length;
@@ -83,13 +96,13 @@ namespace Sandra.Chess.Pgn
             }
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnSymbol> green)
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green)
         {
             Green = green;
 
             ChildNodes = new SafeLazyObjectCollection<PgnSyntax>(
                 green.Count,
-                index => CreateChildNode(green[index], index));
+                index => CreateChildNode(green[index].ForegroundNode, index));
         }
     }
 }

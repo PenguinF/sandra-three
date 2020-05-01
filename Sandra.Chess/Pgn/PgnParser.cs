@@ -151,20 +151,20 @@ namespace Sandra.Chess.Pgn
         }
 
         private readonly List<PgnErrorInfo> Errors;
-        private readonly List<IGreenPgnSymbol> SymbolBuilder;
+        private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
 
         private PgnParser()
         {
             Errors = new List<PgnErrorInfo>();
-            SymbolBuilder = new List<IGreenPgnSymbol>();
+            SymbolBuilder = new List<GreenPgnForegroundSyntax>();
         }
 
         private void Yield(IGreenPgnSymbol symbol)
         {
             Errors.AddRange(symbol.GetErrors(symbolStartIndex));
-            SymbolBuilder.Add(symbol);
+            SymbolBuilder.Add(new GreenPgnForegroundSyntax(symbol));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
