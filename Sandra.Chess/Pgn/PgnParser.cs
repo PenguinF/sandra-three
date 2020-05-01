@@ -144,7 +144,7 @@ namespace Sandra.Chess.Pgn
             if (pgn == null) throw new ArgumentNullException(nameof(pgn));
 
             var parser = new PgnParser();
-            parser.TokenizeAll(pgn);
+            parser.ParsePgnText(pgn);
             return new RootPgnSyntax(
                 new GreenPgnSyntaxNodes(parser.SymbolBuilder),
                 parser.Errors);
@@ -172,7 +172,7 @@ namespace Sandra.Chess.Pgn
             => Yield(symbolBuilder.Yield(length)
                      ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length)));
 
-        private void TokenizeAll(string pgnText)
+        private void ParsePgnText(string pgnText)
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
