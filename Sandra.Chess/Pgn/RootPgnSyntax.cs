@@ -37,6 +37,8 @@ namespace Sandra.Chess.Pgn
         public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
+            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
+
             Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), backgroundAfter);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }

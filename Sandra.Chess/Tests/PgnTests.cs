@@ -182,6 +182,7 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
             Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
