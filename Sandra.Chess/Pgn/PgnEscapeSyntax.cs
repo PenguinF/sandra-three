@@ -79,7 +79,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int Length => Green.Length;
 
-        internal PgnEscapeSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnEscapeSyntax green)
+        internal PgnEscapeSyntax(PgnBackgroundListSyntax parent, int parentIndex, GreenPgnEscapeSyntax green)
             : base(parent, parentIndex)
             => Green = green;
 

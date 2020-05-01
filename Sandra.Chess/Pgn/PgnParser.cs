@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -144,42 +145,59 @@ namespace Sandra.Chess.Pgn
             if (pgn == null) throw new ArgumentNullException(nameof(pgn));
 
             var parser = new PgnParser();
-            parser.TokenizeAll(pgn);
-            var terminalList = parser.SymbolBuilder;
-
-            int startPosition = 0;
-            var errors = new List<PgnErrorInfo>();
-            foreach (var terminal in terminalList)
-            {
-                errors.AddRange(terminal.GetErrors(startPosition));
-                startPosition += terminal.Length;
-            }
-
-            return new RootPgnSyntax(new GreenPgnSyntaxNodes(terminalList), errors);
+            parser.ParsePgnText(pgn);
+            return new RootPgnSyntax(
+                parser.SymbolBuilder,
+                parser.CaptureBackground(),
+                parser.Errors);
         }
 
-        private readonly List<IGreenPgnSymbol> SymbolBuilder;
+        private readonly List<PgnErrorInfo> Errors;
+        private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
+
+        private int symbolStartIndex;
 
         private PgnParser()
         {
-            SymbolBuilder = new List<IGreenPgnSymbol>();
+            Errors = new List<PgnErrorInfo>();
+            BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
+            SymbolBuilder = new List<GreenPgnForegroundSyntax>();
         }
 
-        private void Yield(IGreenPgnSymbol token) => SymbolBuilder.Add(token);
+        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
+        {
+            var background = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(BackgroundBuilder);
+            BackgroundBuilder.Clear();
+            return background;
+        }
+
+        private void Yield(IGreenPgnSymbol symbol)
+        {
+            Errors.AddRange(symbol.GetErrors(symbolStartIndex));
+
+            if (symbol.SymbolType.IsBackground())
+            {
+                BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
+            }
+            else
+            {
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(CaptureBackground(), symbol));
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void YieldPgnSymbol(ref PgnSymbolStateMachine symbolBuilder, string pgnText, int symbolStartIndex, int length)
             => Yield(symbolBuilder.Yield(length)
                      ?? new GreenPgnUnknownSymbolSyntax(pgnText.Substring(symbolStartIndex, length)));
 
-        private void TokenizeAll(string pgnText)
+        private void ParsePgnText(string pgnText)
         {
             // This tokenizer uses labels with goto to switch between modes of tokenization.
 
-            int length = pgnText.Length;
+            int length = symbolStartIndex + pgnText.Length;
 
-            int currentIndex = 0;
-            int symbolStartIndex = 0;
+            int currentIndex = symbolStartIndex;
             StringBuilder valueBuilder = new StringBuilder();
             List<PgnErrorInfo> errors = new List<PgnErrorInfo>();
 

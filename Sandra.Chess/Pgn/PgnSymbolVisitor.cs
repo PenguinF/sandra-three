@@ -19,6 +19,8 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
+
 namespace Sandra.Chess.Pgn
 {
     /// <summary>

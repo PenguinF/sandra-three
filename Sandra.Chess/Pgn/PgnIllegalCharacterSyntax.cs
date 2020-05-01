@@ -114,7 +114,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int Length => IllegalCharacterLength;
 
-        internal PgnIllegalCharacterSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnIllegalCharacterSyntax green)
+        internal PgnIllegalCharacterSyntax(PgnBackgroundListSyntax parent, int parentIndex, GreenPgnIllegalCharacterSyntax green)
             : base(parent, parentIndex)
             => Green = green;
 
