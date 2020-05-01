@@ -68,7 +68,7 @@ namespace Sandra.Chess.Pgn.Temp
         public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
         public ReadOnlySpanList<GreenPgnBackgroundSyntax> GreenBackgroundAfter { get; }
 
-        public SafeLazyObjectCollection<PgnSyntax> ForegroundNodes { get; }
+        public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
 
         private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundAfter;
         public PgnBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
@@ -88,44 +88,9 @@ namespace Sandra.Chess.Pgn.Temp
 
         public override int GetChildStartPosition(int index)
         {
-            int greenIndex = index >> 1;
-
-            if (index == ChildCount - 1)
-            {
-                // Background after.
-                return GreenForegroundNodes.Length;
-            }
-
-            GreenPgnForegroundSyntax green = GreenForegroundNodes[greenIndex];
-
-            if ((index & 1) == 0)
-            {
-                // 0, 2, ...
-                // Some background before.
-                return GreenForegroundNodes.GetElementOffset(greenIndex);
-            }
-
-            // 1, 3, ...
-            // Foreground node.
-            return GreenForegroundNodes.GetElementOffset(greenIndex) + green.BackgroundBefore.Length;
-        }
-
-        private PgnSyntax CreateChildNode(int index)
-        {
-            int greenIndex = index >> 1;
-
-            GreenPgnForegroundSyntax green = GreenForegroundNodes[greenIndex];
-
-            if ((index & 1) == 0)
-            {
-                // 0, 2, ...
-                // Some background before.
-                return new PgnBackgroundListSyntax(this, greenIndex, green.BackgroundBefore);
-            }
-
-            // 1, 3, ...
-            // Foreground node.
-            return new PgnSymbol(this, greenIndex, green.ForegroundNode);
+            if (index < ForegroundNodes.Count) return GreenForegroundNodes.GetElementOffset(index);
+            if (index == ForegroundNodes.Count) return GreenForegroundNodes.Length;
+            throw new IndexOutOfRangeException();
         }
 
         internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
@@ -134,12 +99,12 @@ namespace Sandra.Chess.Pgn.Temp
             GreenForegroundNodes = greenForegroundNodes;
             GreenBackgroundAfter = greenBackgroundAfter;
 
-            ForegroundNodes = new SafeLazyObjectCollection<PgnSyntax>(
-                greenForegroundNodes.Count * 2,
-                index => CreateChildNode(index));
+            ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
+                greenForegroundNodes.Count,
+                index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
             backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(
-                () => new PgnBackgroundListSyntax(this, greenForegroundNodes.Count, greenBackgroundAfter));
+                () => new PgnBackgroundListSyntax(this, greenBackgroundAfter));
         }
     }
 }

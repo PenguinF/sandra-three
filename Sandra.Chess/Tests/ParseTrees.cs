@@ -54,6 +54,9 @@ namespace Sandra.Chess.Tests
 
         private static readonly ParseTree Symbol = new ParseTree<PgnSymbol>();
 
+        private static readonly ParseTree SymbolNoBackground = new ParseTree<PgnSymbolWithTrivia> { EmptyBackground, Symbol };
+        private static readonly ParseTree WhitespaceThenSymbol = new ParseTree<PgnSymbolWithTrivia> { Whitespace, Symbol };
+
         internal static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
             ("", new ParseTree<PgnSyntaxNodes> { EmptyBackground }),
@@ -71,15 +74,15 @@ namespace Sandra.Chess.Tests
             (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } },
                 new[] { PgnErrorCode.IllegalCharacter }),
 
-            ("\"", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground },
+            ("\"", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground },
                 new[] { PgnErrorCode.UnterminatedTagValue }),
-            ("\"\n", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground },
+            ("\"\n", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground },
                 new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
 
-            ("{", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" {", new ParseTree<PgnSyntaxNodes> { Whitespace, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            ("{ ", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" { ", new ParseTree<PgnSyntaxNodes> { Whitespace, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" {", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{ ", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" { ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
         };
     }
 }

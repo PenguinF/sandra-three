@@ -22,6 +22,7 @@
 using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
+using System;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -94,7 +95,7 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia
+    public class PgnSymbolWithTrivia : PgnSyntax
     {
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
@@ -106,27 +107,48 @@ namespace Sandra.Chess.Pgn.Temp
         private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
         public PgnSymbol PgnSymbol => pgnSymbol.Object;
 
+        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
+        public override int Length => Green.Length;
+        public override int ChildCount => 2;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return BackgroundBefore;
+            if (index == 1) return PgnSymbol;
+            throw new IndexOutOfRangeException();
+        }
+
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.BackgroundBefore.Length;
+            throw new IndexOutOfRangeException();
+        }
+
         internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnForegroundSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
             Green = green;
+
+            backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
+
+            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
         }
     }
 
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public PgnSyntaxNodes Parent { get; }
-        public int ParentIndex { get; }
+        public PgnSymbolWithTrivia Parent { get; }
         public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex) + Parent.GreenForegroundNodes[ParentIndex].BackgroundBefore.Length;
+        public override int Start => Parent.Green.BackgroundBefore.Length;
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IGreenPgnSymbol green)
+        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
             Green = green;
         }
 
