@@ -73,6 +73,7 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
+            public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
@@ -140,13 +141,13 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public Union<PgnSymbolWithTrivia, PgnTriviaElementSyntax> Parent { get; }
+        public PgnSymbolWithTrivia Parent { get; }
         public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Match(whenOption1: x => x.LeadingTrivia.Length, whenOption2: x => x.Green.BackgroundBefore.Length);
+        public override int Start => Parent.Green.LeadingTrivia.Length;
         public override int Length => Green.Length;
-        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(Union<PgnSymbolWithTrivia, PgnTriviaElementSyntax> parent, IGreenPgnSymbol green)
+        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
         {
             Parent = parent;
             Green = green;

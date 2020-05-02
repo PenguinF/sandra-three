@@ -21,7 +21,6 @@
 
 using Eutherion;
 using Eutherion.Text;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -96,8 +95,12 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public PgnBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
 
-        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
-        public PgnSymbol PgnSymbol => pgnSymbol.Object;
+        private readonly SafeLazyObject<PgnCommentSyntax> commentNode;
+
+        /// <summary>
+        /// Gets the foreground node which contains the comment.
+        /// </summary>
+        public PgnCommentSyntax CommentNode => commentNode.Object;
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -125,7 +128,7 @@ namespace Sandra.Chess.Pgn
         public override PgnSyntax GetChild(int index)
         {
             if (index == 0) return BackgroundBefore;
-            if (index == 1) return PgnSymbol;
+            if (index == 1) return CommentNode;
             throw new IndexOutOfRangeException();
         }
 
@@ -147,7 +150,7 @@ namespace Sandra.Chess.Pgn
 
             backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
 
-            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.CommentNode));
+            commentNode = new SafeLazyObject<PgnCommentSyntax>(() => new PgnCommentSyntax(this, Green.CommentNode));
         }
     }
 }

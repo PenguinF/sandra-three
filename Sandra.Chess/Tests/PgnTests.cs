@@ -33,6 +33,7 @@ namespace Sandra.Chess.Tests
     {
         private sealed class ToGreenSymbolConverter : PgnSymbolVisitor<IGreenPgnSymbol>
         {
+            public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;

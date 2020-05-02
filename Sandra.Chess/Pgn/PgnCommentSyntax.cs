@@ -63,7 +63,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains a comment.
     /// </summary>
-    public static class PgnCommentSyntax
+    public sealed class PgnCommentSyntax : PgnSyntax, IPgnSymbol
     {
         /// <summary>
         /// The character which starts an end-of-line comment.
@@ -79,5 +79,40 @@ namespace Sandra.Chess.Pgn
         /// The character which starts an end-of-line comment.
         /// </summary>
         public const char MultiLineCommentEndCharacter = '}';
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnTriviaElementSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnCommentSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.BackgroundBefore.Length;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnCommentSyntax(PgnTriviaElementSyntax parent, GreenPgnCommentSyntax green)
+        {
+            Parent = parent;
+            Green = green;
+        }
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitCommentSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitCommentSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitCommentSyntax(this, arg);
     }
 }
