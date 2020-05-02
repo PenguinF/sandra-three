@@ -62,6 +62,9 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree WhitespaceThenSymbol = new ParseTree<TempPgnSymbolWithTrivia> { Whitespace, Symbol };
         private static readonly ParseTree WhitespaceThenSymbolTrivia = new ParseTree<PgnSymbolWithTrivia> { WhitespaceThenSymbol };
 
+        private static readonly ParseTree CommentTrivia = new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground };
+        private static readonly ParseTree WhitespaceThenCommentTrivia = new ParseTree<PgnTriviaSyntax> { WhitespaceThenSymbol, EmptyBackground };
+
         internal static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
             ("", new ParseTree<PgnSyntaxNodes> { TrailingEmptyBackground }),
@@ -87,10 +90,10 @@ namespace Sandra.Chess.Tests
             ("\"\n", new ParseTree<PgnSyntaxNodes> { SymbolNoBackgroundTrivia, TrailingEmptyBackground },
                 new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
 
-            ("{", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" {", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenSymbol, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            ("{ ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" { ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenSymbol, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{", new ParseTree<PgnSyntaxNodes> { CommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" {", new ParseTree<PgnSyntaxNodes> { WhitespaceThenCommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{ ", new ParseTree<PgnSyntaxNodes> { CommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" { ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenCommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
             ("A%%A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackgroundTrivia, new ParseTree<PgnSymbolWithTrivia> { new ParseTree<TempPgnSymbolWithTrivia> { TwoIllegalCharacters, Symbol } }, TrailingEmptyBackground },
                 new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
