@@ -78,7 +78,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
+        public Union<PgnSymbolWithTrivia, PgnSyntaxNodes> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -100,7 +100,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenForegroundNodes.Length;
+        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.GreenForegroundNodes.Length);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -110,7 +110,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         /// <summary>
         /// Gets the number of children of this syntax node.
@@ -137,7 +137,7 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnTriviaSyntax(PgnSyntaxNodes parent, GreenPgnTriviaSyntax green)
+        internal PgnTriviaSyntax(Union<PgnSymbolWithTrivia, PgnSyntaxNodes> parent, GreenPgnTriviaSyntax green)
         {
             Parent = parent;
             Green = green;
