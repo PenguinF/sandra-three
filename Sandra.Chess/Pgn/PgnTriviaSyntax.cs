@@ -142,15 +142,9 @@ namespace Sandra.Chess.Pgn
             Parent = parent;
             Green = green;
 
-            List<TempGreenPgnForegroundSyntax> flattenedSyntax = new List<TempGreenPgnForegroundSyntax>();
-            foreach (GreenPgnTriviaElementSyntax trailing in green.CommentNodes)
-            {
-                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(trailing.BackgroundBefore, trailing.CommentNode));
-            }
-
             CommentNodes = new SafeLazyObjectCollection<TempPgnSymbolWithTrivia>(
-                flattenedSyntax.Count,
-                index => new TempPgnSymbolWithTrivia(this, index, flattenedSyntax[index]));
+                green.CommentNodes.Count,
+                index => new TempPgnSymbolWithTrivia(this, index, Green.CommentNodes[index]));
 
             backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundAfter));
         }

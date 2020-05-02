@@ -142,7 +142,7 @@ namespace Sandra.Chess.Pgn.Temp
     {
         public PgnTriviaSyntax Parent { get; }
         public int ParentIndex { get; }
-        public TempGreenPgnForegroundSyntax Green { get; }
+        public GreenPgnTriviaElementSyntax Green { get; }
 
         private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundBefore;
         public PgnBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
@@ -169,7 +169,7 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal TempPgnSymbolWithTrivia(PgnTriviaSyntax parent, int parentIndex, TempGreenPgnForegroundSyntax green)
+        internal TempPgnSymbolWithTrivia(PgnTriviaSyntax parent, int parentIndex, GreenPgnTriviaElementSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
@@ -177,7 +177,7 @@ namespace Sandra.Chess.Pgn.Temp
 
             backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
 
-            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
+            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.CommentNode));
         }
     }
 

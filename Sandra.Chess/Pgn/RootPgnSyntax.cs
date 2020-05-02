@@ -63,20 +63,6 @@ namespace Sandra.Chess.Pgn.Temp
         }
     }
 
-    public class TempGreenPgnForegroundSyntax : ISpan
-    {
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
-        public IGreenPgnSymbol ForegroundNode { get; }
-
-        public int Length => BackgroundBefore.Length + ForegroundNode.Length;
-
-        public TempGreenPgnForegroundSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
-        {
-            BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
-            ForegroundNode = foreground;
-        }
-    }
-
     public class PgnSyntaxNodes : PgnSyntax
     {
         public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
