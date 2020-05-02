@@ -19,7 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -64,6 +66,88 @@ namespace Sandra.Chess.Pgn
             BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
             CommentNode = commentNode ?? throw new ArgumentNullException(nameof(commentNode));
             Length = BackgroundBefore.Length + CommentNode.Length;
+        }
+    }
+
+    /// <summary>
+    /// Represents a PGN syntax node which contains a comment and its preceding background.
+    /// </summary>
+    public sealed class PgnTriviaElementSyntax : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnTriviaSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in the comment nodes collection of its parent.
+        /// </summary>
+        public int CommentNodeIndex { get; }
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnTriviaElementSyntax Green { get; }
+
+        private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundBefore;
+
+        /// <summary>
+        /// Gets the background before the comment node.
+        /// </summary>
+        public PgnBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
+
+        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
+        public PgnSymbol PgnSymbol => pgnSymbol.Object;
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.CommentNodes.GetElementOffset(CommentNodeIndex);
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public override int ChildCount => 2;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return BackgroundBefore;
+            if (index == 1) return PgnSymbol;
+            throw new IndexOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.BackgroundBefore.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal PgnTriviaElementSyntax(PgnTriviaSyntax parent, int commentNodeIndex, GreenPgnTriviaElementSyntax green)
+        {
+            Parent = parent;
+            CommentNodeIndex = commentNodeIndex;
+            Green = green;
+
+            backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
+
+            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.CommentNode));
         }
     }
 }

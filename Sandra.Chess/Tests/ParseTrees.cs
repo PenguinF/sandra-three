@@ -60,9 +60,9 @@ namespace Sandra.Chess.Tests
         private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(ParseTree<PgnTriviaSyntax> leadingTrivia)
             => new ParseTree<PgnSymbolWithTrivia> { leadingTrivia, Symbol };
 
-        private static readonly ParseTree SymbolNoBackground = new ParseTree<TempPgnSymbolWithTrivia> { EmptyBackground, Symbol };
+        private static readonly ParseTree SymbolNoBackground = new ParseTree<PgnTriviaElementSyntax> { EmptyBackground, Symbol };
         private static readonly ParseTree SymbolNoTrivia = PgnSymbolWithLeadingTrivia(EmptyTrivia);
-        private static readonly ParseTree WhitespaceThenSymbol = new ParseTree<TempPgnSymbolWithTrivia> { Whitespace, Symbol };
+        private static readonly ParseTree WhitespaceThenSymbol = new ParseTree<PgnTriviaElementSyntax> { Whitespace, Symbol };
         private static readonly ParseTree WhitespaceThenSymbolTrivia = PgnSymbolWithLeadingTrivia(WhitespaceTrivia);
 
         private static readonly ParseTree<PgnTriviaSyntax> CommentTrivia = new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground };

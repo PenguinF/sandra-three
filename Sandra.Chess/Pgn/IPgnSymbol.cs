@@ -138,58 +138,15 @@ namespace Sandra.Chess.Pgn.Temp
         }
     }
 
-    public class TempPgnSymbolWithTrivia : PgnSyntax
-    {
-        public PgnTriviaSyntax Parent { get; }
-        public int ParentIndex { get; }
-        public GreenPgnTriviaElementSyntax Green { get; }
-
-        private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundBefore;
-        public PgnBackgroundListSyntax BackgroundBefore => backgroundBefore.Object;
-
-        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
-        public PgnSymbol PgnSymbol => pgnSymbol.Object;
-
-        public override int Start => Parent.Green.CommentNodes.GetElementOffset(ParentIndex);
-        public override int Length => Green.Length;
-        public override PgnSyntax ParentSyntax => Parent;
-        public override int ChildCount => 2;
-
-        public override PgnSyntax GetChild(int index)
-        {
-            if (index == 0) return BackgroundBefore;
-            if (index == 1) return PgnSymbol;
-            throw new IndexOutOfRangeException();
-        }
-
-        public override int GetChildStartPosition(int index)
-        {
-            if (index == 0) return 0;
-            if (index == 1) return Green.BackgroundBefore.Length;
-            throw new IndexOutOfRangeException();
-        }
-
-        internal TempPgnSymbolWithTrivia(PgnTriviaSyntax parent, int parentIndex, GreenPgnTriviaElementSyntax green)
-        {
-            Parent = parent;
-            ParentIndex = parentIndex;
-            Green = green;
-
-            backgroundBefore = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundBefore));
-
-            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.CommentNode));
-        }
-    }
-
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public Union<PgnSymbolWithTrivia, TempPgnSymbolWithTrivia> Parent { get; }
+        public Union<PgnSymbolWithTrivia, PgnTriviaElementSyntax> Parent { get; }
         public IGreenPgnSymbol Green { get; }
         public override int Start => Parent.Match(whenOption1: x => x.LeadingTrivia.Length, whenOption2: x => x.Green.BackgroundBefore.Length);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
-        internal PgnSymbol(Union<PgnSymbolWithTrivia, TempPgnSymbolWithTrivia> parent, IGreenPgnSymbol green)
+        internal PgnSymbol(Union<PgnSymbolWithTrivia, PgnTriviaElementSyntax> parent, IGreenPgnSymbol green)
         {
             Parent = parent;
             Green = green;

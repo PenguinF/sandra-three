@@ -88,7 +88,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the collection of comment nodes.
         /// </summary>
-        public SafeLazyObjectCollection<TempPgnSymbolWithTrivia> CommentNodes { get; }
+        public SafeLazyObjectCollection<PgnTriviaElementSyntax> CommentNodes { get; }
 
         private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundAfter;
 
@@ -142,9 +142,9 @@ namespace Sandra.Chess.Pgn
             Parent = parent;
             Green = green;
 
-            CommentNodes = new SafeLazyObjectCollection<TempPgnSymbolWithTrivia>(
+            CommentNodes = new SafeLazyObjectCollection<PgnTriviaElementSyntax>(
                 green.CommentNodes.Count,
-                index => new TempPgnSymbolWithTrivia(this, index, Green.CommentNodes[index]));
+                index => new PgnTriviaElementSyntax(this, index, Green.CommentNodes[index]));
 
             backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(() => new PgnBackgroundListSyntax(this, Green.BackgroundAfter));
         }

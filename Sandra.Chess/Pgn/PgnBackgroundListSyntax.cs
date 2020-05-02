@@ -22,7 +22,6 @@
 using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 
 namespace Sandra.Chess.Pgn
 {
@@ -50,7 +49,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<TempPgnSymbolWithTrivia, PgnTriviaSyntax> Parent { get; }
+        public Union<PgnTriviaElementSyntax, PgnTriviaSyntax> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' read-only list with background nodes.
@@ -92,14 +91,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnBackgroundListSyntax(Union<TempPgnSymbolWithTrivia, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        internal PgnBackgroundListSyntax(Union<PgnTriviaElementSyntax, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
         {
             Parent = parent;
             Green = green;
 
             BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
                 green.Count,
-                index => PgnBackgroundSyntaxCreator.Instance.Visit(green[index], (this, index)));
+                index => PgnBackgroundSyntaxCreator.Instance.Visit(Green[index], (this, index)));
         }
     }
 }
