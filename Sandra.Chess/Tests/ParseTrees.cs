@@ -45,16 +45,41 @@ namespace Sandra.Chess.Tests
             public override Type ExpectedType => typeof(T);
         }
 
+        private static readonly ParseTree WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
+        private static readonly ParseTree IllegalCharacter = new ParseTree<PgnIllegalCharacterSyntax>();
+        private static readonly ParseTree EscapedLine = new ParseTree<PgnEscapeSyntax>();
+
+        private static readonly ParseTree EmptyBackground = new ParseTree<PgnBackgroundListSyntax>();
+        private static readonly ParseTree Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
+
+        private static readonly ParseTree Symbol = new ParseTree<PgnSymbol>();
+
         internal static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
-            ("", new ParseTree<PgnSyntaxNodes>
-            {
-                new ParseTree<PgnBackgroundListSyntax>(),
-            }),
+            ("", new ParseTree<PgnSyntaxNodes> { EmptyBackground }),
+            (" ", new ParseTree<PgnSyntaxNodes> { Whitespace }),
+            ("%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } }),
+            ("% ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } }),
+            ("% \n", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } }),
+            ("\n%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } }),
         };
 
         internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors = new List<(string, ParseTree, PgnErrorCode[])>
         {
+            (" %", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } },
+                new[] { PgnErrorCode.IllegalCharacter }),
+            (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } },
+                new[] { PgnErrorCode.IllegalCharacter }),
+
+            ("\"", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground },
+                new[] { PgnErrorCode.UnterminatedTagValue }),
+            ("\"\n", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground },
+                new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
+
+            ("{", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" {", new ParseTree<PgnSyntaxNodes> { Whitespace, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{ ", new ParseTree<PgnSyntaxNodes> { EmptyBackground, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" { ", new ParseTree<PgnSyntaxNodes> { Whitespace, Symbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
         };
     }
 }
