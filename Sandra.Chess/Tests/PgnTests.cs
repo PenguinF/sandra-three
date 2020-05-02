@@ -181,10 +181,10 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+            var emptyTriviaSyntax = new GreenPgnTriviaSyntax(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance);
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, emptyTriviaSyntax, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, emptyTriviaSyntax, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -235,6 +235,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("commentNodes", () => new GreenPgnTriviaSyntax(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new GreenPgnTriviaSyntax(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
         }
 
         [Theory]

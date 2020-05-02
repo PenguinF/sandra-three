@@ -149,8 +149,7 @@ namespace Sandra.Chess.Pgn
 
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
-                parser.TriviaBuilder,
-                parser.BackgroundBuilder,
+                new GreenPgnTriviaSyntax(parser.TriviaBuilder, parser.BackgroundBuilder),
                 parser.Errors);
         }
 
@@ -184,7 +183,7 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(TriviaBuilder, BackgroundBuilder, symbol));
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(new GreenPgnTriviaSyntax(TriviaBuilder, BackgroundBuilder), symbol));
                 BackgroundBuilder.Clear();
                 TriviaBuilder.Clear();
             }
