@@ -677,5 +677,70 @@ namespace Sandra.Chess.Tests
         {
             AssertTokens(pgn, ExpectToken<GreenPgnUnknownSymbolSyntax>(pgn.Length));
         }
+
+        private static int AssertParseTree(ParseTrees.ParseTree expectedParseTree, PgnSyntax expectedParent, int expectedStart, PgnSyntax actualParseTree)
+        {
+            Assert.IsType(expectedParseTree.ExpectedType, actualParseTree);
+            Assert.Same(expectedParent, actualParseTree.ParentSyntax);
+            Assert.Equal(expectedStart, actualParseTree.Start);
+
+            int expectedChildCount = expectedParseTree.ChildNodes.Count;
+            Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
+
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(expectedChildCount));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(expectedChildCount + 1));
+
+            int length = 0;
+
+            if (expectedChildCount == 0)
+            {
+                if (actualParseTree.Length > 0)
+                {
+                    Assert.True(actualParseTree.IsTerminalSymbol(out IPgnSymbol pgnSymbol));
+                    length = pgnSymbol.Length;
+                }
+                else
+                {
+                    Assert.False(actualParseTree.IsTerminalSymbol(out _));
+                }
+            }
+            else
+            {
+                Assert.False(actualParseTree.IsTerminalSymbol(out _));
+
+                for (int i = 0; i < expectedChildCount; i++)
+                {
+                    Assert.Equal(length, actualParseTree.GetChildStartOrEndPosition(i));
+                    length += AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree, length, actualParseTree.GetChild(i));
+                }
+            }
+
+            Assert.Equal(length, actualParseTree.GetChildStartOrEndPosition(expectedChildCount));
+
+            return length;
+        }
+
+        public static IEnumerable<object[]> GetTestParseTrees()
+            => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
+            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+
+        [Theory]
+        [MemberData(nameof(GetTestParseTrees))]
+        public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
+        {
+            RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
+            AssertParseTree(parseTree, null, 0, rootSyntax.Syntax);
+
+            // Assert expected errors.
+            Assert.Collection(
+                rootSyntax.Errors,
+                Enumerable.Range(0, expectedErrors.Length)
+                          .Select<int, Action<PgnErrorInfo>>(i => errorInfo => Assert.Equal(expectedErrors[i], errorInfo.ErrorCode))
+                          .ToArray());
+        }
     }
 }
