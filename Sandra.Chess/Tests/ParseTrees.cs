@@ -50,7 +50,9 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree EscapedLine = new ParseTree<PgnEscapeSyntax>();
 
         private static readonly ParseTree EmptyBackground = new ParseTree<PgnBackgroundListSyntax>();
+        private static readonly ParseTree TrailingEmptyBackground = new ParseTree<PgnTriviaSyntax> { EmptyBackground };
         private static readonly ParseTree Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
+        private static readonly ParseTree TrailingWhitespace = new ParseTree<PgnTriviaSyntax> { Whitespace };
         private static readonly ParseTree TwoIllegalCharacters = new ParseTree<PgnBackgroundListSyntax> { IllegalCharacter, IllegalCharacter };
 
         private static readonly ParseTree Symbol = new ParseTree<PgnSymbol>();
@@ -60,35 +62,35 @@ namespace Sandra.Chess.Tests
 
         internal static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
         {
-            ("", new ParseTree<PgnSyntaxNodes> { EmptyBackground }),
-            (" ", new ParseTree<PgnSyntaxNodes> { Whitespace }),
-            ("%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } }),
-            ("% ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } }),
-            ("% \n", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } }),
-            ("\n%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } }),
+            ("", new ParseTree<PgnSyntaxNodes> { TrailingEmptyBackground }),
+            (" ", new ParseTree<PgnSyntaxNodes> { TrailingWhitespace }),
+            ("%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } } }),
+            ("% ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } } }),
+            ("% \n", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } } }),
+            ("\n%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } } }),
 
-            ("A A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, WhitespaceThenSymbol, EmptyBackground }),
-            (" A  AA   AAA    A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, Whitespace }),
+            ("A A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, WhitespaceThenSymbol, TrailingEmptyBackground }),
+            (" A  AA   AAA    A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, TrailingWhitespace }),
         };
 
         internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors = new List<(string, ParseTree, PgnErrorCode[])>
         {
-            (" %", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } },
+            (" %", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter } } },
                 new[] { PgnErrorCode.IllegalCharacter }),
-            (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } },
+            (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } } },
                 new[] { PgnErrorCode.IllegalCharacter }),
 
-            ("\"", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground },
+            ("\"", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, TrailingEmptyBackground },
                 new[] { PgnErrorCode.UnterminatedTagValue }),
-            ("\"\n", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground },
+            ("\"\n", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, TrailingEmptyBackground },
                 new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
 
-            ("{", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" {", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            ("{ ", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
-            (" { ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" {", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenSymbol, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            ("{ ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { SymbolNoBackground, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+            (" { ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenSymbol, EmptyBackground } }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
 
-            ("A%%A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, new ParseTree<PgnSymbolWithTrivia> { TwoIllegalCharacters, Symbol }, EmptyBackground },
+            ("A%%A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, new ParseTree<PgnSymbolWithTrivia> { TwoIllegalCharacters, Symbol }, TrailingEmptyBackground },
                 new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
         };
     }

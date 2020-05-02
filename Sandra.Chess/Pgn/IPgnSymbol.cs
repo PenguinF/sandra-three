@@ -97,7 +97,7 @@ namespace Sandra.Chess.Pgn.Temp
 {
     public class PgnSymbolWithTrivia : PgnSyntax
     {
-        public PgnSyntaxNodes Parent { get; }
+        public Union<PgnSyntaxNodes, PgnTriviaSyntax> Parent { get; }
         public int ParentIndex { get; }
         public TempGreenPgnForegroundSyntax Green { get; }
 
@@ -107,10 +107,10 @@ namespace Sandra.Chess.Pgn.Temp
         private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
         public PgnSymbol PgnSymbol => pgnSymbol.Object;
 
-        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Match(whenOption1: x => x.GreenForegroundNodes.GetElementOffset(ParentIndex), whenOption2: x => x.Green.CommentNodes.GetElementOffset(ParentIndex));
         public override int Length => Green.Length;
         public override int ChildCount => 2;
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         public override PgnSyntax GetChild(int index)
         {
@@ -126,7 +126,7 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, TempGreenPgnForegroundSyntax green)
+        internal PgnSymbolWithTrivia(Union<PgnSyntaxNodes, PgnTriviaSyntax> parent, int parentIndex, TempGreenPgnForegroundSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

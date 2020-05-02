@@ -84,11 +84,11 @@ namespace Sandra.Chess.Pgn.Temp
 
         public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
 
-        private readonly SafeLazyObject<PgnBackgroundListSyntax> backgroundAfter;
-        public PgnBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
+        private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
+        public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
 
         public override int Start => 0;
-        public override int Length => GreenForegroundNodes.Length + GreenTrailingTrivia.BackgroundAfter.Length;
+        public override int Length => GreenForegroundNodes.Length + GreenTrailingTrivia.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
         public override int ChildCount => ForegroundNodes.Count + 1;
@@ -96,7 +96,7 @@ namespace Sandra.Chess.Pgn.Temp
         public override PgnSyntax GetChild(int index)
         {
             if (index < ForegroundNodes.Count) return ForegroundNodes[index];
-            if (index == ForegroundNodes.Count) return BackgroundAfter;
+            if (index == ForegroundNodes.Count) return TrailingTrivia;
             throw new IndexOutOfRangeException();
         }
 
@@ -119,10 +119,6 @@ namespace Sandra.Chess.Pgn.Temp
                 }
                 flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(foreground.LeadingTrivia.BackgroundAfter, foreground.ForegroundNode));
             }
-            foreach (GreenPgnTriviaElementSyntax trailing in greenTrailingTrivia.CommentNodes)
-            {
-                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(trailing.BackgroundBefore, trailing.CommentNode));
-            }
 
             GreenForegroundNodes = ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax);
             GreenTrailingTrivia = greenTrailingTrivia;
@@ -131,8 +127,7 @@ namespace Sandra.Chess.Pgn.Temp
                 flattenedSyntax.Count,
                 index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
-            backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(
-                () => new PgnBackgroundListSyntax(this, GreenTrailingTrivia.BackgroundAfter));
+            trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
     }
 }
