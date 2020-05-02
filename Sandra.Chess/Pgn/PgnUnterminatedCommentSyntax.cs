@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -27,17 +26,17 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a PGN syntax node which contains an unterminated comment.
     /// </summary>
-    public sealed class GreenPgnUnterminatedCommentSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnUnterminatedCommentSyntax : GreenPgnCommentSyntax, IGreenPgnSymbol
     {
-        /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public int Length { get; }
-
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.UnterminatedComment;
+        public override PgnSymbolType SymbolType => PgnSymbolType.UnterminatedComment;
+
+        /// <summary>
+        /// Gets if this is an unterminated comment.
+        /// </summary>
+        public override bool IsUnterminated => true;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnUnterminatedCommentSyntax"/>.
@@ -47,9 +46,8 @@ namespace Sandra.Chess.Pgn
         /// and excluding the '\n' and preceding '\r' that terminates an end-of-line comment.
         /// </param>
         public GreenPgnUnterminatedCommentSyntax(int length)
+            : base(length)
         {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
         }
 
         /// <summary>
@@ -67,7 +65,7 @@ namespace Sandra.Chess.Pgn
     }
 
     /// <summary>
-    /// Represents a PGN syntax node which contains an unterminated comment.
+    /// Contains a method to create a <see cref="PgnErrorInfo"/> for an unterminated comment.
     /// </summary>
     public static class PgnUnterminatedCommentSyntax
     {

@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
@@ -35,12 +36,12 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, GreenPgnTriviaSyntax trailingTrivia, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
-            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
+            if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), backgroundAfter);
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), trailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -50,86 +51,59 @@ namespace Sandra.Chess.Pgn.Temp
 {
     public class GreenPgnForegroundSyntax : ISpan
     {
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
+        public GreenPgnTriviaSyntax LeadingTrivia { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
 
-        public int Length => BackgroundBefore.Length + ForegroundNode.Length;
+        public int Length => LeadingTrivia.Length + ForegroundNode.Length;
 
-        public GreenPgnForegroundSyntax(ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
+        public GreenPgnForegroundSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
         {
-            BackgroundBefore = backgroundBefore;
+            LeadingTrivia = leadingTrivia;
             ForegroundNode = foreground;
         }
     }
 
     public class PgnSyntaxNodes : PgnSyntax
     {
-        public ReadOnlySpanList<GreenPgnForegroundSyntax> Green { get; }
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundAfter { get; }
-        public SafeLazyObjectCollection<PgnSyntax> ChildNodes { get; }
+        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
+        public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
+
+        public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
+
+        private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
+        public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
+
         public override int Start => 0;
-        public override int Length => Green.Length + BackgroundAfter.Length;
+        public override int Length => GreenForegroundNodes.Length + GreenTrailingTrivia.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
-        public override int ChildCount => ChildNodes.Count;
-        public override PgnSyntax GetChild(int index) => ChildNodes[index];
+        public override int ChildCount => ForegroundNodes.Count + 1;
+
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index < ForegroundNodes.Count) return ForegroundNodes[index];
+            if (index == ForegroundNodes.Count) return TrailingTrivia;
+            throw new IndexOutOfRangeException();
+        }
 
         public override int GetChildStartPosition(int index)
         {
-            int greenIndex = index >> 1;
-
-            if (index == ChildCount - 1)
-            {
-                // Background after.
-                return Green.Length;
-            }
-
-            GreenPgnForegroundSyntax green = Green[greenIndex];
-
-            if ((index & 1) == 0)
-            {
-                // 0, 2, ...
-                // Some background before.
-                return Green.GetElementOffset(greenIndex);
-            }
-
-            // 1, 3, ...
-            // Foreground node.
-            return Green.GetElementOffset(greenIndex) + green.BackgroundBefore.Length;
+            if (index < ForegroundNodes.Count) return GreenForegroundNodes.GetElementOffset(index);
+            if (index == ForegroundNodes.Count) return GreenForegroundNodes.Length;
+            throw new IndexOutOfRangeException();
         }
 
-        private PgnSyntax CreateChildNode(int index)
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
+                                GreenPgnTriviaSyntax greenTrailingTrivia)
         {
-            int greenIndex = index >> 1;
+            GreenForegroundNodes = greenForegroundNodes;
+            GreenTrailingTrivia = greenTrailingTrivia;
 
-            if (index == ChildCount - 1)
-            {
-                // Background after.
-                return new PgnBackgroundListSyntax(this, greenIndex, BackgroundAfter);
-            }
+            ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
+                greenForegroundNodes.Count,
+                index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
-            GreenPgnForegroundSyntax green = Green[greenIndex];
-
-            if ((index & 1) == 0)
-            {
-                // 0, 2, ...
-                // Some background before.
-                return new PgnBackgroundListSyntax(this, greenIndex, green.BackgroundBefore);
-            }
-
-            // 1, 3, ...
-            // Foreground node.
-            return new PgnSymbol(this, greenIndex, green.ForegroundNode);
-        }
-
-        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> green, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
-        {
-            Green = green;
-            BackgroundAfter = backgroundAfter;
-
-            ChildNodes = new SafeLazyObjectCollection<PgnSyntax>(
-                green.Count * 2 + 1,
-                index => CreateChildNode(index));
+            trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
     }
 }

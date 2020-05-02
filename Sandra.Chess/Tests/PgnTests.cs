@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion.Text;
 using Sandra.Chess.Pgn;
 using Sandra.Chess.Pgn.Temp;
 using System;
@@ -34,6 +33,7 @@ namespace Sandra.Chess.Tests
     {
         private sealed class ToGreenSymbolConverter : PgnSymbolVisitor<IGreenPgnSymbol>
         {
+            public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
@@ -182,9 +182,10 @@ namespace Sandra.Chess.Tests
         [Fact]
         public void ArgumentChecks()
         {
-            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty, null));
+            var emptyTriviaSyntax = new GreenPgnTriviaSyntax(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance);
+            Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, emptyTriviaSyntax, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, emptyTriviaSyntax, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -232,6 +233,12 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(null));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnknownSymbolSyntax(""));
+
+            Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
+            Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("commentNodes", () => new GreenPgnTriviaSyntax(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("backgroundAfter", () => new GreenPgnTriviaSyntax(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
         }
 
         [Theory]
@@ -676,6 +683,71 @@ namespace Sandra.Chess.Tests
         public void SymbolStateMachineInvalidSymbols(string pgn)
         {
             AssertTokens(pgn, ExpectToken<GreenPgnUnknownSymbolSyntax>(pgn.Length));
+        }
+
+        private static int AssertParseTree(ParseTrees.ParseTree expectedParseTree, PgnSyntax expectedParent, int expectedStart, PgnSyntax actualParseTree)
+        {
+            Assert.IsType(expectedParseTree.ExpectedType, actualParseTree);
+            Assert.Same(expectedParent, actualParseTree.ParentSyntax);
+            Assert.Equal(expectedStart, actualParseTree.Start);
+
+            int expectedChildCount = expectedParseTree.ChildNodes.Count;
+            Assert.Equal(expectedChildCount, actualParseTree.ChildCount);
+
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChild(expectedChildCount));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartPosition(expectedChildCount));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(-1));
+            Assert.Throws<IndexOutOfRangeException>(() => actualParseTree.GetChildStartOrEndPosition(expectedChildCount + 1));
+
+            int length = 0;
+
+            if (expectedChildCount == 0)
+            {
+                if (actualParseTree.Length > 0)
+                {
+                    Assert.True(actualParseTree.IsTerminalSymbol(out IPgnSymbol pgnSymbol));
+                    length = pgnSymbol.Length;
+                }
+                else
+                {
+                    Assert.False(actualParseTree.IsTerminalSymbol(out _));
+                }
+            }
+            else
+            {
+                Assert.False(actualParseTree.IsTerminalSymbol(out _));
+
+                for (int i = 0; i < expectedChildCount; i++)
+                {
+                    Assert.Equal(length, actualParseTree.GetChildStartOrEndPosition(i));
+                    length += AssertParseTree(expectedParseTree.ChildNodes[i], actualParseTree, length, actualParseTree.GetChild(i));
+                }
+            }
+
+            Assert.Equal(length, actualParseTree.GetChildStartOrEndPosition(expectedChildCount));
+
+            return length;
+        }
+
+        public static IEnumerable<object[]> GetTestParseTrees()
+            => ParseTrees.TestParseTrees.Select(x => new object[] { x.Item1, x.Item2, Array.Empty<PgnErrorCode>() })
+            .Union(ParseTrees.TestParseTreesWithErrors.Select(x => new object[] { x.Item1, x.Item2, x.Item3 }));
+
+        [Theory]
+        [MemberData(nameof(GetTestParseTrees))]
+        public void ParseTreeTests(string pgn, ParseTrees.ParseTree parseTree, PgnErrorCode[] expectedErrors)
+        {
+            RootPgnSyntax rootSyntax = PgnParser.Parse(pgn);
+            AssertParseTree(parseTree, null, 0, rootSyntax.Syntax);
+
+            // Assert expected errors.
+            Assert.Collection(
+                rootSyntax.Errors,
+                Enumerable.Range(0, expectedErrors.Length)
+                          .Select<int, Action<PgnErrorInfo>>(i => errorInfo => Assert.Equal(expectedErrors[i], errorInfo.ErrorCode))
+                          .ToArray());
         }
     }
 }

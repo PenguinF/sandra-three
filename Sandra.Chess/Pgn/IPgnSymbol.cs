@@ -19,8 +19,10 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
+using System;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -71,6 +73,7 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
+            public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
@@ -93,19 +96,60 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbol : PgnSyntax, IPgnSymbol
+    public class PgnSymbolWithTrivia : PgnSyntax
     {
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
-        public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Green.GetElementOffset(ParentIndex) + Parent.Green[ParentIndex].BackgroundBefore.Length;
+        public GreenPgnForegroundSyntax Green { get; }
+
+        private readonly SafeLazyObject<PgnTriviaSyntax> leadingTrivia;
+        public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
+
+        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
+        public PgnSymbol PgnSymbol => pgnSymbol.Object;
+
+        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
+        public override int ChildCount => 2;
 
-        internal PgnSymbol(PgnSyntaxNodes parent, int parentIndex, IGreenPgnSymbol green)
+        public override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return LeadingTrivia;
+            if (index == 1) return PgnSymbol;
+            throw new IndexOutOfRangeException();
+        }
+
+        public override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.LeadingTrivia.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnForegroundSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
+            Green = green;
+
+            leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, Green.LeadingTrivia));
+
+            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
+        }
+    }
+
+    public class PgnSymbol : PgnSyntax, IPgnSymbol
+    {
+        public PgnSymbolWithTrivia Parent { get; }
+        public IGreenPgnSymbol Green { get; }
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Length => Green.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
+        {
+            Parent = parent;
             Green = green;
         }
 

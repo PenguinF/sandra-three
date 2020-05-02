@@ -146,14 +146,16 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser();
             parser.ParsePgnText(pgn);
+
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
-                parser.CaptureBackground(),
+                new GreenPgnTriviaSyntax(parser.TriviaBuilder, parser.BackgroundBuilder),
                 parser.Errors);
         }
 
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
+        private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
@@ -162,14 +164,8 @@ namespace Sandra.Chess.Pgn
         {
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
+            TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             SymbolBuilder = new List<GreenPgnForegroundSyntax>();
-        }
-
-        private ReadOnlySpanList<GreenPgnBackgroundSyntax> CaptureBackground()
-        {
-            var background = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(BackgroundBuilder);
-            BackgroundBuilder.Clear();
-            return background;
         }
 
         private void Yield(IGreenPgnSymbol symbol)
@@ -180,9 +176,16 @@ namespace Sandra.Chess.Pgn
             {
                 BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
             }
+            else if (symbol.SymbolType.IsTrivia())
+            {
+                TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, (GreenPgnCommentSyntax)symbol));
+                BackgroundBuilder.Clear();
+            }
             else
             {
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(CaptureBackground(), symbol));
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(new GreenPgnTriviaSyntax(TriviaBuilder, BackgroundBuilder), symbol));
+                BackgroundBuilder.Clear();
+                TriviaBuilder.Clear();
             }
         }
 

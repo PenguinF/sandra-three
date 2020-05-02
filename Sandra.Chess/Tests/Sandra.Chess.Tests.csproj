@@ -63,6 +63,7 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="ParseTrees.cs" />
     <Compile Include="PgnTests.cs" />
     <Compile Include="PositionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -76,6 +76,8 @@
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
     <Compile Include="Pgn\PgnTagNameSyntax.cs" />
     <Compile Include="Pgn\PgnTagValueSyntax.cs" />
+    <Compile Include="Pgn\PgnTriviaElementSyntax.cs" />
+    <Compile Include="Pgn\PgnTriviaSyntax.cs" />
     <Compile Include="Pgn\PgnUnknownSymbolSyntax.cs" />
     <Compile Include="Pgn\PgnUnterminatedCommentSyntax.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />

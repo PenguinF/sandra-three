@@ -153,6 +153,12 @@ namespace Sandra.Chess.Pgn
         /// Returns if the symbol type is background, i.e. always ignored.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsBackground(this PgnSymbolType symbolType) => symbolType < PgnSymbolType.Comment;
+        public static bool IsBackground(this PgnSymbolType symbolType) => symbolType <= PgnSymbolType.Escape;
+
+        /// <summary>
+        /// Returns if the symbol type is background or a comment.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsTrivia(this PgnSymbolType symbolType) => symbolType <= PgnSymbolType.UnterminatedComment;
     }
 }

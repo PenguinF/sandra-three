@@ -19,9 +19,9 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 
 namespace Sandra.Chess.Pgn
 {
@@ -49,12 +49,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public PgnSyntaxNodes Parent { get; }
-
-        /// <summary>
-        /// Gets the index of this syntax node in its parent's collection.
-        /// </summary>
-        public int ParentIndex { get; }
+        public Union<PgnTriviaElementSyntax, PgnTriviaSyntax> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' read-only list with background nodes.
@@ -69,7 +64,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => ParentIndex == Parent.Green.Count ? Parent.Green.Length : Parent.Green.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Match(whenOption1: _ => 0, whenOption2: x => x.Length - Green.Length);
 
         /// <summary>
         /// Gets the length of the text span corresponding with this syntax node.
@@ -79,7 +74,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         /// <summary>
         /// Gets the number of children of this syntax node.
@@ -96,15 +91,14 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnBackgroundListSyntax(PgnSyntaxNodes parent, int parentIndex, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        internal PgnBackgroundListSyntax(Union<PgnTriviaElementSyntax, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
         {
             Parent = parent;
-            ParentIndex = parentIndex;
             Green = green;
 
             BackgroundNodes = new SafeLazyObjectCollection<PgnBackgroundSyntax>(
                 green.Count,
-                index => PgnBackgroundSyntaxCreator.Instance.Visit(green[index], (this, index)));
+                index => PgnBackgroundSyntaxCreator.Instance.Visit(Green[index], (this, index)));
         }
     }
 }
