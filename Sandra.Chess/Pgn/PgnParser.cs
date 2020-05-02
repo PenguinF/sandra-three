@@ -146,10 +146,10 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser();
             parser.ParsePgnText(pgn);
-            parser.SymbolBuilder.AddRange(parser.TriviaBuilder.Select(x => new GreenPgnForegroundSyntax(x.BackgroundBefore, x.CommentNode)));
 
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
+                parser.TriviaBuilder,
                 parser.BackgroundBuilder,
                 parser.Errors);
         }
@@ -184,8 +184,7 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                SymbolBuilder.AddRange(TriviaBuilder.Select(x => new GreenPgnForegroundSyntax(x.BackgroundBefore, x.CommentNode)));
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(BackgroundBuilder, symbol));
+                SymbolBuilder.Add(new GreenPgnForegroundSyntax(TriviaBuilder, BackgroundBuilder, symbol));
                 BackgroundBuilder.Clear();
                 TriviaBuilder.Clear();
             }

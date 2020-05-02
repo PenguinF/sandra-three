@@ -36,12 +36,27 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, IEnumerable<GreenPgnTriviaElementSyntax> trailingTrivia, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
+            if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter));
+            List<GreenPgnForegroundSyntax> flattenedSyntax = new List<GreenPgnForegroundSyntax>();
+            foreach (GreenPgnForegroundSyntax foreground in syntax)
+            {
+                foreach (GreenPgnTriviaElementSyntax leading in foreground.LeadingTrivia)
+                {
+                    flattenedSyntax.Add(new GreenPgnForegroundSyntax(Array.Empty<GreenPgnTriviaElementSyntax>(), leading.BackgroundBefore, leading.CommentNode));
+                }
+                flattenedSyntax.Add(new GreenPgnForegroundSyntax(Array.Empty<GreenPgnTriviaElementSyntax>(), foreground.BackgroundBefore, foreground.ForegroundNode));
+            }
+            foreach (GreenPgnTriviaElementSyntax trailing in trailingTrivia)
+            {
+                flattenedSyntax.Add(new GreenPgnForegroundSyntax(Array.Empty<GreenPgnTriviaElementSyntax>(), trailing.BackgroundBefore, trailing.CommentNode));
+            }
+
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(flattenedSyntax), ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter));
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -51,13 +66,15 @@ namespace Sandra.Chess.Pgn.Temp
 {
     public class GreenPgnForegroundSyntax : ISpan
     {
+        public ReadOnlySpanList<GreenPgnTriviaElementSyntax> LeadingTrivia { get; }
         public ReadOnlySpanList<GreenPgnBackgroundSyntax> BackgroundBefore { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
 
-        public int Length => BackgroundBefore.Length + ForegroundNode.Length;
+        public int Length => LeadingTrivia.Length + BackgroundBefore.Length + ForegroundNode.Length;
 
-        public GreenPgnForegroundSyntax(IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
+        public GreenPgnForegroundSyntax(IEnumerable<GreenPgnTriviaElementSyntax> leadingTrivia, IEnumerable<GreenPgnBackgroundSyntax> backgroundBefore, IGreenPgnSymbol foreground)
         {
+            LeadingTrivia = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(leadingTrivia);
             BackgroundBefore = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundBefore);
             ForegroundNode = foreground;
         }
