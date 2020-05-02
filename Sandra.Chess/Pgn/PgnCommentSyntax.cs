@@ -91,6 +91,11 @@ namespace Sandra.Chess.Pgn
         public GreenPgnCommentSyntax Green { get; }
 
         /// <summary>
+        /// Gets if this is an unterminated comment.
+        /// </summary>
+        public bool IsUnterminated => Green.IsUnterminated;
+
+        /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
         public override int Start => Parent.Green.BackgroundBefore.Length;
