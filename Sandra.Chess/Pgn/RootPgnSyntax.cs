@@ -41,21 +41,7 @@ namespace Sandra.Chess.Pgn
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
 
-            List<TempGreenPgnForegroundSyntax> flattenedSyntax = new List<TempGreenPgnForegroundSyntax>();
-            foreach (GreenPgnForegroundSyntax foreground in syntax)
-            {
-                foreach (GreenPgnTriviaElementSyntax leading in foreground.LeadingTrivia.CommentNodes)
-                {
-                    flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(leading.BackgroundBefore, leading.CommentNode));
-                }
-                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(foreground.LeadingTrivia.BackgroundAfter, foreground.ForegroundNode));
-            }
-            foreach (GreenPgnTriviaElementSyntax trailing in trailingTrivia.CommentNodes)
-            {
-                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(trailing.BackgroundBefore, trailing.CommentNode));
-            }
-
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax), ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(trailingTrivia.BackgroundAfter));
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), trailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -121,18 +107,32 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<TempGreenPgnForegroundSyntax> greenForegroundNodes,
-                                ReadOnlySpanList<GreenPgnBackgroundSyntax> greenBackgroundAfter)
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
+                                GreenPgnTriviaSyntax greenTrailingTrivia)
         {
-            GreenForegroundNodes = greenForegroundNodes;
-            GreenBackgroundAfter = greenBackgroundAfter;
+            List<TempGreenPgnForegroundSyntax> flattenedSyntax = new List<TempGreenPgnForegroundSyntax>();
+            foreach (GreenPgnForegroundSyntax foreground in greenForegroundNodes)
+            {
+                foreach (GreenPgnTriviaElementSyntax leading in foreground.LeadingTrivia.CommentNodes)
+                {
+                    flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(leading.BackgroundBefore, leading.CommentNode));
+                }
+                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(foreground.LeadingTrivia.BackgroundAfter, foreground.ForegroundNode));
+            }
+            foreach (GreenPgnTriviaElementSyntax trailing in greenTrailingTrivia.CommentNodes)
+            {
+                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(trailing.BackgroundBefore, trailing.CommentNode));
+            }
+
+            GreenForegroundNodes = ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax);
+            GreenBackgroundAfter = greenTrailingTrivia.BackgroundAfter;
 
             ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
-                greenForegroundNodes.Count,
+                flattenedSyntax.Count,
                 index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
             backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(
-                () => new PgnBackgroundListSyntax(this, greenBackgroundAfter));
+                () => new PgnBackgroundListSyntax(this, GreenBackgroundAfter));
         }
     }
 }
