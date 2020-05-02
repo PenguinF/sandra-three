@@ -79,7 +79,7 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSyntaxNodes : PgnSyntax
     {
-        public ReadOnlySpanList<TempGreenPgnForegroundSyntax> GreenForegroundNodes { get; }
+        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
         public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
 
         public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
@@ -110,21 +110,11 @@ namespace Sandra.Chess.Pgn.Temp
         internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
                                 GreenPgnTriviaSyntax greenTrailingTrivia)
         {
-            List<TempGreenPgnForegroundSyntax> flattenedSyntax = new List<TempGreenPgnForegroundSyntax>();
-            foreach (GreenPgnForegroundSyntax foreground in greenForegroundNodes)
-            {
-                foreach (GreenPgnTriviaElementSyntax leading in foreground.LeadingTrivia.CommentNodes)
-                {
-                    flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(leading.BackgroundBefore, leading.CommentNode));
-                }
-                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(foreground.LeadingTrivia.BackgroundAfter, foreground.ForegroundNode));
-            }
-
-            GreenForegroundNodes = ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax);
+            GreenForegroundNodes = greenForegroundNodes;
             GreenTrailingTrivia = greenTrailingTrivia;
 
             ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
-                flattenedSyntax.Count,
+                greenForegroundNodes.Count,
                 index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));

@@ -21,6 +21,7 @@
 
 using Eutherion;
 using Eutherion.Text;
+using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
@@ -97,7 +98,43 @@ namespace Sandra.Chess.Pgn.Temp
 {
     public class PgnSymbolWithTrivia : PgnSyntax
     {
-        public Union<PgnSyntaxNodes, PgnTriviaSyntax> Parent { get; }
+        public PgnSyntaxNodes Parent { get; }
+        public int ParentIndex { get; }
+
+        public ReadOnlySpanList<TempGreenPgnForegroundSyntax> GreenForegroundNodes { get; }
+
+        public SafeLazyObjectCollection<TempPgnSymbolWithTrivia> ForegroundNodes { get; }
+
+        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
+        public override int Length => GreenForegroundNodes.Length;
+        public override PgnSyntax ParentSyntax => Parent;
+        public override int ChildCount => ForegroundNodes.Count;
+        public override PgnSyntax GetChild(int index) => ForegroundNodes[index];
+        public override int GetChildStartPosition(int index) => GreenForegroundNodes.GetElementOffset(index);
+
+        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnForegroundSyntax green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+
+            List<TempGreenPgnForegroundSyntax> flattenedSyntax = new List<TempGreenPgnForegroundSyntax>();
+            foreach (GreenPgnTriviaElementSyntax leading in green.LeadingTrivia.CommentNodes)
+            {
+                flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(leading.BackgroundBefore, leading.CommentNode));
+            }
+            flattenedSyntax.Add(new TempGreenPgnForegroundSyntax(green.LeadingTrivia.BackgroundAfter, green.ForegroundNode));
+
+            GreenForegroundNodes = ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax);
+
+            ForegroundNodes = new SafeLazyObjectCollection<TempPgnSymbolWithTrivia>(
+                flattenedSyntax.Count,
+                index => new TempPgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
+        }
+    }
+
+    public class TempPgnSymbolWithTrivia : PgnSyntax
+    {
+        public Union<PgnSymbolWithTrivia, PgnTriviaSyntax> Parent { get; }
         public int ParentIndex { get; }
         public TempGreenPgnForegroundSyntax Green { get; }
 
@@ -109,8 +146,8 @@ namespace Sandra.Chess.Pgn.Temp
 
         public override int Start => Parent.Match(whenOption1: x => x.GreenForegroundNodes.GetElementOffset(ParentIndex), whenOption2: x => x.Green.CommentNodes.GetElementOffset(ParentIndex));
         public override int Length => Green.Length;
-        public override int ChildCount => 2;
         public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override int ChildCount => 2;
 
         public override PgnSyntax GetChild(int index)
         {
@@ -126,7 +163,7 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSymbolWithTrivia(Union<PgnSyntaxNodes, PgnTriviaSyntax> parent, int parentIndex, TempGreenPgnForegroundSyntax green)
+        internal TempPgnSymbolWithTrivia(Union<PgnSymbolWithTrivia, PgnTriviaSyntax> parent, int parentIndex, TempGreenPgnForegroundSyntax green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
@@ -140,13 +177,13 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public PgnSymbolWithTrivia Parent { get; }
+        public TempPgnSymbolWithTrivia Parent { get; }
         public IGreenPgnSymbol Green { get; }
         public override int Start => Parent.Green.BackgroundBefore.Length;
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
+        internal PgnSymbol(TempPgnSymbolWithTrivia parent, IGreenPgnSymbol green)
         {
             Parent = parent;
             Green = green;

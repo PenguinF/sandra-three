@@ -50,7 +50,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnSymbolWithTrivia, PgnTriviaSyntax> Parent { get; }
+        public Union<TempPgnSymbolWithTrivia, PgnTriviaSyntax> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' read-only list with background nodes.
@@ -92,7 +92,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => Green.GetElementOffset(index);
 
-        internal PgnBackgroundListSyntax(Union<PgnSymbolWithTrivia, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
+        internal PgnBackgroundListSyntax(Union<TempPgnSymbolWithTrivia, PgnTriviaSyntax> parent, ReadOnlySpanList<GreenPgnBackgroundSyntax> green)
         {
             Parent = parent;
             Green = green;
