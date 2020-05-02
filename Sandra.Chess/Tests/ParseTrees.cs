@@ -51,6 +51,7 @@ namespace Sandra.Chess.Tests
 
         private static readonly ParseTree EmptyBackground = new ParseTree<PgnBackgroundListSyntax>();
         private static readonly ParseTree Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
+        private static readonly ParseTree TwoIllegalCharacters = new ParseTree<PgnBackgroundListSyntax> { IllegalCharacter, IllegalCharacter };
 
         private static readonly ParseTree Symbol = new ParseTree<PgnSymbol>();
 
@@ -65,6 +66,9 @@ namespace Sandra.Chess.Tests
             ("% ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine } }),
             ("% \n", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { EscapedLine, WhitespaceElement } }),
             ("\n%", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, EscapedLine } }),
+
+            ("A A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, WhitespaceThenSymbol, EmptyBackground }),
+            (" A  AA   AAA    A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, WhitespaceThenSymbol, Whitespace }),
         };
 
         internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors = new List<(string, ParseTree, PgnErrorCode[])>
@@ -83,6 +87,9 @@ namespace Sandra.Chess.Tests
             (" {", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
             ("{ ", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
             (" { ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbol, EmptyBackground }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
+
+            ("A%%A", new ParseTree<PgnSyntaxNodes> { SymbolNoBackground, new ParseTree<PgnSymbolWithTrivia> { TwoIllegalCharacters, Symbol }, EmptyBackground },
+                new[] { PgnErrorCode.IllegalCharacter, PgnErrorCode.IllegalCharacter }),
         };
     }
 }
