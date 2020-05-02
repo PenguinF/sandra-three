@@ -45,15 +45,15 @@ namespace Sandra.Chess.Tests
             public override Type ExpectedType => typeof(T);
         }
 
-        private static readonly ParseTree WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
-        private static readonly ParseTree IllegalCharacter = new ParseTree<PgnIllegalCharacterSyntax>();
-        private static readonly ParseTree EscapedLine = new ParseTree<PgnEscapeSyntax>();
+        private static readonly ParseTree<PgnWhitespaceSyntax> WhitespaceElement = new ParseTree<PgnWhitespaceSyntax>();
+        private static readonly ParseTree<PgnIllegalCharacterSyntax> IllegalCharacter = new ParseTree<PgnIllegalCharacterSyntax>();
+        private static readonly ParseTree<PgnEscapeSyntax> EscapedLine = new ParseTree<PgnEscapeSyntax>();
 
-        private static readonly ParseTree EmptyBackground = new ParseTree<PgnBackgroundListSyntax>();
+        private static readonly ParseTree<PgnBackgroundListSyntax> EmptyBackground = new ParseTree<PgnBackgroundListSyntax>();
         private static readonly ParseTree<PgnTriviaSyntax> EmptyTrivia = new ParseTree<PgnTriviaSyntax> { EmptyBackground };
-        private static readonly ParseTree Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
+        private static readonly ParseTree<PgnBackgroundListSyntax> Whitespace = new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement };
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceTrivia = new ParseTree<PgnTriviaSyntax> { Whitespace };
-        private static readonly ParseTree TwoIllegalCharacters = new ParseTree<PgnBackgroundListSyntax> { IllegalCharacter, IllegalCharacter };
+        private static readonly ParseTree<PgnBackgroundListSyntax> TwoIllegalCharacters = new ParseTree<PgnBackgroundListSyntax> { IllegalCharacter, IllegalCharacter };
 
         private static readonly ParseTree<PgnCommentSyntax> Comment = new ParseTree<PgnCommentSyntax>();
         private static readonly ParseTree<PgnSymbol> Symbol = new ParseTree<PgnSymbol>();
@@ -61,10 +61,21 @@ namespace Sandra.Chess.Tests
         private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(ParseTree<PgnTriviaSyntax> leadingTrivia)
             => new ParseTree<PgnSymbolWithTrivia> { leadingTrivia, Symbol };
 
-        private static readonly ParseTree CommentNoBackground = new ParseTree<PgnTriviaElementSyntax> { EmptyBackground, Comment };
-        private static readonly ParseTree SymbolNoTrivia = PgnSymbolWithLeadingTrivia(EmptyTrivia);
-        private static readonly ParseTree WhitespaceThenComment = new ParseTree<PgnTriviaElementSyntax> { Whitespace, Comment };
-        private static readonly ParseTree WhitespaceThenSymbolTrivia = PgnSymbolWithLeadingTrivia(WhitespaceTrivia);
+        private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(
+            ParseTree<PgnTriviaElementSyntax> element1,
+            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
+            => PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { element1, backgroundAfter });
+
+        private static ParseTree<PgnSymbolWithTrivia> PgnSymbolWithLeadingTrivia(
+            ParseTree<PgnTriviaElementSyntax> element1,
+            ParseTree<PgnTriviaElementSyntax> element2,
+            ParseTree<PgnBackgroundListSyntax> backgroundAfter)
+            => PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { element1, element2, backgroundAfter });
+
+        private static readonly ParseTree<PgnTriviaElementSyntax> CommentNoBackground = new ParseTree<PgnTriviaElementSyntax> { EmptyBackground, Comment };
+        private static readonly ParseTree<PgnSymbolWithTrivia> SymbolNoTrivia = PgnSymbolWithLeadingTrivia(EmptyTrivia);
+        private static readonly ParseTree<PgnTriviaElementSyntax> WhitespaceThenComment = new ParseTree<PgnTriviaElementSyntax> { Whitespace, Comment };
+        private static readonly ParseTree<PgnSymbolWithTrivia> WhitespaceThenSymbolTrivia = PgnSymbolWithLeadingTrivia(WhitespaceTrivia);
 
         private static readonly ParseTree<PgnTriviaSyntax> CommentTrivia = new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground };
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceThenCommentTrivia = new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, EmptyBackground };
@@ -83,28 +94,28 @@ namespace Sandra.Chess.Tests
             (" A  AA   AAA    A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, WhitespaceThenSymbolTrivia, WhitespaceThenSymbolTrivia, WhitespaceThenSymbolTrivia, WhitespaceTrivia }),
 
             ("{}", new ParseTree<PgnSyntaxNodes> { CommentTrivia }),
-            ("  {}   A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, Whitespace }), WhitespaceTrivia }),
+            ("  {}   A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
             (" A   {}  ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, WhitespaceCommentWhitespace }),
             (" {} {} ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace } }),
 
             (" A {} {} ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace } }),
             (" {} A {} ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceCommentWhitespace), WhitespaceCommentWhitespace }),
-            (" {} {} A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, WhitespaceThenComment, Whitespace }), WhitespaceTrivia }),
+            (" {} {} A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
 
-            (" {} A A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, Whitespace }), WhitespaceThenSymbolTrivia, WhitespaceTrivia }),
-            (" A {} A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, Whitespace }), WhitespaceTrivia }),
+            (" {} A A ", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceThenSymbolTrivia, WhitespaceTrivia }),
+            (" A {} A ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, PgnSymbolWithLeadingTrivia(WhitespaceThenComment, Whitespace), WhitespaceTrivia }),
             (" A A {} ", new ParseTree<PgnSyntaxNodes> { WhitespaceThenSymbolTrivia, WhitespaceThenSymbolTrivia, WhitespaceCommentWhitespace }),
 
-            ("{}{}*{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground }), CommentTrivia }),
-            ("{}{}**", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground }), SymbolNoTrivia, EmptyTrivia }),
-            ("{}*{}{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } }),
-            ("{}*{}*", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), EmptyTrivia }),
-            ("{}**{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), SymbolNoTrivia, CommentTrivia }),
-            ("*{}{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground }), EmptyTrivia }),
-            ("*{}*{}", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), CommentTrivia }),
-            ("*{}**", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), SymbolNoTrivia, EmptyTrivia }),
+            ("{}{}*{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), CommentTrivia }),
+            ("{}{}**", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), SymbolNoTrivia, EmptyTrivia }),
+            ("{}*{}{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } }),
+            ("{}*{}*", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), EmptyTrivia }),
+            ("{}**{}", new ParseTree<PgnSyntaxNodes> { PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), SymbolNoTrivia, CommentTrivia }),
+            ("*{}{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, CommentNoBackground, EmptyBackground), EmptyTrivia }),
+            ("*{}*{}", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), CommentTrivia }),
+            ("*{}**", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), SymbolNoTrivia, EmptyTrivia }),
             ("**{}{}", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, SymbolNoTrivia, new ParseTree<PgnTriviaSyntax> { CommentNoBackground, CommentNoBackground, EmptyBackground } }),
-            ("**{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, SymbolNoTrivia, PgnSymbolWithLeadingTrivia(new ParseTree<PgnTriviaSyntax> { CommentNoBackground, EmptyBackground }), EmptyTrivia }),
+            ("**{}*", new ParseTree<PgnSyntaxNodes> { SymbolNoTrivia, SymbolNoTrivia, PgnSymbolWithLeadingTrivia(CommentNoBackground, EmptyBackground), EmptyTrivia }),
         };
 
         internal static readonly List<(string, ParseTree, PgnErrorCode[])> TestParseTreesWithErrors = new List<(string, ParseTree, PgnErrorCode[])>
