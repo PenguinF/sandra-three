@@ -80,7 +80,7 @@ namespace Sandra.Chess.Pgn.Temp
     public class PgnSyntaxNodes : PgnSyntax
     {
         public ReadOnlySpanList<TempGreenPgnForegroundSyntax> GreenForegroundNodes { get; }
-        public ReadOnlySpanList<GreenPgnBackgroundSyntax> GreenBackgroundAfter { get; }
+        public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
 
         public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
 
@@ -88,7 +88,7 @@ namespace Sandra.Chess.Pgn.Temp
         public PgnBackgroundListSyntax BackgroundAfter => backgroundAfter.Object;
 
         public override int Start => 0;
-        public override int Length => GreenForegroundNodes.Length + GreenBackgroundAfter.Length;
+        public override int Length => GreenForegroundNodes.Length + GreenTrailingTrivia.BackgroundAfter.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
         public override int ChildCount => ForegroundNodes.Count + 1;
@@ -125,14 +125,14 @@ namespace Sandra.Chess.Pgn.Temp
             }
 
             GreenForegroundNodes = ReadOnlySpanList<TempGreenPgnForegroundSyntax>.Create(flattenedSyntax);
-            GreenBackgroundAfter = greenTrailingTrivia.BackgroundAfter;
+            GreenTrailingTrivia = greenTrailingTrivia;
 
             ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
                 flattenedSyntax.Count,
                 index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
 
             backgroundAfter = new SafeLazyObject<PgnBackgroundListSyntax>(
-                () => new PgnBackgroundListSyntax(this, GreenBackgroundAfter));
+                () => new PgnBackgroundListSyntax(this, GreenTrailingTrivia.BackgroundAfter));
         }
     }
 }
