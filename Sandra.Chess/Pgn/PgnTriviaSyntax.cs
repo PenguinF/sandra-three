@@ -34,6 +34,26 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnTriviaSyntax : ISpan
     {
         /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTriviaSyntax"/>.
+        /// </summary>
+        /// <param name="commentNodes">
+        /// The comment nodes.
+        /// </param>
+        /// <param name="backgroundAfter">
+        /// The background after the comment nodes.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
+        /// </exception>
+        public static GreenPgnTriviaSyntax Create(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
+        {
+            if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
+            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
+
+            return new GreenPgnTriviaSyntax(commentNodes, backgroundAfter);
+        }
+
+        /// <summary>
         /// Gets the comment nodes.
         /// </summary>
         public ReadOnlySpanList<GreenPgnTriviaElementSyntax> CommentNodes { get; }
@@ -48,23 +68,8 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => CommentNodes.Length + BackgroundAfter.Length;
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnTriviaSyntax"/>.
-        /// </summary>
-        /// <param name="commentNodes">
-        /// The comment nodes.
-        /// </param>
-        /// <param name="backgroundAfter">
-        /// The background after the comment nodes.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
-        /// </exception>
-        public GreenPgnTriviaSyntax(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
+        private GreenPgnTriviaSyntax(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
         {
-            if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
-            if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
-
             CommentNodes = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
             BackgroundAfter = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
         }
