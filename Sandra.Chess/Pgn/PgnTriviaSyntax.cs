@@ -34,6 +34,13 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnTriviaSyntax : ISpan
     {
         /// <summary>
+        /// Gets the empty <see cref="GreenPgnTriviaSyntax"/>.
+        /// </summary>
+        public static readonly GreenPgnTriviaSyntax Empty = new GreenPgnTriviaSyntax(
+            ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Empty,
+            ReadOnlySpanList<GreenPgnBackgroundSyntax>.Empty);
+
+        /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTriviaSyntax"/>.
         /// </summary>
         /// <param name="commentNodes">
@@ -42,6 +49,9 @@ namespace Sandra.Chess.Pgn
         /// <param name="backgroundAfter">
         /// The background after the comment nodes.
         /// </param>
+        /// <returns>
+        /// The new <see cref="GreenPgnTriviaSyntax"/>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="commentNodes"/> and/or <paramref name="backgroundAfter"/> are null.
         /// </exception>
@@ -50,7 +60,12 @@ namespace Sandra.Chess.Pgn
             if (commentNodes == null) throw new ArgumentNullException(nameof(commentNodes));
             if (backgroundAfter == null) throw new ArgumentNullException(nameof(backgroundAfter));
 
-            return new GreenPgnTriviaSyntax(commentNodes, backgroundAfter);
+            var commentNodeSpanList = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
+            var backgroundAfterSpanList = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
+
+            return commentNodeSpanList.Count == 0 && backgroundAfterSpanList.Count == 0
+                ? Empty
+                : new GreenPgnTriviaSyntax(commentNodeSpanList, backgroundAfterSpanList);
         }
 
         /// <summary>
@@ -68,10 +83,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int Length => CommentNodes.Length + BackgroundAfter.Length;
 
-        private GreenPgnTriviaSyntax(IEnumerable<GreenPgnTriviaElementSyntax> commentNodes, IEnumerable<GreenPgnBackgroundSyntax> backgroundAfter)
+        private GreenPgnTriviaSyntax(ReadOnlySpanList<GreenPgnTriviaElementSyntax> commentNodes, ReadOnlySpanList<GreenPgnBackgroundSyntax> backgroundAfter)
         {
-            CommentNodes = ReadOnlySpanList<GreenPgnTriviaElementSyntax>.Create(commentNodes);
-            BackgroundAfter = ReadOnlySpanList<GreenPgnBackgroundSyntax>.Create(backgroundAfter);
+            CommentNodes = commentNodes;
+            BackgroundAfter = backgroundAfter;
         }
     }
 
