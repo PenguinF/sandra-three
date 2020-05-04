@@ -19,6 +19,44 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a syntax node which contains a tag name and a tag value.
+    /// </summary>
+    public sealed class GreenPgnTagPairSyntax : ISpan
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => TagElementNodes.Length;
+
+        /// <summary>
+        /// Gets the tag element nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> TagElementNodes { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTagPairSyntax"/>.
+        /// </summary>
+        /// <param name="tagElementNodes">
+        /// The tag element nodes.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="tagElementNodes"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="tagElementNodes"/> is empty.
+        /// </exception>
+        public GreenPgnTagPairSyntax(IEnumerable<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> tagElementNodes)
+        {
+            if (tagElementNodes == null) throw new ArgumentNullException(nameof(tagElementNodes));
+            TagElementNodes = ReadOnlySpanList<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>.Create(tagElementNodes);
+            if (TagElementNodes.Count == 0) throw new ArgumentException($"{nameof(tagElementNodes)} is empty", nameof(tagElementNodes));
+        }
+    }
 }
