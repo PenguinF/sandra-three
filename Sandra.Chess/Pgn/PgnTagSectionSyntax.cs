@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
 
@@ -28,7 +29,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a collection of <see cref="GreenPgnTagPairSyntax"/> instances.
     /// </summary>
-    public sealed class GreenPgnTagSectionSyntax : ISpan
+    public sealed class GreenPgnTagSectionSyntax : IGreenPgnTopLevelSyntax, ISpan
     {
         /// <summary>
         /// Gets the length of the text span corresponding with this node.

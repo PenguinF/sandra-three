@@ -25,6 +25,7 @@ using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -41,7 +42,24 @@ namespace Sandra.Chess.Pgn
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(syntax), trailingTrivia);
+            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
+
+            foreach (var topLevelSyntax in syntax)
+            {
+                if (topLevelSyntax is GreenPgnTagSectionSyntax tagSectionSyntax)
+                {
+                    foreach (var tagPairSyntax in tagSectionSyntax.TagPairNodes)
+                    {
+                        flattened.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+                    }
+                }
+                else
+                {
+                    flattened.Add(topLevelSyntax);
+                }
+            }
+
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened), trailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
