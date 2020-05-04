@@ -42,24 +42,7 @@ namespace Sandra.Chess.Pgn
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
 
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-
-            foreach (var topLevelSyntax in syntax)
-            {
-                if (topLevelSyntax is GreenPgnTagSectionSyntax tagSectionSyntax)
-                {
-                    foreach (var tagPairSyntax in tagSectionSyntax.TagPairNodes)
-                    {
-                        flattened.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
-                    }
-                }
-                else
-                {
-                    flattened.Add(topLevelSyntax);
-                }
-            }
-
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened), trailingTrivia);
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(syntax), trailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -126,7 +109,22 @@ namespace Sandra.Chess.Pgn.Temp
                 index =>
                 {
                     var topLevelNode = GreenTopLevelNodes[index];
-                    return new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)topLevelNode);
+
+                    if (topLevelNode is GreenPgnTagSectionSyntax tagSectionSyntax)
+                    {
+                        List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
+
+                        foreach (var tagPairSyntax in tagSectionSyntax.TagPairNodes)
+                        {
+                            flattened.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+                        }
+
+                        return new PgnTagSectionSyntax(this, index, ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened));
+                    }
+                    else
+                    {
+                        return new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)topLevelNode);
+                    }
                 });
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));

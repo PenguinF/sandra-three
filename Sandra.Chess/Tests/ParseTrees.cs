@@ -114,11 +114,10 @@ namespace Sandra.Chess.Tests
             List<ParseTree<PgnSymbolWithTrivia>> firstTagPair,
             params List<ParseTree<PgnSymbolWithTrivia>>[] otherTagPairs)
         {
-            var tagSectionSyntax = new ParseTree<PgnSyntaxNodes>();
+            var tagSectionSyntax = new ParseTree<PgnTagSectionSyntax>();
             firstTagPair.ForEach(tagSectionSyntax.Add);
             otherTagPairs.ForEach(otherTagPair => otherTagPair.ForEach(tagSectionSyntax.Add));
-            tagSectionSyntax.Add(trailingTrivia);
-            return tagSectionSyntax;
+            return new ParseTree<PgnSyntaxNodes> { tagSectionSyntax, trailingTrivia };
         }
 
         private static ParseTree<PgnSyntaxNodes> TagSection(List<ParseTree<PgnSymbolWithTrivia>> firstTagPair, params List<ParseTree<PgnSymbolWithTrivia>>[] otherTagPairs)
