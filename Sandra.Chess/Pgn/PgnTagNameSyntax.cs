@@ -64,10 +64,14 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag name syntax node.
     /// </summary>
-    public sealed class PgnTagNameSyntax : PgnTagElementSyntax
+    public sealed class PgnTagNameSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitTagNameSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagNameSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagNameSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitTagNameSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitTagNameSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitTagNameSyntax(this, arg);
     }
 }

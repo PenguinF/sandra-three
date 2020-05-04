@@ -44,6 +44,8 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public abstract class PgnTagElementSyntax
     {
+        public int Length => 0;
+
         public abstract void Accept(PgnTagElementSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg);

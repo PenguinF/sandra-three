@@ -55,7 +55,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the bracket close character ']' in PGN text.
     /// </summary>
-    public sealed class PgnBracketCloseSyntax : PgnTagElementSyntax
+    public sealed class PgnBracketCloseSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         public const char BracketCloseCharacter = ']';
         public const int BracketCloseLength = 1;
@@ -63,5 +63,9 @@ namespace Sandra.Chess.Pgn
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
     }
 }

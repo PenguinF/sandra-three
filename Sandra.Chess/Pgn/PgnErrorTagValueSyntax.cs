@@ -89,7 +89,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class PgnErrorTagValueSyntax : PgnTagElementSyntax
+    public sealed class PgnErrorTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
@@ -130,5 +130,9 @@ namespace Sandra.Chess.Pgn
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 }
