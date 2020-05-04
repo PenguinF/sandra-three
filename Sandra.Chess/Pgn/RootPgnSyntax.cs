@@ -54,6 +54,12 @@ namespace Sandra.Chess.Pgn.Temp
     {
     }
 
+    // Helps with top level syntax node flexibility while developing the syntax tree.
+    public interface IPgnTopLevelSyntax : ISpan
+    {
+        PgnSyntax ToPgnSyntax();
+    }
+
     public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
     {
         public GreenPgnTriviaSyntax LeadingTrivia { get; }
@@ -73,7 +79,7 @@ namespace Sandra.Chess.Pgn.Temp
         public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
         public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
 
-        public SafeLazyObjectCollection<PgnSymbolWithTrivia> TopLevelNodes { get; }
+        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
 
         private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
         public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
@@ -86,7 +92,7 @@ namespace Sandra.Chess.Pgn.Temp
 
         public override PgnSyntax GetChild(int index)
         {
-            if (index < TopLevelNodes.Count) return TopLevelNodes[index];
+            if (index < TopLevelNodes.Count) return TopLevelNodes[index].ToPgnSyntax();
             if (index == TopLevelNodes.Count) return TrailingTrivia;
             throw new IndexOutOfRangeException();
         }
@@ -103,7 +109,7 @@ namespace Sandra.Chess.Pgn.Temp
             GreenTopLevelNodes = greenTopLevelNodes;
             GreenTrailingTrivia = greenTrailingTrivia;
 
-            TopLevelNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
+            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
                 greenTopLevelNodes.Count,
                 index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
 

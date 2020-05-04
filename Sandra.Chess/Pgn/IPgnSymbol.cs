@@ -96,8 +96,10 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia : PgnSyntax
+    public class PgnSymbolWithTrivia : PgnSyntax, IPgnTopLevelSyntax
     {
+        PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
+
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
         public GreenPgnTopLevelSymbolSyntax Green { get; }
