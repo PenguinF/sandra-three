@@ -24,7 +24,6 @@ using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -80,9 +79,15 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int ParentIndex { get; }
 
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnTagSectionSyntax Green { get; }
 
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the collection of tag pair nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<PgnTagPairSyntax> TagPairNodes { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -92,7 +97,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length => GreenTopLevelNodes.Length;
+        public override int Length => Green.Length;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -102,36 +107,27 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count;
+        public override int ChildCount => TagPairNodes.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+        public override PgnSyntax GetChild(int index) => TagPairNodes[index];
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+        public override int GetChildStartPosition(int index) => Green.TagPairNodes.GetElementOffset(index);
 
         internal PgnTagSectionSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnTagSectionSyntax green)
         {
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-
-            foreach (var tagPairSyntax in green.TagPairNodes)
-            {
-                flattened.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
-            }
-
-            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
-
             Parent = parent;
             ParentIndex = parentIndex;
-            GreenTopLevelNodes = greenTopLevelNodes;
+            Green = green;
 
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
-                greenTopLevelNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
+            TagPairNodes = new SafeLazyObjectCollection<PgnTagPairSyntax>(
+                green.TagPairNodes.Count,
+                index => new PgnTagPairSyntax(this, index, Green.TagPairNodes[index]));
         }
     }
 }

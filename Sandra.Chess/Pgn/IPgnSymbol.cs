@@ -99,7 +99,7 @@ namespace Sandra.Chess.Pgn.Temp
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
-        public Union<PgnTagSectionSyntax, PgnSyntaxNodes> Parent { get; }
+        public Union<PgnTagPairSyntax, PgnSyntaxNodes> Parent { get; }
         public int ParentIndex { get; }
 
         public override int Start => Parent.Match(whenOption1: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
@@ -107,7 +107,7 @@ namespace Sandra.Chess.Pgn.Temp
 
         internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
 
-        internal PgnSymbolWithTrivia(Union<PgnTagSectionSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
+        internal PgnSymbolWithTrivia(Union<PgnTagPairSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)
         {
             Parent = parent;

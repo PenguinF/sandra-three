@@ -102,25 +102,24 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnSymbolWithTrivia> WS_TagName = LeadingWhitespace<PgnSymbol>();
         private static readonly ParseTree<PgnSymbolWithTrivia> WS_TagValue = LeadingWhitespace<PgnSymbol>();
 
-        private static List<ParseTree<PgnSymbolWithTrivia>> TagPair(ParseTree<PgnSymbolWithTrivia> firstSymbol, params ParseTree<PgnSymbolWithTrivia>[] otherSymbols)
+        private static ParseTree<PgnTagPairSyntax> TagPair(ParseTree<PgnSymbolWithTrivia> firstSymbol, params ParseTree<PgnSymbolWithTrivia>[] otherSymbols)
         {
-            var tagPairSyntax = new List<ParseTree<PgnSymbolWithTrivia>>() { firstSymbol };
+            var tagPairSyntax = new ParseTree<PgnTagPairSyntax> { firstSymbol };
             otherSymbols.ForEach(tagPairSyntax.Add);
             return tagPairSyntax;
         }
 
         private static ParseTree<PgnSyntaxNodes> TagSectionTrailingTrivia(
             ParseTree<PgnTriviaSyntax> trailingTrivia,
-            List<ParseTree<PgnSymbolWithTrivia>> firstTagPair,
-            params List<ParseTree<PgnSymbolWithTrivia>>[] otherTagPairs)
+            ParseTree<PgnTagPairSyntax> firstTagPair,
+            params ParseTree<PgnTagPairSyntax>[] otherTagPairs)
         {
-            var tagSectionSyntax = new ParseTree<PgnTagSectionSyntax>();
-            firstTagPair.ForEach(tagSectionSyntax.Add);
-            otherTagPairs.ForEach(otherTagPair => otherTagPair.ForEach(tagSectionSyntax.Add));
+            var tagSectionSyntax = new ParseTree<PgnTagSectionSyntax> { firstTagPair };
+            otherTagPairs.ForEach(tagSectionSyntax.Add);
             return new ParseTree<PgnSyntaxNodes> { tagSectionSyntax, trailingTrivia };
         }
 
-        private static ParseTree<PgnSyntaxNodes> TagSection(List<ParseTree<PgnSymbolWithTrivia>> firstTagPair, params List<ParseTree<PgnSymbolWithTrivia>>[] otherTagPairs)
+        private static ParseTree<PgnSyntaxNodes> TagSection(ParseTree<PgnTagPairSyntax> firstTagPair, params ParseTree<PgnTagPairSyntax>[] otherTagPairs)
             => TagSectionTrailingTrivia(EmptyTrivia, firstTagPair, otherTagPairs);
 
         internal static readonly List<(string, ParseTree)> TestParseTrees = new List<(string, ParseTree)>
