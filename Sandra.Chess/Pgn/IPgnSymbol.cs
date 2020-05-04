@@ -96,16 +96,13 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia : PgnSyntax, IPgnTopLevelSyntax
+    public class PgnSymbolWithTrivia : PgnSyntaxWithLeadingTrivia, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
         public GreenPgnTopLevelSymbolSyntax Green { get; }
-
-        private readonly SafeLazyObject<PgnTriviaSyntax> leadingTrivia;
-        public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
 
         private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
         public PgnSymbol PgnSymbol => pgnSymbol.Object;
@@ -130,12 +127,11 @@ namespace Sandra.Chess.Pgn.Temp
         }
 
         internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
+            : base(green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
             Green = green;
-
-            leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, Green.LeadingTrivia));
 
             pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
         }

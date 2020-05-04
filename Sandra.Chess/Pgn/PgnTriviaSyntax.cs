@@ -98,7 +98,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
-        public Union<PgnSymbolWithTrivia, PgnSyntaxNodes> Parent { get; }
+        public Union<PgnSyntaxWithLeadingTrivia, PgnSyntaxNodes> Parent { get; }
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
@@ -157,7 +157,7 @@ namespace Sandra.Chess.Pgn
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnTriviaSyntax(Union<PgnSymbolWithTrivia, PgnSyntaxNodes> parent, GreenPgnTriviaSyntax green)
+        internal PgnTriviaSyntax(Union<PgnSyntaxWithLeadingTrivia, PgnSyntaxNodes> parent, GreenPgnTriviaSyntax green)
         {
             Parent = parent;
             Green = green;

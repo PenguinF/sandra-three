@@ -19,6 +19,26 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
+using Sandra.Chess.Pgn.Temp;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a syntax node together with its leading trivia.
+    /// </summary>
+    public abstract class PgnSyntaxWithLeadingTrivia : PgnSyntax
+    {
+        private readonly SafeLazyObject<PgnTriviaSyntax> leadingTrivia;
+
+        /// <summary>
+        /// Gets the leading trivia of the syntax node.
+        /// </summary>
+        public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
+
+        internal PgnSyntaxWithLeadingTrivia(GreenPgnTopLevelSymbolSyntax green)
+        {
+            leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, green.LeadingTrivia));
+        }
+    }
 }
