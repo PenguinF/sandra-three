@@ -20,6 +20,7 @@
 #endregion
 
 using Eutherion.Text;
+using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
@@ -59,5 +60,13 @@ namespace Sandra.Chess.Pgn
             TagPairNodes = ReadOnlySpanList<GreenPgnTagPairSyntax>.Create(tagPairNodes);
             if (TagPairNodes.Count == 0) throw new ArgumentException($"{nameof(tagPairNodes)} is empty", nameof(tagPairNodes));
         }
+    }
+
+    /// <summary>
+    /// Represents a syntax node which contains a collection of <see cref="PgnTagPairSyntax"/> instances.
+    /// </summary>
+    public abstract class PgnTagSectionSyntax : PgnSyntax
+    {
+        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
     }
 }

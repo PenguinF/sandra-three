@@ -19,6 +19,7 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
@@ -98,15 +99,15 @@ namespace Sandra.Chess.Pgn.Temp
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
-        public PgnSyntaxNodes Parent { get; }
+        public Union<PgnTagSectionSyntax, PgnSyntaxNodes> Parent { get; }
         public int ParentIndex { get; }
 
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
-        public override PgnSyntax ParentSyntax => Parent;
+        public override int Start => Parent.Match(whenOption1: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
         internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
 
-        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
+        internal PgnSymbolWithTrivia(Union<PgnTagSectionSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)
         {
             Parent = parent;
