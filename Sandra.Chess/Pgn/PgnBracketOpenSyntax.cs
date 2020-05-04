@@ -60,10 +60,17 @@ namespace Sandra.Chess.Pgn
         public const char BracketOpenCharacter = '[';
         public const int BracketOpenLength = 1;
 
-        internal PgnBracketOpenSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
-            : base(parent, green)
-        {
-        }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnBracketOpenSyntax Green => GreenPgnBracketOpenSyntax.Value;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnBracketOpenSyntax(PgnTagElementWithTriviaSyntax parent) : base(parent) { }
 
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketOpenSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketOpenSyntax(this);

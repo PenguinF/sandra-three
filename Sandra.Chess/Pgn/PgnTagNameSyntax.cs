@@ -66,10 +66,17 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnTagNameSyntax : PgnTagElementSyntax, IPgnSymbol
     {
-        internal PgnTagNameSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
-            : base(parent, green)
-        {
-        }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnTagNameSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnTagNameSyntax(PgnTagElementWithTriviaSyntax parent, GreenPgnTagNameSyntax green) : base(parent) => Green = green;
 
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitTagNameSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagNameSyntax(this);
