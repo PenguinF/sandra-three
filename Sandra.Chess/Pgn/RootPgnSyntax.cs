@@ -123,7 +123,11 @@ namespace Sandra.Chess.Pgn.Temp
 
             TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
                 greenTopLevelNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
+                index =>
+                {
+                    var topLevelNode = GreenTopLevelNodes[index];
+                    return new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)topLevelNode);
+                });
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
