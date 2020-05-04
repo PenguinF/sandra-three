@@ -60,16 +60,15 @@ namespace Sandra.Chess.Pgn.Temp
         PgnSyntax ToPgnSyntax();
     }
 
-    public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
+    public class GreenPgnTopLevelSymbolSyntax : GreenPgnSyntaxWithLeadingTrivia, IGreenPgnTopLevelSyntax
     {
-        public GreenPgnTriviaSyntax LeadingTrivia { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
 
-        public int Length => LeadingTrivia.Length + ForegroundNode.Length;
+        public override int Length => LeadingTrivia.Length + ForegroundNode.Length;
 
         public GreenPgnTopLevelSymbolSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
+            : base(leadingTrivia)
         {
-            LeadingTrivia = leadingTrivia;
             ForegroundNode = foreground;
         }
     }

@@ -20,10 +20,39 @@
 #endregion
 
 using Eutherion;
-using Sandra.Chess.Pgn.Temp;
+using Eutherion.Text;
+using System;
 
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a syntax node together with its leading trivia.
+    /// </summary>
+    public abstract class GreenPgnSyntaxWithLeadingTrivia : ISpan
+    {
+        /// <summary>
+        /// Gets the leading trivia of the syntax node.
+        /// </summary>
+        public GreenPgnTriviaSyntax LeadingTrivia { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public abstract int Length { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnSyntaxWithLeadingTrivia"/>.
+        /// </summary>
+        /// <param name="leadingTrivia">
+        /// The leading trivia of the syntax node.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="leadingTrivia"/> is null.
+        /// </exception>
+        public GreenPgnSyntaxWithLeadingTrivia(GreenPgnTriviaSyntax leadingTrivia)
+            => LeadingTrivia = leadingTrivia ?? throw new ArgumentNullException(nameof(leadingTrivia));
+    }
+
     /// <summary>
     /// Represents a syntax node together with its leading trivia.
     /// </summary>
@@ -36,7 +65,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public PgnTriviaSyntax LeadingTrivia => leadingTrivia.Object;
 
-        internal PgnSyntaxWithLeadingTrivia(GreenPgnTopLevelSymbolSyntax green)
+        internal PgnSyntaxWithLeadingTrivia(GreenPgnSyntaxWithLeadingTrivia green)
         {
             leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, green.LeadingTrivia));
         }
