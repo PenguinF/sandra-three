@@ -108,7 +108,7 @@ namespace Sandra.Chess.Pgn.Temp
         private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
         public PgnSymbol PgnSymbol => pgnSymbol.Object;
 
-        public override int Start => Parent.GreenForegroundNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
         public override int ChildCount => 2;

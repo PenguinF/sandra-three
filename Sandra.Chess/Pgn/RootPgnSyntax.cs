@@ -65,43 +65,42 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSyntaxNodes : PgnSyntax
     {
-        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenForegroundNodes { get; }
+        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenTopLevelNodes { get; }
         public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
 
-        public SafeLazyObjectCollection<PgnSymbolWithTrivia> ForegroundNodes { get; }
+        public SafeLazyObjectCollection<PgnSymbolWithTrivia> TopLevelNodes { get; }
 
         private readonly SafeLazyObject<PgnTriviaSyntax> trailingTrivia;
         public PgnTriviaSyntax TrailingTrivia => trailingTrivia.Object;
 
         public override int Start => 0;
-        public override int Length => GreenForegroundNodes.Length + GreenTrailingTrivia.Length;
+        public override int Length => GreenTopLevelNodes.Length + GreenTrailingTrivia.Length;
         public override PgnSyntax ParentSyntax => null;
         public override int AbsoluteStart => 0;
-        public override int ChildCount => ForegroundNodes.Count + 1;
+        public override int ChildCount => TopLevelNodes.Count + 1;
 
         public override PgnSyntax GetChild(int index)
         {
-            if (index < ForegroundNodes.Count) return ForegroundNodes[index];
-            if (index == ForegroundNodes.Count) return TrailingTrivia;
+            if (index < TopLevelNodes.Count) return TopLevelNodes[index];
+            if (index == TopLevelNodes.Count) return TrailingTrivia;
             throw new IndexOutOfRangeException();
         }
 
         public override int GetChildStartPosition(int index)
         {
-            if (index < ForegroundNodes.Count) return GreenForegroundNodes.GetElementOffset(index);
-            if (index == ForegroundNodes.Count) return GreenForegroundNodes.Length;
+            if (index < TopLevelNodes.Count) return GreenTopLevelNodes.GetElementOffset(index);
+            if (index == TopLevelNodes.Count) return GreenTopLevelNodes.Length;
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenForegroundNodes,
-                                GreenPgnTriviaSyntax greenTrailingTrivia)
+        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenTopLevelNodes, GreenPgnTriviaSyntax greenTrailingTrivia)
         {
-            GreenForegroundNodes = greenForegroundNodes;
+            GreenTopLevelNodes = greenTopLevelNodes;
             GreenTrailingTrivia = greenTrailingTrivia;
 
-            ForegroundNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
-                greenForegroundNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, GreenForegroundNodes[index]));
+            TopLevelNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
+                greenTopLevelNodes.Count,
+                index => new PgnSymbolWithTrivia(this, index, GreenTopLevelNodes[index]));
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
