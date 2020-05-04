@@ -59,7 +59,7 @@ namespace Sandra.Chess.Pgn
     /// <typeparam name="TSyntaxNode">
     /// The type of <see cref="IGreenPgnSymbol"/> syntax node.
     /// </typeparam>
-    public class GreenPgnSyntaxWithLeadingTrivia<TSyntaxNode> : GreenPgnSyntaxWithLeadingTrivia where TSyntaxNode : IGreenPgnSymbol
+    public class GreenPgnSyntaxWithLeadingTrivia<TSyntaxNode> : GreenPgnSyntaxWithLeadingTrivia where TSyntaxNode : ISpan
     {
         /// <summary>
         /// Gets the inner syntax node.
@@ -119,7 +119,7 @@ namespace Sandra.Chess.Pgn
     /// The type of <see cref="PgnSyntax"/> syntax node.
     /// </typeparam>
     public abstract class PgnSyntaxWithLeadingTrivia<TGreenSyntaxNode, TSyntaxNode> : PgnSyntaxWithLeadingTrivia
-        where TGreenSyntaxNode : IGreenPgnSymbol
+        where TGreenSyntaxNode : ISpan
         where TSyntaxNode : PgnSyntax
     {
         /// <summary>
