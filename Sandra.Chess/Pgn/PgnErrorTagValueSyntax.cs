@@ -29,14 +29,14 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenPgnErrorTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -80,6 +80,10 @@ namespace Sandra.Chess.Pgn
                 error.Start + startPosition,
                 error.Length,
                 error.Parameters));
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 
     public static class PgnErrorTagValueSyntax

@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the bracket open character '[' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketOpenSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnBracketOpenSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnBracketOpenSyntax"/> value.
@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnBracketOpenSyntax.BracketOpenLength;
+        public override int Length => PgnBracketOpenSyntax.BracketOpenLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -46,6 +46,10 @@ namespace Sandra.Chess.Pgn
         private GreenPgnBracketOpenSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketOpenSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketOpenSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketOpenSyntax(this, arg);
     }
 
     public static class PgnBracketOpenSyntax

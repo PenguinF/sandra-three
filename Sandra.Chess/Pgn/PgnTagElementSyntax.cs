@@ -19,6 +19,23 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a node containing a single tag section element in an abstract PGN syntax tree.
+    /// Use <see cref="GreenPgnTagElementSyntaxVisitor"/> overrides to distinguish between implementations of this type.
+    /// </summary>
+    public abstract class GreenPgnTagElementSyntax : ISpan
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public abstract int Length { get; }
+
+        public abstract void Accept(GreenPgnTagElementSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg);
+    }
 }

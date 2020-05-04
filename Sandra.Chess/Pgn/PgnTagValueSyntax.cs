@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the value of this syntax node.
@@ -37,7 +37,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -67,5 +67,9 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
     }
 }
