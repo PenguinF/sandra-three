@@ -80,7 +80,10 @@ namespace Sandra.Chess.Pgn
 
         public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
 
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TopLevelNodes { get; }
+        /// <summary>
+        /// Gets the collection of tag element nodes.
+        /// </summary>
+        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TagElementNodes { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -100,12 +103,12 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the number of children of this syntax node.
         /// </summary>
-        public override int ChildCount => TopLevelNodes.Count;
+        public override int ChildCount => TagElementNodes.Count;
 
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => TopLevelNodes[index].ToPgnSyntax();
+        public override PgnSyntax GetChild(int index) => TagElementNodes[index].ToPgnSyntax();
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
@@ -123,7 +126,7 @@ namespace Sandra.Chess.Pgn
             ParentIndex = parentIndex;
             GreenTopLevelNodes = greenTopLevelNodes;
 
-            TopLevelNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
+            TagElementNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
                 greenTopLevelNodes.Count,
                 index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
         }
