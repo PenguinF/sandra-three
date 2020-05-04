@@ -160,5 +160,11 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsTrivia(this PgnSymbolType symbolType) => symbolType <= PgnSymbolType.UnterminatedComment;
+
+        /// <summary>
+        /// Returns if the symbol type is background, comment, or tag section symbol.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsTagSection(this PgnSymbolType symbolType) => symbolType <= PgnSymbolType.ErrorTagValue;
     }
 }

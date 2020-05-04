@@ -146,6 +146,7 @@ namespace Sandra.Chess.Pgn
 
             var parser = new PgnParser();
             parser.ParsePgnText(pgn);
+            parser.YieldEof();
 
             return new RootPgnSyntax(
                 parser.SymbolBuilder,
@@ -156,37 +157,107 @@ namespace Sandra.Chess.Pgn
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
+        private readonly List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> TagPairBuilder;
+        private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
+        private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
+
+        private bool HasTagPairTagName;
+        private bool HasTagPairTagValue;
 
         private PgnParser()
         {
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            SymbolBuilder = new List<GreenPgnForegroundSyntax>();
+            TagPairBuilder = new List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>();
+            TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
+            SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
 
         private void Yield(IGreenPgnSymbol symbol)
         {
             Errors.AddRange(symbol.GetErrors(symbolStartIndex));
 
-            if (symbol.SymbolType.IsBackground())
+            var symbolType = symbol.SymbolType;
+
+            if (symbolType.IsBackground())
             {
                 BackgroundBuilder.Add((GreenPgnBackgroundSyntax)symbol);
             }
-            else if (symbol.SymbolType.IsTrivia())
+            else if (symbolType.IsTrivia())
             {
                 TriviaBuilder.Add(new GreenPgnTriviaElementSyntax(BackgroundBuilder, (GreenPgnCommentSyntax)symbol));
                 BackgroundBuilder.Clear();
             }
             else
             {
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol));
+                GreenPgnTriviaSyntax leadingTrivia = GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder);
+
+                if (symbolType.IsTagSection())
+                {
+                    if (symbolType == PgnSymbolType.BracketOpen)
+                    {
+                        // When encountering a new '[', open a new tag pair.
+                        CaptureTagPair();
+                    }
+                    else if (symbolType == PgnSymbolType.TagName)
+                    {
+                        // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
+                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair();
+                        HasTagPairTagName = true;
+                    }
+                    else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
+                    {
+                        // If HasTagPairTagValue was already true, this symbol is ignored.
+                        HasTagPairTagValue = true;
+                    }
+
+                    TagPairBuilder.Add(new GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>(leadingTrivia, (GreenPgnTagElementSyntax)symbol));
+
+                    if (symbolType == PgnSymbolType.BracketClose)
+                    {
+                        // When encountering a new ']', always close this tag pair.
+                        CaptureTagPair();
+                    }
+                }
+                else
+                {
+                    CaptureTagPair();
+                    CaptureTagSection();
+                    SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, symbol));
+                }
+
                 BackgroundBuilder.Clear();
                 TriviaBuilder.Clear();
             }
+        }
+
+        private void CaptureTagPair()
+        {
+            if (TagPairBuilder.Count > 0)
+            {
+                TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
+                HasTagPairTagName = false;
+                HasTagPairTagValue = false;
+                TagPairBuilder.Clear();
+            }
+        }
+
+        private void CaptureTagSection()
+        {
+            if (TagSectionBuilder.Count > 0)
+            {
+                SymbolBuilder.Add(new GreenPgnTagSectionSyntax(TagSectionBuilder));
+                TagSectionBuilder.Clear();
+            }
+        }
+
+        private void YieldEof()
+        {
+            CaptureTagPair();
+            CaptureTagSection();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

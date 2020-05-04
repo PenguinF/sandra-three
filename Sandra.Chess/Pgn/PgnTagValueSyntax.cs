@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the value of this syntax node.
@@ -37,7 +37,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -67,5 +67,35 @@ namespace Sandra.Chess.Pgn
         }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
+    }
+
+    /// <summary>
+    /// Represents a tag value syntax node.
+    /// </summary>
+    public sealed class PgnTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnTagValueSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnTagValueSyntax(PgnTagElementWithTriviaSyntax parent, GreenPgnTagValueSyntax green) : base(parent) => Green = green;
+
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
     }
 }

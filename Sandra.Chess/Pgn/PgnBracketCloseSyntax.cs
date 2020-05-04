@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents the bracket close character ']' in PGN text.
     /// </summary>
-    public sealed class GreenPgnBracketCloseSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnBracketCloseSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnBracketCloseSyntax"/> value.
@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnBracketCloseSyntax.BracketCloseLength;
+        public override int Length => PgnBracketCloseSyntax.BracketCloseLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -46,11 +46,38 @@ namespace Sandra.Chess.Pgn
         private GreenPgnBracketCloseSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
     }
 
-    public static class PgnBracketCloseSyntax
+    /// <summary>
+    /// Represents the bracket close character ']' in PGN text.
+    /// </summary>
+    public sealed class PgnBracketCloseSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         public const char BracketCloseCharacter = ']';
         public const int BracketCloseLength = 1;
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnBracketCloseSyntax Green => GreenPgnBracketCloseSyntax.Value;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnBracketCloseSyntax(PgnTagElementWithTriviaSyntax parent) : base(parent) { }
+
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
     }
 }

@@ -29,14 +29,14 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenPgnErrorTagValueSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length { get; }
+        public override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -80,9 +80,16 @@ namespace Sandra.Chess.Pgn
                 error.Start + startPosition,
                 error.Length,
                 error.Parameters));
+
+        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 
-    public static class PgnErrorTagValueSyntax
+    /// <summary>
+    /// Represents a tag value syntax node which contains errors.
+    /// </summary>
+    public sealed class PgnErrorTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
@@ -119,5 +126,25 @@ namespace Sandra.Chess.Pgn
         /// </param>
         public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
             => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
+
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnErrorTagValueSyntax Green { get; }
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this syntax node.
+        /// </summary>
+        public override int Length => Green.Length;
+
+        internal PgnErrorTagValueSyntax(PgnTagElementWithTriviaSyntax parent, GreenPgnErrorTagValueSyntax green) : base(parent) => Green = green;
+
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
+
+        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 }

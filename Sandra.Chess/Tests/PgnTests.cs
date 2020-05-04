@@ -33,9 +33,14 @@ namespace Sandra.Chess.Tests
     {
         private sealed class ToGreenSymbolConverter : PgnSymbolVisitor<IGreenPgnSymbol>
         {
+            public override IGreenPgnSymbol VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
+            public override IGreenPgnSymbol VisitTagValueSyntax(PgnTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node.Green;
 
             public override IGreenPgnSymbol VisitPgnSymbol(PgnSymbol node) => node.Green;
@@ -183,8 +188,8 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, GreenPgnTriviaSyntax.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 
@@ -238,6 +243,15 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
+
+            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new GreenPgnSyntaxWithLeadingTrivia<GreenPgnBracketOpenSyntax>(null, GreenPgnBracketOpenSyntax.Value));
+            Assert.Throws<ArgumentNullException>("syntaxNode", () => new GreenPgnSyntaxWithLeadingTrivia<GreenPgnBracketOpenSyntax>(GreenPgnTriviaSyntax.Empty, null));
+
+            Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>.Instance));
+
+            Assert.Throws<ArgumentNullException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(null));
+            Assert.Throws<ArgumentException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
         }
 
         [Theory]
