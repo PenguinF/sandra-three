@@ -104,8 +104,8 @@ namespace Sandra.Chess.Pgn.Temp
         public int ParentIndex { get; }
         public GreenPgnTopLevelSymbolSyntax Green { get; }
 
-        private readonly SafeLazyObject<PgnSymbol> pgnSymbol;
-        public PgnSymbol PgnSymbol => pgnSymbol.Object;
+        private readonly SafeLazyObject<PgnSymbol> syntaxNode;
+        public PgnSymbol SyntaxNode => syntaxNode.Object;
 
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override int Length => Green.Length;
@@ -115,7 +115,7 @@ namespace Sandra.Chess.Pgn.Temp
         public override PgnSyntax GetChild(int index)
         {
             if (index == 0) return LeadingTrivia;
-            if (index == 1) return PgnSymbol;
+            if (index == 1) return SyntaxNode;
             throw new IndexOutOfRangeException();
         }
 
@@ -133,7 +133,7 @@ namespace Sandra.Chess.Pgn.Temp
             ParentIndex = parentIndex;
             Green = green;
 
-            pgnSymbol = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
+            syntaxNode = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
         }
     }
 
