@@ -41,7 +41,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
         /// </summary>
-        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override int Start => Parent.Green.TagElementNodes.GetElementOffset(ParentIndex);
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -50,8 +50,8 @@ namespace Sandra.Chess.Pgn
 
         internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
 
-        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
-            : base(green)
+        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax> green)
+            : base(new GreenPgnTopLevelSymbolSyntax(green.LeadingTrivia, (IGreenPgnSymbol)green.SyntaxNode))
         {
             Parent = parent;
             ParentIndex = parentIndex;

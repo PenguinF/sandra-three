@@ -21,10 +21,8 @@
 
 using Eutherion.Text;
 using Eutherion.Utils;
-using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -78,7 +76,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public int ParentIndex { get; }
 
-        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnTagPairSyntax Green { get; }
 
         /// <summary>
         /// Gets the collection of tag element nodes.
@@ -93,7 +94,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length => GreenTopLevelNodes.Length;
+        public override int Length => Green.Length;
 
         /// <summary>
         /// Gets the parent syntax node of this instance.
@@ -113,22 +114,17 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
         /// </summary>
-        public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
+        public override int GetChildStartPosition(int index) => Green.TagElementNodes.GetElementOffset(index);
 
         internal PgnTagPairSyntax(PgnTagSectionSyntax parent, int parentIndex, GreenPgnTagPairSyntax green)
         {
-            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
-            flattened.AddRange(green.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
-
-            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
-
             Parent = parent;
             ParentIndex = parentIndex;
-            GreenTopLevelNodes = greenTopLevelNodes;
+            Green = green;
 
             TagElementNodes = new SafeLazyObjectCollection<PgnTagElementWithTriviaSyntax>(
-                greenTopLevelNodes.Count,
-                index => new PgnTagElementWithTriviaSyntax(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
+                green.TagElementNodes.Count,
+                index => new PgnTagElementWithTriviaSyntax(this, index, Green.TagElementNodes[index]));
         }
     }
 }
