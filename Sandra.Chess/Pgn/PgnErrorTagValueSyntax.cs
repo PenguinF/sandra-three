@@ -127,6 +127,11 @@ namespace Sandra.Chess.Pgn
         public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
             => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
 
+        internal PgnErrorTagValueSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
+            : base(parent, green)
+        {
+        }
+
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);

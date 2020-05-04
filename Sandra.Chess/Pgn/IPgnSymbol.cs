@@ -19,7 +19,6 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
 using System.Collections.Generic;
@@ -72,9 +71,14 @@ namespace Sandra.Chess.Pgn
 
             private ToPgnSyntaxConverter() { }
 
+            public override PgnSyntax VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node;
+            public override PgnSyntax VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node;
             public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
+            public override PgnSyntax VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
+            public override PgnSyntax VisitTagNameSyntax(PgnTagNameSyntax node) => node;
+            public override PgnSyntax VisitTagValueSyntax(PgnTagValueSyntax node) => node;
             public override PgnSyntax VisitWhitespaceSyntax(PgnWhitespaceSyntax node) => node;
 
             public override PgnSyntax VisitPgnSymbol(PgnSymbol node) => node;
@@ -117,13 +121,13 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public Union<PgnTagElementWithTriviaSyntax, PgnSymbolWithTrivia> Parent { get; }
+        public PgnSymbolWithTrivia Parent { get; }
         public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Match(whenOption1: x => x.Green.LeadingTrivia.Length, whenOption2: x => x.Green.LeadingTrivia.Length);
+        public override int Start => Parent.Green.LeadingTrivia.Length;
         public override int Length => Green.Length;
-        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override PgnSyntax ParentSyntax => Parent;
 
-        internal PgnSymbol(Union<PgnTagElementWithTriviaSyntax, PgnSymbolWithTrivia> parent, IGreenPgnSymbol green)
+        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
         {
             Parent = parent;
             Green = green;

@@ -75,22 +75,25 @@ namespace Sandra.UI
         public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
+        public override Style VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[errorTagValueStyleIndex];
+
         public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[escapedLineStyleIndex];
 
         public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
 
+        public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[tagNameStyleIndex];
+
+        public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+            => syntaxEditor.Styles[tagValueStyleIndex];
+
         public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
         {
             switch (node.Green.SymbolType)
             {
-                case PgnSymbolType.TagName:
-                    return syntaxEditor.Styles[tagNameStyleIndex];
-                case PgnSymbolType.TagValue:
-                    return syntaxEditor.Styles[tagValueStyleIndex];
-                case PgnSymbolType.ErrorTagValue:
-                    return syntaxEditor.Styles[errorTagValueStyleIndex];
                 case PgnSymbolType.MoveNumber:
                 case PgnSymbolType.Period:
                     return syntaxEditor.Styles[moveNumberStyleIndex];

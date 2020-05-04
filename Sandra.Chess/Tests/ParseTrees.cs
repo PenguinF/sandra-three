@@ -83,24 +83,24 @@ namespace Sandra.Chess.Tests
         private static readonly ParseTree<PgnTriviaSyntax> WhitespaceCommentWhitespace = new ParseTree<PgnTriviaSyntax> { WhitespaceThenComment, Whitespace };
 
         private static ParseTree<PgnTagElementWithTriviaSyntax> NoTrivia<TTagElement>()
-            where TTagElement : PgnSymbol
+            where TTagElement : PgnTagElementSyntax
             => new ParseTree<PgnTagElementWithTriviaSyntax> { EmptyTrivia, new ParseTree<TTagElement>() };
 
         private static ParseTree<PgnTagElementWithTriviaSyntax> LeadingWhitespace<TTagElement>()
-            where TTagElement : PgnSymbol
+            where TTagElement : PgnTagElementSyntax
             => new ParseTree<PgnTagElementWithTriviaSyntax> { WhitespaceTrivia, new ParseTree<TTagElement>() };
 
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketClose = NoTrivia<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketOpen = NoTrivia<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> ErrorTagValue = NoTrivia<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagName = NoTrivia<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagValue = NoTrivia<PgnSymbol>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketClose = NoTrivia<PgnBracketCloseSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketOpen = NoTrivia<PgnBracketOpenSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> ErrorTagValue = NoTrivia<PgnErrorTagValueSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagName = NoTrivia<PgnTagNameSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagValue = NoTrivia<PgnTagValueSyntax>();
 
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketClose = LeadingWhitespace<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketOpen = LeadingWhitespace<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_ErrorTagValue = LeadingWhitespace<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagName = LeadingWhitespace<PgnSymbol>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagValue = LeadingWhitespace<PgnSymbol>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketClose = LeadingWhitespace<PgnBracketCloseSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketOpen = LeadingWhitespace<PgnBracketOpenSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_ErrorTagValue = LeadingWhitespace<PgnErrorTagValueSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagName = LeadingWhitespace<PgnTagNameSyntax>();
+        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagValue = LeadingWhitespace<PgnTagValueSyntax>();
 
         private static ParseTree<PgnTagPairSyntax> TagPair(ParseTree<PgnTagElementWithTriviaSyntax> firstSymbol, params ParseTree<PgnTagElementWithTriviaSyntax>[] otherSymbols)
         {

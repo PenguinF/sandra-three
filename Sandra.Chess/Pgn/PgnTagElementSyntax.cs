@@ -41,10 +41,34 @@ namespace Sandra.Chess.Pgn
 
     /// <summary>
     /// Represents a node containing a single tag section element in an abstract PGN syntax tree.
+    /// Use <see cref="PgnTagElementSyntaxVisitor"/> overrides to distinguish between implementations of this type.
     /// </summary>
-    public abstract class PgnTagElementSyntax
+    public abstract class PgnTagElementSyntax : PgnSyntax
     {
-        public int Length => 0;
+        /// <summary>
+        /// Gets the parent syntax node of this instance. Returns null for the root node.
+        /// </summary>
+        public PgnTagElementWithTriviaSyntax Parent { get; }
+
+        public IGreenPgnSymbol Green { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.Green.LeadingTrivia.Length;
+
+        public override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal PgnTagElementSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
+        {
+            Parent = parent;
+            Green = green;
+        }
 
         public abstract void Accept(PgnTagElementSyntaxVisitor visitor);
         public abstract TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor);

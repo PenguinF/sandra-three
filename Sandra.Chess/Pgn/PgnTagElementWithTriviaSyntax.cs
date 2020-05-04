@@ -19,15 +19,35 @@
 **********************************************************************************/
 #endregion
 
-using Sandra.Chess.Pgn.Temp;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents a node containing a single tag section element together with its leading trivia.
     /// </summary>
-    public sealed class PgnTagElementWithTriviaSyntax : PgnSyntaxWithLeadingTrivia<IGreenPgnSymbol, PgnSymbol>
+    public sealed class PgnTagElementWithTriviaSyntax : PgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax, PgnTagElementSyntax>
     {
+        private class PgnTagElementSyntaxCreator : GreenPgnTagElementSyntaxVisitor<PgnTagElementWithTriviaSyntax, PgnTagElementSyntax>
+        {
+            public static readonly PgnTagElementSyntaxCreator Instance = new PgnTagElementSyntaxCreator();
+
+            private PgnTagElementSyntaxCreator() { }
+
+            public override PgnTagElementSyntax VisitBracketCloseSyntax(GreenPgnBracketCloseSyntax node, PgnTagElementWithTriviaSyntax parent)
+                => new PgnBracketCloseSyntax(parent, node);
+
+            public override PgnTagElementSyntax VisitBracketOpenSyntax(GreenPgnBracketOpenSyntax node, PgnTagElementWithTriviaSyntax parent)
+                => new PgnBracketOpenSyntax(parent, node);
+
+            public override PgnTagElementSyntax VisitErrorTagValueSyntax(GreenPgnErrorTagValueSyntax node, PgnTagElementWithTriviaSyntax parent)
+                => new PgnErrorTagValueSyntax(parent, node);
+
+            public override PgnTagElementSyntax VisitTagNameSyntax(GreenPgnTagNameSyntax node, PgnTagElementWithTriviaSyntax parent)
+                => new PgnTagNameSyntax(parent, node);
+
+            public override PgnTagElementSyntax VisitTagValueSyntax(GreenPgnTagValueSyntax node, PgnTagElementWithTriviaSyntax parent)
+                => new PgnTagValueSyntax(parent, node);
+        }
+
         /// <summary>
         /// Gets the parent syntax node of this instance.
         /// </summary>
@@ -48,10 +68,10 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
+        internal override PgnTagElementSyntax CreateChildNode() => PgnTagElementSyntaxCreator.Instance.Visit(Green.SyntaxNode, this);
 
         internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax> green)
-            : base(new GreenPgnTopLevelSymbolSyntax(green.LeadingTrivia, (IGreenPgnSymbol)green.SyntaxNode))
+            : base(green)
         {
             Parent = parent;
             ParentIndex = parentIndex;

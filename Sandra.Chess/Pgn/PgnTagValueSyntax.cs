@@ -78,6 +78,11 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public sealed class PgnTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
     {
+        internal PgnTagValueSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
+            : base(parent, green)
+        {
+        }
+
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);

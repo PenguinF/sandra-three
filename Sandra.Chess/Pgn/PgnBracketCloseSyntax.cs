@@ -60,6 +60,11 @@ namespace Sandra.Chess.Pgn
         public const char BracketCloseCharacter = ']';
         public const int BracketCloseLength = 1;
 
+        internal PgnBracketCloseSyntax(PgnTagElementWithTriviaSyntax parent, IGreenPgnSymbol green)
+            : base(parent, green)
+        {
+        }
+
         public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketCloseSyntax(this);
         public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketCloseSyntax(this);
         public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketCloseSyntax(this, arg);
