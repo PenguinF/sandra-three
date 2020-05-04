@@ -162,6 +162,9 @@ namespace Sandra.Chess.Pgn
 
         private int symbolStartIndex;
 
+        private bool HasTagPairTagName;
+        private bool HasTagPairTagValue;
+
         private PgnParser()
         {
             Errors = new List<PgnErrorInfo>();
@@ -192,7 +195,30 @@ namespace Sandra.Chess.Pgn
 
                 if (symbolType.IsTagSection())
                 {
+                    if (symbolType == PgnSymbolType.BracketOpen)
+                    {
+                        // When encountering a new '[', open a new tag pair.
+                        CaptureTagPair();
+                    }
+                    else if (symbolType == PgnSymbolType.TagName)
+                    {
+                        // Open a new tag pair if a tag name or value was seen earlier in the same tag pair.
+                        if (HasTagPairTagName || HasTagPairTagValue) CaptureTagPair();
+                        HasTagPairTagName = true;
+                    }
+                    else if (symbolType == PgnSymbolType.TagValue || symbolType == PgnSymbolType.ErrorTagValue)
+                    {
+                        // If HasTagPairTagValue was already true, this symbol is ignored.
+                        HasTagPairTagValue = true;
+                    }
+
                     TagPairBuilder.Add(new GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>(leadingTrivia, (GreenPgnTagElementSyntax)symbol));
+
+                    if (symbolType == PgnSymbolType.BracketClose)
+                    {
+                        // When encountering a new ']', always close this tag pair.
+                        CaptureTagPair();
+                    }
                 }
                 else
                 {
@@ -210,6 +236,8 @@ namespace Sandra.Chess.Pgn
             if (TagPairBuilder.Count > 0)
             {
                 SymbolBuilder.AddRange(TagPairBuilder.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+                HasTagPairTagName = false;
+                HasTagPairTagValue = false;
                 TagPairBuilder.Clear();
             }
         }
