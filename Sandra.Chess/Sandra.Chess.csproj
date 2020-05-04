@@ -74,7 +74,13 @@
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
+    <Compile Include="Pgn\PgnSyntaxWithLeadingTrivia.cs" />
+    <Compile Include="Pgn\PgnTagElementSyntax.cs" />
+    <Compile Include="Pgn\PgnTagElementSyntaxVisitor.cs" />
+    <Compile Include="Pgn\PgnTagElementWithTriviaSyntax.cs" />
     <Compile Include="Pgn\PgnTagNameSyntax.cs" />
+    <Compile Include="Pgn\PgnTagPairSyntax.cs" />
+    <Compile Include="Pgn\PgnTagSectionSyntax.cs" />
     <Compile Include="Pgn\PgnTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaElementSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaSyntax.cs" />
