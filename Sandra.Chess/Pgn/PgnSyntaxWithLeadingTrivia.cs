@@ -108,4 +108,70 @@ namespace Sandra.Chess.Pgn
             leadingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, green.LeadingTrivia));
         }
     }
+
+    /// <summary>
+    /// Represents a syntax node together with its leading trivia.
+    /// </summary>
+    /// <typeparam name="TGreenSyntaxNode">
+    /// The type of <see cref="IGreenPgnSymbol"/> syntax node.
+    /// </typeparam>
+    /// <typeparam name="TSyntaxNode">
+    /// The type of <see cref="PgnSyntax"/> syntax node.
+    /// </typeparam>
+    public abstract class PgnSyntaxWithLeadingTrivia<TGreenSyntaxNode, TSyntaxNode> : PgnSyntaxWithLeadingTrivia
+        where TGreenSyntaxNode : IGreenPgnSymbol
+        where TSyntaxNode : PgnSyntax
+    {
+        /// <summary>
+        /// Gets the bottom-up only 'green' representation of this syntax node.
+        /// </summary>
+        public GreenPgnSyntaxWithLeadingTrivia<TGreenSyntaxNode> Green { get; }
+
+        private readonly SafeLazyObject<TSyntaxNode> syntaxNode;
+
+        /// <summary>
+        /// Gets the inner syntax node.
+        /// </summary>
+        public TSyntaxNode SyntaxNode => syntaxNode.Object;
+
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public sealed override int Length => Green.Length;
+
+        /// <summary>
+        /// Gets the number of children of this syntax node.
+        /// </summary>
+        public sealed override int ChildCount => 2;
+
+        /// <summary>
+        /// Initializes the child at the given <paramref name="index"/> and returns it.
+        /// </summary>
+        public sealed override PgnSyntax GetChild(int index)
+        {
+            if (index == 0) return LeadingTrivia;
+            if (index == 1) return SyntaxNode;
+            throw new IndexOutOfRangeException();
+        }
+
+        /// <summary>
+        /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
+        /// </summary>
+        public sealed override int GetChildStartPosition(int index)
+        {
+            if (index == 0) return 0;
+            if (index == 1) return Green.LeadingTrivia.Length;
+            throw new IndexOutOfRangeException();
+        }
+
+        internal abstract TSyntaxNode CreateChildNode();
+
+        internal PgnSyntaxWithLeadingTrivia(GreenPgnSyntaxWithLeadingTrivia<TGreenSyntaxNode> green)
+            : base(green)
+        {
+            Green = green;
+
+            syntaxNode = new SafeLazyObject<TSyntaxNode>(CreateChildNode);
+        }
+    }
 }

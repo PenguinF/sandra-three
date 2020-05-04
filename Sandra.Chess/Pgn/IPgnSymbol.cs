@@ -19,10 +19,8 @@
 **********************************************************************************/
 #endregion
 
-using Eutherion;
 using Eutherion.Text;
 using Sandra.Chess.Pgn.Temp;
-using System;
 using System.Collections.Generic;
 
 namespace Sandra.Chess.Pgn
@@ -96,44 +94,23 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia : PgnSyntaxWithLeadingTrivia, IPgnTopLevelSyntax
+    public class PgnSymbolWithTrivia : PgnSyntaxWithLeadingTrivia<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
         public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
-        public GreenPgnTopLevelSymbolSyntax Green { get; }
-
-        private readonly SafeLazyObject<PgnSymbol> syntaxNode;
-        public PgnSymbol SyntaxNode => syntaxNode.Object;
 
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
-        public override int Length => Green.Length;
         public override PgnSyntax ParentSyntax => Parent;
-        public override int ChildCount => 2;
 
-        public override PgnSyntax GetChild(int index)
-        {
-            if (index == 0) return LeadingTrivia;
-            if (index == 1) return SyntaxNode;
-            throw new IndexOutOfRangeException();
-        }
-
-        public override int GetChildStartPosition(int index)
-        {
-            if (index == 0) return 0;
-            if (index == 1) return Green.LeadingTrivia.Length;
-            throw new IndexOutOfRangeException();
-        }
+        internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
 
         internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)
         {
             Parent = parent;
             ParentIndex = parentIndex;
-            Green = green;
-
-            syntaxNode = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.SyntaxNode));
         }
     }
 
