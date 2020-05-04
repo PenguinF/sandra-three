@@ -86,7 +86,10 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 
-    public static class PgnErrorTagValueSyntax
+    /// <summary>
+    /// Represents a tag value syntax node which contains errors.
+    /// </summary>
+    public sealed class PgnErrorTagValueSyntax : PgnTagElementSyntax
     {
         /// <summary>
         /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
@@ -123,5 +126,9 @@ namespace Sandra.Chess.Pgn
         /// </param>
         public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
             => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
+
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 }

@@ -38,4 +38,14 @@ namespace Sandra.Chess.Pgn
         public abstract TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor);
         public abstract TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg);
     }
+
+    /// <summary>
+    /// Represents a node containing a single tag section element in an abstract PGN syntax tree.
+    /// </summary>
+    public abstract class PgnTagElementSyntax
+    {
+        public abstract void Accept(PgnTagElementSyntaxVisitor visitor);
+        public abstract TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor);
+        public abstract TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg);
+    }
 }

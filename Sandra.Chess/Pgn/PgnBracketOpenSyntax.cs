@@ -52,9 +52,16 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketOpenSyntax(this, arg);
     }
 
-    public static class PgnBracketOpenSyntax
+    /// <summary>
+    /// Represents the bracket open character '[' in PGN text.
+    /// </summary>
+    public sealed class PgnBracketOpenSyntax : PgnTagElementSyntax
     {
         public const char BracketOpenCharacter = '[';
         public const int BracketOpenLength = 1;
+
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitBracketOpenSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitBracketOpenSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitBracketOpenSyntax(this, arg);
     }
 }

@@ -65,4 +65,49 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitTagNameSyntax(GreenPgnTagNameSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagValueSyntax(GreenPgnTagValueSyntax node, T arg) => DefaultVisit(node, arg);
     }
+
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="GreenPgnTagElementSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
+    public abstract class PgnTagElementSyntaxVisitor
+    {
+        public virtual void DefaultVisit(PgnTagElementSyntax node) { }
+        public virtual void Visit(PgnTagElementSyntax node) { if (node != null) node.Accept(this); }
+        public virtual void VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => DefaultVisit(node);
+        public virtual void VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
+        public virtual void VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => DefaultVisit(node);
+        public virtual void VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
+        public virtual void VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
+    }
+
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="GreenPgnTagElementSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
+    public abstract class PgnTagElementSyntaxVisitor<TResult>
+    {
+        public virtual TResult DefaultVisit(PgnTagElementSyntax node) => default;
+        public virtual TResult Visit(PgnTagElementSyntax node) => node == null ? default : node.Accept(this);
+        public virtual TResult VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
+        public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node) => DefaultVisit(node);
+    }
+
+    /// <summary>
+    /// Represents a visitor that visits a single <see cref="GreenPgnTagElementSyntax"/>.
+    /// See also: https://en.wikipedia.org/wiki/Visitor_pattern
+    /// </summary>
+    public abstract class PgnTagElementSyntaxVisitor<T, TResult>
+    {
+        public virtual TResult DefaultVisit(PgnTagElementSyntax node, T arg) => default;
+        public virtual TResult Visit(PgnTagElementSyntax node, T arg) => node == null ? default : node.Accept(this, arg);
+        public virtual TResult VisitBracketCloseSyntax(PgnBracketCloseSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node, T arg) => DefaultVisit(node, arg);
+        public virtual TResult VisitTagValueSyntax(PgnTagValueSyntax node, T arg) => DefaultVisit(node, arg);
+    }
 }

@@ -72,4 +72,14 @@ namespace Sandra.Chess.Pgn
         public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
         public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
     }
+
+    /// <summary>
+    /// Represents a tag value syntax node.
+    /// </summary>
+    public sealed class PgnTagValueSyntax : PgnTagElementSyntax
+    {
+        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitTagValueSyntax(this);
+        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitTagValueSyntax(this, arg);
+    }
 }
