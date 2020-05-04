@@ -19,6 +19,42 @@
 **********************************************************************************/
 #endregion
 
+using Sandra.Chess.Pgn.Temp;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a node containing a single tag section element together with its leading trivia.
+    /// </summary>
+    public sealed class PgnTagElementWithTriviaSyntax : PgnSyntaxWithLeadingTrivia<IGreenPgnSymbol, PgnSymbol>
+    {
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public PgnTagPairSyntax Parent { get; }
+
+        /// <summary>
+        /// Gets the index of this syntax node in its parent.
+        /// </summary>
+        public int ParentIndex { get; }
+
+        /// <summary>
+        /// Gets the start position of this syntax node relative to its parent's start position.
+        /// </summary>
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+
+        /// <summary>
+        /// Gets the parent syntax node of this instance.
+        /// </summary>
+        public override PgnSyntax ParentSyntax => Parent;
+
+        internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
+
+        internal PgnTagElementWithTriviaSyntax(PgnTagPairSyntax parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
+            : base(green)
+        {
+            Parent = parent;
+            ParentIndex = parentIndex;
+        }
+    }
 }

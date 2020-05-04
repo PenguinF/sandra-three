@@ -99,15 +99,15 @@ namespace Sandra.Chess.Pgn.Temp
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
-        public Union<PgnTagPairSyntax, PgnSyntaxNodes> Parent { get; }
+        public PgnSyntaxNodes Parent { get; }
         public int ParentIndex { get; }
 
-        public override int Start => Parent.Match(whenOption1: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex), whenOption2: x => x.GreenTopLevelNodes.GetElementOffset(ParentIndex));
-        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
+        public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
+        public override PgnSyntax ParentSyntax => Parent;
 
         internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
 
-        internal PgnSymbolWithTrivia(Union<PgnTagPairSyntax, PgnSyntaxNodes> parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
+        internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)
         {
             Parent = parent;
@@ -117,13 +117,13 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSymbol : PgnSyntax, IPgnSymbol
     {
-        public PgnSymbolWithTrivia Parent { get; }
+        public Union<PgnTagElementWithTriviaSyntax, PgnSymbolWithTrivia> Parent { get; }
         public IGreenPgnSymbol Green { get; }
-        public override int Start => Parent.Green.LeadingTrivia.Length;
+        public override int Start => Parent.Match(whenOption1: x => x.Green.LeadingTrivia.Length, whenOption2: x => x.Green.LeadingTrivia.Length);
         public override int Length => Green.Length;
-        public override PgnSyntax ParentSyntax => Parent;
+        public override PgnSyntax ParentSyntax => Parent.Match<PgnSyntax>(whenOption1: x => x, whenOption2: x => x);
 
-        internal PgnSymbol(PgnSymbolWithTrivia parent, IGreenPgnSymbol green)
+        internal PgnSymbol(Union<PgnTagElementWithTriviaSyntax, PgnSymbolWithTrivia> parent, IGreenPgnSymbol green)
         {
             Parent = parent;
             Green = green;

@@ -83,7 +83,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the collection of tag element nodes.
         /// </summary>
-        public SafeLazyObjectCollection<IPgnTopLevelSyntax> TagElementNodes { get; }
+        public SafeLazyObjectCollection<PgnTagElementWithTriviaSyntax> TagElementNodes { get; }
 
         /// <summary>
         /// Gets the start position of this syntax node relative to its parent's start position.
@@ -108,7 +108,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Initializes the child at the given <paramref name="index"/> and returns it.
         /// </summary>
-        public override PgnSyntax GetChild(int index) => TagElementNodes[index].ToPgnSyntax();
+        public override PgnSyntax GetChild(int index) => TagElementNodes[index];
 
         /// <summary>
         /// Gets the start position of the child at the given <paramref name="index"/>, without initializing it.
@@ -126,9 +126,9 @@ namespace Sandra.Chess.Pgn
             ParentIndex = parentIndex;
             GreenTopLevelNodes = greenTopLevelNodes;
 
-            TagElementNodes = new SafeLazyObjectCollection<IPgnTopLevelSyntax>(
+            TagElementNodes = new SafeLazyObjectCollection<PgnTagElementWithTriviaSyntax>(
                 greenTopLevelNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
+                index => new PgnTagElementWithTriviaSyntax(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
         }
     }
 }
