@@ -158,6 +158,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
         private readonly List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>> TagPairBuilder;
+        private readonly List<GreenPgnTagPairSyntax> TagSectionBuilder;
         private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
@@ -171,6 +172,7 @@ namespace Sandra.Chess.Pgn
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
             TagPairBuilder = new List<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>();
+            TagSectionBuilder = new List<GreenPgnTagPairSyntax>();
             SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
 
@@ -223,6 +225,7 @@ namespace Sandra.Chess.Pgn
                 else
                 {
                     CaptureTagPair();
+                    CaptureTagSection();
                     SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(leadingTrivia, symbol));
                 }
 
@@ -235,17 +238,30 @@ namespace Sandra.Chess.Pgn
         {
             if (TagPairBuilder.Count > 0)
             {
-                var tagPairSyntax = new GreenPgnTagPairSyntax(TagPairBuilder);
-                SymbolBuilder.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+                TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
                 HasTagPairTagName = false;
                 HasTagPairTagValue = false;
                 TagPairBuilder.Clear();
             }
         }
 
+        private void CaptureTagSection()
+        {
+            if (TagSectionBuilder.Count > 0)
+            {
+                foreach (var tagPairSyntax in TagSectionBuilder)
+                {
+                    SymbolBuilder.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+                }
+
+                TagSectionBuilder.Clear();
+            }
+        }
+
         private void YieldEof()
         {
             CaptureTagPair();
+            CaptureTagSection();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
