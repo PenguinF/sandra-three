@@ -133,7 +133,7 @@ namespace Sandra.Chess.Pgn.Temp
             ParentIndex = parentIndex;
             Green = green;
 
-            syntaxNode = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.ForegroundNode));
+            syntaxNode = new SafeLazyObject<PgnSymbol>(() => new PgnSymbol(this, Green.SyntaxNode));
         }
     }
 
