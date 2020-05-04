@@ -183,8 +183,8 @@ namespace Sandra.Chess.Tests
         public void ArgumentChecks()
         {
             Assert.Throws<ArgumentNullException>("syntax", () => new RootPgnSyntax(null, GreenPgnTriviaSyntax.Empty, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, null, new List<PgnErrorInfo>()));
-            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<GreenPgnForegroundSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("trailingTrivia", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, null, new List<PgnErrorInfo>()));
+            Assert.Throws<ArgumentNullException>("errors", () => new RootPgnSyntax(EmptyEnumerable<IGreenPgnTopLevelSyntax>.Instance, GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>(() => TerminalSymbols(null).Any());
 

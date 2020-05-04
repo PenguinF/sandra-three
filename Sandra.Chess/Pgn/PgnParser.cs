@@ -156,7 +156,7 @@ namespace Sandra.Chess.Pgn
         private readonly List<PgnErrorInfo> Errors;
         private readonly List<GreenPgnBackgroundSyntax> BackgroundBuilder;
         private readonly List<GreenPgnTriviaElementSyntax> TriviaBuilder;
-        private readonly List<GreenPgnForegroundSyntax> SymbolBuilder;
+        private readonly List<IGreenPgnTopLevelSyntax> SymbolBuilder;
 
         private int symbolStartIndex;
 
@@ -165,7 +165,7 @@ namespace Sandra.Chess.Pgn
             Errors = new List<PgnErrorInfo>();
             BackgroundBuilder = new List<GreenPgnBackgroundSyntax>();
             TriviaBuilder = new List<GreenPgnTriviaElementSyntax>();
-            SymbolBuilder = new List<GreenPgnForegroundSyntax>();
+            SymbolBuilder = new List<IGreenPgnTopLevelSyntax>();
         }
 
         private void Yield(IGreenPgnSymbol symbol)

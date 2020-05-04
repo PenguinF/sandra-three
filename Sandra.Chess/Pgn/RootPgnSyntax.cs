@@ -36,12 +36,12 @@ namespace Sandra.Chess.Pgn
         public PgnSyntaxNodes Syntax { get; }
         public List<PgnErrorInfo> Errors { get; }
 
-        public RootPgnSyntax(IEnumerable<GreenPgnForegroundSyntax> syntax, GreenPgnTriviaSyntax trailingTrivia, List<PgnErrorInfo> errors)
+        public RootPgnSyntax(IEnumerable<IGreenPgnTopLevelSyntax> syntax, GreenPgnTriviaSyntax trailingTrivia, List<PgnErrorInfo> errors)
         {
             if (syntax == null) throw new ArgumentNullException(nameof(syntax));
             if (trailingTrivia == null) throw new ArgumentNullException(nameof(trailingTrivia));
 
-            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax>.Create(syntax), trailingTrivia);
+            Syntax = new PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(syntax), trailingTrivia);
             Errors = errors ?? throw new ArgumentNullException(nameof(errors));
         }
     }
@@ -49,7 +49,12 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class GreenPgnForegroundSyntax : ISpan
+    // Helps with top level syntax node flexibility while developing the syntax tree.
+    public interface IGreenPgnTopLevelSyntax : ISpan
+    {
+    }
+
+    public class GreenPgnForegroundSyntax : IGreenPgnTopLevelSyntax
     {
         public GreenPgnTriviaSyntax LeadingTrivia { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
@@ -65,7 +70,7 @@ namespace Sandra.Chess.Pgn.Temp
 
     public class PgnSyntaxNodes : PgnSyntax
     {
-        public ReadOnlySpanList<GreenPgnForegroundSyntax> GreenTopLevelNodes { get; }
+        public ReadOnlySpanList<IGreenPgnTopLevelSyntax> GreenTopLevelNodes { get; }
         public GreenPgnTriviaSyntax GreenTrailingTrivia { get; }
 
         public SafeLazyObjectCollection<PgnSymbolWithTrivia> TopLevelNodes { get; }
@@ -93,14 +98,14 @@ namespace Sandra.Chess.Pgn.Temp
             throw new IndexOutOfRangeException();
         }
 
-        internal PgnSyntaxNodes(ReadOnlySpanList<GreenPgnForegroundSyntax> greenTopLevelNodes, GreenPgnTriviaSyntax greenTrailingTrivia)
+        internal PgnSyntaxNodes(ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes, GreenPgnTriviaSyntax greenTrailingTrivia)
         {
             GreenTopLevelNodes = greenTopLevelNodes;
             GreenTrailingTrivia = greenTrailingTrivia;
 
             TopLevelNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
                 greenTopLevelNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, GreenTopLevelNodes[index]));
+                index => new PgnSymbolWithTrivia(this, index, (GreenPgnForegroundSyntax)GreenTopLevelNodes[index]));
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
