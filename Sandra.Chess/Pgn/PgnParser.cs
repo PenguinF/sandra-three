@@ -183,7 +183,7 @@ namespace Sandra.Chess.Pgn
             }
             else
             {
-                SymbolBuilder.Add(new GreenPgnForegroundSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol));
+                SymbolBuilder.Add(new GreenPgnTopLevelSymbolSyntax(GreenPgnTriviaSyntax.Create(TriviaBuilder, BackgroundBuilder), symbol));
                 BackgroundBuilder.Clear();
                 TriviaBuilder.Clear();
             }

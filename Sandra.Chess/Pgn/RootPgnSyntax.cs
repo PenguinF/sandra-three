@@ -54,14 +54,14 @@ namespace Sandra.Chess.Pgn.Temp
     {
     }
 
-    public class GreenPgnForegroundSyntax : IGreenPgnTopLevelSyntax
+    public class GreenPgnTopLevelSymbolSyntax : IGreenPgnTopLevelSyntax
     {
         public GreenPgnTriviaSyntax LeadingTrivia { get; }
         public IGreenPgnSymbol ForegroundNode { get; }
 
         public int Length => LeadingTrivia.Length + ForegroundNode.Length;
 
-        public GreenPgnForegroundSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
+        public GreenPgnTopLevelSymbolSyntax(GreenPgnTriviaSyntax leadingTrivia, IGreenPgnSymbol foreground)
         {
             LeadingTrivia = leadingTrivia;
             ForegroundNode = foreground;
@@ -105,7 +105,7 @@ namespace Sandra.Chess.Pgn.Temp
 
             TopLevelNodes = new SafeLazyObjectCollection<PgnSymbolWithTrivia>(
                 greenTopLevelNodes.Count,
-                index => new PgnSymbolWithTrivia(this, index, (GreenPgnForegroundSyntax)GreenTopLevelNodes[index]));
+                index => new PgnSymbolWithTrivia(this, index, (GreenPgnTopLevelSymbolSyntax)GreenTopLevelNodes[index]));
 
             trailingTrivia = new SafeLazyObject<PgnTriviaSyntax>(() => new PgnTriviaSyntax(this, GreenTrailingTrivia));
         }
