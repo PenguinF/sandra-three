@@ -24,6 +24,7 @@ using Eutherion.Utils;
 using Sandra.Chess.Pgn.Temp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sandra.Chess.Pgn
 {
@@ -65,7 +66,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a syntax node which contains a collection of <see cref="PgnTagPairSyntax"/> instances.
     /// </summary>
-    public class PgnTagSectionSyntax : PgnSyntax, IPgnTopLevelSyntax
+    public sealed class PgnTagSectionSyntax : PgnSyntax, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -113,8 +114,17 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public override int GetChildStartPosition(int index) => GreenTopLevelNodes.GetElementOffset(index);
 
-        internal PgnTagSectionSyntax(PgnSyntaxNodes parent, int parentIndex, ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes)
+        internal PgnTagSectionSyntax(PgnSyntaxNodes parent, int parentIndex, GreenPgnTagSectionSyntax green)
         {
+            List<IGreenPgnTopLevelSyntax> flattened = new List<IGreenPgnTopLevelSyntax>();
+
+            foreach (var tagPairSyntax in green.TagPairNodes)
+            {
+                flattened.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
+            }
+
+            ReadOnlySpanList<IGreenPgnTopLevelSyntax> greenTopLevelNodes = ReadOnlySpanList<IGreenPgnTopLevelSyntax>.Create(flattened);
+
             Parent = parent;
             ParentIndex = parentIndex;
             GreenTopLevelNodes = greenTopLevelNodes;
