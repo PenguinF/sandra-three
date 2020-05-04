@@ -244,6 +244,9 @@ namespace Sandra.Chess.Tests
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
             Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>.Instance));
+
+            Assert.Throws<ArgumentNullException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(null));
+            Assert.Throws<ArgumentException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
         }
 
         [Theory]

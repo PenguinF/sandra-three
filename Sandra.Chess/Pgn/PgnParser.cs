@@ -249,7 +249,9 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                foreach (var tagPairSyntax in TagSectionBuilder)
+                var tagSectionSyntax = new GreenPgnTagSectionSyntax(TagSectionBuilder);
+
+                foreach (var tagPairSyntax in tagSectionSyntax.TagPairNodes)
                 {
                     SymbolBuilder.AddRange(tagPairSyntax.TagElementNodes.Select(x => new GreenPgnTopLevelSymbolSyntax(x.LeadingTrivia, (IGreenPgnSymbol)x.SyntaxNode)));
                 }

@@ -19,6 +19,44 @@
 **********************************************************************************/
 #endregion
 
+using Eutherion.Text;
+using System;
+using System.Collections.Generic;
+
 namespace Sandra.Chess.Pgn
 {
+    /// <summary>
+    /// Represents a syntax node which contains a collection of <see cref="GreenPgnTagPairSyntax"/> instances.
+    /// </summary>
+    public sealed class GreenPgnTagSectionSyntax : ISpan
+    {
+        /// <summary>
+        /// Gets the length of the text span corresponding with this node.
+        /// </summary>
+        public int Length => TagPairNodes.Length;
+
+        /// <summary>
+        /// Gets the tag pair nodes.
+        /// </summary>
+        public ReadOnlySpanList<GreenPgnTagPairSyntax> TagPairNodes { get; }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTagSectionSyntax"/>.
+        /// </summary>
+        /// <param name="tagPairNodes">
+        /// The tag pair nodes.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="tagPairNodes"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="tagPairNodes"/> is empty.
+        /// </exception>
+        public GreenPgnTagSectionSyntax(IEnumerable<GreenPgnTagPairSyntax> tagPairNodes)
+        {
+            if (tagPairNodes == null) throw new ArgumentNullException(nameof(tagPairNodes));
+            TagPairNodes = ReadOnlySpanList<GreenPgnTagPairSyntax>.Create(tagPairNodes);
+            if (TagPairNodes.Count == 0) throw new ArgumentException($"{nameof(tagPairNodes)} is empty", nameof(tagPairNodes));
+        }
+    }
 }
