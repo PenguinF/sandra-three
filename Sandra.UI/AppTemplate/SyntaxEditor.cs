@@ -452,6 +452,11 @@ namespace Eutherion.Win.AppTemplate
         public abstract (int, int) GetErrorRange(TError error);
 
         /// <summary>
+        /// Gets the severity level of an error.
+        /// </summary>
+        public abstract ErrorLevel GetErrorLevel(TError error);
+
+        /// <summary>
         /// Gets the localized message of an error.
         /// </summary>
         public abstract string GetErrorMessage(TError error);

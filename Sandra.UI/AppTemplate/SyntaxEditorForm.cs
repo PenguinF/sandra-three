@@ -361,9 +361,7 @@ namespace Eutherion.Win.AppTemplate
                 else
                 {
                     var errorMessages = (from error in SyntaxEditor.CurrentErrors
-                                         let errorRange = SyntaxEditor.SyntaxDescriptor.GetErrorRange(error)
-                                         let errorStart = errorRange.Item1
-                                         let errorLength = errorRange.Item2
+                                         let errorStart = SyntaxEditor.SyntaxDescriptor.GetErrorRange(error).Item1
                                          let errorMessage = SyntaxEditor.SyntaxDescriptor.GetErrorMessage(error)
                                          let lineIndex = (SyntaxEditor.LineFromPosition(errorStart) + 1).ToStringInvariant()
                                          let position = (SyntaxEditor.GetColumn(errorStart) + 1).ToStringInvariant()
