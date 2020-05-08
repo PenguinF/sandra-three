@@ -36,10 +36,11 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
         public static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         public static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
+        public static readonly LocalizedStringKey ErrorPaneTitle = new LocalizedStringKey(nameof(ErrorPaneTitle));
         public static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         public static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
-        public static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
-        public static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
+        public static readonly LocalizedStringKey GoToNextError = new LocalizedStringKey(nameof(GoToNextError));
+        public static readonly LocalizedStringKey GoToPreviousError = new LocalizedStringKey(nameof(GoToPreviousError));
         public static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         public static readonly LocalizedStringKey JsonFiles = new LocalizedStringKey(nameof(JsonFiles));
         public static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
@@ -52,6 +53,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey SaveChangesQuery = new LocalizedStringKey(nameof(SaveChangesQuery));
         public static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         public static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
+        public static readonly LocalizedStringKey ShowErrorPane = new LocalizedStringKey(nameof(ShowErrorPane));
         public static readonly LocalizedStringKey Tools = new LocalizedStringKey(nameof(Tools));
         public static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
         public static readonly LocalizedStringKey UnsavedChangesTitle = new LocalizedStringKey(nameof(UnsavedChangesTitle));
@@ -73,10 +75,11 @@ namespace Eutherion.Win.AppTemplate
                 { EditCurrentLanguage, "Edit current language" },
                 { EditPreferencesFile, "Edit preferences" },
                 { ErrorLocation, "{0} at line {1}, position {2}" },
+                { ErrorPaneTitle, "{0} Messages" },
                 { Exit, "Exit" },
                 { File, "File" },
-                { GoToNextLocation, "Go to next location" },
-                { GoToPreviousLocation, "Go to previous location" },
+                { GoToNextError, "Go to next message" },
+                { GoToPreviousError, "Go to previous message" },
                 { Help, "Help" },
                 { JsonFiles, "Json files" },
                 { NoErrorsMessage, "(No errors)" },
@@ -89,6 +92,7 @@ namespace Eutherion.Win.AppTemplate
                 { SaveChangesQuery, "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?" },
                 { SelectAll, "Select All" },
                 { ShowDefaultSettingsFile, "Show default settings" },
+                { ShowErrorPane, "Show messages" },
                 { Tools, "Tools" },
                 { Undo, "Undo" },
                 { UnsavedChangesTitle, "Save changes" },

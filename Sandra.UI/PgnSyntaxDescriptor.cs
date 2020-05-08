@@ -68,13 +68,16 @@ namespace Sandra.UI
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor, IPgnSymbol terminalSymbol)
-            => PgnStyleSelector<RootPgnSyntax, PgnErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
+            => PgnStyleSelector.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IPgnSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(PgnErrorInfo error)
             => (error.Start, error.Length);
+
+        public override ErrorLevel GetErrorLevel(PgnErrorInfo error)
+            => (ErrorLevel)error.ErrorLevel;
 
         public override string GetErrorMessage(PgnErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);

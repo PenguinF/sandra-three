@@ -162,7 +162,6 @@ namespace Sandra.UI
                 PgnSyntaxDescriptor.Instance,
                 pgnFile,
                 SettingKeys.PgnWindow,
-                SettingKeys.PgnErrorHeight,
                 SettingKeys.PgnZoom)
             {
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),
@@ -173,7 +172,7 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
-            PgnStyleSelector<RootPgnSyntax, PgnErrorInfo>.InitializeStyles(pgnForm.SyntaxEditor);
+            PgnStyleSelector.InitializeStyles(pgnForm.SyntaxEditor);
 
             // Don't index read-only PgnForms.
             if (!isReadOnly)

@@ -30,7 +30,7 @@ namespace Sandra.UI
     /// <summary>
     /// A style selector for PGN syntax highlighting.
     /// </summary>
-    public class PgnStyleSelector<TSyntaxTree, TError> : PgnSymbolVisitor<SyntaxEditor<TSyntaxTree, IPgnSymbol, TError>, Style>
+    public class PgnStyleSelector : PgnSymbolVisitor<SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo>, Style>
     {
         private const int tagNameStyleIndex = 8;
         private const int tagValueStyleIndex = 9;
@@ -38,7 +38,7 @@ namespace Sandra.UI
         private const int illegalCharacterStyleIndex = 11;
         private const int moveNumberStyleIndex = 12;
         private const int moveTextStyleIndex = 13;
-        private const int errorNagStyleIndex = 14;
+        private const int errorSymbolStyleIndex = 14;
         private const int escapedLineStyleIndex = 15;
 
         private static readonly Font tagNameAndEscapeFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -49,12 +49,12 @@ namespace Sandra.UI
         private static readonly Color illegalCharacterForeColor = Color.FromArgb(0xa0, 0xa0, 0xa0);
         private static readonly Color moveNumberForeColor = Color.FromArgb(0xcc, 0xcc, 0x92);
         private static readonly Color moveTextForeColor = Color.FromArgb(0xbb, 0xff, 0x9e);
-        private static readonly Color errorNagForeColor = Color.FromArgb(0x82, 0xbc, 0x70);
+        private static readonly Color errorSymbolForeColor = Color.FromArgb(0x82, 0xbc, 0x70);
         private static readonly Color escapeForeColor = Color.FromArgb(0x8c, 0x8c, 0x8c);
 
-        public static readonly PgnStyleSelector<TSyntaxTree, TError> Instance = new PgnStyleSelector<TSyntaxTree, TError>();
+        public static readonly PgnStyleSelector Instance = new PgnStyleSelector();
 
-        public static void InitializeStyles(SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public static void InitializeStyles(SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
         {
             syntaxEditor.Styles[tagNameStyleIndex].ForeColor = tagNameForeColor;
             tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[tagNameStyleIndex]);
@@ -64,7 +64,7 @@ namespace Sandra.UI
             syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
             syntaxEditor.Styles[moveNumberStyleIndex].ForeColor = moveNumberForeColor;
             syntaxEditor.Styles[moveTextStyleIndex].ForeColor = moveTextForeColor;
-            syntaxEditor.Styles[errorNagStyleIndex].ForeColor = errorNagForeColor;
+            syntaxEditor.Styles[errorSymbolStyleIndex].ForeColor = errorSymbolForeColor;
 
             syntaxEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
             tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[escapedLineStyleIndex]);
@@ -72,25 +72,25 @@ namespace Sandra.UI
 
         private PgnStyleSelector() { }
 
-        public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style DefaultVisit(IPgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.DefaultStyle;
 
-        public override Style VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[errorTagValueStyleIndex];
 
-        public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitEscapeSyntax(PgnEscapeSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[escapedLineStyleIndex];
 
-        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[illegalCharacterStyleIndex];
 
-        public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitTagNameSyntax(PgnTagNameSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[tagNameStyleIndex];
 
-        public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitTagValueSyntax(PgnTagValueSyntax node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
             => syntaxEditor.Styles[tagValueStyleIndex];
 
-        public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<TSyntaxTree, IPgnSymbol, TError> syntaxEditor)
+        public override Style VisitPgnSymbol(PgnSymbol node, SyntaxEditor<RootPgnSyntax, IPgnSymbol, PgnErrorInfo> syntaxEditor)
         {
             switch (node.Green.SymbolType)
             {
@@ -103,7 +103,7 @@ namespace Sandra.UI
                 case PgnSymbolType.EmptyNag:
                     return syntaxEditor.Styles[moveTextStyleIndex];
                 case PgnSymbolType.OverflowNag:
-                    return syntaxEditor.Styles[errorNagStyleIndex];
+                    return syntaxEditor.Styles[errorSymbolStyleIndex];
                 case PgnSymbolType.Unknown:
                     return syntaxEditor.Styles[illegalCharacterStyleIndex];
                 case PgnSymbolType.Asterisk:

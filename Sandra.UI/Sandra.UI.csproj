@@ -40,6 +40,7 @@
     <StartupObject>Sandra.UI.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="ScintillaNET, Version=3.6.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\jacobslusser.ScintillaNET.3.6.3\lib\net40\ScintillaNET.dll</HintPath>
       <Private>True</Private>
@@ -52,8 +53,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppTemplate\AutoSaveFileNamePair.cs" />
     <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
     <Compile Include="AppTemplate\CombinedUIActionInterface.cs" />
+    <Compile Include="AppTemplate\ErrorLevel.cs" />
     <Compile Include="AppTemplate\FileLocalizer.cs" />
     <Compile Include="AppTemplate\FormStateAutoSaver.cs" />
     <Compile Include="AppTemplate\JsonErrorInfoExtensions.cs" />

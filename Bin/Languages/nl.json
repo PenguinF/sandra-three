@@ -51,10 +51,11 @@
     "EditCurrentLanguage": "Huidige taal bewerken",
     "EditPreferencesFile": "Voorkeuren wijzigen",
     "ErrorLocation": "{0} op regel {1}, positie {2}",
+    "ErrorPaneTitle": "Meldingen {0}",
     "Exit": "Afsluiten",
     "File": "Bestand",
-    "GoToNextLocation": "Naar volgende locatie",
-    "GoToPreviousLocation": "Naar vorige locatie",
+    "GoToNextError": "Naar volgende melding",
+    "GoToPreviousError": "Naar vorige melding",
     "Help": "Help",
     "JsonFiles": "Json bestanden",
     "NoErrorsMessage": "(Geen meldingen)",
@@ -67,6 +68,7 @@
     "SaveChangesQuery": "'{0}' bevat wijzigingen die nog niet zijn opgeslagen en die verloren gaan als dit venster wordt gesloten. Alsnog opslaan?",
     "SelectAll": "Alles selecteren",
     "ShowDefaultSettingsFile": "Standaard instellingen tonen",
+    "ShowErrorPane": "Meldingen tonen",
     "Tools": "Extra",
     "Undo": "Ongedaan maken",
     "UnsavedChangesTitle": "Opslaan wijzigingen",
@@ -117,6 +119,6 @@
     "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter",
     "PgnErrorEmptyNag": "geheel getal verwacht na annotatie '$'",
     "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'",
-    "PgnErrorUnknownSymbol": "zet of naam niet herkend '{0}'"
+    "PgnErrorUnknownSymbol": "zet niet herkend '{0}'"
   }
 }

@@ -48,7 +48,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly Box<Form> creditsFormBox = new Box<Form>();
         private readonly Box<Form> languageFormBox = new Box<Form>();
 
-        private void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        internal void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {
@@ -98,7 +98,6 @@ namespace Eutherion.Win.AppTemplate
                                         SettingsFile settingsFile,
                                         Func<string> initialTextGenerator,
                                         SettingProperty<PersistableFormState> formStateSetting,
-                                        SettingProperty<int> errorHeightSetting,
                                         SettingProperty<AutoSaveFileNamePair> autoSaveSetting)
         {
             var syntaxDescriptor = new SettingSyntaxDescriptor(settingsFile.Settings.Schema);
@@ -137,13 +136,12 @@ namespace Eutherion.Win.AppTemplate
                 syntaxDescriptor,
                 codeFile,
                 formStateSetting,
-                errorHeightSetting,
                 SharedSettings.JsonZoom)
             {
                 ClientSize = new Size(600, 600),
             };
 
-            JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.InitializeStyles(settingsForm.SyntaxEditor);
+            JsonStyleSelector<SettingSyntaxTree>.InitializeStyles(settingsForm.SyntaxEditor);
 
             if (autoSaver != null) settingsForm.Disposed += (_, __) => autoSaver.Dispose();
 
@@ -185,7 +183,6 @@ namespace Eutherion.Win.AppTemplate
                             LocalSettings,
                             initialTextGenerator,
                             SharedSettings.PreferencesWindow,
-                            SharedSettings.PreferencesErrorHeight,
                             SharedSettings.PreferencesAutoSave);
                     });
             }
@@ -215,7 +212,6 @@ namespace Eutherion.Win.AppTemplate
                         DefaultSettings,
                         () => DefaultSettings.GenerateJson(DefaultSettings.Settings, SettingWriterOptions.Default),
                         SharedSettings.DefaultSettingsWindow,
-                        SharedSettings.DefaultSettingsErrorHeight,
                         SharedSettings.DefaultSettingsAutoSave));
             }
 
@@ -387,7 +383,6 @@ namespace Eutherion.Win.AppTemplate
                             fileLocalizer.LanguageFile,
                             initialTextGenerator,
                             SharedSettings.LanguageWindow,
-                            SharedSettings.LanguageErrorHeight,
                             null);
                     });
             }

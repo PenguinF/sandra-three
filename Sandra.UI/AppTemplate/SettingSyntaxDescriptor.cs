@@ -82,13 +82,16 @@ namespace Eutherion.Win.AppTemplate
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<SettingSyntaxTree, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
-            => JsonStyleSelector<SettingSyntaxTree, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
+            => JsonStyleSelector<SettingSyntaxTree>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
 
         public override (int, int) GetErrorRange(JsonErrorInfo error)
             => (error.Start, error.Length);
+
+        public override ErrorLevel GetErrorLevel(JsonErrorInfo error)
+            => (ErrorLevel)error.ErrorLevel;
 
         public override string GetErrorMessage(JsonErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);

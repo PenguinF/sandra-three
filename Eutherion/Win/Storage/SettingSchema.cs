@@ -193,7 +193,6 @@ namespace Eutherion.Win.Storage
                 }
                 else
                 {
-                    // TODO: add error levels, this should probably be a warning.
                     errors.Add(UnrecognizedPropertyKeyTypeError.Create(
                         keyNode,
                         json,

@@ -216,6 +216,22 @@ namespace Eutherion.Win.AppTemplate
             base.OnLoad(e);
         }
 
+        /// <summary>
+        /// Returns the current color of the title bar.
+        /// </summary>
+        public Color TitleBarBackColor => titleBarBackColor;
+
+        /// <summary>
+        /// Occurs after the value of <see cref="TitleBarBackColor"/> was updated.
+        /// </summary>
+        public event EventHandler TitleBarBackColorChanged;
+
+        /// <summary>
+        /// Raises the <see cref="TitleBarBackColorChanged"/> event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected virtual void OnTitleBarBackColorChanged(EventArgs e) => TitleBarBackColorChanged?.Invoke(this, e);
+
         private void ThemeHelper_UserPreferencesChanged(_void sender, EventArgs e)
         {
             UpdateCaptionAreaButtonsBackColor();
@@ -223,6 +239,7 @@ namespace Eutherion.Win.AppTemplate
 
         private void UpdateCaptionAreaButtonsBackColor()
         {
+            Color oldTitleBarBackColor = titleBarBackColor;
             titleBarBackColor = ThemeHelper.GetDwmAccentColor(isActive);
             inDarkMode = titleBarBackColor.GetBrightness() < 0.5f;
             titleBarForeColor = !isActive ? SystemColors.GrayText : inDarkMode ? Color.White : Color.Black;
@@ -268,6 +285,12 @@ namespace Eutherion.Win.AppTemplate
             UpdateMaximizeButtonIcon();
 
             Invalidate();
+
+            if (oldTitleBarBackColor != titleBarBackColor)
+            {
+                // Raise event only after everything is updated.
+                OnTitleBarBackColorChanged(EventArgs.Empty);
+            }
         }
 
         private void StyleButton(Button titleBarButton)

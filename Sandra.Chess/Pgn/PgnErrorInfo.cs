@@ -29,10 +29,36 @@ namespace Sandra.Chess.Pgn
     /// </summary>
     public class PgnErrorInfo : ISpan
     {
+        private static PgnErrorLevel GetErrorLevel(PgnErrorCode errorCode)
+        {
+            switch (errorCode)
+            {
+                case PgnErrorCode.IllegalCharacter:
+                case PgnErrorCode.UnterminatedTagValue:
+                case PgnErrorCode.UnrecognizedEscapeSequence:
+                case PgnErrorCode.IllegalControlCharacterInTagValue:
+                case PgnErrorCode.UnknownSymbol:
+                    return PgnErrorLevel.Error;
+                case PgnErrorCode.UnterminatedMultiLineComment:
+                    return PgnErrorLevel.Warning;
+                case PgnErrorCode.EmptyNag:
+                case PgnErrorCode.OverflowNag:
+                    return PgnErrorLevel.Message;
+                default:
+                    // Treat unknown error codes as just messages.
+                    return PgnErrorLevel.Message;
+            }
+        }
+
         /// <summary>
         /// Gets the error code.
         /// </summary>
         public PgnErrorCode ErrorCode { get; }
+
+        /// <summary>
+        /// Gets the severity of the error.
+        /// </summary>
+        public PgnErrorLevel ErrorLevel { get; }
 
         /// <summary>
         /// Gets the start position of the text span where the error occurred.
@@ -93,6 +119,7 @@ namespace Sandra.Chess.Pgn
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 
             ErrorCode = errorCode;
+            ErrorLevel = GetErrorLevel(errorCode);
             Start = start;
             Length = length;
             Parameters = parameters;

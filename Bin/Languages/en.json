@@ -51,10 +51,11 @@
     "EditCurrentLanguage": "Edit current language",
     "EditPreferencesFile": "Edit preferences",
     "ErrorLocation": "{0} at line {1}, position {2}",
+    "ErrorPaneTitle": "{0} Messages",
     "Exit": "Exit",
     "File": "File",
-    "GoToNextLocation": "Go to next location",
-    "GoToPreviousLocation": "Go to previous location",
+    "GoToNextError": "Go to next message",
+    "GoToPreviousError": "Go to previous message",
     "Help": "Help",
     "JsonFiles": "Json files",
     "NoErrorsMessage": "(No errors)",
@@ -67,6 +68,7 @@
     "SaveChangesQuery": "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?",
     "SelectAll": "Select All",
     "ShowDefaultSettingsFile": "Show default settings",
+    "ShowErrorPane": "Show messages",
     "Tools": "Tools",
     "Undo": "Undo",
     "UnsavedChangesTitle": "Save changes",
@@ -117,6 +119,6 @@
     "PgnErrorUnterminatedMultiLineComment": "unterminated comment",
     "PgnErrorEmptyNag": "expected integer value after annotation '$'",
     "PgnErrorOverflowNag": "expected integer value between 0 and 255 for annotation, but found '{0}'",
-    "PgnErrorUnknownSymbol": "unrecognized move or name '{0}'"
+    "PgnErrorUnknownSymbol": "unrecognized move '{0}'"
   }
 }

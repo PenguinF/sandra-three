@@ -35,6 +35,11 @@ namespace Eutherion.Win.Storage
         {
         }
 
+        public PTypeError(int start, int length, JsonErrorLevel errorLevel)
+            : base(JsonErrorCode.Custom, errorLevel, start, length)
+        {
+        }
+
         /// <summary>
         /// Gets the localized, context sensitive message for this error.
         /// </summary>
@@ -72,7 +77,7 @@ namespace Eutherion.Win.Storage
                 new[] { PropertyKey });
 
         private UnrecognizedPropertyKeyTypeError(string propertyKey, int start, int length)
-            : base(start, length)
+            : base(start, length, JsonErrorLevel.Warning)
         {
             PropertyKey = propertyKey;
         }

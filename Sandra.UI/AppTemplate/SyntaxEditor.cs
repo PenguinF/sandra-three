@@ -21,7 +21,6 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
-using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
@@ -47,6 +46,8 @@ namespace Eutherion.Win.AppTemplate
     public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
+        private const int WarningIndicatorIndex = 9;
+        private const int MessageIndicatorIndex = 10;
 
         /// <summary>
         /// Gets the syntax descriptor.
@@ -125,12 +126,20 @@ namespace Eutherion.Win.AppTemplate
 
             Indicators[ErrorIndicatorIndex].Style = IndicatorStyle.Squiggle;
             Indicators[ErrorIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.ErrorColor;
-            IndicatorCurrent = ErrorIndicatorIndex;
+
+            Indicators[WarningIndicatorIndex].Style = IndicatorStyle.Squiggle;
+            Indicators[WarningIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.WarningColor;
+
+            Indicators[MessageIndicatorIndex].Style = IndicatorStyle.Dots;
+            Indicators[MessageIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
 
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
 
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
+
+            // Initialize line number margin for new empty files.
+            UpdateLineNumberMargin(1);
 
             // Only use initialTextGenerator if nothing was auto-saved.
             containsChangesAtSavePoint = CodeFile.ContainsChanges;
@@ -191,16 +200,33 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
-        TSyntaxTree syntaxTree;
-
-        protected override void OnStyleNeeded(StyleNeededEventArgs e)
+        private void UpdateLineNumberMargin(int maxLineNumberLength)
         {
-            // Get the start position of the span which is still unstyled.
+            Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
+            Margins[1].Width = TextWidth(Style.LineNumber, "0");
+            displayedMaxLineNumberLength = maxLineNumberLength;
+        }
+
+        private TSyntaxTree syntaxTree;
+
+        protected override void OnUpdateUI(UpdateUIEventArgs e)
+        {
+            if (syntaxTree == null) return;
+
+            // Get the visible range of text to style.
+            int firstVisibleLine = FirstVisibleLine;
+            if (Lines.Count <= firstVisibleLine) return;
+            int startPosition = Lines[FirstVisibleLine].Position;
+            int bottomVisibleLine = firstVisibleLine + LinesOnScreen;
+            if (Lines.Count <= bottomVisibleLine) bottomVisibleLine = Lines.Count - 1;
+            if (bottomVisibleLine < firstVisibleLine) return;
+            int endPosition = Lines[bottomVisibleLine].EndPosition;
+
             // Increase range on both ends by 1 to make the search for intersecting intervals inclusive,
             // so e.g. terminal symbols that end exactly at the end-styled position and which may be affected
             // by the latest change are returned as well.
-            int startPosition = GetEndStyled() - 1;
-            int endPosition = e.Position + 1;
+            startPosition--;
+            endPosition++;
 
             foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
             {
@@ -208,7 +234,7 @@ namespace Eutherion.Win.AppTemplate
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
             }
 
-            base.OnStyleNeeded(e);
+            base.OnUpdateUI(e);
         }
 
         protected override void OnTextChanged(EventArgs e)
@@ -227,9 +253,7 @@ namespace Eutherion.Win.AppTemplate
             int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
             if (displayedMaxLineNumberLength != maxLineNumberLength)
             {
-                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
-                Margins[1].Width = TextWidth(Style.LineNumber, "0");
-                displayedMaxLineNumberLength = maxLineNumberLength;
+                UpdateLineNumberMargin(maxLineNumberLength);
             }
 
             syntaxTree = SyntaxDescriptor.Parse(code);
@@ -238,9 +262,20 @@ namespace Eutherion.Win.AppTemplate
 
             CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
 
+            // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
+            int indicatorCurrent = 0;
+
             foreach (var error in CurrentErrors)
             {
                 var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+                var errorLevel = SyntaxDescriptor.GetErrorLevel(error);
+
+                int oldIndicatorCurrent = indicatorCurrent;
+                indicatorCurrent = errorLevel == ErrorLevel.Error ? ErrorIndicatorIndex
+                                 : errorLevel == ErrorLevel.Warning ? WarningIndicatorIndex
+                                 : MessageIndicatorIndex;
+
+                if (oldIndicatorCurrent != indicatorCurrent) IndicatorCurrent = indicatorCurrent;
 
                 IndicatorFillRange(errorStart, errorLength);
             }
@@ -453,6 +488,11 @@ namespace Eutherion.Win.AppTemplate
         public abstract (int, int) GetErrorRange(TError error);
 
         /// <summary>
+        /// Gets the severity level of an error.
+        /// </summary>
+        public abstract ErrorLevel GetErrorLevel(TError error);
+
+        /// <summary>
         /// Gets the localized message of an error.
         /// </summary>
         public abstract string GetErrorMessage(TError error);
@@ -473,46 +513,9 @@ namespace Eutherion.Win.AppTemplate
         public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
 
         public static readonly Color ErrorColor = Color.Red;
+        public static readonly Color WarningColor = Color.Yellow;
 
         public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
         public static readonly Font CallTipFont = new Font("Segoe UI", 10);
-    }
-
-    /// <summary>
-    /// Represents two file names in the local application data folder.
-    /// </summary>
-    public struct AutoSaveFileNamePair
-    {
-        public string FileName1;
-        public string FileName2;
-
-        public AutoSaveFileNamePair(string fileName1, string fileName2)
-        {
-            FileName1 = fileName1;
-            FileName2 = fileName2;
-        }
-    }
-
-    /// <summary>
-    /// Specialized PType that accepts pairs of legal file names that are used for auto-saving changes in text files.
-    /// </summary>
-    public sealed class AutoSaveFilePairPType : PType.Derived<(string, string), AutoSaveFileNamePair>
-    {
-        public static readonly AutoSaveFilePairPType Instance = new AutoSaveFilePairPType();
-
-        private AutoSaveFilePairPType()
-            : base(new PType.TupleType<string, string>(
-                                      (FileNameType.InstanceAllowStartWithDots, FileNameType.InstanceAllowStartWithDots)))
-        {
-        }
-
-        public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetTargetValue((string, string) value)
-        {
-            var (fileName1, fileName2) = value;
-            return new AutoSaveFileNamePair(fileName1, fileName2);
-        }
-
-        public override (string, string) GetBaseValue(AutoSaveFileNamePair value)
-            => (value.FileName1, value.FileName2);
     }
 }
