@@ -46,6 +46,8 @@ namespace Eutherion.Win.AppTemplate
     public class SyntaxEditor<TSyntaxTree, TTerminal, TError> : ScintillaEx
     {
         private const int ErrorIndicatorIndex = 8;
+        private const int WarningIndicatorIndex = 9;
+        private const int MessageIndicatorIndex = 10;
 
         /// <summary>
         /// Gets the syntax descriptor.
@@ -124,7 +126,12 @@ namespace Eutherion.Win.AppTemplate
 
             Indicators[ErrorIndicatorIndex].Style = IndicatorStyle.Squiggle;
             Indicators[ErrorIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.ErrorColor;
-            IndicatorCurrent = ErrorIndicatorIndex;
+
+            Indicators[WarningIndicatorIndex].Style = IndicatorStyle.Squiggle;
+            Indicators[WarningIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.WarningColor;
+
+            Indicators[MessageIndicatorIndex].Style = IndicatorStyle.Dots;
+            Indicators[MessageIndicatorIndex].ForeColor = DefaultSyntaxEditorStyle.LineNumberForeColor;
 
             // Enable dwell events.
             MouseDwellTime = SystemInformation.MouseHoverTime;
@@ -237,9 +244,20 @@ namespace Eutherion.Win.AppTemplate
 
             CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
 
+            // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
+            int indicatorCurrent = 0;
+
             foreach (var error in CurrentErrors)
             {
                 var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+                var errorLevel = SyntaxDescriptor.GetErrorLevel(error);
+
+                int oldIndicatorCurrent = indicatorCurrent;
+                indicatorCurrent = errorLevel == ErrorLevel.Error ? ErrorIndicatorIndex
+                                 : errorLevel == ErrorLevel.Warning ? WarningIndicatorIndex
+                                 : MessageIndicatorIndex;
+
+                if (oldIndicatorCurrent != indicatorCurrent) IndicatorCurrent = indicatorCurrent;
 
                 IndicatorFillRange(errorStart, errorLength);
             }
@@ -477,6 +495,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly Color LineNumberForeColor = Color.FromArgb(176, 176, 176);
 
         public static readonly Color ErrorColor = Color.Red;
+        public static readonly Color WarningColor = Color.Yellow;
 
         public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
         public static readonly Font CallTipFont = new Font("Segoe UI", 10);
