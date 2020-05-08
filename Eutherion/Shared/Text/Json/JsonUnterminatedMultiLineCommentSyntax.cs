@@ -63,7 +63,7 @@ namespace Eutherion.Text.Json
         /// The length of the unterminated comment.
         /// </param>
         public static JsonErrorInfo CreateError(int start, int length)
-            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, start, length);
+            => new JsonErrorInfo(JsonErrorCode.UnterminatedMultiLineComment, JsonErrorLevel.Warning, start, length);
 
         /// <summary>
         /// Gets the bottom-up only 'green' representation of this syntax node.
