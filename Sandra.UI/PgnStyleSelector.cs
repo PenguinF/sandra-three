@@ -38,7 +38,7 @@ namespace Sandra.UI
         private const int illegalCharacterStyleIndex = 11;
         private const int moveNumberStyleIndex = 12;
         private const int moveTextStyleIndex = 13;
-        private const int errorNagStyleIndex = 14;
+        private const int errorSymbolStyleIndex = 14;
         private const int escapedLineStyleIndex = 15;
 
         private static readonly Font tagNameAndEscapeFont = new Font("Consolas", 10, FontStyle.Italic);
@@ -49,7 +49,7 @@ namespace Sandra.UI
         private static readonly Color illegalCharacterForeColor = Color.FromArgb(0xa0, 0xa0, 0xa0);
         private static readonly Color moveNumberForeColor = Color.FromArgb(0xcc, 0xcc, 0x92);
         private static readonly Color moveTextForeColor = Color.FromArgb(0xbb, 0xff, 0x9e);
-        private static readonly Color errorNagForeColor = Color.FromArgb(0x82, 0xbc, 0x70);
+        private static readonly Color errorSymbolForeColor = Color.FromArgb(0x82, 0xbc, 0x70);
         private static readonly Color escapeForeColor = Color.FromArgb(0x8c, 0x8c, 0x8c);
 
         public static readonly PgnStyleSelector Instance = new PgnStyleSelector();
@@ -64,7 +64,7 @@ namespace Sandra.UI
             syntaxEditor.Styles[illegalCharacterStyleIndex].ForeColor = illegalCharacterForeColor;
             syntaxEditor.Styles[moveNumberStyleIndex].ForeColor = moveNumberForeColor;
             syntaxEditor.Styles[moveTextStyleIndex].ForeColor = moveTextForeColor;
-            syntaxEditor.Styles[errorNagStyleIndex].ForeColor = errorNagForeColor;
+            syntaxEditor.Styles[errorSymbolStyleIndex].ForeColor = errorSymbolForeColor;
 
             syntaxEditor.Styles[escapedLineStyleIndex].ForeColor = escapeForeColor;
             tagNameAndEscapeFont.CopyTo(syntaxEditor.Styles[escapedLineStyleIndex]);
@@ -103,7 +103,7 @@ namespace Sandra.UI
                 case PgnSymbolType.EmptyNag:
                     return syntaxEditor.Styles[moveTextStyleIndex];
                 case PgnSymbolType.OverflowNag:
-                    return syntaxEditor.Styles[errorNagStyleIndex];
+                    return syntaxEditor.Styles[errorSymbolStyleIndex];
                 case PgnSymbolType.Unknown:
                     return syntaxEditor.Styles[illegalCharacterStyleIndex];
                 case PgnSymbolType.Asterisk:
