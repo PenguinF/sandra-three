@@ -67,6 +67,7 @@
     "SaveChangesQuery": "'{0}' bevat wijzigingen die nog niet zijn opgeslagen en die verloren gaan als dit venster wordt gesloten. Alsnog opslaan?",
     "SelectAll": "Alles selecteren",
     "ShowDefaultSettingsFile": "Standaard instellingen tonen",
+    "ShowErrorPane": "Meldingen tonen",
     "Tools": "Extra",
     "Undo": "Ongedaan maken",
     "UnsavedChangesTitle": "Opslaan wijzigingen",

@@ -99,8 +99,9 @@ namespace Eutherion.Win.AppTemplate
 
             SyntaxEditor.BindActions(new UIActionBindings
             {
-                { SharedUIAction.GoToPreviousError, TryGoToPreviousLocation },
-                { SharedUIAction.GoToNextError, TryGoToNextLocation },
+                { SharedUIAction.ShowErrorPane, TryShowErrorPane },
+                { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
+                { SharedUIAction.GoToNextError, TryGoToNextError },
             });
 
             UIMenu.AddTo(SyntaxEditor);
@@ -131,8 +132,8 @@ namespace Eutherion.Win.AppTemplate
 
                 errorsListBox.BindActions(new UIActionBindings
                 {
-                    { SharedUIAction.GoToPreviousError, TryGoToPreviousLocation },
-                    { SharedUIAction.GoToNextError, TryGoToNextLocation },
+                    { SharedUIAction.GoToPreviousError, TryGoToPreviousError },
+                    { SharedUIAction.GoToNextError, TryGoToNextError },
                 });
 
                 UIMenu.AddTo(errorsListBox);
@@ -475,7 +476,12 @@ namespace Eutherion.Win.AppTemplate
             base.Dispose(disposing);
         }
 
-        public UIActionState TryGoToPreviousLocation(bool perform)
+        public UIActionState TryShowErrorPane(bool perform)
+        {
+            return UIActionVisibility.Enabled;
+        }
+
+        public UIActionState TryGoToPreviousError(bool perform)
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 
@@ -495,7 +501,7 @@ namespace Eutherion.Win.AppTemplate
             return UIActionVisibility.Enabled;
         }
 
-        public UIActionState TryGoToNextLocation(bool perform)
+        public UIActionState TryGoToNextError(bool perform)
         {
             if (errorsListBox == null) return UIActionVisibility.Hidden;
 

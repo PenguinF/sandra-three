@@ -52,6 +52,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey SaveChangesQuery = new LocalizedStringKey(nameof(SaveChangesQuery));
         public static readonly LocalizedStringKey SelectAll = new LocalizedStringKey(nameof(SelectAll));
         public static readonly LocalizedStringKey ShowDefaultSettingsFile = new LocalizedStringKey(nameof(ShowDefaultSettingsFile));
+        public static readonly LocalizedStringKey ShowErrorPane = new LocalizedStringKey(nameof(ShowErrorPane));
         public static readonly LocalizedStringKey Tools = new LocalizedStringKey(nameof(Tools));
         public static readonly LocalizedStringKey Undo = new LocalizedStringKey(nameof(Undo));
         public static readonly LocalizedStringKey UnsavedChangesTitle = new LocalizedStringKey(nameof(UnsavedChangesTitle));
@@ -89,6 +90,7 @@ namespace Eutherion.Win.AppTemplate
                 { SaveChangesQuery, "'{0}' contains unsaved changes which will be lost if this window is closed. Save changes?" },
                 { SelectAll, "Select All" },
                 { ShowDefaultSettingsFile, "Show default settings" },
+                { ShowErrorPane, "Show messages" },
                 { Tools, "Tools" },
                 { Undo, "Undo" },
                 { UnsavedChangesTitle, "Save changes" },

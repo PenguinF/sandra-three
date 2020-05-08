@@ -181,6 +181,17 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
+        public static readonly DefaultUIActionBinding ShowErrorPane = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(ShowErrorPane)),
+            new ImplementationSet<IUIActionInterface>
+            {
+                new CombinedUIActionInterface
+                {
+                    IsFirstInGroup = true,
+                    MenuTextProvider = SharedLocalizedStringKeys.ShowErrorPane.ToTextProvider()
+                },
+            });
+
         public static readonly DefaultUIActionBinding GoToPreviousError = new DefaultUIActionBinding(
             new UIAction(SharedUIActionPrefix + nameof(GoToPreviousError)),
             new ImplementationSet<IUIActionInterface>
@@ -188,7 +199,6 @@ namespace Eutherion.Win.AppTemplate
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
-                    IsFirstInGroup = true,
                     MenuTextProvider = SharedLocalizedStringKeys.GoToPreviousError.ToTextProvider(),
                 },
             });
