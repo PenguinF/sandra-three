@@ -21,7 +21,6 @@
 
 using Eutherion.Localization;
 using Eutherion.UIActions;
-using Eutherion.Win.Storage;
 using ScintillaNET;
 using System;
 using System.Collections.Generic;
@@ -476,43 +475,5 @@ namespace Eutherion.Win.AppTemplate
 
         public static readonly Color CallTipBackColor = Color.FromArgb(48, 32, 32);
         public static readonly Font CallTipFont = new Font("Segoe UI", 10);
-    }
-
-    /// <summary>
-    /// Represents two file names in the local application data folder.
-    /// </summary>
-    public struct AutoSaveFileNamePair
-    {
-        public string FileName1;
-        public string FileName2;
-
-        public AutoSaveFileNamePair(string fileName1, string fileName2)
-        {
-            FileName1 = fileName1;
-            FileName2 = fileName2;
-        }
-    }
-
-    /// <summary>
-    /// Specialized PType that accepts pairs of legal file names that are used for auto-saving changes in text files.
-    /// </summary>
-    public sealed class AutoSaveFilePairPType : PType.Derived<(string, string), AutoSaveFileNamePair>
-    {
-        public static readonly AutoSaveFilePairPType Instance = new AutoSaveFilePairPType();
-
-        private AutoSaveFilePairPType()
-            : base(new PType.TupleType<string, string>(
-                                      (FileNameType.InstanceAllowStartWithDots, FileNameType.InstanceAllowStartWithDots)))
-        {
-        }
-
-        public override Union<ITypeErrorBuilder, AutoSaveFileNamePair> TryGetTargetValue((string, string) value)
-        {
-            var (fileName1, fileName2) = value;
-            return new AutoSaveFileNamePair(fileName1, fileName2);
-        }
-
-        public override (string, string) GetBaseValue(AutoSaveFileNamePair value)
-            => (value.FileName1, value.FileName2);
     }
 }

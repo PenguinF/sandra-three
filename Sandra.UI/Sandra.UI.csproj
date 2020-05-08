@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppTemplate\AutoSaveFileNamePair.cs" />
     <Compile Include="AppTemplate\BuiltInEnglishLocalizer.cs" />
     <Compile Include="AppTemplate\CombinedUIActionInterface.cs" />
     <Compile Include="AppTemplate\FileLocalizer.cs" />
