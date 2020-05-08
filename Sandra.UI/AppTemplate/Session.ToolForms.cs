@@ -48,7 +48,7 @@ namespace Eutherion.Win.AppTemplate
         private readonly Box<Form> creditsFormBox = new Box<Form>();
         private readonly Box<Form> languageFormBox = new Box<Form>();
 
-        private void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
+        internal void OpenOrActivateToolForm(Control ownerControl, Box<Form> toolForm, Func<Form> toolFormConstructor)
         {
             if (toolForm.Value == null)
             {

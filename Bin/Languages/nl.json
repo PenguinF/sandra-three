@@ -51,6 +51,7 @@
     "EditCurrentLanguage": "Huidige taal bewerken",
     "EditPreferencesFile": "Voorkeuren wijzigen",
     "ErrorLocation": "{0} op regel {1}, positie {2}",
+    "ErrorPaneTitle": "Meldingen {0}",
     "Exit": "Afsluiten",
     "File": "Bestand",
     "GoToNextError": "Naar volgende melding",

@@ -36,6 +36,7 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey EditCurrentLanguage = new LocalizedStringKey(nameof(EditCurrentLanguage));
         public static readonly LocalizedStringKey EditPreferencesFile = new LocalizedStringKey(nameof(EditPreferencesFile));
         public static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
+        public static readonly LocalizedStringKey ErrorPaneTitle = new LocalizedStringKey(nameof(ErrorPaneTitle));
         public static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         public static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
         public static readonly LocalizedStringKey GoToNextError = new LocalizedStringKey(nameof(GoToNextError));
@@ -74,6 +75,7 @@ namespace Eutherion.Win.AppTemplate
                 { EditCurrentLanguage, "Edit current language" },
                 { EditPreferencesFile, "Edit preferences" },
                 { ErrorLocation, "{0} at line {1}, position {2}" },
+                { ErrorPaneTitle, "{0} Messages" },
                 { Exit, "Exit" },
                 { File, "File" },
                 { GoToNextError, "Go to next message" },

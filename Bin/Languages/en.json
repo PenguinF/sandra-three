@@ -51,6 +51,7 @@
     "EditCurrentLanguage": "Edit current language",
     "EditPreferencesFile": "Edit preferences",
     "ErrorLocation": "{0} at line {1}, position {2}",
+    "ErrorPaneTitle": "{0} Messages",
     "Exit": "Exit",
     "File": "File",
     "GoToNextError": "Go to next message",
