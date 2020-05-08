@@ -138,6 +138,9 @@ namespace Eutherion.Win.AppTemplate
 
             CodeFile.LoadedTextChanged += CodeFile_LoadedTextChanged;
 
+            // Initialize line number margin for new empty files.
+            UpdateLineNumberMargin(1);
+
             // Only use initialTextGenerator if nothing was auto-saved.
             containsChangesAtSavePoint = CodeFile.ContainsChanges;
             CopyTextFromTextFile();
@@ -197,6 +200,13 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
+        private void UpdateLineNumberMargin(int maxLineNumberLength)
+        {
+            Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
+            Margins[1].Width = TextWidth(Style.LineNumber, "0");
+            displayedMaxLineNumberLength = maxLineNumberLength;
+        }
+
         private TSyntaxTree syntaxTree;
 
         protected override void OnUpdateUI(UpdateUIEventArgs e)
@@ -243,9 +253,7 @@ namespace Eutherion.Win.AppTemplate
             int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
             if (displayedMaxLineNumberLength != maxLineNumberLength)
             {
-                Margins[0].Width = TextWidth(Style.LineNumber, new string('0', maxLineNumberLength + 1));
-                Margins[1].Width = TextWidth(Style.LineNumber, "0");
-                displayedMaxLineNumberLength = maxLineNumberLength;
+                UpdateLineNumberMargin(maxLineNumberLength);
             }
 
             syntaxTree = SyntaxDescriptor.Parse(code);
