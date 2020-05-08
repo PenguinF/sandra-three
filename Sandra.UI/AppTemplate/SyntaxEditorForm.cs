@@ -36,6 +36,9 @@ namespace Eutherion.Win.AppTemplate
     {
         private class ErrorListForm : Form
         {
+            private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
+            private static readonly Font normalFont = new Font("Calibri", 10);
+
             private readonly SyntaxEditorForm<TSyntaxTree, TTerminal, TError> OwnerEditorForm;
 
             private readonly ListBoxEx errorsListBox;
@@ -214,14 +217,13 @@ namespace Eutherion.Win.AppTemplate
 
         private static readonly Color UnsavedModificationsCloseButtonHoverColor = Color.FromArgb(0xff, 0xc0, 0xc0);
 
-        private static readonly Font noErrorsFont = new Font("Calibri", 10, FontStyle.Italic);
-        private static readonly Font normalFont = new Font("Calibri", 10);
-
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
         private readonly SettingProperty<PersistableFormState> formStateSetting;
 
         private readonly UIActionHandler mainMenuActionHandler;
+
+        private readonly Panel fillPanel;
 
         private readonly LocalizedString untitledString;
 
@@ -280,8 +282,6 @@ namespace Eutherion.Win.AppTemplate
             untitledString = new LocalizedString(SharedLocalizedStringKeys.Untitled);
             untitledString.DisplayText.ValueChanged += _ => UpdateChangedMarker();
 
-            Controls.Add(SyntaxEditor);
-
             // Save points.
             SyntaxEditor.SavePointLeft += (_, __) => UpdateChangedMarker();
             SyntaxEditor.SavePointReached += (_, __) => UpdateChangedMarker();
@@ -289,6 +289,16 @@ namespace Eutherion.Win.AppTemplate
 
             // Interaction between settingsTextBox and errorsTextBox.
             SyntaxEditor.CurrentErrorsChanged += (_, __) => UpdateErrorListForm();
+
+            fillPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(2),
+                BackColor = TitleBarBackColor,
+            };
+
+            fillPanel.Controls.Add(SyntaxEditor);
+            Controls.Add(fillPanel);
 
             BindStandardUIActions();
 
@@ -341,6 +351,12 @@ namespace Eutherion.Win.AppTemplate
             }
 
             Session.Current.CurrentLocalizerChanged += CurrentLocalizerChanged;
+        }
+
+        protected override void OnTitleBarBackColorChanged(EventArgs e)
+        {
+            fillPanel.BackColor = TitleBarBackColor;
+            base.OnTitleBarBackColorChanged(e);
         }
 
         private void UpdateErrorListForm()
