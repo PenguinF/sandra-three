@@ -58,6 +58,7 @@
     <Compile Include="Pgn\PgnEmptyNagSyntax.cs" />
     <Compile Include="Pgn\PgnErrorCode.cs" />
     <Compile Include="Pgn\PgnErrorInfo.cs" />
+    <Compile Include="Pgn\PgnErrorLevel.cs" />
     <Compile Include="Pgn\PgnErrorTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnEscapeSyntax.cs" />
     <Compile Include="Pgn\PgnIllegalCharacterSyntax.cs" />

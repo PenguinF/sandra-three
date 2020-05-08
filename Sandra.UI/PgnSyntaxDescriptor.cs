@@ -77,7 +77,7 @@ namespace Sandra.UI
             => (error.Start, error.Length);
 
         public override ErrorLevel GetErrorLevel(PgnErrorInfo error)
-            => ErrorLevel.Error;
+            => (ErrorLevel)error.ErrorLevel;
 
         public override string GetErrorMessage(PgnErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);
