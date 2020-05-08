@@ -91,7 +91,7 @@ namespace Eutherion.Win.AppTemplate
             => (error.Start, error.Length);
 
         public override ErrorLevel GetErrorLevel(JsonErrorInfo error)
-            => ErrorLevel.Error;
+            => (ErrorLevel)error.ErrorLevel;
 
         public override string GetErrorMessage(JsonErrorInfo error)
             => error.Message(Session.Current.CurrentLocalizer);

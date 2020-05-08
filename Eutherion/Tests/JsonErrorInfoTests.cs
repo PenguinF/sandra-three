@@ -37,14 +37,15 @@ namespace Eutherion.Shared.Tests
         }
 
         [Theory]
-        [InlineData(JsonErrorCode.Unspecified, 0, 0, null)]
-        [InlineData(JsonErrorCode.Custom, 0, 1, new string[0])]
-        [InlineData(JsonErrorCode.ExpectedEof, 1, 0, new[] { "\n", "" })]
-        [InlineData(JsonErrorCode.Custom + 999, 0, 2, new[] { "Aa" })]
-        public void UnchangedParametersInError(JsonErrorCode errorCode, int start, int length, string[] parameters)
+        [InlineData(JsonErrorCode.Unspecified, JsonErrorLevel.Message, 0, 0, null)]
+        [InlineData(JsonErrorCode.Custom, JsonErrorLevel.Warning, 0, 1, new string[0])]
+        [InlineData(JsonErrorCode.ExpectedEof, JsonErrorLevel.Error, 1, 0, new[] { "\n", "" })]
+        [InlineData(JsonErrorCode.Custom + 999, (JsonErrorLevel)(-1), 0, 2, new[] { "Aa" })]
+        public void UnchangedParametersInError(JsonErrorCode errorCode, JsonErrorLevel errorLevel, int start, int length, string[] parameters)
         {
-            var errorInfo = new JsonErrorInfo(errorCode, start, length, parameters);
+            var errorInfo = new JsonErrorInfo(errorCode, errorLevel, start, length, parameters);
             Assert.Equal(errorCode, errorInfo.ErrorCode);
+            Assert.Equal(errorLevel, errorInfo.ErrorLevel);
             Assert.Equal(start, errorInfo.Start);
             Assert.Equal(length, errorInfo.Length);
 
