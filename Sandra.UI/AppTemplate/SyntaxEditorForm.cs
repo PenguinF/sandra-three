@@ -99,8 +99,8 @@ namespace Eutherion.Win.AppTemplate
 
             SyntaxEditor.BindActions(new UIActionBindings
             {
-                { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
-                { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
+                { SharedUIAction.GoToPreviousError, TryGoToPreviousLocation },
+                { SharedUIAction.GoToNextError, TryGoToNextLocation },
             });
 
             UIMenu.AddTo(SyntaxEditor);
@@ -131,8 +131,8 @@ namespace Eutherion.Win.AppTemplate
 
                 errorsListBox.BindActions(new UIActionBindings
                 {
-                    { SharedUIAction.GoToPreviousLocation, TryGoToPreviousLocation },
-                    { SharedUIAction.GoToNextLocation, TryGoToNextLocation },
+                    { SharedUIAction.GoToPreviousError, TryGoToPreviousLocation },
+                    { SharedUIAction.GoToNextError, TryGoToNextLocation },
                 });
 
                 UIMenu.AddTo(errorsListBox);

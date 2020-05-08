@@ -181,26 +181,26 @@ namespace Eutherion.Win.AppTemplate
                 },
             });
 
-        public static readonly DefaultUIActionBinding GoToPreviousLocation = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(GoToPreviousLocation)),
+        public static readonly DefaultUIActionBinding GoToPreviousError = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(GoToPreviousError)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(KeyModifiers.Shift, ConsoleKey.F8), },
                     IsFirstInGroup = true,
-                    MenuTextProvider = SharedLocalizedStringKeys.GoToPreviousLocation.ToTextProvider(),
+                    MenuTextProvider = SharedLocalizedStringKeys.GoToPreviousError.ToTextProvider(),
                 },
             });
 
-        public static readonly DefaultUIActionBinding GoToNextLocation = new DefaultUIActionBinding(
-            new UIAction(SharedUIActionPrefix + nameof(GoToNextLocation)),
+        public static readonly DefaultUIActionBinding GoToNextError = new DefaultUIActionBinding(
+            new UIAction(SharedUIActionPrefix + nameof(GoToNextError)),
             new ImplementationSet<IUIActionInterface>
             {
                 new CombinedUIActionInterface
                 {
                     Shortcuts = new[] { new ShortcutKeys(ConsoleKey.F8), },
-                    MenuTextProvider = SharedLocalizedStringKeys.GoToNextLocation.ToTextProvider(),
+                    MenuTextProvider = SharedLocalizedStringKeys.GoToNextError.ToTextProvider(),
                 },
             });
     }

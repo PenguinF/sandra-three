@@ -38,8 +38,8 @@ namespace Eutherion.Win.AppTemplate
         public static readonly LocalizedStringKey ErrorLocation = new LocalizedStringKey(nameof(ErrorLocation));
         public static readonly LocalizedStringKey Exit = new LocalizedStringKey(nameof(Exit));
         public static readonly LocalizedStringKey File = new LocalizedStringKey(nameof(File));
-        public static readonly LocalizedStringKey GoToNextLocation = new LocalizedStringKey(nameof(GoToNextLocation));
-        public static readonly LocalizedStringKey GoToPreviousLocation = new LocalizedStringKey(nameof(GoToPreviousLocation));
+        public static readonly LocalizedStringKey GoToNextError = new LocalizedStringKey(nameof(GoToNextError));
+        public static readonly LocalizedStringKey GoToPreviousError = new LocalizedStringKey(nameof(GoToPreviousError));
         public static readonly LocalizedStringKey Help = new LocalizedStringKey(nameof(Help));
         public static readonly LocalizedStringKey JsonFiles = new LocalizedStringKey(nameof(JsonFiles));
         public static readonly LocalizedStringKey NoErrorsMessage = new LocalizedStringKey(nameof(NoErrorsMessage));
@@ -75,8 +75,8 @@ namespace Eutherion.Win.AppTemplate
                 { ErrorLocation, "{0} at line {1}, position {2}" },
                 { Exit, "Exit" },
                 { File, "File" },
-                { GoToNextLocation, "Go to next location" },
-                { GoToPreviousLocation, "Go to previous location" },
+                { GoToNextError, "Go to next message" },
+                { GoToPreviousError, "Go to previous message" },
                 { Help, "Help" },
                 { JsonFiles, "Json files" },
                 { NoErrorsMessage, "(No errors)" },
