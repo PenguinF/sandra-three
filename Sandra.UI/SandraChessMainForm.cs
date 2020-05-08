@@ -162,7 +162,6 @@ namespace Sandra.UI
                 PgnSyntaxDescriptor.Instance,
                 pgnFile,
                 SettingKeys.PgnWindow,
-                SettingKeys.PgnErrorHeight,
                 SettingKeys.PgnZoom)
             {
                 MinimumSize = new Size(144, SystemInformation.CaptionHeight * 2),

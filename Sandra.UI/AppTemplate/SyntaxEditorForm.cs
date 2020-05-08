@@ -220,7 +220,6 @@ namespace Eutherion.Win.AppTemplate
         private readonly Box<Form> errorListFormBox = new Box<Form>();
 
         private readonly SettingProperty<PersistableFormState> formStateSetting;
-        private readonly SettingProperty<int> errorHeightSetting;
 
         private readonly UIActionHandler mainMenuActionHandler;
 
@@ -232,11 +231,9 @@ namespace Eutherion.Win.AppTemplate
                                 SyntaxDescriptor<TSyntaxTree, TTerminal, TError> syntaxDescriptor,
                                 WorkingCopyTextFile codeFile,
                                 SettingProperty<PersistableFormState> formStateSetting,
-                                SettingProperty<int> errorHeightSetting,
                                 SettingProperty<int> zoomSetting)
         {
             this.formStateSetting = formStateSetting;
-            this.errorHeightSetting = errorHeightSetting;
 
             SyntaxEditor = new SyntaxEditor<TSyntaxTree, TTerminal, TError>(syntaxDescriptor, codeFile)
             {
