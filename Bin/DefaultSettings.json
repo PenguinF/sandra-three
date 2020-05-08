@@ -49,7 +49,7 @@
   // the HTML color format, for example "#B0E0E6" is the PowderBlue color.
   "legal_target_squares_color": "#F05A5A",
 
-  // The number of plies (=half moves) to move forward of backward in a game for
+  // The number of plies (=half moves) to move forward or backward in a game for
   // fast navigation. This value must be between 2 and 40.
   "fast_navigation_ply_count": 10
 }
