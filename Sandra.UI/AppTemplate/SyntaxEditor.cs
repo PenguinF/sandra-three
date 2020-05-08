@@ -197,16 +197,26 @@ namespace Eutherion.Win.AppTemplate
             return (int)Math.Floor(Math.Log10(maxLineNumberToDisplay)) + 1;
         }
 
-        TSyntaxTree syntaxTree;
+        private TSyntaxTree syntaxTree;
 
-        protected override void OnStyleNeeded(StyleNeededEventArgs e)
+        protected override void OnUpdateUI(UpdateUIEventArgs e)
         {
-            // Get the start position of the span which is still unstyled.
+            if (syntaxTree == null) return;
+
+            // Get the visible range of text to style.
+            int firstVisibleLine = FirstVisibleLine;
+            if (Lines.Count <= firstVisibleLine) return;
+            int startPosition = Lines[FirstVisibleLine].Position;
+            int bottomVisibleLine = firstVisibleLine + LinesOnScreen;
+            if (Lines.Count <= bottomVisibleLine) bottomVisibleLine = Lines.Count - 1;
+            if (bottomVisibleLine < firstVisibleLine) return;
+            int endPosition = Lines[bottomVisibleLine].EndPosition;
+
             // Increase range on both ends by 1 to make the search for intersecting intervals inclusive,
             // so e.g. terminal symbols that end exactly at the end-styled position and which may be affected
             // by the latest change are returned as well.
-            int startPosition = GetEndStyled() - 1;
-            int endPosition = e.Position + 1;
+            startPosition--;
+            endPosition++;
 
             foreach (var token in SyntaxDescriptor.GetTerminalsInRange(syntaxTree, startPosition, endPosition - startPosition))
             {
@@ -214,7 +224,7 @@ namespace Eutherion.Win.AppTemplate
                 ApplyStyle(SyntaxDescriptor.GetStyle(this, token), start, length);
             }
 
-            base.OnStyleNeeded(e);
+            base.OnUpdateUI(e);
         }
 
         protected override void OnTextChanged(EventArgs e)
