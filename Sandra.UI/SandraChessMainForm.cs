@@ -173,7 +173,7 @@ namespace Sandra.UI
                 StartPosition = FormStartPosition.CenterScreen,
             };
 
-            PgnStyleSelector<RootPgnSyntax, PgnErrorInfo>.InitializeStyles(pgnForm.SyntaxEditor);
+            PgnStyleSelector.InitializeStyles(pgnForm.SyntaxEditor);
 
             // Don't index read-only PgnForms.
             if (!isReadOnly)

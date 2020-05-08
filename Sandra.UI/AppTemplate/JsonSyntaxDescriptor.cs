@@ -67,7 +67,7 @@ namespace Eutherion.Win.AppTemplate
             => syntaxTree.Errors;
 
         public override Style GetStyle(SyntaxEditor<RootJsonSyntax, IJsonSymbol, JsonErrorInfo> syntaxEditor, IJsonSymbol terminalSymbol)
-            => JsonStyleSelector<RootJsonSyntax, JsonErrorInfo>.Instance.Visit(terminalSymbol, syntaxEditor);
+            => JsonStyleSelector<RootJsonSyntax>.Instance.Visit(terminalSymbol, syntaxEditor);
 
         public override (int, int) GetTokenSpan(IJsonSymbol terminalSymbol)
             => (terminalSymbol.ToSyntax().AbsoluteStart, terminalSymbol.Length);
