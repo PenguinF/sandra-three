@@ -164,6 +164,9 @@ namespace Sandra.Chess.Pgn
         private int symbolStartIndex;
 
         private bool InTagPair;
+        private int TagPairLeadingTriviaLength;
+        private int TagPairStartIndex;
+        private bool HasTagPairBracketOpen;
         private bool HasTagPairTagName;
         private bool HasTagPairTagValue;
 
@@ -183,6 +186,7 @@ namespace Sandra.Chess.Pgn
         {
             TagSectionBuilder.Add(new GreenPgnTagPairSyntax(TagPairBuilder));
             InTagPair = false;
+            HasTagPairBracketOpen = false;
             HasTagPairTagName = false;
             HasTagPairTagValue = false;
             TagPairBuilder.Clear();
@@ -204,7 +208,13 @@ namespace Sandra.Chess.Pgn
 
         private void AddTagElementToBuilder(GreenPgnTriviaSyntax leadingTrivia, GreenPgnTagElementSyntax node)
         {
-            InTagPair = true;
+            if (!InTagPair)
+            {
+                InTagPair = true;
+                TagPairLeadingTriviaLength = leadingTrivia.Length;
+                TagPairStartIndex = symbolStartIndex;
+            }
+
             TagPairBuilder.Add(new WithTrivia<GreenPgnTagElementSyntax>(leadingTrivia, node));
         }
 
@@ -237,6 +247,7 @@ namespace Sandra.Chess.Pgn
                     {
                         // When encountering a new '[', open a new tag pair.
                         CaptureTagPairIfNecessary();
+                        HasTagPairBracketOpen = true;
                     }
                     else if (symbolType == PgnSymbolType.TagName)
                     {
