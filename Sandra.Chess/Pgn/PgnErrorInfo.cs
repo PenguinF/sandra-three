@@ -37,7 +37,7 @@ namespace Sandra.Chess.Pgn
                 case PgnErrorCode.UnterminatedTagValue:
                 case PgnErrorCode.UnrecognizedEscapeSequence:
                 case PgnErrorCode.IllegalControlCharacterInTagValue:
-                case PgnErrorCode.UnknownSymbol:
+                case PgnErrorCode.UnrecognizedMove:
                     return PgnErrorLevel.Error;
                 case PgnErrorCode.UnterminatedMultiLineComment:
                     return PgnErrorLevel.Warning;

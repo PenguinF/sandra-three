@@ -73,27 +73,8 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// The error associated with this symbol.
         /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnUnknownSymbolSyntax.CreateError(SymbolText, startPosition);
+        public PgnErrorInfo GetError(int startPosition) => PgnMoveSyntax.CreateUnrecognizedMoveError(SymbolText, startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-    }
-
-    public static class PgnUnknownSymbolSyntax
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for a PGN syntax node with an unknown symbol.
-        /// </summary>
-        /// <param name="symbolText">
-        /// The text containing the unknown symbol.
-        /// </param>
-        /// <param name="start">
-        /// The start position of the unknown symbol.
-        /// </param>
-        public static PgnErrorInfo CreateError(string symbolText, int start)
-            => new PgnErrorInfo(
-                PgnErrorCode.UnknownSymbol,
-                start,
-                symbolText.Length,
-                new[] { symbolText });
     }
 }

@@ -77,5 +77,20 @@ namespace Sandra.Chess.Pgn
 
     public static class PgnMoveSyntax
     {
+        /// <summary>
+        /// Creates a <see cref="PgnErrorInfo"/> for a PGN syntax node with an unknown symbol.
+        /// </summary>
+        /// <param name="symbolText">
+        /// The text containing the unknown symbol.
+        /// </param>
+        /// <param name="start">
+        /// The start position of the unknown symbol.
+        /// </param>
+        public static PgnErrorInfo CreateUnrecognizedMoveError(string symbolText, int start)
+            => new PgnErrorInfo(
+                PgnErrorCode.UnrecognizedMove,
+                start,
+                symbolText.Length,
+                new[] { symbolText });
     }
 }

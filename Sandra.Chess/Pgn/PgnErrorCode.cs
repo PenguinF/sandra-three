@@ -64,6 +64,6 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Occurs when a symbol is not recognized as a move text, tag name, move number, or game termination marker.
         /// </summary>
-        UnknownSymbol,
+        UnrecognizedMove,
     }
 }

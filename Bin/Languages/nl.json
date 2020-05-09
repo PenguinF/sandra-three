@@ -119,6 +119,6 @@
     "PgnErrorUnterminatedMultiLineComment": "commentaar niet afgesloten met '}' karakter",
     "PgnErrorEmptyNag": "geheel getal verwacht na annotatie '$'",
     "PgnErrorOverflowNag": "geheel getal tussen 0 en 255 verwacht bij annotatie, maar er staat '{0}'",
-    "PgnErrorUnknownSymbol": "zet niet herkend '{0}'"
+    "PgnErrorUnrecognizedMove": "zet niet herkend '{0}'"
   }
 }
