@@ -207,10 +207,57 @@ namespace Eutherion.Win.AppTemplate
             displayedMaxLineNumberLength = maxLineNumberLength;
         }
 
+        // OnUpdateUI gets raised only once for an undo or redo action, whereas OnTextChanged gets raised for each individual keystroke.
+        private bool textDirty;
         private TSyntaxTree syntaxTree;
 
         protected override void OnUpdateUI(UpdateUIEventArgs e)
         {
+            if (textDirty)
+            {
+                string code = Text;
+
+                // This prevents re-entrancy into WorkingCopyTextFile.
+                if (!copyingTextFromTextFile)
+                {
+                    CodeFile.UpdateLocalCopyText(code, ContainsChanges);
+                }
+
+                int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
+                if (displayedMaxLineNumberLength != maxLineNumberLength)
+                {
+                    UpdateLineNumberMargin(maxLineNumberLength);
+                }
+
+                syntaxTree = SyntaxDescriptor.Parse(code);
+
+                IndicatorClearRange(0, TextLength);
+
+                CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
+
+                // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
+                int indicatorCurrent = 0;
+
+                foreach (var error in CurrentErrors)
+                {
+                    var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
+                    var errorLevel = SyntaxDescriptor.GetErrorLevel(error);
+
+                    int oldIndicatorCurrent = indicatorCurrent;
+                    indicatorCurrent = errorLevel == ErrorLevel.Error ? ErrorIndicatorIndex
+                                     : errorLevel == ErrorLevel.Warning ? WarningIndicatorIndex
+                                     : MessageIndicatorIndex;
+
+                    if (oldIndicatorCurrent != indicatorCurrent) IndicatorCurrent = indicatorCurrent;
+
+                    IndicatorFillRange(errorStart, errorLength);
+                }
+
+                textDirty = false;
+
+                CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
+            }
+
             if (syntaxTree == null) return;
 
             // Get the visible range of text to style.
@@ -239,48 +286,9 @@ namespace Eutherion.Win.AppTemplate
 
         protected override void OnTextChanged(EventArgs e)
         {
+            textDirty = true;
             CallTipCancel();
             base.OnTextChanged(e);
-
-            string code = Text;
-
-            // This prevents re-entrancy into WorkingCopyTextFile.
-            if (!copyingTextFromTextFile)
-            {
-                CodeFile.UpdateLocalCopyText(code, ContainsChanges);
-            }
-
-            int maxLineNumberLength = GetMaxLineNumberLength(Lines.Count);
-            if (displayedMaxLineNumberLength != maxLineNumberLength)
-            {
-                UpdateLineNumberMargin(maxLineNumberLength);
-            }
-
-            syntaxTree = SyntaxDescriptor.Parse(code);
-
-            IndicatorClearRange(0, TextLength);
-
-            CurrentErrors = ReadOnlyList<TError>.Create(SyntaxDescriptor.GetErrors(syntaxTree));
-
-            // Keep track of indicatorCurrent here to skip P/Invoke calls to the Scintilla control.
-            int indicatorCurrent = 0;
-
-            foreach (var error in CurrentErrors)
-            {
-                var (errorStart, errorLength) = SyntaxDescriptor.GetErrorRange(error);
-                var errorLevel = SyntaxDescriptor.GetErrorLevel(error);
-
-                int oldIndicatorCurrent = indicatorCurrent;
-                indicatorCurrent = errorLevel == ErrorLevel.Error ? ErrorIndicatorIndex
-                                 : errorLevel == ErrorLevel.Warning ? WarningIndicatorIndex
-                                 : MessageIndicatorIndex;
-
-                if (oldIndicatorCurrent != indicatorCurrent) IndicatorCurrent = indicatorCurrent;
-
-                IndicatorFillRange(errorStart, errorLength);
-            }
-
-            CurrentErrorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public ReadOnlyList<TError> CurrentErrors { get; private set; } = ReadOnlyList<TError>.Empty;
