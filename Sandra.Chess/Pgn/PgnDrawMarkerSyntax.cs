@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnDrawMarkerSyntax.DrawMarkerLength;
+        public int Length => PgnGameResultSyntax.DrawMarkerLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -51,10 +51,5 @@ namespace Sandra.Chess.Pgn
         private GreenPgnDrawMarkerSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-    }
-
-    public static class PgnDrawMarkerSyntax
-    {
-        public const int DrawMarkerLength = 7;
     }
 }

@@ -64,7 +64,7 @@ namespace Sandra.Chess.Pgn
 
             new[]
             {
-                PgnAsteriskSyntax.AsteriskCharacter,
+                PgnGameResultSyntax.AsteriskCharacter,
                 PgnBracketOpenSyntax.BracketOpenCharacter,
                 PgnBracketCloseSyntax.BracketCloseCharacter,
                 PgnParenthesisCloseSyntax.ParenthesisCloseCharacter,
@@ -314,7 +314,7 @@ namespace Sandra.Chess.Pgn
 
                         switch (c)
                         {
-                            case PgnAsteriskSyntax.AsteriskCharacter:
+                            case PgnGameResultSyntax.AsteriskCharacter:
                                 Yield(GreenPgnAsteriskSyntax.Value);
                                 symbolStartIndex++;
                                 break;
@@ -408,7 +408,7 @@ namespace Sandra.Chess.Pgn
                     {
                         switch (c)
                         {
-                            case PgnAsteriskSyntax.AsteriskCharacter:
+                            case PgnGameResultSyntax.AsteriskCharacter:
                                 symbolToYield = GreenPgnAsteriskSyntax.Value;
                                 goto yieldSymbolThenCharacter;
                             case PgnBracketOpenSyntax.BracketOpenCharacter:

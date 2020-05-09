@@ -36,7 +36,7 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnAsteriskSyntax.AsteriskLength;
+        public int Length => PgnGameResultSyntax.AsteriskLength;
 
         /// <summary>
         /// Gets the type of this symbol.
@@ -51,11 +51,5 @@ namespace Sandra.Chess.Pgn
         private GreenPgnAsteriskSyntax() { }
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-    }
-
-    public static class PgnAsteriskSyntax
-    {
-        public const char AsteriskCharacter = '*';
-        public const int AsteriskLength = 1;
     }
 }

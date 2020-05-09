@@ -55,4 +55,22 @@ namespace Sandra.Chess.Pgn
 
         internal GreenPgnGameResultSyntax() { }
     }
+
+    /// <summary>
+    /// Represents any of four types of game termination markers in PGN.
+    /// </summary>
+    public sealed class PgnGameResultSyntax
+    {
+        public const char AsteriskCharacter = '*';
+        public const int AsteriskLength = 1;
+
+        public static readonly string BlackWinMarkerText = "0-1";
+        public const int BlackWinMarkerLength = 3;
+
+        public static readonly string DrawMarkerText = "1/2-1/2";
+        public const int DrawMarkerLength = 7;
+
+        public static readonly string WhiteWinMarkerText = "1-0";
+        public const int WhiteWinMarkerLength = 3;
+    }
 }
