@@ -19,14 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents the asterisk character '*' in PGN text.
     /// </summary>
-    public sealed class GreenPgnAsteriskSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnAsteriskSyntax : GreenPgnGameResultSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnAsteriskSyntax"/> value.
@@ -36,21 +34,18 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnAsteriskSyntax.AsteriskLength;
+        public override int Length => PgnGameResultSyntax.AsteriskLength;
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.Asterisk;
+        public override PgnSymbolType SymbolType => PgnSymbolType.Asterisk;
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public override PgnGameResult GameResult => PgnGameResult.Undetermined;
 
         private GreenPgnAsteriskSyntax() { }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-    }
-
-    public static class PgnAsteriskSyntax
-    {
-        public const char AsteriskCharacter = '*';
-        public const int AsteriskLength = 1;
     }
 }

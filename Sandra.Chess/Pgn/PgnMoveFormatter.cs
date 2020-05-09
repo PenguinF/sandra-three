@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnWhiteWinMarkerSyntax.cs
+ * PgnMoveFormatter.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -22,30 +22,20 @@
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents the white win game termination marker "1-0".
+    /// Move formatter which generates algebraic notation for PGN text.
     /// </summary>
-    public sealed class GreenPgnWhiteWinMarkerSyntax : GreenPgnGameResultSyntax
+    public class PgnMoveFormatter : ShortAlgebraicMoveFormatter
     {
         /// <summary>
-        /// Gets the single <see cref="GreenPgnWhiteWinMarkerSyntax"/> value.
+        /// Standardized PGN notation for pieces.
         /// </summary>
-        public static GreenPgnWhiteWinMarkerSyntax Value { get; } = new GreenPgnWhiteWinMarkerSyntax();
+        public static readonly string PieceSymbols = "NBRQK";
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Returns the single <see cref="PgnMoveFormatter"/> instance.
         /// </summary>
-        public override int Length => PgnGameResultSyntax.WhiteWinMarkerLength;
+        public static PgnMoveFormatter Instance { get; } = new PgnMoveFormatter();
 
-        /// <summary>
-        /// Gets the type of this symbol.
-        /// </summary>
-        public override PgnSymbolType SymbolType => PgnSymbolType.WhiteWinMarker;
-
-        /// <summary>
-        /// Gets the type of game termination marker.
-        /// </summary>
-        public override PgnGameResult GameResult => PgnGameResult.WhiteWins;
-
-        private GreenPgnWhiteWinMarkerSyntax() { }
+        private PgnMoveFormatter() : base(PieceSymbols) { }
     }
 }

@@ -74,7 +74,6 @@ namespace Sandra.Chess.Pgn
             public override PgnSyntax VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node;
             public override PgnSyntax VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node;
             public override PgnSyntax VisitCommentSyntax(PgnCommentSyntax node) => node;
-            public override PgnSyntax VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node;
             public override PgnSyntax VisitEscapeSyntax(PgnEscapeSyntax node) => node;
             public override PgnSyntax VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node;
             public override PgnSyntax VisitTagNameSyntax(PgnTagNameSyntax node) => node;
@@ -99,7 +98,7 @@ namespace Sandra.Chess.Pgn
 
 namespace Sandra.Chess.Pgn.Temp
 {
-    public class PgnSymbolWithTrivia : PgnSyntaxWithLeadingTrivia<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
+    public class PgnSymbolWithTrivia : WithTriviaSyntax<IGreenPgnSymbol, PgnSymbol>, IPgnTopLevelSyntax
     {
         PgnSyntax IPgnTopLevelSyntax.ToPgnSyntax() => this;
 
@@ -109,7 +108,7 @@ namespace Sandra.Chess.Pgn.Temp
         public override int Start => Parent.GreenTopLevelNodes.GetElementOffset(ParentIndex);
         public override PgnSyntax ParentSyntax => Parent;
 
-        internal override PgnSymbol CreateChildNode() => new PgnSymbol(this, Green.SyntaxNode);
+        internal override PgnSymbol CreateContentNode() => new PgnSymbol(this, Green.ContentNode);
 
         internal PgnSymbolWithTrivia(PgnSyntaxNodes parent, int parentIndex, GreenPgnTopLevelSymbolSyntax green)
             : base(green)

@@ -92,13 +92,11 @@ namespace Sandra.Chess.Tests
 
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketClose = NoTrivia<PgnBracketCloseSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> BracketOpen = NoTrivia<PgnBracketOpenSyntax>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> ErrorTagValue = NoTrivia<PgnErrorTagValueSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagName = NoTrivia<PgnTagNameSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> TagValue = NoTrivia<PgnTagValueSyntax>();
 
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketClose = LeadingWhitespace<PgnBracketCloseSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_BracketOpen = LeadingWhitespace<PgnBracketOpenSyntax>();
-        private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_ErrorTagValue = LeadingWhitespace<PgnErrorTagValueSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagName = LeadingWhitespace<PgnTagNameSyntax>();
         private static readonly ParseTree<PgnTagElementWithTriviaSyntax> WS_TagValue = LeadingWhitespace<PgnTagValueSyntax>();
 
@@ -227,9 +225,9 @@ namespace Sandra.Chess.Tests
             (" % ", new ParseTree<PgnSyntaxNodes> { new ParseTree<PgnTriviaSyntax> { new ParseTree<PgnBackgroundListSyntax> { WhitespaceElement, IllegalCharacter, WhitespaceElement } } },
                 new[] { PgnErrorCode.IllegalCharacter }),
 
-            ("\"", TagSection(TagPair(ErrorTagValue)),
+            ("\"", TagSection(TagPair(TagValue)),
                 new[] { PgnErrorCode.UnterminatedTagValue }),
-            ("\"\n", TagSection(TagPair(ErrorTagValue)),
+            ("\"\n", TagSection(TagPair(TagValue)),
                 new[] { PgnErrorCode.IllegalControlCharacterInTagValue, PgnErrorCode.UnterminatedTagValue }),
 
             ("{", new ParseTree<PgnSyntaxNodes> { CommentTrivia }, new[] { PgnErrorCode.UnterminatedMultiLineComment }),
@@ -245,9 +243,9 @@ namespace Sandra.Chess.Tests
             #region Tag sections
 
             // Error tag values must behave like regular tag values.
-            ("[Event \"\\u\"]", TagSection(TagPair(BracketOpen, TagName, WS_ErrorTagValue, BracketClose)),
+            ("[Event \"\\u\"]", TagSection(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose)),
                 new[] { PgnErrorCode.UnrecognizedEscapeSequence }),
-            ("[Event \"\n\"]", TagSection(TagPair(BracketOpen, TagName, WS_ErrorTagValue, BracketClose)),
+            ("[Event \"\n\"]", TagSection(TagPair(BracketOpen, TagName, WS_TagValue, BracketClose)),
                 new[] { PgnErrorCode.IllegalControlCharacterInTagValue }),
 
             #endregion Tag sections

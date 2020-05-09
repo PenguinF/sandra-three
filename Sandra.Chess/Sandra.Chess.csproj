@@ -61,7 +61,10 @@
     <Compile Include="Pgn\PgnErrorLevel.cs" />
     <Compile Include="Pgn\PgnErrorTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnEscapeSyntax.cs" />
+    <Compile Include="Pgn\PgnGameResult.cs" />
+    <Compile Include="Pgn\PgnGameResultSyntax.cs" />
     <Compile Include="Pgn\PgnIllegalCharacterSyntax.cs" />
+    <Compile Include="Pgn\PgnMoveFormatter.cs" />
     <Compile Include="Pgn\PgnMoveNumberSyntax.cs" />
     <Compile Include="Pgn\PgnMoveSyntax.cs" />
     <Compile Include="Pgn\PgnNagSyntax.cs" />
@@ -75,7 +78,6 @@
     <Compile Include="Pgn\PgnSymbolVisitor.cs" />
     <Compile Include="Pgn\PgnSyntax.cs" />
     <Compile Include="Pgn\PgnSyntaxDeprecated.cs" />
-    <Compile Include="Pgn\PgnSyntaxWithLeadingTrivia.cs" />
     <Compile Include="Pgn\PgnTagElementSyntax.cs" />
     <Compile Include="Pgn\PgnTagElementSyntaxVisitor.cs" />
     <Compile Include="Pgn\PgnTagElementWithTriviaSyntax.cs" />
@@ -85,11 +87,12 @@
     <Compile Include="Pgn\PgnTagValueSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaElementSyntax.cs" />
     <Compile Include="Pgn\PgnTriviaSyntax.cs" />
-    <Compile Include="Pgn\PgnUnknownSymbolSyntax.cs" />
+    <Compile Include="Pgn\PgnUnrecognizedMoveSyntax.cs" />
     <Compile Include="Pgn\PgnUnterminatedCommentSyntax.cs" />
     <Compile Include="Pgn\PgnWhitespaceSyntax.cs" />
     <Compile Include="Pgn\PgnWhiteWinMarkerSyntax.cs" />
     <Compile Include="Pgn\RootPgnSyntax.cs" />
+    <Compile Include="Pgn\WithTriviaSyntax.cs" />
     <Compile Include="Position.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Variation.cs" />

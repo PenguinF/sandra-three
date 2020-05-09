@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,19 +28,19 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagValueSyntax, IGreenPgnSymbol
     {
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public override int Length { get; }
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.ErrorTagValue;
+        public override PgnSymbolType SymbolType => PgnSymbolType.ErrorTagValue;
+
+        /// <summary>
+        /// Gets if this tag value contains errors and therefore has an undefined value.
+        /// </summary>
+        public override bool ContainsErrors => true;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnErrorTagValueSyntax"/>.
@@ -52,16 +51,15 @@ namespace Sandra.Chess.Pgn
         /// <param name="errors">
         /// A sequence of errors associated with this symbol.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="errors"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
         public GreenPgnErrorTagValueSyntax(int length, IEnumerable<PgnErrorInfo> errors)
+            : base(length)
         {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
             Errors = ReadOnlyList<PgnErrorInfo>.Create(errors);
         }
 
@@ -80,71 +78,5 @@ namespace Sandra.Chess.Pgn
                 error.Start + startPosition,
                 error.Length,
                 error.Parameters));
-
-        public override void Accept(GreenPgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
-        public override TResult Accept<TResult>(GreenPgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
-        public override TResult Accept<T, TResult>(GreenPgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
-    }
-
-    /// <summary>
-    /// Represents a tag value syntax node which contains errors.
-    /// </summary>
-    public sealed class PgnErrorTagValueSyntax : PgnTagElementSyntax, IPgnSymbol
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for unterminated tag values.
-        /// </summary>
-        /// <param name="length">
-        /// The length of the unterminated tag value.
-        /// </param>
-        public static PgnErrorInfo Unterminated(int length)
-            => new PgnErrorInfo(PgnErrorCode.UnterminatedTagValue, 0, length);
-
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for unrecognized escape sequences.
-        /// </summary>
-        /// <param name="displayCharValue">
-        /// A friendly representation of the unrecognized escape sequence.
-        /// </param>
-        /// <param name="start">
-        /// The start position of the unrecognized escape sequence relative to the start position of the tag value.
-        /// </param>
-        /// <param name="length">
-        /// The length of the unrecognized escape sequence.
-        /// </param>
-        public static PgnErrorInfo UnrecognizedEscapeSequence(string displayCharValue, int start, int length)
-            => new PgnErrorInfo(PgnErrorCode.UnrecognizedEscapeSequence, start, length, new[] { displayCharValue });
-
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for illegal control characters in tag values.
-        /// </summary>
-        /// <param name="illegalCharacter">
-        /// The illegal control character.
-        /// </param>
-        /// <param name="position">
-        /// The position of the illegal control character relative to the start position of the tag value.
-        /// </param>
-        public static PgnErrorInfo IllegalControlCharacter(char illegalCharacter, int position)
-            => new PgnErrorInfo(PgnErrorCode.IllegalControlCharacterInTagValue, position, 1, new[] { StringLiteral.EscapedCharacterString(illegalCharacter) });
-
-        /// <summary>
-        /// Gets the bottom-up only 'green' representation of this syntax node.
-        /// </summary>
-        public GreenPgnErrorTagValueSyntax Green { get; }
-
-        /// <summary>
-        /// Gets the length of the text span corresponding with this syntax node.
-        /// </summary>
-        public override int Length => Green.Length;
-
-        internal PgnErrorTagValueSyntax(PgnTagElementWithTriviaSyntax parent, GreenPgnErrorTagValueSyntax green) : base(parent) => Green = green;
-
-        public override void Accept(PgnTagElementSyntaxVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
-        public override TResult Accept<TResult>(PgnTagElementSyntaxVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
-        public override TResult Accept<T, TResult>(PgnTagElementSyntaxVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
-
-        void IPgnSymbol.Accept(PgnSymbolVisitor visitor) => visitor.VisitErrorTagValueSyntax(this);
-        TResult IPgnSymbol.Accept<TResult>(PgnSymbolVisitor<TResult> visitor) => visitor.VisitErrorTagValueSyntax(this);
-        TResult IPgnSymbol.Accept<T, TResult>(PgnSymbolVisitor<T, TResult> visitor, T arg) => visitor.VisitErrorTagValueSyntax(this, arg);
     }
 }

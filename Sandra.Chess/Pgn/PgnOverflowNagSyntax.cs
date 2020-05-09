@@ -27,7 +27,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an annotation value of 256 or larger.
     /// </summary>
-    public sealed class GreenPgnOverflowNagSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnOverflowNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// The text containing the overflow NAG, including the '$' character.
@@ -35,14 +35,9 @@ namespace Sandra.Chess.Pgn
         public string OverflowNagText { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public int Length { get; }
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.OverflowNag;
+        public override PgnSymbolType SymbolType => PgnSymbolType.OverflowNag;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnOverflowNagSyntax"/>.
@@ -75,27 +70,8 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// The error associated with this symbol.
         /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnOverflowNagSyntax.CreateError(OverflowNagText, startPosition);
+        public PgnErrorInfo GetError(int startPosition) => PgnNagSyntax.CreateOverflowNagMessage(OverflowNagText, startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-    }
-
-    public static class PgnOverflowNagSyntax
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for a Numeric Annotation Glyph with an annotation value of 256 or larger.
-        /// </summary>
-        /// <param name="overflowNagText">
-        /// The text containing the overflow NAG, including the '$' character.
-        /// </param>
-        /// <param name="start">
-        /// The start position of the Numeric Annotation Glyph with an annotation value of 256 or larger.
-        /// </param>
-        public static PgnErrorInfo CreateError(string overflowNagText, int start)
-            => new PgnErrorInfo(
-                PgnErrorCode.OverflowNag,
-                start,
-                overflowNagText.Length,
-                new[] { overflowNagText });
     }
 }

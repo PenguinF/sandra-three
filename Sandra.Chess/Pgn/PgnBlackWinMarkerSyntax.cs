@@ -19,14 +19,12 @@
 **********************************************************************************/
 #endregion
 
-using System.Collections.Generic;
-
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
     /// Represents the black win game termination marker "0-1".
     /// </summary>
-    public sealed class GreenPgnBlackWinMarkerSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnBlackWinMarkerSyntax : GreenPgnGameResultSyntax
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnBlackWinMarkerSyntax"/> value.
@@ -36,20 +34,18 @@ namespace Sandra.Chess.Pgn
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public int Length => PgnBlackWinMarkerSyntax.BlackWinMarkerLength;
+        public override int Length => PgnGameResultSyntax.BlackWinMarkerLength;
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.BlackWinMarker;
+        public override PgnSymbolType SymbolType => PgnSymbolType.BlackWinMarker;
+
+        /// <summary>
+        /// Gets the type of game termination marker.
+        /// </summary>
+        public override PgnGameResult GameResult => PgnGameResult.BlackWins;
 
         private GreenPgnBlackWinMarkerSyntax() { }
-
-        IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => EmptyEnumerable<PgnErrorInfo>.Instance;
-    }
-
-    public static class PgnBlackWinMarkerSyntax
-    {
-        public const int BlackWinMarkerLength = 3;
     }
 }

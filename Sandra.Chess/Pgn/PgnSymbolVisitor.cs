@@ -34,7 +34,6 @@ namespace Sandra.Chess.Pgn
         public virtual void VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => DefaultVisit(node);
         public virtual void VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
         public virtual void VisitCommentSyntax(PgnCommentSyntax node) => DefaultVisit(node);
-        public virtual void VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => DefaultVisit(node);
         public virtual void VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
         public virtual void VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
         public virtual void VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
@@ -55,7 +54,6 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => DefaultVisit(node);
         public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => DefaultVisit(node);
         public virtual TResult VisitCommentSyntax(PgnCommentSyntax node) => DefaultVisit(node);
-        public virtual TResult VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => DefaultVisit(node);
         public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node) => DefaultVisit(node);
         public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => DefaultVisit(node);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node) => DefaultVisit(node);
@@ -76,7 +74,6 @@ namespace Sandra.Chess.Pgn
         public virtual TResult VisitBracketCloseSyntax(PgnBracketCloseSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitBracketOpenSyntax(PgnBracketOpenSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitCommentSyntax(PgnCommentSyntax node, T arg) => DefaultVisit(node, arg);
-        public virtual TResult VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitEscapeSyntax(PgnEscapeSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node, T arg) => DefaultVisit(node, arg);
         public virtual TResult VisitTagNameSyntax(PgnTagNameSyntax node, T arg) => DefaultVisit(node, arg);

@@ -36,7 +36,6 @@ namespace Sandra.Chess.Tests
             public override IGreenPgnSymbol VisitBracketCloseSyntax(PgnBracketCloseSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitBracketOpenSyntax(PgnBracketOpenSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitCommentSyntax(PgnCommentSyntax node) => node.Green;
-            public override IGreenPgnSymbol VisitErrorTagValueSyntax(PgnErrorTagValueSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitEscapeSyntax(PgnEscapeSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitIllegalCharacterSyntax(PgnIllegalCharacterSyntax node) => node.Green;
             public override IGreenPgnSymbol VisitTagNameSyntax(PgnTagNameSyntax node) => node.Green;
@@ -67,15 +66,15 @@ namespace Sandra.Chess.Tests
                     resultTokenType = tokenType1;
                     return true;
                 }
-                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax))
+                else if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax))
                 {
                     resultTokenType = tokenType2;
                     return true;
                 }
             }
-            else if (tokenType1 == typeof(GreenPgnUnknownSymbolSyntax))
+            else if (tokenType1 == typeof(GreenPgnUnrecognizedMoveSyntax))
             {
-                if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax)
                     || tokenType2 == typeof(GreenPgnMoveNumberSyntax))
                 {
@@ -100,10 +99,10 @@ namespace Sandra.Chess.Tests
                     resultTokenType = tokenType1;
                     return true;
                 }
-                else if (tokenType2 == typeof(GreenPgnUnknownSymbolSyntax)
+                else if (tokenType2 == typeof(GreenPgnUnrecognizedMoveSyntax)
                     || tokenType2 == typeof(GreenPgnTagNameSyntax))
                 {
-                    resultTokenType = typeof(GreenPgnUnknownSymbolSyntax);
+                    resultTokenType = typeof(GreenPgnUnrecognizedMoveSyntax);
                     return true;
                 }
             }
@@ -128,7 +127,7 @@ namespace Sandra.Chess.Tests
                 yield return (")", typeof(GreenPgnParenthesisCloseSyntax));
                 yield return ("(", typeof(GreenPgnParenthesisOpenSyntax));
                 yield return (".", typeof(GreenPgnPeriodSyntax));
-                yield return ("a1=", typeof(GreenPgnUnknownSymbolSyntax));
+                yield return ("a1=", typeof(GreenPgnUnrecognizedMoveSyntax));
                 yield return ("Ø1", typeof(GreenPgnTagNameSyntax));
                 yield return ("\"\"", typeof(GreenPgnTagValueSyntax));
                 yield return ("\" \"", typeof(GreenPgnTagValueSyntax));
@@ -231,12 +230,12 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(-1));
             Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveNumberSyntax(0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(-1, false));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(0, false));
+            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnMoveSyntax(1, false));
 
-            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnknownSymbolSyntax(null));
-            Assert.Throws<ArgumentOutOfRangeException>("length", () => new GreenPgnUnknownSymbolSyntax(""));
+            Assert.Throws<ArgumentNullException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(null));
+            Assert.Throws<ArgumentException>("symbolText", () => new GreenPgnUnrecognizedMoveSyntax(""));
 
             Assert.Throws<ArgumentNullException>("backgroundBefore", () => new GreenPgnTriviaElementSyntax(null, new GreenPgnCommentSyntax(1)));
             Assert.Throws<ArgumentNullException>("commentNode", () => new GreenPgnTriviaElementSyntax(EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance, null));
@@ -244,14 +243,14 @@ namespace Sandra.Chess.Tests
             Assert.Throws<ArgumentNullException>("commentNodes", () => GreenPgnTriviaSyntax.Create(null, EmptyEnumerable<GreenPgnBackgroundSyntax>.Instance));
             Assert.Throws<ArgumentNullException>("backgroundAfter", () => GreenPgnTriviaSyntax.Create(EmptyEnumerable<GreenPgnTriviaElementSyntax>.Instance, null));
 
-            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new GreenPgnSyntaxWithLeadingTrivia<GreenPgnBracketOpenSyntax>(null, GreenPgnBracketOpenSyntax.Value));
-            Assert.Throws<ArgumentNullException>("syntaxNode", () => new GreenPgnSyntaxWithLeadingTrivia<GreenPgnBracketOpenSyntax>(GreenPgnTriviaSyntax.Empty, null));
+            Assert.Throws<ArgumentNullException>("leadingTrivia", () => new WithTrivia<GreenPgnBracketOpenSyntax>(null, GreenPgnBracketOpenSyntax.Value));
+            Assert.Throws<ArgumentNullException>("syntaxNode", () => new WithTrivia<GreenPgnBracketOpenSyntax>(GreenPgnTriviaSyntax.Empty, null));
 
             Assert.Throws<ArgumentNullException>("tagElementNodes", () => new GreenPgnTagPairSyntax(null));
-            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<GreenPgnSyntaxWithLeadingTrivia<GreenPgnTagElementSyntax>>.Instance));
+            Assert.Throws<ArgumentException>("tagElementNodes", () => new GreenPgnTagPairSyntax(EmptyEnumerable<WithTrivia<GreenPgnTagElementSyntax>>.Instance));
 
-            Assert.Throws<ArgumentNullException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(null));
-            Assert.Throws<ArgumentException>("tagPairNodes", () => new GreenPgnTagSectionSyntax(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
+            Assert.Throws<ArgumentNullException>("tagPairNodes", () => GreenPgnTagSectionSyntax.Create(null));
+            Assert.Same(GreenPgnTagSectionSyntax.Empty, GreenPgnTagSectionSyntax.Create(EmptyEnumerable<GreenPgnTagPairSyntax>.Instance));
         }
 
         [Theory]
@@ -695,7 +694,7 @@ namespace Sandra.Chess.Tests
         [MemberData(nameof(StateMachineInvalidSymbols))]
         public void SymbolStateMachineInvalidSymbols(string pgn)
         {
-            AssertTokens(pgn, ExpectToken<GreenPgnUnknownSymbolSyntax>(pgn.Length));
+            AssertTokens(pgn, ExpectToken<GreenPgnUnrecognizedMoveSyntax>(pgn.Length));
         }
 
         private static int AssertParseTree(ParseTrees.ParseTree expectedParseTree, PgnSyntax expectedParent, int expectedStart, PgnSyntax actualParseTree)

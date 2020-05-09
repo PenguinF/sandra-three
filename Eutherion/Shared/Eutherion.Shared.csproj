@@ -112,6 +112,7 @@
     <Compile Include="Utils\SafeLazyObjectCollection.cs" />
     <Compile Include="Utils\SpecializedEnumerable.cs" />
     <Compile Include="Utils\StringUtilities.cs" />
+    <Compile Include="Utils\UnreachableException.cs" />
     <Compile Include="Utils\WeakEvent.cs" />
     <Compile Include="Utils\WeakEventInvocationException.cs" />
     <Compile Include="_void.cs" />

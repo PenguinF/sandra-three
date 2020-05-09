@@ -94,9 +94,9 @@ namespace Sandra.Chess.Pgn
         Move,
 
         /// <summary>
-        /// Type of a PGN syntax node with an unknown symbol.
+        /// Type of a PGN syntax node with an unrecognized move.
         /// </summary>
-        Unknown,
+        UnrecognizedMove,
 
         /// <summary>
         /// Type of a Numeric Annotation Glyph syntax node.

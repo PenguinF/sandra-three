@@ -26,7 +26,7 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a Numeric Annotation Glyph syntax node with an empty annotation.
     /// </summary>
-    public sealed class GreenPgnEmptyNagSyntax : IGreenPgnSymbol
+    public sealed class GreenPgnEmptyNagSyntax : GreenPgnNagSyntax, IGreenPgnSymbol
     {
         /// <summary>
         /// Gets the single <see cref="GreenPgnEmptyNagSyntax"/> value.
@@ -34,16 +34,11 @@ namespace Sandra.Chess.Pgn
         public static GreenPgnEmptyNagSyntax Value { get; } = new GreenPgnEmptyNagSyntax();
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public int Length => PgnNagSyntax.NagLength;
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
+        public override PgnSymbolType SymbolType => PgnSymbolType.EmptyNag;
 
-        private GreenPgnEmptyNagSyntax() { }
+        private GreenPgnEmptyNagSyntax() => Length = PgnNagSyntax.NagLength;
 
         /// <summary>
         /// Generates the error associated with this symbol at a given start position.
@@ -54,20 +49,8 @@ namespace Sandra.Chess.Pgn
         /// <returns>
         /// The error associated with this symbol.
         /// </returns>
-        public PgnErrorInfo GetError(int startPosition) => PgnEmptyNagSyntax.CreateError(startPosition);
+        public PgnErrorInfo GetError(int startPosition) => PgnNagSyntax.CreateEmptyNagMessage(startPosition);
 
         IEnumerable<PgnErrorInfo> IGreenPgnSymbol.GetErrors(int startPosition) => new SingleElementEnumerable<PgnErrorInfo>(GetError(startPosition));
-    }
-
-    public static class PgnEmptyNagSyntax
-    {
-        /// <summary>
-        /// Creates a <see cref="PgnErrorInfo"/> for an empty Numeric Annotation Glyph.
-        /// </summary>
-        /// <param name="start">
-        /// The start position of the empty Numeric Annotation Glyph.
-        /// </param>
-        public static PgnErrorInfo CreateError(int start)
-            => new PgnErrorInfo(PgnErrorCode.EmptyNag, start, PgnNagSyntax.NagLength);
     }
 }

@@ -1,6 +1,6 @@
 ﻿#region License
 /*********************************************************************************
- * PgnWhiteWinMarkerSyntax.cs
+ * PgnGameResult.cs
  *
  * Copyright (c) 2004-2020 Henk Nicolai
  *
@@ -22,30 +22,28 @@
 namespace Sandra.Chess.Pgn
 {
     /// <summary>
-    /// Represents the white win game termination marker "1-0".
+    /// Enumerates four types of game termination markers in PGN.
     /// </summary>
-    public sealed class GreenPgnWhiteWinMarkerSyntax : GreenPgnGameResultSyntax
+    public enum PgnGameResult
     {
         /// <summary>
-        /// Gets the single <see cref="GreenPgnWhiteWinMarkerSyntax"/> value.
+        /// The game is in progress, its result is unknown, or the game is abandoned.
         /// </summary>
-        public static GreenPgnWhiteWinMarkerSyntax Value { get; } = new GreenPgnWhiteWinMarkerSyntax();
+        Undetermined,
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
+        /// Black wins the game.
         /// </summary>
-        public override int Length => PgnGameResultSyntax.WhiteWinMarkerLength;
+        BlackWins,
 
         /// <summary>
-        /// Gets the type of this symbol.
+        /// The game is a draw.
         /// </summary>
-        public override PgnSymbolType SymbolType => PgnSymbolType.WhiteWinMarker;
+        Draw,
 
         /// <summary>
-        /// Gets the type of game termination marker.
+        /// White wins the game.
         /// </summary>
-        public override PgnGameResult GameResult => PgnGameResult.WhiteWins;
-
-        private GreenPgnWhiteWinMarkerSyntax() { }
+        WhiteWins,
     }
 }

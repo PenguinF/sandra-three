@@ -33,6 +33,34 @@ namespace Sandra.Chess.Pgn
     public sealed class GreenPgnTagSectionSyntax : IGreenPgnTopLevelSyntax, ISpan
     {
         /// <summary>
+        /// Gets the empty <see cref="GreenPgnTagSectionSyntax"/>.
+        /// </summary>
+        public static readonly GreenPgnTagSectionSyntax Empty = new GreenPgnTagSectionSyntax(ReadOnlySpanList<GreenPgnTagPairSyntax>.Empty);
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="GreenPgnTagSectionSyntax"/>.
+        /// </summary>
+        /// <param name="tagPairNodes">
+        /// The tag pair nodes.
+        /// </param>
+        /// <returns>
+        /// The new <see cref="GreenPgnTagSectionSyntax"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="tagPairNodes"/> is null.
+        /// </exception>
+        public static GreenPgnTagSectionSyntax Create(IEnumerable<GreenPgnTagPairSyntax> tagPairNodes)
+        {
+            if (tagPairNodes == null) throw new ArgumentNullException(nameof(tagPairNodes));
+
+            var tagPairNodeSpanList = ReadOnlySpanList<GreenPgnTagPairSyntax>.Create(tagPairNodes);
+
+            return tagPairNodeSpanList.Count == 0
+               ? Empty
+               : new GreenPgnTagSectionSyntax(tagPairNodeSpanList);
+        }
+
+        /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
         public int Length => TagPairNodes.Length;
@@ -42,24 +70,7 @@ namespace Sandra.Chess.Pgn
         /// </summary>
         public ReadOnlySpanList<GreenPgnTagPairSyntax> TagPairNodes { get; }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="GreenPgnTagSectionSyntax"/>.
-        /// </summary>
-        /// <param name="tagPairNodes">
-        /// The tag pair nodes.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="tagPairNodes"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="tagPairNodes"/> is empty.
-        /// </exception>
-        public GreenPgnTagSectionSyntax(IEnumerable<GreenPgnTagPairSyntax> tagPairNodes)
-        {
-            if (tagPairNodes == null) throw new ArgumentNullException(nameof(tagPairNodes));
-            TagPairNodes = ReadOnlySpanList<GreenPgnTagPairSyntax>.Create(tagPairNodes);
-            if (TagPairNodes.Count == 0) throw new ArgumentException($"{nameof(tagPairNodes)} is empty", nameof(tagPairNodes));
-        }
+        private GreenPgnTagSectionSyntax(ReadOnlySpanList<GreenPgnTagPairSyntax> tagPairNodes) => TagPairNodes = tagPairNodes;
     }
 
     /// <summary>
