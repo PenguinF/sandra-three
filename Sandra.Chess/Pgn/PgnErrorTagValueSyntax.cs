@@ -20,7 +20,6 @@
 #endregion
 
 using Eutherion.Text;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,19 +28,19 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node which contains errors.
     /// </summary>
-    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public sealed class GreenPgnErrorTagValueSyntax : GreenPgnTagValueSyntax, IGreenPgnSymbol
     {
         internal ReadOnlyList<PgnErrorInfo> Errors { get; }
 
         /// <summary>
-        /// Gets the length of the text span corresponding with this node.
-        /// </summary>
-        public override int Length { get; }
-
-        /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.ErrorTagValue;
+        public override PgnSymbolType SymbolType => PgnSymbolType.ErrorTagValue;
+
+        /// <summary>
+        /// Gets if this tag value contains errors and therefore has an undefined value.
+        /// </summary>
+        public override bool ContainsErrors => true;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnErrorTagValueSyntax"/>.
@@ -52,16 +51,15 @@ namespace Sandra.Chess.Pgn
         /// <param name="errors">
         /// A sequence of errors associated with this symbol.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="errors"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
         public GreenPgnErrorTagValueSyntax(int length, IEnumerable<PgnErrorInfo> errors)
+            : base(length)
         {
-            if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
-            Length = length;
             Errors = ReadOnlyList<PgnErrorInfo>.Create(errors);
         }
 

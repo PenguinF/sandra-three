@@ -27,22 +27,27 @@ namespace Sandra.Chess.Pgn
     /// <summary>
     /// Represents a tag value syntax node.
     /// </summary>
-    public sealed class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
+    public class GreenPgnTagValueSyntax : GreenPgnTagElementSyntax, IGreenPgnSymbol
     {
         /// <summary>
-        /// Gets the value of this syntax node.
+        /// Gets the value of this syntax node, or null if this is a <see cref="GreenPgnErrorTagValueSyntax"/>.
         /// </summary>
         public string Value { get; }
 
         /// <summary>
         /// Gets the length of the text span corresponding with this node.
         /// </summary>
-        public override int Length { get; }
+        public sealed override int Length { get; }
 
         /// <summary>
         /// Gets the type of this symbol.
         /// </summary>
-        public PgnSymbolType SymbolType => PgnSymbolType.TagValue;
+        public virtual PgnSymbolType SymbolType => PgnSymbolType.TagValue;
+
+        /// <summary>
+        /// Gets if this tag value contains errors and therefore has an undefined value.
+        /// </summary>
+        public virtual bool ContainsErrors => false;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GreenPgnTagValueSyntax"/>.
@@ -60,8 +65,13 @@ namespace Sandra.Chess.Pgn
         /// <paramref name="length"/> is 0 or lower.
         /// </exception>
         public GreenPgnTagValueSyntax(string value, int length)
+            : this(length)
         {
             Value = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        internal GreenPgnTagValueSyntax(int length)
+        {
             if (length <= 0) throw new ArgumentOutOfRangeException(nameof(length));
             Length = length;
         }
