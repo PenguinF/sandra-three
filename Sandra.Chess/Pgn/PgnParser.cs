@@ -193,7 +193,7 @@ namespace Sandra.Chess.Pgn
         {
             if (TagSectionBuilder.Count > 0)
             {
-                SymbolBuilder.Add(new GreenPgnTagSectionSyntax(TagSectionBuilder));
+                SymbolBuilder.Add(GreenPgnTagSectionSyntax.Create(TagSectionBuilder));
                 TagSectionBuilder.Clear();
             }
         }
